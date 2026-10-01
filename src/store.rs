@@ -43,11 +43,13 @@ impl Store {
                 .any(|column| column == "saved_at")
         };
         let transaction = connection.transaction()?;
-        if legacy_schema || schema_version < 4 {
+        if legacy_schema || schema_version < 5 {
             // The pre-milestone prototype stored a fundamentally different world
             // model; versions through 3 predate typed cargo, building jobs,
-            // technologies, and the seven-resource stockpile. Those snapshots cannot
-            // be translated safely into the current deterministic world.
+            // technologies, and the seven-resource stockpile, and version 4 stored
+            // free-floating positions rather than exclusive cell claims and
+            // building footprints. Those snapshots cannot be translated safely
+            // into the current deterministic world.
             transaction.execute_batch("DROP TABLE IF EXISTS world_state;")?;
         }
         transaction.execute_batch(
@@ -55,7 +57,7 @@ impl Store {
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 world_json TEXT NOT NULL
             );
-            PRAGMA user_version = 4;",
+            PRAGMA user_version = 5;",
         )?;
         transaction.commit()?;
         Ok(())
@@ -70,8 +72,14 @@ impl Store {
                 |row| row.get(0),
             )
             .optional()?;
-        json.map(|value| serde_json::from_str(&value).map_err(Into::into))
-            .transpose()
+        let Some(json) = json else {
+            return Ok(None);
+        };
+        let world: GameWorld = serde_json::from_str(&json)?;
+        world
+            .validate()
+            .map_err(|error| format!("persisted world is corrupt: {error}"))?;
+        Ok(Some(world))
     }
 
     pub fn save(&self, world: &GameWorld) -> StoreResult<()> {
@@ -107,27 +115,30 @@ mod tests {
     }
 
     #[test]
-    fn persistence_round_trips_carried_cargo_and_gather_phase() {
+    fn persistence_round_trips_mid_step_cargo_and_gather_phase() {
         let path = temporary_db("roundtrip");
         let store = Store::from_path(&path);
         store.initialize().unwrap();
         let mut world = GameWorld::default();
-        world.units[0].position = world.resources[0].position;
         world
             .apply_command(crate::game::Command::Gather {
                 unit_id: "villager-1".into(),
-                resource_id: "tree-1".into(),
+                resource_id: "berries-1".into(),
             })
             .unwrap();
-        world.tick(0.5);
+        for _ in 0..7 {
+            world.tick(0.1);
+        }
+        assert!(world.units[0].step.is_some());
         store.save(&world).unwrap();
+        assert_eq!(store.load().unwrap().unwrap(), world);
 
+        while world.units[0].cargo.is_none() {
+            world.tick(0.1);
+        }
+        store.save(&world).unwrap();
         let loaded = store.load().unwrap().unwrap();
         assert_eq!(loaded, world);
-        assert_eq!(
-            loaded.units[0].cargo.as_ref().unwrap().amount,
-            crate::game::GATHER_RATE * 0.5
-        );
         assert!(matches!(
             loaded.units[0].action,
             crate::game::UnitAction::Gather {
@@ -184,34 +195,36 @@ mod tests {
         std::fs::remove_file(path).unwrap();
     }
 
-    #[test]
-    fn current_save_without_slice_a_fields_loads_with_intentional_defaults() {
-        let path = temporary_db("slice-a-defaults");
-        let store = Store::from_path(&path);
+    fn store_raw(path: &Path, value: &serde_json::Value) -> Store {
+        let store = Store::from_path(path);
         store.initialize().unwrap();
-        let original = GameWorld::default();
-        let mut legacy = serde_json::to_value(&original).unwrap();
-        let object = legacy.as_object_mut().unwrap();
-        object.remove("scenario");
-        for unit in object["units"].as_array_mut().unwrap() {
-            unit.as_object_mut().unwrap().remove("kind");
-        }
-        for field in ["coal", "timber", "steel", "bricks", "cloth", "rations"] {
-            object["stockpile"].as_object_mut().unwrap().remove(field);
-        }
-        let connection = Connection::open(&path).unwrap();
+        let connection = Connection::open(path).unwrap();
         connection
             .execute(
                 "INSERT INTO world_state (id, world_json) VALUES (1, ?1)",
-                params![serde_json::to_string(&legacy).unwrap()],
+                params![serde_json::to_string(value).unwrap()],
             )
             .unwrap();
-        drop(connection);
+        store
+    }
 
-        let loaded = store.load().unwrap().unwrap();
-        assert_eq!(loaded, original);
-        assert_eq!(loaded.units[0].kind, crate::game::UnitKind::Villager);
-        assert_eq!(loaded.scenario, crate::game::ScenarioState::default());
+    #[test]
+    fn save_missing_a_field_is_an_explicit_load_error() {
+        let path = temporary_db("missing-field");
+        let mut value = serde_json::to_value(GameWorld::default()).unwrap();
+        value["units"][0].as_object_mut().unwrap().remove("cell");
+        let error = store_raw(&path, &value).load().unwrap_err().to_string();
+        assert!(error.contains("missing field `cell`"), "{error}");
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn overlapping_persisted_world_is_corrupt_not_reset() {
+        let path = temporary_db("overlap");
+        let mut value = serde_json::to_value(GameWorld::default()).unwrap();
+        value["units"][1]["cell"] = value["units"][0]["cell"].clone();
+        let error = store_raw(&path, &value).load().unwrap_err().to_string();
+        assert!(error.contains("persisted world is corrupt"), "{error}");
         std::fs::remove_file(path).unwrap();
     }
 
