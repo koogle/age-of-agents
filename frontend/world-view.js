@@ -217,7 +217,6 @@ export function createWorldView(scene, effects) {
   return {
     sync, frame, markTarget, pickables,
     unitPositions: () => [...units.values()].map(entry => ({ id: entry.data.id, position: entry.root.position })),
-    buildingAnchor: id => buildings.get(id)?.root.position,
     get world() { return world; }
   };
 }
