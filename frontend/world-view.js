@@ -205,7 +205,11 @@ export function createWorldView(scene, effects) {
   function pickables() {
     const list = [];
     for (const map of [units, resources, buildings]) {
-      for (const entry of map.values()) entry.root.traverse(object => { if (object.userData.pick) list.push(object); });
+      for (const entry of map.values()) {
+        // Stumps and stripped bushes are scenery, not targets.
+        if (map === resources && entry.data.amount <= 0) continue;
+        entry.root.traverse(object => { if (object.userData.pick) list.push(object); });
+      }
     }
     return list;
   }
