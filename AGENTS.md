@@ -23,19 +23,21 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - **Authority:** The Rust server owns all world state and advances a fixed-timestep simulation.
 - **Transport:** WebSocket typed commands, command acknowledgements, and full world snapshots. `GET /state` exists for debugging.
 - **Persistence:** SQLite stores the authoritative world snapshot. Respect `AGE_OF_AGENTS_DB` everywhere.
-- **Frontend:** Native Canvas 2D with plain JavaScript/TypeScript-sized code. Keep it deliberately small; no renderer framework unless the current vertical slice proves it necessary.
-- **Rendering:** Fixed isometric perspective. Draw terrain first, then world entities sorted by their ground position. UI buttons are real accessible buttons with image artwork.
+- **Frontend:** Fullscreen WebGL canvas rendered with Three.js (vendored as one ES module under `frontend/vendor/`), plain ES modules, no build step. Three.js is the only framework; models are procedural code, not imported asset pipelines.
+- **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Cel-shaded toon materials, inked outlines, and one shared fog-of-war shader field. UI buttons are real accessible DOM buttons over the canvas.
+- **Spatial authority:** Every unit, step target, building footprint, and live resource exclusively claims its cells; move destinations are reservations. `GameWorld::validate` must hold after every command and tick.
 - **Deployment:** Modal. Verify locally before deploying.
 
 ## Interaction Contract
 
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
+- Tap/click a foundation with villagers selected to have them help build it.
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - Tap/click the build button, then valid ground, to issue a build order.
 - Tap/click a town center to train a villager or start available research through its capability popover.
-- Drag pans. Wheel/pinch zooms.
+- Drag pans. Wheel/pinch zooms. Right-drag, two-finger twist, or Q/E rotates.
 - Mouse and touch semantics must match.
 - Simulation speed is authoritative and controlled through 0×, 1×, and 2× buttons.
 - A busy villager rejects replacement orders in Milestone 1; this avoids cancellation/refund complexity.
@@ -46,7 +48,7 @@ The target is a warm, hand-drawn cel-animation look inspired by pastoral Japanes
 
 - Thin-to-medium dark-brown/charcoal contours; heavier lines only on outer silhouettes.
 - Flat cel colors, warm highlights, restrained cool shadows.
-- Fixed three-quarter isometric view and upper-left light direction.
+- Three-quarter 3D view and upper-left light direction.
 - Readability at actual gameplay size matters more than 1024px detail.
 - No photorealism, painterly gradients, pseudo-3D materials, opaque matte rectangles, text, signatures, or inconsistent character identity between animation frames.
 

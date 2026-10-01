@@ -17,9 +17,10 @@ Use this review before committing meaningful changes. It is intentionally severe
 7. Can an entity or building be created more than once?
 8. Does persistence use the configured path on every path and fail clearly on corrupt data?
 9. Did any file cross 1,000 lines? If so, decompose it unless there is an exceptional structural reason.
-10. Did the frontend add a framework, scene graph, hidden picking system, or interaction mode that direct Canvas code does not need?
+10. Did the frontend add a framework beyond Three.js, a build step, an asset pipeline, or an interaction mode the current slice does not need?
 11. Are mouse and touch semantics identical?
-12. Are generated assets being judged at runtime size and validated for real RGBA transparency?
+12. Are models judged at real gameplay zoom on desktop and phone, with consistent identity across animations?
+13. Can any path leave two claims on one cell, a unit inside a footprint, or a reservation that can never be reached?
 
 ## Structural standards
 
@@ -35,10 +36,10 @@ Use this review before committing meaningful changes. It is intentionally severe
 
 ## Frontend standards
 
-- Canvas renderer, networking, input, and UI state should remain understandable in one reading.
+- Renderer, networking, input, and UI state should remain understandable in one reading; each module owns one of them.
 - Use plain data and functions before classes or abstractions.
-- Keep rendering order explicit: terrain, previews, depth-sorted entities, selection/status.
-- Store simple hit areas during rendering; do not add raycasters or scene graphs.
+- Picking raycasts only invisible per-entity proxies and the ground plane; the server re-validates every intent.
+- Presentation (interpolation, animation, particles) never decides gameplay outcomes.
 - Avoid duplicate gesture paths for desktop and mobile.
 - UI buttons must remain accessible real buttons, not invisible canvas regions.
 - No frontend emojis; use image assets or plain text.

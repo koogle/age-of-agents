@@ -700,3 +700,99 @@ fn a_second_villager_can_help_and_construction_completes_exactly_once() {
         Err(CommandError::BuildingAlreadyComplete)
     );
 }
+
+#[test]
+fn a_cell_someone_is_walking_through_can_be_reserved_and_is_reached() {
+    let mut world = GameWorld::default();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(14, 16),
+        })
+        .unwrap();
+    while world.units[0].step.is_none_or(|step| step.to.row < 13) {
+        world.tick(0.1);
+    }
+    let crossing = world.units[0].step.unwrap().to;
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-2".into(),
+            to: crossing,
+        })
+        .unwrap();
+    run(&mut world, 20.0);
+    assert_eq!(world.units[0].cell, cell(14, 16));
+    assert_eq!(world.units[1].cell, crossing);
+    assert!(
+        world
+            .units
+            .iter()
+            .all(|unit| unit.action == UnitAction::Idle)
+    );
+}
+
+#[test]
+fn a_unit_whose_order_ends_on_a_reserved_cell_makes_way() {
+    let mut world = GameWorld::default();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(14, 16),
+        })
+        .unwrap();
+    while world.units[0].step.is_none() {
+        world.tick(0.1);
+    }
+    let crossing = world.units[0].step.unwrap().to;
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-2".into(),
+            to: crossing,
+        })
+        .unwrap();
+    // The walker's order ends mid-stride, onto the reserved cell.
+    world.units[0].action = UnitAction::Idle;
+    run(&mut world, 20.0);
+    assert_eq!(world.units[1].cell, crossing);
+    assert_ne!(world.units[0].cell, crossing);
+    assert!(
+        world
+            .units
+            .iter()
+            .all(|unit| unit.action == UnitAction::Idle)
+    );
+}
+
+#[test]
+fn head_on_walkers_in_a_corridor_pass_each_other() {
+    let mut world = GameWorld::default();
+    world.resources.clear();
+    world.buildings.clear();
+    // A one-cell-wide corridor along row 5 with a pocket at column 10.
+    for column in 0..WORLD_COLUMNS {
+        for row in [4, 6] {
+            if !(column == 10 && row == 6) {
+                world.resources.push(ResourceNode {
+                    id: format!("wall-{column}-{row}"),
+                    kind: ResourceKind::Stone,
+                    cell: cell(column, row),
+                    amount: 1.0,
+                    capacity: 1.0,
+                });
+            }
+        }
+    }
+    world.units[0].cell = cell(5, 5);
+    world.units[1].cell = cell(15, 5);
+    for (unit_id, to) in [("villager-1", cell(18, 5)), ("villager-2", cell(2, 5))] {
+        world
+            .apply_command(Command::Move {
+                unit_id: unit_id.into(),
+                to,
+            })
+            .unwrap();
+    }
+    run(&mut world, 30.0);
+    assert_eq!(world.units[0].cell, cell(18, 5));
+    assert_eq!(world.units[1].cell, cell(2, 5));
+}
