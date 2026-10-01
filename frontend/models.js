@@ -1,7 +1,7 @@
-// Procedural low-poly models in the cel-shaded, ink-outlined house style.
+// Procedural low-poly models in the soft matte miniature (diorama) style.
 // One cell is one world unit; every model stands on y = 0 at its anchor.
 import * as THREE from 'three';
-import { toon, inked } from './materials.js';
+import { paint } from './materials.js';
 import { random } from './terrain.js';
 
 export const TEAM_COLOR = 0x2f6fe0;
@@ -18,13 +18,12 @@ const G = {
 };
 
 function part(geometry, color, [x, y, z], [sx, sy, sz], options = {}) {
-  const mesh = new THREE.Mesh(geometry, typeof color === 'number' ? toon(color, options) : color);
+  const mesh = new THREE.Mesh(geometry, typeof color === 'number' ? paint(color, options) : color);
   mesh.position.set(x, y, z);
   mesh.scale.set(sx, sy, sz);
   if (options.rotation) mesh.rotation.set(...options.rotation);
   mesh.castShadow = options.shadow !== false;
   mesh.receiveShadow = true;
-  if (options.ink !== false) inked(mesh);
   return mesh;
 }
 function group(...children) {
@@ -110,13 +109,13 @@ export function createVillager(id) {
 
   const legs = [leg(-1), leg(1)];
   body.add(part(G.taper, tunic, [0, 0.3, 0], [0.11, 0.22, 0.09]));
-  body.add(part(G.cyl, 0x5a3b22, [0, 0.215, 0], [0.105, 0.025, 0.085], { ink: false }));
+  body.add(part(G.cyl, 0x5a3b22, [0, 0.215, 0], [0.105, 0.025, 0.085]));
   body.add(part(G.cyl, TEAM_COLOR, [0, 0.415, 0], [0.07, 0.03, 0.06]));
   const head = group(
     part(G.ball, skin, [0, 0, 0], [0.08, 0.085, 0.08]),
     part(G.ball, hair, [0, 0.03, -0.012], [0.084, 0.06, 0.084]),
-    part(G.ball, 0x2b1d14, [-0.028, 0.0, 0.072], [0.011, 0.014, 0.008], { ink: false, shadow: false }),
-    part(G.ball, 0x2b1d14, [0.028, 0.0, 0.072], [0.011, 0.014, 0.008], { ink: false, shadow: false })
+    part(G.ball, 0x2b1d14, [-0.028, 0.0, 0.072], [0.011, 0.014, 0.008], { shadow: false }),
+    part(G.ball, 0x2b1d14, [0.028, 0.0, 0.072], [0.011, 0.014, 0.008], { shadow: false })
   );
   if (seed % 3 === 0) head.add(part(G.cone, 0xe0c071, [0, 0.07, 0], [0.13, 0.06, 0.13]));
   head.position.y = 0.51;
@@ -235,7 +234,7 @@ export function createResource(resource, biome) {
         const bush = group(part(G.ball, 0x4f8f3c, [0, 0.12, 0], [0.17, 0.13, 0.17]));
         for (let b = 0; b < 5; b += 1) {
           const a = b * 1.26 + i;
-          bush.add(part(G.ball, 0xe8203a, [Math.cos(a) * 0.13, 0.13 + (b % 2) * 0.06, Math.sin(a) * 0.13], [0.035, 0.035, 0.035], { ink: false }));
+          bush.add(part(G.ball, 0xe8203a, [Math.cos(a) * 0.13, 0.13 + (b % 2) * 0.06, Math.sin(a) * 0.13], [0.035, 0.035, 0.035]));
         }
         add(bush, i);
       }
@@ -246,13 +245,13 @@ export function createResource(resource, biome) {
         for (let r = 0; r < 5; r += 1) {
           const a = r * 1.3;
           tuft.add(part(G.cone, 0xb7c46a, [Math.cos(a) * 0.05, 0.15, Math.sin(a) * 0.05], [0.025, 0.32, 0.025], { rotation: [Math.sin(a) * 0.2, 0, Math.cos(a) * 0.2] }));
-          tuft.add(part(G.ball, 0xf2e6b0, [Math.cos(a) * 0.07, 0.32, Math.sin(a) * 0.07], [0.025, 0.04, 0.025], { ink: false }));
+          tuft.add(part(G.ball, 0xf2e6b0, [Math.cos(a) * 0.07, 0.32, Math.sin(a) * 0.07], [0.025, 0.04, 0.025]));
         }
         add(tuft, i);
       }
       break;
     case 'clay':
-      root.add(part(G.cyl, 0x8a4f33, [0, 0.005, 0], [0.4, 0.01, 0.4], { ink: false, shadow: false }));
+      root.add(part(G.cyl, 0x8a4f33, [0, 0.005, 0], [0.4, 0.01, 0.4], { shadow: false }));
       for (let i = 0; i < 3; i += 1) add(group(part(G.ball, 0xc06c45, [0, 0.04, 0], [0.16, 0.09, 0.14])), i);
       break;
     default: {
@@ -296,7 +295,7 @@ export function createTownCenter() {
   walls.add(part(G.box, 0x4a2f1c, [0, 0.25, 0.331], [0.2, 0.3, 0.03]));
   const windows = [];
   for (const x of [-0.32, 0.32]) {
-    const glass = part(G.box, 0x3a3a48, [x, 0.42, 0.331], [0.14, 0.12, 0.02], { ink: false });
+    const glass = part(G.box, 0x3a3a48, [x, 0.42, 0.331], [0.14, 0.12, 0.02]);
     windows.push(glass);
     walls.add(glass);
   }
@@ -324,8 +323,8 @@ export function createTownCenter() {
   return root;
 }
 
-const WINDOW_DARK = toon(0x3a3a48);
-const WINDOW_LIT = toon(0xffd27a, { emissive: 0xc07a20 });
+const WINDOW_DARK = paint(0x3a3a48);
+const WINDOW_LIT = paint(0xffd27a, { emissive: 0xc07a20 });
 
 export function poseTownCenter(root, construction, working, time) {
   const p = root.userData.parts;

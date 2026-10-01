@@ -80,8 +80,8 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Move:** with one or more villagers selected, tap/click empty ground. Groups receive one atomic authoritative order and spread across distinct reachable cells.
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
 - **Build:** select a villager, press the build button (or B), then tap/click ground. A 2×2 foundation appears immediately and rises as the villager works. Tap a foundation with other villagers selected to have them help.
-- **Produce:** select a town center and choose **Train villager** in the ledger column. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
-- **Research:** select a town center and choose an available technology in the ledger column. Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
+- **Produce:** select a town center and press the **Train villager** medallion. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
+- **Research:** select a town center and press an available technology medallion (hover for its name and cost). Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
 - **Pan:** drag with one pointer, WASD/arrow keys, or tap the minimap.
 - **Zoom:** pinch or use the mouse wheel.
 - **Rotate:** two-finger twist, right-drag, or Q/E.
@@ -120,8 +120,10 @@ Every push to `master` runs the same checks in GitHub Actions, deploys through M
 
 ## Art direction
 
-The visual target is a sunlit Mediterranean world drawn like a thin-line comic (references in `assets/reference/`, primarily `mediterranean_4.webp`): flat toon shading with a stepped light ramp, dark-brown inked outlines (inverted hulls), warm golden sunlight with cool blue-grey shadows, turquoise sea, cypresses, olive trees, limestone, and a marble town center with a terracotta roof. The interface is painted inside the WebGL canvas (`frontend/hud.js`, `frontend/ui-layer.js`): a thin ivory mount around the picture, a slim stockpile strip, and a ledger column with the selection, command rows, and minimap (a bottom sheet on phones). A visually hidden DOM mirror keeps every command reachable by keyboard and screen reader. Icons are vector placeholders until the generated art kit under `assets/ui/` lands. Every model (villagers with per-activity tools and cargo, seven resource types, the town center, its foundation and scaffolding) is built procedurally from low-poly primitives in `frontend/models.js`, so identities stay consistent across animations and there are no binary 3D assets to manage. 
+The visual target is a soft 3D tilt-shift diorama of a sunlit Greek island (`assets/reference/diorama_primary.webp`): rounded matte models without outlines, a tilt-shift depth-of-field pass (`frontend/tilt-shift.js`), puffy clouds, a distant volcano and sailing ships (`frontend/sky.js`), turquoise sea, limestone, cypresses, olive trees, and a marble town center with a terracotta roof. Models are procedural code in `frontend/models.js`; generated GLB models and icons from FAL are being evaluated on a separate branch.
 
-The fog of war is one shared shader field: unexplored land is drawn as an unfinished paper map with ink hatching, explored-but-unwatched land is desaturated, and the island rim beyond the playable grid is always visible scenery. Terrain heights come from fixed noise rather than biome data, so the shape of the land never leaks unexplored information.
+The interface is painted inside the WebGL canvas (`frontend/hud.js`, `frontend/ui-layer.js`) and stays mostly out of the way: a round globe minimap, a small speed pill, a resource pill that lists only what you have, and glossy medallion buttons that appear at the bottom center only when something is selected. A visually hidden DOM mirror keeps every command reachable by keyboard and screen reader.
+
+The fog of war is one shared shader field: unexplored land lies under a bank of soft cloud, and explored-but-unwatched land is muted. Terrain heights come from fixed noise rather than biome data, so the shape of the land never leaks unexplored information.
 
 The 2D sprites under `assets/game/` are no longer used by the client.
