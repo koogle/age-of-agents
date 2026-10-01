@@ -4,9 +4,9 @@
 import * as THREE from 'three';
 
 export const STYLE = {
-  ivory: '#efe6d0', ivoryLight: '#f6f0e1', ink: '#4a3a2a',
-  hair: 'rgba(74,58,42,0.38)', faint: 'rgba(74,58,42,0.16)', muted: 'rgba(74,58,42,0.72)', accent: '#b5502e',
-  caps: '"Cormorant SC", Georgia, serif', body: 'Alegreya, Georgia, serif'
+  ivory: '#f4efe4', ink: '#3d3328', muted: 'rgba(61,51,40,0.7)', accent: '#c8553a',
+  glass: 'rgba(250,247,240,0.86)', shadow: 'rgba(40,32,24,0.35)',
+  body: '"Nunito", "Trebuchet MS", system-ui, sans-serif'
 };
 
 // One painted rectangle on the overlay, backed by its own canvas texture.
@@ -41,33 +41,26 @@ function createPanel(scene, order) {
     return context;
   };
   panel.end = () => { texture.needsUpdate = true; };
+  // Only painted regions catch the pointer; the transparent rest of a panel
+  // lets taps through to the world.
   panel.hit = (px, py) => {
-    if (!panel.mesh.visible || px < panel.x || py < panel.y || px > panel.x + panel.w || py > panel.y + panel.h) return null;
+    if (!panel.mesh.visible) return null;
     const lx = px - panel.x;
     const ly = py - panel.y;
-    return panel.regions.find(r => lx >= r.x && ly >= r.y && lx <= r.x + r.w && ly <= r.y + r.h) || { id: 'panel' };
+    return panel.regions.find(r => r.round
+      ? Math.hypot(lx - (r.x + r.w / 2), ly - (r.y + r.h / 2)) <= r.w / 2
+      : lx >= r.x && ly >= r.y && lx <= r.x + r.w && ly <= r.y + r.h) || null;
   };
+  panel.hide = () => { mesh.visible = false; panel.regions = []; };
   return panel;
 }
 
 export function createUiLayer(renderer) {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
-  const panels = {
-    top: createPanel(scene, 10), side: createPanel(scene, 10), minimap: createPanel(scene, 11),
-    note: createPanel(scene, 12), toast: createPanel(scene, 12)
-  };
-  // The ivory mount on the remaining edges plus one hairline around the picture.
-  const flat = color => new THREE.MeshBasicMaterial({ color, toneMapped: false, depthTest: false, transparent: true });
-  const mount = [flat(STYLE.ivory), flat(STYLE.ivory), flat('#9a8a74'), flat('#9a8a74'), flat('#9a8a74'), flat('#9a8a74')]
-    .map((material, index) => {
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
-      mesh.renderOrder = index < 2 ? 9 : 13;
-      scene.add(mesh);
-      return mesh;
-    });
+  const panels = new Map();
   const boxFill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: STYLE.ivory, opacity: 0.18, transparent: true, depthTest: false, toneMapped: false }));
-  const boxLine = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1, 1)), new THREE.LineBasicMaterial({ color: STYLE.ink, depthTest: false, toneMapped: false }));
+  const boxLine = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1, 1)), new THREE.LineBasicMaterial({ color: '#ffffff', depthTest: false, toneMapped: false }));
   boxFill.visible = boxLine.visible = false;
   boxFill.renderOrder = boxLine.renderOrder = 14;
   scene.add(boxFill, boxLine);
@@ -77,27 +70,18 @@ export function createUiLayer(renderer) {
     mesh.position.set(x + w / 2, view.height - (y + h / 2), 0);
     mesh.scale.set(Math.max(w, 0.001), Math.max(h, 0.001), 1);
   }
-  function rect(x, y, w, h) {
-    return { x, y, w, h };
-  }
 
   return {
-    panels,
     view,
+    // Panels are created on first use and drawn in creation order.
+    panel(name) {
+      if (!panels.has(name)) panels.set(name, createPanel(scene, 10 + panels.size));
+      return panels.get(name);
+    },
     resize(width, height, dpr) {
       Object.assign(view, { width, height, dpr });
       Object.assign(camera, { left: 0, right: width, top: height, bottom: 0 });
       camera.updateProjectionMatrix();
-    },
-    // Mount strips: right and bottom ivory edges, then a hairline frame around `picture`.
-    frame(picture, mountWidth) {
-      const { x, y, w, h } = picture;
-      place(mount[0], x + w, y, mountWidth, h + mountWidth);
-      place(mount[1], x, y + h, w, mountWidth);
-      place(mount[2], x, y, w, 1);
-      place(mount[3], x, y + h - 1, w, 1);
-      place(mount[4], x, y, 1, h);
-      place(mount[5], x + w - 1, y, 1, h);
     },
     box(area) {
       boxFill.visible = boxLine.visible = Boolean(area);
@@ -105,10 +89,11 @@ export function createUiLayer(renderer) {
       place(boxFill, area.left, area.top, area.right - area.left, area.bottom - area.top);
       place(boxLine, area.left, area.top, area.right - area.left, area.bottom - area.top);
     },
+    // Topmost painted region under a point, or null when the world is there.
     hit(x, y) {
-      for (const panel of [panels.toast, panels.note, panels.minimap, panels.side, panels.top]) {
+      for (const panel of [...panels.values()].reverse()) {
         const region = panel.hit(x, y);
-        if (region) return { panel, region };
+        if (region) return region;
       }
       return null;
     },
@@ -117,8 +102,7 @@ export function createUiLayer(renderer) {
       renderer.clearDepth();
       renderer.render(scene, camera);
       renderer.autoClear = true;
-    },
-    rect
+    }
   };
 }
 

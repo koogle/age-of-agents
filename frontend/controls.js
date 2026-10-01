@@ -11,7 +11,7 @@ const MAX_DISTANCE = 34;
 
 export function createCameraRig(camera) {
   const target = new THREE.Vector3(15, 0, 10.5);
-  const state = { distance: 11, yaw: Math.PI / 4, goalYaw: Math.PI / 4, pitch: 0.92 };
+  const state = { distance: 15, yaw: Math.PI / 4, goalYaw: Math.PI / 4, pitch: 0.92 };
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
