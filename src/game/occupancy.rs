@@ -44,6 +44,10 @@ impl Occupancy {
         matches!(self.claim(cell), Some(Claim::Unit(other)) if other != unit)
     }
 
+    pub(super) fn reservation(&self, cell: CellCoordinate) -> Option<usize> {
+        self.reservations[Self::index(cell)]
+    }
+
     pub(super) fn reserved_by_other(&self, cell: CellCoordinate, unit: Option<usize>) -> bool {
         self.reservations[Self::index(cell)].is_some_and(|owner| Some(owner) != unit)
     }

@@ -2,7 +2,7 @@
 
 ## Product principle
 
-Grow the proven gather/build demo into one compact, coherent RTS scenario. Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real Canvas UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
+Grow the proven gather/build demo into one compact, coherent RTS scenario. Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real WebGL UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
 
 ## Released baseline — Gather, build, research, and route
 
@@ -11,7 +11,18 @@ Grow the proven gather/build demo into one compact, coherent RTS scenario. Every
 - [x] Bounded villager carrying, deposits, resumption, depletion, construction, training, and five gathering technologies.
 - [x] Deterministic four-neighbor routing, occupancy, reserved destinations/build sites, and blocked-spawn rejection.
 - [x] Typed sequenced WebSocket commands/snapshots, SQLite round-trip, authoritative 0×/1×/2× speed.
-- [x] Canvas terrain/entity presentation, directional movement/gathering animation, fog memory, capability popover, and desktop/mobile controls.
+- [x] Terrain/entity presentation, directional movement/gathering animation, fog memory, capability popover, and desktop/mobile controls (Canvas 2D; superseded by the 3D client).
+
+## Direction change — 3D client and spatial soundness
+
+Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
+
+- [x] One derived occupancy map: buildings (2×2 town center footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
+- [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
+- [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
+- [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
+- [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
+- [x] Liveness: head-on standoffs resolve by deterministic yielding (lower index side-steps, highest index wins a contested cell); idle units never rest on another unit's reservation; a destination may be reserved while someone only walks through it.
 
 ## Slice A — Expandable domain foundation
 

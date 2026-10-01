@@ -95,15 +95,115 @@ impl GameWorld {
         {
             return NextStep::Step(to);
         }
-        let through = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
-            !occupancy.is_static(cell)
-        });
+        let through = self.static_paths(unit, occupancy);
         let Some(target) = through.nearest(goals) else {
             return NextStep::Unreachable;
         };
         match through.first_step(target) {
-            Some(to) if step_is_clear(start, to, clear) => NextStep::Step(to),
-            _ => NextStep::Wait,
+            Some(to) if step_is_clear(start, to, clear) => {
+                if self.yields_contested_cell(unit, to, occupancy) {
+                    NextStep::Wait
+                } else {
+                    NextStep::Step(to)
+                }
+            }
+            Some(to) => self
+                .yield_step(unit, to, occupancy)
+                .map_or(NextStep::Wait, NextStep::Step),
+            None => NextStep::Wait,
+        }
+    }
+
+    /// Breaks a head-on standoff: when the unit standing in our way is itself
+    /// waiting to step into our cell, the lower-indexed unit side-steps.
+    fn yield_step(
+        &self,
+        unit: usize,
+        blocked: CellCoordinate,
+        occupancy: &Occupancy,
+    ) -> Option<CellCoordinate> {
+        let Some(occupancy::Claim::Unit(other)) = occupancy.claim(blocked) else {
+            return None;
+        };
+        let here = self.units[unit].cell;
+        if unit > other || self.units[other].step.is_some() {
+            return None;
+        }
+        let goal = self.walking_goal(other)?;
+        let paths = self.static_paths(other, occupancy);
+        let route = paths.path_to(paths.nearest(self.goal_cells(other, goal, occupancy))?);
+        if route.first() != Some(&here) {
+            return None;
+        }
+        // Prefer stepping off the other unit's route; otherwise back away along it.
+        let clear = |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit);
+        let mut options: Vec<_> = [
+            (0, -1),
+            (-1, 0),
+            (1, 0),
+            (0, 1),
+            (-1, -1),
+            (1, -1),
+            (-1, 1),
+            (1, 1),
+        ]
+        .into_iter()
+        .filter_map(|(dx, dy)| offset(here, dx, dy, WORLD_COLUMNS, WORLD_ROWS))
+        .filter(|cell| {
+            *cell != blocked
+                && !occupancy.reserved_by_other(*cell, Some(unit))
+                && step_is_clear(here, *cell, clear)
+        })
+        .collect();
+        options.sort_by_key(|cell| route.contains(cell));
+        options.first().copied()
+    }
+
+    /// The first cell a waiting unit wants to step into, if it is walking.
+    fn wanted_step(&self, unit: usize, occupancy: &Occupancy) -> Option<CellCoordinate> {
+        let goal = self.walking_goal(unit)?;
+        let paths = self.static_paths(unit, occupancy);
+        paths.first_step(paths.nearest(self.goal_cells(unit, goal, occupancy))?)
+    }
+
+    /// When several stalled units want the same free cell, the highest index
+    /// takes it, so a unit that just side-stepped cannot starve the one it let by.
+    fn yields_contested_cell(
+        &self,
+        unit: usize,
+        to: CellCoordinate,
+        occupancy: &Occupancy,
+    ) -> bool {
+        self.units.iter().enumerate().any(|(other, body)| {
+            other > unit
+                && body.step.is_none()
+                && body.cell.touches(to)
+                && self.wanted_step(other, occupancy) == Some(to)
+        })
+    }
+
+    /// Where a unit is currently trying to walk, if anywhere.
+    fn walking_goal(&self, unit: usize) -> Option<Goal> {
+        match &self.units[unit].action {
+            UnitAction::Move { to } => Some(Goal::Cell(*to)),
+            UnitAction::Build { building_id } => self
+                .buildings
+                .iter()
+                .find(|building| &building.id == building_id)
+                .map(|building| Goal::Beside(building.footprint())),
+            UnitAction::Gather {
+                resource_id,
+                phase: GatherPhase::ToResource,
+            } => self
+                .resources
+                .iter()
+                .find(|resource| &resource.id == resource_id)
+                .map(|resource| Goal::Beside(resource.footprint())),
+            UnitAction::Gather {
+                phase: GatherPhase::Returning,
+                ..
+            } => self.nearest_reachable_town_center(unit).map(Goal::Beside),
+            _ => None,
         }
     }
 
@@ -130,7 +230,7 @@ impl GameWorld {
             return Err(CommandError::InvalidDestination);
         }
         let occupancy = self.occupancy();
-        if !occupancy.is_free_for(to, Some(unit)) {
+        if !self.can_reserve(to, &[unit], &occupancy) {
             return Err(CommandError::DestinationOccupied);
         }
         self.static_paths(unit, &occupancy)
@@ -155,11 +255,7 @@ impl GameWorld {
             .terrain
             .iter()
             .map(|cell| cell.coordinate())
-            .filter(|cell| match occupancy.claim(*cell) {
-                None => !occupancy.reserved_by_other(*cell, None),
-                Some(occupancy::Claim::Unit(owner)) => members.contains(&owner),
-                Some(_) => false,
-            })
+            .filter(|cell| self.can_reserve(*cell, members, &occupancy))
             .collect();
         candidates.sort_by_key(|cell| {
             let dx = i32::from(cell.column) - i32::from(target.column);
@@ -180,6 +276,51 @@ impl GameWorld {
             assignments.push((unit, destination));
         }
         Ok(assignments)
+    }
+
+    /// Whether `movers` may reserve `cell` as a stopping place. A cell is
+    /// acceptable while another unit is merely walking through it: walkers never
+    /// stop on a cell reserved by someone else, so the cell is guaranteed to clear.
+    /// Units at rest, or idle units finishing a step, would never leave.
+    fn can_reserve(&self, cell: CellCoordinate, movers: &[usize], occupancy: &Occupancy) -> bool {
+        if !in_bounds(cell) || occupancy.is_static(cell) {
+            return false;
+        }
+        if occupancy
+            .reservation(cell)
+            .is_some_and(|owner| !movers.contains(&owner))
+        {
+            return false;
+        }
+        match occupancy.claim(cell) {
+            Some(occupancy::Claim::Unit(owner)) if !movers.contains(&owner) => {
+                let other = &self.units[owner];
+                other.step.is_some() && other.action != UnitAction::Idle
+            }
+            _ => true,
+        }
+    }
+
+    /// An idle unit that came to rest on someone else's reserved destination
+    /// steps to the nearest cell it may reserve, so every reservation stays reachable.
+    pub(super) fn make_way(&mut self, unit: usize) {
+        let occupancy = self.occupancy();
+        let here = self.units[unit].cell;
+        if self.units[unit].step.is_some() || !occupancy.reserved_by_other(here, Some(unit)) {
+            return;
+        }
+        let paths = self.static_paths(unit, &occupancy);
+        let spot = self
+            .terrain
+            .iter()
+            .map(|cell| cell.coordinate())
+            // Only fully free cells: yielding into someone's path could swap-deadlock.
+            .filter(|cell| *cell != here && occupancy.is_free_for(*cell, None))
+            .filter_map(|cell| Some((paths.cost(cell)?, cell)))
+            .min();
+        if let Some((_, to)) = spot {
+            self.units[unit].action = UnitAction::Move { to };
+        }
     }
 
     pub(super) fn tick_move(&mut self, unit: usize, to: CellCoordinate, dt: f64) {

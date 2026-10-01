@@ -528,6 +528,7 @@ impl GameWorld {
                 UnitAction::Idle => {
                     if let Some(step) = self.units[index].step {
                         self.travel(index, Goal::Cell(step.to), dt);
+                        self.make_way(index);
                     }
                 }
                 UnitAction::Move { to } => self.tick_move(index, to, dt),

@@ -82,18 +82,26 @@ impl PathTree {
             .map(|(_, goal)| goal)
     }
 
+    /// The cells after the start on the way to `goal`, ending at the goal;
+    /// empty if the goal is the start or unreachable.
+    pub fn path_to(&self, goal: CellCoordinate) -> Vec<CellCoordinate> {
+        let mut path = Vec::new();
+        if self.cost(goal).is_none() {
+            return path;
+        }
+        let mut current = goal;
+        while current != self.start {
+            path.push(current);
+            current = self.previous[self.index(current)].expect("reached cells have a predecessor");
+        }
+        path.reverse();
+        path
+    }
+
     /// The first cell to step into on the way to `goal`; `None` if the goal is
     /// the start or unreachable.
     pub fn first_step(&self, goal: CellCoordinate) -> Option<CellCoordinate> {
-        self.cost(goal)?;
-        let mut current = goal;
-        loop {
-            let previous = self.previous[self.index(current)]?;
-            if previous == self.start {
-                return Some(current);
-            }
-            current = previous;
-        }
+        self.path_to(goal).first().copied()
     }
 
     fn index(&self, cell: CellCoordinate) -> usize {
