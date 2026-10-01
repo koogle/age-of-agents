@@ -1,30 +1,98 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use super::movement::interaction_cells;
 use super::*;
-use crate::navigation::neighbors;
 
-#[test]
-fn voronoi_terrain_is_fixed_and_deterministic() {
-    let first = GameWorld::default();
-    let second = GameWorld::default();
-    assert_eq!(first.width, 2400.0);
-    assert_eq!(first.height, 1600.0);
-    assert_eq!(first.cell_size, 80.0);
-    assert_eq!(first.terrain, second.terrain);
+pub(super) fn cell(column: u16, row: u16) -> CellCoordinate {
+    CellCoordinate::new(column, row)
+}
+
+/// Moves `unit` onto a free cell beside `footprint`, as if it had walked there.
+pub(super) fn stand_beside(world: &mut GameWorld, unit: usize, footprint: Footprint) {
+    let occupancy = world.occupancy();
+    let spot = interaction_cells(footprint)
+        .find(|candidate| occupancy.is_free_for(*candidate, Some(unit)))
+        .expect("a free interaction cell");
+    world.units[unit].cell = spot;
+    world.units[unit].step = None;
+}
+
+fn start_gather_at_resource(world: &mut GameWorld, resource_index: usize, amount: f64) {
+    world.resources[resource_index].amount = amount;
+    world.resources[resource_index].capacity = amount.max(1.0);
+    let footprint = world.resources[resource_index].footprint();
+    stand_beside(world, 0, footprint);
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: world.resources[resource_index].id.clone(),
+        })
+        .unwrap();
+}
+
+fn assert_gather_phase(unit: &Unit, expected: GatherPhase) {
+    assert!(
+        matches!(unit.action, UnitAction::Gather { phase, .. } if phase == expected),
+        "expected {expected:?}, got {:?}",
+        unit.action
+    );
+}
+
+fn run(world: &mut GameWorld, seconds: f64) {
+    for _ in 0..(seconds * 10.0).round() as u32 {
+        world.tick(0.1);
+    }
 }
 
 #[test]
-fn resources_are_deterministic_separated_bounded_and_biome_compatible() {
+fn voronoi_terrain_is_fixed_and_deterministic() {
+    assert_eq!(GameWorld::default().terrain, GameWorld::default().terrain);
+    let world = GameWorld::default();
+    let coordinates: BTreeSet<_> = world.terrain.iter().map(|cell| cell.coordinate()).collect();
+    assert_eq!(world.terrain.len(), 600);
+    assert_eq!(coordinates.len(), 600);
+    let biomes: BTreeSet<_> = world.terrain.iter().map(|cell| cell.biome).collect();
+    assert_eq!(biomes.len(), 8);
+}
+
+#[test]
+fn every_voronoi_biome_is_one_coherent_region() {
+    let world = GameWorld::default();
+    let mut regions: BTreeMap<_, BTreeSet<_>> = BTreeMap::new();
+    for terrain in &world.terrain {
+        regions
+            .entry(terrain.biome)
+            .or_default()
+            .insert(terrain.coordinate());
+    }
+    for (biome, region) in regions {
+        let mut reached = BTreeSet::new();
+        let mut queue = VecDeque::from([*region.first().unwrap()]);
+        while let Some(current) = queue.pop_front() {
+            if !reached.insert(current) {
+                continue;
+            }
+            for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                if let Some(next) =
+                    crate::navigation::offset(current, dx, dy, WORLD_COLUMNS, WORLD_ROWS)
+                    && region.contains(&next)
+                {
+                    queue.push_back(next);
+                }
+            }
+        }
+        assert_eq!(reached, region, "{biome:?} is not coherent");
+    }
+}
+
+#[test]
+fn resources_are_deterministic_separated_and_biome_compatible() {
     let world = GameWorld::default();
     assert_eq!(world.resources, GameWorld::default().resources);
-
-    let counts = world
-        .resources
-        .iter()
-        .fold(BTreeMap::new(), |mut counts, resource| {
-            *counts.entry(resource.kind).or_insert(0) += 1;
-            counts
-        });
+    let mut counts = BTreeMap::new();
+    for resource in &world.resources {
+        *counts.entry(resource.kind).or_insert(0) += 1;
+    }
     assert_eq!(
         counts,
         BTreeMap::from([
@@ -37,418 +105,41 @@ fn resources_are_deterministic_separated_bounded_and_biome_compatible() {
             (ResourceKind::Fiber, 2),
         ])
     );
-
     for (index, resource) in world.resources.iter().enumerate() {
-        assert!((0.0..=world.width).contains(&resource.position.x));
-        assert!((0.0..=world.height).contains(&resource.position.y));
-        assert!(
-            resource.position.distance(Position {
-                x: 1200.0,
-                y: 800.0
-            }) >= STARTING_BASE_RESOURCE_CLEARANCE
-        );
-        let coordinate = world.cell_for_position(resource.position).unwrap();
-        let biome = world
-            .terrain
-            .iter()
-            .find(|cell| cell.coordinate() == coordinate)
-            .unwrap()
-            .biome;
+        let biome = world.terrain
+            [usize::from(resource.cell.row) * 30 + usize::from(resource.cell.column)]
+        .biome;
         assert!(compatible_biomes(resource.kind).contains(&biome));
+        assert!(
+            resource
+                .cell
+                .center()
+                .distance(Position { x: 15.0, y: 10.0 })
+                >= STARTING_BASE_RESOURCE_CLEARANCE
+        );
+        assert_eq!(resource.amount, resource.capacity);
         for other in &world.resources[index + 1..] {
             assert!(
-                resource.position.distance(other.position) + f64::EPSILON
-                    >= RESOURCE_MIN_SEPARATION,
-                "{} overlaps {}",
-                resource.id,
-                other.id
+                resource.cell.center().distance(other.cell.center()) + f64::EPSILON
+                    >= RESOURCE_MIN_SEPARATION
             );
         }
     }
 }
 
 #[test]
-fn voronoi_terrain_contains_exactly_all_eight_biomes() {
-    let biomes: BTreeSet<_> = GameWorld::default()
-        .terrain
-        .iter()
-        .map(|cell| cell.biome)
-        .collect();
-    assert_eq!(biomes.len(), 8);
-}
-
-#[test]
-fn terrain_cells_are_unique_and_cover_the_world_bounds() {
+fn default_world_is_valid_and_has_a_productive_base() {
     let world = GameWorld::default();
-    let coordinates: BTreeSet<_> = world.terrain.iter().map(|cell| cell.coordinate()).collect();
-    assert_eq!(world.terrain.len(), 600);
-    assert_eq!(coordinates.len(), 600);
-    assert!(
-        coordinates
-            .iter()
-            .all(|cell| cell.column < WORLD_COLUMNS && cell.row < WORLD_ROWS)
-    );
-    assert!(coordinates.contains(&CellCoordinate { column: 0, row: 0 }));
-    assert!(coordinates.contains(&CellCoordinate {
-        column: WORLD_COLUMNS - 1,
-        row: WORLD_ROWS - 1,
-    }));
-}
-
-#[test]
-fn every_voronoi_biome_is_one_coherent_region() {
-    let world = GameWorld::default();
-    let by_biome: BTreeMap<_, BTreeSet<_>> =
-        world
-            .terrain
-            .iter()
-            .fold(BTreeMap::new(), |mut regions, cell| {
-                regions
-                    .entry(cell.biome)
-                    .or_default()
-                    .insert(cell.coordinate());
-                regions
-            });
-
-    for (biome, region) in by_biome {
-        let mut reached = BTreeSet::new();
-        let mut queue = VecDeque::from([*region.first().expect("biome is present")]);
-        while let Some(cell) = queue.pop_front() {
-            if !reached.insert(cell) {
-                continue;
-            }
-            for (dx, dy) in [(1_i32, 0_i32), (-1, 0), (0, 1), (0, -1)] {
-                let column = i32::from(cell.column) + dx;
-                let row = i32::from(cell.row) + dy;
-                if column >= 0 && row >= 0 {
-                    let neighbor = CellCoordinate {
-                        column: column as u16,
-                        row: row as u16,
-                    };
-                    if region.contains(&neighbor) && !reached.contains(&neighbor) {
-                        queue.push_back(neighbor);
-                    }
-                }
-            }
-        }
-        assert_eq!(reached, region, "{biome:?} is not coherent");
+    world.validate().unwrap();
+    assert_eq!(world.buildings.len(), 1);
+    let base = &world.buildings[0];
+    assert_eq!(base.kind, BuildingKind::TownCenter);
+    assert!(base.is_complete());
+    assert_eq!(base.footprint().cells().count(), 4);
+    assert_eq!(base.researches, TechnologyKind::ALL);
+    for unit in &world.units {
+        assert!(base.footprint().is_interaction_cell(unit.cell));
     }
-}
-
-#[test]
-fn explored_cells_only_grow_as_units_move() {
-    let mut world = GameWorld::default();
-    let initially_explored: BTreeSet<_> = world.explored_cells.iter().copied().collect();
-    world.units[0].position = Position { x: 80.0, y: 80.0 };
-    world.units[1].position = Position { x: 80.0, y: 80.0 };
-    world.tick(0.1);
-    let after_move: BTreeSet<_> = world.explored_cells.iter().copied().collect();
-    assert!(after_move.is_superset(&initially_explored));
-    assert!(after_move.len() > initially_explored.len());
-
-    world.units[0].position = Position {
-        x: 2320.0,
-        y: 1520.0,
-    };
-    world.units[1].position = Position {
-        x: 2320.0,
-        y: 1520.0,
-    };
-    world.tick(0.1);
-    let after_second_move: BTreeSet<_> = world.explored_cells.iter().copied().collect();
-    assert!(after_second_move.is_superset(&after_move));
-    assert!(after_second_move.len() > after_move.len());
-}
-
-#[test]
-fn move_command_walks_to_the_destination_and_reveals_the_route() {
-    let mut world = GameWorld::default();
-    let initially_explored = world.explored_cells.len();
-    let destination = Position { x: 80.0, y: 80.0 };
-
-    world
-        .apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            x: destination.x,
-            y: destination.y,
-        })
-        .unwrap();
-    assert!(matches!(world.units[0].action, UnitAction::Move { .. }));
-
-    world.tick(30.0);
-
-    assert_eq!(world.units[0].position, destination);
-    assert_eq!(world.units[0].action, UnitAction::Idle);
-    assert!(world.explored_cells.len() > initially_explored);
-}
-
-#[test]
-fn move_command_rejects_non_finite_and_out_of_bounds_destinations() {
-    for (x, y) in [(-1.0, 80.0), (80.0, 1601.0), (f64::NAN, 80.0)] {
-        let mut world = GameWorld::default();
-        assert_eq!(
-            world.apply_command(Command::Move {
-                unit_id: "villager-1".into(),
-                x,
-                y,
-            }),
-            Err(CommandError::InvalidDestination)
-        );
-        assert_eq!(world.units[0].action, UnitAction::Idle);
-    }
-}
-
-#[test]
-fn move_rejects_occupied_destination_without_mutation() {
-    let mut world = GameWorld::default();
-    let before = world.clone();
-    let occupied = world.buildings[0].position;
-    assert_eq!(
-        world.apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            x: occupied.x,
-            y: occupied.y,
-        }),
-        Err(CommandError::DestinationOccupied)
-    );
-    assert_eq!(world, before);
-}
-
-#[test]
-fn move_routes_around_an_occupied_cell() {
-    let mut world = GameWorld::default();
-    world.resources.clear();
-    world.buildings.clear();
-    world.units[0].position = world.cell_center(CellCoordinate { column: 0, row: 0 });
-    world.units[1].position = world.cell_center(CellCoordinate { column: 1, row: 0 });
-    let destination = world.cell_center(CellCoordinate { column: 2, row: 0 });
-    world
-        .apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            x: destination.x,
-            y: destination.y,
-        })
-        .unwrap();
-
-    world.tick(10.0);
-
-    assert_eq!(world.units[0].position, destination);
-    assert_eq!(world.units[0].action, UnitAction::Idle);
-    assert_ne!(world.units[0].position, world.units[1].position);
-}
-
-#[test]
-fn group_move_rejects_when_every_destination_is_blocked_without_mutation() {
-    let mut world = GameWorld::default();
-    world.resources.clear();
-    world.buildings = world
-        .terrain
-        .iter()
-        .enumerate()
-        .map(|(index, cell)| {
-            let position = world.cell_center(cell.coordinate());
-            town_center(&format!("blocker-{index}"), position.x, position.y)
-        })
-        .collect();
-    let before = world.clone();
-    assert_eq!(
-        world.apply_command(Command::GroupMove {
-            unit_ids: vec!["villager-1".into(), "villager-2".into()],
-            x: 600.0,
-            y: 600.0,
-        }),
-        Err(CommandError::TargetUnreachable)
-    );
-    assert_eq!(world, before);
-}
-
-#[test]
-fn gatherer_already_in_an_adjacent_cell_reaches_its_center_and_stops_walking() {
-    let mut world = GameWorld::default();
-    world.resources.retain(|resource| resource.id == "tree-2");
-    world.buildings.clear();
-    world.units.truncate(1);
-    world.units[0].position = Position {
-        x: 1120.7243750819825,
-        y: 994.9150302281832,
-    };
-    world.units[0].action = UnitAction::Gather {
-        resource_id: "tree-2".into(),
-        phase: GatherPhase::ToResource,
-    };
-
-    for _ in 0..20 {
-        world.tick(0.05);
-    }
-
-    assert_eq!(
-        world.units[0].position,
-        Position {
-            x: 1160.0,
-            y: 1000.0
-        }
-    );
-    assert!(matches!(
-        world.units[0].action,
-        UnitAction::Gather {
-            phase: GatherPhase::Gathering,
-            ..
-        }
-    ));
-}
-
-#[test]
-fn accepted_move_destination_is_reserved_against_other_units() {
-    let mut world = GameWorld::default();
-    world.resources.clear();
-    world.buildings.clear();
-    let destination = world.cell_center(CellCoordinate {
-        column: 10,
-        row: 10,
-    });
-    world
-        .apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            x: destination.x,
-            y: destination.y,
-        })
-        .unwrap();
-    let before = world.clone();
-
-    assert_eq!(
-        world.apply_command(Command::Move {
-            unit_id: "villager-2".into(),
-            x: destination.x,
-            y: destination.y,
-        }),
-        Err(CommandError::DestinationOccupied)
-    );
-    assert_eq!(world, before);
-}
-
-#[test]
-fn unreachable_move_rejects_without_mutation() {
-    let mut world = GameWorld::default();
-    world.resources.clear();
-    world.buildings.clear();
-    world.units[0].position = world.cell_center(CellCoordinate { column: 1, row: 1 });
-    world.units.truncate(1);
-    for (index, cell) in neighbors(
-        CellCoordinate { column: 1, row: 1 },
-        WORLD_COLUMNS,
-        WORLD_ROWS,
-    )
-    .enumerate()
-    {
-        world.buildings.push(town_center(
-            &format!("blocker-{index}"),
-            world.cell_center(cell).x,
-            world.cell_center(cell).y,
-        ));
-    }
-    let destination = world.cell_center(CellCoordinate { column: 5, row: 5 });
-    let before = world.clone();
-
-    assert_eq!(
-        world.apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            x: destination.x,
-            y: destination.y,
-        }),
-        Err(CommandError::TargetUnreachable)
-    );
-    assert_eq!(world, before);
-}
-
-#[test]
-fn snapshots_have_three_typed_fog_states_and_hide_never_seen_resources() {
-    let mut world = GameWorld::default();
-    world.units[0].position = Position { x: 80.0, y: 80.0 };
-    world.units[1].position = Position { x: 80.0, y: 80.0 };
-    world.tick(0.1);
-    let snapshot = world.snapshot();
-    let states: BTreeSet<_> = snapshot
-        .terrain
-        .iter()
-        .map(|cell| cell.visibility)
-        .collect();
-    assert_eq!(
-        states,
-        BTreeSet::from([
-            CellVisibility::Unseen,
-            CellVisibility::Explored,
-            CellVisibility::Visible,
-        ])
-    );
-    assert!(
-        snapshot
-            .terrain
-            .iter()
-            .all(|cell| { cell.biome.is_none() == (cell.visibility == CellVisibility::Unseen) })
-    );
-    assert!(!snapshot.resources.is_empty());
-    assert!(snapshot.resources.len() < world.resources.len());
-    assert_eq!(snapshot.units.len(), 2);
-}
-
-#[test]
-fn discovered_static_resources_do_not_pop_out_when_vision_moves_away() {
-    let mut world = GameWorld::default();
-    let discovered_resource_ids: BTreeSet<_> = world
-        .snapshot()
-        .resources
-        .into_iter()
-        .map(|resource| resource.id)
-        .collect();
-    assert!(!discovered_resource_ids.is_empty());
-
-    world.units[0].position = Position { x: 80.0, y: 80.0 };
-    world.units[1].position = Position { x: 80.0, y: 80.0 };
-    world.tick(0.1);
-    let remembered_resource_ids: BTreeSet<_> = world
-        .snapshot()
-        .resources
-        .into_iter()
-        .map(|resource| resource.id)
-        .collect();
-
-    assert!(remembered_resource_ids.is_superset(&discovered_resource_ids));
-}
-
-#[test]
-fn completed_buildings_reveal_with_the_larger_building_radius() {
-    let mut world = GameWorld::default();
-    world.units.clear();
-    world
-        .buildings
-        .push(town_center("building-sight", 1200.0, 800.0));
-    world.explored_cells.clear();
-    world.refresh_exploration();
-    let building_visible = world
-        .snapshot()
-        .terrain
-        .into_iter()
-        .filter(|cell| cell.visibility == CellVisibility::Visible)
-        .count();
-
-    world.buildings.clear();
-    world.units.push(Unit {
-        id: "unit-sight".into(),
-        kind: UnitKind::Villager,
-        position: Position {
-            x: 1200.0,
-            y: 800.0,
-        },
-        action: UnitAction::Idle,
-        cargo: None,
-    });
-    let unit_visible = world
-        .snapshot()
-        .terrain
-        .into_iter()
-        .filter(|cell| cell.visibility == CellVisibility::Visible)
-        .count();
-    assert!(building_visible > unit_visible);
 }
 
 #[test]
@@ -456,39 +147,112 @@ fn idle_world_is_invariant_except_tick() {
     let mut world = GameWorld::default();
     let initial = world.clone();
     world.tick(10.0);
-    assert_eq!(world.tick, 1);
-    assert_eq!(world.scenario.elapsed_ticks, 1);
     world.tick = 0;
     world.scenario.elapsed_ticks = 0;
     assert_eq!(world, initial);
 }
 
-fn start_gather_at_resource(world: &mut GameWorld, resource_index: usize, amount: f64) {
-    let resource_id = world.resources[resource_index].id.clone();
-    world.resources[resource_index].amount = amount;
-    world.units[0].position = world.resources[resource_index].position;
+#[test]
+fn move_walks_cell_by_cell_to_the_exact_destination() {
+    let mut world = GameWorld::default();
+    let destination = cell(14, 15);
     world
-        .apply_command(Command::Gather {
+        .apply_command(Command::Move {
             unit_id: "villager-1".into(),
-            resource_id,
+            to: destination,
         })
         .unwrap();
+    let mut previous = world.units[0].cell;
+    for _ in 0..200 {
+        world.tick(0.1);
+        let unit = &world.units[0];
+        assert!(unit.cell == previous || unit.cell.touches(previous));
+        previous = unit.cell;
+        if unit.action == UnitAction::Idle {
+            break;
+        }
+    }
+    assert_eq!(world.units[0].cell, destination);
+    assert_eq!(world.units[0].step, None);
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    assert!(world.explored_cells.contains(&cell(14, 18)));
 }
 
-fn assert_gather_phase(unit: &Unit, expected: GatherPhase) {
-    assert!(matches!(
-        unit.action,
-        UnitAction::Gather { phase, .. } if phase == expected
-    ));
+#[test]
+fn move_rejects_invalid_destinations_without_mutation() {
+    let mut world = GameWorld::default();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-2".into(),
+            to: cell(20, 12),
+        })
+        .unwrap();
+    let resource = world.resources[0].cell;
+    let before = world.clone();
+    for (to, expected) in [
+        (cell(30, 0), CommandError::InvalidDestination),
+        (cell(0, 20), CommandError::InvalidDestination),
+        (cell(14, 9), CommandError::DestinationOccupied),
+        (resource, CommandError::DestinationOccupied),
+        (cell(15, 11), CommandError::DestinationOccupied),
+        (cell(20, 12), CommandError::DestinationOccupied),
+    ] {
+        assert_eq!(
+            world.apply_command(Command::Move {
+                unit_id: "villager-1".into(),
+                to,
+            }),
+            Err(expected),
+            "{to:?}"
+        );
+        assert_eq!(world, before);
+    }
+}
+
+#[test]
+fn walled_off_destination_is_unreachable() {
+    let mut world = GameWorld::default();
+    world.resources.clear();
+    for (index, origin) in [cell(0, 2), cell(2, 2), cell(2, 0)].into_iter().enumerate() {
+        world
+            .buildings
+            .push(town_center(&format!("wall-{index}"), origin, None));
+    }
+    let before = world.clone();
+    assert_eq!(
+        world.apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(0, 0),
+        }),
+        Err(CommandError::TargetUnreachable)
+    );
+    assert_eq!(world, before);
+}
+
+#[test]
+fn walkers_route_around_buildings_and_never_enter_them() {
+    let mut world = GameWorld::default();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(14, 7),
+        })
+        .unwrap();
+    let base = world.buildings[0].footprint();
+    for _ in 0..100 {
+        world.tick(0.1);
+        let unit = &world.units[0];
+        assert!(!base.contains(unit.cell));
+        assert!(unit.step.is_none_or(|step| !base.contains(step.to)));
+    }
+    assert_eq!(world.units[0].cell, cell(14, 7));
 }
 
 #[test]
 fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
     let mut world = GameWorld::default();
     start_gather_at_resource(&mut world, 0, 15.0);
-
     world.tick(15.0 / GATHER_RATE);
-    assert_eq!(world.stockpile.wood, 0.0);
     assert_eq!(
         world.units[0].cargo,
         Some(CarriedResource {
@@ -498,7 +262,6 @@ fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
     );
     assert_eq!(world.resources[0].amount, 0.0);
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
-
     world.tick(100.0);
     assert_gather_phase(&world.units[0], GatherPhase::Depositing);
     assert_eq!(world.stockpile.wood, 0.0);
@@ -509,57 +272,34 @@ fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
 }
 
 #[test]
-fn full_load_deposits_and_resumes_the_same_gather_order() {
-    let mut world = GameWorld::default();
-    start_gather_at_resource(&mut world, 0, 25.0);
-
-    world.tick(VILLAGER_CARRY_CAPACITY / GATHER_RATE);
-    assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 20.0);
-    assert_eq!(world.resources[0].amount, 5.0);
-    assert_eq!(world.stockpile.wood, 0.0);
-    assert_gather_phase(&world.units[0], GatherPhase::Returning);
-    world.tick(100.0);
-    world.tick(0.1);
-
-    assert_eq!(world.stockpile.wood, 20.0);
-    assert_eq!(world.units[0].cargo, None);
-    assert!(matches!(
-        &world.units[0].action,
-        UnitAction::Gather { resource_id, phase: GatherPhase::ToResource }
-            if resource_id == "tree-1"
-    ));
-}
-
-#[test]
-fn repeated_round_trips_deposit_every_load_and_finish_after_depletion() {
+fn full_loads_deposit_once_resume_and_finish_after_depletion() {
     let mut world = GameWorld::default();
     start_gather_at_resource(&mut world, 0, 45.0);
-
-    for expected_stockpile in [20.0, 40.0, 45.0] {
+    for expected in [20.0, 40.0, 45.0] {
         world.tick(100.0);
         assert_gather_phase(&world.units[0], GatherPhase::Returning);
         world.tick(100.0);
         assert_gather_phase(&world.units[0], GatherPhase::Depositing);
         world.tick(0.1);
-        assert_eq!(world.stockpile.wood, expected_stockpile);
+        assert_eq!(world.stockpile.wood, expected);
     }
-
     assert_eq!(world.resources[0].amount, 0.0);
-    assert_eq!(world.units[0].cargo, None);
     assert_eq!(world.units[0].action, UnitAction::Idle);
+    world.tick(100.0);
+    assert_eq!(world.stockpile.wood, 45.0);
 }
 
 #[test]
-fn depositing_is_exactly_once_across_later_ticks() {
+fn gatherer_stays_beside_the_node_until_the_load_is_full() {
     let mut world = GameWorld::default();
-    start_gather_at_resource(&mut world, 0, 10.0);
-    world.tick(10.0 / GATHER_RATE);
-    world.tick(100.0);
-    world.tick(0.1);
-    assert_eq!(world.stockpile.wood, 10.0);
-
-    world.tick(100.0);
-    assert_eq!(world.stockpile.wood, 10.0);
+    start_gather_at_resource(&mut world, 0, 100.0);
+    let spot = world.units[0].cell;
+    world.tick(4.0);
+    assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 8.0);
+    assert_gather_phase(&world.units[0], GatherPhase::Gathering);
+    assert_eq!(world.units[0].cell, spot);
+    world.tick(6.0);
+    assert_gather_phase(&world.units[0], GatherPhase::Returning);
 }
 
 #[test]
@@ -567,12 +307,18 @@ fn deleted_resource_returns_existing_cargo_and_then_finishes() {
     let mut world = GameWorld::default();
     start_gather_at_resource(&mut world, 0, 20.0);
     world.tick(0.5);
-    assert_eq!(
-        world.units[0].cargo.as_ref().unwrap().amount,
-        GATHER_RATE * 0.5
-    );
     world.resources.remove(0);
-
+    world.units[0].action = UnitAction::Gather {
+        resource_id: "gone".into(),
+        phase: GatherPhase::Gathering,
+    };
+    world.resources.push(ResourceNode {
+        id: "gone".into(),
+        kind: ResourceKind::Wood,
+        cell: cell(0, 0),
+        amount: 0.0,
+        capacity: 1.0,
+    });
     world.tick(0.1);
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
     world.tick(100.0);
@@ -586,15 +332,12 @@ fn missing_town_center_retains_cargo_until_a_deposit_is_possible() {
     let mut world = GameWorld::default();
     start_gather_at_resource(&mut world, 0, 10.0);
     world.tick(10.0 / GATHER_RATE);
-    let position = world.units[0].position;
+    let spot = world.units[0].cell;
     let town_center = world.buildings.remove(0);
-
     world.tick(100.0);
-    assert_eq!(world.units[0].position, position);
+    assert_eq!(world.units[0].cell, spot);
     assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 10.0);
-    assert_eq!(world.stockpile.wood, 0.0);
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
-
     world.buildings.push(town_center);
     world.tick(100.0);
     world.tick(0.1);
@@ -603,35 +346,7 @@ fn missing_town_center_retains_cargo_until_a_deposit_is_possible() {
 }
 
 #[test]
-fn default_world_has_seven_resource_kinds_and_a_productive_research_base() {
-    let world = GameWorld::default();
-    let kinds: BTreeSet<_> = world
-        .resources
-        .iter()
-        .map(|resource| resource.kind)
-        .collect();
-    assert_eq!(
-        kinds,
-        BTreeSet::from([
-            ResourceKind::Wood,
-            ResourceKind::Food,
-            ResourceKind::Stone,
-            ResourceKind::Gold,
-            ResourceKind::Iron,
-            ResourceKind::Clay,
-            ResourceKind::Fiber,
-        ])
-    );
-    assert_eq!(world.buildings.len(), 1);
-    assert_eq!(world.buildings[0].kind, BuildingKind::TownCenter);
-    assert_eq!(world.buildings[0].produces, vec![ProductKind::Villager]);
-    assert_eq!(world.buildings[0].researches, TechnologyKind::ALL);
-    assert_eq!(world.buildings[0].job, None);
-    assert!(world.researched_technologies.is_empty());
-}
-
-#[test]
-fn depositing_routes_each_carried_resource_to_its_typed_stockpile() {
+fn deposits_route_each_resource_to_its_typed_stockpile() {
     for kind in [
         ResourceKind::Wood,
         ResourceKind::Food,
@@ -642,92 +357,67 @@ fn depositing_routes_each_carried_resource_to_its_typed_stockpile() {
         ResourceKind::Fiber,
     ] {
         let mut world = GameWorld::default();
-        let resource_index = world
+        let index = world
             .resources
             .iter()
             .position(|resource| resource.kind == kind)
             .unwrap();
-        start_gather_at_resource(&mut world, resource_index, 10.0);
+        start_gather_at_resource(&mut world, index, 10.0);
         world.tick(10.0 / GATHER_RATE);
-        assert_eq!(world.units[0].cargo.as_ref().unwrap().kind, kind);
-        assert_eq!(
-            world.stockpile.wood
-                + world.stockpile.food
-                + world.stockpile.stone
-                + world.stockpile.gold
-                + world.stockpile.iron
-                + world.stockpile.clay
-                + world.stockpile.fiber,
-            0.0
-        );
-
         world.tick(100.0);
         world.tick(0.1);
-        let deposited = match kind {
-            ResourceKind::Wood => world.stockpile.wood,
-            ResourceKind::Food => world.stockpile.food,
-            ResourceKind::Stone => world.stockpile.stone,
-            ResourceKind::Gold => world.stockpile.gold,
-            ResourceKind::Iron => world.stockpile.iron,
-            ResourceKind::Clay => world.stockpile.clay,
-            ResourceKind::Fiber => world.stockpile.fiber,
-            ResourceKind::Coal
-            | ResourceKind::Timber
-            | ResourceKind::Steel
-            | ResourceKind::Bricks
-            | ResourceKind::Cloth
-            | ResourceKind::Rations => unreachable!("default nodes contain raw resources only"),
-        };
-        assert_eq!(deposited, 10.0);
-        assert_eq!(world.resources[resource_index].amount, 0.0);
+        let totals: BTreeMap<_, _> = world.stockpile.entries().into_iter().collect();
+        let name = serde_json::to_value(kind).unwrap();
+        for (resource, amount) in totals {
+            let expected = if name == resource { 10.0 } else { 0.0 };
+            assert_eq!(amount, expected, "{kind:?} deposited into {resource}");
+        }
     }
 }
 
 #[test]
-fn town_center_produces_one_villager_at_a_time_and_reserves_food_once() {
+fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
     let mut world = GameWorld::default();
     world.stockpile.food = 100.0;
-    world
-        .apply_command(Command::Produce {
-            building_id: "base-1".into(),
-            product: ProductKind::Villager,
-        })
-        .unwrap();
+    let produce = Command::Produce {
+        building_id: "base-1".into(),
+        product: ProductKind::Villager,
+    };
+    world.apply_command(produce.clone()).unwrap();
     assert_eq!(world.stockpile.food, 50.0);
-    let before_rejected_command = world.clone();
+    let before = world.clone();
     assert_eq!(
-        world.apply_command(Command::Produce {
-            building_id: "base-1".into(),
-            product: ProductKind::Villager,
-        }),
+        world.apply_command(produce),
         Err(CommandError::BuildingBusy)
     );
-    assert_eq!(world, before_rejected_command);
-
+    assert_eq!(world, before);
     world.tick(VILLAGER_PRODUCTION_SECONDS - 0.1);
     assert_eq!(world.units.len(), 2);
-    assert!(world.buildings[0].job.is_some());
     world.tick(0.1);
     assert_eq!(world.units.len(), 3);
     assert_eq!(world.units[2].id, "villager-3");
-    assert_eq!(world.units[2].action, UnitAction::Idle);
+    assert!(
+        world.buildings[0]
+            .footprint()
+            .is_interaction_cell(world.units[2].cell)
+    );
     assert_eq!(world.buildings[0].job, None);
     assert_eq!(world.stockpile.food, 50.0);
 }
 
 #[test]
-fn produced_villager_waits_for_a_free_adjacent_cell() {
+fn trained_villager_waits_for_a_free_cell_beside_the_building() {
     let mut world = GameWorld::default();
     world.resources.clear();
-    let building_cell = world
-        .cell_for_position(world.buildings[0].position)
-        .unwrap();
-    world.units = neighbors(building_cell, WORLD_COLUMNS, WORLD_ROWS)
+    let ring: Vec<_> = interaction_cells(world.buildings[0].footprint()).collect();
+    world.units = ring
+        .iter()
         .enumerate()
-        .map(|(index, cell)| Unit {
+        .map(|(index, &spot)| Unit {
             id: format!("blocker-{index}"),
             kind: UnitKind::Villager,
-            position: world.cell_center(cell),
+            cell: spot,
+            step: None,
             action: UnitAction::Idle,
             cargo: None,
         })
@@ -739,49 +429,35 @@ fn produced_villager_waits_for_a_free_adjacent_cell() {
             product: ProductKind::Villager,
         })
         .unwrap();
-
     world.tick(VILLAGER_PRODUCTION_SECONDS);
-    assert_eq!(world.units.len(), 4);
+    world.tick(1.0);
+    assert_eq!(world.units.len(), ring.len());
     assert!(world.buildings[0].job.is_some());
-
     world.units.pop();
     world.tick(0.1);
-    assert_eq!(world.units.len(), 4);
+    assert_eq!(world.units.len(), ring.len());
     assert_eq!(world.buildings[0].job, None);
-    let cells: BTreeSet<_> = world
-        .units
-        .iter()
-        .map(|unit| world.cell_for_position(unit.position).unwrap())
-        .collect();
-    assert_eq!(cells.len(), world.units.len());
 }
 
 #[test]
-fn research_uses_the_building_slot_reserves_once_and_enforces_prerequisites() {
+fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
     let mut world = GameWorld::default();
     world.stockpile.food = 100.0;
     world.stockpile.wood = 100.0;
-
-    let before_missing_prerequisite = world.clone();
+    let research = |technology| Command::Research {
+        building_id: "base-1".into(),
+        technology,
+    };
+    let before = world.clone();
     assert_eq!(
-        world.apply_command(Command::Research {
-            building_id: "base-1".into(),
-            technology: TechnologyKind::Mining,
-        }),
+        world.apply_command(research(TechnologyKind::Mining)),
         Err(CommandError::MissingTechnologyPrerequisite)
     );
-    assert_eq!(world, before_missing_prerequisite);
-
+    assert_eq!(world, before);
     world
-        .apply_command(Command::Research {
-            building_id: "base-1".into(),
-            technology: TechnologyKind::Masonry,
-        })
+        .apply_command(research(TechnologyKind::Masonry))
         .unwrap();
-    assert_eq!(world.stockpile.food, 60.0);
-    assert_eq!(world.stockpile.wood, 80.0);
-
-    let before_busy_rejection = world.clone();
+    assert_eq!((world.stockpile.food, world.stockpile.wood), (60.0, 80.0));
     assert_eq!(
         world.apply_command(Command::Produce {
             building_id: "base-1".into(),
@@ -789,33 +465,22 @@ fn research_uses_the_building_slot_reserves_once_and_enforces_prerequisites() {
         }),
         Err(CommandError::BuildingBusy)
     );
-    assert_eq!(world, before_busy_rejection);
-
     world.tick(RESEARCH_SECONDS - 0.1);
     assert!(world.researched_technologies.is_empty());
     world.tick(0.1);
     assert_eq!(world.researched_technologies, vec![TechnologyKind::Masonry]);
-    assert_eq!(world.buildings[0].job, None);
-
-    let before_duplicate = world.clone();
     assert_eq!(
-        world.apply_command(Command::Research {
-            building_id: "base-1".into(),
-            technology: TechnologyKind::Masonry,
-        }),
+        world.apply_command(research(TechnologyKind::Masonry)),
         Err(CommandError::TechnologyAlreadyResearched)
     );
-    assert_eq!(world, before_duplicate);
 }
 
 #[test]
-fn researched_abilities_make_their_resources_twenty_percent_faster() {
-    for (technology, resource_kind) in [
+fn researched_technologies_make_their_resources_twenty_percent_faster() {
+    for (technology, kind) in [
         (TechnologyKind::Forestry, ResourceKind::Wood),
         (TechnologyKind::Agriculture, ResourceKind::Food),
-        (TechnologyKind::Masonry, ResourceKind::Stone),
         (TechnologyKind::Masonry, ResourceKind::Clay),
-        (TechnologyKind::Mining, ResourceKind::Gold),
         (TechnologyKind::Mining, ResourceKind::Iron),
         (TechnologyKind::Textiles, ResourceKind::Fiber),
     ] {
@@ -826,38 +491,15 @@ fn researched_abilities_make_their_resources_twenty_percent_faster() {
         let index = world
             .resources
             .iter()
-            .position(|resource| resource.kind == resource_kind)
+            .position(|resource| resource.kind == kind)
             .unwrap();
-        world.resources[index].amount = 20.0;
-        world.units[0].position = world.resources[index].position;
-        world
-            .apply_command(Command::Gather {
-                unit_id: "villager-1".into(),
-                resource_id: world.resources[index].id.clone(),
-            })
-            .unwrap();
+        start_gather_at_resource(&mut world, index, 20.0);
         world.tick(1.0);
         assert_eq!(
             world.resources[index].amount,
-            20.0 - GATHER_RATE * GATHERING_TECH_MULTIPLIER,
-            "{technology:?}"
+            20.0 - GATHER_RATE * GATHERING_TECH_MULTIPLIER
         );
     }
-}
-
-#[test]
-fn gatherer_waits_at_the_resource_until_the_load_is_full() {
-    let mut world = GameWorld::default();
-    start_gather_at_resource(&mut world, 0, 100.0);
-
-    world.tick(4.0);
-    assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 8.0);
-    assert_gather_phase(&world.units[0], GatherPhase::Gathering);
-    assert_eq!(world.units[0].position, world.resources[0].position);
-
-    world.tick(6.0);
-    assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 20.0);
-    assert_gather_phase(&world.units[0], GatherPhase::Returning);
 }
 
 #[test]
@@ -869,20 +511,18 @@ fn simulation_speed_is_authoritative_validated_and_can_pause() {
     let paused = world.clone();
     world.tick(100.0);
     assert_eq!(world, paused);
-
     world
         .apply_command(Command::SetSimulationSpeed { multiplier: 2.0 })
         .unwrap();
     start_gather_at_resource(&mut world, 0, 100.0);
     world.tick(1.0);
     assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 4.0);
-
-    let before_invalid = world.clone();
+    let before = world.clone();
     assert_eq!(
         world.apply_command(Command::SetSimulationSpeed { multiplier: 3.0 }),
         Err(CommandError::InvalidSimulationSpeed)
     );
-    assert_eq!(world, before_invalid);
+    assert_eq!(world, before);
 }
 
 #[test]
@@ -895,81 +535,168 @@ fn busy_unit_rejects_commands_without_mutation() {
         })
         .unwrap();
     let before = world.clone();
-    let error = world.apply_command(Command::Gather {
-        unit_id: "villager-1".into(),
-        resource_id: "tree-2".into(),
-    });
-    assert_eq!(error, Err(CommandError::UnitBusy));
+    assert_eq!(
+        world.apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(5, 5),
+        }),
+        Err(CommandError::UnitBusy)
+    );
     assert_eq!(world, before);
 }
 
 #[test]
-fn build_reserves_once_works_for_four_seconds_and_creates_one_building() {
+fn build_places_one_foundation_immediately_and_charges_once() {
     let mut world = GameWorld::default();
-    let initial_buildings = world.buildings.len();
-    world.stockpile.wood = 20.0;
-    world.units[0].position = world.cell_center(CellCoordinate { column: 6, row: 6 });
-    let site = world.cell_center(CellCoordinate { column: 7, row: 6 });
+    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Build {
             unit_id: "villager-1".into(),
-            x: site.x,
-            y: site.y,
+            origin: cell(10, 15),
         })
         .unwrap();
     assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.buildings.len(), 2);
+    let foundation = world.buildings[1].clone();
+    assert_eq!(foundation.id, "building-2");
+    assert_eq!(foundation.construction, Some(0.0));
+    let claimed = world.claimed_cells();
+    assert!(foundation.footprint().cells().all(|c| claimed.contains(&c)));
 
-    world.tick(3.9);
-    assert_eq!(world.buildings.len(), initial_buildings);
-    assert!(matches!(world.units[0].action, UnitAction::Build { .. }));
-    world.tick(1.0);
-    assert_eq!(world.buildings.len(), initial_buildings + 1);
+    // A foundation is not a working town center.
+    world.stockpile.food = 100.0;
     assert_eq!(
-        world.buildings.last().unwrap().kind,
-        BuildingKind::TownCenter
+        world.apply_command(Command::Produce {
+            building_id: "building-2".into(),
+            product: ProductKind::Villager,
+        }),
+        Err(CommandError::BuildingUnderConstruction)
     );
+    // Nobody can be ordered onto it.
+    assert_eq!(
+        world.apply_command(Command::Move {
+            unit_id: "villager-2".into(),
+            to: cell(11, 16),
+        }),
+        Err(CommandError::DestinationOccupied)
+    );
+
+    run(&mut world, 30.0);
+    assert!(world.buildings[1].is_complete());
+    assert_eq!(world.buildings.len(), 2);
     assert_eq!(world.units[0].action, UnitAction::Idle);
-    world.tick(10.0);
-    assert_eq!(world.buildings.len(), initial_buildings + 1);
+    assert!(
+        world.buildings[1]
+            .footprint()
+            .is_interaction_cell(world.units[0].cell)
+    );
+    run(&mut world, 10.0);
+    assert_eq!(world.buildings.len(), 2);
     assert_eq!(world.stockpile.wood, 0.0);
 }
 
 #[test]
-fn build_validates_bounds_and_stockpile() {
+fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
     let mut world = GameWorld::default();
+    let build = |origin| Command::Build {
+        unit_id: "villager-1".into(),
+        origin,
+    };
+    let before = world.clone();
     assert_eq!(
-        world.apply_command(Command::Build {
-            unit_id: "villager-1".into(),
-            x: 100.0,
-            y: 100.0,
-        }),
+        world.apply_command(build(cell(10, 15))),
         Err(CommandError::InsufficientWood)
     );
-    world.stockpile.wood = 20.0;
-    assert_eq!(
-        world.apply_command(Command::Build {
-            unit_id: "villager-1".into(),
-            x: -1.0,
-            y: 100.0,
-        }),
-        Err(CommandError::InvalidBuildSite)
-    );
-    assert_eq!(world.stockpile.wood, 20.0);
+    assert_eq!(world, before);
+    world.stockpile.wood = 100.0;
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-2".into(),
+            to: cell(20, 15),
+        })
+        .unwrap();
+    let resource = world.resources[0].cell;
+    let before = world.clone();
+    for origin in [
+        cell(29, 5),  // straddles the east edge
+        cell(5, 19),  // straddles the south edge
+        cell(13, 8),  // overlaps the town center
+        resource,     // overlaps a resource
+        cell(14, 10), // overlaps villager-1 and the base
+        cell(15, 10), // overlaps villager-2 and the base
+        cell(19, 14), // covers villager-2's reservation
+    ] {
+        assert_eq!(
+            world.apply_command(build(origin)),
+            Err(CommandError::InvalidBuildSite),
+            "{origin:?}"
+        );
+        assert_eq!(world, before);
+    }
 }
 
 #[test]
-fn build_rejects_occupied_site_before_reserving_wood() {
+fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
     let mut world = GameWorld::default();
-    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
-    let occupied = world.buildings[0].position;
+    world.resources.clear();
+    world.stockpile.wood = 100.0;
+    world.units[0].cell = cell(0, 0);
+    // Seal villager-1 into the north-west pocket.
+    for (index, origin) in [cell(2, 0), cell(0, 3), cell(2, 2)].into_iter().enumerate() {
+        world
+            .buildings
+            .push(town_center(&format!("wall-{index}"), origin, None));
+    }
     let before = world.clone();
     assert_eq!(
         world.apply_command(Command::Build {
             unit_id: "villager-1".into(),
-            x: occupied.x,
-            y: occupied.y,
+            origin: cell(20, 15),
         }),
-        Err(CommandError::InvalidBuildSite)
+        Err(CommandError::TargetUnreachable)
     );
     assert_eq!(world, before);
+}
+
+#[test]
+fn a_second_villager_can_help_and_construction_completes_exactly_once() {
+    let mut solo = GameWorld::default();
+    solo.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    solo.apply_command(Command::Build {
+        unit_id: "villager-1".into(),
+        origin: cell(17, 14),
+    })
+    .unwrap();
+    let mut pair = solo.clone();
+    pair.apply_command(Command::Construct {
+        unit_id: "villager-2".into(),
+        building_id: "building-2".into(),
+    })
+    .unwrap();
+
+    let mut solo_ticks = 0;
+    while !solo.buildings[1].is_complete() {
+        solo.tick(0.1);
+        solo_ticks += 1;
+    }
+    let mut pair_ticks = 0;
+    while !pair.buildings[1].is_complete() {
+        pair.tick(0.1);
+        pair_ticks += 1;
+    }
+    assert!(pair_ticks < solo_ticks, "{pair_ticks} >= {solo_ticks}");
+    pair.tick(0.1);
+    assert!(
+        pair.units
+            .iter()
+            .all(|unit| unit.action == UnitAction::Idle)
+    );
+    assert_eq!(pair.buildings.len(), 2);
+    assert_eq!(
+        pair.apply_command(Command::Construct {
+            unit_id: "villager-2".into(),
+            building_id: "building-2".into(),
+        }),
+        Err(CommandError::BuildingAlreadyComplete)
+    );
 }

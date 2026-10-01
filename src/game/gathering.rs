@@ -1,3 +1,4 @@
+use super::movement::{Goal, Travel};
 use super::*;
 
 impl GameWorld {
@@ -38,14 +39,16 @@ impl GameWorld {
             return;
         }
 
-        let target = self.resources[resource_index].position;
-        let (arrived, remaining) = self.tick_toward_interaction(unit_index, target, dt);
-        if !arrived {
-            return;
-        }
-        self.set_gather_phase(unit_index, resource_id.clone(), GatherPhase::Gathering);
-        if remaining > 0.0 {
-            self.tick_at_resource(unit_index, resource_id, remaining);
+        let footprint = self.resources[resource_index].footprint();
+        match self.travel(unit_index, Goal::Beside(footprint), dt) {
+            Travel::EnRoute => {}
+            Travel::Unreachable => self.finish_or_return_with_cargo(unit_index, resource_id),
+            Travel::Arrived { remaining } => {
+                self.set_gather_phase(unit_index, resource_id.clone(), GatherPhase::Gathering);
+                if remaining > 0.0 {
+                    self.tick_at_resource(unit_index, resource_id, remaining);
+                }
+            }
         }
     }
 
@@ -65,6 +68,10 @@ impl GameWorld {
         }
 
         let kind = self.resources[resource_index].kind;
+        if !self.is_beside(unit_index, self.resources[resource_index].footprint()) {
+            self.set_gather_phase(unit_index, resource_id, GatherPhase::ToResource);
+            return;
+        }
         if self.units[unit_index]
             .cargo
             .as_ref()
@@ -106,20 +113,22 @@ impl GameWorld {
             self.resume_or_finish_gather(unit_index, resource_id);
             return;
         }
-        let Some(target) = self.nearest_reachable_town_center(unit_index) else {
+        // With no reachable town center the load is kept until one exists.
+        let Some(town_center) = self.nearest_reachable_town_center(unit_index) else {
             return;
         };
-        if self.tick_toward_interaction(unit_index, target, dt).0 {
+        if let Travel::Arrived { .. } = self.travel(unit_index, Goal::Beside(town_center), dt) {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Depositing);
         }
     }
 
     fn tick_depositing(&mut self, unit_index: usize, resource_id: String) {
-        let Some(target) = self.nearest_reachable_town_center(unit_index) else {
-            self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
-            return;
-        };
-        if !self.adjacent_to(unit_index, target) {
+        let beside_town_center = self.buildings.iter().any(|building| {
+            building.kind == BuildingKind::TownCenter
+                && building.is_complete()
+                && self.is_beside(unit_index, building.footprint())
+        });
+        if !beside_town_center {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
             return;
         }
