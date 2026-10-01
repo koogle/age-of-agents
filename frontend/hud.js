@@ -1,232 +1,418 @@
-// DOM overlay drawn as inked paper: coin medallions for the stockpile on top and
-// a console of illustrated cards at the bottom (commands, info, minimap). Real
-// buttons only; the canvas never draws UI.
+// The HUD, painted inside the WebGL canvas: a slim stockpile strip on top, a
+// ledger column on the left (selection, commands, minimap), and short notes.
+// A visually hidden mirror of every button keeps keyboard and screen-reader
+// access; the pixels themselves all come from the canvas.
+import { STYLE, createUiLayer, iconImage, wrapText } from './ui-layer.js';
+import { ACTIVITY_TEXT, FRIENDLY_ERRORS, ICONS, PREREQUISITE, RESOURCES, TECHNOLOGIES } from './hud-content.js';
 import { BIOME_COLORS } from './terrain.js';
 
-const RESOURCES = [
-  ['wood', 'Wood', '<rect x="2" y="8" width="18" height="8" rx="4" fill="#b07a42" stroke="#3a2210"/><ellipse cx="19" cy="12" rx="3" ry="4" fill="#f0cf96" stroke="#3a2210"/><circle cx="19" cy="12" r="1.3" fill="#b07a42"/>'],
-  ['food', 'Food', '<circle cx="8.5" cy="14" r="4.2" fill="#e0303f" stroke="#4a0c12"/><circle cx="15.5" cy="15" r="3.8" fill="#c21f30" stroke="#4a0c12"/><circle cx="12" cy="8.5" r="3.6" fill="#f0485a" stroke="#4a0c12"/><path d="M12 5c1-2 3-3 5-3" stroke="#3f7a2a" stroke-width="1.8" fill="none"/>'],
-  ['stone', 'Stone', '<path d="M3 18 6 8l8-4 7 6 1 8z" fill="#d6d0c4" stroke="#3a3228"/><path d="M6 8l8-4 1 7z" fill="#f2eee6"/>'],
-  ['gold', 'Gold', '<path d="M12 2 20 12 12 22 4 12z" fill="#ffcf2e" stroke="#6a4a00"/><path d="M12 2 20 12h-8z" fill="#fff2a0"/>'],
-  ['iron', 'Iron', '<path d="M4 17h16l-2.5-7h-11z" fill="#8a8fa0" stroke="#2a2e38"/><path d="M6.5 10h11L16 7.5H8z" fill="#c4c9d6" stroke="#2a2e38"/>'],
-  ['clay', 'Clay', '<path d="M8 4h8l-1 3c3 1 4.5 4 3.5 7-1 3.5-4 6-6.5 6S7 17.5 6 14c-1-3 .5-6 3.5-7z" fill="#e2784c" stroke="#5a1e0c"/>'],
-  ['fiber', 'Fiber', '<path d="M12 22V6" stroke="#6f8a2a" stroke-width="1.8"/><ellipse cx="12" cy="5" rx="2.2" ry="3.2" fill="#f2df6a" stroke="#6a5a10"/><ellipse cx="8.5" cy="10.5" rx="1.8" ry="2.8" fill="#f2df6a" stroke="#6a5a10" transform="rotate(-30 8.5 10.5)"/><ellipse cx="15.5" cy="10.5" rx="1.8" ry="2.8" fill="#f2df6a" stroke="#6a5a10" transform="rotate(30 15.5 10.5)"/>']
-];
-const ICONS = {
-  build: '<path d="M4 20V11l8-6 8 6v9z" fill="#e0452e" stroke="#2c1b0e" stroke-width="1.5"/><path d="M7 20v-7h10v7" fill="#fbefd2" stroke="#2c1b0e" stroke-width="1.5"/><path d="M10.5 20v-4h3v4" fill="#6b4528"/>',
-  cancel: '<path d="M6 6l12 12M18 6 6 18" stroke="#7d1f17" stroke-width="3.5" stroke-linecap="round"/>',
-  villager: '<circle cx="12" cy="7" r="3.6" fill="#f2c9a0" stroke="#2c1b0e" stroke-width="1.3"/><path d="M5 21v-4.5C5 13 8 11.5 12 11.5s7 1.5 7 5V21z" fill="#5b8e7d" stroke="#2c1b0e" stroke-width="1.3"/><path d="M8.5 12.2h7l-1 1.8h-5z" fill="#2f6fe0"/>',
-  forestry: '<path d="M12 3 6 13h3l-3 5h12l-3-5h3z" fill="#4f9a5a" stroke="#1e3a20" stroke-width="1.3"/><rect x="11" y="18" width="2" height="4" fill="#6b4528"/>',
-  agriculture: '<path d="M12 22V8" stroke="#6f8a2a" stroke-width="1.8"/><ellipse cx="12" cy="6" rx="2.4" ry="3.6" fill="#f2c84a" stroke="#6a4a00"/><ellipse cx="8.5" cy="12" rx="2" ry="3" fill="#f2c84a" stroke="#6a4a00" transform="rotate(-35 8.5 12)"/><ellipse cx="15.5" cy="12" rx="2" ry="3" fill="#f2c84a" stroke="#6a4a00" transform="rotate(35 15.5 12)"/>',
-  masonry: '<rect x="3" y="14" width="8" height="5" fill="#d6d0c4" stroke="#3a3228"/><rect x="13" y="14" width="8" height="5" fill="#d6d0c4" stroke="#3a3228"/><rect x="8" y="8" width="8" height="5" fill="#e2784c" stroke="#5a1e0c"/>',
-  mining: '<path d="M4 9c4-5 12-5 16 0" stroke="#5a5f6e" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M12 6v15" stroke="#8a5a30" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17l3 3-3 2-2-3z" fill="#ffcf2e" stroke="#6a4a00"/>',
-  textiles: '<ellipse cx="12" cy="12" rx="6" ry="8" fill="#f2df6a" stroke="#6a5a10" stroke-width="1.3"/><path d="M6.5 9h11M6 12h12M6.5 15h11" stroke="#b8a03a"/><path d="M18 18l3 3" stroke="#7a7f8c" stroke-width="1.6"/>',
-  townCenter: '<path d="M3 21V12l9-7 9 7v9z" fill="#e0452e" stroke="#2c1b0e" stroke-width="1.3"/><rect x="6" y="13" width="12" height="8" fill="#fbefd2" stroke="#2c1b0e" stroke-width="1.3"/><rect x="10.5" y="16" width="3" height="5" fill="#6b4528"/><path d="M12 5V1.5l4 1.5-4 1.5" fill="#2f6fe0" stroke="#2c1b0e" stroke-width=".8"/>',
-  group: '<circle cx="8" cy="8" r="3" fill="#f2c9a0" stroke="#2c1b0e"/><circle cx="16" cy="8" r="3" fill="#d8a47a" stroke="#2c1b0e"/><path d="M2 20v-3.5c0-3 2.5-4.5 6-4.5s6 1.5 6 4.5V20z" fill="#5b8e7d" stroke="#2c1b0e"/><path d="M10 20v-3.5c0-3 2.5-4.5 6-4.5s6 1.5 6 4.5V20z" fill="#c8553d" stroke="#2c1b0e"/>',
-  scroll: '<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7" fill="#fbefd2" stroke="#6b4528" stroke-width="1.4"/><path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1V6a2 2 0 0 0-1-2z" fill="#e2c992" stroke="#6b4528" stroke-width="1.4"/><path d="M10 9h6M10 12h6M10 15h4" stroke="#8a6524"/>'
-};
-const TECHNOLOGIES = {
-  forestry: ['Forestry', 'Wood +20%'],
-  agriculture: ['Agriculture', 'Food +20%'],
-  masonry: ['Masonry', 'Stone and clay +20%'],
-  mining: ['Mining', 'Gold and iron +20%'],
-  textiles: ['Textiles', 'Fiber +20%']
-};
-const PREREQUISITE = { mining: 'masonry', textiles: 'agriculture' };
-const FRIENDLY_ERRORS = {
-  'unit is busy': 'That villager is busy with its current task.',
-  'destination cell is occupied': 'Something already stands there.',
-  'target is unreachable': 'No path leads there.',
-  'build site is blocked or outside the world': 'The town center needs a clear 2×2 site.',
-  'insufficient wood': 'You need 20 wood to build.',
-  'insufficient food': 'You need 50 food to train a villager.'
-};
-const ACTIVITY_TEXT = {
-  idle: 'Awaiting orders', move: 'Walking', build: 'Building',
-  to_resource: 'Heading out to gather', gathering: 'Gathering', returning: 'Carrying goods home', depositing: 'Unloading'
-};
-const svg = (body, size = 24) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true">${body}</svg>`;
+const SIDE = 212;
+const ROW = 34;
 
-export function createHud({ onSpeed, onReset, onTrain, onResearch, onBuild, onCancel, onMinimap }) {
-  const $ = id => document.getElementById(id);
-  const values = {};
-  for (const [key, label, icon] of RESOURCES) {
-    const item = document.createElement('li');
-    item.title = label;
-    item.innerHTML = `<span class="coin">${svg(icon)}</span><span class="sr">${label}</span><strong>0</strong>`;
-    $('stockpiles').append(item);
-    values[key] = { item, strong: item.querySelector('strong'), last: 0 };
-  }
-  document.querySelectorAll('#speed-controls button').forEach(button => {
-    button.addEventListener('click', () => onSpeed(Number(button.dataset.speed)));
-  });
-  $('reset-world').addEventListener('click', () => {
-    if (confirm('Reset the world? All progress will be lost.')) onReset();
-  });
+export function createHud(renderer, actions) {
+  const layer = createUiLayer(renderer);
+  const { panels, view } = layer;
+  const state = {
+    world: null, selection: { units: new Set(), building: null }, buildMode: false, online: false,
+    hover: null, pressed: null, dragMinimap: false, toast: '', toastUntil: 0, bumps: {}, last: {},
+    dirty: true, minimapDirty: true, corners: [], commands: [], a11yKey: ''
+  };
+  const icon = body => iconImage(body, () => { state.dirty = true; });
+  document.fonts?.ready.then(() => { state.dirty = true; });
 
-  // The command grid is rebuilt only when its context changes, so a button is
-  // never replaced between press and release; enabled states update in place.
-  const commands = $('commands');
-  let commandContext = '';
-  let buttons = [];
-  function command(icon, label, cost, onClick, key) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'command';
-    button.title = label;
-    button.setAttribute('aria-label', cost ? `${label}, ${cost}` : label);
-    button.innerHTML = `${svg(ICONS[icon], 34)}${cost ? `<span class="cost">${cost}</span>` : ''}${key ? `<span class="key">${key}</span>` : ''}`;
-    button.addEventListener('click', onClick);
-    return button;
-  }
-  function renderCommands(context, specs) {
-    if (context === commandContext) return;
-    commandContext = context;
-    buttons = specs.map(spec => command(...spec));
-    commands.replaceChildren(...buttons);
-    const slots = Math.max(0, (buttons.length <= 4 ? 4 : 8) - buttons.length);
-    for (let i = 0; i < slots; i += 1) commands.append(Object.assign(document.createElement('span'), { className: 'slot' }));
-  }
-
-  let toastTimer = 0;
-  function toast(message) {
-    const element = $('toast');
-    element.textContent = FRIENDLY_ERRORS[message] || message;
-    element.classList.add('visible');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => element.classList.remove('visible'), 2400);
-  }
-
-  const minimap = $('minimap');
-  const mini = minimap.getContext('2d');
-  function minimapCell(event) {
-    const rect = minimap.getBoundingClientRect();
-    return { x: (event.clientX - rect.left) / rect.width * 30, z: (event.clientY - rect.top) / rect.height * 20 };
-  }
-  minimap.addEventListener('pointerdown', event => {
-    minimap.setPointerCapture(event.pointerId);
-    onMinimap(minimapCell(event));
-  });
-  minimap.addEventListener('pointermove', event => {
-    if (event.buttons) onMinimap(minimapCell(event));
-  });
-
-  function drawMinimap(world, viewCorners) {
-    const sx = minimap.width / world.columns;
-    const sy = minimap.height / world.rows;
-    for (const cell of world.terrain) {
-      const [r, g, b] = cell.biome ? BIOME_COLORS[cell.biome] : [233, 216, 176];
-      const dim = cell.visibility === 'visible' ? 1 : cell.visibility === 'explored' ? 0.7 : 1;
-      mini.fillStyle = `rgb(${r * dim},${g * dim},${b * dim})`;
-      mini.fillRect(cell.column * sx, cell.row * sy, sx + 0.5, sy + 0.5);
+  function layout() {
+    const mobile = view.width < 700;
+    if (!mobile) {
+      const mapH = (SIDE - 24) * 2 / 3;
+      return {
+        mobile, top: 30, mount: 6,
+        side: { x: 0, y: 30, w: SIDE, h: view.height - 30 },
+        picture: { x: SIDE, y: 30, w: view.width - SIDE - 6, h: view.height - 36 },
+        minimap: { x: 12, y: view.height - 12 - mapH, w: SIDE - 24, h: mapH }
+      };
     }
-    mini.fillStyle = '#3b2614';
+    const sheet = 62 + (state.commands.length ? 60 : 0);
+    return {
+      mobile, top: 54, mount: 3,
+      side: { x: 0, y: view.height - sheet, w: view.width, h: sheet },
+      picture: { x: 3, y: 54, w: view.width - 6, h: view.height - 54 - sheet },
+      minimap: { x: view.width - 124, y: 62, w: 114, h: 76 }
+    };
+  }
+
+  // ---------- what the HUD says ----------
+  function describe() {
+    const { world, selection, buildMode } = state;
+    const units = world.units.filter(unit => selection.units.has(unit.id));
+    const building = world.buildings.find(b => b.id === selection.building);
+    if (units.length) {
+      const commands = buildMode
+        ? [{ id: 'cancel', icon: 'cancel', label: 'Cancel placement', cost: 'Esc', enabled: true, run: actions.onCancel }]
+        : [{ id: 'build', icon: 'build', label: 'Build town center', cost: '20 wood', enabled: world.stockpile.wood >= 20, run: actions.onBuild }];
+      if (units.length === 1) {
+        const unit = units[0];
+        const phase = unit.action.type === 'gather' ? unit.action.phase : unit.action.type;
+        const cargo = unit.cargo ? ` · carrying ${Math.floor(unit.cargo.amount)} ${unit.cargo.kind}` : '';
+        return { icon: 'villager', title: unit.id.replace('villager-', 'Villager '), detail: `${ACTIVITY_TEXT[phase] || phase}${cargo}`, commands };
+      }
+      const idle = units.filter(unit => unit.action.type === 'idle').length;
+      return { icon: 'group', title: `${units.length} villagers`, detail: `${idle} awaiting orders; tap ground to move together`, commands };
+    }
+    if (building && building.construction !== null) {
+      return {
+        icon: 'townCenter', title: 'Town center foundation', detail: 'Select villagers and tap it to help build',
+        job: { label: 'Construction', progress: building.construction / 4 }, commands: []
+      };
+    }
+    if (building) {
+      const job = building.job;
+      const known = world.researched_technologies;
+      return {
+        icon: 'townCenter', title: 'Town center', detail: 'Trains villagers and studies new crafts',
+        job: job && {
+          label: job.type === 'produce' ? 'Training a villager' : `Researching ${TECHNOLOGIES[job.technology][0]}`,
+          progress: job.elapsed_seconds / (job.type === 'produce' ? 6 : 8)
+        },
+        commands: [
+          { id: 'train', icon: 'villager', label: 'Train villager', cost: '50 food', enabled: !job && world.stockpile.food >= 50, run: actions.onTrain },
+          ...Object.entries(TECHNOLOGIES).map(([key, [label]]) => {
+            const done = known.includes(key);
+            const blocked = PREREQUISITE[key] && !known.includes(PREREQUISITE[key]);
+            return {
+              id: key, icon: key, label, done,
+              cost: done ? 'known' : blocked ? `needs ${TECHNOLOGIES[PREREQUISITE[key]][0]}` : '40 food · 20 wood',
+              enabled: !done && !blocked && !job && world.stockpile.food >= 40 && world.stockpile.wood >= 20,
+              run: () => actions.onResearch(key)
+            };
+          })
+        ]
+      };
+    }
+    return { icon: 'scroll', title: 'Your village', detail: 'Tap a villager to give orders, or the town center to train and research', commands: [] };
+  }
+
+  // ---------- painting ----------
+  function paintTop(L, now) {
+    const c = panels.top.begin(0, 0, view.width, L.top, view.height, view.dpr);
+    c.fillStyle = STYLE.ivory;
+    c.fillRect(0, 0, view.width, L.top);
+    c.fillStyle = STYLE.hair;
+    c.fillRect(0, L.top - 1, view.width, 1);
+    const row = L.mobile ? 16 : L.top / 2;
+    const step = (view.width - 16) / RESOURCES.length;
+    let x = 12;
+    c.textBaseline = 'middle';
+    RESOURCES.forEach(([key, , body], index) => {
+      const value = Math.floor((state.world.stockpile[key] || 0) + 1e-6);
+      if (state.last[key] !== undefined && value > state.last[key]) state.bumps[key] = now + 700;
+      state.last[key] = value;
+      if (L.mobile) x = 8 + index * step;
+      c.drawImage(icon(body), x, row - 7, 14, 14);
+      c.font = `500 13px ${STYLE.body}`;
+      c.fillStyle = state.bumps[key] > now ? STYLE.accent : STYLE.ink;
+      c.textAlign = 'left';
+      c.fillText(String(value), x + 18, row + 1);
+      if (!L.mobile) {
+        x += 18 + Math.max(18, c.measureText(String(value)).width) + 10;
+        c.fillStyle = STYLE.faint;
+        c.fillRect(x, 8, 1, L.top - 16);
+        x += 10;
+      }
+    });
+    if (!L.mobile) {
+      c.textAlign = 'center';
+      c.fillStyle = STYLE.ink;
+      c.font = `600 15px ${STYLE.caps}`;
+      c.fillText('Age of Agents', view.width / 2, row + 1);
+      c.textAlign = 'left';
+      c.font = `italic 400 11px ${STYLE.body}`;
+      c.fillStyle = STYLE.muted;
+      c.fillText(`tick ${state.world.tick}`, view.width / 2 + 62, row + 1);
+    }
+    // Right-hand controls, laid out from the right edge.
+    const controlsY = L.mobile ? 40 : row;
+    let right = view.width - 12;
+    c.fillStyle = state.online ? '#5f8f4a' : STYLE.accent;
+    c.beginPath();
+    c.arc(right - 4, controlsY, 3.5, 0, Math.PI * 2);
+    c.fill();
+    right -= 20;
+    const items = [['reset', 'reset', actions.onReset], ['speed2', '2×', () => actions.onSpeed(2)], ['speed1', '1×', () => actions.onSpeed(1)], ['speed0', 'pause', () => actions.onSpeed(0)]];
+    c.font = `500 14px ${STYLE.caps}`;
+    for (const [id, label, run] of items) {
+      const width = c.measureText(label).width + 14;
+      const active = id === `speed${state.world.simulation_speed}`;
+      c.globalAlpha = active || state.hover === id ? 1 : 0.7;
+      c.fillStyle = active ? STYLE.accent : STYLE.ink;
+      c.textAlign = 'center';
+      c.fillText(label, right - width / 2, controlsY + 1);
+      if (active) c.fillRect(right - width + 7, controlsY + 9, width - 14, 1);
+      c.globalAlpha = 1;
+      panels.top.regions.push({ id, x: right - width, y: controlsY - 12, w: width, h: 24, enabled: true, run });
+      right -= width + (id === 'reset' ? 12 : 0);
+    }
+    panels.top.end();
+  }
+
+  function paintSide(L, model) {
+    const s = L.side;
+    const c = panels.side.begin(s.x, s.y, s.w, s.h, view.height, view.dpr);
+    c.fillStyle = STYLE.ivory;
+    c.fillRect(0, 0, s.w, s.h);
+    c.fillStyle = STYLE.hair;
+    if (L.mobile) c.fillRect(0, 0, s.w, 1);
+    else c.fillRect(s.w - 1, 0, 1, s.h);
+    // Selection header: framed portrait, title, and a line of detail.
+    c.strokeStyle = STYLE.hair;
+    c.lineWidth = 1;
+    c.fillStyle = STYLE.ivoryLight;
+    c.fillRect(13, 11, 33, 33);
+    c.strokeRect(12.5, 10.5, 34, 34);
+    c.drawImage(icon(ICONS[model.icon]), 17, 15, 25, 25);
+    c.textAlign = 'left';
+    c.textBaseline = 'alphabetic';
+    c.fillStyle = STYLE.ink;
+    c.font = `600 16px ${STYLE.caps}`;
+    c.fillText(model.title, 56, 25, s.w - 68);
+    c.font = `italic 400 12px ${STYLE.body}`;
+    c.fillStyle = STYLE.muted;
+    wrapText(c, model.detail, 56, 40, (L.mobile ? s.w - 150 : SIDE) - 68, 14, L.mobile ? 1 : 2);
+    let y = 70;
+    if (model.job) {
+      const jobX = L.mobile ? s.w - 132 : 12;
+      const jobY = L.mobile ? 22 : y;
+      const jobW = L.mobile ? 120 : SIDE - 24;
+      c.font = `italic 400 11px ${STYLE.body}`;
+      c.fillStyle = STYLE.ink;
+      c.fillText(model.job.label, jobX, jobY);
+      c.fillStyle = STYLE.faint;
+      c.fillRect(jobX, jobY + 5, jobW, 3);
+      c.fillStyle = STYLE.accent;
+      c.fillRect(jobX, jobY + 5, jobW * Math.min(1, model.job.progress), 3);
+      if (!L.mobile) y += 20;
+    }
+    if (L.mobile) y = 61;
+    c.fillStyle = STYLE.hair;
+    c.fillRect(0, y, s.w, 1);
+    // Command rows on desktop, a row of cells on phones.
+    const cellW = L.mobile ? Math.max(104, s.w / Math.max(1, model.commands.length)) : SIDE;
+    model.commands.forEach((command, index) => {
+      const area = L.mobile ? { x: index * cellW, y: 62, w: cellW, h: 60 } : { x: 0, y: y + 1 + index * ROW, w: SIDE, h: ROW };
+      const hot = state.hover === command.id && command.enabled;
+      if (hot) {
+        c.fillStyle = STYLE.ivoryLight;
+        c.fillRect(area.x, area.y, area.w, area.h - 1);
+      }
+      c.globalAlpha = command.enabled || command.done ? 1 : 0.42;
+      c.drawImage(icon(ICONS[command.icon]), area.x + 12, L.mobile ? area.y + 12 : area.y + 8, 18, 18);
+      c.fillStyle = hot ? STYLE.accent : STYLE.ink;
+      c.font = `400 13px ${STYLE.body}`;
+      c.textAlign = 'left';
+      c.fillText(command.label, area.x + (L.mobile ? 36 : 40), L.mobile ? area.y + 25 : area.y + 22, area.w - 50);
+      c.font = `italic 400 11px ${STYLE.body}`;
+      c.fillStyle = STYLE.muted;
+      if (L.mobile) {
+        c.fillText(command.cost, area.x + 36, area.y + 42, area.w - 44);
+      } else {
+        c.textAlign = 'right';
+        c.fillText(command.cost, SIDE - 12, area.y + 22);
+      }
+      c.globalAlpha = 1;
+      c.fillStyle = STYLE.faint;
+      if (L.mobile) c.fillRect(area.x + area.w - 1, area.y + 6, 1, area.h - 12);
+      else c.fillRect(0, area.y + area.h - 1, SIDE, 1);
+      panels.side.regions.push({ id: command.id, ...area, enabled: command.enabled, run: command.run });
+    });
+    if (!model.commands.length && !L.mobile) {
+      c.font = `italic 400 12px ${STYLE.body}`;
+      c.fillStyle = STYLE.hair;
+      c.textAlign = 'left';
+      c.fillText('No orders available', 12, y + 22);
+    }
+    if (!L.mobile) {
+      const footer = L.minimap.y - s.y - 12;
+      c.font = `italic 400 11px ${STYLE.body}`;
+      c.fillStyle = STYLE.muted;
+      c.textAlign = 'left';
+      wrapText(c, 'Drag to pan, wheel to zoom, Q/E or right-drag to rotate. Shift-drag selects a group. B builds, Esc cancels.', 12, footer - 34, SIDE - 24, 13, 3);
+      c.fillStyle = STYLE.hair;
+      c.fillRect(0, footer, SIDE, 1);
+    }
+    panels.side.end();
+  }
+
+  function paintNote(panel, text, y, L) {
+    if (!text) {
+      panel.mesh.visible = false;
+      return;
+    }
+    const probe = panel.context;
+    probe.font = `italic 400 13px ${STYLE.body}`;
+    const width = Math.min(L.picture.w - 20, probe.measureText(text).width + 28);
+    const c = panel.begin(L.picture.x + (L.picture.w - width) / 2, y, width, 28, view.height, view.dpr);
+    c.fillStyle = STYLE.ivory;
+    c.fillRect(0, 0, width, 28);
+    c.strokeStyle = STYLE.hair;
+    c.strokeRect(0.5, 0.5, width - 1, 27);
+    c.font = `italic 400 13px ${STYLE.body}`;
+    c.fillStyle = STYLE.ink;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(text, width / 2, 15, width - 16);
+    panel.end();
+  }
+
+  function paintMinimap(L) {
+    const m = L.minimap;
+    const world = state.world;
+    const c = panels.minimap.begin(m.x, m.y, m.w, m.h, view.height, view.dpr);
+    c.fillStyle = STYLE.ivory;
+    c.fillRect(0, 0, m.w, m.h);
+    const inner = { x: 3, y: 3, w: m.w - 6, h: m.h - 6 };
+    const sx = inner.w / world.columns;
+    const sy = inner.h / world.rows;
+    for (const cell of world.terrain) {
+      const [r, g, b] = cell.biome ? BIOME_COLORS[cell.biome] : [226, 214, 186];
+      const dim = cell.visibility === 'explored' ? 0.78 : 1;
+      c.fillStyle = `rgb(${r * dim},${g * dim},${b * dim})`;
+      c.fillRect(inner.x + cell.column * sx, inner.y + cell.row * sy, sx + 0.5, sy + 0.5);
+    }
+    c.fillStyle = STYLE.ink;
     for (const resource of world.resources) {
-      if (resource.amount > 0) mini.fillRect(resource.cell.column * sx + 1, resource.cell.row * sy + 1, sx - 2, sy - 2);
+      if (resource.amount > 0) c.fillRect(inner.x + resource.cell.column * sx + 1, inner.y + resource.cell.row * sy + 1, sx - 2, sy - 2);
     }
     for (const building of world.buildings) {
-      mini.fillStyle = building.construction === null ? '#d0532e' : '#f0a888';
-      mini.fillRect(building.origin.column * sx, building.origin.row * sy, building.columns * sx, building.rows * sy);
+      c.fillStyle = building.construction === null ? STYLE.accent : '#e8b49a';
+      c.fillRect(inner.x + building.origin.column * sx, inner.y + building.origin.row * sy, building.columns * sx, building.rows * sy);
     }
-    mini.fillStyle = '#1f6fd0';
-    for (const unit of world.units) mini.fillRect(unit.position.x * sx - 2, unit.position.y * sy - 2, 4, 4);
-    if (viewCorners.every(Boolean)) {
-      mini.strokeStyle = '#3b2614';
-      mini.lineWidth = 1.5;
-      mini.beginPath();
-      viewCorners.forEach((corner, index) => mini[index ? 'lineTo' : 'moveTo'](corner.x * sx, corner.z * sy));
-      mini.closePath();
-      mini.stroke();
+    c.fillStyle = '#1f6fd0';
+    for (const unit of world.units) c.fillRect(inner.x + unit.position.x * sx - 1.5, inner.y + unit.position.y * sy - 1.5, 3, 3);
+    if (state.corners.length && state.corners.every(Boolean)) {
+      c.strokeStyle = STYLE.ink;
+      c.beginPath();
+      state.corners.forEach((corner, index) => c[index ? 'lineTo' : 'moveTo'](inner.x + corner.x * sx, inner.y + corner.z * sy));
+      c.closePath();
+      c.stroke();
     }
+    c.strokeStyle = STYLE.hair;
+    c.strokeRect(0.5, 0.5, m.w - 1, m.h - 1);
+    c.strokeRect(2.5, 2.5, m.w - 5, m.h - 5);
+    panels.minimap.regions.push({ id: 'minimap', x: 0, y: 0, w: m.w, h: m.h, enabled: true });
+    panels.minimap.end();
   }
 
-  function setInfo(icon, title, detail, job) {
-    if ($('portrait').dataset.icon !== icon) {
-      $('portrait').innerHTML = svg(ICONS[icon], 44);
-      $('portrait').dataset.icon = icon;
-    }
-    $('selection-title').textContent = title;
-    $('selection-detail').textContent = detail;
-    $('job').hidden = !job;
-    if (job) {
-      $('job-label').textContent = job.label;
-      $('job-fill').style.width = `${Math.round(Math.min(1, job.progress) * 100)}%`;
-    }
+  // ---------- accessible mirror ----------
+  const mirror = document.getElementById('a11y');
+  function syncMirror(model) {
+    const key = model.commands.map(command => `${command.id}:${command.enabled}`).join('|');
+    if (key === state.a11yKey) return;
+    state.a11yKey = key;
+    const button = (label, run, disabled = false) => {
+      const element = document.createElement('button');
+      element.type = 'button';
+      element.textContent = label;
+      element.disabled = disabled;
+      element.addEventListener('click', run);
+      return element;
+    };
+    mirror.replaceChildren(
+      button('Pause simulation', () => actions.onSpeed(0)),
+      button('Normal speed', () => actions.onSpeed(1)),
+      button('Double speed', () => actions.onSpeed(2)),
+      button('Reset the world', actions.onReset),
+      ...model.commands.map(command => button(`${command.label}, ${command.cost}`, command.run, !command.enabled))
+    );
+  }
+
+  function regionAt(x, y) {
+    return layer.hit(x, y)?.region || null;
+  }
+  function minimapPoint(x, y) {
+    const m = layout().minimap;
+    return {
+      x: Math.min(1, Math.max(0, (x - m.x - 3) / (m.w - 6))) * state.world.columns,
+      z: Math.min(1, Math.max(0, (y - m.y - 3) / (m.h - 6))) * state.world.rows
+    };
   }
 
   return {
-    toast,
-    drawMinimap,
-    canBuild: () => buttons[0]?.dataset.role === 'build' && !buttons[0].disabled,
-    setConnection(online) {
-      $('connection').classList.toggle('online', online);
-      $('connection').title = online ? 'Connected' : 'Reconnecting';
+    resize(width, height, dpr) {
+      layer.resize(width, height, dpr);
+      state.dirty = true;
     },
     update(world, selection, buildMode) {
-      for (const [key] of RESOURCES) {
-        const value = Math.floor(world.stockpile[key] + 1e-6);
-        const entry = values[key];
-        if (value === entry.last) continue;
-        entry.strong.textContent = value;
-        if (value > entry.last) {
-          entry.item.classList.remove('bump');
-          void entry.item.offsetWidth;
-          entry.item.classList.add('bump');
+      Object.assign(state, { world, selection, buildMode, dirty: true });
+    },
+    setConnection(online) {
+      state.online = online;
+      state.dirty = true;
+    },
+    toast(message) {
+      state.toast = FRIENDLY_ERRORS[message] || message;
+      document.getElementById('status').textContent = state.toast;
+      state.toastUntil = performance.now() + 2400;
+      state.dirty = true;
+      setTimeout(() => { state.dirty = true; }, 2450);
+    },
+    minimap(corners) {
+      state.corners = corners;
+      state.minimapDirty = true;
+    },
+    box: area => layer.box(area),
+    canBuild: () => state.commands.some(command => command.id === 'build' && command.enabled),
+    pointer: {
+      contains: (x, y) => Boolean(layer.hit(x, y)),
+      down(x, y) {
+        const region = regionAt(x, y);
+        if (!region) return false;
+        state.pressed = region.id;
+        if (region.id === 'minimap' && state.world) {
+          state.dragMinimap = true;
+          actions.onMinimap(minimapPoint(x, y));
         }
-        entry.last = value;
+        return true;
+      },
+      move(x, y) {
+        if (state.dragMinimap) actions.onMinimap(minimapPoint(x, y));
+      },
+      up(x, y) {
+        const region = regionAt(x, y);
+        if (region && region.id === state.pressed && region.enabled && region.run) region.run();
+        state.pressed = null;
+        state.dragMinimap = false;
+      },
+      hover(x, y) {
+        const region = regionAt(x, y);
+        const id = (region?.run && region.enabled) || region?.id === 'minimap' ? region.id : null;
+        if (id !== state.hover) {
+          state.hover = id;
+          state.dirty = true;
+        }
+        if (region) renderer.domElement.style.cursor = id ? 'pointer' : 'default';
+        return Boolean(region);
       }
-      $('clock').textContent = `Tick ${world.tick}`;
-      document.querySelectorAll('#speed-controls button').forEach(button => {
-        button.classList.toggle('active', Number(button.dataset.speed) === world.simulation_speed);
-      });
-      $('placement').hidden = !buildMode;
-
-      const selectedUnits = world.units.filter(unit => selection.units.has(unit.id));
-      const building = world.buildings.find(b => b.id === selection.building);
-      if (selectedUnits.length) {
-        if (selectedUnits.length === 1) {
-          const unit = selectedUnits[0];
-          const state = unit.action.type === 'gather' ? unit.action.phase : unit.action.type;
-          const cargo = unit.cargo ? ` · carrying ${Math.floor(unit.cargo.amount)} ${unit.cargo.kind}` : '';
-          setInfo('villager', unit.id.replace('villager-', 'Villager '), `${ACTIVITY_TEXT[state] || state}${cargo}`);
-        } else {
-          const idle = selectedUnits.filter(unit => unit.action.type === 'idle').length;
-          setInfo('group', `${selectedUnits.length} villagers`, `${idle} awaiting orders · tap ground to move together`);
-        }
-        if (buildMode) {
-          renderCommands('placing', [['cancel', 'Cancel placement', '', onCancel, 'Esc']]);
-        } else {
-          renderCommands('villager', [['build', 'Build town center', '20 wood', onBuild, 'B']]);
-          buttons[0].dataset.role = 'build';
-          buttons[0].disabled = world.stockpile.wood < 20;
-        }
-      } else if (building && building.construction !== null) {
-        setInfo('townCenter', 'Town Center foundation', 'Villagers raise the walls; tap it with villagers selected to help',
-          { label: 'Construction', progress: building.construction / 4 });
-        renderCommands('foundation', []);
-      } else if (building) {
-        const job = building.job;
-        setInfo('townCenter', 'Town Center', 'Trains villagers and studies new crafts', job && {
-          label: job.type === 'produce' ? 'Training a villager' : `Researching ${TECHNOLOGIES[job.technology][0]}`,
-          progress: job.elapsed_seconds / (job.type === 'produce' ? 6 : 8)
-        });
-        renderCommands('town-center', [
-          ['villager', 'Train villager', '50 food', onTrain],
-          ...Object.entries(TECHNOLOGIES).map(([key, [label, effect]]) => [key, `${label}: ${effect}`, '40F 20W', () => onResearch(key)])
-        ]);
-        buttons[0].disabled = Boolean(job) || world.stockpile.food < 50;
-        Object.keys(TECHNOLOGIES).forEach((key, index) => {
-          const button = buttons[index + 1];
-          const done = world.researched_technologies.includes(key);
-          const blocked = PREREQUISITE[key] && !world.researched_technologies.includes(PREREQUISITE[key]);
-          button.classList.toggle('done', done);
-          button.disabled = done || blocked || Boolean(job) || world.stockpile.food < 40 || world.stockpile.wood < 20;
-          button.title = `${TECHNOLOGIES[key][0]}: ${TECHNOLOGIES[key][1]}${done ? ' (researched)' : blocked ? ` (requires ${TECHNOLOGIES[PREREQUISITE[key]][0]})` : ''}`;
-        });
-      } else {
-        setInfo('scroll', 'Your village awaits', 'Tap a villager to give orders, or the town center to train and research');
-        renderCommands('none', []);
+    },
+    render(now) {
+      if (!state.world) return;
+      const bumping = Object.values(state.bumps).some(until => until > now - 50);
+      if (state.dirty || bumping) {
+        const model = describe();
+        state.commands = model.commands;
+        const L = layout();
+        layer.frame(L.picture, L.mount);
+        paintTop(L, now);
+        paintSide(L, model);
+        paintNote(panels.note, state.buildMode ? 'Choose ground for the new town center' : '', L.picture.y + 12, L);
+        paintNote(panels.toast, now < state.toastUntil ? state.toast : '', L.picture.y + L.picture.h - 40, L);
+        syncMirror(model);
+        state.dirty = false;
+        state.minimapDirty = true;
       }
+      if (state.minimapDirty) {
+        paintMinimap(layout());
+        state.minimapDirty = false;
+      }
+      layer.render();
     }
   };
 }

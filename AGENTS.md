@@ -24,7 +24,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - **Transport:** WebSocket typed commands, command acknowledgements, and full world snapshots. `GET /state` exists for debugging.
 - **Persistence:** SQLite stores the authoritative world snapshot. Respect `AGE_OF_AGENTS_DB` everywhere.
 - **Frontend:** Fullscreen WebGL canvas rendered with Three.js (vendored as one ES module under `frontend/vendor/`), plain ES modules, no build step. Three.js is the only framework; models are procedural code, not imported asset pipelines.
-- **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Cel-shaded toon materials, inked outlines, and one shared fog-of-war shader field. UI buttons are real accessible DOM buttons over the canvas.
+- **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Cel-shaded toon materials, inked outlines, and one shared fog-of-war shader field. The interface is painted inside the WebGL canvas (an orthographic overlay of canvas-textured panels with hit regions); a visually hidden DOM mirror of every button keeps keyboard and screen-reader access.
 - **Spatial authority:** Every unit, step target, building footprint, and live resource exclusively claims its cells; move destinations are reservations. `GameWorld::validate` must hold after every command and tick.
 - **Deployment:** Modal. Verify locally before deploying.
 
@@ -36,7 +36,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - Tap/click the build button, then valid ground, to issue a build order.
-- Tap/click a town center to train a villager or start available research through its command cards in the bottom console.
+- Tap/click a town center to train a villager or start available research through the command rows in the left ledger column (a bottom sheet on phones).
 - Drag pans. Wheel/pinch zooms. Right-drag, two-finger twist, or Q/E rotates.
 - Mouse and touch semantics must match.
 - Simulation speed is authoritative and controlled through 0×, 1×, and 2× buttons.
@@ -48,7 +48,7 @@ The target is a sunlit Mediterranean world drawn like a thin-line European comic
 
 - Thin-to-medium dark-brown/charcoal contours; heavier lines only on outer silhouettes.
 - Flat cel colors under warm golden sun: yellow-green and ochre land, white limestone and marble, dark cypress spires, turquoise water, terracotta roofs; shadows go cool blue-grey.
-- UI is inked paper: cream sheets with fine brown double rules, round coin medallions, illustrated card tiles, terracotta accents.
+- UI is quiet and subtle, never cute: a thin ivory mount around the picture, hairline ink rules, a slim stockpile strip, a ledger column of small icon rows, small serif type, terracotta only as an accent. Ornament and icons should come from generated art (FAL/Midjourney), not hand-drawn CSS or code shapes.
 - Three-quarter 3D view and upper-left light direction.
 - Readability at actual gameplay size matters more than 1024px detail.
 - No photorealism, painterly gradients, pseudo-3D materials, opaque matte rectangles, text, signatures, or inconsistent character identity between animation frames.
