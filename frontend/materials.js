@@ -50,15 +50,18 @@ float aoaVisibility(vec2 xz) {
 vec3 aoaApplyWorldLight(vec3 color) {
   // Slow cloud shadows drifting across the land.
   float cloud = aoaFbm(vAoaWorld.xz * 0.07 + vec2(uTime * 0.018, uTime * 0.011));
-  color *= mix(1.0, 0.8, smoothstep(0.52, 0.72, cloud));
+  color *= mix(1.0, 0.86, smoothstep(0.52, 0.72, cloud));
   float vis = aoaVisibility(vAoaWorld.xz);
   float seen = smoothstep(0.08, 0.45, vis);
   float lit = smoothstep(0.55, 0.95, vis);
   float grey = dot(color, vec3(0.299, 0.587, 0.114));
-  vec3 remembered = mix(vec3(grey), color, 0.4) * vec3(0.62, 0.63, 0.7);
+  vec3 remembered = mix(vec3(grey), color, 0.4) * vec3(0.82, 0.8, 0.74);
   color = mix(remembered, color, lit);
-  float mist = aoaFbm(vAoaWorld.xz * 0.35 + vec2(uTime * 0.05, -uTime * 0.03));
-  vec3 unknown = mix(vec3(0.07, 0.085, 0.12), vec3(0.2, 0.22, 0.28), mist);
+  // Unexplored land is an unfinished map: cream paper with ink cross-hatching.
+  float mist = aoaFbm(vAoaWorld.xz * 0.35 + vec2(uTime * 0.03, -uTime * 0.02));
+  float hatch = smoothstep(0.85, 1.0, sin((vAoaWorld.x + vAoaWorld.z) * 9.0)) * smoothstep(0.35, 0.7, mist);
+  vec3 unknown = mix(vec3(0.84, 0.72, 0.5), vec3(0.93, 0.86, 0.7), mist);
+  unknown = mix(unknown, vec3(0.42, 0.3, 0.18), hatch * 0.55);
   return mix(unknown, color, seen);
 }
 `;
@@ -87,7 +90,7 @@ export function patchWorld(material, extra) {
   return material;
 }
 
-const gradient = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 165, 165, 165, 255, 225, 225, 225, 255, 255, 255, 255, 255]), 4, 1);
+const gradient = new THREE.DataTexture(new Uint8Array([105, 105, 105, 255, 170, 170, 170, 255, 228, 228, 228, 255, 255, 255, 255, 255]), 4, 1);
 gradient.magFilter = THREE.NearestFilter;
 gradient.minFilter = THREE.NearestFilter;
 gradient.needsUpdate = true;
@@ -109,7 +112,7 @@ export function toon(color, options = {}) {
 
 // Inverted-hull ink line: back faces pushed out along view-space normals so
 // the line keeps a constant world width regardless of a part's scale.
-export const outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x2b1d14, side: THREE.BackSide });
+export const outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x24170c, side: THREE.BackSide });
 outlineMaterial.onBeforeCompile = shader => {
   shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
     vec4 mvPosition = vec4(transformed, 1.0);
@@ -119,7 +122,7 @@ outlineMaterial.onBeforeCompile = shader => {
     inkNormal = mat3(instanceMatrix) * inkNormal;
     #endif
     mvPosition = modelViewMatrix * mvPosition;
-    mvPosition.xyz += normalize(normalMatrix * inkNormal) * 0.011;
+    mvPosition.xyz += normalize(normalMatrix * inkNormal) * 0.015;
     gl_Position = projectionMatrix * mvPosition;`);
 };
 

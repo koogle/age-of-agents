@@ -20,11 +20,12 @@ renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
 scene.background = skyTexture();
-scene.fog = new THREE.Fog(0xcfe3e6, 26, 62);
+scene.fog = new THREE.Fog(0xcfe6ec, 26, 62);
 const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
 
-scene.add(new THREE.HemisphereLight(0xd7ecff, 0x7a6440, 1.5));
-const sun = new THREE.DirectionalLight(0xfff0d2, 2.6);
+// Warm sun, cool sky fill: shadows go blue-grey like the reference art.
+scene.add(new THREE.HemisphereLight(0xa8d4ff, 0x6a7f92, 1.6));
+const sun = new THREE.DirectionalLight(0xffe6b8, 2.9);
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(mobile ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 });
@@ -263,7 +264,7 @@ const controls = bindPointer(canvas, rig, {
         if (world) hud.update(world, selection, buildMode);
       }
     }
-    if (event.code === 'KeyB' && !document.getElementById('build').disabled) setBuildMode(!buildMode);
+    if (event.code === 'KeyB' && (buildMode || hud.canBuild())) setBuildMode(!buildMode);
   }
 });
 
@@ -283,9 +284,10 @@ function skyTexture() {
   sky.height = 256;
   const context = sky.getContext('2d');
   const gradient = context.createLinearGradient(0, 0, 0, 256);
-  gradient.addColorStop(0, '#6fb2e0');
-  gradient.addColorStop(0.55, '#b9dcec');
-  gradient.addColorStop(1, '#f4e3bf');
+  gradient.addColorStop(0, '#3fa6d0');
+  gradient.addColorStop(0.55, '#8fd0e6');
+  gradient.addColorStop(0.85, '#d8ecec');
+  gradient.addColorStop(1, '#f6e6c4');
   context.fillStyle = gradient;
   context.fillRect(0, 0, 2, 256);
   const texture = new THREE.CanvasTexture(sky);
@@ -316,11 +318,10 @@ renderer.setAnimationLoop(now => {
   rig.update(dt);
   scene.fog.near = rig.state.distance + 8;
   scene.fog.far = rig.state.distance + 60;
-  sun.position.set(rig.target.x - 12, 16, rig.target.z - 4);
+  sun.position.set(rig.target.x - 11, 15, rig.target.z + 7);
   sun.target.position.copy(rig.target);
   view.frame(now, time, dt, selection);
   effects.update(dt);
-  hud.positionPopover(selection.building && view.buildingAnchor(selection.building), camera);
   if (world && now > minimapAt) {
     minimapAt = now + 200;
     hud.drawMinimap(world, viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));

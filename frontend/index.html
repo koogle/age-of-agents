@@ -3,8 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <meta name="theme-color" content="#1b2a33">
+  <meta name="theme-color" content="#f3e6c8">
   <title>Age of Agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Alegreya:ital,wght@0,500;0,700;1,500&display=swap">
   <link rel="stylesheet" href="/frontend/hud.css">
   <script type="importmap">{ "imports": { "three": "/frontend/vendor/three.min.js" } }</script>
 </head>
@@ -12,55 +15,40 @@
   <canvas id="world" aria-label="Game world"></canvas>
   <div id="box-select" hidden></div>
 
-  <header id="topbar">
+  <header id="topbar" class="paper">
     <ul id="stockpiles" aria-label="Stockpile"></ul>
+    <div id="crest" aria-hidden="true"><span>Age of Agents</span><small id="clock">Tick 0</small></div>
     <div id="top-actions">
-      <span id="clock" aria-label="Simulation tick">0</span>
       <span id="speed-controls" role="group" aria-label="Simulation speed">
-        <button type="button" data-speed="0" aria-label="Pause simulation">0×</button>
+        <button type="button" data-speed="0" aria-label="Pause simulation">II</button>
         <button type="button" data-speed="1" aria-label="Normal simulation speed">1×</button>
         <button type="button" data-speed="2" aria-label="Double simulation speed">2×</button>
       </span>
-      <button id="reset-world" type="button">Reset</button>
-      <span id="connection" role="status">Connecting</span>
+      <button id="reset-world" type="button" title="Reset the world">Reset</button>
+      <span id="connection" role="status" title="Connecting"><span class="sr">Connecting</span></span>
     </div>
   </header>
 
-  <canvas id="minimap" width="150" height="100" aria-label="Minimap: tap to move the camera"></canvas>
+  <footer id="console">
+    <section id="commands" class="paper" aria-label="Commands"></section>
+    <section id="info" class="paper" aria-live="polite">
+      <div id="portrait" aria-hidden="true"></div>
+      <div id="info-text">
+        <strong id="selection-title">Your village awaits</strong>
+        <span id="selection-detail">Tap a villager to give orders</span>
+        <div id="job" hidden><span id="job-label"></span><div class="bar"><div id="job-fill"></div></div></div>
+      </div>
+    </section>
+    <section id="map-frame" class="paper"><canvas id="minimap" width="150" height="100" aria-label="Minimap: tap to move the camera"></canvas></section>
+  </footer>
 
-  <aside id="selection" aria-live="polite">
-    <strong id="selection-title">Tap a villager</strong>
-    <span id="selection-detail">Drag to pan · pinch or scroll to zoom</span>
-  </aside>
-
-  <section id="building-popover" role="region" aria-labelledby="building-title" hidden>
-    <strong id="building-title">Town Center</strong>
-    <div id="building-job" hidden><span id="building-job-label"></span><progress id="building-progress" max="1" value="0"></progress></div>
-    <button id="train-villager" class="action" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="3.2"/><path d="M6 21v-5.5C6 12 8.5 10.5 12 10.5S18 12 18 15.5V21z"/></svg>
-      <span>Train Villager<small>50 food · 6s</small></span>
-    </button>
-    <div id="research-actions" role="group" aria-label="Research"></div>
-  </section>
-
-  <nav id="dock" aria-label="Commands">
-    <button id="build" class="command" type="button" disabled title="Build town center (B)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v1.5h-2V20H5v-7.5H3z"/><path class="door" d="M10 20v-5h4v5z"/></svg>
-      <span>Build<small>20 wood</small></span>
-    </button>
-    <button id="cancel" class="command" type="button" hidden title="Cancel placement (Esc)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke-width="3" stroke-linecap="round"/></svg>
-      <span>Cancel</span>
-    </button>
-  </nav>
-
-  <div id="placement" hidden>Tap ground to place the town center</div>
-  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="placement" class="paper" hidden>Choose ground for the new town center</div>
+  <div id="toast" class="paper" role="status" aria-live="polite"></div>
   <div id="floaters" aria-hidden="true"></div>
 
-  <details id="help">
+  <details id="help" class="paper">
     <summary>Controls</summary>
-    <p>Tap a villager to select it; long-press or Shift-click adds to the selection, Shift-drag box-selects. Tap ground to move, a resource to gather, a foundation to help build. Drag pans, pinch or wheel zooms, Q/E or right-drag rotates. B builds, Esc cancels.</p>
+    <p>Tap a villager to select it; long-press or Shift-click adds, Shift-drag box-selects. Tap ground to move, a resource to gather, a foundation to help build. Drag pans, pinch or wheel zooms, Q/E or right-drag rotates. B builds, Esc cancels.</p>
   </details>
 
   <script type="module" src="/frontend/app.js"></script>

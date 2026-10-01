@@ -8,16 +8,16 @@ export const SEA_LEVEL = -0.32;
 const MARGIN = 9;
 
 export const BIOME_COLORS = {
-  meadow: [138, 190, 88],
-  forest: [78, 138, 64],
-  prairie: [196, 192, 96],
-  highland: [150, 152, 126],
-  wetland: [92, 156, 124],
-  scrubland: [176, 158, 96],
-  heath: [150, 128, 118],
-  clayland: [196, 138, 92]
+  meadow: [176, 204, 92],
+  forest: [108, 156, 74],
+  prairie: [230, 200, 104],
+  highland: [214, 206, 182],
+  wetland: [118, 184, 128],
+  scrubland: [206, 180, 112],
+  heath: [166, 176, 104],
+  clayland: [214, 142, 92]
 };
-const UNSEEN_COLOR = [20, 24, 34];
+const UNSEEN_COLOR = [233, 216, 176];
 
 function hash(x, y) {
   const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
@@ -76,12 +76,12 @@ function buildGround() {
         float wild = smoothstep(0.0, 1.6, length(outside));
         // Cell colors are stored as sRGB bytes; light in linear space.
         vec3 biome = pow(texture2D(uCells, clamp(xz / uMapSize, 0.0, 1.0)).rgb, vec3(2.2));
-        vec3 land = mix(biome, vec3(0.22, 0.45, 0.12), wild);
+        vec3 land = mix(biome, vec3(0.38, 0.55, 0.16), wild);
         land *= vShade * (0.92 + 0.16 * aoaNoise(xz * 3.1));
         float h = vAoaWorld.y;
-        vec3 sand = vec3(0.84, 0.66, 0.36) * (0.95 + 0.1 * aoaNoise(xz * 6.0));
+        vec3 sand = vec3(0.93, 0.82, 0.6) * (0.96 + 0.08 * aoaNoise(xz * 6.0));
         vec3 color = mix(sand, land, smoothstep(-0.2, -0.08, h));
-        color = mix(color * vec3(0.55, 0.7, 0.75), color, smoothstep(${SEA_LEVEL - 0.25}, ${SEA_LEVEL}, h));
+        color = mix(color * vec3(0.35, 0.8, 0.85), color, smoothstep(${SEA_LEVEL - 0.25}, ${SEA_LEVEL}, h));
         float foam = smoothstep(0.03, 0.0, abs(h - ${SEA_LEVEL} - 0.012 * sin(uTime * 1.4 + xz.x * 2.0 + xz.y)));
         color = mix(color, vec3(1.0), foam * 0.85);
         vec2 cell = fract(xz);
@@ -99,7 +99,7 @@ function buildSea() {
   const geometry = new THREE.PlaneGeometry(400, 400, 80, 80);
   geometry.rotateX(-Math.PI / 2);
   geometry.translate(MAP.columns / 2, SEA_LEVEL, MAP.rows / 2);
-  const material = new THREE.MeshPhongMaterial({ color: 0x1f7fa6, transparent: true, opacity: 0.86, shininess: 90, specular: 0x9fd9ff });
+  const material = new THREE.MeshPhongMaterial({ color: 0x1fb3c8, transparent: true, opacity: 0.85, shininess: 90, specular: 0xffffff });
   material.onBeforeCompile = shader => {
     shader.uniforms.uTime = uniforms.uTime;
     shader.vertexShader = shader.vertexShader
@@ -122,14 +122,14 @@ const DECOR = {
   shrub: { geometry: new THREE.IcosahedronGeometry(0.09, 0), y: 0.05 }
 };
 const DECOR_BY_BIOME = {
-  meadow: [['tuft', 0x6fa648, 5], ['flower', 0xfff1a8, 3], ['flower', 0xf3a0b8, 2]],
-  forest: [['tuft', 0x3f7a35, 3], ['shrub', 0x2f6a2c, 1], ['pebble', 0x8b8a78, 1]],
-  prairie: [['tuft', 0xc9b860, 6], ['flower', 0xf4d35e, 2]],
-  highland: [['pebble', 0x9b9a8c, 4], ['tuft', 0x7f8f5a, 2]],
-  wetland: [['reed', 0x7aa860, 4], ['tuft', 0x4f8f6a, 2], ['flower', 0xd8f0ff, 1]],
-  scrubland: [['shrub', 0x8c8a4a, 2], ['pebble', 0xa89a72, 2]],
-  heath: [['shrub', 0x6f6a44, 1], ['tuft', 0x8a7a5a, 3], ['flower', 0xb77ab0, 3]],
-  clayland: [['pebble', 0xb07a52, 3], ['tuft', 0x9a9a52, 1]]
+  meadow: [['tuft', 0x8aa83c, 5], ['flower', 0xffffff, 3], ['flower', 0xe8402e, 2]],
+  forest: [['tuft', 0x4f7f34, 3], ['shrub', 0x3a6a32, 1], ['flower', 0xf2c84a, 1]],
+  prairie: [['tuft', 0xc8a84a, 6], ['flower', 0xe8402e, 2]],
+  highland: [['pebble', 0xeae4d2, 4], ['tuft', 0x8a9a5a, 2]],
+  wetland: [['reed', 0x7aa850, 4], ['tuft', 0x4f9a5a, 2], ['flower', 0x2fa8e0, 1]],
+  scrubland: [['shrub', 0x7f8a44, 2], ['pebble', 0xe2d2b0, 2]],
+  heath: [['shrub', 0x6f7f44, 2], ['tuft', 0x9a9a5a, 3], ['flower', 0xa04ab0, 2]],
+  clayland: [['pebble', 0xc0703e, 3], ['tuft', 0x9aa04a, 1]]
 };
 
 export function createTerrain(scene) {
@@ -198,7 +198,7 @@ function buildDecor(terrain, blockedCells) {
 function buildScenery() {
   const group = new THREE.Group();
   const trunk = new THREE.CylinderGeometry(0.05, 0.07, 0.3, 5);
-  const crown = new THREE.ConeGeometry(0.3, 0.7, 6);
+  const crown = new THREE.ConeGeometry(0.17, 1.1, 6);
   const boulder = new THREE.DodecahedronGeometry(0.35, 0);
   for (let i = 0; i < 260; i += 1) {
     const x = -MARGIN + random(i * 3 + 1) * (MAP.columns + MARGIN * 2);
@@ -211,15 +211,15 @@ function buildScenery() {
       const tree = new THREE.Group();
       const t = inked(new THREE.Mesh(trunk, toon(0x6b4a2e)));
       t.position.y = 0.15;
-      const c = inked(new THREE.Mesh(crown, toon(random(i) > 0.5 ? 0x3f7d3a : 0x4f9444)));
-      c.position.y = 0.6;
+      const c = inked(new THREE.Mesh(crown, toon(random(i) > 0.5 ? 0x2f6b3c : 0x3f7f44)));
+      c.position.y = 0.75;
       c.castShadow = true;
       tree.add(t, c);
       tree.position.set(x, y, z);
       tree.scale.setScalar(scale);
       group.add(tree);
     } else {
-      const rock = inked(new THREE.Mesh(boulder, toon(0x9a968a)));
+      const rock = inked(new THREE.Mesh(boulder, toon(0xe6dfca)));
       rock.position.set(x, y + 0.08, z);
       rock.scale.set(scale, scale * 0.7, scale);
       rock.rotation.y = random(i) * 6;

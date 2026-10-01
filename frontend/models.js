@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { toon, inked } from './materials.js';
 import { random } from './terrain.js';
 
-export const TEAM_COLOR = 0x3f8fd8;
+export const TEAM_COLOR = 0x2f6fe0;
 const G = {
   box: new THREE.BoxGeometry(1, 1, 1),
   ball: new THREE.IcosahedronGeometry(1, 1),
@@ -197,15 +197,16 @@ export function poseVillager(root, activity, resourceKind, carrying, time) {
 // Each resource cell holds a few pieces; pieces disappear as the node depletes.
 function tree(conifer, seed) {
   const g = new THREE.Group();
-  g.add(part(G.cyl, conifer ? 0x6b4a2e : 0xe8e2d0, [0, 0.14, 0], [0.04, 0.28, 0.04]));
+  // Mediterranean pair: tall dark cypress spires, or a gnarled silver-green olive.
   if (conifer) {
-    const green = random(seed) > 0.5 ? 0x3c7a3a : 0x2f6b35;
-    g.add(part(G.cone, green, [0, 0.38, 0], [0.22, 0.32, 0.22]));
-    g.add(part(G.cone, green, [0, 0.55, 0], [0.17, 0.27, 0.17]));
-    g.add(part(G.cone, green, [0, 0.7, 0], [0.11, 0.2, 0.11]));
+    const green = random(seed) > 0.5 ? 0x2f6b3c : 0x3a7a44;
+    g.add(part(G.cyl, 0x6b4a2e, [0, 0.06, 0], [0.035, 0.12, 0.035]));
+    g.add(part(G.ball, green, [0, 0.5, 0], [0.13, 0.42, 0.13]));
+    g.add(part(G.cone, green, [0, 0.95, 0], [0.09, 0.22, 0.09]));
   } else {
-    g.add(part(G.ball, 0x7cae4a, [0, 0.45, 0], [0.2, 0.19, 0.2]));
-    g.add(part(G.ball, 0x8fbf55, [0.07, 0.56, 0.03], [0.13, 0.12, 0.13]));
+    g.add(part(G.cyl, 0x8a7458, [0, 0.14, 0], [0.04, 0.28, 0.04], { rotation: [0, 0, 0.18] }));
+    g.add(part(G.ball, 0x8fa860, [0.04, 0.42, 0], [0.22, 0.15, 0.2]));
+    g.add(part(G.ball, 0xa9bd78, [-0.07, 0.5, 0.04], [0.14, 0.1, 0.13]));
   }
   g.userData.stump = part(G.cyl, 0x7a5634, [0, 0.03, 0], [0.05, 0.06, 0.05]);
   return g;
@@ -231,10 +232,10 @@ export function createResource(resource, biome) {
       break;
     case 'food':
       for (let i = 0; i < 3; i += 1) {
-        const bush = group(part(G.ball, 0x4c8a3a, [0, 0.12, 0], [0.17, 0.13, 0.17]));
+        const bush = group(part(G.ball, 0x4f8f3c, [0, 0.12, 0], [0.17, 0.13, 0.17]));
         for (let b = 0; b < 5; b += 1) {
           const a = b * 1.26 + i;
-          bush.add(part(G.ball, 0xd1323a, [Math.cos(a) * 0.13, 0.13 + (b % 2) * 0.06, Math.sin(a) * 0.13], [0.03, 0.03, 0.03], { ink: false }));
+          bush.add(part(G.ball, 0xe8203a, [Math.cos(a) * 0.13, 0.13 + (b % 2) * 0.06, Math.sin(a) * 0.13], [0.035, 0.035, 0.035], { ink: false }));
         }
         add(bush, i);
       }
@@ -255,10 +256,10 @@ export function createResource(resource, biome) {
       for (let i = 0; i < 3; i += 1) add(group(part(G.ball, 0xc06c45, [0, 0.04, 0], [0.16, 0.09, 0.14])), i);
       break;
     default: {
-      const rockColor = { stone: 0xb7b2a5, gold: 0xa49a86, iron: 0x6e5c55 }[resource.kind] || 0xaaaaaa;
+      const rockColor = { stone: 0xe6e0cc, gold: 0xd8c8a4, iron: 0x8a7a72 }[resource.kind] || 0xaaaaaa;
       for (let i = 0; i < 4; i += 1) {
         const piece = group(part(G.rock, rockColor, [0, 0.1, 0], [0.17, 0.14, 0.15]));
-        if (resource.kind === 'gold') piece.add(part(G.gem, 0xffd23f, [0.05, 0.2, 0.03], [0.05, 0.08, 0.05], { emissive: 0x7a5200 }));
+        if (resource.kind === 'gold') piece.add(part(G.gem, 0xffc21a, [0.05, 0.2, 0.03], [0.05, 0.08, 0.05], { emissive: 0x7a5200 }));
         if (resource.kind === 'iron') piece.add(part(G.box, 0xd0703a, [0, 0.16, 0.1], [0.12, 0.03, 0.03], { rotation: [0.3, 0.4, 0] }));
         add(piece, i, i === 0 ? 1.2 : 0.9);
       }
@@ -286,25 +287,25 @@ export function setResourceAmount(root, fraction) {
 // ---------- Town center ----------
 export function createTownCenter() {
   const root = new THREE.Group();
-  const plinth = part(G.box, 0xbcae94, [0, 0.05, 0], [1.75, 0.1, 1.75]);
+  const plinth = part(G.box, 0xe8e0cc, [0, 0.06, 0], [1.75, 0.12, 1.75]);
   const walls = new THREE.Group();
-  walls.add(part(G.box, 0xf0e3c4, [0, 0.33, 0.05], [1.15, 0.46, 0.95]));
-  for (const x of [-0.575, 0.575]) for (const z of [-0.425, 0.525]) walls.add(part(G.box, 0x5a3d26, [x, 0.33, z], [0.06, 0.48, 0.06], { ink: false }));
-  walls.add(part(G.box, 0x5a3d26, [0, 0.57, 0.53], [1.2, 0.05, 0.03], { ink: false }));
-  walls.add(part(G.box, 0x5a3d26, [0, 0.33, 0.531], [0.04, 0.46, 0.02], { ink: false }));
-  walls.add(part(G.box, 0x4a2f1c, [0, 0.22, 0.53], [0.2, 0.3, 0.03]));
+  // A small marble hall fronted by a colonnade.
+  walls.add(part(G.box, 0xf6f1e4, [0, 0.36, -0.1], [1.15, 0.5, 0.85]));
+  walls.add(part(G.box, 0xf6f1e4, [0, 0.64, 0.12], [1.3, 0.07, 1.25]));
+  for (const x of [-0.5, -0.17, 0.17, 0.5]) walls.add(part(G.cyl, 0xfbf7ee, [x, 0.36, 0.66], [0.055, 0.5, 0.055]));
+  walls.add(part(G.box, 0x4a2f1c, [0, 0.25, 0.331], [0.2, 0.3, 0.03]));
   const windows = [];
   for (const x of [-0.32, 0.32]) {
-    const glass = part(G.box, 0x3a3a48, [x, 0.38, 0.531], [0.14, 0.12, 0.02], { ink: false });
+    const glass = part(G.box, 0x3a3a48, [x, 0.42, 0.331], [0.14, 0.12, 0.02], { ink: false });
     windows.push(glass);
     walls.add(glass);
   }
   const roof = new THREE.Group();
-  roof.add(part(G.pyramid, 0xc0563a, [0, 0.82, 0.05], [0.98, 0.5, 0.86], { rotation: [0, Math.PI / 4, 0] }));
-  roof.add(part(G.box, 0x9a9384, [0.3, 0.95, -0.15], [0.12, 0.3, 0.12]));
+  roof.add(part(G.pyramid, 0xd0532e, [0, 0.86, 0.12], [1.05, 0.42, 0.98], { rotation: [0, Math.PI / 4, 0] }));
+  roof.add(part(G.box, 0xe8e0cc, [0.3, 0.98, -0.2], [0.12, 0.3, 0.12]));
   const tower = new THREE.Group();
-  tower.add(part(G.box, 0xc9bfa8, [-0.62, 0.5, -0.55], [0.36, 0.95, 0.36]));
-  tower.add(part(G.pyramid, 0x9c4a32, [-0.62, 1.15, -0.55], [0.32, 0.36, 0.32], { rotation: [0, Math.PI / 4, 0] }));
+  tower.add(part(G.box, 0xefe6d2, [-0.62, 0.5, -0.55], [0.36, 0.95, 0.36]));
+  tower.add(part(G.pyramid, 0xd0532e, [-0.62, 1.15, -0.55], [0.32, 0.36, 0.32], { rotation: [0, Math.PI / 4, 0] }));
   tower.add(part(G.cyl, 0x5a3d26, [-0.62, 1.5, -0.55], [0.012, 0.45, 0.012]));
   const flag = part(G.box, TEAM_COLOR, [-0.5, 1.62, -0.55], [0.22, 0.13, 0.01]);
   tower.add(flag);
@@ -319,7 +320,7 @@ export function createTownCenter() {
   for (const y of [0.35, 0.75]) for (const z of [-0.65, 0.7]) scaffold.add(part(G.cyl, 0xb08a58, [0, y, z], [0.015, 1.45, 0.015], { rotation: [0, 0, Math.PI / 2] }));
   scaffold.add(part(G.box, 0xc9a26a, [0.55, 0.16, 0.75], [0.4, 0.05, 0.12]), part(G.box, 0xc9a26a, [0.58, 0.21, 0.73], [0.36, 0.05, 0.12]));
   root.add(plinth, walls, roof, tower, props, scaffold);
-  root.userData.parts = { walls, roof, tower, props, scaffold, windows, flag, chimney: new THREE.Vector3(0.3, 1.15, -0.15) };
+  root.userData.parts = { walls, roof, tower, props, scaffold, windows, flag, chimney: new THREE.Vector3(0.3, 1.18, -0.2) };
   return root;
 }
 
