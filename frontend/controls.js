@@ -1,5 +1,6 @@
-// Camera rig plus one pointer path for mouse and touch. Gestures are turned
-// into four intents: tap, box select, hover, and camera motion.
+// Camera rig plus one pointer path for mouse and touch. The canvas-drawn UI
+// gets first refusal on every press; the rest becomes tap, box select, hover,
+// or camera motion.
 import * as THREE from 'three';
 import { MAP } from './materials.js';
 
@@ -72,11 +73,17 @@ export function createCameraRig(camera) {
   };
 }
 
+function boxRect(start, event) {
+  return {
+    left: Math.min(start.x, event.clientX), right: Math.max(start.x, event.clientX),
+    top: Math.min(start.y, event.clientY), bottom: Math.max(start.y, event.clientY)
+  };
+}
+
 export function bindPointer(canvas, rig, handlers) {
   const pointers = new Map();
   let gesture = null;
   let longPress = 0;
-  const box = document.getElementById('box-select');
 
   function cancelLongPress() {
     clearTimeout(longPress);
@@ -94,6 +101,12 @@ export function bindPointer(canvas, rig, handlers) {
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     canvas.setPointerCapture(event.pointerId);
+    if (pointers.size === 0 && handlers.ui.down(event.clientX, event.clientY)) {
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      gesture = { type: 'ui' };
+      return;
+    }
+    if (gesture?.type === 'ui') return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     cancelLongPress();
     if (pointers.size === 2) {
@@ -118,11 +131,15 @@ export function bindPointer(canvas, rig, handlers) {
   });
   canvas.addEventListener('pointermove', event => {
     if (!pointers.has(event.pointerId)) {
-      if (event.pointerType === 'mouse') handlers.hover(event.clientX, event.clientY);
+      if (event.pointerType === 'mouse' && !handlers.ui.hover(event.clientX, event.clientY)) handlers.hover(event.clientX, event.clientY);
       return;
     }
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (!gesture) return;
+    if (gesture.type === 'ui') {
+      handlers.ui.move(event.clientX, event.clientY);
+      return;
+    }
     if (gesture.type === 'pinch' && pointers.size === 2) {
       const now = pinchState();
       rig.zoom(gesture.last.distance / Math.max(1, now.distance));
@@ -143,24 +160,23 @@ export function bindPointer(canvas, rig, handlers) {
       rig.rotate((gesture.lastX - event.clientX) * 0.008);
       gesture.lastX = event.clientX;
     } else if (gesture.type === 'box') {
-      const left = Math.min(gesture.start.x, event.clientX);
-      const top = Math.min(gesture.start.y, event.clientY);
-      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${Math.abs(event.clientX - gesture.start.x)}px`, height: `${Math.abs(event.clientY - gesture.start.y)}px` });
-      box.hidden = false;
+      handlers.boxDraw(boxRect(gesture.start, event));
     }
   });
   function end(event) {
     if (!pointers.has(event.pointerId)) return;
     pointers.delete(event.pointerId);
     cancelLongPress();
+    if (gesture?.type === 'ui') {
+      handlers.ui.up(event.clientX, event.clientY);
+      gesture = null;
+      return;
+    }
     if (gesture?.type === 'pending' && pointers.size === 0) {
       handlers.tap(event.clientX, event.clientY, gesture.additive);
     } else if (gesture?.type === 'box') {
-      box.hidden = true;
-      handlers.boxSelect({
-        left: Math.min(gesture.start.x, event.clientX), right: Math.max(gesture.start.x, event.clientX),
-        top: Math.min(gesture.start.y, event.clientY), bottom: Math.max(gesture.start.y, event.clientY)
-      });
+      handlers.boxDraw(null);
+      handlers.boxSelect(boxRect(gesture.start, event));
     }
     if (pointers.size === 1 && gesture?.type === 'pinch') {
       const [remaining] = pointers.values();
@@ -171,12 +187,13 @@ export function bindPointer(canvas, rig, handlers) {
   }
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', event => {
-    box.hidden = true;
+    handlers.boxDraw(null);
     gesture = { type: 'done' };
     end(event);
   });
   canvas.addEventListener('wheel', event => {
     event.preventDefault();
+    if (handlers.ui.contains(event.clientX, event.clientY)) return;
     rig.zoom(Math.exp(event.deltaY * 0.0012));
   }, { passive: false });
 

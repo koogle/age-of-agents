@@ -46,9 +46,10 @@ let world = null;
 let buildMode = false;
 let cameraPlaced = false;
 
-const hud = createHud({
+const hud = createHud(renderer, {
   onSpeed: multiplier => order({ type: 'set_simulation_speed', multiplier }),
   onReset: async () => {
+    if (!confirm('Reset the world? All progress will be lost.')) return;
     const response = await fetch('/reset', { method: 'POST' }).catch(() => null);
     if (!response?.ok) hud.toast('The world could not be reset.');
     selection.units.clear();
@@ -229,6 +230,8 @@ function tap(x, y, additive) {
 const projected = new THREE.Vector3();
 const controls = bindPointer(canvas, rig, {
   tap,
+  ui: hud.pointer,
+  boxDraw: area => hud.box(area),
   boxSelect(rect) {
     if (!world) return;
     const chosen = view.unitPositions().filter(({ position }) => {
@@ -270,6 +273,7 @@ const controls = bindPointer(canvas, rig, {
 
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
+  hud.resize(innerWidth, innerHeight, renderer.getPixelRatio());
   camera.aspect = innerWidth / innerHeight;
   // Portrait phones need a wider lens to see a useful slice of the island.
   camera.fov = camera.aspect < 1 ? 52 : 36;
@@ -324,7 +328,8 @@ renderer.setAnimationLoop(now => {
   effects.update(dt);
   if (world && now > minimapAt) {
     minimapAt = now + 200;
-    hud.drawMinimap(world, viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));
+    hud.minimap(viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));
   }
   renderer.render(scene, camera);
+  hud.render(now);
 });
