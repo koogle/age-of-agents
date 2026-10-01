@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "icons": {
+    "command": {
+      "build": "icons/command_build.png",
+      "cancel": "icons/command_cancel.png",
+      "train": "icons/command_train.png"
+    },
+    "portrait": {
+      "group": "icons/portrait_group.png",
+      "towncenter": "icons/portrait_towncenter.png",
+      "villager": "icons/portrait_villager.png"
+    },
+    "resource": {
+      "clay": "icons/resource_clay.png",
+      "fiber": "icons/resource_fiber.png",
+      "food": "icons/resource_food.png",
+      "gold": "icons/resource_gold.png",
+      "iron": "icons/resource_iron.png",
+      "stone": "icons/resource_stone.png",
+      "wood": "icons/resource_wood.png"
+    },
+    "tech": {
+      "agriculture": "icons/tech_agriculture.png",
+      "forestry": "icons/tech_forestry.png",
+      "masonry": "icons/tech_masonry.png",
+      "mining": "icons/tech_mining.png",
+      "textiles": "icons/tech_textiles.png"
+    }
+  },
+  "textures": {
+    "paper": {
+      "file": "paper_tile.png",
+      "size": [
+        512,
+        512
+      ],
+      "wrap": "repeat"
+    },
+    "border_strip": {
+      "file": "border_strip.png",
+      "size": [
+        123,
+        32
+      ],
+      "wrap": "repeat-x",
+      "note": "horizontal edge, outer ink rule on top; transpose for vertical edges"
+    },
+    "border_frame": {
+      "file": "border_frame.png",
+      "size": [
+        310,
+        310
+      ],
+      "nine_slice": {
+        "inset": 32
+      },
+      "note": "edges hold exactly two strip periods; tile edges with repeat or round, do not stretch"
+    }
+  }
+}
