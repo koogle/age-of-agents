@@ -136,7 +136,9 @@ function siteLooksFree(origin) {
 function pick(x, y) {
   pointerNdc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1);
   raycaster.setFromCamera(pointerNdc, camera);
-  const [hit] = raycaster.intersectObjects(view.pickables(), false);
+  // Villagers win over the buildings and props they stand beside.
+  const hits = raycaster.intersectObjects(view.pickables(), false);
+  const hit = hits.find(h => h.object.userData.pick.type === 'unit') || hits[0];
   if (hit) return hit.object.userData.pick;
   const point = rig.groundAt(x, y);
   if (!point || point.x < 0 || point.z < 0 || point.x >= MAP.columns || point.z >= MAP.rows) return null;
@@ -188,18 +190,20 @@ function commandSelection(hit) {
 
 function tap(x, y, additive) {
   if (!world) return;
-  const hit = pick(x, y);
   if (buildMode) {
-    if (hit?.type !== 'ground') return;
+    // Placement aims at the ground under the pointer; the server judges the site.
+    const point = rig.groundAt(x, y);
+    if (!point) return;
     const [builder] = idleSelected();
     if (!builder) {
       hud.toast('unit is busy');
       return;
     }
-    const origin = buildOrigin(hit.point);
+    const origin = buildOrigin(point);
     order({ type: 'build', unit_id: builder, origin }).then(ok => { if (ok) setBuildMode(false); });
     return;
   }
+  const hit = pick(x, y);
   if (!hit) return;
   if (hit.type === 'unit') {
     selection.building = null;
@@ -296,7 +300,8 @@ window.ageOfAgents = {
     projected.set(x, lift, z).project(camera);
     return { x: (projected.x + 1) / 2 * innerWidth, y: (1 - projected.y) / 2 * innerHeight };
   },
-  lookAt: (x, z) => rig.lookAt(x, z)
+  lookAt: (x, z) => rig.lookAt(x, z),
+  get target() { return { x: rig.target.x, z: rig.target.z }; }
 };
 
 const viewCorners = [[0, 0], [1, 0], [1, 1], [0, 1]];
