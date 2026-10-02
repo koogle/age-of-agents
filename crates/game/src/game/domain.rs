@@ -27,6 +27,21 @@ pub enum TerrainBiome {
     Scrubland,
     Heath,
     Clayland,
+    /// Sand along the open sea.
+    Beach,
+    /// Sea and lakes: nobody walks, builds or gathers on water.
+    Water,
+    /// Bare rock and snow on the peaks: too steep to walk or build on.
+    Mountain,
+    /// Fresh water running from the hills to the sea, crossed only at fords.
+    River,
+}
+
+impl TerrainBiome {
+    /// Whether villagers may stand, walk and build here.
+    pub fn is_walkable(self) -> bool {
+        !matches!(self, Self::Water | Self::Mountain | Self::River)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -90,11 +105,14 @@ impl Footprint {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct TerrainCell {
     pub column: u16,
     pub row: u16,
     pub biome: TerrainBiome,
+    /// Land (rivers included) in (0, 1] rising toward the peaks; sea and lakes
+    /// in [-1, 0) by depth.
+    pub elevation: f32,
 }
 
 impl TerrainCell {
@@ -114,12 +132,15 @@ pub enum CellVisibility {
     Visible,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct SnapshotTerrainCell {
     pub column: u16,
     pub row: u16,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub biome: Option<TerrainBiome>,
+    /// Only for explored cells, like the biome.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub elevation: Option<f32>,
     pub visibility: CellVisibility,
 }
 
@@ -137,6 +158,11 @@ pub enum UnitAction {
     },
     /// Walk beside the foundation `building_id` and raise it.
     Build {
+        building_id: String,
+    },
+    /// Carry the load to the complete building `building_id`, unload it
+    /// there, and stand idle.
+    Deposit {
         building_id: String,
     },
 }
@@ -286,15 +312,73 @@ pub enum BuildingKind {
     Infirmary,
     Watchtower,
     Monument,
+    House,
+    Granary,
+    Dock,
 }
+
+/// What villagers can construct, in build-menu order.
+pub const BUILDABLE: [BuildingKind; 5] = [
+    BuildingKind::TownCenter,
+    BuildingKind::House,
+    BuildingKind::Granary,
+    BuildingKind::Watchtower,
+    BuildingKind::Dock,
+];
 
 impl BuildingKind {
     /// Footprint in cells.
     pub const fn size(self) -> (u16, u16) {
         match self {
-            Self::TownCenter => (4, 4),
+            // Sized from the art: doors stand a little taller than a villager.
+            Self::TownCenter => (8, 8),
+            Self::Dock => (5, 5),
+            Self::House | Self::Granary => (4, 4),
+            Self::Watchtower => (3, 3),
             _ => (1, 1),
         }
+    }
+
+    /// Resources reserved when the foundation is placed.
+    pub const fn cost(self) -> &'static [(ResourceKind, f64)] {
+        match self {
+            Self::TownCenter => &[(ResourceKind::Wood, super::TOWN_CENTER_WOOD_COST)],
+            Self::House => &[(ResourceKind::Wood, 15.0)],
+            Self::Granary => &[(ResourceKind::Wood, 25.0)],
+            Self::Watchtower => &[(ResourceKind::Wood, 15.0), (ResourceKind::Stone, 15.0)],
+            Self::Dock => &[(ResourceKind::Wood, 30.0)],
+            _ => &[],
+        }
+    }
+
+    /// Villagers this building houses once complete.
+    pub const fn housing(self) -> usize {
+        match self {
+            Self::TownCenter | Self::House => 5,
+            _ => 0,
+        }
+    }
+
+    /// Whether gatherers may drop this resource here once it is complete.
+    pub const fn accepts(self, resource: ResourceKind) -> bool {
+        match self {
+            Self::TownCenter => true,
+            Self::Granary => matches!(resource, ResourceKind::Food | ResourceKind::Fiber),
+            _ => false,
+        }
+    }
+
+    /// How far a complete building sees, in world units.
+    pub const fn sight_radius(self) -> f64 {
+        match self {
+            Self::Watchtower => 20.0,
+            _ => super::BUILDING_SIGHT_RADIUS,
+        }
+    }
+
+    /// A dock must stand on land with open water along one side.
+    pub const fn needs_coast(self) -> bool {
+        matches!(self, Self::Dock)
     }
 }
 
@@ -386,6 +470,30 @@ impl Stockpile {
         ]
     }
 
+    pub fn amount(&self, kind: ResourceKind) -> f64 {
+        match kind {
+            ResourceKind::Wood => self.wood,
+            ResourceKind::Food => self.food,
+            ResourceKind::Stone => self.stone,
+            ResourceKind::Gold => self.gold,
+            ResourceKind::Iron => self.iron,
+            ResourceKind::Coal => self.coal,
+            ResourceKind::Clay => self.clay,
+            ResourceKind::Fiber => self.fiber,
+            ResourceKind::Timber => self.timber,
+            ResourceKind::Steel => self.steel,
+            ResourceKind::Bricks => self.bricks,
+            ResourceKind::Cloth => self.cloth,
+            ResourceKind::Rations => self.rations,
+        }
+    }
+
+    /// Whether every cost is covered.
+    pub fn affords(&self, cost: &[(ResourceKind, f64)]) -> bool {
+        cost.iter()
+            .all(|(kind, amount)| self.amount(*kind) >= *amount)
+    }
+
     pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
         match kind {
             ResourceKind::Wood => self.wood += amount,
@@ -449,7 +557,7 @@ pub const ROADMAP_RESOURCES: [ResourceKind; 13] = [
     ResourceKind::Rations,
 ];
 
-pub const ROADMAP_BUILDINGS: [BuildingKind; 14] = [
+pub const ROADMAP_BUILDINGS: [BuildingKind; 17] = [
     BuildingKind::TownCenter,
     BuildingKind::MiningCamp,
     BuildingKind::Farm,
@@ -464,6 +572,9 @@ pub const ROADMAP_BUILDINGS: [BuildingKind; 14] = [
     BuildingKind::Infirmary,
     BuildingKind::Watchtower,
     BuildingKind::Monument,
+    BuildingKind::House,
+    BuildingKind::Granary,
+    BuildingKind::Dock,
 ];
 
 pub const ROADMAP_UNITS: [UnitKind; 5] = [

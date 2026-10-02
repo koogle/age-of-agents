@@ -14,7 +14,11 @@ pub fn manifest() -> Vec<String> {
         files.push(format!("sprites/{sheet}.png"));
     }
     files.push("sprites/towncenter.png".into());
+    files.push("sprites/villager_idle_hd.png".into());
     files.push("sprites/villager.json".into());
+    files.push("sprites/villager_idle_hd.json".into());
+    files.push("loading/buildings.webp".into());
+    files.push("loading/buildings.json".into());
     files.push("sprites/resources.json".into());
     files.push("sprites/towncenter.json".into());
     files.extend(crate::hud::files());
@@ -37,6 +41,20 @@ impl Rgba {
             width: image.width(),
             height: image.height(),
             pixels: image.into_raw(),
+        }
+    }
+
+    /// The `w`×`h` block at (`x`, `y`).
+    pub fn crop(&self, x: u32, y: u32, w: u32, h: u32) -> Self {
+        let mut pixels = Vec::with_capacity((w * h * 4) as usize);
+        for row in y..y + h {
+            let from = ((row * self.width + x) * 4) as usize;
+            pixels.extend_from_slice(&self.pixels[from..from + (w * 4) as usize]);
+        }
+        Self {
+            width: w,
+            height: h,
+            pixels,
         }
     }
 
@@ -122,18 +140,25 @@ impl Assets {
         use wasm_bindgen::JsCast;
         use wasm_bindgen_futures::JsFuture;
         let window = web_sys::window().expect("window");
+        let paths = manifest();
+        // Start every request at once; the browser fetches them in parallel.
+        let requests: Vec<_> = paths
+            .iter()
+            .map(|path| JsFuture::from(window.fetch_with_str(&format!("/assets/{path}"))))
+            .collect();
+        let total = paths.len();
         let mut files = HashMap::new();
-        for path in manifest() {
+        for (done, (path, request)) in paths.into_iter().zip(requests).enumerate() {
             let response: web_sys::Response =
-                JsFuture::from(window.fetch_with_str(&format!("/assets/{path}")))
-                    .await
-                    .expect("fetch")
-                    .dyn_into()
-                    .expect("response");
+                request.await.expect("fetch").dyn_into().expect("response");
             let buffer = JsFuture::from(response.array_buffer().expect("body"))
                 .await
                 .expect("bytes");
             files.insert(path, js_sys::Uint8Array::new(&buffer).to_vec());
+            crate::loading(
+                0.4 + 0.5 * (done + 1) as f64 / total as f64,
+                &format!("Painting the island ({} of {total})", done + 1),
+            );
         }
         Self { files }
     }

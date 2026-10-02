@@ -41,6 +41,9 @@ pub struct Sprite {
     pub pivot: [f32; 2],
     /// u0, v0 (top), u1, v1 (bottom); u0 > u1 mirrors.
     pub uv: [f32; 4],
+    /// How far toward the camera (world units) the sprite takes its depth
+    /// from, so the solid thing it pictures is not cut by the ground in front.
+    pub pull: f32,
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -237,12 +240,12 @@ impl Renderer {
                 fs: "fs",
             },
         );
-        let ground_mesh = terrain::ground_mesh();
+        let ground_mesh = terrain::ground_mesh(&terrain::Heights::unknown());
         let ground = (
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("ground"),
                 contents: bytemuck::cast_slice(&ground_mesh.vertices),
-                usage: wgpu::BufferUsages::VERTEX,
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             }),
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("ground indices"),
@@ -347,7 +350,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32];
         let sprite_pipeline = pipeline(
             device,
             PipelineSpec {
@@ -626,6 +629,12 @@ impl Renderer {
     }
 
     /// Per-cell fog-of-war colour/visibility (RGBA) and painted ground layer (255 = unknown).
+    /// Re-shapes the ground once exploration reveals more of the island.
+    pub fn update_ground(&self, queue: &wgpu::Queue, heights: &terrain::Heights) {
+        let mesh = terrain::ground_mesh(heights);
+        queue.write_buffer(&self.ground.0, 0, bytemuck::cast_slice(&mesh.vertices));
+    }
+
     pub fn update_cells(&self, queue: &wgpu::Queue, rgba: &[u8], layers: &[u8]) {
         let (width, height) = (aoa_game::WORLD_COLUMNS as u32, aoa_game::WORLD_ROWS as u32);
         let size = wgpu::Extent3d {

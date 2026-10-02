@@ -3,6 +3,8 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 mod domain;
+#[cfg(test)]
+mod fixture;
 mod gathering;
 #[cfg(test)]
 mod group_move_tests;
@@ -12,9 +14,13 @@ mod occupancy;
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
+mod terrain_codec;
+mod worldgen;
 
 pub use domain::*;
+pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
+pub use worldgen::FISHING_BOAT_COST;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -35,16 +41,19 @@ pub const GATHERING_TECH_MULTIPLIER: f64 = 1.2;
 /// Minimum gap between resource clusters and starting-base clearance, in cells.
 /// Nodes within one cluster touch.
 pub const RESOURCE_CLUSTER_SEPARATION: f64 = 5.0;
-pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 6.0;
+pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 8.0;
 /// Walking speed in cells per second.
 const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
-const STARTING_TOWN_CENTER: CellCoordinate = CellCoordinate::new(28, 17);
+/// The island new worlds get unless a seed is given.
+pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GameWorld {
+    /// The island this world was generated from.
+    pub seed: u64,
     pub tick: u64,
     pub simulation_speed: f64,
     pub terrain: Vec<TerrainCell>,
@@ -82,6 +91,7 @@ pub struct WorldSnapshot {
     pub rows: u16,
     pub tick: u64,
     pub simulation_speed: f64,
+    #[serde(with = "terrain_codec")]
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
     pub resources: Vec<ResourceNode>,
@@ -108,10 +118,13 @@ pub enum Command {
         unit_id: String,
         resource_id: String,
     },
-    /// Place a town center foundation with its north-west corner at `origin`.
+    /// Place a foundation of `kind` (a town center when omitted) with its
+    /// north-west corner at `origin`.
     Build {
         unit_id: String,
         origin: CellCoordinate,
+        #[serde(default = "town_center_kind")]
+        kind: BuildingKind,
     },
     /// Join or resume work on an existing foundation.
     Construct {
@@ -129,6 +142,12 @@ pub enum Command {
     SetSimulationSpeed {
         multiplier: f64,
     },
+    /// Take the unit's load to a drop site (a town center, or a granary for
+    /// food and fiber) and unload it.
+    Deposit {
+        unit_id: String,
+        building_id: String,
+    },
     /// Abandon the current task. The unit finishes the step it is taking,
     /// keeps any cargo, and leaves foundation progress in place.
     Stop {
@@ -143,12 +162,17 @@ pub enum CommandError {
     DuplicateUnit,
     ResourceNotFound,
     ResourceDepleted,
-    UnitBusy,
     InvalidDestination,
     DestinationOccupied,
     TargetUnreachable,
     InvalidBuildSite,
     InsufficientWood,
+    InsufficientStone,
+    NotBuildable,
+    NeedsCoast,
+    PopulationCapReached,
+    NothingToDeposit,
+    BuildingRefusesCargo,
     BuildingNotFound,
     BuildingBusy,
     BuildingUnderConstruction,
@@ -170,12 +194,17 @@ impl std::fmt::Display for CommandError {
             Self::DuplicateUnit => "unit group contains a duplicate member",
             Self::ResourceNotFound => "resource not found",
             Self::ResourceDepleted => "resource is depleted",
-            Self::UnitBusy => "unit is busy",
             Self::InvalidDestination => "destination is outside the world",
             Self::DestinationOccupied => "destination cell is occupied",
             Self::TargetUnreachable => "target is unreachable",
             Self::InvalidBuildSite => "build site is blocked or outside the world",
             Self::InsufficientWood => "insufficient wood",
+            Self::InsufficientStone => "insufficient stone",
+            Self::NotBuildable => "villagers cannot build that",
+            Self::NeedsCoast => "a dock must touch the sea",
+            Self::PopulationCapReached => "population cap reached",
+            Self::NothingToDeposit => "unit is not carrying anything",
+            Self::BuildingRefusesCargo => "building does not take that cargo",
             Self::BuildingNotFound => "building not found",
             Self::BuildingBusy => "building is already producing",
             Self::BuildingUnderConstruction => "building is still under construction",
@@ -194,23 +223,34 @@ impl std::fmt::Display for CommandError {
 
 impl Default for GameWorld {
     fn default() -> Self {
-        let terrain = generate_terrain();
-        let villager = |number: u64, column, row| Unit {
+        Self::generate(DEFAULT_SEED)
+    }
+}
+
+impl GameWorld {
+    /// A fresh world on the island grown from `seed`.
+    pub fn generate(seed: u64) -> Self {
+        let island = worldgen::generate(seed);
+        let villager = |number: u64, cell: CellCoordinate| Unit {
             id: format!("villager-{number}"),
             kind: UnitKind::Villager,
-            cell: CellCoordinate::new(column, row),
+            cell,
             step: None,
             action: UnitAction::Idle,
             cargo: None,
         };
         let mut world = Self {
+            seed: island.seed,
             tick: 0,
             simulation_speed: 1.0,
-            terrain: terrain.clone(),
+            terrain: island.terrain,
             explored_cells: Vec::new(),
-            units: vec![villager(1, 29, 21), villager(2, 31, 21)],
-            resources: generate_resources(&terrain),
-            buildings: vec![town_center("base-1", STARTING_TOWN_CENTER, None)],
+            units: vec![
+                villager(1, island.villagers[0]),
+                villager(2, island.villagers[1]),
+            ],
+            resources: island.resources,
+            buildings: vec![town_center("base-1", island.town_center, None)],
             stockpile: Stockpile::default(),
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
@@ -222,153 +262,49 @@ impl Default for GameWorld {
     }
 }
 
+fn town_center_kind() -> BuildingKind {
+    BuildingKind::TownCenter
+}
+
 fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> Building {
+    building(BuildingKind::TownCenter, id, origin, construction)
+}
+
+fn building(
+    kind: BuildingKind,
+    id: &str,
+    origin: CellCoordinate,
+    construction: Option<f64>,
+) -> Building {
+    let town_center = kind == BuildingKind::TownCenter;
     Building {
         id: id.into(),
-        kind: BuildingKind::TownCenter,
+        kind,
         origin,
         construction,
-        produces: vec![ProductKind::Villager],
-        researches: TechnologyKind::ALL.to_vec(),
+        produces: if town_center {
+            vec![ProductKind::Villager]
+        } else {
+            Vec::new()
+        },
+        researches: if town_center {
+            TechnologyKind::ALL.to_vec()
+        } else {
+            Vec::new()
+        },
         job: None,
     }
-}
-
-fn generate_terrain() -> Vec<TerrainCell> {
-    const SITES: [(u16, u16, TerrainBiome); 8] = [
-        (6, 6, TerrainBiome::Meadow),
-        (22, 4, TerrainBiome::Forest),
-        (42, 6, TerrainBiome::Prairie),
-        (54, 14, TerrainBiome::Highland),
-        (8, 28, TerrainBiome::Wetland),
-        (24, 34, TerrainBiome::Scrubland),
-        (40, 26, TerrainBiome::Heath),
-        (54, 34, TerrainBiome::Clayland),
-    ];
-
-    let mut terrain = Vec::with_capacity(usize::from(WORLD_COLUMNS * WORLD_ROWS));
-    for row in 0..WORLD_ROWS {
-        for column in 0..WORLD_COLUMNS {
-            let (_, _, biome) = SITES
-                .iter()
-                .min_by_key(|(site_column, site_row, _)| {
-                    let dx = i32::from(column) - i32::from(*site_column);
-                    let dy = i32::from(row) - i32::from(*site_row);
-                    dx * dx + dy * dy
-                })
-                .expect("the fixed Voronoi map has sites");
-            terrain.push(TerrainCell {
-                column,
-                row,
-                biome: *biome,
-            });
-        }
-    }
-    terrain
-}
-
-fn compatible_biomes(kind: ResourceKind) -> &'static [TerrainBiome] {
-    match kind {
-        ResourceKind::Wood => &[TerrainBiome::Forest, TerrainBiome::Heath],
-        ResourceKind::Food => &[TerrainBiome::Meadow, TerrainBiome::Prairie],
-        ResourceKind::Stone => &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        ResourceKind::Gold => &[TerrainBiome::Highland],
-        ResourceKind::Iron => &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        ResourceKind::Clay => &[TerrainBiome::Clayland, TerrainBiome::Wetland],
-        ResourceKind::Fiber => &[TerrainBiome::Wetland, TerrainBiome::Prairie],
-        ResourceKind::Coal
-        | ResourceKind::Timber
-        | ResourceKind::Steel
-        | ResourceKind::Bricks
-        | ResourceKind::Cloth
-        | ResourceKind::Rations => &[],
-    }
-}
-
-/// Resource kinds and how they cluster: (kind, id prefix, clusters, nodes per
-/// cluster, amount per node, preferred distance from the base in cells).
-/// Woodlines stretch east-west; the rest are clumps.
-const RESOURCE_CLUSTERS: [(ResourceKind, &str, usize, usize, f64, f64); 7] = [
-    (ResourceKind::Wood, "tree", 3, 10, 30.0, 11.0),
-    (ResourceKind::Food, "berries", 2, 5, 30.0, 8.0),
-    (ResourceKind::Stone, "stone", 2, 4, 40.0, 14.0),
-    (ResourceKind::Gold, "gold", 1, 4, 40.0, 15.0),
-    (ResourceKind::Iron, "iron", 1, 4, 40.0, 16.0),
-    (ResourceKind::Clay, "clay", 2, 3, 40.0, 17.0),
-    (ResourceKind::Fiber, "fiber", 2, 3, 30.0, 17.0),
-];
-
-fn generate_resources(terrain: &[TerrainCell]) -> Vec<ResourceNode> {
-    let base = Position {
-        x: f64::from(WORLD_COLUMNS) / 2.0,
-        y: f64::from(WORLD_ROWS) / 2.0,
-    };
-    let squared = |a: CellCoordinate, b: CellCoordinate, stretch: i32| {
-        let dx = i32::from(a.column) - i32::from(b.column);
-        let dy = i32::from(a.row) - i32::from(b.row);
-        dx * dx + stretch * dy * dy
-    };
-
-    let mut resources: Vec<ResourceNode> = Vec::new();
-    for (kind, prefix, clusters, size, amount, preferred) in RESOURCE_CLUSTERS {
-        let stretch = if kind == ResourceKind::Wood { 4 } else { 1 };
-        let mut number = 0;
-        for _ in 0..clusters {
-            // A cell is free for this cluster when it suits the kind, keeps the
-            // base clear, and stays well away from every earlier cluster.
-            let taken = resources.len();
-            let free = |cell: &&TerrainCell, resources: &[ResourceNode]| {
-                let center = cell.coordinate().center();
-                compatible_biomes(kind).contains(&cell.biome)
-                    && center.distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE
-                    && resources[..taken].iter().all(|resource| {
-                        resource.cell.center().distance(center) + f64::EPSILON
-                            >= RESOURCE_CLUSTER_SEPARATION
-                    })
-                    && resources[taken..]
-                        .iter()
-                        .all(|resource| resource.cell != cell.coordinate())
-            };
-            let site = terrain
-                .iter()
-                .filter(|cell| free(cell, &resources))
-                .min_by_key(|cell| {
-                    let off = (cell.coordinate().center().distance(base) - preferred).abs();
-                    ((off * 16.0).round() as i64, cell.row, cell.column)
-                })
-                .expect("fixed terrain has room for every resource cluster")
-                .coordinate();
-            for _ in 0..size {
-                let cell = terrain
-                    .iter()
-                    .filter(|cell| free(cell, &resources))
-                    .min_by_key(|cell| {
-                        (
-                            squared(cell.coordinate(), site, stretch),
-                            cell.row,
-                            cell.column,
-                        )
-                    })
-                    .expect("fixed terrain has room for every resource node")
-                    .coordinate();
-                number += 1;
-                resources.push(ResourceNode {
-                    id: format!("{prefix}-{number}"),
-                    kind,
-                    cell,
-                    amount,
-                    capacity: amount,
-                });
-            }
-        }
-    }
-    resources
 }
 
 impl GameWorld {
     /// Applies a command atomically: on error the world is unchanged.
     pub fn apply_command(&mut self, command: Command) -> Result<(), CommandError> {
-        self.execute(command)?;
+        // A new order replaces a unit's current task, so validate it against a
+        // copy in which that unit has stopped; a rejected order leaves the
+        // world, and the unit's old task, untouched.
+        let mut next = self.clone();
+        next.execute(command)?;
+        *self = next;
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
             panic!("an accepted command broke a world invariant: {error}");
@@ -379,7 +315,7 @@ impl GameWorld {
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
             Command::Move { unit_id, to } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 self.validate_move_destination(unit, to)?;
                 self.units[unit].action = UnitAction::Move { to };
             }
@@ -393,7 +329,7 @@ impl GameWorld {
                     if !seen.insert(unit_id.clone()) {
                         return Err(CommandError::DuplicateUnit);
                     }
-                    let index = self.unit_index_and_idle(&unit_id)?;
+                    let index = self.ordered_unit(&unit_id)?;
                     members.push((unit_id, index));
                 }
                 members.sort();
@@ -406,7 +342,7 @@ impl GameWorld {
                 unit_id,
                 resource_id,
             } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 let resource = self
                     .resources
                     .iter()
@@ -423,9 +359,16 @@ impl GameWorld {
                     phase: GatherPhase::ToResource,
                 };
             }
-            Command::Build { unit_id, origin } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
-                let (columns, rows) = BuildingKind::TownCenter.size();
+            Command::Build {
+                unit_id,
+                origin,
+                kind,
+            } => {
+                let unit = self.ordered_unit(&unit_id)?;
+                if !BUILDABLE.contains(&kind) {
+                    return Err(CommandError::NotBuildable);
+                }
+                let (columns, rows) = kind.size();
                 let footprint = Footprint {
                     origin,
                     columns,
@@ -434,26 +377,36 @@ impl GameWorld {
                 if !self.footprint_is_free(footprint) {
                     return Err(CommandError::InvalidBuildSite);
                 }
-                if self.stockpile.wood < TOWN_CENTER_WOOD_COST {
-                    return Err(CommandError::InsufficientWood);
+                if kind.needs_coast() && !self.touches_sea(footprint) {
+                    return Err(CommandError::NeedsCoast);
+                }
+                for &(resource, amount) in kind.cost() {
+                    if self.stockpile.amount(resource) < amount {
+                        return Err(match resource {
+                            ResourceKind::Stone => CommandError::InsufficientStone,
+                            _ => CommandError::InsufficientWood,
+                        });
+                    }
                 }
                 // Validate reachability against the world as it will be, with
                 // the foundation in place; roll back if the builder is cut off.
                 let id = self.next_building_name();
-                self.buildings.push(town_center(&id, origin, Some(0.0)));
+                self.buildings.push(building(kind, &id, origin, Some(0.0)));
                 if !self.can_reach_beside(unit, footprint) {
                     self.buildings.pop();
                     return Err(CommandError::TargetUnreachable);
                 }
                 self.next_building_id += 1;
-                self.stockpile.wood -= TOWN_CENTER_WOOD_COST;
+                for &(resource, amount) in kind.cost() {
+                    self.stockpile.add(resource, -amount);
+                }
                 self.units[unit].action = UnitAction::Build { building_id: id };
             }
             Command::Construct {
                 unit_id,
                 building_id,
             } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 let building = self
                     .buildings
                     .iter()
@@ -476,6 +429,9 @@ impl GameWorld {
                     return Err(CommandError::ProductUnavailable);
                 }
                 match product {
+                    ProductKind::Villager if self.villagers_and_trainees() >= self.housing() => {
+                        return Err(CommandError::PopulationCapReached);
+                    }
                     ProductKind::Villager if self.stockpile.food < VILLAGER_FOOD_COST => {
                         return Err(CommandError::InsufficientFood);
                     }
@@ -515,6 +471,32 @@ impl GameWorld {
                     elapsed_seconds: 0.0,
                 });
             }
+            Command::Deposit {
+                unit_id,
+                building_id,
+            } => {
+                let unit = self.ordered_unit(&unit_id)?;
+                let cargo = self.units[unit]
+                    .cargo
+                    .as_ref()
+                    .ok_or(CommandError::NothingToDeposit)?
+                    .kind;
+                let building = self
+                    .buildings
+                    .iter()
+                    .find(|building| building.id == building_id)
+                    .ok_or(CommandError::BuildingNotFound)?;
+                if !building.is_complete() {
+                    return Err(CommandError::BuildingUnderConstruction);
+                }
+                if !building.kind.accepts(cargo) {
+                    return Err(CommandError::BuildingRefusesCargo);
+                }
+                if !self.can_reach_beside(unit, building.footprint()) {
+                    return Err(CommandError::TargetUnreachable);
+                }
+                self.units[unit].action = UnitAction::Deposit { building_id };
+            }
             Command::Stop { unit_id } => {
                 let unit = self
                     .units
@@ -531,6 +513,46 @@ impl GameWorld {
             }
         }
         Ok(())
+    }
+
+    /// Villagers the complete buildings can house.
+    pub fn housing(&self) -> usize {
+        self.buildings
+            .iter()
+            .filter(|building| building.is_complete())
+            .map(|building| building.kind.housing())
+            .sum()
+    }
+
+    /// Living villagers plus those in training.
+    pub fn villagers_and_trainees(&self) -> usize {
+        self.units.len()
+            + self
+                .buildings
+                .iter()
+                .filter(|b| matches!(b.job, Some(BuildingJob::Produce { .. })))
+                .count()
+    }
+
+    /// Whether any cell beside the footprint (sharing an edge) is water.
+    fn touches_sea(&self, footprint: Footprint) -> bool {
+        let Footprint {
+            origin,
+            columns,
+            rows,
+        } = footprint;
+        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
+        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
+        let water = |column: i32, row: i32| {
+            column >= 0
+                && row >= 0
+                && column < i32::from(WORLD_COLUMNS)
+                && row < i32::from(WORLD_ROWS)
+                && self.terrain[row as usize * usize::from(WORLD_COLUMNS) + column as usize].biome
+                    == TerrainBiome::Water
+        };
+        (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
+            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r))
     }
 
     fn next_building_name(&self) -> String {
@@ -556,15 +578,15 @@ impl GameWorld {
         Ok(index)
     }
 
-    fn unit_index_and_idle(&self, unit_id: &str) -> Result<usize, CommandError> {
+    /// The unit receiving an order, stopped first: like `Stop`, it finishes
+    /// the step it is taking, keeps any cargo, and leaves foundation progress.
+    fn ordered_unit(&mut self, unit_id: &str) -> Result<usize, CommandError> {
         let index = self
             .units
             .iter()
             .position(|unit| unit.id == unit_id)
             .ok_or(CommandError::UnitNotFound)?;
-        if self.units[index].action != UnitAction::Idle {
-            return Err(CommandError::UnitBusy);
-        }
+        self.units[index].action = UnitAction::Idle;
         Ok(index)
     }
 
@@ -591,6 +613,7 @@ impl GameWorld {
                     self.tick_gather(index, resource_id, phase, dt)
                 }
                 UnitAction::Build { building_id } => self.tick_build(index, &building_id, dt),
+                UnitAction::Deposit { building_id } => self.tick_deposit(index, &building_id, dt),
             }
         }
         for index in 0..self.buildings.len() {
@@ -637,6 +660,8 @@ impl GameWorld {
                         column: cell.column,
                         row: cell.row,
                         biome: (visibility != CellVisibility::Unseen).then_some(cell.biome),
+                        elevation: (visibility != CellVisibility::Unseen)
+                            .then(|| terrain_codec::quantize(cell.elevation)),
                         visibility,
                     }
                 })
@@ -696,7 +721,7 @@ impl GameWorld {
                 self.buildings
                     .iter()
                     .filter(|building| building.is_complete())
-                    .map(|building| (building.footprint().center(), BUILDING_SIGHT_RADIUS)),
+                    .map(|building| (building.footprint().center(), building.kind.sight_radius())),
             )
             .collect();
         self.terrain
@@ -732,6 +757,9 @@ impl GameWorld {
             self.units[unit].action = UnitAction::Idle;
             return;
         };
+        if self.drop_off_before_building(unit, dt) {
+            return;
+        }
         let remaining =
             match self.travel(unit, Goal::Beside(self.buildings[building].footprint()), dt) {
                 Travel::EnRoute => return,

@@ -54,7 +54,10 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let p = (in.local - 0.5) * in.size;
     let texel = textureSample(atlas, atlas_sampler, in.uv);
     if mode == 0 {
-        color = vec4<f32>(texel.rgb * color.rgb, texel.a * color.a);
+        // params.z = 1 draws the texture in greyscale (unavailable commands).
+        let grey = vec3<f32>(dot(texel.rgb, vec3<f32>(0.299, 0.587, 0.114)));
+        let rgb = mix(texel.rgb, grey, in.params.z);
+        color = vec4<f32>(rgb * color.rgb, texel.a * color.a);
     } else if mode == 1 {
         // Rounded rectangle with a soft one-pixel edge.
         let r = in.params.y;

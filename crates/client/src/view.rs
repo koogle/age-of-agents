@@ -10,7 +10,7 @@ use serde::Deserialize;
 
 use crate::camera::Rig;
 use crate::render::{Decal, Sprite};
-use crate::terrain::{self, height_at, random};
+use crate::terrain::{self, Heights, random};
 
 const VILLAGER_HEIGHT: f32 = 0.78;
 /// Units are drawn this many ticks behind the newest snapshot so jittery
@@ -20,6 +20,10 @@ const TICK_SECONDS: f64 = 0.1;
 const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
 const SHEET_TOWN_CENTER: usize = 4;
+const SHEET_IDLE_HD: usize = 5;
+const SHEET_BUILDINGS: usize = 6;
+/// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
+const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
 
 #[derive(Deserialize)]
 struct VillagerSheet {
@@ -29,6 +33,38 @@ struct VillagerSheet {
     figure_height: f32,
     fps: HashMap<String, f32>,
     animations: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
+}
+
+/// Generated buildings in four construction stages (foundation, walls, roof,
+/// complete), one row per building, each drawn to fill its cell.
+#[derive(Deserialize)]
+struct BuildingSheet {
+    size: [f32; 2],
+    cell: [f32; 2],
+    frames: HashMap<String, Vec<[f32; 4]>>,
+}
+
+/// Sheet row, world width of a sheet cell, and the pixel height (from the cell
+/// top) of the footprint centre, for buildings other than the town center.
+/// Widths are set so each door stands about 1.2 villagers tall (the dock's
+/// rowboat is about two villagers long).
+fn building_art(kind: aoa_game::BuildingKind) -> Option<(&'static str, f32, f32)> {
+    use aoa_game::BuildingKind::*;
+    Some(match kind {
+        House => ("house", 4.1, 205.0),
+        Granary => ("granary", 3.9, 199.0),
+        Watchtower => ("watchtower", 5.0, 228.0),
+        Dock => ("dock", 4.5, 193.0),
+        _ => return None,
+    })
+}
+
+/// Standing frames at twice the resolution of `villager.json`, with the same
+/// anchor after scaling: idle villagers are on screen most of the time.
+#[derive(Deserialize)]
+struct IdleSheet {
+    size: [f32; 2],
+    people: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
 }
 
 #[derive(Deserialize)]
@@ -51,6 +87,9 @@ struct TownCenterSheet {
     size: [f32; 2],
     cell: [f32; 2],
     anchor: [f32; 2],
+    /// Lowest painted pixel of the front step, in cell pixels.
+    #[serde(rename = "baseBottom")]
+    base_bottom: [f32; 2],
     #[serde(rename = "unitsPerPixel")]
     units_per_pixel: f32,
     frames: HashMap<String, [f32; 4]>,
@@ -61,14 +100,24 @@ struct TownCenterSheet {
 
 pub struct Sheets {
     villager: VillagerSheet,
+    idle: IdleSheet,
+    buildings: BuildingSheet,
     resources: ResourceSheet,
     town_center: TownCenterSheet,
 }
 
 impl Sheets {
-    pub fn parse(villager: &[u8], resources: &[u8], town_center: &[u8]) -> Self {
+    pub fn parse(
+        villager: &[u8],
+        idle: &[u8],
+        resources: &[u8],
+        town_center: &[u8],
+        buildings: &[u8],
+    ) -> Self {
         Self {
+            buildings: serde_json::from_slice(buildings).expect("buildings.json"),
             villager: serde_json::from_slice(villager).expect("villager.json"),
+            idle: serde_json::from_slice(idle).expect("villager_idle_hd.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),
             town_center: serde_json::from_slice(town_center).expect("towncenter.json"),
         }
@@ -86,12 +135,31 @@ struct UnitEntry {
     lean: Vec2,
 }
 
+/// Something a tap can land on by its drawn picture, not the ground under it.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Pick {
+    Resource(String, aoa_game::CellCoordinate),
+    Building(String),
+}
+
+/// A drawn picture that answers taps: what it is, plus its sprite geometry.
+struct Pickable {
+    pick: Pick,
+    sprite: Sprite,
+}
+
 pub struct WorldView {
     pub snapshot: Option<WorldSnapshot>,
+    /// Last frame's resource and building pictures, for tap picking.
+    pickables: Vec<Pickable>,
     units: HashMap<String, UnitEntry>,
     render_tick: Option<f64>,
     latest_tick: f64,
     pub cells_dirty: bool,
+    /// Ground heights of explored cells; rebuilt only when exploration grows.
+    pub heights: Heights,
+    pub heights_dirty: bool,
+    known_heights: usize,
 }
 
 fn seed_of(id: &str) -> u32 {
@@ -99,8 +167,8 @@ fn seed_of(id: &str) -> u32 {
         .fold(0u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32))
 }
 
-fn ground(x: f32, z: f32) -> Vec3 {
-    Vec3::new(x, height_at(x, z), z)
+fn ground(heights: &Heights, x: f32, z: f32) -> Vec3 {
+    Vec3::new(x, heights.at(x, z), z)
 }
 
 fn uv(rect: [f32; 4], size: [f32; 2], mirror: bool) -> [f32; 4] {
@@ -139,10 +207,14 @@ impl WorldView {
     pub fn new() -> Self {
         Self {
             snapshot: None,
+            pickables: Vec::new(),
             units: HashMap::new(),
             render_tick: None,
             latest_tick: 0.0,
             cells_dirty: true,
+            heights: Heights::unknown(),
+            heights_dirty: true,
+            known_heights: 0,
         }
     }
 
@@ -154,10 +226,21 @@ impl WorldView {
         if (self.latest_tick - PLAYOUT_TICKS - *render_tick).abs() > 8.0 {
             *render_tick = self.latest_tick - PLAYOUT_TICKS;
         }
+        let known = next
+            .terrain
+            .iter()
+            .filter(|cell| cell.elevation.is_some())
+            .count();
+        if known != self.known_heights {
+            self.known_heights = known;
+            self.heights =
+                Heights::from_cells(next.terrain.iter().map(|cell| (cell.elevation, cell.biome)));
+            self.heights_dirty = true;
+        }
         let mut seen = Vec::with_capacity(next.units.len());
         for view in &next.units {
             let at = terrain::world_of(view.position.x, view.position.y);
-            let target = ground(at.x, at.y);
+            let target = ground(&self.heights, at.x, at.y);
             let entry = self
                 .units
                 .entry(view.unit.id.clone())
@@ -247,6 +330,8 @@ impl WorldView {
     ) -> (Vec<(usize, Sprite)>, Vec<Decal>) {
         let mut sprites = Vec::new();
         let mut decals = Vec::new();
+        let mut picks = Vec::new();
+        let heights = &self.heights;
         let Some(snapshot) = self.snapshot.as_ref() else {
             return (sprites, decals);
         };
@@ -262,6 +347,7 @@ impl WorldView {
                 size: [size, size],
                 pivot,
                 uv: uv(rect, resources.size, false),
+                pull: 0.3 * size,
             }
         };
         for resource in &snapshot.resources {
@@ -286,24 +372,76 @@ impl WorldView {
                 let x = center.x + (random(seed) - 0.5) * 0.12;
                 let z = center.y + (random(seed + 1.0) - 0.5) * 0.12;
                 let scale = base * (0.9 + random(seed + 7.0) * 0.25);
-                sprites.push((
-                    SHEET_RESOURCES,
-                    resource_sprite(node, resources.nodes[node].stages[0], ground(x, z), scale),
-                ));
+                let sprite = resource_sprite(
+                    node,
+                    resources.nodes[node].stages[0],
+                    ground(heights, x, z),
+                    scale,
+                );
+                if fraction > 0.0 {
+                    picks.push(Pickable {
+                        pick: Pick::Resource(resource.id.clone(), resource.cell),
+                        sprite,
+                    });
+                }
+                sprites.push((SHEET_RESOURCES, sprite));
             } else if fraction > 0.0 {
                 let node = node_for(resource.kind);
                 let stages = &resources.nodes[node].stages;
                 let stage = (((1.0 - fraction) * stages.len() as f32).floor() as usize)
                     .min(stages.len() - 1);
-                let at = ground(center.x, center.y);
-                sprites.push((
-                    SHEET_RESOURCES,
-                    resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08),
-                ));
+                let at = ground(heights, center.x, center.y);
+                let sprite = resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08);
+                picks.push(Pickable {
+                    pick: Pick::Resource(resource.id.clone(), resource.cell),
+                    sprite,
+                });
+                sprites.push((SHEET_RESOURCES, sprite));
             }
         }
         for building in &snapshot.buildings {
-            let center = footprint_center(building);
+            let center = footprint_center(heights, building);
+            if let Some((row, width, center_px)) = building_art(building.building.kind) {
+                let sheet = &sheets.buildings;
+                let stage = match building.building.construction {
+                    None => 3,
+                    Some(work) => {
+                        let progress = work / aoa_game::BUILD_SECONDS;
+                        if progress < 1.0 / 3.0 {
+                            0
+                        } else if progress < 2.0 / 3.0 {
+                            1
+                        } else {
+                            2
+                        }
+                    }
+                };
+                // The art's base bottom is BASE_PX; stand it on the footprint
+                // edge nearest the camera (see `grounded`).
+                const BASE_PX: f32 = 248.0;
+                let drop = (BASE_PX - center_px) / sheet.cell[1] * width;
+                let sprite = Sprite {
+                    anchor: grounded(heights, center, rig.eye(), drop).to_array(),
+                    size: [width, width * sheet.cell[1] / sheet.cell[0]],
+                    pivot: [0.5, 1.0 - BASE_PX / sheet.cell[1]],
+                    uv: uv(sheet.frames[row][stage], sheet.size, false),
+                    pull: 0.08 * width,
+                };
+                picks.push(Pickable {
+                    pick: Pick::Building(building.building.id.clone()),
+                    sprite,
+                });
+                sprites.push((SHEET_BUILDINGS, sprite));
+                if selection.building.as_deref() == Some(building.building.id.as_str()) {
+                    decals.push(Decal {
+                        center: (center + Vec3::Y * 0.03).to_array(),
+                        radius: building.columns as f32 * terrain::CELL * 0.75,
+                        color: TEAM_BLUE,
+                        ring: 1.0,
+                    });
+                }
+                continue;
+            }
             // The temple rises through its drawn stages, then glows while working.
             let tc = &sheets.town_center;
             let frame = town_center_frame(
@@ -311,20 +449,34 @@ impl WorldView {
                 building.building.construction,
                 building.building.job.is_some(),
             );
-            let size = tc.cell[0] * tc.units_per_pixel;
-            sprites.push((
-                SHEET_TOWN_CENTER,
-                Sprite {
-                    anchor: center.to_array(),
-                    size: [size, size * tc.cell[1] / tc.cell[0]],
-                    pivot: [tc.anchor[0] / tc.cell[0], 1.0 - tc.anchor[1] / tc.cell[1]],
-                    uv: uv(tc.frames[frame], tc.size, false),
-                },
-            ));
+            // The temple sheet is drawn for a 4-cell footprint; scale it to
+            // the town center's real one.
+            let size = tc.cell[0] * tc.units_per_pixel * building.columns as f32 / 4.0;
+            let sprite = Sprite {
+                anchor: grounded(
+                    heights,
+                    center,
+                    rig.eye(),
+                    (tc.base_bottom[1] - tc.anchor[1]) / tc.cell[1] * size,
+                )
+                .to_array(),
+                size: [size, size * tc.cell[1] / tc.cell[0]],
+                pivot: [
+                    tc.anchor[0] / tc.cell[0],
+                    1.0 - tc.base_bottom[1] / tc.cell[1],
+                ],
+                uv: uv(tc.frames[frame], tc.size, false),
+                pull: 0.08 * size,
+            };
+            picks.push(Pickable {
+                pick: Pick::Building(building.building.id.clone()),
+                sprite,
+            });
+            sprites.push((SHEET_TOWN_CENTER, sprite));
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
                 decals.push(Decal {
                     center: (center + Vec3::Y * 0.03).to_array(),
-                    radius: 1.5,
+                    radius: building.columns as f32 * terrain::CELL * 0.75,
                     color: TEAM_BLUE,
                     ring: 1.0,
                 });
@@ -348,11 +500,15 @@ impl WorldView {
             let work = if moving {
                 None
             } else {
-                work_target(snapshot, &unit.unit.action)
+                work_target(heights, snapshot, &unit.unit.action)
             };
             let carrying = unit.unit.cargo.is_some();
-            let mut name = if moving {
-                if carrying { "carry" } else { "walk" }
+            // A villager holding goods shows its load even when it stops
+            // (interrupted, or waiting for a drop site): the carry pose, held still.
+            let mut name = if carrying {
+                "carry"
+            } else if moving {
+                "walk"
             } else {
                 "idle"
             };
@@ -369,6 +525,7 @@ impl WorldView {
             }
             entry.lean = entry.lean.lerp(lean, (dt * 6.0).min(1.0));
             let position = ground(
+                heights,
                 entry.position.x + entry.lean.x,
                 entry.position.z + entry.lean.y,
             );
@@ -394,17 +551,37 @@ impl WorldView {
             } else {
                 !screen_right
             };
-            let frames = &animation[view];
-            let fps = villager.fps.get(name).copied().unwrap_or(4.0);
+            let fps = if name == "carry" && !moving {
+                0.0
+            } else {
+                villager.fps.get(name).copied().unwrap_or(4.0)
+            };
+            let (sheet, frames, sheet_size) = if name == "idle" {
+                let idle = &sheets.idle;
+                (
+                    SHEET_IDLE_HD,
+                    &idle.people[PEOPLE[entry.variant]][view],
+                    idle.size,
+                )
+            } else {
+                (entry.variant, &animation[view], [2048.0, 1280.0])
+            };
+            // The second standing frame from behind is mid-step, so a villager
+            // seen from the back holds the first one instead of walking on the spot.
+            let frames = if name == "idle" && view == "back" {
+                &frames[..1]
+            } else {
+                &frames[..]
+            };
             let rect = frames[(time * fps) as usize % frames.len()];
-            let sheet_size = [2048.0, 1280.0];
             sprites.push((
-                entry.variant,
+                sheet,
                 Sprite {
                     anchor: position.to_array(),
                     size: [cell_size, cell_size],
                     pivot,
                     uv: uv(rect, sheet_size, mirror),
+                    pull: 0.3 * cell_size,
                 },
             ));
             decals.push(Decal {
@@ -422,10 +599,43 @@ impl WorldView {
                 });
             }
         }
+        self.pickables = picks;
         (sprites, decals)
     }
 
     /// The unit whose sprite covers a screen pixel, nearest the camera first.
+    /// The resource or building whose drawn picture is under a screen pixel,
+    /// nearest the camera first. Pictures stand up from the ground, so a tap on
+    /// a tree's crown or a temple's roof must not fall through to the ground
+    /// behind it. Only the middle of each cell counts, where the art is.
+    pub fn sprite_at(&self, rig: &Rig, pixel: Vec2) -> Option<Pick> {
+        let (right, up) = rig.basis();
+        let mut best: Option<(f32, &Pick)> = None;
+        for Pickable { pick, sprite } in &self.pickables {
+            let anchor = Vec3::from(sprite.anchor);
+            let corner = |fx: f32, fy: f32| {
+                anchor
+                    + right * (fx - sprite.pivot[0]) * sprite.size[0]
+                    + up * (fy - sprite.pivot[1]) * sprite.size[1]
+            };
+            let (Some(low), Some(high)) = (
+                rig.screen_of(corner(0.25, 0.04)),
+                rig.screen_of(corner(0.75, 0.85)),
+            ) else {
+                continue;
+            };
+            let inside = pixel.x > low.x.min(high.x)
+                && pixel.x < low.x.max(high.x)
+                && pixel.y > high.y.min(low.y)
+                && pixel.y < high.y.max(low.y);
+            let depth = rig.eye().distance(anchor);
+            if inside && best.is_none_or(|(d, _)| depth < d) {
+                best = Some((depth, pick));
+            }
+        }
+        best.map(|(_, pick)| pick.clone())
+    }
+
     pub fn unit_at(&self, rig: &Rig, pixel: Vec2) -> Option<String> {
         let (_, up) = rig.basis();
         let mut best: Option<(f32, &String)> = None;
@@ -451,7 +661,11 @@ impl WorldView {
     }
 }
 
-fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &'static str)> {
+fn work_target(
+    heights: &Heights,
+    snapshot: &WorldSnapshot,
+    action: &UnitAction,
+) -> Option<(Vec2, &'static str)> {
     match action {
         UnitAction::Gather {
             resource_id,
@@ -468,7 +682,7 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
                 .buildings
                 .iter()
                 .find(|b| &b.building.id == building_id)?;
-            let center = footprint_center(building);
+            let center = footprint_center(heights, building);
             let center = Vec2::new(center.x, center.z);
             Some((center, "build"))
         }
@@ -476,10 +690,29 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
     }
 }
 
+/// Where a building's picture stands. A flat picture anchored at the middle
+/// of its footprint hangs its front steps below the ground, and those points
+/// swim against the terrain whenever the camera pans, zooms or turns. Instead
+/// the bottom of the art stands on the ground on the camera's side of the
+/// footprint, `drop` (its on-screen distance below the middle, in world units)
+/// divided by the sine of a typical view pitch away from the middle. A fixed
+/// distance keeps it from creeping as the pitch changes with zoom.
+fn grounded(heights: &Heights, center: Vec3, eye: Vec3, drop: f32) -> Vec3 {
+    const TYPICAL_PITCH_SINE: f32 = 0.8;
+    let toward = Vec2::new(eye.x - center.x, eye.z - center.z).normalize_or_zero();
+    let distance = drop / TYPICAL_PITCH_SINE;
+    ground(
+        heights,
+        center.x + toward.x * distance,
+        center.z + toward.y * distance,
+    )
+}
+
 /// World point at the middle of a building's footprint.
-pub fn footprint_center(building: &aoa_game::BuildingView) -> Vec3 {
+pub fn footprint_center(heights: &Heights, building: &aoa_game::BuildingView) -> Vec3 {
     let origin = &building.building.origin;
     ground(
+        heights,
         (origin.column as f32 + building.columns as f32 / 2.0) * terrain::CELL,
         (origin.row as f32 + building.rows as f32 / 2.0) * terrain::CELL,
     )
