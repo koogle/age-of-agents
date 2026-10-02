@@ -140,6 +140,9 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         let activity = match &unit.unit.action {
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
+            UnitAction::Build { .. } if unit.unit.cargo.is_some() => {
+                "Dropping off goods first".into()
+            }
             UnitAction::Build { .. } => "Building".into(),
             UnitAction::Gather { phase, .. } => match phase {
                 aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),

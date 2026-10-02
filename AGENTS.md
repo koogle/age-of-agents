@@ -34,7 +34,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
 - Tap/click a foundation with villagers selected to have them help build it.
-- Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle.
+- Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: ordered to gather another kind or to build, it delivers its cargo to a drop site before starting.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
 - Tap/click the build button to open the building menu (town center, house, granary, watchtower, dock; unaffordable ones in greyscale), pick one, then tap valid ground to issue a build order.
