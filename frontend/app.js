@@ -74,7 +74,7 @@ const net = connect({
   onSnapshot: next => {
     world = next;
     view.sync(world, performance.now());
-    terrain.update(world, blockedCells(world, false));
+    terrain.update(world);
     const present = new Set(world.units.map(unit => unit.id));
     for (const id of selection.units) if (!present.has(id)) selection.units.delete(id);
     if (selection.building && !world.buildings.some(b => b.id === selection.building)) selection.building = null;
