@@ -41,6 +41,9 @@ pub struct Sprite {
     pub pivot: [f32; 2],
     /// u0, v0 (top), u1, v1 (bottom); u0 > u1 mirrors.
     pub uv: [f32; 4],
+    /// How far toward the camera (world units) the sprite takes its depth
+    /// from, so the solid thing it pictures is not cut by the ground in front.
+    pub pull: f32,
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -347,7 +350,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32];
         let sprite_pipeline = pipeline(
             device,
             PipelineSpec {
