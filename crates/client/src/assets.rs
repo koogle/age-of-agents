@@ -17,6 +17,8 @@ pub fn manifest() -> Vec<String> {
     files.push("sprites/villager_idle_hd.png".into());
     files.push("sprites/villager.json".into());
     files.push("sprites/villager_idle_hd.json".into());
+    files.push("loading/buildings.webp".into());
+    files.push("loading/buildings.json".into());
     files.push("sprites/resources.json".into());
     files.push("sprites/towncenter.json".into());
     files.extend(crate::hud::files());
@@ -39,6 +41,20 @@ impl Rgba {
             width: image.width(),
             height: image.height(),
             pixels: image.into_raw(),
+        }
+    }
+
+    /// The `w`×`h` block at (`x`, `y`).
+    pub fn crop(&self, x: u32, y: u32, w: u32, h: u32) -> Self {
+        let mut pixels = Vec::with_capacity((w * h * 4) as usize);
+        for row in y..y + h {
+            let from = ((row * self.width + x) * 4) as usize;
+            pixels.extend_from_slice(&self.pixels[from..from + (w * 4) as usize]);
+        }
+        Self {
+            width: w,
+            height: h,
+            pixels,
         }
     }
 

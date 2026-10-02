@@ -13,7 +13,7 @@ fn roadmap_catalog_has_exact_stable_wire_contract() {
             "buildings": [
                 "town_center", "mining_camp", "farm", "lumber_mill", "smelter", "kiln",
                 "weaver", "kitchen", "barracks", "range", "workshop", "infirmary",
-                "watchtower", "monument"
+                "watchtower", "monument", "house", "granary", "dock"
             ],
             "units": ["villager", "guard", "archer", "healer", "siege_cart"],
             "recipes": [

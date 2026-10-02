@@ -1,9 +1,10 @@
 use std::collections::BTreeSet;
 
-use super::tests::cell;
+use super::tests::{cell, house};
 use super::*;
 
 fn train_until(world: &mut GameWorld, count: usize) {
+    house(world, count);
     world.stockpile.food = 1_000.0;
     while world.units.len() < count {
         if world.buildings[0].job.is_none() {
