@@ -39,8 +39,8 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 - `assets/ui/buttons/`: blank coin button frames (normal, hover, pressed, disabled).
 - `assets/models/`: generated GLBs selected with `?glb=`; the temple town center (126 KB) is on by default, while the rigged villager (275 KB, 5 clips) and the cypress (22 KB) are opt-in because they don't read better than the procedural ones at gameplay zoom.
 - `assets/terrain/`: ten seamless painted ground textures (512 webp plus 1024 masters) for `frontend/ground-paint.js`.
-- `assets/sprites/villager.{png,json}`: illustrated villager billboard sheet (34 frames, 256 px cells, feet anchor 128,240), not wired in.
-- FAL spend about $4.66 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+- `assets/sprites/villager{,_woman,_elder}.{png,json}`: three illustrated villager billboard sheets, same layout (34 frames, 256 px cells, feet anchor 128,240), not wired in.
+- FAL spend about $6.63 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 - Branch `claude/fal-sprites-resources` (PR #12): villager walk fix, painterly terrain revision carried over, `assets/sprites/resources.{png,json}` resource/tree billboards (9 nodes, 21 sprites), not wired in.
 
