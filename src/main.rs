@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Query, State};
-use axum::http::StatusCode;
+use axum::http::{HeaderValue, StatusCode, header};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use store::Store;
 use tokio::sync::{Mutex, broadcast};
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 use tracing_subscriber::EnvFilter;
 
 const TICK_DURATION: Duration = Duration::from_millis(100);
@@ -111,6 +112,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest_service("/frontend", ServeDir::new("frontend"))
         .route("/play", get(play))
         .nest_service("/web", ServeDir::new("web"))
+        // Browsers must revalidate everything (cheap with Last-Modified), so a
+        // deploy never pairs a fresh page with stale game code or art.
+        .layer(SetResponseHeaderLayer::overriding(
+            header::CACHE_CONTROL,
+            HeaderValue::from_static("no-cache"),
+        ))
         .with_state(state);
 
     let address = "0.0.0.0:8000";

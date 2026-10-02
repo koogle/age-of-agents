@@ -113,6 +113,8 @@ pub struct App {
     framed: bool,
     /// Whether the page's loading overlay has been dismissed.
     revealed: bool,
+    /// Until when (page seconds) a second tap on "New island" resets.
+    reset_armed_until: f64,
     /// Fingers currently down, by touch id.
     touches: Vec<(u64, Vec2)>,
     /// A two-finger pinch/twist is (or was, until every finger lifts) in progress,
@@ -120,7 +122,7 @@ pub struct App {
     gesture: bool,
 }
 
-fn now_seconds() -> f64 {
+pub(crate) fn now_seconds() -> f64 {
     #[cfg(target_arch = "wasm32")]
     {
         web_sys::window()
@@ -169,6 +171,7 @@ impl App {
             last_frame: None,
             framed: false,
             revealed: false,
+            reset_armed_until: 0.0,
             touches: Vec::new(),
             gesture: false,
         }
@@ -343,6 +346,22 @@ impl App {
                 }
             }
             hud::Action::LookAt(point) => self.rig.look_at(point.x, point.y),
+            hud::Action::Explain(reason) => self.toast = Some((reason, now_seconds() + 3.0)),
+            hud::Action::Reset => {
+                let now = now_seconds();
+                if now < self.reset_armed_until {
+                    self.reset_armed_until = 0.0;
+                    self.source.reset();
+                    // A different island: start the view and selection over.
+                    self.view = WorldView::new();
+                    self.incoming.clear();
+                    self.selection = Selection::default();
+                    self.build = hud::BuildUi::Off;
+                    self.framed = false;
+                } else {
+                    self.reset_armed_until = now + 4.0;
+                }
+            }
         }
     }
 
@@ -417,6 +436,9 @@ impl App {
                         building_id: building_id.clone(),
                     });
                 }
+                // The building's own menu stays one tap away: it is selected.
+                self.selection.units.clear();
+                self.selection.building = Some(building_id);
             }
             Target::Ground(cell) if units.len() == 1 => self.send(Command::Move {
                 unit_id: units[0].clone(),
@@ -751,6 +773,7 @@ impl App {
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
             build: self.build,
+            reset_armed: now_seconds() < self.reset_armed_until,
             toast: self.toast.as_ref().map(|(text, _)| text.as_str()),
             camera: Vec2::new(self.rig.target.x, self.rig.target.z),
         };

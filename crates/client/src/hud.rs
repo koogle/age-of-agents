@@ -83,6 +83,10 @@ pub enum Action {
     Research(TechnologyKind),
     /// Globe click: look at this map point.
     LookAt(Vec2),
+    /// The "New island" pill: arms on the first tap, resets on the second.
+    Reset,
+    /// A tap on an unavailable command: say why in the toast line.
+    Explain(String),
 }
 
 struct Region {
@@ -267,6 +271,8 @@ pub struct Model<'a> {
     pub units: &'a [String],
     pub building: Option<&'a str>,
     pub build: BuildUi,
+    /// The "New island" pill was tapped once and waits for confirmation.
+    pub reset_armed: bool,
     pub toast: Option<&'a str>,
     pub camera: Vec2,
 }
@@ -545,6 +551,32 @@ impl Hud {
             });
         }
 
+        // A small "New island" pill top-left; the first tap asks to confirm.
+        {
+            let text = if model.reset_armed {
+                "Tap again for a new island"
+            } else {
+                "New island"
+            };
+            let w = Self::text_width(atlas, text, 12.0 * s) + 28.0 * s;
+            let pill = [12.0 * s, 14.0 * s, w, 28.0 * s];
+            self.shape(pill, GLASS, 1.0, 14.0 * s);
+            let ink = if model.reset_armed { ACCENT } else { MUTED };
+            self.text(
+                atlas,
+                text,
+                (pill[0] + w / 2.0, pill[1] + 18.5 * s),
+                12.0 * s,
+                ink,
+                true,
+            );
+            self.regions.push(Region {
+                rect: pill,
+                action: Action::Reset,
+                enabled: true,
+            });
+        }
+
         // While paused, a pill at the top says so; tapping it resumes, since a
         // stray tap on the pause coin otherwise looks like stuck villagers.
         if snapshot.simulation_speed == 0.0 {
@@ -640,10 +672,16 @@ impl Hud {
                     command.enabled,
                     hot && command.enabled,
                 );
+                // An unavailable coin still answers a tap, with the reason:
+                // phones have no hover to show it.
                 self.regions.push(Region {
                     rect: hit,
-                    action: command.action.clone(),
-                    enabled: command.enabled,
+                    action: if command.enabled {
+                        command.action.clone()
+                    } else {
+                        Action::Explain(format!("{}: {}", command.label, command.detail))
+                    },
+                    enabled: true,
                 });
             }
         }
@@ -716,14 +754,19 @@ impl Hud {
 
     fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32) {
         if let Some(text) = toast {
+            // Below the resource coins (and the paused pill), so it never
+            // covers the counts on a narrow screen.
             let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
-            self.shape(
-                [(width - w) / 2.0, 16.0 * s, w, 34.0 * s],
-                GLASS,
-                1.0,
-                17.0 * s,
+            let top = 134.0 * s;
+            self.shape([(width - w) / 2.0, top, w, 34.0 * s], GLASS, 1.0, 17.0 * s);
+            self.text(
+                atlas,
+                text,
+                (width / 2.0, top + 22.0 * s),
+                14.0 * s,
+                INK,
+                true,
             );
-            self.text(atlas, text, (width / 2.0, 38.0 * s), 14.0 * s, INK, true);
         }
     }
 
