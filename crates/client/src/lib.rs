@@ -3,6 +3,7 @@
 //! `?local` to simulate in the page).
 mod assets;
 mod camera;
+mod gpu;
 mod hud;
 mod render;
 mod source;
@@ -22,8 +23,9 @@ use winit::window::{Window, WindowId};
 
 use assets::{Assets, Rgba};
 use camera::Rig;
-use render::{Globals, Gpu, Renderer};
-use source::{CommandResult, Source};
+use gpu::Gpu;
+use render::{Globals, Renderer};
+use source::Source;
 use view::{Selection, Sheets, WorldView};
 
 const DRAG_THRESHOLD: f32 = 8.0;
@@ -84,7 +86,6 @@ pub struct App {
     pointer: Option<Pointer>,
     cursor: Vec2,
     incoming: VecDeque<WorldSnapshot>,
-    results: Vec<CommandResult>,
     clock: f64,
     last_frame: Option<f64>,
 }
@@ -132,14 +133,13 @@ impl App {
             pointer: None,
             cursor: Vec2::ZERO,
             incoming: VecDeque::new(),
-            results: Vec::new(),
             clock: 0.0,
             last_frame: None,
         }
     }
 
     fn send(&mut self, command: Command) {
-        self.source.send(command, &mut self.results);
+        self.source.send(command);
     }
 
     fn placement(&self, pixel: Vec2) -> Option<(CellCoordinate, bool)> {
@@ -372,11 +372,11 @@ impl App {
             .unwrap_or(0.0);
         self.last_frame = Some(now);
         self.clock += dt;
-        self.source.poll(dt, &mut self.incoming, &mut self.results);
+        self.source.poll(dt, &mut self.incoming);
         while let Some(snapshot) = self.incoming.pop_front() {
             self.view.sync(snapshot);
         }
-        for result in std::mem::take(&mut self.results) {
+        for result in self.source.take_results() {
             if let Err(error) = result {
                 self.toast = Some((friendly(&error), now + 3.0));
             }

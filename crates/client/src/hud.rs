@@ -772,3 +772,41 @@ fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> 
         commands,
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoa_game::GameWorld;
+
+    fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {
+        let snapshot = world.snapshot();
+        let model = Model {
+            snapshot: Some(&snapshot),
+            units: &[],
+            building: Some(&snapshot.buildings[0].building.id),
+            build_mode: false,
+            toast: None,
+            camera: Vec2::ZERO,
+        };
+        selection_model(&snapshot, &model).unwrap().4
+    }
+
+    #[test]
+    fn town_center_coins_follow_costs_and_prerequisites() {
+        let mut world = GameWorld::default();
+        world.stockpile.food = 0.0;
+        world.stockpile.wood = 0.0;
+        let poor = commands_for_town_center(&world);
+        assert!(poor.iter().all(|c| !c.enabled), "nothing is affordable");
+        world.stockpile.food = 100.0;
+        world.stockpile.wood = 100.0;
+        let rich = commands_for_town_center(&world);
+        let enabled = |action: Action| rich.iter().find(|c| c.action == action).unwrap().enabled;
+        assert!(enabled(Action::Train));
+        assert!(enabled(Action::Research(TechnologyKind::Masonry)));
+        assert!(
+            !enabled(Action::Research(TechnologyKind::Mining)),
+            "mining needs masonry"
+        );
+    }
+}
