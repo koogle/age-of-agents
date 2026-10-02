@@ -8,6 +8,9 @@ use aoa_game::{
 use glam::{Vec2, Vec3};
 use serde::Deserialize;
 
+mod buildings;
+pub(crate) use buildings::sprite as building_sprite;
+
 use crate::camera::Rig;
 use crate::render::{Decal, Sprite};
 use crate::terrain::{self, Heights, random};
@@ -42,21 +45,6 @@ struct BuildingSheet {
     size: [f32; 2],
     cell: [f32; 2],
     frames: HashMap<String, Vec<[f32; 4]>>,
-}
-
-/// Sheet row, world width of a sheet cell, and the pixel height (from the cell
-/// top) of the footprint centre, for buildings other than the town center.
-/// Widths are set so each door stands about 1.2 villagers tall (the dock's
-/// rowboat is about two villagers long).
-fn building_art(kind: aoa_game::BuildingKind) -> Option<(&'static str, f32, f32)> {
-    use aoa_game::BuildingKind::*;
-    Some(match kind {
-        House => ("house", 4.1, 205.0),
-        Granary => ("granary", 3.9, 199.0),
-        Watchtower => ("watchtower", 5.0, 228.0),
-        Dock => ("dock", 4.5, 193.0),
-        _ => return None,
-    })
 }
 
 /// Standing frames at twice the resolution of `villager.json`, with the same
@@ -348,6 +336,7 @@ impl WorldView {
                 pivot,
                 uv: uv(rect, resources.size, false),
                 pull: 0.3 * size,
+                tint: [1.0; 4],
             }
         };
         for resource in &snapshot.resources {
@@ -401,84 +390,25 @@ impl WorldView {
         }
         for building in &snapshot.buildings {
             let center = footprint_center(heights, building);
-            if let Some((row, width, center_px)) = building_art(building.building.kind) {
-                let sheet = &sheets.buildings;
-                let stage = match building.building.construction {
-                    None => 3,
-                    Some(work) => {
-                        let progress = work / aoa_game::BUILD_SECONDS;
-                        if progress < 1.0 / 3.0 {
-                            0
-                        } else if progress < 2.0 / 3.0 {
-                            1
-                        } else {
-                            2
-                        }
-                    }
-                };
-                // The art's base bottom is BASE_PX; stand it on the footprint
-                // edge nearest the camera (see `grounded`).
-                const BASE_PX: f32 = 248.0;
-                let drop = (BASE_PX - center_px) / sheet.cell[1] * width;
-                let sprite = Sprite {
-                    anchor: grounded(heights, center, rig.eye(), drop).to_array(),
-                    size: [width, width * sheet.cell[1] / sheet.cell[0]],
-                    pivot: [0.5, 1.0 - BASE_PX / sheet.cell[1]],
-                    uv: uv(sheet.frames[row][stage], sheet.size, false),
-                    pull: 0.08 * width,
-                };
-                picks.push(Pickable {
-                    pick: Pick::Building(building.building.id.clone()),
-                    sprite,
-                });
-                sprites.push((SHEET_BUILDINGS, sprite));
-                if selection.building.as_deref() == Some(building.building.id.as_str()) {
-                    decals.push(Decal {
-                        center: (center + Vec3::Y * 0.03).to_array(),
-                        radius: building.columns as f32 * terrain::CELL * 0.75,
-                        color: TEAM_BLUE,
-                        ring: 1.0,
-                    });
-                }
-                continue;
-            }
-            // The temple rises through its drawn stages, then glows while working.
-            let tc = &sheets.town_center;
-            let frame = town_center_frame(
-                tc,
+            let (sheet, sprite) = building_sprite(
+                sheets,
+                heights,
+                building.building.kind,
+                center,
                 building.building.construction,
                 building.building.job.is_some(),
             );
-            // The temple sheet is drawn for a 4-cell footprint; scale it to
-            // the town center's real one.
-            let size = tc.cell[0] * tc.units_per_pixel * building.columns as f32 / 4.0;
-            let sprite = Sprite {
-                anchor: grounded(
-                    heights,
-                    center,
-                    rig.eye(),
-                    (tc.base_bottom[1] - tc.anchor[1]) / tc.cell[1] * size,
-                )
-                .to_array(),
-                size: [size, size * tc.cell[1] / tc.cell[0]],
-                pivot: [
-                    tc.anchor[0] / tc.cell[0],
-                    1.0 - tc.base_bottom[1] / tc.cell[1],
-                ],
-                uv: uv(tc.frames[frame], tc.size, false),
-                pull: 0.08 * size,
-            };
             picks.push(Pickable {
                 pick: Pick::Building(building.building.id.clone()),
                 sprite,
             });
-            sprites.push((SHEET_TOWN_CENTER, sprite));
+            sprites.push((sheet, sprite));
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
                 decals.push(Decal {
                     center: (center + Vec3::Y * 0.03).to_array(),
-                    radius: building.columns as f32 * terrain::CELL * 0.75,
+                    radius: building.columns as f32 * terrain::CELL * 0.5,
                     color: TEAM_BLUE,
-                    ring: 1.0,
+                    ring: 2.0,
                 });
             }
         }
@@ -582,6 +512,7 @@ impl WorldView {
                     pivot,
                     uv: uv(rect, sheet_size, mirror),
                     pull: 0.3 * cell_size,
+                    tint: [1.0; 4],
                 },
             ));
             decals.push(Decal {
@@ -688,24 +619,6 @@ fn work_target(
         }
         _ => None,
     }
-}
-
-/// Where a building's picture stands. A flat picture anchored at the middle
-/// of its footprint hangs its front steps below the ground, and those points
-/// swim against the terrain whenever the camera pans, zooms or turns. Instead
-/// the bottom of the art stands on the ground on the camera's side of the
-/// footprint, `drop` (its on-screen distance below the middle, in world units)
-/// divided by the sine of a typical view pitch away from the middle. A fixed
-/// distance keeps it from creeping as the pitch changes with zoom.
-fn grounded(heights: &Heights, center: Vec3, eye: Vec3, drop: f32) -> Vec3 {
-    const TYPICAL_PITCH_SINE: f32 = 0.8;
-    let toward = Vec2::new(eye.x - center.x, eye.z - center.z).normalize_or_zero();
-    let distance = drop / TYPICAL_PITCH_SINE;
-    ground(
-        heights,
-        center.x + toward.x * distance,
-        center.z + toward.y * distance,
-    )
 }
 
 /// World point at the middle of a building's footprint.

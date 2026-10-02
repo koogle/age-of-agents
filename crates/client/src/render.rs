@@ -28,6 +28,9 @@ pub struct Globals {
     pub curve_center: [f32; 2],
     pub fog_near: f32,
     pub fog_far: f32,
+    pub placement: [f32; 4],
+    pub placement_color: [f32; 4],
+    pub grid: [f32; 4],
 }
 
 /// One painted sprite standing on the ground.
@@ -44,6 +47,8 @@ pub struct Sprite {
     /// How far toward the camera (world units) the sprite takes its depth
     /// from, so the solid thing it pictures is not cut by the ground in front.
     pub pull: f32,
+    /// White/opaque for world sprites; tinted/translucent for placement ghosts.
+    pub tint: [f32; 4],
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -93,6 +98,7 @@ pub struct Renderer {
     sea: (wgpu::Buffer, wgpu::Buffer, u32),
     sky_pipeline: wgpu::RenderPipeline,
     sprite_pipeline: wgpu::RenderPipeline,
+    ghost_pipeline: wgpu::RenderPipeline,
     sheets: Vec<Sheet>,
     sprite_buffer: wgpu::Buffer,
     decal_pipeline: wgpu::RenderPipeline,
@@ -350,25 +356,40 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32];
-        let sprite_pipeline = pipeline(
-            device,
-            PipelineSpec {
-                label: "billboard",
-                module: &sprite_module,
-                layouts: &[Some(&globals_layout), Some(&sheet_layout)],
-                buffers: &[Some(wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<Sprite>() as u64,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &sprite_attributes,
-                })],
-                format: SCENE_FORMAT,
-                blend: None,
-                depth: Some((true, wgpu::CompareFunction::Less)),
-                vs: "vs",
-                fs: "fs",
-            },
-        );
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4];
+        let make_sprite_pipeline = |ghost: bool| {
+            pipeline(
+                device,
+                PipelineSpec {
+                    label: if ghost { "building ghost" } else { "billboard" },
+                    module: &sprite_module,
+                    layouts: &[Some(&globals_layout), Some(&sheet_layout)],
+                    buffers: &[Some(wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::<Sprite>() as u64,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: &sprite_attributes,
+                    })],
+                    format: SCENE_FORMAT,
+                    blend: if ghost {
+                        Some(wgpu::BlendState::ALPHA_BLENDING)
+                    } else {
+                        None
+                    },
+                    depth: Some((
+                        !ghost,
+                        if ghost {
+                            wgpu::CompareFunction::Always
+                        } else {
+                            wgpu::CompareFunction::Less
+                        },
+                    )),
+                    vs: "vs",
+                    fs: "fs",
+                },
+            )
+        };
+        let sprite_pipeline = make_sprite_pipeline(false);
+        let ghost_pipeline = make_sprite_pipeline(true);
         let decal_module = shader(device, "decal", include_str!("shaders/decal.wgsl"));
         let decal_attributes =
             wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32, 2 => Float32x4, 3 => Float32];
@@ -548,6 +569,7 @@ impl Renderer {
             sea,
             sky_pipeline,
             sprite_pipeline,
+            ghost_pipeline,
             sheets,
             sprite_buffer,
             decal_pipeline,
@@ -703,7 +725,7 @@ impl Renderer {
             bytemuck::bytes_of(&post([0.0, 1.0 / height], true)),
         );
 
-        sprites.sort_by_key(|(sheet, _)| *sheet);
+        sprites.sort_by_key(|(sheet, sprite)| (sprite.tint[3] < 1.0, *sheet));
         let instances: Vec<Sprite> = sprites.iter().map(|(_, sprite)| *sprite).collect();
         ensure_capacity(
             &gpu.device,
@@ -773,24 +795,30 @@ impl Renderer {
                 pass.set_vertex_buffer(0, self.decal_buffer.slice(..));
                 pass.draw(0..6, 0..decals.len() as u32);
             }
+            pass.set_pipeline(&self.sea_pipeline);
+            pass.set_vertex_buffer(0, self.sea.0.slice(..));
+            pass.set_index_buffer(self.sea.1.slice(..), wgpu::IndexFormat::Uint32);
+            pass.draw_indexed(0..self.sea.2, 0, 0..1);
             pass.set_pipeline(&self.sprite_pipeline);
             pass.set_vertex_buffer(0, self.sprite_buffer.slice(..));
             let mut start = 0;
             while start < sprites.len() {
                 let sheet = sprites[start].0;
+                let ghost = sprites[start].1.tint[3] < 1.0;
+                pass.set_pipeline(if ghost {
+                    &self.ghost_pipeline
+                } else {
+                    &self.sprite_pipeline
+                });
                 let end = start
                     + sprites[start..]
                         .iter()
-                        .take_while(|(s, _)| *s == sheet)
+                        .take_while(|(s, sprite)| *s == sheet && (sprite.tint[3] < 1.0) == ghost)
                         .count();
                 pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
                 pass.draw(0..6, start as u32..end as u32);
                 start = end;
             }
-            pass.set_pipeline(&self.sea_pipeline);
-            pass.set_vertex_buffer(0, self.sea.0.slice(..));
-            pass.set_index_buffer(self.sea.1.slice(..), wgpu::IndexFormat::Uint32);
-            pass.draw_indexed(0..self.sea.2, 0, 0..1);
         }
         let surface_view = frame.texture.create_view(&Default::default());
         let passes: [(&wgpu::RenderPipeline, &wgpu::BindGroup, &wgpu::TextureView); 3] = [

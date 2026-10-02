@@ -845,4 +845,6 @@ impl GameWorld {
 }
 
 #[cfg(test)]
+mod placement_tests;
+#[cfg(test)]
 mod tests;

@@ -12,6 +12,9 @@ struct Globals {
     curve_center: vec2<f32>,
     fog_near: f32,
     fog_far: f32,
+    placement: vec4<f32>,
+    placement_color: vec4<f32>,
+    grid: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> g: Globals;

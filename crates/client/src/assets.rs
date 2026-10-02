@@ -17,8 +17,10 @@ pub fn manifest() -> Vec<String> {
     files.push("sprites/villager_idle_hd.png".into());
     files.push("sprites/villager.json".into());
     files.push("sprites/villager_idle_hd.json".into());
+    files.push("sprites/buildings_hd.png".into());
     files.push("loading/buildings.webp".into());
     files.push("loading/buildings.json".into());
+    files.push("sprites/buildings_hd.json".into());
     files.push("sprites/resources.json".into());
     files.push("sprites/towncenter.json".into());
     files.extend(crate::hud::files());

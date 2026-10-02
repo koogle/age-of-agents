@@ -15,12 +15,14 @@ struct Instance {
     @location(2) pivot: vec2<f32>,
     @location(3) uv: vec4<f32>,
     @location(4) pull: f32,
+    @location(5) tint: vec4<f32>,
 };
 
 struct VOut {
     @builtin(position) clip: vec4<f32>,
     @location(0) uv: vec2<f32>,
     @location(1) anchor: vec3<f32>,
+    @location(2) tint: vec4<f32>,
 };
 
 @vertex
@@ -36,6 +38,7 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
     out.clip.z = front.z / front.w * out.clip.w;
     out.uv = vec2<f32>(mix(inst.uv.x, inst.uv.z, q.x), mix(inst.uv.w, inst.uv.y, q.y));
     out.anchor = inst.anchor;
+    out.tint = inst.tint;
     return out;
 }
 
@@ -46,5 +49,5 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
         discard;
     }
     let color = world_light(texel.rgb, in.anchor.xz);
-    return vec4<f32>(distance_fog(color, in.anchor), 1.0);
+    return vec4<f32>(distance_fog(color, in.anchor) * in.tint.rgb, in.tint.a);
 }
