@@ -1105,3 +1105,58 @@ fn a_dock_must_touch_the_sea() {
         .any(|origin| build(&mut island, BuildingKind::Dock, origin).is_ok());
     assert!(built, "some coastal site takes a dock");
 }
+
+#[test]
+fn goods_of_another_kind_are_dropped_off_before_gathering() {
+    let mut world = fixture::fixture();
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Wood,
+        amount: 12.0,
+    });
+    let berries = world
+        .resources
+        .iter()
+        .find(|r| r.kind == ResourceKind::Food)
+        .unwrap()
+        .id
+        .clone();
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: berries.clone(),
+        })
+        .unwrap();
+    world.tick(0.1);
+    assert_gather_phase(&world.units[0], GatherPhase::Returning);
+    run(&mut world, 60.0);
+    assert_eq!(world.stockpile.wood, 12.0);
+    assert!(world.stockpile.food > 0.0 || world.units[0].cargo.is_some());
+}
+
+#[test]
+fn a_builder_drops_off_carried_goods_before_building() {
+    let mut world = fixture::fixture();
+    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    world
+        .apply_command(Command::Build {
+            unit_id: "villager-2".into(),
+            origin: cell(20, 24),
+            kind: BuildingKind::TownCenter,
+        })
+        .unwrap();
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Stone,
+        amount: 7.0,
+    });
+    let site = world.buildings.last().unwrap().id.clone();
+    world
+        .apply_command(Command::Construct {
+            unit_id: "villager-1".into(),
+            building_id: site,
+        })
+        .unwrap();
+    run(&mut world, 60.0);
+    assert_eq!(world.stockpile.stone, 7.0);
+    assert!(world.units[0].cargo.is_none());
+    assert!(world.buildings.last().unwrap().is_complete());
+}
