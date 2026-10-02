@@ -20,6 +20,9 @@ const TICK_SECONDS: f64 = 0.1;
 const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
 const SHEET_TOWN_CENTER: usize = 4;
+const SHEET_IDLE_HD: usize = 5;
+/// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
+const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
 
 #[derive(Deserialize)]
 struct VillagerSheet {
@@ -29,6 +32,14 @@ struct VillagerSheet {
     figure_height: f32,
     fps: HashMap<String, f32>,
     animations: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
+}
+
+/// Standing frames at twice the resolution of `villager.json`, with the same
+/// anchor after scaling: idle villagers are on screen most of the time.
+#[derive(Deserialize)]
+struct IdleSheet {
+    size: [f32; 2],
+    people: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
 }
 
 #[derive(Deserialize)]
@@ -61,14 +72,16 @@ struct TownCenterSheet {
 
 pub struct Sheets {
     villager: VillagerSheet,
+    idle: IdleSheet,
     resources: ResourceSheet,
     town_center: TownCenterSheet,
 }
 
 impl Sheets {
-    pub fn parse(villager: &[u8], resources: &[u8], town_center: &[u8]) -> Self {
+    pub fn parse(villager: &[u8], idle: &[u8], resources: &[u8], town_center: &[u8]) -> Self {
         Self {
             villager: serde_json::from_slice(villager).expect("villager.json"),
+            idle: serde_json::from_slice(idle).expect("villager_idle_hd.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),
             town_center: serde_json::from_slice(town_center).expect("towncenter.json"),
         }
@@ -418,12 +431,20 @@ impl WorldView {
             } else {
                 !screen_right
             };
-            let frames = &animation[view];
             let fps = villager.fps.get(name).copied().unwrap_or(4.0);
+            let (sheet, frames, sheet_size) = if name == "idle" {
+                let idle = &sheets.idle;
+                (
+                    SHEET_IDLE_HD,
+                    &idle.people[PEOPLE[entry.variant]][view],
+                    idle.size,
+                )
+            } else {
+                (entry.variant, &animation[view], [2048.0, 1280.0])
+            };
             let rect = frames[(time * fps) as usize % frames.len()];
-            let sheet_size = [2048.0, 1280.0];
             sprites.push((
-                entry.variant,
+                sheet,
                 Sprite {
                     anchor: position.to_array(),
                     size: [cell_size, cell_size],
