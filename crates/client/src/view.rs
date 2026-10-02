@@ -306,19 +306,11 @@ impl WorldView {
             let center = footprint_center(building);
             // The temple rises through its drawn stages, then glows while working.
             let tc = &sheets.town_center;
-            let frame = match building.building.construction {
-                Some(work) => {
-                    let progress = work / aoa_game::BUILD_SECONDS;
-                    tc.construction_stages
-                        .iter()
-                        .rev()
-                        .find(|(_, from)| progress >= *from)
-                        .map(|(name, _)| name.as_str())
-                        .unwrap_or("foundation")
-                }
-                None if building.building.job.is_some() => "working",
-                None => "complete",
-            };
+            let frame = town_center_frame(
+                tc,
+                building.building.construction,
+                building.building.job.is_some(),
+            );
             let size = tc.cell[0] * tc.units_per_pixel;
             sprites.push((
                 SHEET_TOWN_CENTER,
@@ -493,6 +485,24 @@ pub fn footprint_center(building: &aoa_game::BuildingView) -> Vec3 {
     )
 }
 
+/// The temple's drawn stage: construction frames by progress, then complete or working.
+fn town_center_frame(sheet: &TownCenterSheet, construction: Option<f64>, working: bool) -> &str {
+    match construction {
+        Some(work) => {
+            let progress = work / aoa_game::BUILD_SECONDS;
+            sheet
+                .construction_stages
+                .iter()
+                .rev()
+                .find(|(_, from)| progress >= *from)
+                .map(|(name, _)| name.as_str())
+                .unwrap_or("foundation")
+        }
+        None if working => "working",
+        None => "complete",
+    }
+}
+
 fn sample_at(samples: &VecDeque<(f64, Vec3)>, tick: f64) -> Vec3 {
     let mut i = samples.len() - 1;
     while i > 0 && samples[i - 1].0 > tick {
@@ -513,4 +523,55 @@ fn sample_at(samples: &VecDeque<(f64, Vec3)>, tick: f64) -> Vec3 {
 pub struct Selection {
     pub units: Vec<String>,
     pub building: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoa_game::GameWorld;
+
+    fn sheet() -> TownCenterSheet {
+        serde_json::from_str(include_str!("../../../assets/sprites/towncenter.json")).unwrap()
+    }
+
+    #[test]
+    fn the_temple_rises_through_its_drawn_stages() {
+        let sheet = sheet();
+        let at = |seconds: f64| town_center_frame(&sheet, Some(seconds), false);
+        assert_eq!(at(0.0), "foundation");
+        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.2), "build33");
+        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.6), "build66");
+        assert_eq!(town_center_frame(&sheet, None, false), "complete");
+        assert_eq!(town_center_frame(&sheet, None, true), "working");
+        for frame in ["foundation", "build33", "build66", "complete", "working"] {
+            assert!(sheet.frames.contains_key(frame));
+        }
+    }
+
+    #[test]
+    fn samples_interpolate_between_ticks_and_hold_at_the_ends() {
+        let samples: VecDeque<_> = [(1.0, Vec3::ZERO), (2.0, Vec3::X)].into();
+        assert_eq!(sample_at(&samples, 0.5), Vec3::ZERO);
+        assert!((sample_at(&samples, 1.25) - Vec3::new(0.25, 0.0, 0.0)).length() < 1e-6);
+        assert_eq!(sample_at(&samples, 3.0), Vec3::X);
+    }
+
+    #[test]
+    fn the_presentation_clock_trails_the_newest_tick_and_never_passes_it() {
+        let mut world = GameWorld::default();
+        let mut view = WorldView::new();
+        for _ in 0..20 {
+            world.tick(0.1);
+            view.sync(world.snapshot());
+            view.frame(0.1);
+        }
+        let render = view.render_tick.unwrap();
+        assert!(render <= view.latest_tick);
+        assert!(view.latest_tick - render < PLAYOUT_TICKS + 1.0);
+        // A paused simulation stops the clock at the newest tick.
+        for _ in 0..50 {
+            view.frame(0.1);
+        }
+        assert_eq!(view.render_tick.unwrap(), view.latest_tick);
+    }
 }
