@@ -328,7 +328,11 @@ renderer.setAnimationLoop(now => {
   controls.update(dt);
   rig.update(dt);
   scene.fog.near = rig.state.distance + 8;
-  scene.fog.far = rig.state.distance + 60;
+  scene.fog.far = rig.state.distance * 2 + 60;
+  uniforms.uCurve.value = THREE.MathUtils.smoothstep(rig.state.distance, 24, 70) * 0.014;
+  uniforms.uCurveCenter.value.set(rig.target.x, rig.target.z);
+  // Shadow maps are not bent with the world, so the planet view goes without.
+  sun.castShadow = uniforms.uCurve.value < 0.0005;
   sun.position.set(rig.target.x - 11, 15, rig.target.z + 7);
   sun.target.position.copy(rig.target);
   view.frame(now, time, dt, selection);
