@@ -1,6 +1,6 @@
 # UI art kit
 
-Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. Nothing here is loaded by the game yet; `manifest.json` is the entry point for the HUD.
+Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The canvas HUD loads the icons (`frontend/hud-content.js` maps its keys to these files); `manifest.json` lists everything.
 
 ## Files
 
@@ -10,6 +10,7 @@ Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets
 | `paper_tile.png` | 512×512 RGB | Seamless cream paper with faint fibre. Use `repeat` wrapping. |
 | `border_strip.png` | 123×32 RGBA | One horizontal Greek-key band (8 meander periods); outer ink rule on top. Repeat along x; transpose for vertical edges. |
 | `border_frame.png` | 310×310 RGBA | 9-slice frame, inset 32 px on all sides, transparent inside and outside. Each edge holds exactly two strips, so tile edges (`repeat`/`round`); stretching distorts the meander. |
+| `buttons/coin_{normal,hover,pressed,disabled}.png` | 256×256 RGBA | Blank coin medallion button frames. Coin is 224 px across, centred; the ivory face has a 92 px radius, which is where icons go. The 16 px margin holds the hover glow. |
 | `manifest.json` | | Names → files, texture sizes, slice inset. |
 | `contact_sheet.png` | | Every icon at 128 / 32 / 24 / 20 px on cream and dark, the paper, the frame, and a framed panel demo. |
 | `tools/` | | Scripts and the per-request cost ledger used to make all of the above. |
@@ -36,7 +37,14 @@ Paper: `fal-ai/nano-banana`, prompt "Macro photograph scan of warm cream handmad
 
 Frame: `fal-ai/nano-banana`, prompt "A square decorative frame for a game UI panel, seen flat and straight on: a thin double rule in fine dark-brown ink with a delicate Greek key meander band running between the two rules, small neat square corner ornaments, drawn in the style of a Moebius thin-line European comic, tiny touches of muted terracotta watercolor inside the meander. The frame is a thin band only, perfectly symmetrical and straight, near the image edges. The inside of the frame and the outside are plain pure white and empty. No text." A `fal-ai/flux-pro/v1.1` version (seed 5151) was rejected for an irregular, hand-wobbled meander.
 
+Coin buttons: `fal-ai/nano-banana/edit` with the raw (pre-cutout) `portrait_villager` coin attached as the reference, generated twice; the variant with the clearer bronze rim was kept. Prompt: "The attached image is a STYLE REFERENCE. Draw the SAME round antique coin medallion, seen perfectly straight on, with the identical warm gold-bronze rim, thin double ink rim lines and the same fine dark-brown ink linework and restrained watercolor wash, but with a completely EMPTY face: a smooth, soft ivory-parchment coloured flat disc inside the rim, very subtly shaded, no portrait, no figure, no building, no symbol, no text, no letters, no inscription. The coin is perfectly circular, centered, filling about 85% of the frame, on a plain pure white background, no shadow."
+
 ## Processing
+
+- Coin buttons (`tools/coin_states.py`): one generated blank coin makes all four states, so they line up pixel for pixel. The coin is fitted as a circle and masked analytically, which gives a crisp antialiased edge with no matting. The rim/face boundary comes from the radial saturation profile (face at 0.825 of the radius).
+  - Hover: rim warmed and brightened, plus a soft warm (#FFCD78) glow outside the coin.
+  - Pressed: rim darkened 18%, the face shaded in from its upper-left inner edge, and the coin scaled to 97%.
+  - Disabled: 85% desaturated, lightened, alpha 0.6.
 
 - Icons: `fal-ai/birefnet/v2` ("General Use (Heavy)", 1024², `refine_foreground`) cut the white background (`tools/cut.py`). `tools/norm.py` zeroes alpha below 12, crops to the alpha > 40 bounding box, pads 6%, squares, and Lanczos-downscales to 128. Alpha was checked to span 0–255 on every icon; no white fringe is visible on the dark preview.
 - Paper (`tools/build_deco.py`): downscaled to 512, low frequencies removed (divide out a 48 px Gaussian), fibre contrast scaled by 0.6 around cream `#F0E5CE`, then made seamless by feathered blending with a half-offset copy.
@@ -45,7 +53,7 @@ Frame: `fal-ai/nano-banana`, prompt "A square decorative frame for a game UI pan
 
 ## Cost
 
-Estimated from fal's published unit prices (`api.fal.ai/v1/models/pricing`): about **$1.32** for the kit, including the bake-off and rejected attempts (19 nano-banana/edit at $0.0398, 3 nano-banana, 4 flux-pro v1.1 at $0.04/MP, 1 nano-banana-pro at $0.15, 1 recraft at $0.04, 18 BiRefNet runs at under $0.005).
+Estimated from fal's published unit prices (`api.fal.ai/v1/models/pricing`): about **$1.40** for the kit (coin buttons $0.08), including the bake-off and rejected attempts (19 nano-banana/edit at $0.0398, 3 nano-banana, 4 flux-pro v1.1 at $0.04/MP, 1 nano-banana-pro at $0.15, 1 recraft at $0.04, 18 BiRefNet runs at under $0.005).
 
 ## Known limitations
 
