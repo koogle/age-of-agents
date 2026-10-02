@@ -1,0 +1,7 @@
+/* The interface is painted inside the canvas (frontend/hud.js); this file only
+   sizes the canvas and hides the accessible button mirror. */
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #dde8ee; }
+#world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; outline: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sr:focus-within { clip: auto; width: auto; height: auto; left: 8px; bottom: 8px; z-index: 10; padding: 6px; background: #dde8ee; border: 1px solid #4a3a2a; }

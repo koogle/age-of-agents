@@ -27,14 +27,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check numpy==2.4.3 Pillow==12.3.0
       - name: Verify frontend and deployment files
         run: |
-          node --check frontend/app.js
-          node --check frontend/selection-controls.js
-          node --check frontend/activity-presentation.js
-          node scripts/check_selection_controls.cjs
-          node scripts/check_directional_walk.cjs
-          node scripts/check_building_popover.cjs
-          node scripts/check_snapshot_buffer.cjs
-          node scripts/check_activity_presentation.cjs
+          for module in frontend/*.js; do node --check "$module"; done
           python3 -m py_compile modal_app.py scripts/modal_manage.py scripts/process_resource_activity_sprites.py scripts/check_resource_activity_assets.py
           python3 scripts/check_depleted_asset.py
           python3 scripts/check_resource_activity_assets.py

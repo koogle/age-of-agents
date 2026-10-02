@@ -121,22 +121,22 @@ async fn game_loop(state: SharedState) {
     loop {
         interval.tick().await;
         let mut world = state.world.lock().await;
-        let buildings = world.buildings.len();
-        let active_units = world
-            .units
-            .iter()
-            .filter(|unit| !matches!(unit.action, game::UnitAction::Idle))
-            .count();
+        let milestones = |world: &GameWorld| {
+            (
+                world.units.len(),
+                world.buildings.iter().filter(|b| b.is_complete()).count(),
+                world
+                    .units
+                    .iter()
+                    .filter(|unit| unit.action == game::UnitAction::Idle)
+                    .count(),
+            )
+        };
+        let before = milestones(&world);
         let previous_tick = world.tick;
         world.tick(TICK_DURATION.as_secs_f64());
         let advanced = world.tick != previous_tick;
-        let completed_action = world.buildings.len() != buildings
-            || world
-                .units
-                .iter()
-                .filter(|unit| !matches!(unit.action, game::UnitAction::Idle))
-                .count()
-                < active_units;
+        let completed_action = milestones(&world) != before;
         if ((advanced && world.tick % SAVE_EVERY_TICKS == 0) || completed_action)
             && let Err(error) = state.store.save(&world)
         {
@@ -348,7 +348,7 @@ mod tests {
     #[test]
     fn group_move_is_one_typed_command() {
         let message: ClientMessage = serde_json::from_str(
-            r#"{"type":"command","request_id":"group-1","command":{"type":"group_move","unit_ids":["villager-1","villager-2"],"x":400,"y":500}}"#,
+            r#"{"type":"command","request_id":"group-1","command":{"type":"group_move","unit_ids":["villager-1","villager-2"],"to":{"column":4,"row":5}}}"#,
         ).unwrap();
         assert!(matches!(message, ClientMessage::Command {
             command: Command::GroupMove { unit_ids, .. }, ..
@@ -362,7 +362,12 @@ mod tests {
         let json = serde_json::to_value(message).unwrap();
         assert_eq!(json["type"], "snapshot");
         assert_eq!(json["sequence"], 4);
-        assert_eq!(json["world"]["width"], 2400.0);
+        assert_eq!(json["world"]["columns"], 30);
+        assert_eq!(json["world"]["rows"], 20);
+        let unit = &json["world"]["units"][0];
+        assert_eq!(unit["cell"], serde_json::json!({"column": 14, "row": 11}));
+        assert_eq!(unit["position"], serde_json::json!({"x": 14.5, "y": 11.5}));
+        assert_eq!(json["world"]["buildings"][0]["columns"], 2);
         let terrain = json["world"]["terrain"].as_array().unwrap();
         assert!(terrain.iter().all(|cell| matches!(
             cell["visibility"].as_str(),

@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "runtime_size": 512,
+  "master_size": 1024,
+  "repeat_cells": 4,
+  "textures": {
+    "meadow": {
+      "file": "meadow.webp",
+      "master": "masters/meadow.webp",
+      "target_mean": [
+        176,
+        204,
+        92
+      ],
+      "mean": [
+        175,
+        204,
+        92
+      ],
+      "prompt_ground": "lush yellow-green meadow grass with tiny scattered painted wildflowers in white and yellow"
+    },
+    "forest": {
+      "file": "forest.webp",
+      "master": "masters/forest.webp",
+      "target_mean": [
+        108,
+        156,
+        74
+      ],
+      "mean": [
+        107,
+        156,
+        73
+      ],
+      "prompt_ground": "darker green forest-floor grass with fallen pine needles and small leaf litter"
+    },
+    "prairie": {
+      "file": "prairie.webp",
+      "master": "masters/prairie.webp",
+      "target_mean": [
+        230,
+        200,
+        104
+      ],
+      "mean": [
+        230,
+        200,
+        103
+      ],
+      "prompt_ground": "golden dry summer grass with soft ochre tones"
+    },
+    "highland": {
+      "file": "highland.webp",
+      "master": "masters/highland.webp",
+      "target_mean": [
+        214,
+        206,
+        182
+      ],
+      "mean": [
+        214,
+        206,
+        181
+      ],
+      "prompt_ground": "pale cream limestone ground with tiny pebbles and thin sparse grass"
+    },
+    "wetland": {
+      "file": "wetland.webp",
+      "master": "masters/wetland.webp",
+      "target_mean": [
+        118,
+        184,
+        128
+      ],
+      "mean": [
+        118,
+        184,
+        127
+      ],
+      "prompt_ground": "damp lush green grass with tiny reeds and small soft puddle glints"
+    },
+    "scrubland": {
+      "file": "scrubland.webp",
+      "master": "masters/scrubland.webp",
+      "target_mean": [
+        206,
+        180,
+        112
+      ],
+      "mean": [
+        206,
+        180,
+        112
+      ],
+      "prompt_ground": "ochre dry soil with sparse small dry shrub tufts"
+    },
+    "heath": {
+      "file": "heath.webp",
+      "master": "masters/heath.webp",
+      "target_mean": [
+        166,
+        176,
+        104
+      ],
+      "mean": [
+        166,
+        176,
+        103
+      ],
+      "prompt_ground": "olive-sage low heather with tiny purple heather specks"
+    },
+    "clayland": {
+      "file": "clayland.webp",
+      "master": "masters/clayland.webp",
+      "target_mean": [
+        214,
+        142,
+        92
+      ],
+      "mean": [
+        213,
+        142,
+        91
+      ],
+      "prompt_ground": "smooth, even warm terracotta clay soil with soft faint dry cracks; only a few tiny pebbles scattered sparsely and evenly, no clusters, no rows"
+    },
+    "beach": {
+      "file": "beach.webp",
+      "master": "masters/beach.webp",
+      "target_mean": [
+        237,
+        209,
+        153
+      ],
+      "mean": [
+        236,
+        209,
+        153
+      ],
+      "prompt_ground": "warm pale fine beach sand with very faint ripples and a few tiny shell specks"
+    },
+    "shallows": {
+      "file": "shallows.webp",
+      "master": "masters/shallows.webp",
+      "target_mean": [
+        120,
+        196,
+        190
+      ],
+      "mean": [
+        119,
+        196,
+        189
+      ],
+      "prompt_ground": "clear turquoise shallow sea water over pale sand, soft light ripples, seen from directly above"
+    }
+  },
+  "generation": {
+    "endpoint": "fal-ai/nano-banana/edit",
+    "references": [
+      "assets/reference/diorama_primary.webp (768 px)",
+      "assets/reference/mediterranean_4.webp crop (700,900)-(1500,1500)"
+    ],
+    "seed": "not supported by the endpoint",
+    "estimated_cost_usd": 0.595
+  }
+}

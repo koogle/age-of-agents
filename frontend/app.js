@@ -1,962 +1,349 @@
-'use strict';
+// Entry point: renderer, lighting, and the mapping from player intent to typed
+// server commands. The server decides every outcome; this file only asks.
+import * as THREE from 'three';
+import { MAP, uniforms } from './materials.js';
+import { createTerrain } from './terrain.js';
+import { createSky } from './sky.js';
+import { createTiltShift } from './tilt-shift.js';
+import { createBuildGhost, createWorldView } from './world-view.js';
+import { createEffects } from './effects.js';
+import { bindPointer, createCameraRig } from './controls.js';
+import { createHud } from './hud.js';
+import { connect } from './net.js';
+
 const canvas = document.getElementById('world');
-const ctx = canvas.getContext('2d', { alpha: false });
-const woodValue = document.querySelector('#wood strong');
-const foodValue = document.querySelector('#food strong');
-const stoneValue = document.querySelector('#stone strong');
-const goldValue = document.querySelector('#gold strong');
-const ironValue = document.querySelector('#iron strong');
-const clayValue = document.querySelector('#clay strong');
-const fiberValue = document.querySelector('#fiber strong');
-const connection = document.getElementById('connection');
-const tickValue = document.querySelector('#tick strong');
-const speedControls = document.getElementById('speed-controls');
-const selection = document.getElementById('selection');
-const buildingPopover = document.getElementById('building-popover');
-const buildingPopoverTitle = document.getElementById('building-popover-title');
-const buildingProducts = document.getElementById('building-products');
-const buildingJob = document.getElementById('building-job');
-const buildingJobLabel = document.getElementById('building-job-label');
-const buildingProgress = document.getElementById('building-progress');
-const buildingResearches = document.getElementById('building-researches');
-const researchActions = document.getElementById('research-actions');
-const buildButton = document.getElementById('build');
-const trainButton = document.getElementById('train-villager');
-const cancelButton = document.getElementById('cancel');
-const resetWorldButton = document.getElementById('reset-world');
-const placementHint = document.getElementById('placement');
-const toast = document.getElementById('toast');
-const laptopModeQuery = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
-const TILE = 80;
-const MIN_ZOOM = 0.35;
-const MAX_ZOOM = 2.5;
-const DRAG_THRESHOLD = 8;
-const sprites = {};
-const hits = [];
-const pointers = new Map();
-let groundLayer = null;
-let groundLayerKey = '';
-let cssWidth = 1;
-let cssHeight = 1;
-let dpr = 1;
-let selectedUnitIds = new Set();
-let selectedBuildingId = null;
+const mobile = matchMedia('(pointer: coarse)').matches;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.75 : 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.background = skyTexture();
+scene.fog = new THREE.Fog(0xcfe5f2, 26, 62);
+const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
+
+// Warm late-afternoon sun with a soft sky fill, like a lit tabletop model.
+scene.add(new THREE.HemisphereLight(0x9fc8ff, 0x8c7f6a, 1.25));
+const sun = new THREE.DirectionalLight(0xfff0d4, 3.0);
+sun.castShadow = true;
+sun.shadow.mapSize.setScalar(mobile ? 1024 : 2048);
+Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 });
+sun.shadow.bias = -0.0008;
+sun.shadow.radius = 4;
+sun.shadow.intensity = 0.8;
+sun.shadow.blurSamples = 12;
+sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+
+const terrain = createTerrain(scene);
+const effects = createEffects(scene, camera);
+const sky = createSky(scene);
+const tiltShift = createTiltShift(renderer);
+const view = createWorldView(scene, effects);
+const ghost = createBuildGhost(scene);
+const rig = createCameraRig(camera);
+const raycaster = new THREE.Raycaster();
+const pointerNdc = new THREE.Vector2();
+
+const selection = { units: new Set(), building: null };
+let world = null;
 let buildMode = false;
-let cameraReady = false;
-let receivedSnapshot = false;
-let toastTimer = 0;
-let gestureUsed = false;
-let pinch = null;
-let ws = null;
-let reconnectTimer = 0;
-let reconnectAttempt = 0;
-let requestSequence = 0;
-let lastSnapshotSequence = 0;
-let minimumSnapshotSequence = 0;
-let world = { width: 2400, height: 1600, cellSize: TILE, simulationSpeed: 1, wood: 0, food: 0, stone: 0, gold: 0, iron: 0, clay: 0, fiber: 0, terrain: [], units: [], resources: [], buildings: [] };
-let authoritativeWorld = world;
-const snapshotBuffer = window.SnapshotBuffer.createSnapshotBuffer();
-let tick = 0;
-const camera = { x: 0, y: 0, zoom: 0.8 };
-const pressedPanKeys = new Set();
-let previousFrameTime = null;
-let hoveredHit = null;
-let mousePosition = null;
-let selectionRectangle = null;
-const assetPaths = {
-  idle: '/assets/game/agent_idle.png',
-  walk1: '/assets/game/agent_walk_01.png',
-  walk2: '/assets/game/agent_walk_02.png',
-  walkDiagToward1: '/assets/game/agent_walk_diag_toward_01.png',
-  walkDiagToward2: '/assets/game/agent_walk_diag_toward_02.png',
-  walkDown1: '/assets/game/agent_walk_down_01.png',
-  walkDown2: '/assets/game/agent_walk_down_02.png',
-  walkUp1: '/assets/game/agent_walk_up_01.png',
-  walkUp2: '/assets/game/agent_walk_up_02.png',
-  gather: '/assets/game/agent_gather.png',
-  gatherWood1: '/assets/game/agent_gather_wood_01.png',
-  gatherWood2: '/assets/game/agent_gather_wood_02.png',
-  gatherFood1: '/assets/game/agent_gather_food_01.png',
-  gatherFood2: '/assets/game/agent_gather_food_02.png',
-  gatherStone1: '/assets/game/agent_gather_stone_01.png',
-  gatherStone2: '/assets/game/agent_gather_stone_02.png',
-  gatherGold1: '/assets/game/agent_gather_gold_01.png',
-  gatherGold2: '/assets/game/agent_gather_gold_02.png',
-  gatherIron1: '/assets/game/agent_gather_iron_01.png',
-  gatherIron2: '/assets/game/agent_gather_iron_02.png',
-  gatherClay1: '/assets/game/agent_gather_clay_01.png',
-  gatherClay2: '/assets/game/agent_gather_clay_02.png',
-  gatherFiber1: '/assets/game/agent_gather_fiber_01.png',
-  gatherFiber2: '/assets/game/agent_gather_fiber_02.png',
-  build: '/assets/game/agent_build.png',
-  tree: '/assets/game/resource_tree.png',
-  treeDepleted: '/assets/game/resource_tree_depleted.png',
-  berries: '/assets/game/resource_berries.png',
-  stone: '/assets/game/resource_stone.png',
-  building: '/assets/game/building_town_center.png',
-  meadow: '/assets/game/terrain_meadow.png',
-  forest: '/assets/game/terrain_forest.png',
-  prairie: '/assets/game/terrain_grassland.png',
-  highland: '/assets/game/terrain_highland.png',
-  wetland: '/assets/game/terrain_deep_forest.png',
-  scrubland: '/assets/game/terrain_scrub.png',
-  heath: '/assets/game/terrain_rock.png',
-  clayland: '/assets/game/terrain_dirt.png'
-};
-const biomeTextures = {
-  meadow: 'meadow', forest: 'forest', prairie: 'prairie', highland: 'highland',
-  wetland: 'wetland', scrubland: 'scrubland', heath: 'heath', clayland: 'clayland'
-};
-function loadSprite(name, url) {
-  const asset = { image: null, alphaBottom: 1 };
-  sprites[name] = asset;
-  const image = new Image();
-  image.onload = () => {
-    asset.image = image;
-    const sample = document.createElement('canvas');
-    sample.width = image.naturalWidth;
-    sample.height = image.naturalHeight;
-    const sampleContext = sample.getContext('2d');
-    sampleContext.drawImage(image, 0, 0);
-    const alpha = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
-    outer: for (let y = sample.height - 1; y >= 0; y -= 1) {
-      for (let x = 0; x < sample.width; x += 1) {
-        if (alpha[(y * sample.width + x) * 4 + 3]) {
-          asset.alphaBottom = (y + 1) / sample.height;
-          break outer;
-        }
-      }
+let cameraPlaced = false;
+
+const hud = createHud(renderer, {
+  onSpeed: multiplier => order({ type: 'set_simulation_speed', multiplier }),
+  onReset: async () => {
+    if (!confirm('Reset the world? All progress will be lost.')) return;
+    const response = await fetch('/reset', { method: 'POST' }).catch(() => null);
+    if (!response?.ok) hud.toast('The world could not be reset.');
+    selection.units.clear();
+    selection.building = null;
+  },
+  onTrain: () => order({ type: 'produce', building_id: selection.building, product: 'villager' }),
+  onResearch: technology => order({ type: 'research', building_id: selection.building, technology }),
+  onBuild: () => setBuildMode(true),
+  onCancel: () => setBuildMode(false),
+  onMinimap: ({ x, z }) => rig.lookAt(x, z)
+});
+
+const net = connect({
+  onStatus: online => hud.setConnection(online),
+  onSnapshot: next => {
+    world = next;
+    view.sync(world, performance.now());
+    terrain.update(world);
+    const present = new Set(world.units.map(unit => unit.id));
+    for (const id of selection.units) if (!present.has(id)) selection.units.delete(id);
+    if (selection.building && !world.buildings.some(b => b.id === selection.building)) selection.building = null;
+    if (!cameraPlaced && world.units.length) {
+      const sum = world.units.reduce((acc, unit) => ({ x: acc.x + unit.position.x, z: acc.z + unit.position.y }), { x: 0, z: 0 });
+      rig.lookAt(sum.x / world.units.length, sum.z / world.units.length - 1);
+      if (innerWidth < innerHeight) rig.zoom(1.4);
+      cameraPlaced = true;
     }
-    if (Object.prototype.hasOwnProperty.call(biomeTextures, name)) groundLayer = null;
-  };
-  image.onerror = () => { console.warn('Sprite failed to load', url); };
-  image.src = url;
-}
-Object.entries(assetPaths).forEach(([name, url]) => loadSprite(name, url));
-function rawProject(x, y) {
-  return { x: (x - y) / 2, y: (x + y) / 4 };
-}
-function project(x, y) {
-  const raw = rawProject(x, y);
-  return {
-    x: cssWidth / 2 + (raw.x - camera.x) * camera.zoom,
-    y: cssHeight * 0.42 + (raw.y - camera.y) * camera.zoom
-  };
-}
-function buildingPopoverAnchor(building, projectWorld, zoom) {
-  const ground = projectWorld(Number(building.x) || 0, Number(building.y) || 0);
-  return { x: ground.x, y: ground.y - 132 * Math.max(0, Number(zoom) || 0) };
-}
-function screenToRaw(x, y) {
-  return {
-    x: camera.x + (x - cssWidth / 2) / camera.zoom,
-    y: camera.y + (y - cssHeight * 0.42) / camera.zoom
-  };
-}
-function screenToWorld(x, y) {
-  const raw = screenToRaw(x, y);
-  return { x: raw.y * 2 + raw.x, y: raw.y * 2 - raw.x };
-}
-function centerCamera() {
-  const focus = world.units.length
-    ? world.units.reduce((sum, unit) => ({ x: sum.x + unit.x / world.units.length, y: sum.y + unit.y / world.units.length }), { x: 0, y: 0 })
-    : { x: world.width / 2, y: world.height / 2 };
-  const center = rawProject(focus.x, focus.y);
-  camera.x = center.x;
-  camera.y = center.y;
-  camera.zoom = Math.max(MIN_ZOOM, Math.min(1, cssWidth < 700 ? 0.55 : 0.8));
-  cameraReady = true;
-}
-function clampCamera() {
-  const corners = [rawProject(0, 0), rawProject(world.width, 0), rawProject(0, world.height), rawProject(world.width, world.height)];
-  const marginX = cssWidth * 0.35 / camera.zoom;
-  const marginY = cssHeight * 0.35 / camera.zoom;
-  camera.x = Math.max(Math.min(...corners.map(point => point.x)) - marginX, Math.min(Math.max(...corners.map(point => point.x)) + marginX, camera.x));
-  camera.y = Math.max(Math.min(...corners.map(point => point.y)) - marginY, Math.min(Math.max(...corners.map(point => point.y)) + marginY, camera.y));
-}
-function panCameraWithKeyboard(elapsedSeconds) {
-  if (!laptopModeQuery.matches || pressedPanKeys.size === 0) return;
-  let x = 0;
-  let y = 0;
-  if (pressedPanKeys.has('KeyA') || pressedPanKeys.has('ArrowLeft')) x -= 1;
-  if (pressedPanKeys.has('KeyD') || pressedPanKeys.has('ArrowRight')) x += 1;
-  if (pressedPanKeys.has('KeyW') || pressedPanKeys.has('ArrowUp')) y -= 1;
-  if (pressedPanKeys.has('KeyS') || pressedPanKeys.has('ArrowDown')) y += 1;
-  if (x === 0 && y === 0) return;
-  const length = Math.hypot(x, y);
-  const distance = 440 * Math.max(0, elapsedSeconds) / camera.zoom;
-  camera.x += x / length * distance;
-  camera.y += y / length * distance;
-  clampCamera();
-}
-function resize() {
-  const rect = canvas.getBoundingClientRect();
-  cssWidth = Math.max(1, rect.width);
-  cssHeight = Math.max(1, rect.height);
-  dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-  const width = Math.round(cssWidth * dpr);
-  const height = Math.round(cssHeight * dpr);
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
+    hud.update(world, selection, buildMode);
   }
-  if (!cameraReady) centerCamera();
-  else clampCamera();
-  positionBuildingPopover();
+});
+
+async function order(command) {
+  const result = await net.send(command);
+  if (!result.ok) hud.toast(result.error);
+  return result.ok;
 }
-function diamondPath(x, y, size) {
-  const a = project(x, y);
-  const b = project(x + size, y);
-  const c = project(x + size, y + size);
-  const d = project(x, y + size);
-  ctx.beginPath();
-  ctx.moveTo(a.x, a.y);
-  ctx.lineTo(b.x, b.y);
-  ctx.lineTo(c.x, c.y);
-  ctx.lineTo(d.x, d.y);
-  ctx.closePath();
-}
-function buildGroundLayer(columns, rows) {
-  const textures = Object.values(biomeTextures).map(name => sprites[name]);
-  if (textures.some(asset => !asset?.image) || world.terrain.length !== columns * rows) return null;
-  const key = world.terrain.map(cell => `${cell.biome}:${cell.visibility}`).join('|');
-  if (groundLayer && groundLayerKey === key) return groundLayer;
-  const sourceSize = 96;
-  const layer = document.createElement('canvas');
-  layer.width = columns * sourceSize;
-  layer.height = rows * sourceSize;
-  const layerContext = layer.getContext('2d', { alpha: false });
-  for (const cell of world.terrain) {
-    const left = cell.column * sourceSize;
-    const top = cell.row * sourceSize;
-    if (cell.visibility === 'unseen' || !cell.biome) {
-      layerContext.fillStyle = '#020504';
-      layerContext.fillRect(left, top, sourceSize, sourceSize);
-      continue;
-    }
-    layerContext.drawImage(sprites[biomeTextures[cell.biome]].image, left, top, sourceSize, sourceSize);
-    if (cell.visibility === 'explored') {
-      layerContext.fillStyle = '#08100bc4';
-      layerContext.fillRect(left, top, sourceSize, sourceSize);
-    }
-  }
-  groundLayer = layer;
-  groundLayerKey = key;
-  return layer;
-}
-function drawGround() {
-  const columns = Math.ceil(world.width / world.cellSize);
-  const rows = Math.ceil(world.height / world.cellSize);
-  const layer = buildGroundLayer(columns, rows);
-  if (layer) {
-    // Compose square tiles edge-to-edge first, then project the complete layer
-    // once. This keeps the isometric diamonds interlocked without per-tile
-    // antialiasing seams or overlap-based edge bleed.
-    const a = project(0, 0);
-    const b = project(columns * TILE, 0);
-    const d = project(0, rows * TILE);
-    ctx.save();
-    ctx.transform(
-      (b.x - a.x) / layer.width,
-      (b.y - a.y) / layer.width,
-      (d.x - a.x) / layer.height,
-      (d.y - a.y) / layer.height,
-      a.x,
-      a.y
-    );
-    ctx.drawImage(layer, 0, 0);
-    ctx.restore();
-    return;
-  }
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const x = column * world.cellSize;
-      const y = row * world.cellSize;
-      diamondPath(x, y, world.cellSize);
-      ctx.fillStyle = '#020504';
-      ctx.fill();
-    }
-  }
-}
-function drawGridOverlay() {
-  window.GridOverlay.draw(ctx, world, project, camera);
-}
-function drawConstructionSites() {
-  for (const unit of world.units) {
-    if (unit.action?.type !== 'build') continue;
-    const point = project(unit.action.x, unit.action.y);
-    const progress = Math.max(0, Math.min(1, Number(unit.action.work_seconds) / 4));
-    ctx.save();
-    ctx.translate(point.x, point.y);
-    ctx.globalAlpha = 0.35 + progress * 0.45;
-    ctx.fillStyle = '#c8a35d';
-    ctx.beginPath();
-    ctx.moveTo(0, -28 * camera.zoom);
-    ctx.lineTo(52 * camera.zoom, 0);
-    ctx.lineTo(0, 28 * camera.zoom);
-    ctx.lineTo(-52 * camera.zoom, 0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = '#f0cc75';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = '#171b12';
-    ctx.fillRect(-42 * camera.zoom, 34 * camera.zoom, 84 * camera.zoom, 5 * camera.zoom);
-    ctx.fillStyle = '#e6bd58';
-    ctx.fillRect(-42 * camera.zoom, 34 * camera.zoom, 84 * camera.zoom * progress, 5 * camera.zoom);
-    ctx.restore();
-  }
-}
-function spriteForUnit(unit, now) {
-  if (unit.state === 'gathering') {
-    const kind = String(unit.resourceKind || '');
-    const prefix = kind ? `gather${kind[0].toUpperCase()}${kind.slice(1)}` : '';
-    const frames = prefix ? [sprites[`${prefix}1`], sprites[`${prefix}2`]] : [];
-    if (frames.every(frame => frame?.image)) return frames[Math.floor(now / 260) % 2];
-    return sprites.gather;
-  }
-  if (unit.state === 'building') {
-    const frames = [sprites.build, sprites.idle];
-    return frames[Math.floor(now / 260) % frames.length];
-  }
-  if (unit.state === 'moving') {
-    const frames = unit.walkDirection === 'down'
-      ? [sprites.walkDown1, sprites.walkDown2]
-      : unit.walkDirection === 'up'
-        ? [sprites.walkUp1, sprites.walkUp2]
-        : unit.walkDirection === 'diag_toward'
-          ? [sprites.walkDiagToward1, sprites.walkDiagToward2]
-          : [sprites.walk1, sprites.walk2];
-    return frames[Math.floor(now / 190) % frames.length];
-  }
-  return sprites.idle;
-}
-function fallbackEntity(entity, type, point, scale) {
-  ctx.save();
-  ctx.translate(point.x, point.y);
-  if (type === 'unit') {
-    ctx.fillStyle = '#e6c273';
-    ctx.beginPath(); ctx.arc(0, -22 * scale, 12 * scale, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#31586b'; ctx.fillRect(-10 * scale, -14 * scale, 20 * scale, 28 * scale);
-  } else if (type === 'resource') {
-    if (entity.kind === 'food') {
-      ctx.fillStyle = '#6c8240'; ctx.beginPath(); ctx.arc(0, -18 * scale, 22 * scale, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#a94f58'; ctx.beginPath(); ctx.arc(-6 * scale, -20 * scale, 4 * scale, 0, Math.PI * 2); ctx.fill();
-    } else if (entity.kind === 'stone') {
-      ctx.fillStyle = '#69706a'; ctx.beginPath(); ctx.moveTo(-24 * scale, 0); ctx.lineTo(-12 * scale, -38 * scale); ctx.lineTo(10 * scale, -46 * scale); ctx.lineTo(26 * scale, 0); ctx.fill();
-    } else {
-      ctx.fillStyle = '#6a4328'; ctx.fillRect(-5 * scale, -30 * scale, 10 * scale, 32 * scale);
-      ctx.fillStyle = '#275a30'; ctx.beginPath(); ctx.arc(0, -42 * scale, 24 * scale, 0, Math.PI * 2); ctx.fill();
-    }
-  } else {
-    ctx.fillStyle = '#765639'; ctx.fillRect(-32 * scale, -38 * scale, 64 * scale, 38 * scale);
-    ctx.fillStyle = '#a56742'; ctx.beginPath(); ctx.moveTo(-38 * scale, -38 * scale); ctx.lineTo(0, -68 * scale); ctx.lineTo(38 * scale, -38 * scale); ctx.fill();
-  }
-  ctx.restore();
-}
-function visibilityAtWorldPosition(x, y) {
-  const column = Math.floor(x / world.cellSize);
-  const row = Math.floor(y / world.cellSize);
-  return world.terrain.find(cell => cell.column === column && cell.row === row)?.visibility || 'unseen';
-}
-function drawEntity(item, now) {
-  const projected = project(Number(item.data.x) || 0, Number(item.data.y) || 0);
-  const point = { x: projected.x + (Number(item.data.screenOffsetX) || 0) * camera.zoom, y: projected.y };
-  const villager = item.type === 'unit' || item.type === 'activity';
-  const resourceScales = item.data.kind === 'wood' ? [105, 112] : item.data.kind === 'food' ? [92, 78] : [100, 92];
-  const scales = item.type === 'building' ? [150, 145] : item.type === 'resource' ? resourceScales : item.type === 'activity' ? [106, 112] : [88, 94];
-  const width = scales[0] * camera.zoom;
-  const height = scales[1] * camera.zoom;
-  if (point.x < -width || point.x > cssWidth + width || point.y < -height || point.y > cssHeight + height) return;
-  const selected = (villager && selectedUnitIds.has(item.data.id))
-    || (item.type === 'building' && item.data.id === selectedBuildingId);
-  if (selected) {
-    const radius = item.type === 'building' ? 40 : 22;
-    ctx.beginPath();
-    ctx.ellipse(point.x, point.y, radius * camera.zoom, radius * 0.46 * camera.zoom, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#f6c74a35';
-    ctx.fill();
-    ctx.strokeStyle = '#070907e6';
-    ctx.lineWidth = Math.max(4, 5 * camera.zoom);
-    ctx.stroke();
-    ctx.strokeStyle = '#ffe073';
-    ctx.lineWidth = Math.max(2, 2.5 * camera.zoom);
-    ctx.stroke();
-  }
-  if (hoveredHit?.type === item.type && hoveredHit.data.id === item.data.id) {
-    ctx.beginPath();
-    ctx.ellipse(point.x, point.y, 29 * camera.zoom, 14 * camera.zoom, 0, 0, Math.PI * 2);
-    ctx.fillStyle = item.type === 'resource' ? '#8ed06a33' : '#ffe08a22';
-    ctx.fill();
-    ctx.strokeStyle = item.type === 'resource' ? '#9bdc76' : '#ffe08a';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-  const depletedResource = item.type === 'resource' && Number(item.data.amount) <= 0;
-  let asset;
-  if (villager) asset = spriteForUnit(item.data, now);
-  else if (item.type === 'building') asset = sprites.building;
-  else if (item.data.kind === 'wood') asset = depletedResource && sprites.treeDepleted?.image ? sprites.treeDepleted : sprites.tree;
-  else if (item.data.kind === 'food') asset = sprites.berries;
-  else asset = sprites.stone;
-  const remembered = item.type !== 'unit'
-    && visibilityAtWorldPosition(Number(item.data.x) || 0, Number(item.data.y) || 0) === 'explored';
-  ctx.save();
-  if (remembered) ctx.globalAlpha = 0.58;
-  if (depletedResource && item.data.kind !== 'wood') {
-    ctx.globalAlpha *= 0.48;
-    ctx.filter = 'grayscale(1) brightness(.65)';
-  }
-  if (asset && asset.image) {
-    const ratio = asset.image.width / asset.image.height;
-    const drawWidth = width * Math.min(1.35, Math.max(0.72, ratio));
-    const top = villager ? point.y - height * asset.alphaBottom : point.y - height * 0.88;
-    if (villager && item.data.walkFlip) {
-      ctx.save();
-      ctx.translate(point.x, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(asset.image, -drawWidth / 2, top, drawWidth, height);
-      ctx.restore();
-    } else {
-      ctx.drawImage(asset.image, point.x - drawWidth / 2, top, drawWidth, height);
-    }
-  } else {
-    fallbackEntity(item.data, item.type, point, camera.zoom);
-  }
-  ctx.restore();
-  const activeJob = item.type === 'building' ? (item.data.job || item.data.production) : null;
-  if (activeJob) {
-    const duration = activeJob.type === 'research' ? 8 : 6;
-    const progress = Math.max(0, Math.min(1, Number(activeJob.elapsed_seconds) / duration));
-    const barWidth = 78 * camera.zoom;
-    ctx.fillStyle = '#111b';
-    ctx.fillRect(point.x - barWidth / 2, point.y + 15 * camera.zoom, barWidth, 6 * camera.zoom);
-    ctx.fillStyle = '#e8bd51';
-    ctx.fillRect(point.x - barWidth / 2, point.y + 15 * camera.zoom, barWidth * progress, 6 * camera.zoom);
-  }
-  if (depletedResource) return;
-  hits.push({
-    type: item.type,
-    data: item.data,
-    left: point.x - width * 0.38,
-    top: point.y - height * 0.82,
-    right: point.x + width * 0.38,
-    bottom: point.y + height * 0.08
-  });
-}
-function render(now) {
-  requestAnimationFrame(render);
-  world = snapshotBuffer.presentation(now) || authoritativeWorld;
-  if (previousFrameTime !== null) panCameraWithKeyboard((now - previousFrameTime) / 1000);
-  previousFrameTime = now;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = '#020504';
-  ctx.fillRect(0, 0, cssWidth, cssHeight);
-  drawGround();
-  drawGridOverlay();
-  drawConstructionSites();
-  hits.length = 0;
-  ActivityPresentation.entities(world).forEach(item => drawEntity(item, now));
-  if (selectionRectangle) {
-    const rectangle = SelectionControls.normalizedRectangle(selectionRectangle.start, selectionRectangle.end);
-    ctx.fillStyle = '#f6c74a26';
-    ctx.fillRect(rectangle.left, rectangle.top, rectangle.right - rectangle.left, rectangle.bottom - rectangle.top);
-    ctx.strokeStyle = '#ffe073';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(rectangle.left, rectangle.top, rectangle.right - rectangle.left, rectangle.bottom - rectangle.top);
-  }
-  positionBuildingPopover();
-  if (mousePosition) updateCursor(mousePosition.x, mousePosition.y);
-}
-function showToast(message) {
-  window.clearTimeout(toastTimer);
-  toast.textContent = message;
-  toast.classList.add('visible');
-  toastTimer = window.setTimeout(() => toast.classList.remove('visible'), 2200);
-}
-function selectedUnit() {
-  return authoritativeWorld.units.find(unit => selectedUnitIds.has(unit.id)) || null;
-}
-function resolveSelectedBuilding(buildings, selectedId, visibilityAt) {
-  const building = buildings.find(item => item.id === selectedId) || null;
-  if (!building || visibilityAt(Number(building.x) || 0, Number(building.y) || 0) !== 'visible') return null;
-  return building;
-}
-function selectedBuilding() {
-  return resolveSelectedBuilding(authoritativeWorld.buildings, selectedBuildingId, visibilityAtWorldPosition);
-}
-function capabilityId(value) {
-  if (typeof value === 'string') return value;
-  return value?.id || value?.kind || value?.product || value?.technology || '';
-}
-function buildingCapabilityView(building) {
-  const list = value => Array.isArray(value) ? value.map(capabilityId).filter(Boolean) : [];
-  const products = list(building?.produces);
-  const researches = list(building?.researches);
-  const researched = list(building?.researched_technologies);
-  const rawJob = building?.job || building?.active_job || building?.production || null;
-  if (!rawJob) return { products, researches, researched, job: null };
-  const product = capabilityId(rawJob.product);
-  const technology = capabilityId(rawJob.technology);
-  const type = rawJob.type || rawJob.kind || (technology ? 'research' : 'produce');
-  const subject = product || technology || capabilityId(rawJob.item ?? rawJob.target) || 'task';
-  const duration = Math.max(0, Number(rawJob.required_seconds ?? rawJob.duration_seconds ?? rawJob.total_seconds) || (subject === 'villager' ? 6 : String(type).includes('research') ? 8 : 0));
-  const elapsed = Math.max(0, Number(rawJob.elapsed_seconds ?? rawJob.elapsed ?? rawJob.progress_seconds) || 0);
-  const explicit = rawJob.progress == null ? NaN : Number(rawJob.progress);
-  const fraction = Number.isFinite(explicit) ? (explicit > 1 ? explicit / 100 : explicit) : (duration > 0 ? elapsed / duration : 0);
-  return { products, researches, researched, job: { type, subject, progress: Math.max(0, Math.min(1, fraction)) } };
-}
-function capabilityLabel(value) {
-  return String(value || 'task').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase());
-}
-function positionBuildingPopover() {
-  const building = selectedBuilding();
-  if (!building) {
-    buildingPopover.hidden = true;
-    return;
-  }
-  if (buildingPopover.hidden) return;
-  const anchor = buildingPopoverAnchor(building, project, camera.zoom);
-  buildingPopover.style.left = `${anchor.x}px`;
-  buildingPopover.style.top = `${anchor.y}px`;
-}
-function updateBuildingPopover(building) {
-  buildingPopover.hidden = !building;
-  if (!building) return;
-  const view = buildingCapabilityView(building);
-  const job = view.job;
-  buildingPopoverTitle.textContent = building.kind === 'town_center' ? 'Town Center' : capabilityLabel(building.kind);
-  buildingProducts.textContent = `Produces: ${view.products.map(capabilityLabel).join(', ') || 'Nothing'}`;
-  buildingJob.hidden = !job;
-  if (job) {
-    const verb = String(job.type).includes('research') ? 'Researching' : 'Producing';
-    const percent = Math.floor(job.progress * 100);
-    buildingJobLabel.textContent = `${verb} ${capabilityLabel(job.subject)} · ${percent}%`;
-    buildingProgress.value = job.progress;
-    buildingProgress.setAttribute('aria-label', `${verb} ${capabilityLabel(job.subject)} progress`);
-  }
-  const researchText = [];
-  if (view.researches.length) researchText.push(`Researches: ${view.researches.map(capabilityLabel).join(', ')}`);
-  if (view.researched.length) researchText.push(`Researched: ${view.researched.map(capabilityLabel).join(', ')}`);
-  buildingResearches.hidden = researchText.length === 0;
-  buildingResearches.textContent = researchText.join(' · ');
-  researchActions.replaceChildren();
-  const prerequisites = { mining: 'masonry', textiles: 'agriculture' };
-  for (const technology of view.researches.filter(item => !view.researched.includes(item))) {
-    const button = document.createElement('button');
-    const prerequisite = prerequisites[technology];
-    button.type = 'button';
-    button.dataset.tech = technology;
-    button.textContent = `${capabilityLabel(technology)} · 40 food, 20 wood`;
-    button.disabled = Boolean(job) || world.food < 40 || world.wood < 20 || Boolean(prerequisite && !view.researched.includes(prerequisite));
-    researchActions.append(button);
-  }
-  trainButton.hidden = !view.products.includes('villager');
-  trainButton.disabled = Boolean(job) || world.food < 50;
-  trainButton.title = job ? 'Town center is already busy' : world.food < 50 ? 'Train villager (50 food required)' : 'Train villager (50 food)';
-  positionBuildingPopover();
-}
-function updateHud() {
-  tickValue.textContent = String(tick);
-  woodValue.textContent = String(Math.floor(world.wood ?? 0));
-  foodValue.textContent = String(Math.floor(world.food ?? 0));
-  stoneValue.textContent = String(Math.floor(world.stone ?? 0));
-  goldValue.textContent = String(Math.floor(world.gold ?? 0));
-  ironValue.textContent = String(Math.floor(world.iron ?? 0));
-  clayValue.textContent = String(Math.floor(world.clay ?? 0));
-  fiberValue.textContent = String(Math.floor(world.fiber ?? 0));
-  for (const button of speedControls.querySelectorAll('button')) button.classList.toggle('active', Number(button.dataset.speed) === world.simulationSpeed);
-  selectedUnitIds = SelectionControls.reconcile(selectedUnitIds, authoritativeWorld.units);
-  const unit = selectedUnit();
-  const building = selectedBuilding();
-  if (!building) selectedBuildingId = null;
-  buildButton.disabled = !unit;
-  updateBuildingPopover(building);
-  if (selectedUnitIds.size > 1) {
-    selection.className = '';
-    selection.replaceChildren();
-    const name = document.createElement('strong');
-    name.textContent = `${selectedUnitIds.size} villagers selected`;
-    const status = document.createElement('span');
-    status.textContent = 'Tap ground to move group · long-press villagers to add or remove on touch';
-    selection.append(name, status);
-    return;
-  }
-  if (unit) {
-    selection.className = '';
-    selection.replaceChildren();
-    const name = document.createElement('strong');
-    name.textContent = unit.name || `Villager ${unit.id}`;
-    const status = document.createElement('span');
-    const cargo = unit.cargo ? ` · carrying ${Math.floor(unit.cargo.amount)}/${20} ${unit.cargo.kind}` : '';
-    status.textContent = `${unit.state || 'idle'}${cargo} · tick ${tick}`;
-    selection.append(name, status);
-    return;
-  }
-  if (building) {
-    if (buildMode) cancelBuild();
-    selection.className = '';
-    selection.replaceChildren();
-    const name = document.createElement('strong');
-    name.textContent = building.kind === 'town_center' ? 'Town Center' : building.id;
-    const status = document.createElement('span');
-    status.textContent = 'Capabilities shown above building';
-    selection.append(name, status);
-    return;
-  }
-  selection.className = 'empty';
-  selection.textContent = 'Tap a villager or town center';
-  if (buildMode) cancelBuild();
-}
+
 function setBuildMode(enabled) {
-  buildMode = enabled && Boolean(selectedUnit());
-  buildButton.classList.toggle('active', buildMode);
-  cancelButton.classList.toggle('visible', buildMode);
-  placementHint.classList.toggle('visible', buildMode);
-  updateCursor();
+  buildMode = enabled && selection.units.size > 0;
+  uniforms.uGrid.value = buildMode ? 1 : 0;
+  if (!buildMode) ghost.hide();
+  if (world) hud.update(world, selection, buildMode);
 }
-function cancelBuild() {
-  setBuildMode(false);
+
+function cellKey(column, row) {
+  return `${column},${row}`;
 }
-function sendCommand(command) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    showToast('Not connected');
-    return false;
+
+// Cells the client knows are taken; used only to preview placement and to keep
+// decorations off resources and buildings. The server re-validates everything.
+function blockedCells(snapshot, includeUnits) {
+  const blocked = new Set();
+  for (const resource of snapshot.resources) if (resource.amount > 0) blocked.add(cellKey(resource.cell.column, resource.cell.row));
+  for (const building of snapshot.buildings) {
+    for (let dz = 0; dz < building.rows; dz += 1) {
+      for (let dx = 0; dx < building.columns; dx += 1) blocked.add(cellKey(building.origin.column + dx, building.origin.row + dz));
+    }
   }
-  const requestId = `${Date.now().toString(36)}-${(++requestSequence).toString(36)}`;
-  ws.send(JSON.stringify({ type: 'command', request_id: requestId, command }));
+  if (includeUnits) {
+    for (const unit of snapshot.units) {
+      blocked.add(cellKey(unit.cell.column, unit.cell.row));
+      if (unit.step) blocked.add(cellKey(unit.step.to.column, unit.step.to.row));
+      if (unit.action.type === 'move') blocked.add(cellKey(unit.action.to.column, unit.action.to.row));
+    }
+  }
+  return blocked;
+}
+
+function buildOrigin(point) {
+  return { column: Math.round(point.x) - 1, row: Math.round(point.z) - 1 };
+}
+
+function siteLooksFree(origin) {
+  const blocked = blockedCells(world, true);
+  for (let dz = 0; dz < 2; dz += 1) {
+    for (let dx = 0; dx < 2; dx += 1) {
+      const column = origin.column + dx;
+      const row = origin.row + dz;
+      if (column < 0 || row < 0 || column >= MAP.columns || row >= MAP.rows) return false;
+      if (blocked.has(cellKey(column, row)) || world.terrain[row * MAP.columns + column].visibility === 'unseen') return false;
+    }
+  }
   return true;
 }
-function hitAt(x, y) {
-  for (let i = hits.length - 1; i >= 0; i -= 1) {
-    const hit = hits[i];
-    if (x >= hit.left && x <= hit.right && y >= hit.top && y <= hit.bottom) return hit;
-  }
-  return null;
+
+function pick(x, y) {
+  pointerNdc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1);
+  raycaster.setFromCamera(pointerNdc, camera);
+  // Villagers win over the buildings and props they stand beside.
+  const hits = raycaster.intersectObjects(view.pickables(), false);
+  const hit = hits.find(h => h.object.userData.pick.type === 'unit') || hits[0];
+  if (hit) return hit.object.userData.pick;
+  const point = rig.groundAt(x, y);
+  if (!point || point.x < 0 || point.z < 0 || point.x >= MAP.columns || point.z >= MAP.rows) return null;
+  // A tap on an occupied cell means its occupant, even if the model was missed.
+  const cell = { column: Math.floor(point.x), row: Math.floor(point.z) };
+  const resource = world.resources.find(r => r.amount > 0 && r.cell.column === cell.column && r.cell.row === cell.row);
+  if (resource) return { type: 'resource', id: resource.id };
+  const building = world.buildings.find(b => cell.column >= b.origin.column && cell.column < b.origin.column + b.columns &&
+    cell.row >= b.origin.row && cell.row < b.origin.row + b.rows);
+  if (building) return { type: 'building', id: building.id };
+  return { type: 'ground', point, cell };
 }
-function updateCursor(x, y) {
-  if (Number.isFinite(x) && Number.isFinite(y)) {
-    mousePosition = { x, y };
-    hoveredHit = hitAt(x, y);
-  }
-  if (buildMode) canvas.style.cursor = 'crosshair';
-  else if (laptopModeQuery.matches && (['unit', 'activity', 'resource', 'building'].includes(hoveredHit?.type) || selectedUnit())) canvas.style.cursor = 'pointer';
-  else canvas.style.cursor = laptopModeQuery.matches ? 'grab' : '';
+
+function idleSelected() {
+  return world.units.filter(unit => selection.units.has(unit.id) && unit.action.type === 'idle').map(unit => unit.id);
 }
-function handleTap(x, y, additive = false) {
-  const hit = hitAt(x, y);
-  if (buildMode) {
-    const ground = screenToWorld(x, y);
-    if (ground.x < 0 || ground.y < 0 || ground.x > world.width || ground.y > world.height) {
-      showToast('Choose ground inside the map');
-      return;
-    }
-    const unit = selectedUnit();
-    if (unit && sendCommand({ type: 'build', unit_id: unit.id, x: ground.x, y: ground.y })) cancelBuild();
+
+async function orderEach(unitIds, makeCommand, marker) {
+  const results = await Promise.all(unitIds.map(id => net.send(makeCommand(id))));
+  const failure = results.find(result => !result.ok);
+  if (failure) hud.toast(failure.error);
+  if (results.some(result => result.ok) && marker) view.markTarget(marker.x, marker.z, marker.color, uniforms.uTime.value);
+}
+
+function commandSelection(hit) {
+  const idle = idleSelected();
+  if (idle.length === 0) {
+    hud.toast('unit is busy');
     return;
   }
-  if (!hit) {
-    if (selectedBuildingId) {
-      selectedBuildingId = null;
-      updateHud();
-      return;
-    }
-    const unit = selectedUnit();
-    if (!unit) return;
-    const ground = screenToWorld(x, y);
-    if (ground.x < 0 || ground.y < 0 || ground.x > world.width || ground.y > world.height) return;
-    if (selectedUnitIds.size > 1) sendCommand({ type: 'group_move', unit_ids: [...selectedUnitIds], x: ground.x, y: ground.y });
-    else sendCommand({ type: 'move', unit_id: unit.id, x: ground.x, y: ground.y });
-    return;
-  }
-  if (hit.type === 'activity') {
-    const unit = selectedUnit();
-    const resource = hit.data.activityResource;
-    if (unit?.state === 'idle' && resource && unit.id !== hit.data.id) {
-      sendCommand({ type: 'gather', unit_id: unit.id, resource_id: resource.id });
-    } else {
-      selectedUnitIds = SelectionControls.update(selectedUnitIds, hit.data.id, additive);
-      selectedBuildingId = null;
-      updateHud();
-    }
-  } else if (hit.type === 'unit') {
-    selectedUnitIds = SelectionControls.update(selectedUnitIds, hit.data.id, additive);
-    selectedBuildingId = null;
-    updateHud();
-  } else if (hit.type === 'resource') {
-    if (Number(hit.data.amount) <= 0) return;
-    const unit = selectedUnit();
-    if (unit) sendCommand({ type: 'gather', unit_id: unit.id, resource_id: hit.data.id });
-    else showToast('Select an agent first');
+  if (idle.length < selection.units.size) hud.toast(`${selection.units.size - idle.length} busy villager(s) kept working.`);
+  if (hit.type === 'resource') {
+    const resource = world.resources.find(r => r.id === hit.id);
+    orderEach(idle, unit_id => ({ type: 'gather', unit_id, resource_id: hit.id }),
+      { x: resource.cell.column + 0.5, z: resource.cell.row + 0.5, color: 0xffd36a });
   } else if (hit.type === 'building') {
-    selectedBuildingId = hit.data.id;
-    selectedUnitIds.clear();
-    cancelBuild();
-    updateHud();
-  }
-}
-function pointerDistance(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-function pointerMidpoint(a, b) {
-  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-}
-function beginPinch() {
-  const pair = [...pointers.values()].slice(0, 2);
-  const middle = pointerMidpoint(pair[0], pair[1]);
-  pinch = {
-    distance: Math.max(1, pointerDistance(pair[0], pair[1])),
-    zoom: camera.zoom,
-    anchor: screenToRaw(middle.x, middle.y)
-  };
-  selectionRectangle = null;
-  gestureUsed = true;
-}
-function onPointerDown(event) {
-  if (event.pointerType === 'mouse' && event.button !== 0) return;
-  event.preventDefault();
-  canvas.setPointerCapture(event.pointerId);
-  pointers.set(event.pointerId, SelectionControls.beginPointer(event.pointerType, event.shiftKey, !hitAt(event.clientX, event.clientY), buildMode, event.clientX, event.clientY));
-  if (pointers.size === 1) gestureUsed = false;
-  if (pointers.size === 2) beginPinch();
-}
-function onPointerMove(event) {
-  const pointer = pointers.get(event.pointerId);
-  if (!pointer) {
-    if (event.pointerType === 'mouse') updateCursor(event.clientX, event.clientY);
-    return;
-  }
-  event.preventDefault();
-  const pointerMode = SelectionControls.movePointer(pointer, event.clientX, event.clientY, DRAG_THRESHOLD);
-  if (pointers.size >= 2) {
-    if (!pinch) beginPinch();
-    const pair = [...pointers.values()].slice(0, 2);
-    const middle = pointerMidpoint(pair[0], pair[1]);
-    const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinch.zoom * pointerDistance(pair[0], pair[1]) / pinch.distance));
-    camera.zoom = nextZoom;
-    camera.x = pinch.anchor.x - (middle.x - cssWidth / 2) / nextZoom;
-    camera.y = pinch.anchor.y - (middle.y - cssHeight * 0.42) / nextZoom;
-    clampCamera();
+    const building = world.buildings.find(b => b.id === hit.id);
+    orderEach(idle, unit_id => ({ type: 'construct', unit_id, building_id: hit.id }),
+      { x: building.origin.column + 1, z: building.origin.row + 1, color: 0xffd36a });
   } else {
-    if (pointerMode === 'box') {
-      selectionRectangle = { start: { x: pointer.startX, y: pointer.startY }, end: { x: pointer.x, y: pointer.y } };
-      gestureUsed = true;
-    } else if (pointerMode === 'pan') {
-      camera.x -= (pointer.x - pointer.lastX) / camera.zoom;
-      camera.y -= (pointer.y - pointer.lastY) / camera.zoom;
-      clampCamera();
-      gestureUsed = true;
+    const command = idle.length === 1
+      ? { type: 'move', unit_id: idle[0], to: hit.cell }
+      : { type: 'group_move', unit_ids: idle, to: hit.cell };
+    order(command).then(ok => {
+      view.markTarget(hit.cell.column + 0.5, hit.cell.row + 0.5, ok ? 0x9fe07a : 0xe0604a, uniforms.uTime.value);
+    });
+  }
+}
+
+function tap(x, y, additive) {
+  if (!world) return;
+  if (buildMode) {
+    // Placement aims at the ground under the pointer; the server judges the site.
+    const point = rig.groundAt(x, y);
+    if (!point) return;
+    const [builder] = idleSelected();
+    if (!builder) {
+      hud.toast('unit is busy');
+      return;
     }
-  }
-  pointer.lastX = pointer.x;
-  pointer.lastY = pointer.y;
-}
-function onPointerLeave(event) {
-  if (event.pointerType !== 'mouse') return;
-  mousePosition = null;
-  hoveredHit = null;
-  updateCursor();
-}
-function finishPointer(event, cancelled) {
-  const pointer = pointers.get(event.pointerId);
-  if (!pointer) return;
-  const wasSingle = pointers.size === 1;
-  pointers.delete(event.pointerId);
-  if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-  const result = SelectionControls.finishPointer(pointer, cancelled, DRAG_THRESHOLD);
-  if (result === 'box' && selectionRectangle) {
-    const rectangle = SelectionControls.normalizedRectangle(selectionRectangle.start, selectionRectangle.end);
-    const enclosed = SelectionControls.enclosedUnitIds(authoritativeWorld.units, rectangle, project);
-    selectedUnitIds = pointer.additive ? new Set([...selectedUnitIds, ...enclosed]) : new Set(enclosed);
-    selectedBuildingId = null;
-    updateHud();
-  }
-  selectionRectangle = null;
-  if (result === 'tap' && wasSingle && !gestureUsed) {
-    const additive = SelectionControls.additiveTap(pointer.pointerType, pointer.shiftKey, Date.now() - pointer.startedAt);
-    handleTap(pointer.x, pointer.y, additive);
-  }
-  if (pointers.size < 2) {
-    pinch = null;
-    const remaining = pointers.values().next().value;
-    if (remaining) remaining.dragging = true;
-  }
-}
-function zoomAt(x, y, factor) {
-  const anchor = screenToRaw(x, y);
-  const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, camera.zoom * factor));
-  camera.zoom = next;
-  camera.x = anchor.x - (x - cssWidth / 2) / next;
-  camera.y = anchor.y - (y - cssHeight * 0.42) / next;
-  clampCamera();
-}
-function shortcutTargetIsInteractive(target) {
-  return target instanceof Element && Boolean(target.closest('input, textarea, select, button, summary, a[href], [contenteditable], [role="button"], [role="textbox"]'));
-}
-function clearPanInput() {
-  pressedPanKeys.clear();
-}
-function onKeyDown(event) {
-  if (!laptopModeQuery.matches || shortcutTargetIsInteractive(event.target) || event.ctrlKey || event.metaKey || event.altKey) {
-    clearPanInput();
+    const origin = buildOrigin(point);
+    order({ type: 'build', unit_id: builder, origin }).then(ok => { if (ok) setBuildMode(false); });
     return;
   }
-  if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(event.code)) {
-    pressedPanKeys.add(event.code);
-    event.preventDefault();
-  } else if (event.code === 'KeyB' && !event.repeat && selectedUnit()) {
-    setBuildMode(true);
-    event.preventDefault();
-  } else if (event.key === 'Escape' && buildMode) {
-    cancelBuild();
-    event.preventDefault();
-  }
-}
-function onKeyUp(event) {
-  pressedPanKeys.delete(event.code);
-}
-function updateLaptopMode() {
-  clearPanInput();
-  placementHint.textContent = laptopModeQuery.matches ? 'Click ground to build · Escape to cancel' : 'Tap ground to build · Escape to cancel';
-  updateCursor();
-}
-function connect() {
-  window.clearTimeout(reconnectTimer);
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
-  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const socket = new WebSocket(`${protocol}//${location.host}/ws`);
-  ws = socket;
-  connection.className = '';
-  connection.textContent = 'Connecting';
-  socket.onopen = () => {
-    if (ws !== socket) return;
-    reconnectAttempt = 0;
-    lastSnapshotSequence = 0;
-    minimumSnapshotSequence = 0;
-    snapshotBuffer.clear();
-    connection.className = 'online';
-    connection.textContent = 'Connected';
-  };
-  socket.onmessage = event => {
-    try {
-      const message = JSON.parse(event.data);
-      if (message.type === 'snapshot' && message.world) {
-        const sequence = Number(message.sequence) || 0;
-        if (sequence < minimumSnapshotSequence || sequence <= lastSnapshotSequence) return;
-        lastSnapshotSequence = sequence;
-        const next = message.world;
-        const withPosition = item => ({
-          ...item,
-          x: Number(item.position?.x) || 0,
-          y: Number(item.position?.y) || 0
-        });
-        const presentationWorld = {
-          resources: Array.isArray(next.resources) ? next.resources : [],
-          buildings: Array.isArray(next.buildings) ? next.buildings : []
-        };
-        const normalizedWorld = {
-          width: Number(next.width) || 2400,
-          height: Number(next.height) || 1600,
-          cellSize: Number(next.cell_size) || TILE,
-          simulationSpeed: Number.isFinite(Number(next.simulation_speed)) ? Number(next.simulation_speed) : 1,
-          wood: Number(next.stockpile?.wood) || 0,
-          food: Number(next.stockpile?.food) || 0,
-          stone: Number(next.stockpile?.stone) || 0,
-          gold: Number(next.stockpile?.gold) || 0,
-          iron: Number(next.stockpile?.iron) || 0,
-          clay: Number(next.stockpile?.clay) || 0,
-          fiber: Number(next.stockpile?.fiber) || 0,
-          terrain: Array.isArray(next.terrain) ? next.terrain : [],
-          units: Array.isArray(next.units) ? next.units.map(unit => ActivityPresentation.presentUnit(unit, presentationWorld)) : [],
-          resources: Array.isArray(next.resources) ? next.resources.map(withPosition) : [],
-          buildings: Array.isArray(next.buildings) ? next.buildings.map(building => ({ ...withPosition(building), researched_technologies: next.researched_technologies || [] })) : []
-        };
-        snapshotBuffer.push(sequence, normalizedWorld, performance.now());
-        authoritativeWorld = normalizedWorld;
-        world = normalizedWorld;
-        tick = Number(next.tick) || 0;
-        if (!receivedSnapshot) {
-          centerCamera();
-          receivedSnapshot = true;
-        }
-        updateHud();
-      } else if (message.type === 'command_result') {
-        const failed = message.ok === false || message.success === false || message.error;
-        if (!failed) minimumSnapshotSequence = Math.max(minimumSnapshotSequence, Number(message.applied_sequence) || 0);
-        showToast(failed ? (message.error || message.message || 'Command failed') : (message.message || 'Command accepted'));
-      }
-    } catch (error) {
-      console.warn('Ignored invalid server message', error);
+  const hit = pick(x, y);
+  if (!hit) return;
+  if (hit.type === 'unit') {
+    selection.building = null;
+    if (additive) {
+      if (selection.units.has(hit.id)) selection.units.delete(hit.id);
+      else selection.units.add(hit.id);
+    } else {
+      selection.units = new Set([hit.id]);
     }
-  };
-  socket.onerror = () => socket.close();
-  socket.onclose = () => {
-    if (ws !== socket) return;
-    ws = null;
-    connection.className = '';
-    connection.textContent = 'Reconnecting';
-    const delay = Math.min(15000, 700 * (2 ** reconnectAttempt)) * (0.8 + Math.random() * 0.4);
-    reconnectAttempt = Math.min(reconnectAttempt + 1, 6);
-    reconnectTimer = window.setTimeout(connect, delay);
-  };
-}
-async function resetWorld() {
-  if (!window.confirm('Reset the entire world? All progress will be lost.')) return;
-  resetWorldButton.disabled = true;
-  try {
-    const response = await fetch('/reset', { method: 'POST' });
-    if (!response.ok) throw new Error(await response.text() || `Reset failed (${response.status})`);
-    selectedUnitIds.clear();
-    selectedBuildingId = null;
-    cancelBuild();
-    updateHud();
-    showToast('World reset');
-  } catch (error) {
-    showToast(error instanceof Error ? error.message : 'World reset failed');
-  } finally {
-    resetWorldButton.disabled = false;
+  } else if (selection.units.size && (hit.type === 'resource' || hit.type === 'ground' ||
+    (hit.type === 'building' && world.buildings.find(b => b.id === hit.id)?.construction !== null))) {
+    commandSelection(hit);
+  } else if (hit.type === 'building') {
+    selection.units.clear();
+    selection.building = hit.id;
+  } else if (hit.type === 'ground') {
+    selection.building = null;
   }
+  hud.update(world, selection, buildMode);
 }
-buildButton.addEventListener('click', () => setBuildMode(!buildMode));
-trainButton.addEventListener('click', () => {
-  const building = selectedBuilding();
-  if (building) sendCommand({ type: 'produce', building_id: building.id, product: 'villager' });
+
+const projected = new THREE.Vector3();
+const controls = bindPointer(canvas, rig, {
+  tap,
+  ui: hud.pointer,
+  boxDraw: area => hud.box(area),
+  boxSelect(rect) {
+    if (!world) return;
+    const chosen = view.unitPositions().filter(({ position }) => {
+      projected.copy(position).setY(position.y + 0.3).project(camera);
+      const sx = (projected.x + 1) / 2 * innerWidth;
+      const sy = (1 - projected.y) / 2 * innerHeight;
+      return sx >= rect.left && sx <= rect.right && sy >= rect.top && sy <= rect.bottom;
+    });
+    selection.units = new Set(chosen.map(entry => entry.id));
+    selection.building = null;
+    hud.update(world, selection, buildMode);
+  },
+  hover(x, y) {
+    if (!world) return;
+    if (buildMode) {
+      const point = rig.groundAt(x, y);
+      if (point) {
+        const origin = buildOrigin(point);
+        ghost.show(origin, siteLooksFree(origin));
+      }
+      canvas.style.cursor = 'crosshair';
+      return;
+    }
+    const hit = pick(x, y);
+    canvas.style.cursor = hit && hit.type !== 'ground' ? 'pointer' : 'default';
+  },
+  key(event) {
+    if (event.code === 'Escape') {
+      if (buildMode) setBuildMode(false);
+      else {
+        selection.units.clear();
+        selection.building = null;
+        if (world) hud.update(world, selection, buildMode);
+      }
+    }
+    if (event.code === 'KeyB' && (buildMode || hud.canBuild())) setBuildMode(!buildMode);
+  }
 });
-researchActions.addEventListener('click', event => {
-  const technology = event.target.closest('button[data-tech]')?.dataset.tech;
-  const building = selectedBuilding();
-  if (technology && building) sendCommand({ type: 'research', building_id: building.id, technology });
-});
-speedControls.addEventListener('click', event => {
-  const multiplier = Number(event.target.closest('button[data-speed]')?.dataset.speed);
-  if (Number.isFinite(multiplier)) sendCommand({ type: 'set_simulation_speed', multiplier });
-});
-cancelButton.addEventListener('click', cancelBuild);
-resetWorldButton.addEventListener('click', resetWorld);
-canvas.addEventListener('pointerdown', onPointerDown);
-canvas.addEventListener('pointermove', onPointerMove);
-canvas.addEventListener('pointerleave', onPointerLeave);
-canvas.addEventListener('pointerup', event => finishPointer(event, false));
-canvas.addEventListener('pointercancel', event => finishPointer(event, true));
-canvas.addEventListener('contextmenu', event => event.preventDefault());
-canvas.addEventListener('wheel', event => {
-  event.preventDefault();
-  zoomAt(event.clientX, event.clientY, Math.exp(-event.deltaY * 0.0012));
-}, { passive: false });
-window.addEventListener('keydown', onKeyDown);
-window.addEventListener('keyup', onKeyUp);
-window.addEventListener('blur', clearPanInput);
-document.addEventListener('focusin', clearPanInput);
-laptopModeQuery.addEventListener('change', updateLaptopMode);
-window.addEventListener('online', connect);
-document.addEventListener('visibilitychange', () => {
-  clearPanInput();
-  if (!document.hidden && (!ws || ws.readyState > WebSocket.OPEN)) connect();
-});
-new ResizeObserver(resize).observe(canvas);
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  hud.resize(innerWidth, innerHeight, renderer.getPixelRatio());
+  tiltShift.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  // Portrait phones need a wider lens to see a useful slice of the island.
+  camera.fov = camera.aspect < 1 ? 52 : 36;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
 resize();
-updateLaptopMode();
-updateHud();
-connect();
-requestAnimationFrame(render);
+
+function skyTexture() {
+  const sky = document.createElement('canvas');
+  sky.width = 2;
+  sky.height = 256;
+  const context = sky.getContext('2d');
+  const gradient = context.createLinearGradient(0, 0, 0, 256);
+  gradient.addColorStop(0, '#3a8ad4');
+  gradient.addColorStop(0.45, '#79bde9');
+  gradient.addColorStop(0.8, '#cfe8f4');
+  gradient.addColorStop(1, '#f4ecd6');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 2, 256);
+  const texture = new THREE.CanvasTexture(sky);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+// Read-only hook for automated browser checks: where an entity is on screen.
+window.ageOfAgents = {
+  get world() { return world; },
+  screenOf(x, z, lift = 0.3) {
+    projected.set(x, lift, z).project(camera);
+    return { x: (projected.x + 1) / 2 * innerWidth, y: (1 - projected.y) / 2 * innerHeight };
+  },
+  lookAt: (x, z) => rig.lookAt(x, z),
+  get target() { return { x: rig.target.x, z: rig.target.z }; },
+  unitPositions: () => view.unitPositions().map(u => ({ id: u.id, x: u.position.x, z: u.position.z }))
+};
+
+const viewCorners = [[0, 0], [1, 0], [1, 1], [0, 1]];
+let previous = performance.now();
+let minimapAt = 0;
+renderer.setAnimationLoop(now => {
+  const dt = Math.min(0.1, (now - previous) / 1000);
+  previous = now;
+  const time = now / 1000;
+  uniforms.uTime.value = time;
+  controls.update(dt);
+  rig.update(dt);
+  scene.fog.near = rig.state.distance + 8;
+  scene.fog.far = rig.state.distance * 2 + 60;
+  uniforms.uCurve.value = THREE.MathUtils.smoothstep(rig.state.distance, 24, 70) * 0.014;
+  uniforms.uCurveCenter.value.set(rig.target.x, rig.target.z);
+  // Shadow maps are not bent with the world, so the planet view goes without.
+  sun.castShadow = uniforms.uCurve.value < 0.0005;
+  sun.position.set(rig.target.x - 11, 15, rig.target.z + 7);
+  sun.target.position.copy(rig.target);
+  view.frame(now, time, dt, selection);
+  effects.update(dt);
+  sky.update(time);
+  if (world && now > minimapAt) {
+    minimapAt = now + 200;
+    hud.minimap(viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));
+  }
+  tiltShift.render(scene, camera);
+  hud.render(now);
+});

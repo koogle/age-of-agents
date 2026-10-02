@@ -15,13 +15,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 APP_NAME = "age-of-agents"
 BASE_URL = "https://koogle-frick--age-of-agents-web.modal.run"
-DIRECTIONAL_ASSETS = (
-    "agent_walk_diag_toward_01.png",
-    "agent_walk_diag_toward_02.png",
-    "agent_walk_down_01.png",
-    "agent_walk_down_02.png",
-    "agent_walk_up_01.png",
-    "agent_walk_up_02.png",
+FRONTEND_FILES = (
+    "app.js",
+    "controls.js",
+    "effects.js",
+    "ground-paint.js",
+    "hud.css",
+    "hud.js",
+    "materials.js",
+    "models.js",
+    "net.js",
+    "terrain.js",
+    "world-view.js",
+    "vendor/three.min.js",
+    "vendor/GLTFLoader.js",
+    "vendor/BufferGeometryUtils.js",
+    "vendor/SkeletonUtils.js",
+    "vendor/meshopt_decoder.js",
 )
 
 
@@ -40,14 +50,7 @@ def fetch(path: str, timeout: int = 120) -> bytes:
 def verify_once() -> None:
     comparisons = {
         "/": ROOT / "frontend/index.html",
-        "/frontend/app.js": ROOT / "frontend/app.js",
-        "/frontend/selection-controls.js": ROOT / "frontend/selection-controls.js",
-        "/frontend/snapshot-buffer.js": ROOT / "frontend/snapshot-buffer.js",
-        "/frontend/activity-presentation.js": ROOT / "frontend/activity-presentation.js",
-        **{
-            f"/assets/game/{name}": ROOT / "assets/game" / name
-            for name in DIRECTIONAL_ASSETS
-        },
+        **{f"/frontend/{name}": ROOT / "frontend" / name for name in FRONTEND_FILES},
     }
     for remote_path, local_path in comparisons.items():
         remote = fetch(remote_path)
@@ -58,8 +61,11 @@ def verify_once() -> None:
     state = json.loads(fetch("/state"))
     terrain = state.get("terrain", [])
     units = state.get("units", [])
-    if len(terrain) != 600 or len(units) != 2:
+    if len(terrain) != 600 or not units or (state.get("columns"), state.get("rows")) != (30, 20):
         raise RuntimeError(f"unexpected world shape: terrain={len(terrain)}, units={len(units)}")
+    cells = [(unit["cell"]["column"], unit["cell"]["row"]) for unit in units]
+    if len(set(cells)) != len(cells):
+        raise RuntimeError("production units share a cell")
     unseen = [cell for cell in terrain if cell.get("visibility") == "unseen"]
     if not unseen:
         raise RuntimeError("production state has no unseen terrain to verify")
@@ -88,7 +94,7 @@ def verify_once() -> None:
     print(
         "PASS production matches checkout; "
         f"terrain={len(terrain)}, units={len(units)}, unseen={len(unseen)}, "
-        f"directional_assets={len(DIRECTIONAL_ASSETS)}, speed={state['simulation_speed']}"
+        f"frontend_files={len(FRONTEND_FILES)}, speed={state['simulation_speed']}"
     )
 
 

@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 pub const DEFAULT_SCENARIO_TICK_LIMIT: u64 = 36_000;
 
+/// A continuous point in cell units: `(column + 0.5, row + 0.5)` is a cell center.
+/// Positions are derived for presentation and sight; they are never authoritative.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Position {
     pub x: f64,
@@ -27,10 +29,65 @@ pub enum TerrainBiome {
     Clayland,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct CellCoordinate {
     pub column: u16,
     pub row: u16,
+}
+
+impl CellCoordinate {
+    pub const fn new(column: u16, row: u16) -> Self {
+        Self { column, row }
+    }
+
+    pub fn center(self) -> Position {
+        Position {
+            x: f64::from(self.column) + 0.5,
+            y: f64::from(self.row) + 0.5,
+        }
+    }
+
+    /// Chebyshev adjacency: the eight cells around `self`.
+    pub(super) fn touches(self, other: Self) -> bool {
+        self != other
+            && self.column.abs_diff(other.column) <= 1
+            && self.row.abs_diff(other.row) <= 1
+    }
+}
+
+/// An axis-aligned block of cells. Every static thing in the world claims one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Footprint {
+    pub origin: CellCoordinate,
+    pub columns: u16,
+    pub rows: u16,
+}
+
+impl Footprint {
+    pub(super) fn cells(self) -> impl Iterator<Item = CellCoordinate> {
+        (self.origin.row..self.origin.row + self.rows).flat_map(move |row| {
+            (self.origin.column..self.origin.column + self.columns)
+                .map(move |column| CellCoordinate::new(column, row))
+        })
+    }
+
+    pub(super) fn contains(self, cell: CellCoordinate) -> bool {
+        (self.origin.column..self.origin.column + self.columns).contains(&cell.column)
+            && (self.origin.row..self.origin.row + self.rows).contains(&cell.row)
+    }
+
+    /// A cell from which a villager can work on this footprint: outside it and
+    /// touching it, including diagonally.
+    pub(super) fn is_interaction_cell(self, cell: CellCoordinate) -> bool {
+        !self.contains(cell) && self.cells().any(|inner| inner.touches(cell))
+    }
+
+    pub(super) fn center(self) -> Position {
+        Position {
+            x: f64::from(self.origin.column) + f64::from(self.columns) / 2.0,
+            y: f64::from(self.origin.row) + f64::from(self.rows) / 2.0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -70,19 +127,17 @@ pub struct SnapshotTerrainCell {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum UnitAction {
     Idle,
+    /// Walk to `to`. The destination cell is reserved for this unit until it arrives.
     Move {
-        x: f64,
-        y: f64,
+        to: CellCoordinate,
     },
     Gather {
         resource_id: String,
-        #[serde(default)]
         phase: GatherPhase,
     },
+    /// Walk beside the foundation `building_id` and raise it.
     Build {
-        x: f64,
-        y: f64,
-        work_seconds: f64,
+        building_id: String,
     },
 }
 
@@ -105,20 +160,56 @@ pub struct CarriedResource {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Unit {
     pub id: String,
-    #[serde(default)]
     pub kind: UnitKind,
-    pub position: Position,
+    /// The cell this unit stands in. It is exclusively claimed by this unit.
+    pub cell: CellCoordinate,
+    /// A step in progress. Its target cell is claimed before the unit leaves
+    /// `cell`, so a unit always owns every cell its body overlaps.
+    pub step: Option<Step>,
     pub action: UnitAction,
-    #[serde(default)]
     pub cargo: Option<CarriedResource>,
+}
+
+impl Unit {
+    pub fn position(&self) -> Position {
+        let from = self.cell.center();
+        match self.step {
+            None => from,
+            Some(step) => {
+                let to = step.to.center();
+                Position {
+                    x: from.x + (to.x - from.x) * step.progress,
+                    y: from.y + (to.y - from.y) * step.progress,
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Step {
+    pub to: CellCoordinate,
+    /// Fraction of the step completed, in `[0, 1)`.
+    pub progress: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ResourceNode {
     pub id: String,
     pub kind: ResourceKind,
-    pub position: Position,
+    pub cell: CellCoordinate,
     pub amount: f64,
+    pub capacity: f64,
+}
+
+impl ResourceNode {
+    pub(super) fn footprint(&self) -> Footprint {
+        Footprint {
+            origin: self.cell,
+            columns: 1,
+            rows: 1,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -154,10 +245,28 @@ pub enum UnitKind {
 pub struct Building {
     pub id: String,
     pub kind: BuildingKind,
-    pub position: Position,
+    /// North-west cell of the footprint.
+    pub origin: CellCoordinate,
+    /// `Some(seconds of work done)` while this is a foundation; `None` once complete.
+    pub construction: Option<f64>,
     pub produces: Vec<ProductKind>,
     pub researches: Vec<TechnologyKind>,
     pub job: Option<BuildingJob>,
+}
+
+impl Building {
+    pub fn footprint(&self) -> Footprint {
+        let (columns, rows) = self.kind.size();
+        Footprint {
+            origin: self.origin,
+            columns,
+            rows,
+        }
+    }
+
+    pub fn is_complete(&self) -> bool {
+        self.construction.is_none()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -177,6 +286,16 @@ pub enum BuildingKind {
     Infirmary,
     Watchtower,
     Monument,
+}
+
+impl BuildingKind {
+    /// Footprint in cells.
+    pub const fn size(self) -> (u16, u16) {
+        match self {
+            Self::TownCenter => (2, 2),
+            _ => (1, 1),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -231,30 +350,42 @@ impl TechnologyKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Stockpile {
     pub wood: f64,
     pub food: f64,
     pub stone: f64,
     pub gold: f64,
     pub iron: f64,
-    #[serde(default)]
     pub coal: f64,
     pub clay: f64,
     pub fiber: f64,
-    #[serde(default)]
     pub timber: f64,
-    #[serde(default)]
     pub steel: f64,
-    #[serde(default)]
     pub bricks: f64,
-    #[serde(default)]
     pub cloth: f64,
-    #[serde(default)]
     pub rations: f64,
 }
 
 impl Stockpile {
+    pub(super) fn entries(&self) -> [(&'static str, f64); 13] {
+        [
+            ("wood", self.wood),
+            ("food", self.food),
+            ("stone", self.stone),
+            ("gold", self.gold),
+            ("iron", self.iron),
+            ("coal", self.coal),
+            ("clay", self.clay),
+            ("fiber", self.fiber),
+            ("timber", self.timber),
+            ("steel", self.steel),
+            ("bricks", self.bricks),
+            ("cloth", self.cloth),
+            ("rations", self.rations),
+        ]
+    }
+
     pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
         match kind {
             ResourceKind::Wood => self.wood += amount,
@@ -407,7 +538,6 @@ pub struct ScenarioObjectiveProgress {
 pub struct ScenarioState {
     pub id: ScenarioId,
     pub tick_limit: u64,
-    #[serde(default)]
     pub elapsed_ticks: u64,
     pub objective_progress: ScenarioObjectiveProgress,
     pub outcome: ScenarioOutcome,
