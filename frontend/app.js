@@ -315,7 +315,8 @@ window.ageOfAgents = {
     return { x: (projected.x + 1) / 2 * innerWidth, y: (1 - projected.y) / 2 * innerHeight };
   },
   lookAt: (x, z) => rig.lookAt(x, z),
-  get target() { return { x: rig.target.x, z: rig.target.z }; }
+  get target() { return { x: rig.target.x, z: rig.target.z }; },
+  unitPositions: () => view.unitPositions().map(u => ({ id: u.id, x: u.position.x, z: u.position.z }))
 };
 
 const viewCorners = [[0, 0], [1, 0], [1, 1], [0, 1]];
