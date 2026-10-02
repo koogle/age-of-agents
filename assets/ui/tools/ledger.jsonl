@@ -45,3 +45,14 @@
 {"t": 1790898108.2155256, "endpoint": "fal-ai/flux-pro/v1.1", "tag": "deco:frame_b", "est_usd": 0.04, "request_id": "01a0f9d8-4a90-7310-b277-7b25ee9b3124", "seconds": 11.4}
 {"t": 1790898179.871325, "endpoint": "fal-ai/nano-banana", "tag": "deco:paper_c", "est_usd": 0.0398, "request_id": "01a0f9d9-73ce-7eb0-b96b-c5a70c2f4784", "seconds": 7.0}
 {"t": 1790898182.083279, "endpoint": "fal-ai/flux-pro/v1.1", "tag": "deco:paper_b", "est_usd": 0.04, "request_id": "01a0f9d9-73ca-75a1-8627-dacbad15d17f", "seconds": 9.2}
+{"t": 1790898470.497289, "endpoint": "fal-ai/nano-banana", "tag": "concept:nano_a", "est_usd": 0.0398, "request_id": "01a0f9dd-e330-7620-99e7-97381ce3a529", "seconds": 7.0}
+{"t": 1790898472.8851528, "endpoint": "fal-ai/nano-banana/edit", "tag": "concept:nano_ref", "est_usd": 0.0398, "request_id": "01a0f9dd-e3ba-7ae1-beeb-4d05120d0b04", "seconds": 9.2}
+{"t": 1790898483.5888007, "endpoint": "fal-ai/nano-banana-pro", "tag": "concept:pro", "est_usd": 0.15, "request_id": "01a0f9dd-e301-7461-b456-dd9d883e172d", "seconds": 20.1}
+{"t": 1790898500.4587965, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:concept", "est_usd": 0.005, "request_id": "01a0f9de-694e-7571-8c7b-1e36def0aa1a", "seconds": 2.6}
+{"t": 1790898578.2279427, "endpoint": "tripo3d/p2/image-to-3d", "tag": "mesh:tripo", "est_usd": 0.4, "request_id": "01a0f9de-994e-7f12-8486-34c426fb7317", "seconds": 68.1}
+{"t": 1790898696.0856366, "endpoint": "fal-ai/meshy/rigging/multi-animation", "tag": "rig:tripo", "est_usd": 0.08, "request_id": "01a0f9e0-28bf-7e20-967f-9f8e62e30d9e", "seconds": 83.7}
+{"t": 1790898917.8853068, "endpoint": "fal-ai/meshy/rigging/multi-animation", "tag": "rig:work", "est_usd": 0.08, "request_id": "01a0f9e2-bfb4-7cc0-925d-ec423e2bbe73", "seconds": 135.8}
+{"t": 1790899067.3718889, "endpoint": "fal-ai/meshy/rigging/multi-animation", "tag": "rig:all", "est_usd": 0.08, "request_id": "01a0f9e5-07f2-75f0-a038-b7a062e62c2e", "seconds": 135.7}
+{"t": 1790899835.17004, "endpoint": "fal-ai/meshy/rigging/multi-animation", "tag": "rig:z", "est_usd": 0.08, "request_id": "01a0f9f1-dab1-7612-9050-f0a987f02443", "seconds": 63.1}
+{"t": 1790901025.6833289, "endpoint": "fal-ai/nano-banana/edit", "tag": "coin:1", "est_usd": 0.0398, "request_id": "01a0fa04-d7dc-7c70-934d-442fc0dd2ad6", "seconds": 9.1}
+{"t": 1790901025.746727, "endpoint": "fal-ai/nano-banana/edit", "tag": "coin:0", "est_usd": 0.0398, "request_id": "01a0fa04-d810-7d83-b4b9-73d958547d71", "seconds": 9.2}
