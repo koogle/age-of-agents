@@ -40,7 +40,9 @@ def blue_area(sub):
     r, g, b, al = sub[..., 0], sub[..., 1], sub[..., 2], sub[..., 3]
     return ((b > r + 50) & (b > g + 20) & (b > 120) & (al > 128)).sum()
 
-data = {k: frames_of(f"spr/{k}_cut.png", v[2]) for k, v in STRIPS.items()}
+import os
+PREFIX = os.environ.get("VARIANT", "") and os.environ["VARIANT"] + "_"
+data = {k: frames_of(f"spr/{PREFIX}{k}_cut.png", v[2]) for k, v in STRIPS.items()}
 ref = data["idle_front"]
 H0 = np.median([y1 - y0 for _, y0, y1 in ref]); B0 = np.median([np.sqrt(blue_area(s)) for s, _, _ in ref])
 sheet_cells, meta = [], {}
@@ -49,9 +51,11 @@ for name, frames in data.items():
     by_blue = (B0 / np.median([np.sqrt(blue_area(s)) for s, _, _ in frames])) * (FIG_H / H0)
     by_height = FIG_H / np.median([y1 - y0 for _, y0, y1 in frames])
     # Upright strips without raised tools scale by head-to-feet height (the scarf looks smaller from behind and
-    # the sack hides it). Tool strips scale by the front-facing scarf area, since raised tools inflate the
-    # height. Forage is a crouch at about 62% of standing height.
-    scale = {"idle": by_height, "walk": by_height, "carry": by_height, "forage": by_height * 0.62}.get(anim, by_blue)
+    # the sack hides it). Forage is a crouch at about 62% of standing height.
+    # Each estimate fails differently (raised tools inflate height; a headscarf or the pose hides scarf area),
+    # so tool strips use their geometric mean. TOOL_SCALE=height forces height (the woman's headscarf hides
+    # most of her scarf).
+    scale = {"idle": by_height, "walk": by_height, "carry": by_height, "forage": by_height * 0.62}.get(anim, by_height if os.environ.get("TOOL_SCALE") == "height" else (by_blue * by_height) ** 0.5)
     print(f"{name:12s} blue {by_blue:.3f} height {by_height:.3f}")
     ground = np.median([y1 for _, _, y1 in frames])          # shared ground line of the strip
     for sub, y0, y1 in frames:
@@ -69,7 +73,7 @@ cols = 8; rows = -(-len(sheet_cells) // cols)
 sheet = Image.new("RGBA", (cols * CELL, rows * CELL))
 for i, c in enumerate(sheet_cells): sheet.alpha_composite(c, ((i % cols) * CELL, (i // cols) * CELL))
 rect = lambda i: [(i % cols) * CELL, (i // cols) * CELL, CELL, CELL]
-manifest = {"image": "villager.png", "cell": [CELL, CELL], "anchor": [CELL // 2, FOOT_Y], "figureHeight": FIG_H,
+manifest = {"image": os.path.basename(sys.argv[1]) + ".png", "cell": [CELL, CELL], "anchor": [CELL // 2, FOOT_Y], "figureHeight": FIG_H,
             "facings": "front = three-quarter front (facing viewer-left), back = three-quarter back (facing viewer-right); mirror for the other two",
             "fps": {"idle": 2, "walk": 8, "carry": 7, "chop": 5, "mine": 5, "forage": 3, "dig": 5, "build": 6},
             "animations": {a: {f: [rect(i) for i in idx] for f, idx in fs.items()} for a, fs in meta.items()}}
