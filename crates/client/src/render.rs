@@ -289,8 +289,8 @@ fn data_texture(device: &wgpu::Device, format: wgpu::TextureFormat, label: &str)
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some(label),
         size: wgpu::Extent3d {
-            width: terrain::COLUMNS as u32,
-            height: terrain::ROWS as u32,
+            width: aoa_game::WORLD_COLUMNS as u32,
+            height: aoa_game::WORLD_ROWS as u32,
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,
@@ -896,7 +896,7 @@ impl Renderer {
 
     /// Per-cell fog-of-war colour/visibility (RGBA) and painted ground layer (255 = unknown).
     pub fn update_cells(&self, queue: &wgpu::Queue, rgba: &[u8], layers: &[u8]) {
-        let (width, height) = (terrain::COLUMNS as u32, terrain::ROWS as u32);
+        let (width, height) = (aoa_game::WORLD_COLUMNS as u32, aoa_game::WORLD_ROWS as u32);
         let size = wgpu::Extent3d {
             width,
             height,

@@ -2,7 +2,7 @@
 
 ## Product
 
-Age of Agents is a deliberately small, mobile-friendly 2D isometric real-time strategy game inspired by late-1990s and early-2000s RTS games. The near-term reference is the clarity and immediacy of an early Age of Empires vertical slice, not a full simulation.
+Age of Agents is a deliberately small, mobile-friendly 2D isometric real-time strategy game inspired by late-1990s and early-2000s RTS games. The near-term reference is the clarity and immediacy of an early Age of Empires vertical slice, not a full simulation. The Anno series is the second inspiration: a calm, readable economy and settlement that grows from what the player builds.
 
 Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle units remain idle until the player commands them.
 
@@ -25,6 +25,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - **Persistence:** SQLite stores the authoritative world snapshot. Respect `AGE_OF_AGENTS_DB` everywhere.
 - **Client:** Rust. `crates/client` is one wgpu renderer that runs as a native window (`cargo run -p aoa-client`, simulation in-process) and as WebGL2 in the browser (`scripts/build_web.sh`, served at `/play`). `crates/game` is the shared deterministic simulation; keep game logic there, never in the client. The legacy Three.js client in `frontend/` is served at `/` only until the Rust client reaches parity; do not extend it. World assets (villagers, buildings, trees, resources, ground) come from generated high-quality renders (FAL/Midjourney) used as painted sprites and textures in the 3D world; procedural code geometry is only a temporary placeholder until a generated asset replaces it.
 - **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Soft two-tone cel shading, a fine one-pixel ink-line finish pass (depth creases and silhouettes), a tilt-shift post-process, and one shared fog-of-war shader field (unexplored land lies under cloud). The interface is painted inside the WebGL canvas (an orthographic overlay of canvas-textured panels with hit regions); a visually hidden DOM mirror of every button keeps keyboard and screen-reader access.
+- **Grid scale:** simulation cells are finer than a villager is tall (60×40 cells, half a world unit each; the client converts with `terrain::CELL`). Resources cluster tightly, as in Age of Empires.
 - **Spatial authority:** Every unit, step target, building footprint, and live resource exclusively claims its cells; move destinations are reservations. `GameWorld::validate` must hold after every command and tick.
 - **Deployment:** Modal. Verify locally before deploying.
 
@@ -35,12 +36,13 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Tap/click a foundation with villagers selected to have them help build it.
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
+- With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
 - Tap/click the build button, then valid ground, to issue a build order.
 - Tap/click a town center to train a villager or start available research through the medallion buttons that appear at the bottom center.
 - Drag pans. Wheel/pinch zooms. Right-drag, two-finger twist, or Q/E rotates.
 - Mouse and touch semantics must match.
 - Simulation speed is authoritative and controlled through 0×, 1×, and 2× buttons.
-- A busy villager rejects replacement orders in Milestone 1; this avoids cancellation/refund complexity.
+- A busy villager rejects replacement orders in Milestone 1. The Stop medallion (or X) idles it first; stopping keeps cargo and foundation progress, so there is nothing to refund.
 
 ## Art Direction
 

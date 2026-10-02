@@ -67,6 +67,7 @@ pub enum Action {
     Speed(f64),
     Build,
     Cancel,
+    Stop,
     Train,
     Research(TechnologyKind),
     /// Globe click: look at this map point.
@@ -89,7 +90,28 @@ struct Glyph {
 pub struct Atlas {
     pub image: Rgba,
     sprites: HashMap<String, [f32; 4]>,
+    /// Painted bounds of each icon (uv rect and pixel size), so icons whose
+    /// art fills their square differently still line up inside the coins.
+    content: HashMap<String, ([f32; 4], Vec2)>,
     glyphs: HashMap<char, Glyph>,
+}
+
+/// The rectangle of `image` whose alpha is visibly painted, in pixels.
+fn painted_bounds(image: &Rgba) -> (u32, u32, u32, u32) {
+    let (mut x0, mut y0, mut x1, mut y1) = (image.width, image.height, 0, 0);
+    for y in 0..image.height {
+        for x in 0..image.width {
+            if image.pixels[((y * image.width + x) * 4 + 3) as usize] > 40 {
+                (x0, y0) = (x0.min(x), y0.min(y));
+                (x1, y1) = (x1.max(x + 1), y1.max(y + 1));
+            }
+        }
+    }
+    if x1 <= x0 || y1 <= y0 {
+        (0, 0, image.width, image.height)
+    } else {
+        (x0, y0, x1, y1)
+    }
 }
 
 /// Packs coins, icons and glyphs into one texture with a simple shelf packer.
@@ -128,6 +150,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         }
     };
     let mut sprites = HashMap::new();
+    let mut content = HashMap::new();
     for name in COINS {
         let coin = assets
             .image(&format!("ui/buttons/{name}.png"))
@@ -141,6 +164,14 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         let at = place(icon.width, icon.height);
         blit(&mut image, &icon, at);
         sprites.insert(name.to_string(), uv(at, icon.width, icon.height));
+        let (x0, y0, x1, y1) = painted_bounds(&icon);
+        content.insert(
+            name.to_string(),
+            (
+                uv((at.0 + x0, at.1 + y0), x1 - x0, y1 - y0),
+                Vec2::new((x1 - x0) as f32, (y1 - y0) as f32),
+            ),
+        );
     }
     let font = FontRef::try_from_slice(assets.bytes("fonts/Nunito-ExtraBold.ttf")).expect("font");
     let scaled = font.as_scaled(PxScale::from(GLYPH_PX));
@@ -189,6 +220,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
     Atlas {
         image,
         sprites,
+        content,
         glyphs,
     }
 }
@@ -329,24 +361,28 @@ impl Hud {
         let lift = if hot { -3.0 } else { 0.0 };
         let rect = [rect[0], rect[1] + lift, rect[2], rect[3]];
         self.sprite(atlas, frame, rect, [1.0; 4]);
-        // Icons are normalized to sit inside the face (scripts/normalize_icons.py).
-        let inset = rect[2] * 0.15;
         let tint = if enabled {
             [1.0; 4]
         } else {
             [0.75, 0.75, 0.75, 0.7]
         };
-        self.sprite(
-            atlas,
-            icon,
-            [
-                rect[0] + inset,
-                rect[1] + inset,
-                rect[2] - inset * 2.0,
-                rect[3] - inset * 2.0,
+        // Fit the painted part of the icon into the same box on every coin.
+        let Some(&(uv, size)) = atlas.content.get(icon) else {
+            return;
+        };
+        let scale = rect[2] * 0.6 / size.x.max(size.y);
+        let (w, h) = (size.x * scale, size.y * scale);
+        self.quads.push(Quad {
+            rect: [
+                rect[0] + (rect[2] - w) / 2.0,
+                rect[1] + (rect[3] - h) / 2.0,
+                w,
+                h,
             ],
-            tint,
-        );
+            uv,
+            color: tint,
+            params: [0.0; 4],
+        });
     }
 
     fn hovered(&self, rect: [f32; 4]) -> bool {
@@ -515,7 +551,10 @@ impl Hud {
                     m,
                     m,
                 ];
-                let hot = self.hovered(rect);
+                // The hit area spans half the gap on each side, so sweeping
+                // across the bar never falls back to the selection text.
+                let hit = [rect[0] - gap / 2.0, bar[1], m + gap, bar[3]];
+                let hot = self.hovered(hit);
                 if hot {
                     hover_text = Some((command.label.clone(), command.detail.clone()));
                 }
@@ -527,19 +566,22 @@ impl Hud {
                     hot && command.enabled,
                 );
                 self.regions.push(Region {
-                    rect,
+                    rect: hit,
                     action: command.action.clone(),
                     enabled: command.enabled,
                 });
             }
         }
+        // One width for every text this selection can show, so hovering
+        // commands changes the words but never resizes the pill.
+        let widest = std::iter::once((&title, &detail))
+            .chain(commands.iter().map(|c| (&c.label, &c.detail)))
+            .map(|(t, d)| {
+                Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
+            })
+            .fold(0.0, f32::max);
+        let info_width = (widest + 84.0 * s).max(200.0 * s);
         let (title, detail) = hover_text.unwrap_or((title, detail));
-        let info_width = (Self::text_width(atlas, &title, 15.0 * s).max(Self::text_width(
-            atlas,
-            &detail,
-            12.0 * s,
-        )) + 84.0 * s)
-            .max(200.0 * s);
         let info = [
             (width - info_width) / 2.0,
             bar[1] - 64.0 * s,
@@ -600,6 +642,14 @@ impl Hud {
         }
     }
 
+    /// Whether a screen point lies on an interactive HUD element.
+    pub fn covers(&self, at: Vec2) -> bool {
+        self.regions.iter().any(|region| {
+            let r = region.rect;
+            at.x >= r[0] && at.x <= r[0] + r[2] && at.y >= r[1] && at.y <= r[1] + r[3]
+        })
+    }
+
     /// Pointer press: true when the HUD takes it.
     pub fn press(&mut self, at: Vec2) -> bool {
         self.pressed = None;
@@ -638,6 +688,10 @@ type Selected = (&'static str, String, String, Option<f32>, Vec<Command>);
 fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> {
     let stock = &snapshot.stockpile;
     if !model.units.is_empty() {
+        let busy = snapshot
+            .units
+            .iter()
+            .any(|u| model.units.contains(&u.unit.id) && u.unit.action != UnitAction::Idle);
         let commands = if model.build_mode {
             vec![Command {
                 icon: "command_cancel",
@@ -647,13 +701,23 @@ fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> 
                 action: Action::Cancel,
             }]
         } else {
-            vec![Command {
+            let mut commands = vec![Command {
                 icon: "command_build",
                 label: "Build town center".into(),
                 detail: format!("{} wood", TOWN_CENTER_WOOD_COST),
                 enabled: stock.wood >= TOWN_CENTER_WOOD_COST,
                 action: Action::Build,
-            }]
+            }];
+            if busy {
+                commands.push(Command {
+                    icon: "command_cancel",
+                    label: "Stop".into(),
+                    detail: "Drop the current task · X".into(),
+                    enabled: true,
+                    action: Action::Stop,
+                });
+            }
+            commands
         };
         if model.units.len() > 1 {
             let idle = snapshot

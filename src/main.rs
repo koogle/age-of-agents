@@ -372,12 +372,12 @@ mod tests {
         let json = serde_json::to_value(message).unwrap();
         assert_eq!(json["type"], "snapshot");
         assert_eq!(json["sequence"], 4);
-        assert_eq!(json["world"]["columns"], 30);
-        assert_eq!(json["world"]["rows"], 20);
+        assert_eq!(json["world"]["columns"], 60);
+        assert_eq!(json["world"]["rows"], 40);
         let unit = &json["world"]["units"][0];
-        assert_eq!(unit["cell"], serde_json::json!({"column": 14, "row": 11}));
-        assert_eq!(unit["position"], serde_json::json!({"x": 14.5, "y": 11.5}));
-        assert_eq!(json["world"]["buildings"][0]["columns"], 2);
+        assert_eq!(unit["cell"], serde_json::json!({"column": 29, "row": 21}));
+        assert_eq!(unit["position"], serde_json::json!({"x": 29.5, "y": 21.5}));
+        assert_eq!(json["world"]["buildings"][0]["columns"], 4);
         let terrain = json["world"]["terrain"].as_array().unwrap();
         assert!(terrain.iter().all(|cell| matches!(
             cell["visibility"].as_str(),

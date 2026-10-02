@@ -6,12 +6,12 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 ## Milestone 1
 
-- Persistent deterministic 30×20-cell Voronoi-style island with eight connected biomes
+- Persistent deterministic 60×40-cell Voronoi-style island with eight connected biomes; cells are finer than a villager is tall, and resources grow in tight woodlines, berry patches and mine clumps
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases
-- Command-driven construction of one building type through 2×2 foundations that several villagers can raise together
+- Command-driven construction of one building type through 4×4 foundations that several villagers can raise together
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
@@ -42,7 +42,7 @@ is still served at `/` until the Rust client reaches full parity.
 
 ### World soundness
 
-The world is a 30×20 grid of cells. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
+The world is a 60×40 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
 
 - Every building footprint (complete or foundation), live resource node, unit cell, and in-progress step target is an **exclusive claim**.
 - A unit claims the next cell **before** stepping into it and releases its old cell only when the step completes, so two bodies never overlap, even mid-stride. Diagonal steps never cut past an occupied corner.
@@ -89,7 +89,9 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Select:** tap/click a villager to replace the selection. On touch, long-press a villager to add or remove it. On desktop, Shift-drag from empty ground box-selects visible villagers, and Shift-click adds or removes. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
 - **Move:** with one or more villagers selected, tap/click empty ground. Groups receive one atomic authoritative order and spread across distinct reachable cells.
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
-- **Build:** select a villager, press the build button (or B), then tap/click ground. A 2×2 foundation appears immediately and rises as the villager works. Tap a foundation with other villagers selected to have them help.
+- **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. A busy villager still rejects a new order until stopped.
+- **Target marker:** while villagers are selected, a ring under the pointer shows what a tap would do: gold over a resource or foundation to work on, white over ground to walk to.
+- **Build:** select a villager, press the build button (or B), then tap/click ground. A 4×4 foundation appears immediately and rises as the villager works. Tap a foundation with other villagers selected to have them help.
 - **Produce:** select a town center and press the **Train villager** medallion. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
 - **Research:** select a town center and press an available technology medallion (hover for its name and cost). Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
 - **Pan:** drag with one pointer, WASD/arrow keys, or tap the minimap.
@@ -102,7 +104,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 Mouse and touch use the same command semantics.
 
-Schema version 5 stores units as exclusive cell claims and buildings as footprints. Older persisted worlds (free-floating positions) are intentionally dropped because they cannot be translated into the claim model safely.
+Schema version 6 stores units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, or the coarser 30×20 grid of version 5) are intentionally dropped because they cannot be translated safely.
 
 ## Development checks
 

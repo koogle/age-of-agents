@@ -144,7 +144,7 @@ fn validation_rejects_overlapping_or_inconsistent_worlds() {
     type Corruption = (&'static str, fn(&mut GameWorld));
     let corrupt: [Corruption; 9] = [
         ("units share a cell", |w| w.units[1].cell = w.units[0].cell),
-        ("unit inside a building", |w| w.units[0].cell = cell(14, 9)),
+        ("unit inside a building", |w| w.units[0].cell = cell(28, 17)),
         ("unit inside a resource", |w| {
             w.units[0].cell = w.resources[0].cell;
         }),
@@ -165,7 +165,7 @@ fn validation_rejects_overlapping_or_inconsistent_worlds() {
             w.units[1].action = UnitAction::Move { to: cell(3, 3) };
         }),
         ("overlapping buildings", |w| {
-            w.buildings.push(town_center("overlap", cell(15, 10), None));
+            w.buildings.push(town_center("overlap", cell(30, 19), None));
         }),
         ("negative stockpile", |w| w.stockpile.food = -1.0),
         ("building a finished building", |w| {

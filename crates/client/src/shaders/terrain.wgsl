@@ -43,9 +43,11 @@ fn paint_sample(xz: vec2<f32>, layer: i32) -> vec4<f32> {
 }
 
 fn ground_paint(xz: vec2<f32>) -> vec4<f32> {
-    let gp = xz - 0.5;
+    // Blend between simulation cells, which are finer than world units.
+    let cell = xz / g.map_size * vec2<f32>(textureDimensions(ground_index));
+    let gp = cell - 0.5;
     let base = floor(gp);
-    var f = fract(gp) + (vec2<f32>(fbm(xz * 1.7), fbm(xz * 1.7 + 11.3)) - 0.5) * 0.7;
+    var f = fract(gp) + (vec2<f32>(fbm(cell * 1.7), fbm(cell * 1.7 + 11.3)) - 0.5) * 0.7;
     f = smoothstep(vec2<f32>(0.3), vec2<f32>(0.7), clamp(f, vec2<f32>(0.0), vec2<f32>(1.0)));
     let c00 = paint_sample(xz, layer_at(base));
     let c10 = paint_sample(xz, layer_at(base + vec2<f32>(1.0, 0.0)));

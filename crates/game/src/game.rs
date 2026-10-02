@@ -16,11 +16,14 @@ mod soundness_tests;
 pub use domain::*;
 use movement::{Goal, Travel};
 
-pub const WORLD_COLUMNS: u16 = 30;
-pub const WORLD_ROWS: u16 = 20;
+/// The grid is finer than a villager is tall (a villager stands about one and
+/// a half cells high), so bodies stand right against what they work on and
+/// resources pack into tight woodlines, berry patches and mine clumps.
+pub const WORLD_COLUMNS: u16 = 60;
+pub const WORLD_ROWS: u16 = 40;
 /// Sight radii in cells.
-pub const UNIT_SIGHT_RADIUS: f64 = 4.0;
-pub const BUILDING_SIGHT_RADIUS: f64 = 6.0;
+pub const UNIT_SIGHT_RADIUS: f64 = 8.0;
+pub const BUILDING_SIGHT_RADIUS: f64 = 12.0;
 pub const TOWN_CENTER_WOOD_COST: f64 = 20.0;
 pub const BUILD_SECONDS: f64 = 4.0;
 pub const VILLAGER_FOOD_COST: f64 = 50.0;
@@ -29,14 +32,15 @@ pub const RESEARCH_FOOD_COST: f64 = 40.0;
 pub const RESEARCH_WOOD_COST: f64 = 20.0;
 pub const RESEARCH_SECONDS: f64 = 8.0;
 pub const GATHERING_TECH_MULTIPLIER: f64 = 1.2;
-/// Resource spacing and starting-base clearance, in cells.
-pub const RESOURCE_MIN_SEPARATION: f64 = 1.5;
-pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 2.5;
+/// Minimum gap between resource clusters and starting-base clearance, in cells.
+/// Nodes within one cluster touch.
+pub const RESOURCE_CLUSTER_SEPARATION: f64 = 5.0;
+pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 6.0;
 /// Walking speed in cells per second.
-const MOVE_SPEED: f64 = 1.5;
+const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
-const STARTING_TOWN_CENTER: CellCoordinate = CellCoordinate::new(14, 9);
+const STARTING_TOWN_CENTER: CellCoordinate = CellCoordinate::new(28, 17);
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -125,6 +129,11 @@ pub enum Command {
     SetSimulationSpeed {
         multiplier: f64,
     },
+    /// Abandon the current task. The unit finishes the step it is taking,
+    /// keeps any cargo, and leaves foundation progress in place.
+    Stop {
+        unit_id: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -199,7 +208,7 @@ impl Default for GameWorld {
             simulation_speed: 1.0,
             terrain: terrain.clone(),
             explored_cells: Vec::new(),
-            units: vec![villager(1, 14, 11), villager(2, 15, 11)],
+            units: vec![villager(1, 29, 21), villager(2, 31, 21)],
             resources: generate_resources(&terrain),
             buildings: vec![town_center("base-1", STARTING_TOWN_CENTER, None)],
             stockpile: Stockpile::default(),
@@ -227,14 +236,14 @@ fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> B
 
 fn generate_terrain() -> Vec<TerrainCell> {
     const SITES: [(u16, u16, TerrainBiome); 8] = [
-        (3, 3, TerrainBiome::Meadow),
-        (11, 2, TerrainBiome::Forest),
-        (21, 3, TerrainBiome::Prairie),
-        (27, 7, TerrainBiome::Highland),
-        (4, 14, TerrainBiome::Wetland),
-        (12, 17, TerrainBiome::Scrubland),
-        (20, 13, TerrainBiome::Heath),
-        (27, 17, TerrainBiome::Clayland),
+        (6, 6, TerrainBiome::Meadow),
+        (22, 4, TerrainBiome::Forest),
+        (42, 6, TerrainBiome::Prairie),
+        (54, 14, TerrainBiome::Highland),
+        (8, 28, TerrainBiome::Wetland),
+        (24, 34, TerrainBiome::Scrubland),
+        (40, 26, TerrainBiome::Heath),
+        (54, 34, TerrainBiome::Clayland),
     ];
 
     let mut terrain = Vec::with_capacity(usize::from(WORLD_COLUMNS * WORLD_ROWS));
@@ -276,45 +285,81 @@ fn compatible_biomes(kind: ResourceKind) -> &'static [TerrainBiome] {
     }
 }
 
+/// Resource kinds and how they cluster: (kind, id prefix, clusters, nodes per
+/// cluster, amount per node, preferred distance from the base in cells).
+/// Woodlines stretch east-west; the rest are clumps.
+const RESOURCE_CLUSTERS: [(ResourceKind, &str, usize, usize, f64, f64); 7] = [
+    (ResourceKind::Wood, "tree", 3, 10, 30.0, 11.0),
+    (ResourceKind::Food, "berries", 2, 5, 30.0, 8.0),
+    (ResourceKind::Stone, "stone", 2, 4, 40.0, 14.0),
+    (ResourceKind::Gold, "gold", 1, 4, 40.0, 15.0),
+    (ResourceKind::Iron, "iron", 1, 4, 40.0, 16.0),
+    (ResourceKind::Clay, "clay", 2, 3, 40.0, 17.0),
+    (ResourceKind::Fiber, "fiber", 2, 3, 30.0, 17.0),
+];
+
 fn generate_resources(terrain: &[TerrainCell]) -> Vec<ResourceNode> {
-    const SPECS: [(ResourceKind, &str, usize, f64); 7] = [
-        (ResourceKind::Wood, "tree", 6, 25.0),
-        (ResourceKind::Food, "berries", 4, 50.0),
-        (ResourceKind::Stone, "stone", 4, 40.0),
-        (ResourceKind::Gold, "gold", 2, 35.0),
-        (ResourceKind::Iron, "iron", 2, 40.0),
-        (ResourceKind::Clay, "clay", 2, 45.0),
-        (ResourceKind::Fiber, "fiber", 2, 50.0),
-    ];
-    let base = Position { x: 15.0, y: 10.0 };
+    let base = Position {
+        x: f64::from(WORLD_COLUMNS) / 2.0,
+        y: f64::from(WORLD_ROWS) / 2.0,
+    };
+    let squared = |a: CellCoordinate, b: CellCoordinate, stretch: i32| {
+        let dx = i32::from(a.column) - i32::from(b.column);
+        let dy = i32::from(a.row) - i32::from(b.row);
+        dx * dx + stretch * dy * dy
+    };
 
     let mut resources: Vec<ResourceNode> = Vec::new();
-    for (kind, prefix, count, amount) in SPECS {
-        for number in 1..=count {
-            let cell = terrain
+    for (kind, prefix, clusters, size, amount, preferred) in RESOURCE_CLUSTERS {
+        let stretch = if kind == ResourceKind::Wood { 4 } else { 1 };
+        let mut number = 0;
+        for _ in 0..clusters {
+            // A cell is free for this cluster when it suits the kind, keeps the
+            // base clear, and stays well away from every earlier cluster.
+            let taken = resources.len();
+            let free = |cell: &&TerrainCell, resources: &[ResourceNode]| {
+                let center = cell.coordinate().center();
+                compatible_biomes(kind).contains(&cell.biome)
+                    && center.distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE
+                    && resources[..taken].iter().all(|resource| {
+                        resource.cell.center().distance(center) + f64::EPSILON
+                            >= RESOURCE_CLUSTER_SEPARATION
+                    })
+                    && resources[taken..]
+                        .iter()
+                        .all(|resource| resource.cell != cell.coordinate())
+            };
+            let site = terrain
                 .iter()
-                .filter(|cell| compatible_biomes(kind).contains(&cell.biome))
-                .filter(|cell| {
-                    let center = cell.coordinate().center();
-                    center.distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE
-                        && resources.iter().all(|resource| {
-                            resource.cell.center().distance(center) + f64::EPSILON
-                                >= RESOURCE_MIN_SEPARATION
-                        })
-                })
+                .filter(|cell| free(cell, &resources))
                 .min_by_key(|cell| {
-                    let dx = i32::from(cell.column) - i32::from(WORLD_COLUMNS / 2);
-                    let dy = i32::from(cell.row) - i32::from(WORLD_ROWS / 2);
-                    (dx * dx + dy * dy, cell.row, cell.column)
+                    let off = (cell.coordinate().center().distance(base) - preferred).abs();
+                    ((off * 16.0).round() as i64, cell.row, cell.column)
                 })
-                .expect("fixed terrain has enough separated biome-compatible resource cells");
-            resources.push(ResourceNode {
-                id: format!("{prefix}-{number}"),
-                kind,
-                cell: cell.coordinate(),
-                amount,
-                capacity: amount,
-            });
+                .expect("fixed terrain has room for every resource cluster")
+                .coordinate();
+            for _ in 0..size {
+                let cell = terrain
+                    .iter()
+                    .filter(|cell| free(cell, &resources))
+                    .min_by_key(|cell| {
+                        (
+                            squared(cell.coordinate(), site, stretch),
+                            cell.row,
+                            cell.column,
+                        )
+                    })
+                    .expect("fixed terrain has room for every resource node")
+                    .coordinate();
+                number += 1;
+                resources.push(ResourceNode {
+                    id: format!("{prefix}-{number}"),
+                    kind,
+                    cell,
+                    amount,
+                    capacity: amount,
+                });
+            }
         }
     }
     resources
@@ -469,6 +514,14 @@ impl GameWorld {
                     technology,
                     elapsed_seconds: 0.0,
                 });
+            }
+            Command::Stop { unit_id } => {
+                let unit = self
+                    .units
+                    .iter()
+                    .position(|unit| unit.id == unit_id)
+                    .ok_or(CommandError::UnitNotFound)?;
+                self.units[unit].action = UnitAction::Idle;
             }
             Command::SetSimulationSpeed { multiplier } => {
                 if ![0.0, 1.0, 2.0].contains(&multiplier) {

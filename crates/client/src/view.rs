@@ -81,6 +81,9 @@ struct UnitEntry {
     velocity: Vec3,
     facing: f32,
     variant: usize,
+    /// Eased offset toward the thing being worked on, so a working villager
+    /// stands right against it rather than at its cell centre.
+    lean: Vec2,
 }
 
 pub struct WorldView {
@@ -153,7 +156,8 @@ impl WorldView {
         }
         let mut seen = Vec::with_capacity(next.units.len());
         for view in &next.units {
-            let target = ground(view.position.x as f32, view.position.y as f32);
+            let at = terrain::world_of(view.position.x, view.position.y);
+            let target = ground(at.x, at.y);
             let entry = self
                 .units
                 .entry(view.unit.id.clone())
@@ -162,6 +166,7 @@ impl WorldView {
                     position: target,
                     velocity: Vec3::ZERO,
                     facing: 0.0,
+                    lean: Vec2::ZERO,
                     variant: (seed_of(&view.unit.id) % 3) as usize,
                 });
             // A command snapshot repeats the current tick: replace that sample.
@@ -267,49 +272,38 @@ impl WorldView {
             } else {
                 0.0
             };
+            let center = terrain::cell_center(resource.cell);
             if resource.kind == ResourceKind::Wood {
-                // A grove of three: dark cypresses, or gnarled olives on the heath.
+                // One tree per cell, so woodlines read as dense stands: dark
+                // cypresses, or gnarled olives on the heath.
                 let olive = self.biome_at(column, row) == Some(TerrainBiome::Heath);
                 let (tree, base) = if olive {
                     ("olive", 0.62)
                 } else {
                     ("cypress", 0.85)
                 };
-                let standing = if fraction <= 0.0 {
-                    0
-                } else {
-                    ((fraction * 3.0).ceil() as usize).max(1)
-                };
-                for (i, (dx, dz)) in [(-0.2, -0.14), (0.2, -0.04), (-0.02, 0.22)]
-                    .into_iter()
-                    .enumerate()
-                {
-                    let x = column as f32 + 0.5 + dx + (random(seed + i as f32) - 0.5) * 0.08;
-                    let z = row as f32 + 0.5 + dz + (random(seed - i as f32) - 0.5) * 0.08;
-                    let scale = base * (0.9 + random(seed + i as f32 * 7.0) * 0.25);
-                    let node = if i < standing { tree } else { "stump" };
-                    sprites.push((
-                        SHEET_RESOURCES,
-                        resource_sprite(node, resources.nodes[node].stages[0], ground(x, z), scale),
-                    ));
-                }
+                let node = if fraction > 0.0 { tree } else { "stump" };
+                let x = center.x + (random(seed) - 0.5) * 0.12;
+                let z = center.y + (random(seed + 1.0) - 0.5) * 0.12;
+                let scale = base * (0.9 + random(seed + 7.0) * 0.25);
+                sprites.push((
+                    SHEET_RESOURCES,
+                    resource_sprite(node, resources.nodes[node].stages[0], ground(x, z), scale),
+                ));
             } else if fraction > 0.0 {
                 let node = node_for(resource.kind);
                 let stages = &resources.nodes[node].stages;
                 let stage = (((1.0 - fraction) * stages.len() as f32).floor() as usize)
                     .min(stages.len() - 1);
-                let at = ground(column as f32 + 0.5, row as f32 + 0.5);
+                let at = ground(center.x, center.y);
                 sprites.push((
                     SHEET_RESOURCES,
-                    resource_sprite(node, stages[stage], at, 0.95 + random(seed) * 0.1),
+                    resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08),
                 ));
             }
         }
         for building in &snapshot.buildings {
-            let center = ground(
-                building.building.origin.column as f32 + building.columns as f32 / 2.0,
-                building.building.origin.row as f32 + building.rows as f32 / 2.0,
-            );
+            let center = footprint_center(building);
             // The temple rises through its drawn stages, then glows while working.
             let tc = &sheets.town_center;
             let frame = match building.building.construction {
@@ -374,10 +368,18 @@ impl WorldView {
             if moving {
                 desired = entry.velocity.x.atan2(entry.velocity.z);
             }
+            let mut lean = Vec2::ZERO;
             if let Some((target, activity)) = work {
                 name = activity;
                 desired = (target.x - entry.position.x).atan2(target.y - entry.position.z);
+                let toward = target - Vec2::new(entry.position.x, entry.position.z);
+                lean = toward.normalize_or_zero() * (toward.length() - 0.3).clamp(0.0, 0.2);
             }
+            entry.lean = entry.lean.lerp(lean, (dt * 6.0).min(1.0));
+            let position = ground(
+                entry.position.x + entry.lean.x,
+                entry.position.z + entry.lean.y,
+            );
             let turn = (desired - entry.facing)
                 .sin()
                 .atan2((desired - entry.facing).cos());
@@ -407,21 +409,21 @@ impl WorldView {
             sprites.push((
                 entry.variant,
                 Sprite {
-                    anchor: entry.position.to_array(),
+                    anchor: position.to_array(),
                     size: [cell_size, cell_size],
                     pivot,
                     uv: uv(rect, sheet_size, mirror),
                 },
             ));
             decals.push(Decal {
-                center: (entry.position + Vec3::Y * 0.015).to_array(),
+                center: (position + Vec3::Y * 0.015).to_array(),
                 radius: 0.2,
                 color: [0.165, 0.165, 0.118, 0.28],
                 ring: 0.0,
             });
             if selection.units.contains(&unit.unit.id) {
                 decals.push(Decal {
-                    center: (entry.position + Vec3::Y * 0.02).to_array(),
+                    center: (position + Vec3::Y * 0.02).to_array(),
                     radius: 0.32,
                     color: TEAM_BLUE,
                     ring: 1.0,
@@ -465,10 +467,7 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
         } => {
             let resource = snapshot.resources.iter().find(|r| &r.id == resource_id)?;
             Some((
-                Vec2::new(
-                    resource.cell.column as f32 + 0.5,
-                    resource.cell.row as f32 + 0.5,
-                ),
+                terrain::cell_center(resource.cell),
                 activity_for(resource.kind),
             ))
         }
@@ -477,14 +476,21 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
                 .buildings
                 .iter()
                 .find(|b| &b.building.id == building_id)?;
-            let center = Vec2::new(
-                building.building.origin.column as f32 + building.columns as f32 / 2.0,
-                building.building.origin.row as f32 + building.rows as f32 / 2.0,
-            );
+            let center = footprint_center(building);
+            let center = Vec2::new(center.x, center.z);
             Some((center, "build"))
         }
         _ => None,
     }
+}
+
+/// World point at the middle of a building's footprint.
+pub fn footprint_center(building: &aoa_game::BuildingView) -> Vec3 {
+    let origin = &building.building.origin;
+    ground(
+        (origin.column as f32 + building.columns as f32 / 2.0) * terrain::CELL,
+        (origin.row as f32 + building.rows as f32 / 2.0) * terrain::CELL,
+    )
 }
 
 fn sample_at(samples: &VecDeque<(f64, Vec3)>, tick: f64) -> Vec3 {
