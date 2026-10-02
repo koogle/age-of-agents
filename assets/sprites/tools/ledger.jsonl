@@ -209,3 +209,15 @@
 {"t": 1790905938.7414558, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:fix_woman_walk_front", "est_usd": 0.01, "request_id": "01a0fa4f-e7e2-7873-a53b-cf1cd7a90d1e", "seconds": 2.9}
 {"t": 1790905938.936775, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:fix_elder_walk_front", "est_usd": 0.01, "request_id": "01a0fa4f-e84c-7561-89a0-e8dd9b5709c4", "seconds": 3.0}
 {"t": 1790905938.9533153, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:fix_woman_carry_front", "est_usd": 0.01, "request_id": "01a0fa4f-e857-7a10-a2a5-4ca13c444995", "seconds": 3.0}
+{"t": 1790930239.985452, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:complete", "est_usd": 0.0398, "request_id": "01a0fbc2-9513-7df1-9036-419732488f57", "seconds": 11.5}
+{"t": 1790930264.3532016, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:build66", "est_usd": 0.0398, "request_id": "01a0fbc2-fcec-7283-af6c-2873a5ae067b", "seconds": 9.3}
+{"t": 1790930264.3978949, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:working", "est_usd": 0.0398, "request_id": "01a0fbc2-fd0b-71c2-b4fb-39d4bb036690", "seconds": 9.3}
+{"t": 1790930264.5220888, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:build33", "est_usd": 0.0398, "request_id": "01a0fbc2-fd18-7b91-b2ac-30f75c546e04", "seconds": 9.4}
+{"t": 1790930264.5381224, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:foundation", "est_usd": 0.0398, "request_id": "01a0fbc2-fce9-7ba1-b8ee-d00568e2a431", "seconds": 9.5}
+{"t": 1790930292.998774, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:build33", "est_usd": 0.0398, "request_id": "01a0fbc3-6c6d-7322-b094-59c214c1b242", "seconds": 9.4}
+{"t": 1790930293.0136478, "endpoint": "fal-ai/nano-banana/edit", "tag": "tc:working", "est_usd": 0.0398, "request_id": "01a0fbc3-6c82-7363-bc69-f5c01e40201e", "seconds": 9.4}
+{"t": 1790930332.136118, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tc_complete", "est_usd": 0.005, "request_id": "01a0fbc4-1fb6-7803-a1df-9e700e7b1b27", "seconds": 2.6}
+{"t": 1790930332.1769462, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tc_working", "est_usd": 0.005, "request_id": "01a0fbc4-1fda-70a1-97f0-4d1f6135690e", "seconds": 2.6}
+{"t": 1790930332.2678573, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tc_build66", "est_usd": 0.005, "request_id": "01a0fbc4-1fea-7cc0-a3d2-859400a790f6", "seconds": 2.7}
+{"t": 1790930332.289926, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tc_build33", "est_usd": 0.005, "request_id": "01a0fbc4-1fee-79a2-b7e7-1cb861d855f0", "seconds": 2.7}
+{"t": 1790930332.506029, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tc_foundation", "est_usd": 0.005, "request_id": "01a0fbc4-1ff4-7693-8a10-5896c2e9988d", "seconds": 2.9}

@@ -26,7 +26,8 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 
 - On master: `assets/ui/` icon kit and coin buttons, `assets/terrain/` painted ground (revision 2), `assets/sprites/villager{,_woman,_elder}` billboards (drawn by `frontend/villager-sprite.js`), `assets/models/` opt-in GLBs (temple town center on by default via `?glb=`).
 - Branch `claude/fal-sprites-resources` (PR #12): base villager walk fix (no hop, moving carry stride; layout unchanged), and `assets/sprites/resources.{png,json}` resource/tree billboards (9 nodes, 21 sprites, depletion stages, base anchor, per-node world scale), not wired in yet.
-- FAL spend about $7.64 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+- `assets/sprites/towncenter.{png,json}`: town center billboard (foundation, build33, build66, complete, working; 512 px cells, footprint-centre anchor) for the Rust/wgpu client (branch `claude/fal-towncenter-sprites`).
+- FAL spend about $7.94 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
 

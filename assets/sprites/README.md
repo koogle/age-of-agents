@@ -97,3 +97,34 @@ The other images in this folder (`agent_*.png`, `sprite_*.png`, `tile_*.png`, `b
 ## Cost
 
 About $0.39: eight nano-banana/edit strips including the berry redo, and seven BiRefNet runs. Revision 2 (three berry tries, one gold strip, two cutouts): about $0.18.
+
+# Town center billboard
+
+`towncenter.png` (2560×512 RGBA, five 512 px cells in a row) and `towncenter.json`: the marble temple town center in the same illustrated style, view and light as the villager and resource sheets. Fine internal pen lines, no heavy outer stroke, no baked ground shadow, and a small blue team pennant on the roof ridge.
+
+## Layout (`towncenter.json`)
+
+- **`frames`:** `foundation`, `build33`, `build66`, `complete`, `working`, each a cell rect. `constructionStages` suggests the construction-progress threshold at which each building frame starts (0, 0.15, 0.5); `complete` shows when construction ends, and `working` while the job slot runs.
+- **`anchor [256, 344]`:** the footprint centre on the ground, measured as the middle of the flat foundation platform. All five frames share it, so the building grows in place.
+- **`baseBottom [256, 470]`:** the lowest point of the front step, if a client prefers bottom anchoring.
+- **`unitsPerPixel`:** world units per sprite pixel, the same for every frame. It is set so the complete temple's full sprite width is 1.9 units (2×2 footprint; villager 0.78 tall); the cell is about 2.09 units.
+
+## Pipeline
+
+1. **Complete temple** (`tools/tc_gen.py`): `fal-ai/nano-banana/edit` with the villager master and the stone resource strip as style references, 1024². The prompt asks for a white marble temple on a three-step base with fluted columns, a terracotta gable roof with pediments, a blue pennant, a 45° three-quarter view, and no ground or shadow.
+2. **Other stages:** nano-banana/edit of the complete image, asking for the same footprint, camera, scale and position. Foundation is the lowest step as an outline with blocks and planks. build33 is knee-high column stumps on the finished base, with no beams or roof. build66 is full columns, a partial roof frame and scaffolding with ladders. working is the finished temple plus a doorway glow and smoke. build33 and working were each regenerated once: the first build33 already had full columns and beams, and the first working lost the pennant and shrank.
+3. **Cutout:** `fal-ai/birefnet/v2`.
+4. **Pack** (`tools/tc_pack.py`): the edits keep the complete image's framing (build33, complete and working share the same bounding box to the pixel), so all frames are placed in shared raw coordinates with one scale. The foundation, which the model drew about 9% larger, is rescaled about its bottom centre to the complete temple's width.
+5. **Review** (`tools/tc_contact.py`, `towncenter_contact.jpg`): every frame at game size (60 px per cell) with a villager beside it, on meadow and prairie.
+
+## Verdict
+
+- The five stages read clearly at game size and line up on one footprint. The temple matches the villager and resource style and palette.
+- **Weak spots:**
+  - The working frame's doorway glow is subtle and barely visible at game size.
+  - Most of its smoke wisp was lost in the cutout; a client particle or glow would read better.
+  - The build66 scaffolding extends a little beyond the base.
+
+## Cost
+
+About $0.30: seven nano-banana/edit images (the complete temple, four stages, two redos) and five BiRefNet runs.
