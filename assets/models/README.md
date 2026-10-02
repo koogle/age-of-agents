@@ -1,8 +1,16 @@
 # Generated 3D models
 
+The client picks generated models with `?glb=` (`frontend/models.js`): a comma-separated subset of `villager,towncenter,cypress`, `all`, or `none`. **Default: `towncenter` only**, the one model that reads better than its procedural counterpart at gameplay zoom. Loaders (`frontend/vendor/GLTFLoader.js`, `meshopt_decoder.js`, `SkeletonUtils.js`) and GLBs are fetched only for the selected models. If loading fails, the client warns once and uses the procedural models.
+
+| Model | Bytes | Triangles | Default | Verdict at gameplay zoom |
+| --- | --- | --- | --- | --- |
+| `towncenter.glb` | 126,484 | 5,483 | on | Clearly better: reads instantly as a marble temple and matches the diorama reference |
+| `cypress.glb` | 21,940 | 1,444 | off | About equal; nicer clumped foliage up close |
+| `villager.glb` | 275,516 | 5,094 | off | Less clear: slimmer, cream tunic on sand, no per-villager colour or team marker |
+
 ## `villager.glb` (275,516 bytes)
 
-A rigged, animated villager generated with fal.ai on 2026-10-01/02. Loaded only with `?villager=glb` (`frontend/models.js`); the procedural villager is the default and the fallback if loading fails.
+A rigged, animated villager generated with fal.ai on 2026-10-01/02. Loaded only with `?glb=villager` (or `all`); the procedural villager is the default. In the diorama look it uses the shared `paint()` matte material with its texture and no outline.
 
 | Property | Value |
 | --- | --- |
@@ -33,7 +41,7 @@ The game maps activities to clips as idle→idle, walk→walk, chop/mine/build�
 - `gltf-transform validate` on the raw Meshy output: no errors.
 - Skeleton overlay on the bind-pose mesh: joints sit at hips, knees, ankles, shoulders, and elbows. A manual 45–60° knee and elbow bend from rest deforms cleanly.
 - All clips share identical inverse bind matrices.
-- In-game, headless Chromium (SwiftShader), at the default camera distance and the closest zoom, desktop 1280×800 and phone 390×844: select → gather wood → walk → hammer swing → deposit, with no page errors. Without `?villager=glb` the loaders and GLB are never fetched.
+- In-game, headless Chromium (SwiftShader), at the default camera distance and the closest zoom, desktop 1280×800 and phone 390×844: select → gather wood → walk → hammer swing → deposit, with no page errors. With `?glb=none` the loaders and GLBs are never fetched.
 
 ## Cost
 
@@ -49,3 +57,33 @@ It fits the Mediterranean ink-comic direction far better than the block villager
 - The dig clip (Pull_Radish) is a crouch-and-pull, so the shovel points into the ground.
 - The outline follows the bind-pose normals, so it thins slightly on strongly bent joints.
 - Tripo's knee-length tunic is skinned to the thighs, so it stretches a little in wide strides.
+
+## `towncenter.glb` and `cypress.glb` (diorama look)
+
+Made on 2026-10-02 for the soft matte tilt-shift diorama direction (`assets/reference/diorama_primary.webp`).
+
+1. **Concepts** (`towncenter_concept.jpg`, `cypress_concept.jpg`): `fal-ai/nano-banana/edit` with the diorama reference attached (768²) as a style reference, two of each; picked the temple with the fully visible stepped base and the cleaner cypress. The prompts start with "Use the attached image only as a STYLE reference: soft matte 3D miniature tabletop diorama look, rounded slightly chunky shapes, smooth matte painted surfaces, warm sunlight, no outlines." and then ask for, respectively:
+   - Temple: "a small ancient Greek temple-style town hall, square footprint, white marble colonnade of six columns on each side around a cella, stepped marble base, warm terracotta tiled gable roof with pediments, simple and readable, low detail".
+   - Cypress: "a single tall slender Mediterranean cypress, dark green flame-shaped crown made of soft rounded foliage clumps, short brown trunk, simple and readable, low detail".
+
+   Both on a plain light-grey background, no ground, no text.
+2. **Cutout**: `fal-ai/birefnet/v2`, then padded onto a white square.
+3. **Image to 3D**: `tripo3d/p2/image-to-3d`, `texture_quality: standard`, `pbr: false`, seeds 7. `face_limit` was 6000 for the temple and 1500 for the cypress.
+4. **Optimize** (`tools/build_static.mjs`: `node build_static.mjs in.glb out.glb <simplify ratio> <texture px> <turn deg> <remap>`): bake an optional Y turn, downsize the texture, `dedup`, `prune`, `weld`, `simplify`, `quantize`, `meshopt`.
+   - Temple: ratio 1, 512², turn 0 (the pediment entrance already faces +Z), remap `marble`.
+   - Cypress: ratio 0.5, 256², turn 0, remap `foliage`.
+   - **Remap:** Tripo bakes dull colours (marble around RGB 149/134/123, foliage around 73/85/20). The remap puts each texel onto the procedural palette and keeps its relative shading: neutral stone becomes `#F6F1E4`, green leaves become `#34743E`. Terracotta gets a 1.15× lift and the trunk is left as is.
+
+Integration (`frontend/models.js`):
+- **Temple:** scaled to 1.8 world units across and grounded. While under construction, the procedural plinth, rising walls, scaffold and roof still show the stages; the temple appears when the building completes. The procedural team flag tower stays; its red cap peeks over the ridge like an acroterion. The yard props (barrels, crate) are dropped because they sank into the temple's steps. The build ghost shows the temple.
+- **Cypress:** replaces the conifer branch of the procedural `tree()` (wood nodes outside the `heath` biome), scaled to 1.1 world units tall.
+
+Costs: about $0.97 (four concepts $0.16, two BiRefNet runs, two Tripo P2 runs at about $0.40 each).
+
+Limitations:
+- The temple has no lit-window "working" cue (the procedural windows are hidden once it completes); chimney smoke still rises from the roof.
+- All cypresses share one silhouette apart from the random rotation and scale variation.
+
+## Total FAL spend
+
+About $3.32 for this branch (UI kit, coin buttons, and the three models), estimated from fal's published unit prices. The per-request ledger is `tools/ledger.jsonl`.

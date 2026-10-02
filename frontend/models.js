@@ -78,32 +78,65 @@ const CARGO = {
   fiber: () => group(part(G.cyl, 0xd8cf7a, [0, 0, 0], [0.04, 0.2, 0.04], { rotation: [0, 0, 1.3] }), part(G.cyl, 0x9a7a4a, [0, 0, 0], [0.042, 0.02, 0.042], { rotation: [0, 0, 1.3] }))
 };
 
-// Generated, rigged villager (assets/models/README.md). Opt in with ?villager=glb;
-// the procedural villager below stays the default and the fallback.
-const VILLAGER_GLB = '/assets/models/villager.glb';
+// Generated models (assets/models/README.md). Only the temple town center is on by
+// default, because it is the only one that reads better than its procedural model
+// at gameplay zoom; ?glb=villager,towncenter,cypress picks a set, ?glb=all or
+// ?glb=none overrides. Procedural models are the fallback if loading fails.
+const GLB_FILES = { villager: 'villager.glb', towncenter: 'towncenter.glb', cypress: 'cypress.glb' };
+const GLB_DEFAULT = 'towncenter';
 const VILLAGER_HEIGHT = 0.78;
+const TOWN_CENTER_WIDTH = 1.8;
+const CYPRESS_HEIGHT = 1.1;
 const CLIP_FOR = { idle: 'idle', walk: 'walk', chop: 'hammer', mine: 'hammer', build: 'hammer', dig: 'dig', forage: 'forage' };
-const villagerAsset = new URLSearchParams(location.search).get('villager') === 'glb'
-  ? await loadVillagerAsset().catch(error => (console.warn('villager.glb unavailable, using procedural villager', error), null))
-  : null;
+const glb = await loadModels(new URLSearchParams(location.search).get('glb') ?? GLB_DEFAULT)
+  .catch(error => (console.warn('generated models unavailable, using procedural models', error), {}));
+const villagerAsset = glb.villager;
 
-// Loaders are fetched only when the generated villager is requested.
-async function loadVillagerAsset() {
+// Loaders are fetched only when a generated model is requested.
+async function loadModels(param) {
+  const names = param === 'all' ? Object.keys(GLB_FILES) : (param || '').split(',').filter(name => GLB_FILES[name]);
+  if (!names.length) return {};
   const [{ GLTFLoader }, { MeshoptDecoder }, { clone }] = await Promise.all([
     import('./vendor/GLTFLoader.js'), import('./vendor/meshopt_decoder.js'), import('./vendor/SkeletonUtils.js')
   ]);
-  const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(VILLAGER_GLB);
-  const skinned = gltf.scene.getObjectByProperty('isSkinnedMesh', true);
-  // Texture-mapped twin of the shared matte material, keeping its world patch.
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const loaded = await Promise.all(names.map(name => loader.loadAsync(`/assets/models/${GLB_FILES[name]}`)));
+  const assets = {};
+  names.forEach((name, i) => {
+    const gltf = loaded[i];
+    // Texture-mapped twin of the shared matte material, keeping its world patch.
+    gltf.scene.traverse(node => {
+      if (!node.isMesh) return;
+      node.material = mapped(node.material.map);
+      node.castShadow = true;
+      node.receiveShadow = true;
+      node.raycast = () => {};
+    });
+    gltf.scene.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(gltf.scene, true);
+    const extent = size.getSize(new THREE.Vector3());
+    const scale = name === 'towncenter' ? TOWN_CENTER_WIDTH / Math.max(extent.x, extent.z)
+      : (name === 'villager' ? VILLAGER_HEIGHT : CYPRESS_HEIGHT) / extent.y;
+    assets[name] = { scene: gltf.scene, scale, floor: size.min.y, clone, clips: Object.fromEntries(gltf.animations.map(clip => [clip.name, clip])) };
+  });
+  return assets;
+}
+
+function mapped(map) {
   const base = paint(0xffffff);
   const material = base.clone();
-  material.map = skinned.material.map;
+  material.map = map;
   material.onBeforeCompile = base.onBeforeCompile;
   material.customProgramCacheKey = () => 'aoa-world-map';
-  gltf.scene.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(gltf.scene, true);
-  const clips = Object.fromEntries(gltf.animations.map(clip => [clip.name, clip]));
-  return { scene: gltf.scene, clone, material, clips, scale: VILLAGER_HEIGHT / (box.max.y - box.min.y), floor: box.min.y };
+  return material;
+}
+
+// A scaled, grounded copy of a static generated model; geometry and materials are shared.
+function placeModel(asset) {
+  const model = asset.scene.clone();
+  model.scale.multiplyScalar(asset.scale);
+  model.position.y = -asset.floor * asset.scale;
+  return model;
 }
 
 // Holder under `bone` whose bind-pose world transform is `desired` (in villager-root space).
@@ -120,15 +153,7 @@ function createModelVillager(seed) {
   model.scale.multiplyScalar(villagerAsset.scale);
   model.position.y = -villagerAsset.floor * villagerAsset.scale;
   root.add(model);
-  const skinned = [];
-  model.traverse(node => node.isSkinnedMesh && skinned.push(node));
-  skinned.forEach(node => {
-    node.material = villagerAsset.material;
-    node.castShadow = true;
-    node.receiveShadow = true;
-    node.frustumCulled = false;
-    node.raycast = () => {};
-  });
+  model.traverse(node => { if (node.isSkinnedMesh) node.frustumCulled = false; });
   root.updateMatrixWorld(true);
   // Tools and cargo are the procedural props, sized for the procedural villager's 1.3 scale.
   const at = (bone, offset) => new THREE.Matrix4().compose(
@@ -288,7 +313,9 @@ export function poseVillager(root, activity, resourceKind, carrying, time) {
 function tree(conifer, seed) {
   const g = new THREE.Group();
   // Mediterranean pair: tall dark cypress spires, or a gnarled silver-green olive.
-  if (conifer) {
+  if (conifer && glb.cypress) {
+    g.add(placeModel(glb.cypress));
+  } else if (conifer) {
     const green = random(seed) > 0.5 ? 0x2f6b3c : 0x3a7a44;
     g.add(part(G.cyl, 0x6b4a2e, [0, 0.06, 0], [0.035, 0.12, 0.035]));
     g.add(part(G.ball, green, [0, 0.5, 0], [0.13, 0.42, 0.13]));
@@ -410,7 +437,15 @@ export function createTownCenter() {
   for (const y of [0.35, 0.75]) for (const z of [-0.65, 0.7]) scaffold.add(part(G.cyl, 0xb08a58, [0, y, z], [0.015, 1.45, 0.015], { rotation: [0, 0, Math.PI / 2] }));
   scaffold.add(part(G.box, 0xc9a26a, [0.55, 0.16, 0.75], [0.4, 0.05, 0.12]), part(G.box, 0xc9a26a, [0.58, 0.21, 0.73], [0.36, 0.05, 0.12]));
   root.add(plinth, walls, roof, tower, props, scaffold);
-  root.userData.parts = { walls, roof, tower, props, scaffold, windows, flag, chimney: new THREE.Vector3(0.3, 1.18, -0.2) };
+  // The generated temple stands in for the finished hall; the procedural plinth, walls and roof
+  // still show the construction stages. Yard props are dropped (they would sink into its steps).
+  const temple = glb.towncenter ? placeModel(glb.towncenter) : null;
+  if (temple) {
+    root.add(temple);
+    props.clear();
+    plinth.visible = walls.visible = roof.visible = false;
+  }
+  root.userData.parts = { plinth, walls, roof, tower, props, scaffold, windows, flag, temple, chimney: new THREE.Vector3(0.3, 1.18, -0.2) };
   return root;
 }
 
@@ -427,6 +462,11 @@ export function poseTownCenter(root, construction, working, time) {
   p.props.visible = progress >= 1;
   p.scaffold.visible = progress < 1;
   p.windows.forEach(w => { w.material = working ? WINDOW_LIT : WINDOW_DARK; });
+  if (p.temple) {
+    p.temple.visible = progress >= 1;
+    p.plinth.visible = p.walls.visible = progress < 1;
+    p.roof.visible &&= progress < 1;
+  }
   p.flag.rotation.y = Math.sin(time * 3) * 0.25;
   p.flag.scale.x = 0.2 + Math.sin(time * 5) * 0.015;
 }

@@ -34,9 +34,10 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Generated art (branch `claude/fal-generated-assets`, PR into this branch)
 
-- `assets/ui/`: FAL-generated paper-and-ink UI kit (18 icons at 128 px, seamless paper tile, Greek-key strip and 9-slice frame, `manifest.json`); not loaded by the client yet, intended for the canvas HUD.
-- `assets/models/villager.glb`: rigged Tripo + Meshy villager (275 KB, 5 clips) behind `?villager=glb`; procedural villager stays default because it reads more clearly at gameplay zoom.
-- FAL spend about $2.27 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+- `assets/ui/`: FAL-generated illustrated icon kit (18 icons at 128 px, paper tile, Greek-key strip and 9-slice frame, `manifest.json`); the canvas HUD draws the icons.
+- `assets/ui/buttons/`: blank coin button frames (normal, hover, pressed, disabled).
+- `assets/models/`: generated GLBs selected with `?glb=`; the temple town center (126 KB) is on by default, while the rigged villager (275 KB, 5 clips) and the cypress (22 KB) are opt-in because they don't read better than the procedural ones at gameplay zoom.
+- FAL spend about $3.32 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
 
