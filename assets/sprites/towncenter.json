@@ -1,0 +1,67 @@
+{
+ "image": "towncenter.png",
+ "size": [
+  2560,
+  512
+ ],
+ "cell": [
+  512,
+  512
+ ],
+ "anchor": [
+  256,
+  344
+ ],
+ "baseBottom": [
+  256,
+  470
+ ],
+ "unitsPerPixel": 0.004086,
+ "note": "anchor = footprint centre on the ground (middle of the foundation platform); baseBottom = lowest point of the front step. All frames share one scale and anchor.",
+ "frames": {
+  "foundation": [
+   0,
+   0,
+   512,
+   512
+  ],
+  "build33": [
+   512,
+   0,
+   512,
+   512
+  ],
+  "build66": [
+   1024,
+   0,
+   512,
+   512
+  ],
+  "complete": [
+   1536,
+   0,
+   512,
+   512
+  ],
+  "working": [
+   2048,
+   0,
+   512,
+   512
+  ]
+ },
+ "constructionStages": [
+  [
+   "foundation",
+   0.0
+  ],
+  [
+   "build33",
+   0.15
+  ],
+  [
+   "build66",
+   0.5
+  ]
+ ]
+}
