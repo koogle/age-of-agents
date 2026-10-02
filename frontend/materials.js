@@ -150,33 +150,3 @@ export function paint(color, options = {}) {
   }
   return paintCache.get(key);
 }
-
-// Thin warm-brown linework, as on hand-drawn characters and buildings: back
-// faces pushed out along view-space normals by a depth-scaled amount so the
-// line keeps a constant on-screen width.
-const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x3b2a1e, side: THREE.BackSide });
-lineMaterial.onBeforeCompile = shader => {
-  Object.assign(shader.uniforms, { uCurve: uniforms.uCurve, uCurveCenter: uniforms.uCurveCenter });
-  shader.vertexShader = shader.vertexShader
-    .replace('#include <common>', `#include <common>\n${CURVE_UNIFORMS}`)
-    .replace('#include <project_vertex>', `
-    vec4 mvPosition = vec4(transformed, 1.0);
-    vec3 lineNormal = normal;
-    #ifdef USE_INSTANCING
-    mvPosition = instanceMatrix * mvPosition;
-    lineNormal = mat3(instanceMatrix) * lineNormal;
-    #endif
-    mvPosition = modelViewMatrix * mvPosition;
-    // Width scales with depth so the line stays about 1.5 px on screen.
-    float lineWidth = 0.0021 * -mvPosition.z;
-    mvPosition.xyz += normalize(normalMatrix * lineNormal) * lineWidth;
-    gl_Position = projectionMatrix * mvPosition;
-    ${CURVE_GLSL.replace('gl_Position = projectionMatrix * viewMatrix * bentWorld;', 'gl_Position = projectionMatrix * (viewMatrix * bentWorld + vec4(normalize(normalMatrix * lineNormal) * lineWidth, 0.0));')}`);
-};
-
-export function lined(mesh) {
-  const line = new THREE.Mesh(mesh.geometry, lineMaterial);
-  line.raycast = () => {};
-  mesh.add(line);
-  return mesh;
-}

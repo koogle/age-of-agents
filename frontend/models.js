@@ -1,7 +1,7 @@
-// Procedural low-poly models, cel-shaded with thin linework (Ghibli style).
+// Procedural low-poly placeholder models, cel-shaded; ink lines come from the finish pass.
 // One cell is one world unit; every model stands on y = 0 at its anchor.
 import * as THREE from 'three';
-import { lined, paint } from './materials.js';
+import { paint } from './materials.js';
 import { random } from './terrain.js';
 
 export const TEAM_COLOR = 0x2f6fe0;
@@ -25,7 +25,6 @@ function part(geometry, color, [x, y, z], [sx, sy, sz], options = {}) {
   mesh.castShadow = options.shadow !== false;
   mesh.receiveShadow = true;
   // Linework on everything but tiny details, which would turn to dark specks.
-  if (options.line !== false && Math.max(sx, sy, sz) > 0.03) lined(mesh);
   return mesh;
 }
 function group(...children) {
@@ -106,8 +105,7 @@ async function loadModels(param) {
   const assets = {};
   names.forEach((name, i) => {
     const gltf = loaded[i];
-    // Texture-mapped twin of the shared cel material; static meshes also get the linework
-    // (a skinned mesh would leave its unskinned line hull behind).
+    // Texture-mapped twin of the shared cel material.
     const meshes = [];
     gltf.scene.traverse(node => node.isMesh && meshes.push(node));
     meshes.forEach(node => {
@@ -115,7 +113,6 @@ async function loadModels(param) {
       node.castShadow = true;
       node.receiveShadow = true;
       node.raycast = () => {};
-      if (!node.isSkinnedMesh) lined(node);
     });
     gltf.scene.updateMatrixWorld(true);
     const size = new THREE.Box3().setFromObject(gltf.scene, true);
