@@ -1,232 +1,511 @@
-// DOM overlay drawn as inked paper: coin medallions for the stockpile on top and
-// a console of illustrated cards at the bottom (commands, info, minimap). Real
-// buttons only; the canvas never draws UI.
+// The HUD, painted inside the WebGL canvas and mostly out of the way, after
+// assets/reference/diorama_primary.webp: a round globe minimap, a small speed
+// pill, a resource pill that lists only what you have, and glossy medallion
+// buttons that appear only when something is selected. A visually hidden DOM
+// mirror of every button keeps keyboard and screen-reader access.
+import { STYLE, createUiLayer, iconImage } from './ui-layer.js';
+import { ACTIVITY_TEXT, ART, FRIENDLY_ERRORS, ICONS, PREREQUISITE, RESOURCES, TECHNOLOGIES } from './hud-content.js';
 import { BIOME_COLORS } from './terrain.js';
 
-const RESOURCES = [
-  ['wood', 'Wood', '<rect x="2" y="8" width="18" height="8" rx="4" fill="#b07a42" stroke="#3a2210"/><ellipse cx="19" cy="12" rx="3" ry="4" fill="#f0cf96" stroke="#3a2210"/><circle cx="19" cy="12" r="1.3" fill="#b07a42"/>'],
-  ['food', 'Food', '<circle cx="8.5" cy="14" r="4.2" fill="#e0303f" stroke="#4a0c12"/><circle cx="15.5" cy="15" r="3.8" fill="#c21f30" stroke="#4a0c12"/><circle cx="12" cy="8.5" r="3.6" fill="#f0485a" stroke="#4a0c12"/><path d="M12 5c1-2 3-3 5-3" stroke="#3f7a2a" stroke-width="1.8" fill="none"/>'],
-  ['stone', 'Stone', '<path d="M3 18 6 8l8-4 7 6 1 8z" fill="#d6d0c4" stroke="#3a3228"/><path d="M6 8l8-4 1 7z" fill="#f2eee6"/>'],
-  ['gold', 'Gold', '<path d="M12 2 20 12 12 22 4 12z" fill="#ffcf2e" stroke="#6a4a00"/><path d="M12 2 20 12h-8z" fill="#fff2a0"/>'],
-  ['iron', 'Iron', '<path d="M4 17h16l-2.5-7h-11z" fill="#8a8fa0" stroke="#2a2e38"/><path d="M6.5 10h11L16 7.5H8z" fill="#c4c9d6" stroke="#2a2e38"/>'],
-  ['clay', 'Clay', '<path d="M8 4h8l-1 3c3 1 4.5 4 3.5 7-1 3.5-4 6-6.5 6S7 17.5 6 14c-1-3 .5-6 3.5-7z" fill="#e2784c" stroke="#5a1e0c"/>'],
-  ['fiber', 'Fiber', '<path d="M12 22V6" stroke="#6f8a2a" stroke-width="1.8"/><ellipse cx="12" cy="5" rx="2.2" ry="3.2" fill="#f2df6a" stroke="#6a5a10"/><ellipse cx="8.5" cy="10.5" rx="1.8" ry="2.8" fill="#f2df6a" stroke="#6a5a10" transform="rotate(-30 8.5 10.5)"/><ellipse cx="15.5" cy="10.5" rx="1.8" ry="2.8" fill="#f2df6a" stroke="#6a5a10" transform="rotate(30 15.5 10.5)"/>']
-];
-const ICONS = {
-  build: '<path d="M4 20V11l8-6 8 6v9z" fill="#e0452e" stroke="#2c1b0e" stroke-width="1.5"/><path d="M7 20v-7h10v7" fill="#fbefd2" stroke="#2c1b0e" stroke-width="1.5"/><path d="M10.5 20v-4h3v4" fill="#6b4528"/>',
-  cancel: '<path d="M6 6l12 12M18 6 6 18" stroke="#7d1f17" stroke-width="3.5" stroke-linecap="round"/>',
-  villager: '<circle cx="12" cy="7" r="3.6" fill="#f2c9a0" stroke="#2c1b0e" stroke-width="1.3"/><path d="M5 21v-4.5C5 13 8 11.5 12 11.5s7 1.5 7 5V21z" fill="#5b8e7d" stroke="#2c1b0e" stroke-width="1.3"/><path d="M8.5 12.2h7l-1 1.8h-5z" fill="#2f6fe0"/>',
-  forestry: '<path d="M12 3 6 13h3l-3 5h12l-3-5h3z" fill="#4f9a5a" stroke="#1e3a20" stroke-width="1.3"/><rect x="11" y="18" width="2" height="4" fill="#6b4528"/>',
-  agriculture: '<path d="M12 22V8" stroke="#6f8a2a" stroke-width="1.8"/><ellipse cx="12" cy="6" rx="2.4" ry="3.6" fill="#f2c84a" stroke="#6a4a00"/><ellipse cx="8.5" cy="12" rx="2" ry="3" fill="#f2c84a" stroke="#6a4a00" transform="rotate(-35 8.5 12)"/><ellipse cx="15.5" cy="12" rx="2" ry="3" fill="#f2c84a" stroke="#6a4a00" transform="rotate(35 15.5 12)"/>',
-  masonry: '<rect x="3" y="14" width="8" height="5" fill="#d6d0c4" stroke="#3a3228"/><rect x="13" y="14" width="8" height="5" fill="#d6d0c4" stroke="#3a3228"/><rect x="8" y="8" width="8" height="5" fill="#e2784c" stroke="#5a1e0c"/>',
-  mining: '<path d="M4 9c4-5 12-5 16 0" stroke="#5a5f6e" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M12 6v15" stroke="#8a5a30" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17l3 3-3 2-2-3z" fill="#ffcf2e" stroke="#6a4a00"/>',
-  textiles: '<ellipse cx="12" cy="12" rx="6" ry="8" fill="#f2df6a" stroke="#6a5a10" stroke-width="1.3"/><path d="M6.5 9h11M6 12h12M6.5 15h11" stroke="#b8a03a"/><path d="M18 18l3 3" stroke="#7a7f8c" stroke-width="1.6"/>',
-  townCenter: '<path d="M3 21V12l9-7 9 7v9z" fill="#e0452e" stroke="#2c1b0e" stroke-width="1.3"/><rect x="6" y="13" width="12" height="8" fill="#fbefd2" stroke="#2c1b0e" stroke-width="1.3"/><rect x="10.5" y="16" width="3" height="5" fill="#6b4528"/><path d="M12 5V1.5l4 1.5-4 1.5" fill="#2f6fe0" stroke="#2c1b0e" stroke-width=".8"/>',
-  group: '<circle cx="8" cy="8" r="3" fill="#f2c9a0" stroke="#2c1b0e"/><circle cx="16" cy="8" r="3" fill="#d8a47a" stroke="#2c1b0e"/><path d="M2 20v-3.5c0-3 2.5-4.5 6-4.5s6 1.5 6 4.5V20z" fill="#5b8e7d" stroke="#2c1b0e"/><path d="M10 20v-3.5c0-3 2.5-4.5 6-4.5s6 1.5 6 4.5V20z" fill="#c8553d" stroke="#2c1b0e"/>',
-  scroll: '<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7" fill="#fbefd2" stroke="#6b4528" stroke-width="1.4"/><path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1V6a2 2 0 0 0-1-2z" fill="#e2c992" stroke="#6b4528" stroke-width="1.4"/><path d="M10 9h6M10 12h6M10 15h4" stroke="#8a6524"/>'
-};
-const TECHNOLOGIES = {
-  forestry: ['Forestry', 'Wood +20%'],
-  agriculture: ['Agriculture', 'Food +20%'],
-  masonry: ['Masonry', 'Stone and clay +20%'],
-  mining: ['Mining', 'Gold and iron +20%'],
-  textiles: ['Textiles', 'Fiber +20%']
-};
-const PREREQUISITE = { mining: 'masonry', textiles: 'agriculture' };
-const FRIENDLY_ERRORS = {
-  'unit is busy': 'That villager is busy with its current task.',
-  'destination cell is occupied': 'Something already stands there.',
-  'target is unreachable': 'No path leads there.',
-  'build site is blocked or outside the world': 'The town center needs a clear 2×2 site.',
-  'insufficient wood': 'You need 20 wood to build.',
-  'insufficient food': 'You need 50 food to train a villager.'
-};
-const ACTIVITY_TEXT = {
-  idle: 'Awaiting orders', move: 'Walking', build: 'Building',
-  to_resource: 'Heading out to gather', gathering: 'Gathering', returning: 'Carrying goods home', depositing: 'Unloading'
-};
-const svg = (body, size = 24) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true">${body}</svg>`;
+const ALWAYS_SHOWN = new Set(['wood', 'food']);
 
-export function createHud({ onSpeed, onReset, onTrain, onResearch, onBuild, onCancel, onMinimap }) {
-  const $ = id => document.getElementById(id);
-  const values = {};
-  for (const [key, label, icon] of RESOURCES) {
-    const item = document.createElement('li');
-    item.title = label;
-    item.innerHTML = `<span class="coin">${svg(icon)}</span><span class="sr">${label}</span><strong>0</strong>`;
-    $('stockpiles').append(item);
-    values[key] = { item, strong: item.querySelector('strong'), last: 0 };
-  }
-  document.querySelectorAll('#speed-controls button').forEach(button => {
-    button.addEventListener('click', () => onSpeed(Number(button.dataset.speed)));
-  });
-  $('reset-world').addEventListener('click', () => {
-    if (confirm('Reset the world? All progress will be lost.')) onReset();
-  });
+export function createHud(renderer, actions) {
+  const layer = createUiLayer(renderer);
+  const { view } = layer;
+  const state = {
+    world: null, selection: { units: new Set(), building: null }, buildMode: false, online: false,
+    hover: null, pressed: null, dragGlobe: false, toast: '', toastUntil: 0, bumps: {}, last: {},
+    dirty: true, globeDirty: true, corners: [], commands: [], a11yKey: ''
+  };
+  const icon = body => iconImage(body, () => { state.dirty = true; });
+  document.fonts?.ready.then(() => { state.dirty = true; });
 
-  // The command grid is rebuilt only when its context changes, so a button is
-  // never replaced between press and release; enabled states update in place.
-  const commands = $('commands');
-  let commandContext = '';
-  let buttons = [];
-  function command(icon, label, cost, onClick, key) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'command';
-    button.title = label;
-    button.setAttribute('aria-label', cost ? `${label}, ${cost}` : label);
-    button.innerHTML = `${svg(ICONS[icon], 34)}${cost ? `<span class="cost">${cost}</span>` : ''}${key ? `<span class="key">${key}</span>` : ''}`;
-    button.addEventListener('click', onClick);
-    return button;
-  }
-  function renderCommands(context, specs) {
-    if (context === commandContext) return;
-    commandContext = context;
-    buttons = specs.map(spec => command(...spec));
-    commands.replaceChildren(...buttons);
-    const slots = Math.max(0, (buttons.length <= 4 ? 4 : 8) - buttons.length);
-    for (let i = 0; i < slots; i += 1) commands.append(Object.assign(document.createElement('span'), { className: 'slot' }));
+  // Generated illustrations (assets/ui) replace the vector placeholders as
+  // soon as they load; until then, or if one is missing, the placeholder draws.
+  const art = new Map();
+  function picture(name, fallback) {
+    if (!art.has(name)) {
+      const image = new Image();
+      image.onload = () => { state.dirty = true; };
+      image.src = `/assets/ui/${ART[name]}`;
+      art.set(name, image);
+    }
+    const image = art.get(name);
+    return image.complete && image.naturalWidth ? image : icon(fallback);
   }
 
-  let toastTimer = 0;
-  function toast(message) {
-    const element = $('toast');
-    element.textContent = FRIENDLY_ERRORS[message] || message;
-    element.classList.add('visible');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => element.classList.remove('visible'), 2400);
+  // Layout after Jakob's second diorama reference (see assets/reference/README.md): a menu coin top-left, a
+  // row of resource coins top-right, a parchment globe bottom-right with speed
+  // coins on its shoulder, and one slim command bar at the bottom centre.
+  function layout() {
+    const mobile = view.width < 700;
+    const r = mobile ? 46 : 76;
+    const globe = mobile
+      ? { cx: view.width - 14 - r, cy: view.height - 14 - r, r }
+      : { cx: view.width - 22 - r, cy: view.height - 22 - r, r };
+    return {
+      mobile, globe,
+      menu: { x: 14, y: 14, d: mobile ? 36 : 42 },
+      resourceCoin: mobile ? 30 : 36,
+      button: mobile ? 42 : 48,
+      speedCoin: mobile ? 28 : 32,
+      dockBottom: view.height - (mobile ? 14 : 22),
+      // Keep the bar centred on the picture but clear of the globe.
+      dockCenter: mobile ? (view.width - (2 * r + 28)) / 2 : view.width / 2
+    };
   }
 
-  const minimap = $('minimap');
-  const mini = minimap.getContext('2d');
-  function minimapCell(event) {
-    const rect = minimap.getBoundingClientRect();
-    return { x: (event.clientX - rect.left) / rect.width * 30, z: (event.clientY - rect.top) / rect.height * 20 };
+  // ---------- what the HUD offers ----------
+  function describe() {
+    const { world, selection, buildMode } = state;
+    const units = world.units.filter(unit => selection.units.has(unit.id));
+    const building = world.buildings.find(b => b.id === selection.building);
+    if (units.length) {
+      const commands = buildMode
+        ? [{ id: 'cancel', icon: 'cancel', label: 'Cancel placement', cost: 'Esc', enabled: true, run: actions.onCancel }]
+        : [{ id: 'build', icon: 'build', label: 'Build town center', cost: '20 wood', enabled: world.stockpile.wood >= 20, run: actions.onBuild }];
+      if (units.length === 1) {
+        const unit = units[0];
+        const phase = unit.action.type === 'gather' ? unit.action.phase : unit.action.type;
+        const cargo = unit.cargo ? `, carrying ${Math.floor(unit.cargo.amount)} ${unit.cargo.kind}` : '';
+        return { portrait: 'villager', title: unit.id.replace('villager-', 'Villager '), detail: `${ACTIVITY_TEXT[phase] || phase}${cargo}`, commands };
+      }
+      const idle = units.filter(unit => unit.action.type === 'idle').length;
+      return { portrait: 'group', title: `${units.length} villagers`, detail: `${idle} awaiting orders`, commands };
+    }
+    if (building && building.construction !== null) {
+      return { portrait: 'townCenter', title: 'Town center foundation', detail: 'Villagers can help build it', job: building.construction / 4, commands: [] };
+    }
+    if (building) {
+      const job = building.job;
+      const known = world.researched_technologies;
+      return {
+        portrait: 'townCenter',
+        title: 'Town center',
+        detail: job ? (job.type === 'produce' ? 'Training a villager' : `Researching ${TECHNOLOGIES[job.technology][0]}`) : 'Ready',
+        job: job && job.elapsed_seconds / (job.type === 'produce' ? 6 : 8),
+        commands: [
+          { id: 'train', icon: 'train', label: 'Train villager', cost: '50 food', enabled: !job && world.stockpile.food >= 50, run: actions.onTrain },
+          ...Object.entries(TECHNOLOGIES).map(([key, [label, effect]]) => {
+            const done = known.includes(key);
+            const blocked = PREREQUISITE[key] && !known.includes(PREREQUISITE[key]);
+            return {
+              id: key, icon: key, done,
+              label: `${label}: ${effect}`,
+              cost: done ? 'researched' : blocked ? `needs ${TECHNOLOGIES[PREREQUISITE[key]][0]}` : '40 food, 20 wood',
+              enabled: !done && !blocked && !job && world.stockpile.food >= 40 && world.stockpile.wood >= 20,
+              run: () => actions.onResearch(key)
+            };
+          })
+        ]
+      };
+    }
+    return null;
   }
-  minimap.addEventListener('pointerdown', event => {
-    minimap.setPointerCapture(event.pointerId);
-    onMinimap(minimapCell(event));
-  });
-  minimap.addEventListener('pointermove', event => {
-    if (event.buttons) onMinimap(minimapCell(event));
-  });
 
-  function drawMinimap(world, viewCorners) {
-    const sx = minimap.width / world.columns;
-    const sy = minimap.height / world.rows;
+  // ---------- drawing helpers ----------
+  function pill(c, x, y, w, h) {
+    c.save();
+    c.shadowColor = STYLE.shadow;
+    c.shadowBlur = 8;
+    c.shadowOffsetY = 2;
+    c.fillStyle = STYLE.glass;
+    c.beginPath();
+    c.roundRect(x, y, w, h, h / 2);
+    c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(255,255,255,0.9)';
+    c.lineWidth = 1;
+    c.stroke();
+  }
+  // A coin button in the style of the generated portrait coins: bronze-gold
+  // rim, ivory face, and the illustrated icon in the middle.
+  function coin(c, x, y, d, image, { enabled = true, hot = false, done = false, label = '', active = false } = {}) {
+    const r = d / 2;
+    const cx = x + r;
+    const cy = y + r - (hot ? 3 : 0);
+    c.save();
+    if (!enabled && !done) {
+      c.globalAlpha = 0.62;
+      c.filter = 'grayscale(0.85)';
+    }
+    c.shadowColor = hot ? 'rgba(255,196,96,0.85)' : STYLE.shadow;
+    c.shadowBlur = hot ? 16 : 7;
+    c.shadowOffsetY = hot ? 2 : 3;
+    const rim = c.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    rim.addColorStop(0, '#f6dc9a');
+    rim.addColorStop(0.45, done ? '#e2b04a' : '#c9963f');
+    rim.addColorStop(1, '#7d5420');
+    c.fillStyle = rim;
+    c.beginPath();
+    c.arc(cx, cy, r, 0, Math.PI * 2);
+    c.fill();
+    c.shadowColor = 'transparent';
+    const face = c.createRadialGradient(cx - r * 0.25, cy - r * 0.3, r * 0.1, cx, cy, r * 0.82);
+    face.addColorStop(0, '#fffaf0');
+    face.addColorStop(1, '#efe3c8');
+    c.fillStyle = face;
+    c.beginPath();
+    c.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = 'rgba(110,74,30,0.55)';
+    c.lineWidth = 1;
+    c.stroke();
+    c.beginPath();
+    c.arc(cx, cy, r - 1, 0, Math.PI * 2);
+    c.strokeStyle = 'rgba(90,60,20,0.6)';
+    c.stroke();
+    if (image) c.drawImage(image, cx - r * 0.66, cy - r * 0.66, r * 1.32, r * 1.32);
+    if (label) {
+      if (active) {
+        c.fillStyle = STYLE.accent;
+        c.beginPath();
+        c.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.fillStyle = active ? '#fffaf0' : STYLE.ink;
+      c.font = `800 ${Math.round(d * 0.36)}px ${STYLE.body}`;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText(label, cx, cy + 1);
+    }
+    c.restore();
+    if (done) {
+      c.fillStyle = '#4f9a5a';
+      c.beginPath();
+      c.arc(cx + r * 0.68, cy + r * 0.68, r * 0.2, 0, Math.PI * 2);
+      c.fill();
+      c.strokeStyle = '#fffaf0';
+      c.lineWidth = 1.5;
+      c.stroke();
+    }
+  }
+
+  // ---------- panels ----------
+  function paintMenu(L) {
+    const panel = layer.panel('menu');
+    const { x, y, d } = L.menu;
+    const c = panel.begin(x - 8, y - 8, d + 16, d + 16, view.height, view.dpr);
+    const hot = state.hover === 'reset';
+    coin(c, 8, 8, d, null, { hot, label: '\u21BA' });
+    c.fillStyle = state.online ? '#5f9f5a' : STYLE.accent;
+    c.beginPath();
+    c.arc(8 + d * 0.86, 8 + d * 0.86, 4, 0, Math.PI * 2);
+    c.fill();
+    panel.regions.push({ id: 'reset', x: 8, y: 8, w: d, h: d, round: true, enabled: true, run: actions.onReset, label: 'Reset the world' });
+    panel.end();
+  }
+
+  function paintResources(L, now) {
+    const panel = layer.panel('resources');
+    const shown = RESOURCES.filter(([key]) => ALWAYS_SHOWN.has(key) || (state.world.stockpile[key] || 0) >= 1);
+    const d = L.resourceCoin;
+    const step = d + (L.mobile ? 14 : 22);
+    const width = shown.length * step + 8;
+    const height = d + 26;
+    const c = panel.begin(view.width - width - (L.mobile ? 8 : 16), 10, width, height, view.height, view.dpr);
+    c.textAlign = 'center';
+    c.textBaseline = 'alphabetic';
+    shown.forEach(([key, label, body], index) => {
+      const value = Math.floor((state.world.stockpile[key] || 0) + 1e-6);
+      if (state.last[key] !== undefined && value > state.last[key]) state.bumps[key] = now + 700;
+      state.last[key] = value;
+      const x = 4 + index * step + (step - d) / 2;
+      const bump = state.bumps[key] > now;
+      coin(c, x, 4, d, picture(key, body), { hot: bump });
+      // Count on a small glass tab under each coin.
+      const text = String(value);
+      c.font = `800 ${L.mobile ? 11 : 12}px ${STYLE.body}`;
+      const tab = Math.max(22, c.measureText(text).width + 12);
+      c.fillStyle = STYLE.glass;
+      c.beginPath();
+      c.roundRect(x + d / 2 - tab / 2, d + 6, tab, 16, 8);
+      c.fill();
+      c.fillStyle = bump ? STYLE.accent : STYLE.ink;
+      c.fillText(text, x + d / 2, d + 18);
+      panel.regions.push({ id: `resource-${key}`, x, y: 4, w: d, h: d, round: true, label });
+    });
+    panel.end();
+  }
+
+  function paintSpeed(L) {
+    const panel = layer.panel('speed');
+    const { cx, cy, r } = L.globe;
+    const d = L.speedCoin;
+    const box = r + d + 12;
+    const c = panel.begin(cx - box, cy - box, box, box, view.height, view.dpr);
+    // Three coins on the globe's upper-left shoulder, like the reference.
+    [['speed0', 'II', 0], ['speed1', '1\u00D7', 1], ['speed2', '2\u00D7', 2]].forEach(([id, label, speed], index) => {
+      const angle = Math.PI * (1.08 + index * 0.17);
+      const x = box + Math.cos(angle) * (r + d / 2 + 6) - d / 2;
+      const y = box + Math.sin(angle) * (r + d / 2 + 6) - d / 2;
+      const active = state.world.simulation_speed === speed;
+      coin(c, x, y, d, null, { hot: state.hover === id, done: false, label, active });
+      panel.regions.push({ id, x, y, w: d, h: d, round: true, enabled: true, run: () => actions.onSpeed(speed), label: `Speed ${label}` });
+    });
+    panel.end();
+  }
+
+  function paintDock(L, model) {
+    const panel = layer.panel('dock');
+    const notes = layer.panel('notes');
+    if (!model) {
+      panel.hide();
+    } else {
+      const m = L.button;
+      const gap = L.mobile ? 6 : 10;
+      const count = model.commands.length;
+      const barWidth = count ? count * m + (count - 1) * gap + 28 : 0;
+      const hovered = model.commands.find(command => command.id === state.hover);
+      const title = hovered ? hovered.label : model.title;
+      const detail = hovered ? hovered.cost : model.detail;
+      const probe = panel.context;
+      probe.font = `800 14px ${STYLE.body}`;
+      const titleWidth = probe.measureText(title).width;
+      probe.font = `600 12px ${STYLE.body}`;
+      const infoWidth = Math.min(view.width - 24, Math.max(titleWidth, probe.measureText(detail).width) + 84);
+      const width = Math.max(barWidth, infoWidth) + 24;
+      const height = (count ? m + 26 : 0) + 64;
+      const left = Math.max(8, L.dockCenter - width / 2);
+      const c = panel.begin(left, L.dockBottom - height, width, height, view.height, view.dpr);
+      const infoX = (width - infoWidth) / 2;
+      const hasJob = model.job !== undefined && model.job !== null;
+      pill(c, infoX, 8, infoWidth, hasJob ? 46 : 40);
+      // The selection's coin portrait sits on the pill's left end like a badge.
+      const portrait = picture(`portrait_${model.portrait}`, ICONS[model.portrait]);
+      c.save();
+      c.shadowColor = STYLE.shadow;
+      c.shadowBlur = 5;
+      c.shadowOffsetY = 2;
+      c.drawImage(portrait, infoX - 4, 2, 52, 52);
+      c.restore();
+      const textX = infoX + 50 + (infoWidth - 64) / 2;
+      c.textAlign = 'center';
+      c.textBaseline = 'alphabetic';
+      c.fillStyle = STYLE.ink;
+      c.font = `800 14px ${STYLE.body}`;
+      c.fillText(title, textX, 25, infoWidth - 70);
+      c.fillStyle = STYLE.muted;
+      c.font = `600 12px ${STYLE.body}`;
+      c.fillText(detail, textX, 40, infoWidth - 70);
+      if (hasJob) {
+        c.fillStyle = 'rgba(61,51,40,0.15)';
+        c.fillRect(infoX + 56, 46, infoWidth - 76, 3);
+        c.fillStyle = STYLE.accent;
+        c.fillRect(infoX + 56, 46, (infoWidth - 76) * Math.min(1, model.job), 3);
+      }
+      if (count) {
+        // One slim glass bar holds the command coins.
+        const barX = (width - barWidth) / 2;
+        const barY = height - m - 18;
+        pill(c, barX, barY, barWidth, m + 12);
+        model.commands.forEach((command, index) => {
+          const x = barX + 14 + index * (m + gap);
+          const y = barY + 6;
+          const hot = state.hover === command.id && command.enabled;
+          coin(c, x, y, m, picture(command.icon, ICONS[command.icon] || ICONS.villager), { enabled: command.enabled, hot, done: command.done });
+          panel.regions.push({ id: command.id, x, y, w: m, h: m, round: true, enabled: command.enabled, run: command.run });
+        });
+      }
+      panel.end();
+    }
+    // Placement hint and toast share one pill near the top centre.
+    const text = performance.now() < state.toastUntil ? state.toast : state.buildMode ? 'Choose a clear spot for the new town center' : '';
+    if (!text) {
+      notes.hide();
+      return;
+    }
+    const probe = notes.context;
+    probe.font = `700 13px ${STYLE.body}`;
+    const width = Math.min(view.width - 24, probe.measureText(text).width + 36);
+    const c = notes.begin((view.width - width) / 2 - 6, (L.mobile ? 70 : 18) - 6, width + 12, 44, view.height, view.dpr);
+    pill(c, 6, 6, width, 32);
+    c.fillStyle = STYLE.ink;
+    c.font = `700 13px ${STYLE.body}`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(text, (width + 12) / 2, 23, width - 20);
+    notes.end();
+  }
+
+  // The minimap as an old parchment map set in a gold coin rim.
+  function paintGlobe(L) {
+    const panel = layer.panel('globe');
+    const { cx, cy, r } = L.globe;
+    const world = state.world;
+    const pad = 12;
+    const size = r * 2 + pad * 2;
+    const c = panel.begin(cx - r - pad, cy - r - pad, size, size, view.height, view.dpr);
+    const ox = pad + r;
+    const oy = pad + r;
+    coin(c, pad, pad, r * 2, null, {});
+    c.save();
+    c.beginPath();
+    c.arc(ox, oy, r * 0.84, 0, Math.PI * 2);
+    c.clip();
+    const sea = c.createRadialGradient(ox - r * 0.3, oy - r * 0.3, r * 0.1, ox, oy, r);
+    sea.addColorStop(0, '#d6ebe8');
+    sea.addColorStop(1, '#9ec8cf');
+    c.fillStyle = sea;
+    c.fillRect(ox - r, oy - r, r * 2, r * 2);
+    const mapW = r * 1.4;
+    const mapH = mapW * world.rows / world.columns;
+    const mx = ox - mapW / 2;
+    const my = oy - mapH / 2;
+    const sx = mapW / world.columns;
+    const sy = mapH / world.rows;
     for (const cell of world.terrain) {
-      const [r, g, b] = cell.biome ? BIOME_COLORS[cell.biome] : [233, 216, 176];
-      const dim = cell.visibility === 'visible' ? 1 : cell.visibility === 'explored' ? 0.7 : 1;
-      mini.fillStyle = `rgb(${r * dim},${g * dim},${b * dim})`;
-      mini.fillRect(cell.column * sx, cell.row * sy, sx + 0.5, sy + 0.5);
+      const [red, green, blue] = cell.biome ? BIOME_COLORS[cell.biome] : [236, 226, 200];
+      // Parchment wash: biome colours blended toward old paper.
+      const mix = cell.biome ? (cell.visibility === 'explored' ? 0.55 : 0.35) : 0;
+      c.fillStyle = `rgb(${red * (1 - mix) + 236 * mix},${green * (1 - mix) + 224 * mix},${blue * (1 - mix) + 196 * mix})`;
+      c.fillRect(mx + cell.column * sx, my + cell.row * sy, sx + 0.5, sy + 0.5);
     }
-    mini.fillStyle = '#3b2614';
-    for (const resource of world.resources) {
-      if (resource.amount > 0) mini.fillRect(resource.cell.column * sx + 1, resource.cell.row * sy + 1, sx - 2, sy - 2);
-    }
+    c.strokeStyle = 'rgba(110,80,40,0.55)';
+    c.lineWidth = 1;
+    c.strokeRect(mx, my, mapW, mapH);
     for (const building of world.buildings) {
-      mini.fillStyle = building.construction === null ? '#d0532e' : '#f0a888';
-      mini.fillRect(building.origin.column * sx, building.origin.row * sy, building.columns * sx, building.rows * sy);
+      c.fillStyle = building.construction === null ? STYLE.accent : '#e8b49a';
+      c.fillRect(mx + building.origin.column * sx, my + building.origin.row * sy, building.columns * sx, building.rows * sy);
     }
-    mini.fillStyle = '#1f6fd0';
-    for (const unit of world.units) mini.fillRect(unit.position.x * sx - 2, unit.position.y * sy - 2, 4, 4);
-    if (viewCorners.every(Boolean)) {
-      mini.strokeStyle = '#3b2614';
-      mini.lineWidth = 1.5;
-      mini.beginPath();
-      viewCorners.forEach((corner, index) => mini[index ? 'lineTo' : 'moveTo'](corner.x * sx, corner.z * sy));
-      mini.closePath();
-      mini.stroke();
+    c.fillStyle = '#2f5f8f';
+    for (const unit of world.units) {
+      c.beginPath();
+      c.arc(mx + unit.position.x * sx, my + unit.position.y * sy, 1.8, 0, Math.PI * 2);
+      c.fill();
     }
+    if (state.corners.length && state.corners.every(Boolean)) {
+      c.strokeStyle = 'rgba(61,51,40,0.85)';
+      c.lineWidth = 1.2;
+      c.beginPath();
+      state.corners.forEach((corner, index) => c[index ? 'lineTo' : 'moveTo'](mx + corner.x * sx, my + corner.z * sy));
+      c.closePath();
+      c.stroke();
+    }
+    const dome = c.createRadialGradient(ox - r * 0.35, oy - r * 0.45, r * 0.05, ox, oy, r);
+    dome.addColorStop(0, 'rgba(255,255,255,0.32)');
+    dome.addColorStop(0.55, 'rgba(255,255,255,0)');
+    dome.addColorStop(1, 'rgba(80,50,20,0.25)');
+    c.fillStyle = dome;
+    c.fillRect(ox - r, oy - r, r * 2, r * 2);
+    c.restore();
+    panel.regions.push({ id: 'globe', x: pad, y: pad, w: r * 2, h: r * 2, round: true, enabled: true, map: { mx, my, mapW, mapH } });
+    panel.end();
   }
 
-  function setInfo(icon, title, detail, job) {
-    if ($('portrait').dataset.icon !== icon) {
-      $('portrait').innerHTML = svg(ICONS[icon], 44);
-      $('portrait').dataset.icon = icon;
-    }
-    $('selection-title').textContent = title;
-    $('selection-detail').textContent = detail;
-    $('job').hidden = !job;
-    if (job) {
-      $('job-label').textContent = job.label;
-      $('job-fill').style.width = `${Math.round(Math.min(1, job.progress) * 100)}%`;
-    }
+  // ---------- accessible mirror ----------
+  const mirror = document.getElementById('a11y');
+  function syncMirror(model) {
+    const commands = model?.commands || [];
+    const key = commands.map(command => `${command.id}:${command.enabled}`).join('|');
+    if (key === state.a11yKey && mirror.childElementCount) return;
+    state.a11yKey = key;
+    const button = (label, run, disabled = false) => {
+      const element = document.createElement('button');
+      element.type = 'button';
+      element.textContent = label;
+      element.disabled = disabled;
+      element.addEventListener('click', run);
+      return element;
+    };
+    mirror.replaceChildren(
+      button('Pause simulation', () => actions.onSpeed(0)),
+      button('Normal speed', () => actions.onSpeed(1)),
+      button('Double speed', () => actions.onSpeed(2)),
+      button('Reset the world', actions.onReset),
+      ...commands.map(command => button(`${command.label}, ${command.cost}`, command.run, !command.enabled))
+    );
+  }
+
+  function globePoint(x, y) {
+    const panel = layer.panel('globe');
+    const map = panel.regions[0]?.map;
+    if (!map) return null;
+    return {
+      x: Math.min(1, Math.max(0, (x - panel.x - map.mx) / map.mapW)) * state.world.columns,
+      z: Math.min(1, Math.max(0, (y - panel.y - map.my) / map.mapH)) * state.world.rows
+    };
   }
 
   return {
-    toast,
-    drawMinimap,
-    canBuild: () => buttons[0]?.dataset.role === 'build' && !buttons[0].disabled,
-    setConnection(online) {
-      $('connection').classList.toggle('online', online);
-      $('connection').title = online ? 'Connected' : 'Reconnecting';
+    resize(width, height, dpr) {
+      layer.resize(width, height, dpr);
+      state.dirty = true;
     },
     update(world, selection, buildMode) {
-      for (const [key] of RESOURCES) {
-        const value = Math.floor(world.stockpile[key] + 1e-6);
-        const entry = values[key];
-        if (value === entry.last) continue;
-        entry.strong.textContent = value;
-        if (value > entry.last) {
-          entry.item.classList.remove('bump');
-          void entry.item.offsetWidth;
-          entry.item.classList.add('bump');
+      Object.assign(state, { world, selection, buildMode, dirty: true });
+    },
+    setConnection(online) {
+      state.online = online;
+      state.dirty = true;
+    },
+    toast(message) {
+      state.toast = FRIENDLY_ERRORS[message] || message;
+      state.toastUntil = performance.now() + 2400;
+      document.getElementById('status').textContent = state.toast;
+      state.dirty = true;
+      setTimeout(() => { state.dirty = true; }, 2450);
+    },
+    minimap(corners) {
+      state.corners = corners;
+      state.globeDirty = true;
+    },
+    box: area => layer.box(area),
+    canBuild: () => state.commands.some(command => command.id === 'build' && command.enabled),
+    pointer: {
+      contains: (x, y) => Boolean(layer.hit(x, y)),
+      down(x, y) {
+        const region = layer.hit(x, y);
+        if (!region) return false;
+        state.pressed = region.id;
+        if (region.id === 'globe' && state.world) {
+          state.dragGlobe = true;
+          const point = globePoint(x, y);
+          if (point) actions.onMinimap(point);
         }
-        entry.last = value;
+        return true;
+      },
+      move(x, y) {
+        const point = state.dragGlobe && globePoint(x, y);
+        if (point) actions.onMinimap(point);
+      },
+      up(x, y) {
+        const region = layer.hit(x, y);
+        if (region && region.id === state.pressed && region.enabled && region.run) region.run();
+        state.pressed = null;
+        state.dragGlobe = false;
+      },
+      hover(x, y) {
+        const region = layer.hit(x, y);
+        const id = region && (region.run || region.id === 'globe') ? region.id : null;
+        if (id !== state.hover) {
+          state.hover = id;
+          state.dirty = true;
+        }
+        if (region) renderer.domElement.style.cursor = id && region.enabled !== false ? 'pointer' : 'default';
+        return Boolean(region);
       }
-      $('clock').textContent = `Tick ${world.tick}`;
-      document.querySelectorAll('#speed-controls button').forEach(button => {
-        button.classList.toggle('active', Number(button.dataset.speed) === world.simulation_speed);
-      });
-      $('placement').hidden = !buildMode;
-
-      const selectedUnits = world.units.filter(unit => selection.units.has(unit.id));
-      const building = world.buildings.find(b => b.id === selection.building);
-      if (selectedUnits.length) {
-        if (selectedUnits.length === 1) {
-          const unit = selectedUnits[0];
-          const state = unit.action.type === 'gather' ? unit.action.phase : unit.action.type;
-          const cargo = unit.cargo ? ` · carrying ${Math.floor(unit.cargo.amount)} ${unit.cargo.kind}` : '';
-          setInfo('villager', unit.id.replace('villager-', 'Villager '), `${ACTIVITY_TEXT[state] || state}${cargo}`);
-        } else {
-          const idle = selectedUnits.filter(unit => unit.action.type === 'idle').length;
-          setInfo('group', `${selectedUnits.length} villagers`, `${idle} awaiting orders · tap ground to move together`);
-        }
-        if (buildMode) {
-          renderCommands('placing', [['cancel', 'Cancel placement', '', onCancel, 'Esc']]);
-        } else {
-          renderCommands('villager', [['build', 'Build town center', '20 wood', onBuild, 'B']]);
-          buttons[0].dataset.role = 'build';
-          buttons[0].disabled = world.stockpile.wood < 20;
-        }
-      } else if (building && building.construction !== null) {
-        setInfo('townCenter', 'Town Center foundation', 'Villagers raise the walls; tap it with villagers selected to help',
-          { label: 'Construction', progress: building.construction / 4 });
-        renderCommands('foundation', []);
-      } else if (building) {
-        const job = building.job;
-        setInfo('townCenter', 'Town Center', 'Trains villagers and studies new crafts', job && {
-          label: job.type === 'produce' ? 'Training a villager' : `Researching ${TECHNOLOGIES[job.technology][0]}`,
-          progress: job.elapsed_seconds / (job.type === 'produce' ? 6 : 8)
-        });
-        renderCommands('town-center', [
-          ['villager', 'Train villager', '50 food', onTrain],
-          ...Object.entries(TECHNOLOGIES).map(([key, [label, effect]]) => [key, `${label}: ${effect}`, '40F 20W', () => onResearch(key)])
-        ]);
-        buttons[0].disabled = Boolean(job) || world.stockpile.food < 50;
-        Object.keys(TECHNOLOGIES).forEach((key, index) => {
-          const button = buttons[index + 1];
-          const done = world.researched_technologies.includes(key);
-          const blocked = PREREQUISITE[key] && !world.researched_technologies.includes(PREREQUISITE[key]);
-          button.classList.toggle('done', done);
-          button.disabled = done || blocked || Boolean(job) || world.stockpile.food < 40 || world.stockpile.wood < 20;
-          button.title = `${TECHNOLOGIES[key][0]}: ${TECHNOLOGIES[key][1]}${done ? ' (researched)' : blocked ? ` (requires ${TECHNOLOGIES[PREREQUISITE[key]][0]})` : ''}`;
-        });
-      } else {
-        setInfo('scroll', 'Your village awaits', 'Tap a villager to give orders, or the town center to train and research');
-        renderCommands('none', []);
+    },
+    render(now) {
+      if (!state.world) return;
+      const bumping = Object.values(state.bumps).some(until => until > now - 50);
+      const L = layout();
+      if (state.dirty || bumping) {
+        const model = describe();
+        state.commands = model?.commands || [];
+        paintMenu(L);
+        paintResources(L, now);
+        paintSpeed(L);
+        paintDock(L, model);
+        syncMirror(model);
+        state.dirty = false;
+        state.globeDirty = true;
       }
+      if (state.globeDirty) {
+        paintGlobe(L);
+        state.globeDirty = false;
+      }
+      layer.render();
     }
   };
 }

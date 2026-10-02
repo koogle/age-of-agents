@@ -3,6 +3,8 @@
 import * as THREE from 'three';
 import { MAP, uniforms } from './materials.js';
 import { createTerrain } from './terrain.js';
+import { createSky } from './sky.js';
+import { createTiltShift } from './tilt-shift.js';
 import { createBuildGhost, createWorldView } from './world-view.js';
 import { createEffects } from './effects.js';
 import { bindPointer, createCameraRig } from './controls.js';
@@ -14,27 +16,31 @@ const mobile = matchMedia('(pointer: coarse)').matches;
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.75 : 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.shadowMap.type = THREE.VSMShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
 scene.background = skyTexture();
-scene.fog = new THREE.Fog(0xcfe6ec, 26, 62);
+scene.fog = new THREE.Fog(0xdde8ee, 26, 62);
 const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
 
-// Warm sun, cool sky fill: shadows go blue-grey like the reference art.
-scene.add(new THREE.HemisphereLight(0xa8d4ff, 0x6a7f92, 1.6));
-const sun = new THREE.DirectionalLight(0xffe6b8, 2.9);
+// Warm late-afternoon sun with a soft sky fill, like a lit tabletop model.
+scene.add(new THREE.HemisphereLight(0xcfe4ff, 0x8a8070, 1.5));
+const sun = new THREE.DirectionalLight(0xffe2b4, 2.6);
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(mobile ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 });
 sun.shadow.bias = -0.0008;
+sun.shadow.radius = 6;
+sun.shadow.blurSamples = 12;
 sun.shadow.normalBias = 0.02;
 scene.add(sun, sun.target);
 
 const terrain = createTerrain(scene);
 const effects = createEffects(scene, camera);
+const sky = createSky(scene);
+const tiltShift = createTiltShift(renderer);
 const view = createWorldView(scene, effects);
 const ghost = createBuildGhost(scene);
 const rig = createCameraRig(camera);
@@ -46,9 +52,10 @@ let world = null;
 let buildMode = false;
 let cameraPlaced = false;
 
-const hud = createHud({
+const hud = createHud(renderer, {
   onSpeed: multiplier => order({ type: 'set_simulation_speed', multiplier }),
   onReset: async () => {
+    if (!confirm('Reset the world? All progress will be lost.')) return;
     const response = await fetch('/reset', { method: 'POST' }).catch(() => null);
     if (!response?.ok) hud.toast('The world could not be reset.');
     selection.units.clear();
@@ -229,6 +236,8 @@ function tap(x, y, additive) {
 const projected = new THREE.Vector3();
 const controls = bindPointer(canvas, rig, {
   tap,
+  ui: hud.pointer,
+  boxDraw: area => hud.box(area),
   boxSelect(rect) {
     if (!world) return;
     const chosen = view.unitPositions().filter(({ position }) => {
@@ -270,6 +279,8 @@ const controls = bindPointer(canvas, rig, {
 
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
+  hud.resize(innerWidth, innerHeight, renderer.getPixelRatio());
+  tiltShift.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth / innerHeight;
   // Portrait phones need a wider lens to see a useful slice of the island.
   camera.fov = camera.aspect < 1 ? 52 : 36;
@@ -284,10 +295,10 @@ function skyTexture() {
   sky.height = 256;
   const context = sky.getContext('2d');
   const gradient = context.createLinearGradient(0, 0, 0, 256);
-  gradient.addColorStop(0, '#3fa6d0');
-  gradient.addColorStop(0.55, '#8fd0e6');
-  gradient.addColorStop(0.85, '#d8ecec');
-  gradient.addColorStop(1, '#f6e6c4');
+  gradient.addColorStop(0, '#7fb3d6');
+  gradient.addColorStop(0.5, '#b8d4e4');
+  gradient.addColorStop(0.85, '#e6ecee');
+  gradient.addColorStop(1, '#f2e8d8');
   context.fillStyle = gradient;
   context.fillRect(0, 0, 2, 256);
   const texture = new THREE.CanvasTexture(sky);
@@ -317,14 +328,20 @@ renderer.setAnimationLoop(now => {
   controls.update(dt);
   rig.update(dt);
   scene.fog.near = rig.state.distance + 8;
-  scene.fog.far = rig.state.distance + 60;
+  scene.fog.far = rig.state.distance * 2 + 60;
+  uniforms.uCurve.value = THREE.MathUtils.smoothstep(rig.state.distance, 24, 70) * 0.014;
+  uniforms.uCurveCenter.value.set(rig.target.x, rig.target.z);
+  // Shadow maps are not bent with the world, so the planet view goes without.
+  sun.castShadow = uniforms.uCurve.value < 0.0005;
   sun.position.set(rig.target.x - 11, 15, rig.target.z + 7);
   sun.target.position.copy(rig.target);
   view.frame(now, time, dt, selection);
   effects.update(dt);
+  sky.update(time);
   if (world && now > minimapAt) {
     minimapAt = now + 200;
-    hud.drawMinimap(world, viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));
+    hud.minimap(viewCorners.map(([u, v]) => rig.groundAt(u * innerWidth, v * innerHeight)));
   }
-  renderer.render(scene, camera);
+  tiltShift.render(scene, camera);
+  hud.render(now);
 });

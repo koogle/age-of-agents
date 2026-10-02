@@ -25,6 +25,8 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Open work
 
+0. Art: the HUD is canvas-drawn (diorama style: globe, pills, medallions) with placeholder vector icons. Session "Age of Agents: FAL asset generation (retry)" is generating the UI icon kit and a villager model on branch `claude/fal-generated-assets` (PR into this branch); wire `assets/ui/manifest.json` into `frontend/hud-content.js` once it lands.
+
 1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
 2. Production verification after deploy (`python3 scripts/modal_manage.py verify`) plus a real phone check of touch rotate/pinch.
 3. Liveness beyond pairwise standoffs (e.g. three-way jams in dead ends) is untested.

@@ -1,16 +1,18 @@
-// Camera rig plus one pointer path for mouse and touch. Gestures are turned
-// into four intents: tap, box select, hover, and camera motion.
+// Camera rig plus one pointer path for mouse and touch. The canvas-drawn UI
+// gets first refusal on every press; the rest becomes tap, box select, hover,
+// or camera motion.
 import * as THREE from 'three';
 import { MAP } from './materials.js';
 
 const DRAG_THRESHOLD = 8;
 const LONG_PRESS_MS = 450;
 const MIN_DISTANCE = 5;
-const MAX_DISTANCE = 34;
+// Beyond about 24 the world starts to curve into a small planet.
+const MAX_DISTANCE = 70;
 
 export function createCameraRig(camera) {
   const target = new THREE.Vector3(15, 0, 10.5);
-  const state = { distance: 11, yaw: Math.PI / 4, goalYaw: Math.PI / 4, pitch: 0.92 };
+  const state = { distance: 15, yaw: Math.PI / 4, goalYaw: Math.PI / 4, pitch: 0.92 };
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
@@ -26,6 +28,7 @@ export function createCameraRig(camera) {
   }
   function clamp() {
     target.x = THREE.MathUtils.clamp(target.x, -1, MAP.columns + 1);
+    if (state.distance > 30) target.lerp(new THREE.Vector3(MAP.columns / 2, 0, MAP.rows / 2), 0.08);
     target.z = THREE.MathUtils.clamp(target.z, -1, MAP.rows + 1);
     state.distance = THREE.MathUtils.clamp(state.distance, MIN_DISTANCE, MAX_DISTANCE);
   }
@@ -42,7 +45,11 @@ export function createCameraRig(camera) {
       const turn = state.goalYaw - state.yaw;
       state.yaw += turn * Math.min(1, dt * 8);
       // Closer views tilt toward the horizon; distant views look down like a map.
-      state.pitch = THREE.MathUtils.lerp(0.72, 1.12, (state.distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE));
+      // Play zoom tilts from near-horizon (close) to map-like (34); beyond that
+      // the view eases back toward the horizon so the planet's limb shows.
+      const play = THREE.MathUtils.clamp((state.distance - MIN_DISTANCE) / (34 - MIN_DISTANCE), 0, 1);
+      const orbit = THREE.MathUtils.smoothstep(state.distance, 34, MAX_DISTANCE);
+      state.pitch = THREE.MathUtils.lerp(THREE.MathUtils.lerp(0.72, 1.12, play), 0.78, orbit);
       place();
     },
     // Keep the ground point grabbed at `from` under the pointer at `to`.
@@ -72,11 +79,17 @@ export function createCameraRig(camera) {
   };
 }
 
+function boxRect(start, event) {
+  return {
+    left: Math.min(start.x, event.clientX), right: Math.max(start.x, event.clientX),
+    top: Math.min(start.y, event.clientY), bottom: Math.max(start.y, event.clientY)
+  };
+}
+
 export function bindPointer(canvas, rig, handlers) {
   const pointers = new Map();
   let gesture = null;
   let longPress = 0;
-  const box = document.getElementById('box-select');
 
   function cancelLongPress() {
     clearTimeout(longPress);
@@ -94,6 +107,12 @@ export function bindPointer(canvas, rig, handlers) {
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     canvas.setPointerCapture(event.pointerId);
+    if (pointers.size === 0 && handlers.ui.down(event.clientX, event.clientY)) {
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      gesture = { type: 'ui' };
+      return;
+    }
+    if (gesture?.type === 'ui') return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     cancelLongPress();
     if (pointers.size === 2) {
@@ -118,11 +137,15 @@ export function bindPointer(canvas, rig, handlers) {
   });
   canvas.addEventListener('pointermove', event => {
     if (!pointers.has(event.pointerId)) {
-      if (event.pointerType === 'mouse') handlers.hover(event.clientX, event.clientY);
+      if (event.pointerType === 'mouse' && !handlers.ui.hover(event.clientX, event.clientY)) handlers.hover(event.clientX, event.clientY);
       return;
     }
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (!gesture) return;
+    if (gesture.type === 'ui') {
+      handlers.ui.move(event.clientX, event.clientY);
+      return;
+    }
     if (gesture.type === 'pinch' && pointers.size === 2) {
       const now = pinchState();
       rig.zoom(gesture.last.distance / Math.max(1, now.distance));
@@ -143,24 +166,23 @@ export function bindPointer(canvas, rig, handlers) {
       rig.rotate((gesture.lastX - event.clientX) * 0.008);
       gesture.lastX = event.clientX;
     } else if (gesture.type === 'box') {
-      const left = Math.min(gesture.start.x, event.clientX);
-      const top = Math.min(gesture.start.y, event.clientY);
-      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${Math.abs(event.clientX - gesture.start.x)}px`, height: `${Math.abs(event.clientY - gesture.start.y)}px` });
-      box.hidden = false;
+      handlers.boxDraw(boxRect(gesture.start, event));
     }
   });
   function end(event) {
     if (!pointers.has(event.pointerId)) return;
     pointers.delete(event.pointerId);
     cancelLongPress();
+    if (gesture?.type === 'ui') {
+      handlers.ui.up(event.clientX, event.clientY);
+      gesture = null;
+      return;
+    }
     if (gesture?.type === 'pending' && pointers.size === 0) {
       handlers.tap(event.clientX, event.clientY, gesture.additive);
     } else if (gesture?.type === 'box') {
-      box.hidden = true;
-      handlers.boxSelect({
-        left: Math.min(gesture.start.x, event.clientX), right: Math.max(gesture.start.x, event.clientX),
-        top: Math.min(gesture.start.y, event.clientY), bottom: Math.max(gesture.start.y, event.clientY)
-      });
+      handlers.boxDraw(null);
+      handlers.boxSelect(boxRect(gesture.start, event));
     }
     if (pointers.size === 1 && gesture?.type === 'pinch') {
       const [remaining] = pointers.values();
@@ -171,12 +193,13 @@ export function bindPointer(canvas, rig, handlers) {
   }
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', event => {
-    box.hidden = true;
+    handlers.boxDraw(null);
     gesture = { type: 'done' };
     end(event);
   });
   canvas.addEventListener('wheel', event => {
     event.preventDefault();
+    if (handlers.ui.contains(event.clientX, event.clientY)) return;
     rig.zoom(Math.exp(event.deltaY * 0.0012));
   }, { passive: false });
 

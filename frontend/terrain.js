@@ -2,7 +2,7 @@
 // and sea. Heights come from a fixed noise field (never from biome data) so the
 // shape of the land reveals nothing about unexplored terrain.
 import * as THREE from 'three';
-import { MAP, patchWorld, toon, inked, uniforms, writeCell, cellTexture } from './materials.js';
+import { CURVE_GLSL, CURVE_UNIFORMS, MAP, patchWorld, paint, uniforms, writeCell, cellTexture } from './materials.js';
 
 export const SEA_LEVEL = -0.32;
 const MARGIN = 9;
@@ -99,13 +99,14 @@ function buildSea() {
   const geometry = new THREE.PlaneGeometry(400, 400, 80, 80);
   geometry.rotateX(-Math.PI / 2);
   geometry.translate(MAP.columns / 2, SEA_LEVEL, MAP.rows / 2);
-  const material = new THREE.MeshPhongMaterial({ color: 0x1fb3c8, transparent: true, opacity: 0.85, shininess: 90, specular: 0xffffff });
+  const material = new THREE.MeshPhongMaterial({ color: 0x2c8db2, transparent: true, opacity: 0.9, shininess: 70, specular: 0xcfe8f0 });
   material.onBeforeCompile = shader => {
-    shader.uniforms.uTime = uniforms.uTime;
+    Object.assign(shader.uniforms, { uTime: uniforms.uTime, uCurve: uniforms.uCurve, uCurveCenter: uniforms.uCurveCenter });
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uTime;')
+      .replace('#include <common>', `#include <common>\nuniform float uTime;\n${CURVE_UNIFORMS}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>
-        transformed.y += sin(position.x * 0.9 + uTime * 1.1) * 0.025 + cos(position.z * 0.7 + uTime * 0.8) * 0.025;`);
+        transformed.y += sin(position.x * 0.9 + uTime * 1.1) * 0.025 + cos(position.z * 0.7 + uTime * 0.8) * 0.025;`)
+      .replace('#include <project_vertex>', `#include <project_vertex>\n${CURVE_GLSL}`);
   };
   const mesh = new THREE.Mesh(geometry, material);
   mesh.receiveShadow = true;
@@ -180,7 +181,7 @@ function buildDecor(terrain, blockedCells) {
   for (const [key, list] of placements) {
     const [kind, color] = key.split('|');
     const spec = DECOR[kind];
-    const mesh = new THREE.InstancedMesh(spec.geometry, toon(Number(color)), list.length);
+    const mesh = new THREE.InstancedMesh(spec.geometry, paint(Number(color)), list.length);
     list.forEach(([x, z, r], index) => {
       const scale = 0.7 + r * 0.6;
       rotation.setFromAxisAngle(up, r * Math.PI * 2);
@@ -209,9 +210,9 @@ function buildScenery() {
     const scale = 0.8 + random(i * 5) * 0.8;
     if (random(i * 7) < 0.78) {
       const tree = new THREE.Group();
-      const t = inked(new THREE.Mesh(trunk, toon(0x6b4a2e)));
+      const t = new THREE.Mesh(trunk, paint(0x6b4a2e));
       t.position.y = 0.15;
-      const c = inked(new THREE.Mesh(crown, toon(random(i) > 0.5 ? 0x2f6b3c : 0x3f7f44)));
+      const c = new THREE.Mesh(crown, paint(random(i) > 0.5 ? 0x2f6b3c : 0x3f7f44));
       c.position.y = 0.75;
       c.castShadow = true;
       tree.add(t, c);
@@ -219,7 +220,7 @@ function buildScenery() {
       tree.scale.setScalar(scale);
       group.add(tree);
     } else {
-      const rock = inked(new THREE.Mesh(boulder, toon(0xe6dfca)));
+      const rock = new THREE.Mesh(boulder, paint(0xe6dfca));
       rock.position.set(x, y + 0.08, z);
       rock.scale.set(scale, scale * 0.7, scale);
       rock.rotation.y = random(i) * 6;

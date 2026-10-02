@@ -23,8 +23,6 @@ const STYLES = {
 
 export function createEffects(scene, camera) {
   const live = [];
-  const floaters = document.getElementById('floaters');
-  const projected = new THREE.Vector3();
 
   function burst(style, position) {
     const s = STYLES[style];
@@ -40,19 +38,46 @@ export function createEffects(scene, camera) {
     }
   }
 
+  // Gain labels are sprites in the world, painted once into a small texture.
+  const labels = [];
   function floatText(text, position) {
-    projected.copy(position).project(camera);
-    if (projected.z > 1) return;
-    const label = document.createElement('div');
-    label.className = 'floater';
-    label.textContent = text;
-    label.style.left = `${(projected.x + 1) / 2 * window.innerWidth}px`;
-    label.style.top = `${(1 - projected.y) / 2 * window.innerHeight}px`;
-    floaters.append(label);
-    setTimeout(() => label.remove(), 1500);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const font = 'italic 500 34px Alegreya, Georgia, serif';
+    context.font = font;
+    canvas.width = Math.ceil(context.measureText(text).width) + 16;
+    canvas.height = 48;
+    context.font = font;
+    context.textBaseline = 'middle';
+    context.lineWidth = 5;
+    context.strokeStyle = '#4a3a2a';
+    context.strokeText(text, 8, 25);
+    context.fillStyle = '#f6f0e1';
+    context.fillText(text, 8, 25);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, toneMapped: false }));
+    sprite.center.set(0.5, 0);
+    sprite.scale.set(canvas.width / 110, canvas.height / 110, 1);
+    sprite.position.copy(position);
+    sprite.renderOrder = 5;
+    scene.add(sprite);
+    labels.push({ sprite, age: 0 });
   }
 
   function update(dt) {
+    for (let i = labels.length - 1; i >= 0; i -= 1) {
+      const label = labels[i];
+      label.age += dt;
+      label.sprite.position.y += dt * 0.45;
+      label.sprite.material.opacity = Math.min(1, label.age * 6) * (1 - Math.max(0, label.age - 0.9) / 0.5);
+      if (label.age > 1.4) {
+        scene.remove(label.sprite);
+        label.sprite.material.map.dispose();
+        label.sprite.material.dispose();
+        labels.splice(i, 1);
+      }
+    }
     for (let i = live.length - 1; i >= 0; i -= 1) {
       const p = live[i];
       p.age += dt;
