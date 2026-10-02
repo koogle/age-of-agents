@@ -124,18 +124,25 @@ impl Assets {
         use wasm_bindgen::JsCast;
         use wasm_bindgen_futures::JsFuture;
         let window = web_sys::window().expect("window");
+        let paths = manifest();
+        // Start every request at once; the browser fetches them in parallel.
+        let requests: Vec<_> = paths
+            .iter()
+            .map(|path| JsFuture::from(window.fetch_with_str(&format!("/assets/{path}"))))
+            .collect();
+        let total = paths.len();
         let mut files = HashMap::new();
-        for path in manifest() {
+        for (done, (path, request)) in paths.into_iter().zip(requests).enumerate() {
             let response: web_sys::Response =
-                JsFuture::from(window.fetch_with_str(&format!("/assets/{path}")))
-                    .await
-                    .expect("fetch")
-                    .dyn_into()
-                    .expect("response");
+                request.await.expect("fetch").dyn_into().expect("response");
             let buffer = JsFuture::from(response.array_buffer().expect("body"))
                 .await
                 .expect("bytes");
             files.insert(path, js_sys::Uint8Array::new(&buffer).to_vec());
+            crate::loading(
+                0.4 + 0.5 * (done + 1) as f64 / total as f64,
+                &format!("Painting the island ({} of {total})", done + 1),
+            );
         }
         Self { files }
     }
