@@ -1,6 +1,6 @@
 //! The fixed all-land map the movement, gathering and soundness tests run on:
 //! eight Voronoi biome regions, clustered resources, the town center at
-//! (28, 17) and villagers at (29, 21) and (31, 21). Mechanics tests use it so
+//! (28, 17) and villagers at (29, 25) and (31, 25). Mechanics tests use it so
 //! they do not depend on how islands are generated.
 
 use super::*;
@@ -19,7 +19,7 @@ pub(super) fn fixture() -> GameWorld {
     };
     let mut world = GameWorld::generate(DEFAULT_SEED);
     world.terrain = terrain.clone();
-    world.units = vec![villager(1, 29, 21), villager(2, 31, 21)];
+    world.units = vec![villager(1, 29, 25), villager(2, 31, 25)];
     world.resources = generate_resources(&terrain);
     world.buildings = vec![town_center("base-1", STARTING_TOWN_CENTER, None)];
     world.explored_cells.clear();

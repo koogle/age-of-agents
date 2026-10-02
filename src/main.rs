@@ -412,7 +412,7 @@ mod tests {
             json["world"]["units"][0]["cell"],
             serde_json::json!({"column": unit.cell.column, "row": unit.cell.row})
         );
-        assert_eq!(json["world"]["buildings"][0]["columns"], 4);
+        assert_eq!(json["world"]["buildings"][0]["columns"], 8);
         // Terrain is one character per cell: unseen cells reveal neither biome nor height.
         let terrain = &json["world"]["terrain"];
         let (cells, heights) = (

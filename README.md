@@ -11,7 +11,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases
-- Command-driven construction of five building types (town center 4×4, house 2×2, granary 3×3, watchtower 2×2, dock 3×3) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
+- Command-driven construction of five building types (town center 8×8, house and granary 4×4, watchtower 3×3, dock 5×5; sized so doors stand about 1.2 villagers tall) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
@@ -107,7 +107,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 Mouse and touch use the same command semantics.
 
-Schema version 7 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, or the all-land map of version 6) are intentionally dropped because they cannot be translated safely.
+Schema version 9 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, or the smaller building footprints of versions 7 and 8) are intentionally dropped because they cannot be translated safely.
 
 Snapshots encode terrain compactly (one character per cell for biome and fog, one for quantized elevation of explored cells), so a full snapshot is about 8 KB rather than over 100 KB.
 

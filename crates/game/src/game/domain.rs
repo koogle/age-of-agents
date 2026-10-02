@@ -330,9 +330,11 @@ impl BuildingKind {
     /// Footprint in cells.
     pub const fn size(self) -> (u16, u16) {
         match self {
-            Self::TownCenter => (4, 4),
-            Self::Granary | Self::Dock => (3, 3),
-            Self::House | Self::Watchtower => (2, 2),
+            // Sized from the art: doors stand a little taller than a villager.
+            Self::TownCenter => (8, 8),
+            Self::Dock => (5, 5),
+            Self::House | Self::Granary => (4, 4),
+            Self::Watchtower => (3, 3),
             _ => (1, 1),
         }
     }
