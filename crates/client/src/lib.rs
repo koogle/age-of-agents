@@ -757,7 +757,6 @@ fn physical_size(window: &Window) -> (u32, u32) {
 /// Plain-language versions of the server's rejection reasons.
 fn friendly(error: &str) -> String {
     match error {
-        "unit is busy" => "That villager is busy with its current task.".into(),
         "destination cell is occupied" => "Something already stands there.".into(),
         "target is unreachable" => "No path leads there.".into(),
         "build site is blocked or outside the world" => {

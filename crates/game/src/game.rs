@@ -18,6 +18,7 @@ mod terrain_codec;
 mod worldgen;
 
 pub use domain::*;
+pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use worldgen::FISHING_BOAT_COST;
 
@@ -152,7 +153,6 @@ pub enum CommandError {
     DuplicateUnit,
     ResourceNotFound,
     ResourceDepleted,
-    UnitBusy,
     InvalidDestination,
     DestinationOccupied,
     TargetUnreachable,
@@ -179,7 +179,6 @@ impl std::fmt::Display for CommandError {
             Self::DuplicateUnit => "unit group contains a duplicate member",
             Self::ResourceNotFound => "resource not found",
             Self::ResourceDepleted => "resource is depleted",
-            Self::UnitBusy => "unit is busy",
             Self::InvalidDestination => "destination is outside the world",
             Self::DestinationOccupied => "destination cell is occupied",
             Self::TargetUnreachable => "target is unreachable",
@@ -257,7 +256,12 @@ fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> B
 impl GameWorld {
     /// Applies a command atomically: on error the world is unchanged.
     pub fn apply_command(&mut self, command: Command) -> Result<(), CommandError> {
-        self.execute(command)?;
+        // A new order replaces a unit's current task, so validate it against a
+        // copy in which that unit has stopped; a rejected order leaves the
+        // world, and the unit's old task, untouched.
+        let mut next = self.clone();
+        next.execute(command)?;
+        *self = next;
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
             panic!("an accepted command broke a world invariant: {error}");
@@ -268,7 +272,7 @@ impl GameWorld {
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
             Command::Move { unit_id, to } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 self.validate_move_destination(unit, to)?;
                 self.units[unit].action = UnitAction::Move { to };
             }
@@ -282,7 +286,7 @@ impl GameWorld {
                     if !seen.insert(unit_id.clone()) {
                         return Err(CommandError::DuplicateUnit);
                     }
-                    let index = self.unit_index_and_idle(&unit_id)?;
+                    let index = self.ordered_unit(&unit_id)?;
                     members.push((unit_id, index));
                 }
                 members.sort();
@@ -295,7 +299,7 @@ impl GameWorld {
                 unit_id,
                 resource_id,
             } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 let resource = self
                     .resources
                     .iter()
@@ -313,7 +317,7 @@ impl GameWorld {
                 };
             }
             Command::Build { unit_id, origin } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 let (columns, rows) = BuildingKind::TownCenter.size();
                 let footprint = Footprint {
                     origin,
@@ -342,7 +346,7 @@ impl GameWorld {
                 unit_id,
                 building_id,
             } => {
-                let unit = self.unit_index_and_idle(&unit_id)?;
+                let unit = self.ordered_unit(&unit_id)?;
                 let building = self
                     .buildings
                     .iter()
@@ -445,15 +449,15 @@ impl GameWorld {
         Ok(index)
     }
 
-    fn unit_index_and_idle(&self, unit_id: &str) -> Result<usize, CommandError> {
+    /// The unit receiving an order, stopped first: like `Stop`, it finishes
+    /// the step it is taking, keeps any cargo, and leaves foundation progress.
+    fn ordered_unit(&mut self, unit_id: &str) -> Result<usize, CommandError> {
         let index = self
             .units
             .iter()
             .position(|unit| unit.id == unit_id)
             .ok_or(CommandError::UnitNotFound)?;
-        if self.units[index].action != UnitAction::Idle {
-            return Err(CommandError::UnitBusy);
-        }
+        self.units[index].action = UnitAction::Idle;
         Ok(index)
     }
 

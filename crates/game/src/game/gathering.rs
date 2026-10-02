@@ -1,6 +1,10 @@
 use super::movement::{Goal, Travel};
 use super::*;
 
+/// How far (in cells, from the exhausted node) a gatherer looks for the next
+/// node of the same kind before going idle.
+pub const NEXT_RESOURCE_RADIUS: u32 = 10;
+
 impl GameWorld {
     pub(super) fn tick_gather(
         &mut self,
@@ -103,8 +107,14 @@ impl GameWorld {
             .cargo
             .as_ref()
             .is_some_and(|cargo| cargo.amount + f64::EPSILON >= VILLAGER_CARRY_CAPACITY);
-        if full || self.resources[resource_index].amount == 0.0 {
+        if full {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
+        } else if self.resources[resource_index].amount == 0.0 {
+            // Keep filling the basket at the next node when there is one.
+            match self.next_resource(unit_index, &resource_id) {
+                Some(next) => self.set_gather_phase(unit_index, next, GatherPhase::ToResource),
+                None => self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning),
+            }
         }
     }
 
@@ -142,7 +152,7 @@ impl GameWorld {
         if self.units[unit_index].cargo.is_some() {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
         } else {
-            self.units[unit_index].action = UnitAction::Idle;
+            self.continue_or_idle(unit_index, &resource_id);
         }
     }
 
@@ -154,8 +164,38 @@ impl GameWorld {
         if resource_remains {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::ToResource);
         } else {
-            self.units[unit_index].action = UnitAction::Idle;
+            self.continue_or_idle(unit_index, &resource_id);
         }
+    }
+
+    /// Moves on to the next node of the same kind near an exhausted one, or idles.
+    fn continue_or_idle(&mut self, unit_index: usize, resource_id: &str) {
+        match self.next_resource(unit_index, resource_id) {
+            Some(next) => self.set_gather_phase(unit_index, next, GatherPhase::ToResource),
+            None => self.units[unit_index].action = UnitAction::Idle,
+        }
+    }
+
+    /// The nearest live node of the same kind within `NEXT_RESOURCE_RADIUS`
+    /// cells of the given node that the unit can reach; ties go to the lower id.
+    fn next_resource(&self, unit_index: usize, resource_id: &str) -> Option<String> {
+        let finished = self.resources.iter().find(|r| r.id == resource_id)?;
+        let mut candidates: Vec<(u32, &ResourceNode)> = self
+            .resources
+            .iter()
+            .filter(|r| r.kind == finished.kind && r.id != resource_id && r.amount > f64::EPSILON)
+            .filter_map(|r| {
+                let dc = u32::from(r.cell.column.abs_diff(finished.cell.column));
+                let dr = u32::from(r.cell.row.abs_diff(finished.cell.row));
+                let distance = dc * dc + dr * dr;
+                (distance <= NEXT_RESOURCE_RADIUS * NEXT_RESOURCE_RADIUS).then_some((distance, r))
+            })
+            .collect();
+        candidates.sort_by(|(da, a), (db, b)| da.cmp(db).then_with(|| a.id.cmp(&b.id)));
+        candidates
+            .into_iter()
+            .find(|(_, r)| self.can_reach_beside(unit_index, r.footprint()))
+            .map(|(_, r)| r.id.clone())
     }
 
     fn set_gather_phase(&mut self, unit_index: usize, resource_id: String, phase: GatherPhase) {

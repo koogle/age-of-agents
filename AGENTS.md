@@ -15,7 +15,7 @@ The current playable demo proves these loops:
 3. A player can construct a town center and train villagers through its single authoritative job slot.
 4. A player can research five bounded gathering improvements through that same job slot.
 
-Keep the world deterministic and small. Do not add combat, pathfinding frameworks, autonomous task selection, LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
+Keep the world deterministic and small. Do not add combat, pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
 - Tap/click a foundation with villagers selected to have them help build it.
-- Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering.
+- Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
 - Tap/click the build button, then valid ground, to issue a build order.
@@ -42,7 +42,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Drag pans. Wheel/pinch zooms. Right-drag, two-finger twist, or Q/E rotates.
 - Mouse and touch semantics must match.
 - Simulation speed is authoritative and controlled through 0×, 1×, and 2× buttons.
-- A busy villager rejects replacement orders in Milestone 1. The Stop medallion (or X) idles it first; stopping keeps cargo and foundation progress, so there is nothing to refund.
+- A new order replaces a villager's current task, and the Stop medallion (or X) idles it. Either way it finishes its current step, keeps cargo, and leaves foundation progress, so there is nothing to refund. A rejected order leaves the old task untouched.
 
 ## Art Direction
 
