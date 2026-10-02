@@ -49,6 +49,11 @@ pub struct Sprite {
     pub pull: f32,
     /// White/opaque for world sprites; tinted/translucent for placement ghosts.
     pub tint: [f32; 4],
+    /// Cross-axis offsets in camera right/up; zero for ordinary billboards.
+    /// Buildings calibrate this affine transform from their painted base corners.
+    pub shear: [f32; 2],
+    /// Projective correction for the fourth painted footprint corner.
+    pub warp: [f32; 2],
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -356,7 +361,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4, 6 => Float32x2, 7 => Float32x2];
         let make_sprite_pipeline = |ghost: bool| {
             pipeline(
                 device,

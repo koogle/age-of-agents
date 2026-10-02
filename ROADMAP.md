@@ -19,12 +19,12 @@ Grow the proven gather/build demo into one compact, coherent RTS scenario. Every
 
 Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 
-- [x] One derived occupancy map: buildings (2×2 town center footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
+- [x] One derived occupancy map: buildings (rectangular footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
 - [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
-- [x] Finer grid: 60×40 half-unit cells (a villager is about 1.5 cells tall), 7×7 town centers (houses/granaries/watchtowers 3×3, docks 4×4; neighboring plots may share edges), clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
+- [x] Finer grid: 60×40 half-unit cells (a villager is about 1.5 cells tall), 5×5 town centers (houses/granaries 3×3, watchtowers 2×2, docks 4×4; neighboring plots may share edges), clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
 - [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
 - [x] Villager build menu: town center, house (+5 housing), granary (food and fiber drop-off), watchtower (sight 20), dock (must touch the sea; the fishing boat comes later). Training respects housing.
 - [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells when theirs runs out.
@@ -149,4 +149,4 @@ Gameplay acceptance:
 
 - LLM-controlled villagers, autonomous planning, multiplayer, mod/plugin APIs, generic ECS/content engines, procedural world generation, and a large branching tech tree.
 
-- [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G).
+- [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). All stages use measured structural base corners and level foundation ground; touching plots share one height.

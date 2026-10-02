@@ -656,6 +656,7 @@ impl App {
                 .map(|(origin, ok)| (kind, origin, ok)),
             _ => None,
         };
+        let plots_changed = self.level_building_plots(ghost);
         let hover = self.hover_decal();
         let Some(game) = self.game.as_mut() else {
             return;
@@ -668,7 +669,7 @@ impl App {
         // Rebuilding the ground mesh costs several milliseconds and a large
         // upload; while villagers explore, exploration grows every tick, so
         // the mesh catches up at most once a second.
-        if self.view.heights_dirty && now - self.ground_rebuilt_at >= 1.0 {
+        if plots_changed || (self.view.heights_dirty && now - self.ground_rebuilt_at >= 1.0) {
             self.view.heights_dirty = false;
             self.ground_rebuilt_at = now;
             game.renderer

@@ -331,10 +331,10 @@ impl BuildingKind {
     pub const fn size(self) -> (u16, u16) {
         match self {
             // Compact rectangular plots; neighboring buildings can share an edge.
-            Self::TownCenter => (7, 7),
+            Self::TownCenter => (5, 5),
             Self::Dock => (4, 4),
             Self::House | Self::Granary => (3, 3),
-            Self::Watchtower => (3, 3),
+            Self::Watchtower => (2, 2),
             _ => (1, 1),
         }
     }

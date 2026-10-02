@@ -16,6 +16,8 @@ struct Instance {
     @location(3) uv: vec4<f32>,
     @location(4) pull: f32,
     @location(5) tint: vec4<f32>,
+    @location(6) shear: vec2<f32>,
+    @location(7) warp: vec2<f32>,
 };
 
 struct VOut {
@@ -30,12 +32,18 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
     let corners = array<vec2<f32>, 6>(vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(1.0, 1.0));
     let q = corners[index];
     let anchor = bend(inst.anchor);
-    let offset = (q.x - inst.pivot.x) * inst.size.x * g.camera_right.xyz + (q.y - inst.pivot.y) * inst.size.y * g.camera_up.xyz;
+    let local = q - inst.pivot;
+    let denominator = 1.0 + dot(local, inst.warp);
+    let offset = (local.x * inst.size.x + local.y * inst.shear.x) * g.camera_right.xyz
+        + (local.y * inst.size.y + local.x * inst.shear.y) * g.camera_up.xyz;
     var out: VOut;
-    out.clip = g.view_proj * vec4<f32>(anchor + offset, 1.0);
-    let toward_camera = normalize(g.camera_pos.xyz - anchor);
+    out.clip = g.view_proj * vec4<f32>(anchor + offset / denominator, 1.0);
+    let toward_camera = normalize(cross(g.camera_right.xyz, g.camera_up.xyz));
     let front = g.view_proj * vec4<f32>(anchor + toward_camera * inst.pull, 1.0);
     out.clip.z = front.z / front.w * out.clip.w;
+    // Homogeneous weights keep texture interpolation consistent with the
+    // four-corner map, without subdividing every billboard into a mesh.
+    out.clip *= denominator;
     out.uv = vec2<f32>(mix(inst.uv.x, inst.uv.z, q.x), mix(inst.uv.w, inst.uv.y, q.y));
     out.anchor = inst.anchor;
     out.tint = inst.tint;

@@ -4,6 +4,38 @@ use aoa_game::{CellCoordinate, UnitAction};
 use glam::Vec2;
 
 impl App {
+    /// Terrain, art and grid use one flat foundation plane, also during preview.
+    pub(super) fn level_building_plots(
+        &mut self,
+        ghost: Option<(aoa_game::BuildingKind, CellCoordinate, bool)>,
+    ) -> bool {
+        let Some(snapshot) = self.view.snapshot.as_ref() else {
+            return false;
+        };
+        let mut bounds: Vec<_> = snapshot
+            .buildings
+            .iter()
+            .map(|b| {
+                [
+                    b.building.origin.column as f32 * terrain::CELL,
+                    b.building.origin.row as f32 * terrain::CELL,
+                    b.columns as f32 * terrain::CELL,
+                    b.rows as f32 * terrain::CELL,
+                ]
+            })
+            .collect();
+        if let Some((kind, origin, _)) = ghost {
+            let (columns, rows) = kind.size();
+            bounds.push([
+                origin.column as f32 * terrain::CELL,
+                origin.row as f32 * terrain::CELL,
+                columns as f32 * terrain::CELL,
+                rows as f32 * terrain::CELL,
+            ]);
+        }
+        self.view.heights.set_plots(bounds, ghost.is_some())
+    }
+
     /// The site for `kind` under the cursor (centred on it) and whether it is clear.
     pub(super) fn placement(
         &self,
@@ -11,7 +43,9 @@ impl App {
         kind: aoa_game::BuildingKind,
     ) -> Option<(CellCoordinate, bool)> {
         let snapshot = self.view.snapshot.as_ref()?;
-        let point = self.ground_at(pixel)?;
+        let point = self
+            .rig
+            .ground_at(pixel, |x, z| self.view.heights.placement_at(x, z))?;
         let (columns, rows) = kind.size();
         let column = (point.x / terrain::CELL - columns as f32 / 2.0).round();
         let row = (point.z / terrain::CELL - rows as f32 / 2.0).round();
