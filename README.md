@@ -11,7 +11,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases
-- Command-driven construction of five building types (town center 7×7, house and granary 3×3, watchtower 3×3, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
+- Command-driven construction of five building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
@@ -94,13 +94,13 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Unload:** with villagers selected, tap a town center (or a granary for food and fiber) to send those carrying goods to unload there; they then wait for orders. A villager holding goods shows its load even when stopped.
 - **Finish the load:** a villager carrying goods drops them off before gathering a different kind or building.
 - **Target marker:** while villagers are selected, a ring under the pointer shows what a tap would do: gold over a resource or foundation to work on, white over ground to walk to.
-- **Build:** select a villager and press the build button to open the building menu. Buildings you cannot afford are shown in greyscale; pick one, then tap/click ground (the ring turns green on a clear site). Costs: town center 20 wood, house 15 wood, granary 25 wood, watchtower 15 wood and 15 stone, dock 30 wood. The foundation appears immediately and rises through its drawn stages as the villager works. Tap a foundation with other villagers selected to have them help.
+- **Build:** select a villager and press the build button to open the building menu. Buildings you cannot afford are shown in greyscale; pick one, then tap/click ground (the ghost and rectangular plot turn green on a clear site). Costs: town center 20 wood, house 15 wood, granary 25 wood, watchtower 15 wood and 15 stone, dock 30 wood. The foundation appears immediately and rises through its drawn stages as the villager works. Tap a foundation with other villagers selected to have them help.
 - **Produce:** select a town center and press the **Train villager** medallion. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
 - **Research:** select a town center and press an available technology medallion (hover for its name and cost). Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
 - **Pan:** drag with one pointer, WASD/arrow keys, or tap the minimap.
 - **Zoom:** pinch or use the mouse wheel.
 - **View:** fixed-angle orthographic isometric view; pan and zoom keep buildings seated on their cells.
-- **Grid:** toggle the **Grid** pill (or G) to show square cells as diamonds. Choosing a building shows a translucent ghost and a green/red rectangular footprint; neighboring houses can share an edge.
+- **Grid:** toggle the **Grid** pill (or G) to show square cells as diamonds. Choosing a building shows a translucent ghost and a green/red rectangular footprint; neighboring houses can share an edge. Painted structural base corners are calibrated to those same plot corners for every construction stage. Rendered foundation ground is level, and touching plots share one height; steps and decorations can extend beyond the walls.
 - **Recover view:** reload to center the camera on the currently visible villagers.
 - **Reset world:** in the Rust client (`/play`), tap the **New island** pill top-left, then tap it again within four seconds; the legacy client has a **Reset world** button with a confirmation. Either erases progress and starts a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
 - **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed. While paused, a **Paused · tap to resume** pill shows at the top; tap it to continue at 1×. Tapping a greyed-out command shows why it is unavailable. The web client reconnects by itself when the server restarts (for example during a deploy).

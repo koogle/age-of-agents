@@ -6,6 +6,8 @@ use aoa_game::{CellCoordinate, TerrainBiome, WORLD_COLUMNS, WORLD_ROWS};
 use bytemuck::{Pod, Zeroable};
 use glam::Vec2;
 
+mod plots;
+
 /// World units per simulation cell. The grid is finer than a villager is
 /// tall, so the island keeps its size while cells shrink.
 pub const CELL: f32 = 0.5;
@@ -131,12 +133,16 @@ fn world_height(elevation: f32) -> f32 {
 #[derive(Clone)]
 pub struct Heights {
     cells: Vec<f32>,
+    plots: Vec<plots::Plot>,
+    preview: bool,
 }
 
 impl Heights {
     pub fn unknown() -> Self {
         Self {
             cells: vec![UNKNOWN_HEIGHT; usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS)],
+            plots: Vec::new(),
+            preview: false,
         }
     }
 
@@ -144,6 +150,8 @@ impl Heights {
     /// beds sink below their banks.
     pub fn from_cells(cells: impl Iterator<Item = (Option<f32>, Option<TerrainBiome>)>) -> Self {
         Self {
+            plots: Vec::new(),
+            preview: false,
             cells: cells
                 .map(|(elevation, biome)| match elevation {
                     None => UNKNOWN_HEIGHT,
@@ -167,6 +175,16 @@ impl Heights {
 
     /// Smooth ground height at a world point.
     pub fn at(&self, x: f32, z: f32) -> f32 {
+        self.levelled_height(x, z, self.natural_height(x, z), false)
+    }
+
+    /// Pointer snapping ignores temporary preview terraforming, so the ghost
+    /// cannot move its own target into a neighboring cell on the next frame.
+    pub fn placement_at(&self, x: f32, z: f32) -> f32 {
+        self.levelled_height(x, z, self.natural_height(x, z), true)
+    }
+
+    fn natural_height(&self, x: f32, z: f32) -> f32 {
         let (gx, gz) = (x / CELL - 0.5, z / CELL - 0.5);
         let (c, r) = (gx.floor(), gz.floor());
         let (fx, fz) = (gx - c, gz - r);

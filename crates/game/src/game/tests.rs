@@ -190,7 +190,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
     let base = &world.buildings[0];
     assert_eq!(base.kind, BuildingKind::TownCenter);
     assert!(base.is_complete());
-    assert_eq!(base.footprint().cells().count(), 49);
+    assert_eq!(base.footprint().cells().count(), 25);
     assert_eq!(base.researches, TechnologyKind::ALL);
     for unit in &world.units {
         assert!(base.footprint().is_interaction_cell(unit.cell));

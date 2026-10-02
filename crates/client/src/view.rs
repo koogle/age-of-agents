@@ -5,7 +5,7 @@ use std::collections::{HashMap, VecDeque};
 use aoa_game::{
     CellVisibility, GatherPhase, ResourceKind, TerrainBiome, UnitAction, WorldSnapshot,
 };
-use glam::{Vec2, Vec3};
+use glam::{Mat2, Vec2, Vec3};
 use serde::Deserialize;
 
 mod buildings;
@@ -45,6 +45,7 @@ struct BuildingSheet {
     size: [f32; 2],
     cell: [f32; 2],
     frames: HashMap<String, Vec<[f32; 4]>>,
+    footprints: HashMap<String, Vec<[[f32; 2]; 4]>>,
 }
 
 /// Standing frames at twice the resolution of `villager.json`, with the same
@@ -74,13 +75,8 @@ struct ResourceSheet {
 struct TownCenterSheet {
     size: [f32; 2],
     cell: [f32; 2],
-    anchor: [f32; 2],
-    /// Lowest painted pixel of the front step, in cell pixels.
-    #[serde(rename = "baseBottom")]
-    base_bottom: [f32; 2],
-    #[serde(rename = "unitsPerPixel")]
-    units_per_pixel: f32,
     frames: HashMap<String, [f32; 4]>,
+    footprints: HashMap<String, [[f32; 2]; 4]>,
     /// (frame, construction progress from which it shows).
     #[serde(rename = "constructionStages")]
     construction_stages: Vec<(String, f64)>,
@@ -337,6 +333,8 @@ impl WorldView {
                 uv: uv(rect, resources.size, false),
                 pull: 0.3 * size,
                 tint: [1.0; 4],
+                shear: [0.0; 2],
+                warp: [0.0; 2],
             }
         };
         for resource in &snapshot.resources {
@@ -513,6 +511,8 @@ impl WorldView {
                     uv: uv(rect, sheet_size, mirror),
                     pull: 0.3 * cell_size,
                     tint: [1.0; 4],
+                    shear: [0.0; 2],
+                    warp: [0.0; 2],
                 },
             ));
             decals.push(Decal {
@@ -540,25 +540,24 @@ impl WorldView {
     /// a tree's crown or a temple's roof must not fall through to the ground
     /// behind it. Only the middle of each cell counts, where the art is.
     pub fn sprite_at(&self, rig: &Rig, pixel: Vec2) -> Option<Pick> {
-        let (right, up) = rig.basis();
+        let (right, _) = rig.basis();
         let mut best: Option<(f32, &Pick)> = None;
         for Pickable { pick, sprite } in &self.pickables {
             let anchor = Vec3::from(sprite.anchor);
-            let corner = |fx: f32, fy: f32| {
-                anchor
-                    + right * (fx - sprite.pivot[0]) * sprite.size[0]
-                    + up * (fy - sprite.pivot[1]) * sprite.size[1]
-            };
-            let (Some(low), Some(high)) = (
-                rig.screen_of(corner(0.25, 0.04)),
-                rig.screen_of(corner(0.75, 0.85)),
-            ) else {
+            // Screen -> image uses the same projective map as the shader.
+            let Some(at) = rig.screen_of(anchor) else {
                 continue;
             };
-            let inside = pixel.x > low.x.min(high.x)
-                && pixel.x < low.x.max(high.x)
-                && pixel.y > high.y.min(low.y)
-                && pixel.y < high.y.max(low.y);
+            let screen_scale = (rig.screen_of(anchor + right).unwrap() - at).length();
+            let projected = Vec2::new(pixel.x - at.x, at.y - pixel.y) / screen_scale;
+            let raw = Mat2::from_cols(
+                Vec2::new(sprite.size[0], sprite.shear[1]),
+                Vec2::new(sprite.shear[0], sprite.size[1]),
+            )
+            .inverse()
+                * projected;
+            let local = raw / (1.0 - raw.dot(Vec2::from(sprite.warp))) + Vec2::from(sprite.pivot);
+            let inside = local.x > 0.25 && local.x < 0.75 && local.y > 0.04 && local.y < 0.85;
             let depth = rig.eye().distance(anchor);
             if inside && best.is_none_or(|(d, _)| depth < d) {
                 best = Some((depth, pick));

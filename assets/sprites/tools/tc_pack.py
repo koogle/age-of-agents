@@ -53,6 +53,14 @@ manifest = {"image": "towncenter.png", "size": list(sheet.size), "cell": [CELL, 
   "anchor": [CELL // 2, anchor_y], "baseBottom": [CELL // 2, BASE_Y],
   "unitsPerPixel": round(WORLD_WIDTH / cw, 6),
   "note": "anchor = footprint centre on the ground (middle of the foundation platform); baseBottom = lowest point of the front step. All frames share one scale and anchor.",
+  # Pixel calibration is part of the atlas contract, not the transparent bounds.
+  "footprints": {
+    "foundation": [[24, 352], [258, 468], [488, 352], [254, 236]],
+    "build33": [[24, 360], [256, 468], [488, 357], [256, 249]],
+    "build66": [[30, 364], [250, 474], [480, 361], [260, 251]],
+    "complete": [[24, 360], [256, 469], [488, 359], [256, 250]],
+    "working": [[24, 360], [256, 469], [488, 359], [256, 250]],
+  },
   "frames": {k: [i * CELL, 0, CELL, CELL] for i, k in enumerate(ORDER)},
   "constructionStages": [["foundation", 0.0], ["build33", 0.15], ["build66", 0.5]]}
 sheet.save(sys.argv[1] + ".png", optimize=True); json.dump(manifest, open(sys.argv[1] + ".json", "w"), indent=1)

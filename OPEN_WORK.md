@@ -1,6 +1,6 @@
 # Open Work
 
-**Last updated:** 2026-10-02T21:49:33+00:00
+**Last updated:** 2026-10-02T22:10:55+00:00
 **Branch:** `master` (fixed camera heading; PRs #20 and #21 merged)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
@@ -18,7 +18,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 ## Open work
 
-0. Scale: buildings are sized from their art so buildings fit compact plots (town center 7×7, house and granary 3×3, watchtower 3×3, dock 4×4); resources keep 8 cells from the town center's middle; schema 9 drops older saves, so production starts a new island on deploy. The start site may now also sit on scrubland or heath.
+0. Scale: buildings are sized from their art so buildings fit compact plots (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4); resources keep 8 cells from the town center's middle; schema 9 drops older saves, so production starts a new island on deploy. The start site may now also sit on scrubland or heath.
 0. Robustness: the web client reconnects after a server restart (a deploy) and accepts the new server's snapshot numbering; every response carries `Cache-Control: no-cache`, so phones revalidate the page, game code and art after a deploy. Deploys queue: the workflow cancels a pending run when a newer merge arrives.
 0. Buildings: villagers build town center, house, granary, watchtower and dock from a menu (greyscale when unaffordable); in-world house/granary/watchtower/dock art uses `assets/sprites/buildings_hd.png` (lossless 512 px cells), repacked from original 1024 px construction cutouts. The dock has no function until the fishing boat. The HUD command bar moves above the globe on narrow screens, and the page uses 100dvh so phone toolbars no longer hide it.
 0. Touch: two fingers pinch-zoom and pan; the Rust camera heading is fixed (Q/E, right-drag and twist no longer rotate); taps pick the terrain surface (the seeded island's elevation had made taps miss).
@@ -52,7 +52,9 @@ None.
 
 ## Current building-placement work
 
-- Implemented: compact rectangular plots (town center 7×7, house/granary/watchtower 3×3, dock 4×4); moderately smaller art; lossless 512 px building/construction sprites repacked from the original 1024 px cutouts without new FAL spend; green/red translucent ghosts sharing actual building geometry; local placement grid and optional full Grid pill/G toggle.
-- Stable rendering: orthographic camera with a fixed isometric angle (30-degree projected cell edges matching the art), no zoom recentering or planet bend; front anchors fixed in world space rather than recalculated toward the camera. Pan/zoom no longer move a building relative to its cells.
-- Verification: 84 workspace tests, native/WebAssembly lint and formatting passed. Adjacency test completes houses sharing an edge on both axes, rejects overlap atomically, and checks world invariants. Desktop HUD checks passed: blocked ghost rejection, completed shared-edge houses, Grid on/off, pan and zoom, no page errors. Final mobile touch checks are running. Thermonuclear review: shared geometry and placement module remove duplication; no new gameplay autonomy or dependencies.
-- All work is committed/pushed to `master` as milestones complete; pushes trigger production CI/deployment. Finish browser verification and check the latest deployment workflow before reporting production status.
+- Implemented: town center 5×5, house/granary 3×3, watchtower 2×2, dock 4×4; high-resolution lossless building and construction sprites; green/red translucent ghosts; local placement grid and optional Grid pill/G toggle; fixed orthographic camera with stable pan/zoom.
+- Alignment correction: every stage has measured structural base corners. One four-corner mapping seats the finished art, foundations and ghosts on the authoritative rectangular claim. Transparent bounds, loose materials, steps and scaffolding no longer determine placement or size. The town-center PNG is unchanged.
+- Terrain: rendered foundation plots are level, touching plots share the oldest foundation's height, and a short shoulder joins them to the island. Preview leveling is temporary; pointer snapping uses the permanent ground so the ghost cannot move its own target. Simulation terrain, passability and save data are unchanged by this rendering correction.
+- Verification: 88 workspace tests; native/WebAssembly lint, formatting, Python asset-packer compilation and asset checks passed. Tests cover all four base corners at every stage through pan/zoom, shared house wall endpoints on both axes, every explored build site on three generated islands without folded sprites, and preview-ground isolation. Desktop and DPR-2 phone browser checks passed: Grid on/off, blocked-ghost rejection, shared-edge completed houses, drag/release placement, camera navigation, town-center roof picking; no page errors. An independent snapshot-footprint overlay visually matches painted base edges.
+- Thermonuclear review passed: arbitrary per-kind scales/offsets were removed in favor of one calibration path; leveling stays in the terrain presentation module; no new dependencies or gameplay autonomy; client files remain under 1,000 lines.
+- Prior camera/asset/grid milestones are committed and pushed to `master`, with successful production deployments. The alignment correction passes all local gates; its master push triggers production deployment. Confirm that latest workflow before claiming the correction is live. No open PRs remain.

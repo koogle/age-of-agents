@@ -23,25 +23,36 @@ def cutout(path):
     keep = np.isin(labels, 1 + np.flatnonzero(sizes > max(60, solid.sum() * 0.002)))
     pixels[..., 3] *= ndimage.binary_dilation(keep, iterations=2)
     y, x = np.nonzero(pixels[..., 3] > 40)
-    return Image.fromarray(pixels[y.min():y.max() + 1, x.min():x.max() + 1])
+    return Image.fromarray(pixels[y.min():y.max() + 1, x.min():x.max() + 1]), (int(x.min()), int(y.min()))
 
 
 def main():
     atlas = Image.new("RGBA", (CELL * 4, CELL * len(KINDS)))
     frames = {}
+    footprints = {}
+    source_corners = json.loads((SOURCE / "footprints.json").read_text())["footprints"]
     for row, kind in enumerate(KINDS):
-        images = [cutout(SOURCE / f"{kind}_{stage}.png") for stage in STAGES]
+        cutouts = [cutout(SOURCE / f"{kind}_{stage}.png") for stage in STAGES]
+        images = [im for im, _ in cutouts]
         scale = min(FIT_H / max(im.height for im in images), FIT_W / max(im.width for im in images))
         frames[kind] = []
-        for col, image in enumerate(images):
+        footprints[kind] = []
+        for col, (image, origin) in enumerate(cutouts):
             width, height = round(image.width * scale), round(image.height * scale)
+            offset = ((CELL - width) // 2, BASE - height)
+            footprints[kind].append([
+                [round((x - origin[0]) * width / image.width + offset[0], 4),
+                 round((y - origin[1]) * height / image.height + offset[1], 4)]
+                for x, y in source_corners[kind][col]
+            ])
             # Pack native high-resolution detail, keeping one scale and baseline per building.
             image = image.resize((width, height), Image.Resampling.LANCZOS)
-            atlas.alpha_composite(image, (col * CELL + (CELL - width) // 2, row * CELL + BASE - height))
+            atlas.alpha_composite(image, (col * CELL + offset[0], row * CELL + offset[1]))
             frames[kind].append([col * CELL, row * CELL, CELL, CELL])
     atlas.save(DEST / "buildings_hd.png")
     manifest = {"image": "buildings_hd.png", "size": list(atlas.size), "cell": [CELL, CELL],
-                "anchor": [CELL // 2, BASE], "stages": list(STAGES), "frames": frames}
+                "anchor": [CELL // 2, BASE], "stages": list(STAGES), "frames": frames,
+                "footprints": footprints}
     (DEST / "buildings_hd.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"Packed {len(KINDS) * len(STAGES)} original cutouts into {atlas.size}, lossless RGBA PNG")
 

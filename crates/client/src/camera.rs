@@ -160,8 +160,14 @@ impl Rig {
 
     /// Camera right and up vectors in world space, for billboards.
     pub fn basis(&self) -> (Vec3, Vec3) {
-        let view = self.view();
-        (view.row(0).xyz(), view.row(1).xyz())
+        (
+            Vec3::new(YAW.cos(), 0.0, -YAW.sin()),
+            Vec3::new(
+                -PITCH.sin() * YAW.sin(),
+                PITCH.cos(),
+                -PITCH.sin() * YAW.cos(),
+            ),
+        )
     }
 }
 
