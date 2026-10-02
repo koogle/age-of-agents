@@ -233,7 +233,8 @@ impl WorldView {
             .count();
         if known != self.known_heights {
             self.known_heights = known;
-            self.heights = Heights::from_elevations(next.terrain.iter().map(|cell| cell.elevation));
+            self.heights =
+                Heights::from_cells(next.terrain.iter().map(|cell| (cell.elevation, cell.biome)));
             self.heights_dirty = true;
         }
         let mut seen = Vec::with_capacity(next.units.len());

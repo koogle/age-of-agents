@@ -234,7 +234,7 @@ impl App {
                         * snapshot.columns as usize
                         + (origin.column + dx) as usize];
                     cell.visibility == aoa_game::CellVisibility::Unseen
-                        || cell.biome == Some(aoa_game::TerrainBiome::Water)
+                        || cell.biome.is_some_and(|biome| !biome.is_walkable())
                 })
             });
         let water = |column: i32, row: i32| {
