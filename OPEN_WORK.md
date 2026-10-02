@@ -25,7 +25,7 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Open work
 
-0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Next: villager and resource sprites from generated renders; meadow texture is still flatter than prairie.
+0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Villagers are now generated illustrated billboards (`frontend/villager-sprite.js`, `assets/sprites/villager.*`). Next: resource and tree sprites; meadow texture is still flatter than prairie.
 0b. Smoothness: units are drawn ~1.6 ticks behind the newest snapshot on a self-correcting presentation clock (`frontend/world-view.js`); verify on a real phone over Modal.
 
 1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
