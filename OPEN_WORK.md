@@ -17,7 +17,7 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 
 ## Open work
 
-1. Parity before `/` switches to the Rust client: box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
+1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, and touch lacks pinch/twist, so mouse and touch are not yet identical): box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
 4. Liveness beyond pairwise standoffs is untested.
