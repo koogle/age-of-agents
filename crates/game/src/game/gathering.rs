@@ -34,11 +34,12 @@ impl GameWorld {
             self.finish_or_return_with_cargo(unit_index, resource_id);
             return;
         }
-        if self.units[unit_index]
-            .cargo
-            .as_ref()
-            .is_some_and(|cargo| cargo.amount + f64::EPSILON >= VILLAGER_CARRY_CAPACITY)
-        {
+        // A full basket, or goods of another kind, are dropped off before
+        // heading out, rather than walking to the node and turning back.
+        let kind = self.resources[resource_index].kind;
+        if self.units[unit_index].cargo.as_ref().is_some_and(|cargo| {
+            cargo.kind != kind || cargo.amount + f64::EPSILON >= VILLAGER_CARRY_CAPACITY
+        }) {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
             return;
         }
@@ -200,6 +201,28 @@ impl GameWorld {
             .into_iter()
             .find(|(_, r)| self.can_reach_beside(unit_index, r.footprint()))
             .map(|(_, r)| r.id.clone())
+    }
+
+    /// A builder carrying goods takes them to a drop site before building.
+    /// Returns whether the unit is still on that errand. With no reachable
+    /// drop site the goods are simply carried along.
+    pub(super) fn drop_off_before_building(&mut self, unit_index: usize, dt: f64) -> bool {
+        if self.units[unit_index].cargo.is_none() {
+            return false;
+        }
+        let Some(site) = self.nearest_drop_site(unit_index) else {
+            return false;
+        };
+        match self.travel(unit_index, Goal::Beside(site), dt) {
+            Travel::EnRoute => true,
+            Travel::Unreachable => false,
+            Travel::Arrived { .. } => {
+                if let Some(cargo) = self.units[unit_index].cargo.take() {
+                    self.stockpile.add(cargo.kind, cargo.amount);
+                }
+                true
+            }
+        }
     }
 
     fn set_gather_phase(&mut self, unit_index: usize, resource_id: String, phase: GatherPhase) {

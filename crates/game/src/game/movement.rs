@@ -186,6 +186,18 @@ impl GameWorld {
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
             UnitAction::Move { to } => Some(Goal::Cell(*to)),
+            UnitAction::Build { .. } if self.units[unit].cargo.is_some() => {
+                // Dropping goods off first; see `drop_off_before_building`.
+                self.nearest_drop_site(unit).map(Goal::Beside).or_else(|| {
+                    let UnitAction::Build { building_id } = &self.units[unit].action else {
+                        return None;
+                    };
+                    self.buildings
+                        .iter()
+                        .find(|building| &building.id == building_id)
+                        .map(|building| Goal::Beside(building.footprint()))
+                })
+            }
             UnitAction::Build { building_id } => self
                 .buildings
                 .iter()

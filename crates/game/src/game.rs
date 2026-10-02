@@ -720,6 +720,9 @@ impl GameWorld {
             self.units[unit].action = UnitAction::Idle;
             return;
         };
+        if self.drop_off_before_building(unit, dt) {
+            return;
+        }
         let remaining =
             match self.travel(unit, Goal::Beside(self.buildings[building].footprint()), dt) {
                 Travel::EnRoute => return,
