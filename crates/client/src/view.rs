@@ -10,7 +10,7 @@ use serde::Deserialize;
 
 use crate::camera::Rig;
 use crate::render::{Decal, Sprite};
-use crate::terrain::{self, height_at, random};
+use crate::terrain::{self, Heights, random};
 
 const VILLAGER_HEIGHT: f32 = 0.78;
 /// Units are drawn this many ticks behind the newest snapshot so jittery
@@ -92,6 +92,10 @@ pub struct WorldView {
     render_tick: Option<f64>,
     latest_tick: f64,
     pub cells_dirty: bool,
+    /// Ground heights of explored cells; rebuilt only when exploration grows.
+    pub heights: Heights,
+    pub heights_dirty: bool,
+    known_heights: usize,
 }
 
 fn seed_of(id: &str) -> u32 {
@@ -99,8 +103,8 @@ fn seed_of(id: &str) -> u32 {
         .fold(0u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32))
 }
 
-fn ground(x: f32, z: f32) -> Vec3 {
-    Vec3::new(x, height_at(x, z), z)
+fn ground(heights: &Heights, x: f32, z: f32) -> Vec3 {
+    Vec3::new(x, heights.at(x, z), z)
 }
 
 fn uv(rect: [f32; 4], size: [f32; 2], mirror: bool) -> [f32; 4] {
@@ -143,6 +147,9 @@ impl WorldView {
             render_tick: None,
             latest_tick: 0.0,
             cells_dirty: true,
+            heights: Heights::unknown(),
+            heights_dirty: true,
+            known_heights: 0,
         }
     }
 
@@ -154,10 +161,20 @@ impl WorldView {
         if (self.latest_tick - PLAYOUT_TICKS - *render_tick).abs() > 8.0 {
             *render_tick = self.latest_tick - PLAYOUT_TICKS;
         }
+        let known = next
+            .terrain
+            .iter()
+            .filter(|cell| cell.elevation.is_some())
+            .count();
+        if known != self.known_heights {
+            self.known_heights = known;
+            self.heights = Heights::from_elevations(next.terrain.iter().map(|cell| cell.elevation));
+            self.heights_dirty = true;
+        }
         let mut seen = Vec::with_capacity(next.units.len());
         for view in &next.units {
             let at = terrain::world_of(view.position.x, view.position.y);
-            let target = ground(at.x, at.y);
+            let target = ground(&self.heights, at.x, at.y);
             let entry = self
                 .units
                 .entry(view.unit.id.clone())
@@ -247,6 +264,7 @@ impl WorldView {
     ) -> (Vec<(usize, Sprite)>, Vec<Decal>) {
         let mut sprites = Vec::new();
         let mut decals = Vec::new();
+        let heights = &self.heights;
         let Some(snapshot) = self.snapshot.as_ref() else {
             return (sprites, decals);
         };
@@ -288,14 +306,19 @@ impl WorldView {
                 let scale = base * (0.9 + random(seed + 7.0) * 0.25);
                 sprites.push((
                     SHEET_RESOURCES,
-                    resource_sprite(node, resources.nodes[node].stages[0], ground(x, z), scale),
+                    resource_sprite(
+                        node,
+                        resources.nodes[node].stages[0],
+                        ground(heights, x, z),
+                        scale,
+                    ),
                 ));
             } else if fraction > 0.0 {
                 let node = node_for(resource.kind);
                 let stages = &resources.nodes[node].stages;
                 let stage = (((1.0 - fraction) * stages.len() as f32).floor() as usize)
                     .min(stages.len() - 1);
-                let at = ground(center.x, center.y);
+                let at = ground(heights, center.x, center.y);
                 sprites.push((
                     SHEET_RESOURCES,
                     resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08),
@@ -303,7 +326,7 @@ impl WorldView {
             }
         }
         for building in &snapshot.buildings {
-            let center = footprint_center(building);
+            let center = footprint_center(heights, building);
             // The temple rises through its drawn stages, then glows while working.
             let tc = &sheets.town_center;
             let frame = town_center_frame(
@@ -348,7 +371,7 @@ impl WorldView {
             let work = if moving {
                 None
             } else {
-                work_target(snapshot, &unit.unit.action)
+                work_target(heights, snapshot, &unit.unit.action)
             };
             let carrying = unit.unit.cargo.is_some();
             let mut name = if moving {
@@ -369,6 +392,7 @@ impl WorldView {
             }
             entry.lean = entry.lean.lerp(lean, (dt * 6.0).min(1.0));
             let position = ground(
+                heights,
                 entry.position.x + entry.lean.x,
                 entry.position.z + entry.lean.y,
             );
@@ -451,7 +475,11 @@ impl WorldView {
     }
 }
 
-fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &'static str)> {
+fn work_target(
+    heights: &Heights,
+    snapshot: &WorldSnapshot,
+    action: &UnitAction,
+) -> Option<(Vec2, &'static str)> {
     match action {
         UnitAction::Gather {
             resource_id,
@@ -468,7 +496,7 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
                 .buildings
                 .iter()
                 .find(|b| &b.building.id == building_id)?;
-            let center = footprint_center(building);
+            let center = footprint_center(heights, building);
             let center = Vec2::new(center.x, center.z);
             Some((center, "build"))
         }
@@ -477,9 +505,10 @@ fn work_target(snapshot: &WorldSnapshot, action: &UnitAction) -> Option<(Vec2, &
 }
 
 /// World point at the middle of a building's footprint.
-pub fn footprint_center(building: &aoa_game::BuildingView) -> Vec3 {
+pub fn footprint_center(heights: &Heights, building: &aoa_game::BuildingView) -> Vec3 {
     let origin = &building.building.origin;
     ground(
+        heights,
         (origin.column as f32 + building.columns as f32 / 2.0) * terrain::CELL,
         (origin.row as f32 + building.rows as f32 / 2.0) * terrain::CELL,
     )

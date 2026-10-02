@@ -19,6 +19,7 @@ pub(super) enum Claim {
 }
 
 pub(super) struct Occupancy {
+    water: Vec<bool>,
     claims: Vec<Option<Claim>>,
     reservations: Vec<Option<usize>>,
 }
@@ -32,12 +33,13 @@ impl Occupancy {
         self.claims[Self::index(cell)]
     }
 
-    /// Buildings, foundations, and live resources: things nobody walks through.
+    /// Water, buildings, foundations, and live resources: things nobody walks through.
     pub(super) fn is_static(&self, cell: CellCoordinate) -> bool {
-        matches!(
-            self.claim(cell),
-            Some(Claim::Building(_) | Claim::Resource(_))
-        )
+        self.water[Self::index(cell)]
+            || matches!(
+                self.claim(cell),
+                Some(Claim::Building(_) | Claim::Resource(_))
+            )
     }
 
     pub(super) fn has_other_unit(&self, cell: CellCoordinate, unit: usize) -> bool {
@@ -54,6 +56,9 @@ impl Occupancy {
 
     /// A cell `unit` may stop in: unclaimed by anyone else and unreserved by anyone else.
     pub(super) fn is_free_for(&self, cell: CellCoordinate, unit: Option<usize>) -> bool {
+        if self.water[Self::index(cell)] {
+            return false;
+        }
         let claimed = match self.claim(cell) {
             None => false,
             Some(Claim::Unit(owner)) => Some(owner) != unit,
@@ -73,13 +78,22 @@ impl GameWorld {
 
     fn try_occupancy(&self) -> Result<Occupancy, String> {
         let count = usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS);
+        let water: Vec<bool> = self
+            .terrain
+            .iter()
+            .map(|cell| cell.biome == TerrainBiome::Water)
+            .collect();
         let mut occupancy = Occupancy {
+            water: water.clone(),
             claims: vec![None; count],
             reservations: vec![None; count],
         };
         let mut claim = |cell: CellCoordinate, owner: Claim| {
             if !in_bounds(cell) {
                 return Err(format!("{owner:?} claims out-of-bounds cell {cell:?}"));
+            }
+            if water[Occupancy::index(cell)] {
+                return Err(format!("{owner:?} stands on water at {cell:?}"));
             }
             let slot = &mut occupancy.claims[Occupancy::index(cell)];
             if let Some(existing) = slot {

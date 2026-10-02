@@ -1,12 +1,12 @@
 # Open Work
 
-**Last updated:** 2026-10-02T10:05:00Z
-**Branch:** `claude/epic-feynman-n716xd` (merged with master at 3fa4555)
+**Last updated:** 2026-10-02T14:30:00Z
+**Branch:** `claude/rts-frontend-webgl-canvas-gukaet` (seeded islands, on top of master fa6cd43)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
 ## Current goal
 
-Run as much as possible in Rust: one wgpu client (native window and WebGL2) over the shared `crates/game` simulation, so the game is easy to run locally (`cargo run -p aoa-client`).
+Core loop: start on a seeded island that holds everything a fishing boat needs, gather and build up, then leave the island. Next come smoothness and speed, then the boat itself, then adversarial events (pirate raid, drought) that reward stockpiling.
 
 ## Done
 
@@ -18,12 +18,13 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 
 ## Open work
 
+0. Seeded islands (this branch): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal; HD idle villager sprites once the FAL PR lands.
 1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, and touch lacks pinch/twist, so mouse and touch are not yet identical): box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
 4. Liveness beyond pairwise standoffs is untested.
 5. Small resource nodes (30 per tree or bush) deplete quickly and the gatherer then goes idle; consider continuing to the nearest node of the same patch (AoE behaviour) if playtesting confirms the micromanagement hurts. Not done: it is close to autonomous task selection, which the milestone forbids.
-6. The legacy Three.js client at `/` reads the new 60×40 grid but draws it at one world unit per cell (twice the size); it is frozen until removal.
+6. The legacy Three.js client at `/` reads the new 60×40 grid but draws it at one world unit per cell (twice the size) and draws water and beach flat; it is frozen until removal.
 7. Anno is now a named second inspiration (calm economy, growing settlement) in `AGENTS.md`.
 
 ## Generated art
@@ -39,4 +40,4 @@ None.
 
 ## Exact next action
 
-Review and merge `claude/epic-feynman-n716xd`, redeploy Modal (schema 6 drops the persisted 30×20 world on first start), then verify production on a high-DPI phone.
+Merge the seeded-island PR, redeploy Modal (schema 7 replaces the persisted world with a generated island on first start), and verify production with `scripts/modal_manage.py verify`.

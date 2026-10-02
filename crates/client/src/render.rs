@@ -237,12 +237,12 @@ impl Renderer {
                 fs: "fs",
             },
         );
-        let ground_mesh = terrain::ground_mesh();
+        let ground_mesh = terrain::ground_mesh(&terrain::Heights::unknown());
         let ground = (
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("ground"),
                 contents: bytemuck::cast_slice(&ground_mesh.vertices),
-                usage: wgpu::BufferUsages::VERTEX,
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             }),
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("ground indices"),
@@ -626,6 +626,12 @@ impl Renderer {
     }
 
     /// Per-cell fog-of-war colour/visibility (RGBA) and painted ground layer (255 = unknown).
+    /// Re-shapes the ground once exploration reveals more of the island.
+    pub fn update_ground(&self, queue: &wgpu::Queue, heights: &terrain::Heights) {
+        let mesh = terrain::ground_mesh(heights);
+        queue.write_buffer(&self.ground.0, 0, bytemuck::cast_slice(&mesh.vertices));
+    }
+
     pub fn update_cells(&self, queue: &wgpu::Queue, rgba: &[u8], layers: &[u8]) {
         let (width, height) = (aoa_game::WORLD_COLUMNS as u32, aoa_game::WORLD_ROWS as u32);
         let size = wgpu::Extent3d {

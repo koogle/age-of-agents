@@ -27,14 +27,14 @@ fn roadmap_catalog_has_exact_stable_wire_contract() {
         })
     );
     assert_eq!(
-        GameWorld::default().snapshot().catalog,
+        fixture::fixture().snapshot().catalog,
         DomainCatalog::roadmap()
     );
 }
 
 #[test]
 fn scenario_reaches_loss_on_the_exact_authoritative_tick_boundary() {
-    let mut before = GameWorld::default();
+    let mut before = fixture::fixture();
     before.scenario.elapsed_ticks = 7;
     before.scenario.tick_limit = 9;
     let mut repeat = before.clone();
@@ -54,7 +54,7 @@ fn scenario_reaches_loss_on_the_exact_authoritative_tick_boundary() {
 #[test]
 fn terminal_scenario_progress_freezes_while_gameplay_remains_deferred() {
     for outcome in [ScenarioOutcome::Won, ScenarioOutcome::Lost] {
-        let mut world = GameWorld::default();
+        let mut world = fixture::fixture();
         world.scenario.elapsed_ticks = 12;
         world.scenario.outcome = outcome;
         let game_tick = world.tick;
@@ -69,7 +69,7 @@ fn terminal_scenario_progress_freezes_while_gameplay_remains_deferred() {
 
 #[test]
 fn paused_and_invalid_ticks_do_not_advance_the_scenario_limit() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.scenario.elapsed_ticks = world.scenario.tick_limit - 1;
     world.simulation_speed = 0.0;
 

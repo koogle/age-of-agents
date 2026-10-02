@@ -27,6 +27,10 @@ pub enum TerrainBiome {
     Scrubland,
     Heath,
     Clayland,
+    /// Sand along the open sea.
+    Beach,
+    /// Sea and lakes: nobody walks, builds or gathers on water.
+    Water,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -90,11 +94,13 @@ impl Footprint {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct TerrainCell {
     pub column: u16,
     pub row: u16,
     pub biome: TerrainBiome,
+    /// Land in (0, 1] rising toward the peaks; water in [-1, 0) by depth.
+    pub elevation: f32,
 }
 
 impl TerrainCell {
@@ -114,12 +120,15 @@ pub enum CellVisibility {
     Visible,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct SnapshotTerrainCell {
     pub column: u16,
     pub row: u16,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub biome: Option<TerrainBiome>,
+    /// Only for explored cells, like the biome.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub elevation: Option<f32>,
     pub visibility: CellVisibility,
 }
 
