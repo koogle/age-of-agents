@@ -1,6 +1,21 @@
 // WebSocket link to the authoritative server: sequenced snapshots in, typed
 // commands out, each command resolved by its acknowledgement.
 const RETRY_MS = [500, 1000, 2000, 4000];
+const BIOMES = ['meadow', 'forest', 'prairie', 'highland', 'wetland', 'scrubland', 'heath', 'clayland', 'beach', 'water', 'mountain', 'river'];
+
+// Snapshots carry terrain as one character per cell (crates/game terrain_codec);
+// this frozen client still reads the per-cell objects it was written for.
+function decodeTerrain({ columns, cells }) {
+  return [...cells].map((code, index) => {
+    const cell = { column: index % columns, row: Math.floor(index / columns), visibility: 'unseen' };
+    if (code !== '.') {
+      const visible = code < 'a';
+      cell.visibility = visible ? 'visible' : 'explored';
+      cell.biome = BIOMES[code.charCodeAt(0) - (visible ? 65 : 97)];
+    }
+    return cell;
+  });
+}
 
 export function connect({ onSnapshot, onStatus }) {
   const pending = new Map();
@@ -22,7 +37,7 @@ export function connect({ onSnapshot, onStatus }) {
       if (message.type === 'snapshot') {
         if (message.sequence <= lastSequence) return;
         lastSequence = message.sequence;
-        onSnapshot(message.world);
+        onSnapshot({ ...message.world, terrain: decodeTerrain(message.world.terrain) });
       } else if (message.type === 'command_result') {
         pending.get(message.request_id)?.(message);
         pending.delete(message.request_id);

@@ -22,9 +22,10 @@ pub enum Source {
 pub type CommandResult = Result<(), String>;
 
 impl Source {
-    pub fn local() -> Self {
+    /// The simulation in-process, on the island grown from `seed`.
+    pub fn local(seed: u64) -> Self {
         Source::Local {
-            world: Box::default(),
+            world: Box::new(GameWorld::generate(seed)),
             accumulator: 0.0,
             fresh: true,
             results: Vec::new(),
@@ -61,6 +62,19 @@ impl Source {
             Source::Local { results, .. } => std::mem::take(results),
             #[cfg(target_arch = "wasm32")]
             Source::Remote(remote) => std::mem::take(&mut remote.inbox.borrow_mut().results),
+        }
+    }
+
+    /// Starts over on a new island. The hosted server picks the seed.
+    pub fn reset(&mut self) {
+        match self {
+            Source::Local { world, fresh, .. } => {
+                let seed = (crate::now_seconds() * 1000.0) as u64 ^ world.seed.rotate_left(17);
+                **world = GameWorld::generate(seed);
+                *fresh = true;
+            }
+            #[cfg(target_arch = "wasm32")]
+            Source::Remote(remote) => remote.reset(),
         }
     }
 
@@ -120,10 +134,14 @@ pub mod remote {
     }
 
     pub struct Remote {
+        url: String,
         socket: web_sys::WebSocket,
         pub(super) inbox: Rc<RefCell<Inbox>>,
         request: u64,
-        _on_message: Closure<dyn FnMut(web_sys::MessageEvent)>,
+        /// When to try again after the connection drops (a deploy restarts
+        /// the server), in page seconds.
+        retry_at: Option<f64>,
+        on_message: Closure<dyn FnMut(web_sys::MessageEvent)>,
     }
 
     impl Remote {
@@ -165,15 +183,57 @@ pub mod remote {
             );
             socket.set_onmessage(Some(on_message.as_ref().unchecked_ref()));
             Self {
+                url,
                 socket,
                 inbox,
                 request: 0,
-                _on_message: on_message,
+                retry_at: None,
+                on_message,
             }
         }
 
         pub fn drain(&mut self, out: &mut VecDeque<WorldSnapshot>) {
+            self.keep_connected();
             out.extend(self.inbox.borrow_mut().snapshots.drain(..));
+        }
+
+        /// Reopens the socket after it closes. A restarted server numbers its
+        /// snapshots from zero again, so the sequence check starts over too.
+        fn keep_connected(&mut self) {
+            if self.socket.ready_state() != web_sys::WebSocket::CLOSED {
+                self.retry_at = None;
+                return;
+            }
+            let now = crate::now_seconds();
+            match self.retry_at {
+                None => {
+                    self.retry_at = Some(now + 1.0);
+                    self.inbox
+                        .borrow_mut()
+                        .results
+                        .push(Err("Reconnecting to the island…".into()));
+                }
+                Some(at) if now >= at => {
+                    if let Ok(socket) = web_sys::WebSocket::new(&self.url) {
+                        socket.set_onmessage(Some(self.on_message.as_ref().unchecked_ref()));
+                        self.socket = socket;
+                        self.inbox.borrow_mut().last_sequence = 0;
+                    }
+                    self.retry_at = Some(now + 3.0);
+                }
+                Some(_) => {}
+            }
+        }
+
+        /// Asks the server for a new island; the next snapshots carry it.
+        pub fn reset(&mut self) {
+            let Some(window) = web_sys::window() else {
+                return;
+            };
+            let init = web_sys::RequestInit::new();
+            init.set_method("POST");
+            let _ = window.fetch_with_str_and_init("/reset", &init);
+            self.inbox.borrow_mut().last_sequence = 0;
         }
 
         pub fn send(&mut self, command: &Command) {
@@ -195,7 +255,7 @@ mod tests {
 
     #[test]
     fn the_local_source_ticks_ten_times_a_second_and_reports_rejections() {
-        let mut source = Source::local();
+        let mut source = Source::local(aoa_game::DEFAULT_SEED);
         let mut out = VecDeque::new();
         source.poll(0.0, &mut out);
         assert_eq!(out.len(), 1, "the first poll publishes the starting world");

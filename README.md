@@ -6,12 +6,12 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 ## Milestone 1
 
-- Persistent deterministic 60×40-cell Voronoi-style island with eight connected biomes; cells are finer than a villager is tall, and resources grow in tight woodlines, berry patches and mine clumps
+- Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases
-- Command-driven construction of one building type through 4×4 foundations that several villagers can raise together
+- Command-driven construction of five building types (town center 8×8, house and granary 4×4, watchtower 3×3, dock 5×5; sized so doors stand about 1.2 villagers tall) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
@@ -89,22 +89,27 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Select:** tap/click a villager to replace the selection. On touch, long-press a villager to add or remove it. On desktop, Shift-drag from empty ground box-selects visible villagers, and Shift-click adds or removes. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
 - **Move:** with one or more villagers selected, tap/click empty ground. Groups receive one atomic authoritative order and spread across distinct reachable cells.
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
-- **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. A busy villager still rejects a new order until stopped.
+- **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. Giving a busy villager a new order does the same and then starts the new task.
+- **Keep gathering:** when a node runs out, the gatherer moves on to the nearest reachable node of the same kind within 10 cells, and goes idle only when none is left.
+- **Unload:** with villagers selected, tap a town center (or a granary for food and fiber) to send those carrying goods to unload there; they then wait for orders. A villager holding goods shows its load even when stopped.
+- **Finish the load:** a villager carrying goods drops them off before gathering a different kind or building.
 - **Target marker:** while villagers are selected, a ring under the pointer shows what a tap would do: gold over a resource or foundation to work on, white over ground to walk to.
-- **Build:** select a villager, press the build button (or B), then tap/click ground. A 4×4 foundation appears immediately and rises as the villager works. Tap a foundation with other villagers selected to have them help.
+- **Build:** select a villager and press the build button to open the building menu. Buildings you cannot afford are shown in greyscale; pick one, then tap/click ground (the ring turns green on a clear site). Costs: town center 20 wood, house 15 wood, granary 25 wood, watchtower 15 wood and 15 stone, dock 30 wood. The foundation appears immediately and rises through its drawn stages as the villager works. Tap a foundation with other villagers selected to have them help.
 - **Produce:** select a town center and press the **Train villager** medallion. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
 - **Research:** select a town center and press an available technology medallion (hover for its name and cost). Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
 - **Pan:** drag with one pointer, WASD/arrow keys, or tap the minimap.
 - **Zoom:** pinch or use the mouse wheel.
-- **Rotate:** two-finger twist, right-drag, or Q/E.
+- **View:** fixed camera heading; pan and zoom to navigate.
 - **Recover view:** reload to center the camera on the currently visible villagers.
-- **Reset world:** press **Reset world** and confirm to erase progress and restore the deterministic starting state.
-- **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed.
+- **Reset world:** in the Rust client (`/play`), tap the **New island** pill top-left, then tap it again within four seconds; the legacy client has a **Reset world** button with a confirmation. Either erases progress and starts a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
+- **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed. While paused, a **Paused · tap to resume** pill shows at the top; tap it to continue at 1×. Tapping a greyed-out command shows why it is unavailable. The web client reconnects by itself when the server restarts (for example during a deploy).
 - **Cancel build placement:** press the cancel button or Escape.
 
 Mouse and touch use the same command semantics.
 
-Schema version 6 stores units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, or the coarser 30×20 grid of version 5) are intentionally dropped because they cannot be translated safely.
+Schema version 9 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, or the smaller building footprints of versions 7 and 8) are intentionally dropped because they cannot be translated safely.
+
+Snapshots encode terrain compactly (one character per cell for biome and fog, one for quantized elevation of explored cells), so a full snapshot is about 8 KB rather than over 100 KB.
 
 ## Development checks
 

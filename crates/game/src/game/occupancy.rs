@@ -19,6 +19,7 @@ pub(super) enum Claim {
 }
 
 pub(super) struct Occupancy {
+    impassable: Vec<bool>,
     claims: Vec<Option<Claim>>,
     reservations: Vec<Option<usize>>,
 }
@@ -32,12 +33,13 @@ impl Occupancy {
         self.claims[Self::index(cell)]
     }
 
-    /// Buildings, foundations, and live resources: things nobody walks through.
+    /// Water, peaks, rivers, buildings, foundations, and live resources: things nobody walks through.
     pub(super) fn is_static(&self, cell: CellCoordinate) -> bool {
-        matches!(
-            self.claim(cell),
-            Some(Claim::Building(_) | Claim::Resource(_))
-        )
+        self.impassable[Self::index(cell)]
+            || matches!(
+                self.claim(cell),
+                Some(Claim::Building(_) | Claim::Resource(_))
+            )
     }
 
     pub(super) fn has_other_unit(&self, cell: CellCoordinate, unit: usize) -> bool {
@@ -54,6 +56,9 @@ impl Occupancy {
 
     /// A cell `unit` may stop in: unclaimed by anyone else and unreserved by anyone else.
     pub(super) fn is_free_for(&self, cell: CellCoordinate, unit: Option<usize>) -> bool {
+        if self.impassable[Self::index(cell)] {
+            return false;
+        }
         let claimed = match self.claim(cell) {
             None => false,
             Some(Claim::Unit(owner)) => Some(owner) != unit,
@@ -73,13 +78,22 @@ impl GameWorld {
 
     fn try_occupancy(&self) -> Result<Occupancy, String> {
         let count = usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS);
+        let impassable: Vec<bool> = self
+            .terrain
+            .iter()
+            .map(|cell| !cell.biome.is_walkable())
+            .collect();
         let mut occupancy = Occupancy {
+            impassable: impassable.clone(),
             claims: vec![None; count],
             reservations: vec![None; count],
         };
         let mut claim = |cell: CellCoordinate, owner: Claim| {
             if !in_bounds(cell) {
                 return Err(format!("{owner:?} claims out-of-bounds cell {cell:?}"));
+            }
+            if impassable[Occupancy::index(cell)] {
+                return Err(format!("{owner:?} stands on impassable ground at {cell:?}"));
             }
             let slot = &mut occupancy.claims[Occupancy::index(cell)];
             if let Some(existing) = slot {
@@ -216,6 +230,15 @@ impl GameWorld {
                         .any(|b| &b.id == building_id && !b.is_complete()) =>
                 {
                     return Err(format!("{} builds a missing foundation", unit.id));
+                }
+                UnitAction::Deposit { building_id }
+                    if unit.cargo.is_none()
+                        || !self
+                            .buildings
+                            .iter()
+                            .any(|b| &b.id == building_id && b.is_complete()) =>
+                {
+                    return Err(format!("{} deposits nothing or nowhere", unit.id));
                 }
                 _ => {}
             }
