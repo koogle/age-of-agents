@@ -9,7 +9,8 @@ pub const NEAR: f32 = 0.1;
 pub const FAR: f32 = 200.0;
 const FOV_Y: f32 = 36.0;
 const YAW: f32 = std::f32::consts::FRAC_PI_4;
-pub(crate) const PITCH: f32 = 0.86;
+// atan(1 / sqrt(2)): square-cell edges project at the art's 30-degree angle.
+pub(crate) const PITCH: f32 = 0.6154797;
 
 pub struct Rig {
     pub target: Vec3,
@@ -167,6 +168,23 @@ impl Rig {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pan_and_zoom_keep_ground_geometry_aligned() {
+        let mut rig = Rig::new();
+        rig.width = 900.0;
+        rig.height = 650.0;
+        let point = Vec3::new(10.0, 0.0, 10.0);
+        let edge =
+            |rig: &Rig| rig.screen_of(point + Vec3::X).unwrap() - rig.screen_of(point).unwrap();
+        let before = edge(&rig);
+        rig.look_at(20.0, 15.0);
+        assert!(edge(&rig).abs_diff_eq(before, 1e-4));
+        let target = rig.target;
+        rig.zoom(4.0);
+        assert_eq!(rig.target, target);
+        assert!(edge(&rig).abs_diff_eq(before / 4.0, 1e-4));
+    }
 
     #[test]
     fn navigation_preserves_heading() {
