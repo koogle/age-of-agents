@@ -181,3 +181,35 @@ No upscaler was needed: the original nano-banana strip generations are about 2.1
 `variety_scenery_contact.jpg` shows mixed clusters on the half-unit grid (base plus variants at about 0.45 units per node, 120 px per unit), the scenery as a composition preview (not to scale), and the effects.
 
 Round 3 cost about $1.02 for 40 FAL calls; the stop icon is included. The per-request ledger is `tools/ledger.jsonl`.
+
+## Roof cleanup, revision 2 (2026-10-02)
+
+The Rust client's completed and working frames now use a simpler terracotta
+gable roof with straight eaves, one straight ridge and sparse straight seams.
+The dense, irregular curved tile outlines were removed. The working frame keeps
+an amber doorway glow and adds no smoke across the roof.
+
+`towncenter_roof_complete.png` and `towncenter_roof_working.png` are the reviewed
+source renders from the built-in image tool. FAL was unavailable because this
+cloud environment's network policy blocks its host; no FAL generation spend was
+incurred for this revision. An earlier atlas-wide candidate was rejected for
+irregular tile seams and colored edge artifacts.
+
+Repack the reviewed sources with Node.js and `sharp` available:
+
+```bash
+node assets/sprites/tools/tc_roof_pack.cjs \
+  assets/sprites/towncenter_roof_complete.png \
+  assets/sprites/towncenter_roof_working.png assets/sprites/towncenter.png
+```
+
+The packer fits both finished renders to the previous finished frame's bounds
+and copies the complete frame's top 260 rows into the working frame, keeping its
+roof and pennant identical. The three construction cells are preserved exactly.
+The atlas size, frame rectangles, world scale and footprint anchor are unchanged;
+`towncenter.json` requires no edit. The legacy client's `towncenter.glb` is unchanged.
+
+Verified: decoded construction pixels unchanged, identical finished roof pixels,
+RGBA PNG with transparent corners, gameplay-scale contact sheet, and Chromium
+WebGL2 at 1280×800 and 390×844 with no page errors. Town-center selection still
+shows the command medallions. Rust workspace tests, formatting and Clippy pass.

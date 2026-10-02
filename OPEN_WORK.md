@@ -35,6 +35,8 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 - PR #20 adds the Stop icon, resource variant sheet, and scenery/work-particle sheet; renderer wiring remains future work.
 
+- PR #21 replaces completed/working town-center roofs while preserving construction frames and anchors; includes reviewed source renders, packer, and Midjourney setup docs.
+
 ## Generated art
 
 - On master: `assets/ui/` icon kit and coin buttons, `assets/terrain/` painted ground (revision 2), `assets/sprites/villager{,_woman,_elder}` billboards (drawn by `frontend/villager-sprite.js`), `assets/models/` opt-in GLBs (temple town center on by default via `?glb=`).
