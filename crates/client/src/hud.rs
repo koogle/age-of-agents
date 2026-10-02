@@ -580,32 +580,55 @@ impl Hud {
             return;
         };
         let gap = 10.0 * s;
-        // Coins shrink (down to a thumb-sized minimum) to fit narrow screens.
-        let count = commands.len().max(1) as f32;
-        let m = ((width - 24.0 * s - 28.0 * s + gap) / count - gap).clamp(40.0 * s, 52.0 * s);
-        let bar_width = commands.len() as f32 * (m + gap) - gap + 28.0 * s;
-        let left = (width - bar_width) / 2.0;
-        // On a narrow screen the bar would run under the globe, so it sits
-        // above the globe and its speed coins instead.
-        let top = if left + bar_width > gx - 8.0 * s {
-            gy - 48.0 * s - (m + 12.0 * s)
+        let margin = 12.0 * s;
+        // Phones: the selection sits bottom-left beside the globe, its coins
+        // wrapping into rows; wide screens keep one centred row.
+        let narrow = width < 600.0 * s;
+        let count = commands.len().max(1);
+        let (m, per_row) = if narrow {
+            let m = 48.0 * s;
+            let room = gx - 10.0 * s - margin - 28.0 * s + gap;
+            (m, ((room / (m + gap)).floor() as usize).max(1))
         } else {
-            height - m - 30.0 * s
+            let m = ((width - 24.0 * s - 28.0 * s + gap) / count as f32 - gap)
+                .clamp(40.0 * s, 52.0 * s);
+            (m, count)
         };
-        let bar = [left, top, bar_width, m + 12.0 * s];
+        let rows = count.div_ceil(per_row);
+        let columns = count.min(per_row);
+        let bar_width = columns as f32 * (m + gap) - gap + 28.0 * s;
+        let bar_height = rows as f32 * (m + gap) - gap + 12.0 * s;
+        let bar = if narrow {
+            [
+                margin,
+                height - 18.0 * s - bar_height,
+                bar_width,
+                bar_height,
+            ]
+        } else {
+            let left = (width - bar_width) / 2.0;
+            // A centred bar that would run under the globe sits above it.
+            let top = if left + bar_width > gx - 8.0 * s {
+                gy - 48.0 * s - bar_height
+            } else {
+                height - m - 30.0 * s
+            };
+            [left, top, bar_width, bar_height]
+        };
         let mut hover_text = None;
         if !commands.is_empty() {
-            self.shape(bar, GLASS, 1.0, bar[3] / 2.0);
+            self.shape(bar, GLASS, 1.0, (m + 12.0 * s) / 2.0);
             for (index, command) in commands.iter().enumerate() {
+                let (column, row) = (index % per_row, index / per_row);
                 let rect = [
-                    bar[0] + 14.0 * s + index as f32 * (m + gap),
-                    bar[1] + 6.0 * s,
+                    bar[0] + 14.0 * s + column as f32 * (m + gap),
+                    bar[1] + 6.0 * s + row as f32 * (m + gap),
                     m,
                     m,
                 ];
                 // The hit area spans half the gap on each side, so sweeping
                 // across the bar never falls back to the selection text.
-                let hit = [rect[0] - gap / 2.0, bar[1], m + gap, bar[3]];
+                let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, m + gap];
                 let hot = self.hovered(hit);
                 if hot {
                     hover_text = Some((command.label.clone(), command.detail.clone()));
@@ -632,14 +655,24 @@ impl Hud {
                 Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
             })
             .fold(0.0, f32::max);
-        let info_width = (widest + 84.0 * s).max(200.0 * s);
+        let info_width = (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin);
         let (title, detail) = hover_text.unwrap_or((title, detail));
-        let info = [
-            (width - info_width) / 2.0,
-            bar[1] - 64.0 * s,
-            info_width,
-            52.0 * s,
-        ];
+        let info = if narrow {
+            // Above the coins; lifted clear of the speed coins when it is
+            // wide enough to reach over the globe.
+            let mut top = bar[1] - 64.0 * s;
+            if margin + info_width > gx - 10.0 * s {
+                top = top.min(gy - 56.0 * s - 60.0 * s);
+            }
+            [margin, top, info_width, 52.0 * s]
+        } else {
+            [
+                (width - info_width) / 2.0,
+                bar[1] - 64.0 * s,
+                info_width,
+                52.0 * s,
+            ]
+        };
         self.shape(info, GLASS, 1.0, 26.0 * s);
         self.sprite(
             atlas,
