@@ -1,0 +1,69 @@
+{
+  "note": "Recovered original cutouts from existing FAL request results; no new generation spend.",
+  "files": {
+    "house_foundation.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bcde-72c0-a8e8-7d28f45a6b99"
+    },
+    "house_complete.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd21-74d2-9b16-5b1a068ff827"
+    },
+    "granary_walls.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd0c-7651-a6b2-bc33a2041ab4"
+    },
+    "granary_foundation.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd0c-7e21-aada-5ee2473b00c7"
+    },
+    "granary_complete.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd43-70c3-abe7-ff79d8391d39"
+    },
+    "house_roof.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd16-77e1-8d8f-5fb13dced558"
+    },
+    "granary_roof.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd4e-7f60-895e-75650efda0a6"
+    },
+    "house_walls.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-bd34-73d1-9294-63be4bb13b3b"
+    },
+    "watchtower_foundation.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-c9d8-71d0-b54a-a7c4ca8d9200"
+    },
+    "watchtower_walls.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-caed-7072-89f6-69f22e96a61f"
+    },
+    "watchtower_roof.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-cb6a-7532-a27f-2f23fe5d834f"
+    },
+    "watchtower_complete.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-cbc2-75b2-948c-9d6a8a2e0cf9"
+    },
+    "dock_foundation.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-cc45-7961-96d2-12b73c628cf4"
+    },
+    "dock_walls.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-ccb5-7a72-a39f-cd0d25455ac8"
+    },
+    "dock_roof.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-ccdf-73c0-8f67-a466c7cc5dd3"
+    },
+    "dock_complete.png": {
+      "endpoint": "fal-ai/birefnet/v2",
+      "request_id": "01a0fd3d-cd44-7571-8ab5-da9d504cf22a"
+    }
+  }
+}

@@ -50,9 +50,8 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 None.
 
-## Verification and next action
+## Current building-placement work
 
-- Camera rotation removed at the rig and input layers: fixed starting heading, no Q/E, right-drag, or touch twist rotation. Pan, zoom, and zoom-driven tilt remain.
-- Combined master: formatting, 81 workspace tests, native and WebAssembly Clippy, asset checks, icon normalization, packer/installer syntax, and thermonuclear review pass. Chromium mouse/touch checks passed at DPR 1 and 2 on the integrated terrain/assets: Q/E, right-drag and twist leave the heading fixed; drag pan, wheel zoom and pinch zoom work; no page errors.
-- PRs #20 and #21 merged after resolving documentation conflicts; construction sprite pixels remain byte-identical and all new sprite rectangles fit their atlases. No open PRs remain. New scenery and variants are available assets, not yet wired into the renderer.
-- `master` pushes trigger production quality/deployment via `.github/workflows/deploy.yml`; latest deployment is queued behind an active run. Direct Modal credentials are unavailable in this environment. Check the latest workflow, then run `python scripts/modal_manage.py verify` once deployment completes. Continue with the fishing boat after production verification.
+- Requested: slightly smaller buildings, sharper completed/construction sprites, ghost placement, touching neighboring houses, diamond-shaped square grid with an optional Grid button, and stable building anchors while panning/zooming.
+- Recovered all 16 original 1024 px cutouts from recorded FAL request results (no new generation spend). `scripts/pack_building_sprites.py` packs a dedicated lossless 512 px/cell gameplay atlas. Loading-screen art remains separate.
+- Runtime work in progress: compact plots, fixed isometric angle/anchors, shared real/ghost building geometry, placement grid and toggle. Next: complete implementation, verify adjacency/collision and browser placement at desktop/mobile sizes, commit/push to master.
