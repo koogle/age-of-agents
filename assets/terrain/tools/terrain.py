@@ -19,7 +19,7 @@ BIOMES = {
   "wetland":  ((118, 184, 128), "damp lush green grass with tiny reeds and small soft puddle glints"),
   "scrubland":((206, 180, 112), "ochre dry soil with sparse small dry shrub tufts"),
   "heath":    ((166, 176, 104), "olive-sage low heather with tiny purple heather specks"),
-  "clayland": ((214, 142, 92),  "warm terracotta clay soil with faint cracks and tiny pebbles"),
+  "clayland": ((214, 142, 92),  "smooth, even warm terracotta clay soil with soft faint dry cracks; only a few tiny pebbles scattered sparsely and evenly, no clusters, no rows"),
   "beach":    ((237, 209, 153), "warm pale fine beach sand with very faint ripples and a few tiny shell specks"),
   "shallows": ((120, 196, 190), "clear turquoise shallow sea water over pale sand, soft light ripples, seen from directly above"),
 }
