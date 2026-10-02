@@ -46,16 +46,31 @@ struct ResourceSheet {
     nodes: HashMap<String, ResourceNodeSheet>,
 }
 
+#[derive(Deserialize)]
+struct TownCenterSheet {
+    size: [f32; 2],
+    cell: [f32; 2],
+    anchor: [f32; 2],
+    #[serde(rename = "unitsPerPixel")]
+    units_per_pixel: f32,
+    frames: HashMap<String, [f32; 4]>,
+    /// (frame, construction progress from which it shows).
+    #[serde(rename = "constructionStages")]
+    construction_stages: Vec<(String, f64)>,
+}
+
 pub struct Sheets {
     villager: VillagerSheet,
     resources: ResourceSheet,
+    town_center: TownCenterSheet,
 }
 
 impl Sheets {
-    pub fn parse(villager: &[u8], resources: &[u8]) -> Self {
+    pub fn parse(villager: &[u8], resources: &[u8], town_center: &[u8]) -> Self {
         Self {
             villager: serde_json::from_slice(villager).expect("villager.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),
+            town_center: serde_json::from_slice(town_center).expect("towncenter.json"),
         }
     }
 }
@@ -295,14 +310,29 @@ impl WorldView {
                 building.building.origin.column as f32 + building.columns as f32 / 2.0,
                 building.building.origin.row as f32 + building.rows as f32 / 2.0,
             );
-            // Placeholder generated sheet until the illustrated temple lands.
+            // The temple rises through its drawn stages, then glows while working.
+            let tc = &sheets.town_center;
+            let frame = match building.building.construction {
+                Some(work) => {
+                    let progress = work / aoa_game::BUILD_SECONDS;
+                    tc.construction_stages
+                        .iter()
+                        .rev()
+                        .find(|(_, from)| progress >= *from)
+                        .map(|(name, _)| name.as_str())
+                        .unwrap_or("foundation")
+                }
+                None if building.building.job.is_some() => "working",
+                None => "complete",
+            };
+            let size = tc.cell[0] * tc.units_per_pixel;
             sprites.push((
                 SHEET_TOWN_CENTER,
                 Sprite {
                     anchor: center.to_array(),
-                    size: [2.5, 2.5],
-                    pivot: [0.5, 1.0 - 330.0 / 512.0],
-                    uv: [0.0, 0.0, 1.0, 1.0],
+                    size: [size, size * tc.cell[1] / tc.cell[0]],
+                    pivot: [tc.anchor[0] / tc.cell[0], 1.0 - tc.anchor[1] / tc.cell[1]],
+                    uv: uv(tc.frames[frame], tc.size, false),
                 },
             ));
             if selection.building.as_deref() == Some(building.building.id.as_str()) {

@@ -113,6 +113,7 @@ impl App {
         let sheets = Sheets::parse(
             assets.bytes("sprites/villager.json"),
             assets.bytes("sprites/resources.json"),
+            assets.bytes("sprites/towncenter.json"),
         );
         let atlas = hud::build_atlas(&assets);
         Self {
@@ -489,7 +490,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/villager_woman.png"),
         assets.image("sprites/villager_elder.png"),
         assets.image("sprites/resources.png"),
-        assets.image("game/building_town_center.png"),
+        assets.image("sprites/towncenter.png"),
     ]
 }
 
