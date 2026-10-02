@@ -1,12 +1,15 @@
 //! Seeded island generation. One seed always yields the same island: a single
-//! landmass ringed by sea, with highlands inland around a peak, forests and
+//! landmass ringed by sea, rolling hills, a ridge of impassable peaks with
+//! highlands around it, rivers running from there to the sea (crossed at
+//! sandbar fords), forests and
 //! wetland where it is moist, beaches on the coast, and resources where they
 //! belong (stone and ore in the hills, clay by the water, berries at forest
 //! edges). Every island is checked to hold enough of every resource to reach
 //! a fishing boat, all of it reachable on foot from the starting town center;
 //! a seed that fails is deterministically re-rolled.
 //!
-//! Only integer hashing and `+ - * /` are used, so the result is bit-identical
+//! Only integer hashing, `+ - * /` and `sqrt` (all exactly rounded under IEEE
+//! 754) are used, so the result is bit-identical
 //! on every platform, native and wasm.
 
 use std::collections::VecDeque;
@@ -27,6 +30,12 @@ pub const FISHING_BOAT_COST: [(ResourceKind, f64); 6] = [
 /// Share of the map that is land.
 const LAND_SHARE: f64 = 0.55;
 const MAX_ATTEMPTS: u64 = 64;
+/// Land above this height rank is bare mountain; above the next, highland.
+const MOUNTAIN_RANK: f64 = 0.93;
+const HIGHLAND_RANK: f64 = 0.8;
+const RIVERS: usize = 2;
+const MIN_RIVER_LENGTH: usize = 12;
+const FORD_SPACING: usize = 9;
 
 pub(super) struct Island {
     pub seed: u64,
@@ -158,10 +167,25 @@ fn distance_from(
 fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
     let mut rng = Rng(roll);
     let (width, height) = (COLUMNS as f64, ROWS as f64);
-    // A peak somewhere inland raises the hills; the coast is a warped ellipse.
+    // A mountain ridge runs through a point inland, broken into peaks by
+    // ridged noise; rolling hills cover the rest; the coast is a warped ellipse.
     let peak = (width * rng.range(0.3, 0.7), height * rng.range(0.3, 0.7));
-    let (shape_seed, detail_seed, moisture_seed, clay_seed) =
-        (rng.next(), rng.next(), rng.next(), rng.next());
+    let (dx, dy) = (rng.range(-1.0, 1.0), rng.range(-1.0, 1.0));
+    let norm = (dx * dx + dy * dy).sqrt().max(1e-6);
+    let half = width * rng.range(0.1, 0.2);
+    let ridge = (
+        (peak.0 - dx / norm * half, peak.1 - dy / norm * half),
+        (peak.0 + dx / norm * half, peak.1 + dy / norm * half),
+    );
+    let (shape_seed, detail_seed, hill_seed, crag_seed, moisture_seed, clay_seed, meander_seed) = (
+        rng.next(),
+        rng.next(),
+        rng.next(),
+        rng.next(),
+        rng.next(),
+        rng.next(),
+        rng.next(),
+    );
     let raw: Vec<f64> = (0..COLUMNS * ROWS)
         .map(|index| {
             let (x, y) = (
@@ -174,12 +198,11 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
             );
             let warp = (fbm(shape_seed, x / 9.0, y / 9.0) - 0.5) * 0.55;
             let falloff = 1.0 - (nx * nx + ny * ny) - warp;
-            let (px, py) = (
-                (x - peak.0) / (width * 0.22),
-                (y - peak.1) / (height * 0.22),
-            );
-            let mountain = 0.55 / (1.0 + px * px + py * py);
-            falloff * 0.9 + mountain + (fbm(detail_seed, x / 7.0, y / 7.0) - 0.5) * 0.35
+            let d = distance_to_segment((x, y), ridge) / 3.5;
+            let crags = 1.0 - (2.0 * noise(crag_seed, x / 5.0, y / 5.0) - 1.0).abs();
+            let mountain = 0.8 / (1.0 + d * d) * (0.45 + 0.9 * crags);
+            let hills = (fbm(hill_seed, x / 11.0, y / 11.0) - 0.5) * 0.6;
+            falloff * 0.9 + mountain + hills + (fbm(detail_seed, x / 6.0, y / 6.0) - 0.5) * 0.2
         })
         .collect();
 
@@ -219,15 +242,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         *cell = *cell && component[index] == main && !edge;
     }
 
-    // Distance to the open sea (water reachable from the map edge) versus
-    // inland lakes, and a moisture field that is wetter near water.
-    let open_sea = distance_from((0..land.len()).filter(|&i| i < COLUMNS), |i| !land[i]);
-    let coast = distance_from(
-        (0..land.len()).filter(|&i| !land[i] && open_sea[i] != u32::MAX),
-        |i| land[i],
-    );
-    let water_any = distance_from((0..land.len()).filter(|&i| !land[i]), |i| land[i]);
-    let elevation: Vec<f32> = raw
+    let mut elevation: Vec<f32> = raw
         .iter()
         .zip(&land)
         .map(|(&e, &is_land)| {
@@ -238,28 +253,57 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
             }
         })
         .collect();
+    // Rank of every land cell by height, so biome bands hold a steady share
+    // of the island however steep its relief.
+    let mut by_height: Vec<usize> = (0..land.len()).filter(|&i| land[i]).collect();
+    by_height.sort_by(|&a, &b| raw[a].total_cmp(&raw[b]).then(a.cmp(&b)));
+    let mut rank = vec![0.0; land.len()];
+    for (place, &index) in by_height.iter().enumerate() {
+        rank[index] = place as f64 / by_height.len() as f64;
+    }
+    let mountain = |i: usize| land[i] && rank[i] >= MOUNTAIN_RANK;
+
+    let (river, ford) = carve_rivers(&raw, &land, &rank, &mut elevation, meander_seed, &mut rng);
+
+    // Distance to the open sea (water reachable from the map edge) versus
+    // inland lakes and rivers, and a moisture field that is wetter near water.
+    let open_sea = distance_from((0..land.len()).filter(|&i| i < COLUMNS), |i| !land[i]);
+    let coast = distance_from(
+        (0..land.len()).filter(|&i| !land[i] && open_sea[i] != u32::MAX),
+        |i| land[i],
+    );
+    let water_any = distance_from((0..land.len()).filter(|&i| !land[i] || river[i]), |i| {
+        land[i]
+    });
     let terrain: Vec<TerrainCell> = (0..land.len())
         .map(|index| {
             let (column, row) = (index % COLUMNS, index / COLUMNS);
-            let h = f64::from(elevation[index]);
+            let r = rank[index];
             let wet = (fbm(moisture_seed, column as f64 / 8.0, row as f64 / 8.0) * 0.7
                 + 0.3 / (1.0 + f64::from(water_any[index].min(40)) / 3.0))
                 .clamp(0.0, 1.0);
             let biome = if !land[index] {
                 TerrainBiome::Water
-            } else if coast[index] <= 1 && h < 0.45 {
+            } else if ford[index] {
+                // Sandbars where the river runs shallow enough to wade.
                 TerrainBiome::Beach
-            } else if h > 0.78 {
+            } else if river[index] {
+                TerrainBiome::River
+            } else if mountain(index) {
+                TerrainBiome::Mountain
+            } else if coast[index] <= 1 && r < 0.45 {
+                TerrainBiome::Beach
+            } else if r >= HIGHLAND_RANK {
                 TerrainBiome::Highland
             } else if water_any[index] <= 2 && wet > 0.5 {
                 TerrainBiome::Wetland
-            } else if h > 0.52 {
+            } else if r > 0.55 {
                 if wet > 0.52 {
                     TerrainBiome::Heath
                 } else {
                     TerrainBiome::Scrubland
                 }
-            } else if h < 0.35 && fbm(clay_seed, column as f64 / 5.0, row as f64 / 5.0) > 0.62 {
+            } else if r < 0.35 && fbm(clay_seed, column as f64 / 5.0, row as f64 / 5.0) > 0.62 {
                 // Clay beds lie in a few low patches.
                 TerrainBiome::Clayland
             } else if wet > 0.55 {
@@ -279,7 +323,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         .collect();
 
     let (town_center, villagers) = choose_start(&terrain, &coast)?;
-    let resources = place_resources(&terrain, town_center, &mut rng);
+    let resources = place_resources(&terrain, &ford, town_center, &mut rng);
     let resources = reachable_only(&terrain, resources, town_center, villagers[0]);
     let enough = FISHING_BOAT_COST.iter().all(|&(kind, cost)| {
         let total: f64 = resources
@@ -308,6 +352,104 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         town_center,
         villagers,
     })
+}
+
+fn distance_to_segment(p: (f64, f64), (a, b): ((f64, f64), (f64, f64))) -> f64 {
+    let (abx, aby) = (b.0 - a.0, b.1 - a.1);
+    let t = (((p.0 - a.0) * abx + (p.1 - a.1) * aby) / (abx * abx + aby * aby).max(1e-9))
+        .clamp(0.0, 1.0);
+    let (x, y) = (p.0 - a.0 - abx * t, p.1 - a.1 - aby * t);
+    (x * x + y * y).sqrt()
+}
+
+/// Rivers rise in the highlands below the peaks and run downhill to the sea
+/// (or into an earlier river). Returns the river cells and the fords, shallow
+/// sandbars spaced along each river so no bank is ever cut off. River beds
+/// only ever descend toward the mouth.
+fn carve_rivers(
+    raw: &[f64],
+    land: &[bool],
+    rank: &[f64],
+    elevation: &mut [f32],
+    meander_seed: u64,
+    rng: &mut Rng,
+) -> (Vec<bool>, Vec<bool>) {
+    use std::cmp::Reverse;
+    use std::collections::BinaryHeap;
+
+    // Priority flood from the water inward: every land cell learns the next
+    // cell on its lowest route to the water. A little noise makes rivers meander.
+    let level = |i: usize| {
+        let (x, y) = ((i % COLUMNS) as f64, (i / COLUMNS) as f64);
+        raw[i] + (fbm(meander_seed, x / 4.0, y / 4.0) - 0.5) * 0.3
+    };
+    let key = |value: f64| (value * 1e9) as i64;
+    let mut downstream = vec![usize::MAX; land.len()];
+    let mut done: Vec<bool> = land.iter().map(|&l| !l).collect();
+    let mut heap = BinaryHeap::new();
+    for i in (0..land.len()).filter(|&i| !land[i]) {
+        if neighbours4(i).any(|n| land[n]) {
+            heap.push(Reverse((i64::MIN, i)));
+        }
+    }
+    while let Some(Reverse((current, cell))) = heap.pop() {
+        for next in neighbours4(cell) {
+            if !done[next] {
+                done[next] = true;
+                downstream[next] = cell;
+                heap.push(Reverse((current.max(key(level(next))), next)));
+            }
+        }
+    }
+
+    let mut river = vec![false; land.len()];
+    let mut ford = vec![false; land.len()];
+    let mut sources: Vec<usize> = (0..land.len())
+        .filter(|&i| (HIGHLAND_RANK..MOUNTAIN_RANK).contains(&rank[i]))
+        .collect();
+    let mut rivers = 0;
+    while rivers < RIVERS && !sources.is_empty() {
+        let source = sources.swap_remove(rng.below(sources.len()));
+        let mut path = vec![source];
+        while let Some(&last) = path.last() {
+            let next = downstream[last];
+            if next == usize::MAX || !land[next] || river[next] {
+                break;
+            }
+            path.push(next);
+        }
+        let near_other = river
+            .iter()
+            .enumerate()
+            .any(|(i, &r)| r && near(i, source, 10));
+        if path.len() < MIN_RIVER_LENGTH || near_other {
+            continue;
+        }
+        let mut bed = f32::MAX;
+        let mut since_ford = FORD_SPACING / 2;
+        for (step, &cell) in path.iter().enumerate() {
+            river[cell] = true;
+            bed = bed.min(elevation[cell]);
+            elevation[cell] = bed.max(0.02);
+            since_ford += 1;
+            // A ford every few cells on a straight reach (a ford on a bend
+            // would touch only one bank), never at the source or the mouth.
+            let straight = step >= 3
+                && step + 3 < path.len()
+                && cell + cell == path[step - 1] + path[step + 1];
+            if straight && since_ford >= FORD_SPACING {
+                ford[cell] = true;
+                since_ford = 0;
+            }
+        }
+        sources.retain(|&s| !near(s, source, 10));
+        rivers += 1;
+    }
+    (river, ford)
+}
+
+fn near(a: usize, b: usize, cells: usize) -> bool {
+    (a % COLUMNS).abs_diff(b % COLUMNS) <= cells && (a / COLUMNS).abs_diff(b / COLUMNS) <= cells
 }
 
 /// A flat, dry, central site for the town center, with two villager spots
@@ -452,6 +594,7 @@ pub(super) fn grows_in(kind: ResourceKind) -> &'static [TerrainBiome] {
 
 fn place_resources(
     terrain: &[TerrainCell],
+    ford: &[bool],
     town_center: CellCoordinate,
     rng: &mut Rng,
 ) -> Vec<ResourceNode> {
@@ -462,7 +605,8 @@ fn place_resources(
         rows,
     }
     .center();
-    let mut taken = vec![false; terrain.len()];
+    // Fords stay open so both banks keep their crossing.
+    let mut taken = ford.to_vec();
     let mut resources: Vec<ResourceNode> = Vec::new();
     for (kind, prefix, biomes, clusters, size, amount) in RESOURCE_PLAN {
         let mut number = 0;
@@ -536,7 +680,7 @@ fn place_resources(
 }
 
 /// Drops nodes nobody could stand beside, walking from the villagers'
-/// spot around water, the town center and other nodes.
+/// spot around water, peaks, rivers, the town center and other nodes.
 fn reachable_only(
     terrain: &[TerrainCell],
     resources: Vec<ResourceNode>,
@@ -549,10 +693,7 @@ fn reachable_only(
         columns,
         rows,
     };
-    let mut blocked: Vec<bool> = terrain
-        .iter()
-        .map(|c| c.biome == TerrainBiome::Water)
-        .collect();
+    let mut blocked: Vec<bool> = terrain.iter().map(|c| !c.biome.is_walkable()).collect();
     for cell in footprint.cells() {
         blocked[at(usize::from(cell.column), usize::from(cell.row))] = true;
     }
@@ -675,6 +816,78 @@ mod tests {
                         .any(|r| r.kind == kind && r.cell.center().distance(base.center()) <= 16.0)
                 );
             }
+        }
+    }
+
+    #[test]
+    fn every_island_has_peaks_and_rivers_that_reach_the_water() {
+        for seed in 0..24 {
+            let world = GameWorld::generate(seed);
+            let biome = |i: usize| world.terrain[i].biome;
+            let count = |b: TerrainBiome| world.terrain.iter().filter(|c| c.biome == b).count();
+            assert!(count(TerrainBiome::Mountain) > 0, "seed {seed}: no peaks");
+            assert!(
+                count(TerrainBiome::River) >= MIN_RIVER_LENGTH,
+                "seed {seed}: no river"
+            );
+            // Following river cells (and the fords across them) leads to the water.
+            let wet = |i: usize| matches!(biome(i), TerrainBiome::River | TerrainBiome::Beach);
+            let mouth = distance_from(
+                (0..world.terrain.len()).filter(|&i| biome(i) == TerrainBiome::Water),
+                wet,
+            );
+            for (i, cell) in world.terrain.iter().enumerate() {
+                if cell.biome == TerrainBiome::River {
+                    assert!(mouth[i] != u32::MAX, "seed {seed}: river cut off at {i}");
+                    assert!(cell.elevation > 0.0);
+                }
+            }
+            // Every peak towers over the land around it on average.
+            let mean = |b: TerrainBiome| {
+                let cells = world.terrain.iter().filter(|c| c.biome == b);
+                cells.clone().map(|c| f64::from(c.elevation)).sum::<f64>() / cells.count() as f64
+            };
+            assert!(mean(TerrainBiome::Mountain) > mean(TerrainBiome::Highland));
+            assert!(mean(TerrainBiome::Highland) > mean(TerrainBiome::Meadow));
+        }
+    }
+
+    #[test]
+    fn nobody_walks_or_builds_on_peaks_or_rivers() {
+        let world = GameWorld::generate(1);
+        for biome in [TerrainBiome::Mountain, TerrainBiome::River] {
+            let cell = world
+                .terrain
+                .iter()
+                .find(|c| c.biome == biome)
+                .unwrap()
+                .coordinate();
+            let mut moved = world.clone();
+            assert!(
+                moved
+                    .apply_command(Command::Move {
+                        unit_id: "villager-1".into(),
+                        to: cell
+                    })
+                    .is_err()
+            );
+            let mut built = world.clone();
+            built.stockpile.wood = 1000.0;
+            built.stockpile.stone = 1000.0;
+            let origin =
+                CellCoordinate::new(cell.column.saturating_sub(1), cell.row.saturating_sub(1));
+            assert!(
+                built
+                    .apply_command(Command::Build {
+                        kind: BuildingKind::House,
+                        unit_id: "villager-1".into(),
+                        origin
+                    })
+                    .is_err()
+            );
+            let mut stranded = world.clone();
+            stranded.units[0].cell = cell;
+            assert!(stranded.validate().is_err());
         }
     }
 
