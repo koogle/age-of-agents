@@ -1,6 +1,6 @@
 # Open Work
 
-**Last updated:** 2026-10-02T11:45:17Z
+**Last updated:** 2026-10-02T12:06:55Z
 **Branch:** `codex/towncenter-roof-midjourney`
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
@@ -49,5 +49,8 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 
 ## Exact next action
 
+Review [PR #21](https://github.com/koogle/age-of-agents/pull/21), which publishes
+the roof cleanup and Midjourney setup on `codex/towncenter-roof-midjourney`,
+rebased onto current master. Desktop and mobile (DPR 2) browser checks pass.
 Enable provider network access and complete Midjourney browser login on a
 desktop; restore Modal credentials/tooling to deploy and verify the roof change.
