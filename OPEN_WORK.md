@@ -1,7 +1,7 @@
 # Open Work
 
-**Last updated:** 2026-10-02T15:20:00Z
-**Branch:** `claude/rts-frontend-webgl-canvas-gukaet` (seeded islands, on top of master fa6cd43)
+**Last updated:** 2026-10-02T18:30:00Z
+**Branch:** `claude/terrain-relief-rivers` (hills, peaks and rivers, on top of master d13b684)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
 ## Current goal
@@ -23,6 +23,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 0. Touch: two fingers pinch-zoom, twist-rotate and pan; taps pick the terrain surface (the seeded island's elevation had made taps miss).
 0. `/play` shows a loading overlay with the generated title and buildings rising through their stages (`assets/loading/`) (game download, then art files fetched in parallel, then world setup) until the first world frame is drawn.
 0. Seeded islands (merged in PR #22): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal.
+0. Relief and rivers (branch `claude/terrain-relief-rivers`): worldgen adds rolling hills and a ridge of peaks (`TerrainBiome::Mountain`, impassable, top 7% of land by height) and up to two rivers (`TerrainBiome::River`, impassable) that follow a priority-flood drainage route from the highlands to the sea, with sandbar fords (beach cells) on straight reaches; river banks turn to wetland. The client sinks river beds, lays animated water over them, paints peaks as rock with snow on the summits, and peaks rise steeper. Also fixed a ground-paint bug: cells past column 29 or row 19 sampled the edge column/row's painted layer. Old saves still load (no schema bump); press New island to see the new terrain. A generated rock texture would beat the shader's rock tint.
 1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, so mouse and touch are not yet identical): box select, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
@@ -46,4 +47,4 @@ None.
 
 ## Exact next action
 
-Merge the seeded-island PR, redeploy Modal (schema 7 replaces the persisted world with a generated island on first start), and verify production with `scripts/modal_manage.py verify`.
+Review and merge `claude/terrain-relief-rivers`, let the deploy workflow redeploy Modal, verify production with `scripts/modal_manage.py verify`, and press New island to get a world with peaks and rivers.
