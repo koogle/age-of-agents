@@ -41,7 +41,7 @@ pub const GATHERING_TECH_MULTIPLIER: f64 = 1.2;
 /// Minimum gap between resource clusters and starting-base clearance, in cells.
 /// Nodes within one cluster touch.
 pub const RESOURCE_CLUSTER_SEPARATION: f64 = 5.0;
-pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 6.0;
+pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 8.0;
 /// Walking speed in cells per second.
 const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;

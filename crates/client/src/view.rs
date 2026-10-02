@@ -46,13 +46,15 @@ struct BuildingSheet {
 
 /// Sheet row, world width of a sheet cell, and the pixel height (from the cell
 /// top) of the footprint centre, for buildings other than the town center.
+/// Widths are set so each door stands about 1.2 villagers tall (the dock's
+/// rowboat is about two villagers long).
 fn building_art(kind: aoa_game::BuildingKind) -> Option<(&'static str, f32, f32)> {
     use aoa_game::BuildingKind::*;
     Some(match kind {
-        House => ("house", 2.8, 205.0),
-        Granary => ("granary", 3.0, 199.0),
-        Watchtower => ("watchtower", 3.75, 228.0),
-        Dock => ("dock", 2.9, 193.0),
+        House => ("house", 4.1, 205.0),
+        Granary => ("granary", 3.9, 199.0),
+        Watchtower => ("watchtower", 5.0, 228.0),
+        Dock => ("dock", 4.5, 193.0),
         _ => return None,
     })
 }

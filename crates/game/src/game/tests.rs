@@ -7,6 +7,25 @@ pub(super) fn cell(column: u16, row: u16) -> CellCoordinate {
     CellCoordinate::new(column, row)
 }
 
+/// The first free site for `kind`, scanning from the south-west of the map,
+/// that villager-1 can reach.
+pub(super) fn free_site(world: &mut GameWorld, kind: BuildingKind) -> CellCoordinate {
+    let (columns, rows) = kind.size();
+    for row in (0..WORLD_ROWS - rows).rev() {
+        for column in 0..WORLD_COLUMNS - columns {
+            let footprint = Footprint {
+                origin: cell(column, row),
+                columns,
+                rows,
+            };
+            if world.footprint_is_free(footprint) && world.can_reach_beside(0, footprint) {
+                return footprint.origin;
+            }
+        }
+    }
+    panic!("no free site for {kind:?}");
+}
+
 /// Adds complete houses on free land until the world houses `capacity` villagers.
 pub(super) fn house(world: &mut GameWorld, capacity: usize) {
     let (columns, rows) = BuildingKind::House.size();
@@ -171,7 +190,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
     let base = &world.buildings[0];
     assert_eq!(base.kind, BuildingKind::TownCenter);
     assert!(base.is_complete());
-    assert_eq!(base.footprint().cells().count(), 36);
+    assert_eq!(base.footprint().cells().count(), 64);
     assert_eq!(base.researches, TechnologyKind::ALL);
     for unit in &world.units {
         assert!(base.footprint().is_interaction_cell(unit.cell));
@@ -249,7 +268,7 @@ fn move_rejects_invalid_destinations_without_mutation() {
 fn walled_off_destination_is_unreachable() {
     let mut world = fixture::fixture();
     world.resources.clear();
-    for (index, origin) in [cell(0, 6), cell(6, 6), cell(6, 0)].into_iter().enumerate() {
+    for (index, origin) in [cell(0, 8), cell(8, 8), cell(8, 0)].into_iter().enumerate() {
         world
             .buildings
             .push(town_center(&format!("wall-{index}"), origin, None));
@@ -604,11 +623,12 @@ fn a_rejected_order_keeps_the_busy_units_task() {
 fn build_places_one_foundation_immediately_and_charges_once() {
     let mut world = fixture::fixture();
     world.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    let site = free_site(&mut world.clone(), BuildingKind::TownCenter);
     world
         .apply_command(Command::Build {
             kind: BuildingKind::TownCenter,
             unit_id: "villager-1".into(),
-            origin: cell(20, 24),
+            origin: site,
         })
         .unwrap();
     assert_eq!(world.stockpile.wood, 0.0);
@@ -632,7 +652,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
     assert_eq!(
         world.apply_command(Command::Move {
             unit_id: "villager-2".into(),
-            to: cell(21, 25),
+            to: cell(site.column + 1, site.row + 1),
         }),
         Err(CommandError::DestinationOccupied)
     );
@@ -699,7 +719,10 @@ fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
     world.stockpile.wood = 100.0;
     world.units[0].cell = cell(0, 0);
     // Seal villager-1 into the north-west pocket.
-    for (index, origin) in [cell(6, 0), cell(0, 8), cell(6, 6)].into_iter().enumerate() {
+    for (index, origin) in [cell(8, 0), cell(0, 10), cell(8, 8)]
+        .into_iter()
+        .enumerate()
+    {
         world
             .buildings
             .push(town_center(&format!("wall-{index}"), origin, None));
@@ -723,7 +746,7 @@ fn a_second_villager_can_help_and_construction_completes_exactly_once() {
     solo.apply_command(Command::Build {
         kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
-        origin: cell(20, 24),
+        origin: free_site(&mut solo.clone(), BuildingKind::TownCenter),
     })
     .unwrap();
     let mut pair = solo.clone();
@@ -891,7 +914,7 @@ fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
         .apply_command(Command::Build {
             kind: BuildingKind::TownCenter,
             unit_id: "villager-2".into(),
-            origin: cell(20, 24),
+            origin: free_site(&mut world.clone(), BuildingKind::TownCenter),
         })
         .unwrap();
     while world.buildings[1].construction.unwrap_or(0.0) < 0.5 {
@@ -1033,7 +1056,7 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     assert_eq!(world.stockpile.wood, 0.0);
     let house = world.buildings.last().unwrap();
     assert_eq!(house.kind, BuildingKind::House);
-    assert_eq!(house.footprint().columns, 3);
+    assert_eq!(house.footprint().columns, 4);
     assert!(house.produces.is_empty() && house.researches.is_empty());
     assert_eq!(
         build(&mut world, BuildingKind::Monument, cell(30, 30)),
@@ -1140,7 +1163,7 @@ fn a_builder_drops_off_carried_goods_before_building() {
     world
         .apply_command(Command::Build {
             unit_id: "villager-2".into(),
-            origin: cell(20, 24),
+            origin: free_site(&mut world.clone(), BuildingKind::TownCenter),
             kind: BuildingKind::TownCenter,
         })
         .unwrap();
