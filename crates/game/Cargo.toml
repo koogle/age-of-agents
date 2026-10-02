@@ -8,4 +8,4 @@ description = "Deterministic Age of Agents simulation shared by the server and t
 serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
-serde_json = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }

@@ -22,6 +22,8 @@ Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
+- [x] Finer grid: 60×40 half-unit cells (a villager is about 1.5 cells tall), 4×4 town centers, clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
+- [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a busy villager still rejects replacement orders.
 - [x] Liveness: head-on standoffs resolve by deterministic yielding (lower index side-steps, highest index wins a contested cell); idle units never rest on another unit's reservation; a destination may be reserved while someone only walks through it.
 
 ## Slice A — Expandable domain foundation

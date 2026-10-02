@@ -43,12 +43,12 @@ impl Store {
                 .any(|column| column == "saved_at")
         };
         let transaction = connection.transaction()?;
-        if legacy_schema || schema_version < 5 {
+        if legacy_schema || schema_version < 6 {
             // The pre-milestone prototype stored a fundamentally different world
             // model; versions through 3 predate typed cargo, building jobs,
             // technologies, and the seven-resource stockpile, and version 4 stored
             // free-floating positions rather than exclusive cell claims and
-            // building footprints. Those snapshots cannot be translated safely
+            // building footprints; version 5 used a coarser 30 by 20 grid. Those snapshots cannot be translated safely
             // into the current deterministic world.
             transaction.execute_batch("DROP TABLE IF EXISTS world_state;")?;
         }
@@ -57,7 +57,7 @@ impl Store {
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 world_json TEXT NOT NULL
             );
-            PRAGMA user_version = 5;",
+            PRAGMA user_version = 6;",
         )?;
         transaction.commit()?;
         Ok(())

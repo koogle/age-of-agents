@@ -292,7 +292,7 @@ impl BuildingKind {
     /// Footprint in cells.
     pub const fn size(self) -> (u16, u16) {
         match self {
-            Self::TownCenter => (2, 2),
+            Self::TownCenter => (4, 4),
             _ => (1, 1),
         }
     }

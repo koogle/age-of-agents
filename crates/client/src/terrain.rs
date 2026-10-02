@@ -1,11 +1,33 @@
 //! The island: a gently rolling playable rectangle that falls away to beaches
 //! and sea. Heights come from a fixed noise field (never from biome data) so
 //! the shape of the land reveals nothing about unexplored terrain.
-use aoa_game::{TerrainBiome, WORLD_COLUMNS, WORLD_ROWS};
+use aoa_game::{CellCoordinate, TerrainBiome, WORLD_COLUMNS, WORLD_ROWS};
 use bytemuck::{Pod, Zeroable};
+use glam::Vec2;
 
-pub const COLUMNS: f32 = WORLD_COLUMNS as f32;
-pub const ROWS: f32 = WORLD_ROWS as f32;
+/// World units per simulation cell. The grid is finer than a villager is
+/// tall, so the island keeps its size while cells shrink.
+pub const CELL: f32 = 0.5;
+/// The playable rectangle in world units.
+pub const COLUMNS: f32 = WORLD_COLUMNS as f32 * CELL;
+pub const ROWS: f32 = WORLD_ROWS as f32 * CELL;
+
+/// World ground point of a simulation position given in cell units.
+pub fn world_of(x: f64, y: f64) -> Vec2 {
+    Vec2::new(x as f32, y as f32) * CELL
+}
+
+/// World ground point at the centre of a cell.
+pub fn cell_center(cell: CellCoordinate) -> Vec2 {
+    Vec2::new(cell.column as f32 + 0.5, cell.row as f32 + 0.5) * CELL
+}
+
+/// The cell under a world ground point, if it lies on the map.
+pub fn cell_at(x: f32, z: f32) -> Option<CellCoordinate> {
+    let (column, row) = ((x / CELL).floor(), (z / CELL).floor());
+    (column >= 0.0 && row >= 0.0 && column < WORLD_COLUMNS as f32 && row < WORLD_ROWS as f32)
+        .then(|| CellCoordinate::new(column as u16, row as u16))
+}
 pub const SEA_LEVEL: f32 = -0.32;
 const MARGIN: f32 = 9.0;
 const SUBDIVISIONS: u32 = 3;

@@ -27,6 +27,18 @@ use source::{CommandResult, Source};
 use view::{Selection, Sheets, WorldView};
 
 const DRAG_THRESHOLD: f32 = 8.0;
+/// Hover markers: warm gold over something to work on, soft white over ground.
+const HOVER_WORK: [f32; 4] = [0.98, 0.8, 0.32, 0.95];
+const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
+
+/// What lies under a pointer.
+enum Target {
+    Unit(String),
+    Resource(String, CellCoordinate),
+    Foundation(String),
+    Building(String),
+    Ground(CellCoordinate),
+}
 
 // Last frame's camera, for the browser test hook below.
 #[cfg(target_arch = "wasm32")]
@@ -142,11 +154,17 @@ impl App {
         self.source.send(command, &mut self.results);
     }
 
+    /// The town center site under the cursor (centred on it) and whether it is clear.
     fn placement(&self, pixel: Vec2) -> Option<(CellCoordinate, bool)> {
         let snapshot = self.view.snapshot.as_ref()?;
         let point = self.rig.ground_at(pixel)?;
-        let (column, row) = ((point.x - 0.5).floor(), (point.z - 0.5).floor());
-        if column < 0.0 || row < 0.0 || column + 2.0 > terrain::COLUMNS || row + 2.0 > terrain::ROWS
+        let (columns, rows) = aoa_game::BuildingKind::TownCenter.size();
+        let column = (point.x / terrain::CELL - columns as f32 / 2.0).round();
+        let row = (point.z / terrain::CELL - rows as f32 / 2.0).round();
+        if column < 0.0
+            || row < 0.0
+            || column as u16 + columns > snapshot.columns
+            || row as u16 + rows > snapshot.rows
         {
             return None;
         }
@@ -155,8 +173,8 @@ impl App {
             row: row as u16,
         };
         let covers = |c: CellCoordinate| {
-            (origin.column..origin.column + 2).contains(&c.column)
-                && (origin.row..origin.row + 2).contains(&c.row)
+            (origin.column..origin.column + columns).contains(&c.column)
+                && (origin.row..origin.row + rows).contains(&c.row)
         };
         let blocked = snapshot
             .resources
@@ -165,18 +183,83 @@ impl App {
             || snapshot.units.iter().any(|u| covers(u.unit.cell))
             || snapshot.buildings.iter().any(|b| {
                 let o = b.building.origin;
-                o.column < origin.column + 2
+                o.column < origin.column + columns
                     && origin.column < o.column + b.columns
-                    && o.row < origin.row + 2
+                    && o.row < origin.row + rows
                     && origin.row < o.row + b.rows
             })
-            || (0..4).any(|i| {
-                let cell = &snapshot.terrain[(origin.row + i / 2) as usize
-                    * snapshot.columns as usize
-                    + (origin.column + i % 2) as usize];
-                cell.visibility == aoa_game::CellVisibility::Unseen
+            || (0..rows).any(|dy| {
+                (0..columns).any(|dx| {
+                    let cell = &snapshot.terrain[(origin.row + dy) as usize
+                        * snapshot.columns as usize
+                        + (origin.column + dx) as usize];
+                    cell.visibility == aoa_game::CellVisibility::Unseen
+                })
             });
         Some((origin, !blocked))
+    }
+
+    /// What a tap at `pixel` would land on.
+    fn target_at(&self, pixel: Vec2) -> Option<Target> {
+        let snapshot = self.view.snapshot.as_ref()?;
+        if let Some(id) = self.view.unit_at(&self.rig, pixel) {
+            return Some(Target::Unit(id));
+        }
+        let point = self.rig.ground_at(pixel)?;
+        let cell = terrain::cell_at(point.x, point.z)?;
+        if let Some(resource) = snapshot
+            .resources
+            .iter()
+            .find(|r| r.amount > 0.0 && r.cell == cell)
+        {
+            return Some(Target::Resource(resource.id.clone(), resource.cell));
+        }
+        if let Some(building) = snapshot.buildings.iter().find(|b| {
+            let o = b.building.origin;
+            (o.column..o.column + b.columns).contains(&cell.column)
+                && (o.row..o.row + b.rows).contains(&cell.row)
+        }) {
+            let id = building.building.id.clone();
+            return Some(if building.building.construction.is_some() {
+                Target::Foundation(id)
+            } else {
+                Target::Building(id)
+            });
+        }
+        Some(Target::Ground(cell))
+    }
+
+    /// Ground marker under the cursor while villagers are selected: what a
+    /// tap would order them to do.
+    fn hover_decal(&self) -> Option<render::Decal> {
+        if self.selection.units.is_empty()
+            || self.build_mode
+            || self.hud.covers(self.cursor)
+            || self.pointer.as_ref().is_some_and(|p| p.dragging)
+        {
+            return None;
+        }
+        let snapshot = self.view.snapshot.as_ref()?;
+        let (center, radius, color) = match self.target_at(self.cursor)? {
+            Target::Resource(_, cell) => (terrain::cell_center(cell), 0.36, HOVER_WORK),
+            Target::Foundation(id) => {
+                let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
+                let c = view::footprint_center(building);
+                (Vec2::new(c.x, c.z), 1.2, HOVER_WORK)
+            }
+            Target::Ground(cell) => (terrain::cell_center(cell), 0.24, HOVER_GROUND),
+            Target::Unit(_) | Target::Building(_) => return None,
+        };
+        Some(render::Decal {
+            center: [
+                center.x,
+                terrain::height_at(center.x, center.y) + 0.035,
+                center.y,
+            ],
+            radius,
+            color,
+            ring: 1.0,
+        })
     }
 
     fn act(&mut self, action: hud::Action) {
@@ -184,6 +267,7 @@ impl App {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Build => self.build_mode = true,
             hud::Action::Cancel => self.build_mode = false,
+            hud::Action::Stop => self.stop(),
             hud::Action::Train => {
                 if let Some(building_id) = self.selection.building.clone() {
                     self.send(Command::Produce {
@@ -214,10 +298,10 @@ impl App {
             }
             return;
         }
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
+        let Some(target) = self.target_at(pixel) else {
             return;
         };
-        if let Some(id) = self.view.unit_at(&self.rig, pixel) {
+        if let Target::Unit(id) = target {
             if !additive {
                 self.selection.units.clear();
             }
@@ -227,63 +311,67 @@ impl App {
             self.selection.building = None;
             return;
         }
-        let Some(point) = self.rig.ground_at(pixel) else {
-            return;
-        };
-        if point.x < 0.0 || point.z < 0.0 || point.x >= terrain::COLUMNS || point.z >= terrain::ROWS
-        {
-            return;
-        }
-        let cell = CellCoordinate {
-            column: point.x as u16,
-            row: point.z as u16,
-        };
-        let resource = snapshot
-            .resources
-            .iter()
-            .find(|r| r.amount > 0.0 && r.cell == cell)
-            .map(|r| r.id.clone());
-        let building = snapshot
-            .buildings
-            .iter()
-            .find(|b| {
-                let o = b.building.origin;
-                (o.column..o.column + b.columns).contains(&cell.column)
-                    && (o.row..o.row + b.rows).contains(&cell.row)
-            })
-            .map(|b| (b.building.id.clone(), b.building.construction.is_some()));
         let units = self.selection.units.clone();
         if units.is_empty() {
-            self.selection.building = building.map(|(id, _)| id);
+            self.selection.building = match target {
+                Target::Foundation(id) | Target::Building(id) => Some(id),
+                _ => None,
+            };
             return;
         }
-        if let Some(resource_id) = resource {
-            for unit_id in units {
-                self.send(Command::Gather {
-                    unit_id,
-                    resource_id: resource_id.clone(),
-                });
+        match target {
+            Target::Unit(_) => {}
+            Target::Resource(resource_id, _) => {
+                for unit_id in units {
+                    self.send(Command::Gather {
+                        unit_id,
+                        resource_id: resource_id.clone(),
+                    });
+                }
             }
-        } else if let Some((building_id, true)) = building {
-            for unit_id in units {
-                self.send(Command::Construct {
-                    unit_id,
-                    building_id: building_id.clone(),
-                });
+            Target::Foundation(building_id) => {
+                for unit_id in units {
+                    self.send(Command::Construct {
+                        unit_id,
+                        building_id: building_id.clone(),
+                    });
+                }
             }
-        } else if let Some((building_id, false)) = building {
-            self.selection.units.clear();
-            self.selection.building = Some(building_id);
-        } else if units.len() == 1 {
-            self.send(Command::Move {
+            Target::Building(building_id) => {
+                self.selection.units.clear();
+                self.selection.building = Some(building_id);
+            }
+            Target::Ground(cell) if units.len() == 1 => self.send(Command::Move {
                 unit_id: units[0].clone(),
                 to: cell,
-            });
-        } else {
-            self.send(Command::GroupMove {
+            }),
+            Target::Ground(cell) => self.send(Command::GroupMove {
                 unit_ids: units,
                 to: cell,
-            });
+            }),
+        }
+    }
+
+    /// Stops every selected villager that is busy.
+    fn stop(&mut self) {
+        let busy: Vec<String> = self
+            .view
+            .snapshot
+            .as_ref()
+            .map(|snapshot| {
+                snapshot
+                    .units
+                    .iter()
+                    .filter(|u| {
+                        self.selection.units.contains(&u.unit.id)
+                            && u.unit.action != aoa_game::UnitAction::Idle
+                    })
+                    .map(|u| u.unit.id.clone())
+                    .collect()
+            })
+            .unwrap_or_default();
+        for unit_id in busy {
+            self.send(Command::Stop { unit_id });
         }
     }
 
@@ -307,6 +395,7 @@ impl App {
                     });
                 }
             }
+            Key::Character("x") | Key::Character("X") => self.stop(),
             Key::Character("0") => self.send(Command::SetSimulationSpeed { multiplier: 0.0 }),
             Key::Character("1") => self.send(Command::SetSimulationSpeed { multiplier: 1.0 }),
             Key::Character("2") => self.send(Command::SetSimulationSpeed { multiplier: 2.0 }),
@@ -407,6 +496,7 @@ impl App {
         } else {
             None
         };
+        let hover = self.hover_decal();
         let Some(game) = self.game.as_mut() else {
             return;
         };
@@ -448,8 +538,11 @@ impl App {
             dt as f32,
             &self.selection,
         );
+        decals.extend(hover);
         if let Some((origin, ok)) = ghost {
-            let (x, z) = (origin.column as f32 + 1.0, origin.row as f32 + 1.0);
+            let (columns, rows) = aoa_game::BuildingKind::TownCenter.size();
+            let x = (origin.column as f32 + columns as f32 / 2.0) * terrain::CELL;
+            let z = (origin.row as f32 + rows as f32 / 2.0) * terrain::CELL;
             let color = if ok {
                 [0.42, 0.78, 0.38, 0.85]
             } else {
