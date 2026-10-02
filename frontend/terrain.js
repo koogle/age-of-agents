@@ -130,88 +130,22 @@ function buildSea() {
   return mesh;
 }
 
-// Small instanced props (grass, flowers, pebbles, reeds, heather) per explored cell.
-const DECOR = {
-  tuft: { geometry: new THREE.ConeGeometry(0.035, 0.14, 4), y: 0.06 },
-  flower: { geometry: new THREE.IcosahedronGeometry(0.03, 0), y: 0.08 },
-  pebble: { geometry: new THREE.DodecahedronGeometry(0.06, 0), y: 0.01 },
-  reed: { geometry: new THREE.CylinderGeometry(0.01, 0.015, 0.3, 4), y: 0.14 },
-  shrub: { geometry: new THREE.IcosahedronGeometry(0.09, 0), y: 0.05 }
-};
-const DECOR_BY_BIOME = {
-  meadow: [['tuft', 0x8aa83c, 5], ['flower', 0xffffff, 3], ['flower', 0xe8402e, 2]],
-  forest: [['tuft', 0x4f7f34, 3], ['shrub', 0x3a6a32, 1], ['flower', 0xf2c84a, 1]],
-  prairie: [['tuft', 0xc8a84a, 6], ['flower', 0xe8402e, 2]],
-  highland: [['pebble', 0xeae4d2, 4], ['tuft', 0x8a9a5a, 2]],
-  wetland: [['reed', 0x7aa850, 4], ['tuft', 0x4f9a5a, 2], ['flower', 0x2fa8e0, 1]],
-  scrubland: [['shrub', 0x7f8a44, 2], ['pebble', 0xe2d2b0, 2]],
-  heath: [['shrub', 0x6f7f44, 2], ['tuft', 0x9a9a5a, 3], ['flower', 0xa04ab0, 2]],
-  clayland: [['pebble', 0xc0703e, 3], ['tuft', 0x9aa04a, 1]]
-};
-
 export function createTerrain(scene) {
   loadGroundTextures();
   scene.add(buildGround());
   scene.add(buildSea());
   scene.add(buildScenery());
-  let decor = null;
-  let decorKey = '';
 
-  function update(world, blockedCells) {
-    let explored = 0;
+  function update(world) {
     for (const cell of world.terrain) {
       const visibility = cell.visibility === 'visible' ? 255 : cell.visibility === 'explored' ? 128 : 0;
-      if (visibility) explored += 1;
       writeCell(cell.column, cell.row, cell.biome ? BIOME_COLORS[cell.biome] : UNSEEN_COLOR, visibility);
       writeGroundCell(cell.column, cell.row, cell.biome);
     }
     cellTexture.needsUpdate = true;
     flushGroundCells();
-    const key = `${explored}:${blockedCells.size}`;
-    if (key === decorKey) return;
-    decorKey = key;
-    if (decor) scene.remove(decor);
-    decor = buildDecor(world.terrain, blockedCells);
-    scene.add(decor);
   }
   return { update };
-}
-
-function buildDecor(terrain, blockedCells) {
-  const placements = new Map();
-  for (const cell of terrain) {
-    if (!cell.biome || blockedCells.has(`${cell.column},${cell.row}`)) continue;
-    for (const [kind, color, count] of DECOR_BY_BIOME[cell.biome]) {
-      for (let i = 0; i < count; i += 1) {
-        const seed = cell.column * 7919 + cell.row * 104729 + i * 31 + color % 97;
-        if (random(seed) < 0.35) continue;
-        const x = cell.column + 0.1 + random(seed + 1) * 0.8;
-        const z = cell.row + 0.1 + random(seed + 2) * 0.8;
-        const list = placements.get(`${kind}|${color}`) || [];
-        list.push([x, z, random(seed + 3)]);
-        placements.set(`${kind}|${color}`, list);
-      }
-    }
-  }
-  const group = new THREE.Group();
-  const matrix = new THREE.Matrix4();
-  const rotation = new THREE.Quaternion();
-  const up = new THREE.Vector3(0, 1, 0);
-  for (const [key, list] of placements) {
-    const [kind, color] = key.split('|');
-    const spec = DECOR[kind];
-    const mesh = new THREE.InstancedMesh(spec.geometry, paint(Number(color)), list.length);
-    list.forEach(([x, z, r], index) => {
-      const scale = 0.7 + r * 0.6;
-      rotation.setFromAxisAngle(up, r * Math.PI * 2);
-      matrix.compose(new THREE.Vector3(x, heightAt(x, z) + spec.y * scale, z), rotation, new THREE.Vector3(scale, scale, scale));
-      mesh.setMatrixAt(index, matrix);
-    });
-    mesh.raycast = () => {};
-    mesh.receiveShadow = true;
-    group.add(mesh);
-  }
-  return group;
 }
 
 // Decorative trees and boulders on the island rim, outside the playable grid.

@@ -9,7 +9,7 @@ export const BEACH_LAYER = GROUND_LAYERS.indexOf('beach');
 export const SHALLOWS_LAYER = GROUND_LAYERS.indexOf('shallows');
 const SIZE = 512;
 // One texture repeat spans this many cells.
-const REPEAT = 4;
+const REPEAT = 2.5;
 
 // Per-cell layer index; 255 means unknown biome.
 const indexData = new Uint8Array(MAP.columns * MAP.rows).fill(255);
@@ -79,7 +79,10 @@ vec4 groundSample(vec2 xz, float layer) {
   vec2 uv = xz / ${REPEAT.toFixed(1)};
   vec3 a = texture(uGroundLayers, vec3(uv, layer)).rgb;
   vec3 b = texture(uGroundLayers, vec3(mat2(0.8, -0.6, 0.6, 0.8) * uv * 0.43 + 0.37, layer)).rgb;
-  return vec4(mix(a, b, 0.35 * aoaFbm(xz * 0.21)), 1.0);
+  vec3 paint = mix(a, b, 0.3 * aoaFbm(xz * 0.21));
+  // Lift the brushwork that mipmapping flattens at gameplay distance.
+  vec3 mean = texture(uGroundLayers, vec3(uv, layer), 9.0).rgb;
+  return vec4(max(mean + (paint - mean) * 1.8, 0.0), 1.0);
 }
 // Blends the four nearest cells' paint with a ragged, painterly border.
 vec4 groundPaint(vec2 xz) {
