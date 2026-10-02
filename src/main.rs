@@ -1,6 +1,6 @@
-mod game;
-mod navigation;
 mod store;
+
+use aoa_game as game;
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -106,6 +106,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/ws", get(websocket))
         .nest_service("/assets", ServeDir::new("assets"))
         .nest_service("/frontend", ServeDir::new("frontend"))
+        .route("/play", get(play))
+        .nest_service("/web", ServeDir::new("web"))
         .with_state(state);
 
     let address = "0.0.0.0:8000";
@@ -152,6 +154,14 @@ async fn index() -> Html<String> {
     match tokio::fs::read_to_string("frontend/index.html").await {
         Ok(content) => Html(content),
         Err(_) => Html("<h1>Age of Agents</h1><p>Frontend not found.</p>".into()),
+    }
+}
+
+/// The Rust/WebGL2 client (`scripts/build_web.sh`).
+async fn play() -> Html<String> {
+    match tokio::fs::read_to_string("web/index.html").await {
+        Ok(content) => Html(content),
+        Err(_) => Html("<h1>Age of Agents</h1><p>Web client not built.</p>".into()),
     }
 }
 

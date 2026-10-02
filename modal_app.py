@@ -16,19 +16,20 @@ image = (
         "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
         ". $HOME/.cargo/env && cargo --version",
     )
-    .workdir("/app")
     .run_commands(
-        "mkdir -p src",
+        ". $HOME/.cargo/env && rustup target add wasm32-unknown-unknown",
+        ". $HOME/.cargo/env && cargo install wasm-bindgen-cli --version 0.2.129 --locked",
     )
+    .workdir("/app")
     .add_local_file("Cargo.toml", "/app/Cargo.toml", copy=True)
     .add_local_file("Cargo.lock", "/app/Cargo.lock", copy=True)
-    .run_commands(
-        "echo 'fn main() {}' > src/main.rs",
-        ". $HOME/.cargo/env && cargo build --release --locked || true",
-    )
     .add_local_dir("src", "/app/src", copy=True)
+    .add_local_dir("crates", "/app/crates", copy=True)
+    .add_local_dir("scripts", "/app/scripts", copy=True)
+    .add_local_dir("web", "/app/web", copy=True, ignore=["pkg"])
     .run_commands(
-        ". $HOME/.cargo/env && cargo build --release --locked --bin age-of-agents",
+        ". $HOME/.cargo/env && cargo build --release --locked -p age-of-agents",
+        ". $HOME/.cargo/env && ./scripts/build_web.sh",
     )
     .add_local_dir("frontend", "/app/frontend", copy=True)
     .add_local_dir("assets", "/app/assets", copy=True)

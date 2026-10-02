@@ -330,7 +330,7 @@ pub enum TechnologyKind {
 impl TechnologyKind {
     pub const ALL: [Self; 5] = ROADMAP_TECHNOLOGIES;
 
-    pub(super) fn prerequisite(self) -> Option<Self> {
+    pub fn prerequisite(self) -> Option<Self> {
         match self {
             Self::Mining => Some(Self::Masonry),
             Self::Textiles => Some(Self::Agriculture),

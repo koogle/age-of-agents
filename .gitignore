@@ -17,4 +17,4 @@ build/
 # OS
 .DS_Store
 *.db
-*.swp
+*.swpweb/pkg/

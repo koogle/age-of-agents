@@ -796,3 +796,14 @@ fn head_on_walkers_in_a_corridor_pass_each_other() {
     assert_eq!(world.units[0].cell, cell(18, 5));
     assert_eq!(world.units[1].cell, cell(2, 5));
 }
+
+#[test]
+fn snapshots_round_trip_through_json_for_remote_clients() {
+    let mut world = GameWorld::default();
+    start_gather_at_resource(&mut world, 0, 40.0);
+    run(&mut world, 3.0);
+    let snapshot = world.snapshot();
+    let json = serde_json::to_string(&snapshot).unwrap();
+    let decoded: WorldSnapshot = serde_json::from_str(&json).unwrap();
+    assert_eq!(decoded, snapshot);
+}
