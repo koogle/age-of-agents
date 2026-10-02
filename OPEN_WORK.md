@@ -30,6 +30,12 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 3. Liveness beyond pairwise standoffs (e.g. three-way jams in dead ends) is untested.
 4. Decide whether to delete the unused 2D sprites under `assets/game/` and their Python checks.
 
+## Generated art (branch `claude/fal-generated-assets`, PR into this branch)
+
+- `assets/ui/`: FAL-generated paper-and-ink UI kit (18 icons at 128 px, seamless paper tile, Greek-key strip and 9-slice frame, `manifest.json`); not loaded by the client yet, intended for the canvas HUD.
+- `assets/models/villager.glb`: rigged Tripo + Meshy villager (275 KB, 5 clips) behind `?villager=glb`; procedural villager stays default because it reads more clearly at gameplay zoom.
+- FAL spend about $2.27 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+
 ## Blockers
 
 None.

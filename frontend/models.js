@@ -1,7 +1,7 @@
 // Procedural low-poly models in the cel-shaded, ink-outlined house style.
 // One cell is one world unit; every model stands on y = 0 at its anchor.
 import * as THREE from 'three';
-import { toon, inked } from './materials.js';
+import { toon, inked, outlineMaterial } from './materials.js';
 import { random } from './terrain.js';
 
 export const TEAM_COLOR = 0x2f6fe0;
@@ -79,8 +79,103 @@ const CARGO = {
   fiber: () => group(part(G.cyl, 0xd8cf7a, [0, 0, 0], [0.04, 0.2, 0.04], { rotation: [0, 0, 1.3] }), part(G.cyl, 0x9a7a4a, [0, 0, 0], [0.042, 0.02, 0.042], { rotation: [0, 0, 1.3] }))
 };
 
+// Generated, rigged villager (assets/models/README.md). Opt in with ?villager=glb;
+// the procedural villager below stays the default and the fallback.
+const VILLAGER_GLB = '/assets/models/villager.glb';
+const VILLAGER_HEIGHT = 0.78;
+const CLIP_FOR = { idle: 'idle', walk: 'walk', chop: 'hammer', mine: 'hammer', build: 'hammer', dig: 'dig', forage: 'forage' };
+const villagerAsset = new URLSearchParams(location.search).get('villager') === 'glb'
+  ? await loadVillagerAsset().catch(error => (console.warn('villager.glb unavailable, using procedural villager', error), null))
+  : null;
+
+// Loaders are fetched only when the generated villager is requested.
+async function loadVillagerAsset() {
+  const [{ GLTFLoader }, { MeshoptDecoder }, { clone }] = await Promise.all([
+    import('./vendor/GLTFLoader.js'), import('./vendor/meshopt_decoder.js'), import('./vendor/SkeletonUtils.js')
+  ]);
+  const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(VILLAGER_GLB);
+  const skinned = gltf.scene.getObjectByProperty('isSkinnedMesh', true);
+  // Texture-mapped twin of the shared toon material, keeping its fog-of-war patch.
+  const base = toon(0xffffff);
+  const material = base.clone();
+  material.map = skinned.material.map;
+  material.onBeforeCompile = base.onBeforeCompile;
+  material.customProgramCacheKey = () => 'aoa-world-map';
+  gltf.scene.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(gltf.scene, true);
+  const clips = Object.fromEntries(gltf.animations.map(clip => [clip.name, clip]));
+  return { scene: gltf.scene, clone, material, clips, scale: VILLAGER_HEIGHT / (box.max.y - box.min.y), floor: box.min.y };
+}
+
+// Holder under `bone` whose bind-pose world transform is `desired` (in villager-root space).
+function boneHolder(bone, desired) {
+  const holder = new THREE.Group();
+  bone.matrixWorld.clone().invert().multiply(desired).decompose(holder.position, holder.quaternion, holder.scale);
+  bone.add(holder);
+  return holder;
+}
+
+function createModelVillager(seed) {
+  const root = new THREE.Group();
+  const model = villagerAsset.clone(villagerAsset.scene);
+  model.scale.multiplyScalar(villagerAsset.scale);
+  model.position.y = -villagerAsset.floor * villagerAsset.scale;
+  root.add(model);
+  const skinned = [];
+  model.traverse(node => node.isSkinnedMesh && skinned.push(node));
+  skinned.forEach(node => {
+    node.material = villagerAsset.material;
+    node.castShadow = true;
+    node.receiveShadow = true;
+    node.frustumCulled = false;
+    node.raycast = () => {};
+    const line = new THREE.SkinnedMesh(node.geometry, outlineMaterial);
+    line.bind(node.skeleton, node.bindMatrix);
+    line.frustumCulled = false;
+    line.raycast = () => {};
+    node.add(line);
+  });
+  root.updateMatrixWorld(true);
+  // Tools and cargo are the procedural props, sized for the procedural villager's 1.3 scale.
+  const at = (bone, offset) => new THREE.Matrix4().compose(
+    model.getObjectByName(bone).getWorldPosition(new THREE.Vector3()).add(offset),
+    new THREE.Quaternion(), new THREE.Vector3(1.3, 1.3, 1.3));
+  const hand = boneHolder(model.getObjectByName('RightHand'), at('RightHand', new THREE.Vector3()));
+  const back = boneHolder(model.getObjectByName('Spine'), at('Spine', new THREE.Vector3(0, 0, -0.12)));
+  const tools = {};
+  for (const [name, make] of Object.entries(TOOLS)) {
+    tools[name] = make();
+    tools[name].visible = false;
+    hand.add(tools[name]);
+  }
+  const cargo = {};
+  for (const [name, make] of Object.entries(CARGO)) {
+    cargo[name] = make();
+    cargo[name].visible = false;
+    back.add(cargo[name]);
+  }
+  const mixer = new THREE.AnimationMixer(model);
+  const actions = Object.fromEntries(Object.entries(villagerAsset.clips).map(([name, clip]) => [name, mixer.clipAction(clip)]));
+  const phase = random(seed) * 6;
+  root.userData.rig = { model: true, mixer, actions, clip: null, tools, cargo, phase, last: null };
+  return root;
+}
+
+function poseModelVillager(rig, activity, time) {
+  const clip = CLIP_FOR[activity] || 'idle';
+  if (clip !== rig.clip) {
+    const next = rig.actions[clip].reset().fadeIn(rig.clip ? 0.2 : 0).play();
+    if (rig.clip) rig.actions[rig.clip].fadeOut(0.2);
+    else next.time = rig.phase % next.getClip().duration;
+    rig.clip = clip;
+  }
+  rig.mixer.update(rig.last === null ? 0 : Math.min(0.1, Math.max(0, time - rig.last)));
+  rig.last = time;
+}
+
 export function createVillager(id) {
   const seed = seedOf(id);
+  if (villagerAsset) return createModelVillager(seed);
   const tunic = TUNICS[seed % TUNICS.length];
   const skin = SKINS[(seed >> 3) % SKINS.length];
   const hair = HAIR[(seed >> 6) % HAIR.length];
@@ -151,6 +246,7 @@ export function poseVillager(root, activity, resourceKind, carrying, time) {
   const tool = activity === 'build' ? 'hammer' : activity === 'walk' || activity === 'idle' ? null : TOOL_FOR[resourceKind];
   for (const [name, mesh] of Object.entries(rig.tools)) mesh.visible = name === tool;
   for (const [name, mesh] of Object.entries(rig.cargo)) mesh.visible = name === carrying;
+  if (rig.model) return poseModelVillager(rig, activity, time);
 
   let legSwing = 0, armL = 0, armR = 0, lean = 0, bob = 0, headTilt = 0;
   if (activity === 'walk') {
