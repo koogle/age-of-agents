@@ -3,8 +3,9 @@
 import * as THREE from 'three';
 import { heightAt } from './terrain.js';
 import {
-  ACTIVITY_FOR, TEAM_COLOR, createRing, createResource, createTownCenter, poseTownCenter, setResourceAmount
+  ACTIVITY_FOR, TEAM_COLOR, createRing, createTownCenter, poseTownCenter
 } from './models.js';
+import { createResource, setResourceAmount } from './resource-sprites.js';
 import { createVillager, poseVillager } from './villager-sprite.js';
 
 const TICK_MS = 100;
