@@ -4,8 +4,7 @@
 //
 // A flat quad stands at its anchor, but the picture shows a solid object whose
 // front (a temple's steps, a villager's feet) reaches toward the viewer. So the
-// whole sprite takes the depth of a point pulled toward the camera by part of
-// its width: rising ground just in front of the anchor no longer cuts it off,
+// whole sprite takes the depth of a point pulled toward the camera (`pull`): rising ground just in front of the anchor no longer cuts it off,
 // while a real ridge between it and the camera still hides it.
 @group(1) @binding(0) var sheet: texture_2d<f32>;
 @group(1) @binding(1) var sheet_sampler: sampler;
@@ -15,6 +14,7 @@ struct Instance {
     @location(1) size: vec2<f32>,
     @location(2) pivot: vec2<f32>,
     @location(3) uv: vec4<f32>,
+    @location(4) pull: f32,
 };
 
 struct VOut {
@@ -32,7 +32,7 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
     var out: VOut;
     out.clip = g.view_proj * vec4<f32>(anchor + offset, 1.0);
     let toward_camera = normalize(g.camera_pos.xyz - anchor);
-    let front = g.view_proj * vec4<f32>(anchor + toward_camera * (0.3 * inst.size.x), 1.0);
+    let front = g.view_proj * vec4<f32>(anchor + toward_camera * inst.pull, 1.0);
     out.clip.z = front.z / front.w * out.clip.w;
     out.uv = vec2<f32>(mix(inst.uv.x, inst.uv.z, q.x), mix(inst.uv.w, inst.uv.y, q.y));
     out.anchor = inst.anchor;
