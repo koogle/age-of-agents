@@ -682,6 +682,7 @@ mod tests {
         assert!(moved.is_err());
         world.stockpile.wood = 100.0;
         let built = world.apply_command(Command::Build {
+            kind: BuildingKind::TownCenter,
             unit_id: "villager-1".into(),
             origin: water,
         });

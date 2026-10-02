@@ -7,6 +7,29 @@ pub(super) fn cell(column: u16, row: u16) -> CellCoordinate {
     CellCoordinate::new(column, row)
 }
 
+/// Adds complete houses on free land until the world houses `capacity` villagers.
+pub(super) fn house(world: &mut GameWorld, capacity: usize) {
+    let (columns, rows) = BuildingKind::House.size();
+    let mut row = 0;
+    while world.housing() < capacity {
+        for column in (0..WORLD_COLUMNS - columns).step_by(usize::from(columns)) {
+            let footprint = Footprint {
+                origin: cell(column, row),
+                columns,
+                rows,
+            };
+            if world.housing() < capacity && world.footprint_is_free(footprint) {
+                let id = format!("house-{}", world.buildings.len());
+                world
+                    .buildings
+                    .push(building(BuildingKind::House, &id, footprint.origin, None));
+            }
+        }
+        row += rows;
+        assert!(row < WORLD_ROWS, "no room for houses");
+    }
+}
+
 /// Moves `unit` onto a free cell beside `footprint`, as if it had walked there.
 pub(super) fn stand_beside(world: &mut GameWorld, unit: usize, footprint: Footprint) {
     let occupancy = world.occupancy();
@@ -435,6 +458,7 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
             cargo: None,
         })
         .collect();
+    house(&mut world, ring.len() + 1);
     world.stockpile.food = VILLAGER_FOOD_COST;
     world
         .apply_command(Command::Produce {
@@ -582,6 +606,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
     world.stockpile.wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Build {
+            kind: BuildingKind::TownCenter,
             unit_id: "villager-1".into(),
             origin: cell(20, 24),
         })
@@ -630,6 +655,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
 fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
     let mut world = fixture::fixture();
     let build = |origin| Command::Build {
+        kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
         origin,
     };
@@ -681,6 +707,7 @@ fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
     let before = world.clone();
     assert_eq!(
         world.apply_command(Command::Build {
+            kind: BuildingKind::TownCenter,
             unit_id: "villager-1".into(),
             origin: cell(20, 15),
         }),
@@ -694,6 +721,7 @@ fn a_second_villager_can_help_and_construction_completes_exactly_once() {
     let mut solo = fixture::fixture();
     solo.stockpile.wood = TOWN_CENTER_WOOD_COST;
     solo.apply_command(Command::Build {
+        kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
         origin: cell(34, 19),
     })
@@ -861,6 +889,7 @@ fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
     }
     world
         .apply_command(Command::Build {
+            kind: BuildingKind::TownCenter,
             unit_id: "villager-2".into(),
             origin: cell(34, 20),
         })
@@ -976,4 +1005,103 @@ fn a_gatherer_idles_when_no_node_of_the_same_kind_is_near() {
     }
     assert_eq!(world.units[0].action, UnitAction::Idle);
     assert!(world.units[0].cargo.is_none());
+}
+
+fn build(
+    world: &mut GameWorld,
+    kind: BuildingKind,
+    origin: CellCoordinate,
+) -> Result<(), CommandError> {
+    world.apply_command(Command::Build {
+        unit_id: "villager-1".into(),
+        origin,
+        kind,
+    })
+}
+
+#[test]
+fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
+    let mut world = fixture::fixture();
+    world.stockpile.wood = 15.0;
+    let before = world.clone();
+    assert_eq!(
+        build(&mut world, BuildingKind::Watchtower, cell(20, 24)),
+        Err(CommandError::InsufficientStone)
+    );
+    assert_eq!(world, before);
+    build(&mut world, BuildingKind::House, cell(20, 24)).unwrap();
+    assert_eq!(world.stockpile.wood, 0.0);
+    let house = world.buildings.last().unwrap();
+    assert_eq!(house.kind, BuildingKind::House);
+    assert_eq!(house.footprint().columns, 2);
+    assert!(house.produces.is_empty() && house.researches.is_empty());
+    assert_eq!(
+        build(&mut world, BuildingKind::Monument, cell(30, 30)),
+        Err(CommandError::NotBuildable)
+    );
+}
+
+#[test]
+fn houses_raise_the_population_cap() {
+    let mut world = fixture::fixture();
+    world.stockpile.food = 1_000.0;
+    while world.villagers_and_trainees() < world.housing() {
+        world.units.push(Unit {
+            id: format!("extra-{}", world.units.len()),
+            kind: UnitKind::Villager,
+            cell: cell(2 + world.units.len() as u16, 2),
+            step: None,
+            action: UnitAction::Idle,
+            cargo: None,
+        });
+    }
+    let produce = Command::Produce {
+        building_id: "base-1".into(),
+        product: ProductKind::Villager,
+    };
+    assert_eq!(
+        world.apply_command(produce.clone()),
+        Err(CommandError::PopulationCapReached)
+    );
+    let capacity = world.housing() + 1;
+    house(&mut world, capacity);
+    world.apply_command(produce).unwrap();
+}
+
+#[test]
+fn a_granary_takes_food_but_not_wood() {
+    assert!(BuildingKind::Granary.accepts(ResourceKind::Food));
+    assert!(BuildingKind::Granary.accepts(ResourceKind::Fiber));
+    assert!(!BuildingKind::Granary.accepts(ResourceKind::Wood));
+    assert!(BuildingKind::TownCenter.accepts(ResourceKind::Wood));
+}
+
+#[test]
+fn a_dock_must_touch_the_sea() {
+    // The fixture map is all land.
+    let mut world = fixture::fixture();
+    world.stockpile.wood = 100.0;
+    assert_eq!(
+        build(&mut world, BuildingKind::Dock, cell(20, 24)),
+        Err(CommandError::NeedsCoast)
+    );
+    // On a generated island some coastal site accepts one.
+    let mut island = GameWorld::generate(DEFAULT_SEED);
+    island.stockpile.wood = 100.0;
+    let sites = (0..WORLD_ROWS - 3)
+        .flat_map(|row| (0..WORLD_COLUMNS - 3).map(move |column| cell(column, row)));
+    let coastal: Vec<_> = sites
+        .filter(|origin| {
+            let footprint = Footprint {
+                origin: *origin,
+                columns: 3,
+                rows: 3,
+            };
+            island.footprint_is_free(footprint) && island.touches_sea(footprint)
+        })
+        .collect();
+    let built = coastal
+        .into_iter()
+        .any(|origin| build(&mut island, BuildingKind::Dock, origin).is_ok());
+    assert!(built, "some coastal site takes a dock");
 }

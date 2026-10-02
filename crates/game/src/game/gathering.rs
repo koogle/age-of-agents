@@ -123,22 +123,26 @@ impl GameWorld {
             self.resume_or_finish_gather(unit_index, resource_id);
             return;
         }
-        // With no reachable town center the load is kept until one exists.
-        let Some(town_center) = self.nearest_reachable_town_center(unit_index) else {
+        // With no reachable drop site the load is kept until one exists.
+        let Some(site) = self.nearest_drop_site(unit_index) else {
             return;
         };
-        if let Travel::Arrived { .. } = self.travel(unit_index, Goal::Beside(town_center), dt) {
+        if let Travel::Arrived { .. } = self.travel(unit_index, Goal::Beside(site), dt) {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Depositing);
         }
     }
 
     fn tick_depositing(&mut self, unit_index: usize, resource_id: String) {
-        let beside_town_center = self.buildings.iter().any(|building| {
-            building.kind == BuildingKind::TownCenter
-                && building.is_complete()
+        let cargo = self.units[unit_index]
+            .cargo
+            .as_ref()
+            .map(|cargo| cargo.kind);
+        let beside_drop_site = self.buildings.iter().any(|building| {
+            building.is_complete()
+                && cargo.is_none_or(|kind| building.kind.accepts(kind))
                 && self.is_beside(unit_index, building.footprint())
         });
-        if !beside_town_center {
+        if !beside_drop_site {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
             return;
         }

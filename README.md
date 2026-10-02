@@ -11,7 +11,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases
-- Command-driven construction of one building type through 4×4 foundations that several villagers can raise together
+- Command-driven construction of five building types (town center 4×4, house 2×2, granary 3×3, watchtower 2×2, dock 3×3) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
@@ -92,7 +92,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. Giving a busy villager a new order does the same and then starts the new task.
 - **Keep gathering:** when a node runs out, the gatherer moves on to the nearest reachable node of the same kind within 10 cells, and goes idle only when none is left.
 - **Target marker:** while villagers are selected, a ring under the pointer shows what a tap would do: gold over a resource or foundation to work on, white over ground to walk to.
-- **Build:** select a villager, press the build button (or B), then tap/click ground. A 4×4 foundation appears immediately and rises as the villager works. Tap a foundation with other villagers selected to have them help.
+- **Build:** select a villager and press the build button to open the building menu. Buildings you cannot afford are shown in greyscale; pick one, then tap/click ground (the ring turns green on a clear site). Costs: town center 20 wood, house 15 wood, granary 25 wood, watchtower 15 wood and 15 stone, dock 30 wood. The foundation appears immediately and rises through its drawn stages as the villager works. Tap a foundation with other villagers selected to have them help.
 - **Produce:** select a town center and press the **Train villager** medallion. It reserves 50 food and produces one villager over six seconds; each building has one active production slot.
 - **Research:** select a town center and press an available technology medallion (hover for its name and cost). Research reserves 40 food and 20 wood, occupies the building for eight seconds, and improves matching gather rates by 20%.
 - **Pan:** drag with one pointer, WASD/arrow keys, or tap the minimap.

@@ -118,10 +118,13 @@ pub enum Command {
         unit_id: String,
         resource_id: String,
     },
-    /// Place a town center foundation with its north-west corner at `origin`.
+    /// Place a foundation of `kind` (a town center when omitted) with its
+    /// north-west corner at `origin`.
     Build {
         unit_id: String,
         origin: CellCoordinate,
+        #[serde(default = "town_center_kind")]
+        kind: BuildingKind,
     },
     /// Join or resume work on an existing foundation.
     Construct {
@@ -158,6 +161,10 @@ pub enum CommandError {
     TargetUnreachable,
     InvalidBuildSite,
     InsufficientWood,
+    InsufficientStone,
+    NotBuildable,
+    NeedsCoast,
+    PopulationCapReached,
     BuildingNotFound,
     BuildingBusy,
     BuildingUnderConstruction,
@@ -184,6 +191,10 @@ impl std::fmt::Display for CommandError {
             Self::TargetUnreachable => "target is unreachable",
             Self::InvalidBuildSite => "build site is blocked or outside the world",
             Self::InsufficientWood => "insufficient wood",
+            Self::InsufficientStone => "insufficient stone",
+            Self::NotBuildable => "villagers cannot build that",
+            Self::NeedsCoast => "a dock must touch the sea",
+            Self::PopulationCapReached => "population cap reached",
             Self::BuildingNotFound => "building not found",
             Self::BuildingBusy => "building is already producing",
             Self::BuildingUnderConstruction => "building is still under construction",
@@ -241,14 +252,36 @@ impl GameWorld {
     }
 }
 
+fn town_center_kind() -> BuildingKind {
+    BuildingKind::TownCenter
+}
+
 fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> Building {
+    building(BuildingKind::TownCenter, id, origin, construction)
+}
+
+fn building(
+    kind: BuildingKind,
+    id: &str,
+    origin: CellCoordinate,
+    construction: Option<f64>,
+) -> Building {
+    let town_center = kind == BuildingKind::TownCenter;
     Building {
         id: id.into(),
-        kind: BuildingKind::TownCenter,
+        kind,
         origin,
         construction,
-        produces: vec![ProductKind::Villager],
-        researches: TechnologyKind::ALL.to_vec(),
+        produces: if town_center {
+            vec![ProductKind::Villager]
+        } else {
+            Vec::new()
+        },
+        researches: if town_center {
+            TechnologyKind::ALL.to_vec()
+        } else {
+            Vec::new()
+        },
         job: None,
     }
 }
@@ -316,9 +349,16 @@ impl GameWorld {
                     phase: GatherPhase::ToResource,
                 };
             }
-            Command::Build { unit_id, origin } => {
+            Command::Build {
+                unit_id,
+                origin,
+                kind,
+            } => {
                 let unit = self.ordered_unit(&unit_id)?;
-                let (columns, rows) = BuildingKind::TownCenter.size();
+                if !BUILDABLE.contains(&kind) {
+                    return Err(CommandError::NotBuildable);
+                }
+                let (columns, rows) = kind.size();
                 let footprint = Footprint {
                     origin,
                     columns,
@@ -327,19 +367,29 @@ impl GameWorld {
                 if !self.footprint_is_free(footprint) {
                     return Err(CommandError::InvalidBuildSite);
                 }
-                if self.stockpile.wood < TOWN_CENTER_WOOD_COST {
-                    return Err(CommandError::InsufficientWood);
+                if kind.needs_coast() && !self.touches_sea(footprint) {
+                    return Err(CommandError::NeedsCoast);
+                }
+                for &(resource, amount) in kind.cost() {
+                    if self.stockpile.amount(resource) < amount {
+                        return Err(match resource {
+                            ResourceKind::Stone => CommandError::InsufficientStone,
+                            _ => CommandError::InsufficientWood,
+                        });
+                    }
                 }
                 // Validate reachability against the world as it will be, with
                 // the foundation in place; roll back if the builder is cut off.
                 let id = self.next_building_name();
-                self.buildings.push(town_center(&id, origin, Some(0.0)));
+                self.buildings.push(building(kind, &id, origin, Some(0.0)));
                 if !self.can_reach_beside(unit, footprint) {
                     self.buildings.pop();
                     return Err(CommandError::TargetUnreachable);
                 }
                 self.next_building_id += 1;
-                self.stockpile.wood -= TOWN_CENTER_WOOD_COST;
+                for &(resource, amount) in kind.cost() {
+                    self.stockpile.add(resource, -amount);
+                }
                 self.units[unit].action = UnitAction::Build { building_id: id };
             }
             Command::Construct {
@@ -369,6 +419,9 @@ impl GameWorld {
                     return Err(CommandError::ProductUnavailable);
                 }
                 match product {
+                    ProductKind::Villager if self.villagers_and_trainees() >= self.housing() => {
+                        return Err(CommandError::PopulationCapReached);
+                    }
                     ProductKind::Villager if self.stockpile.food < VILLAGER_FOOD_COST => {
                         return Err(CommandError::InsufficientFood);
                     }
@@ -424,6 +477,46 @@ impl GameWorld {
             }
         }
         Ok(())
+    }
+
+    /// Villagers the complete buildings can house.
+    pub fn housing(&self) -> usize {
+        self.buildings
+            .iter()
+            .filter(|building| building.is_complete())
+            .map(|building| building.kind.housing())
+            .sum()
+    }
+
+    /// Living villagers plus those in training.
+    pub fn villagers_and_trainees(&self) -> usize {
+        self.units.len()
+            + self
+                .buildings
+                .iter()
+                .filter(|b| matches!(b.job, Some(BuildingJob::Produce { .. })))
+                .count()
+    }
+
+    /// Whether any cell beside the footprint (sharing an edge) is water.
+    fn touches_sea(&self, footprint: Footprint) -> bool {
+        let Footprint {
+            origin,
+            columns,
+            rows,
+        } = footprint;
+        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
+        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
+        let water = |column: i32, row: i32| {
+            column >= 0
+                && row >= 0
+                && column < i32::from(WORLD_COLUMNS)
+                && row < i32::from(WORLD_ROWS)
+                && self.terrain[row as usize * usize::from(WORLD_COLUMNS) + column as usize].biome
+                    == TerrainBiome::Water
+        };
+        (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
+            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r))
     }
 
     fn next_building_name(&self) -> String {
@@ -591,7 +684,7 @@ impl GameWorld {
                 self.buildings
                     .iter()
                     .filter(|building| building.is_complete())
-                    .map(|building| (building.footprint().center(), BUILDING_SIGHT_RADIUS)),
+                    .map(|building| (building.footprint().center(), building.kind.sight_radius())),
             )
             .collect();
         self.terrain
