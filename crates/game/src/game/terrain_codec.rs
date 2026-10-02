@@ -12,7 +12,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::*;
 
-const BIOMES: [TerrainBiome; 10] = [
+const BIOMES: [TerrainBiome; 12] = [
     TerrainBiome::Meadow,
     TerrainBiome::Forest,
     TerrainBiome::Prairie,
@@ -23,6 +23,8 @@ const BIOMES: [TerrainBiome; 10] = [
     TerrainBiome::Clayland,
     TerrainBiome::Beach,
     TerrainBiome::Water,
+    TerrainBiome::Mountain,
+    TerrainBiome::River,
 ];
 const DIGITS: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
@@ -94,11 +96,11 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
         .map(|(index, (cell, height))| {
             let (visibility, biome) = match cell {
                 b'.' => (CellVisibility::Unseen, None),
-                b'a'..=b'j' => (
+                b'a'..=b'l' => (
                     CellVisibility::Explored,
                     Some(BIOMES[usize::from(cell - b'a')]),
                 ),
-                b'A'..=b'J' => (
+                b'A'..=b'L' => (
                     CellVisibility::Visible,
                     Some(BIOMES[usize::from(cell - b'A')]),
                 ),

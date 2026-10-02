@@ -6,7 +6,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 ## Milestone 1
 
-- Seeded island generation on a 60×40-cell map: value-noise elevation sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water is impassable. Cells are finer than a villager is tall
+- Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering

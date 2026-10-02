@@ -59,6 +59,10 @@ pub fn biome_layer(biome: TerrainBiome) -> u8 {
         TerrainBiome::Scrubland => 5,
         TerrainBiome::Heath => 6,
         TerrainBiome::Clayland => 7,
+        // Neither has a painted layer of its own: the shader lays running
+        // water over the shallows paint, and rock and snow over the highland's.
+        TerrainBiome::River => 10,
+        TerrainBiome::Mountain => 11,
     }
 }
 
@@ -74,6 +78,8 @@ pub fn biome_color(biome: TerrainBiome) -> [u8; 3] {
         TerrainBiome::Scrubland => [206, 180, 112],
         TerrainBiome::Heath => [166, 176, 104],
         TerrainBiome::Clayland => [214, 142, 92],
+        TerrainBiome::Mountain => [156, 148, 138],
+        TerrainBiome::River => [86, 166, 200],
     }
 }
 pub const UNSEEN_COLOR: [u8; 3] = [233, 216, 176];
@@ -106,11 +112,16 @@ const UNKNOWN_HEIGHT: f32 = 0.06;
 /// Open sea floor beyond the map.
 const SEA_FLOOR: f32 = -1.1;
 
+/// How far a river bed sits below its banks.
+const RIVER_DEPTH: f32 = 0.14;
+
 /// World-unit height of a simulation elevation: land rises gently from the
-/// shore, water drops below the sea surface.
+/// shore through rolling hills and steepens into peaks; water drops below the
+/// sea surface.
 fn world_height(elevation: f32) -> f32 {
     if elevation > 0.0 {
-        0.04 + elevation * 0.9
+        let peak = elevation * elevation * elevation * elevation;
+        0.04 + elevation * 0.8 + peak * 1.5
     } else {
         SEA_LEVEL - 0.15 + elevation * 0.6
     }
@@ -129,11 +140,16 @@ impl Heights {
         }
     }
 
-    /// Heights from snapshot elevations (`None` for unexplored cells).
-    pub fn from_elevations(elevations: impl Iterator<Item = Option<f32>>) -> Self {
+    /// Heights from snapshot elevations (`None` for unexplored cells); river
+    /// beds sink below their banks.
+    pub fn from_cells(cells: impl Iterator<Item = (Option<f32>, Option<TerrainBiome>)>) -> Self {
         Self {
-            cells: elevations
-                .map(|e| e.map(world_height).unwrap_or(UNKNOWN_HEIGHT))
+            cells: cells
+                .map(|(elevation, biome)| match elevation {
+                    None => UNKNOWN_HEIGHT,
+                    Some(e) if biome == Some(TerrainBiome::River) => world_height(e) - RIVER_DEPTH,
+                    Some(e) => world_height(e),
+                })
                 .collect(),
         }
     }
@@ -246,13 +262,24 @@ mod tests {
 
     #[test]
     fn land_stands_above_the_sea_and_water_below_it() {
-        let land = Heights::from_elevations((0..2400).map(|_| Some(0.4)));
-        let water = Heights::from_elevations((0..2400).map(|_| Some(-0.4)));
+        let land = Heights::from_cells((0..2400).map(|_| (Some(0.4), None)));
+        let water = Heights::from_cells((0..2400).map(|_| (Some(-0.4), None)));
         assert!(land.at(15.0, 10.0) > SEA_LEVEL + 0.2);
         assert!(water.at(15.0, 10.0) < SEA_LEVEL - 0.1);
         assert!(
             land.at(-6.0, -6.0) < SEA_LEVEL,
             "beyond the map is open sea"
         );
+    }
+
+    #[test]
+    fn peaks_tower_over_hills_and_rivers_sink_into_their_banks() {
+        assert!(
+            world_height(1.0) - world_height(0.8) > (world_height(0.4) - world_height(0.2)) * 1.5
+        );
+        let river = Heights::from_cells((0..2400).map(|_| (Some(0.4), Some(TerrainBiome::River))));
+        let banks = Heights::from_cells((0..2400).map(|_| (Some(0.4), Some(TerrainBiome::Meadow))));
+        assert!(river.at(15.0, 10.0) < banks.at(15.0, 10.0) - 0.1);
+        assert!(river.at(15.0, 10.0) > SEA_LEVEL, "rivers run above the sea");
     }
 }

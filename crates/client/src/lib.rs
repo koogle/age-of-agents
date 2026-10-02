@@ -114,6 +114,8 @@ pub struct App {
     revealed: bool,
     /// Until when (page seconds) a second tap on "New island" resets.
     reset_armed_until: f64,
+    /// When the ground mesh was last rebuilt (page seconds).
+    ground_rebuilt_at: f64,
     /// Fingers currently down, by touch id.
     touches: Vec<(u64, Vec2)>,
     /// A two-finger pinch/twist is (or was, until every finger lifts) in progress,
@@ -171,6 +173,7 @@ impl App {
             framed: false,
             revealed: false,
             reset_armed_until: 0.0,
+            ground_rebuilt_at: f64::MIN,
             touches: Vec::new(),
             gesture: false,
         }
@@ -230,7 +233,7 @@ impl App {
                         * snapshot.columns as usize
                         + (origin.column + dx) as usize];
                     cell.visibility == aoa_game::CellVisibility::Unseen
-                        || cell.biome == Some(aoa_game::TerrainBiome::Water)
+                        || cell.biome.is_some_and(|biome| !biome.is_walkable())
                 })
             });
         let water = |column: i32, row: i32| {
@@ -254,6 +257,20 @@ impl App {
         let snapshot = self.view.snapshot.as_ref()?;
         if let Some(id) = self.view.unit_at(&self.rig, pixel) {
             return Some(Target::Unit(id));
+        }
+        // A tree, rock or building is hit where it is drawn, not where the
+        // ground behind it happens to be.
+        match self.view.sprite_at(&self.rig, pixel) {
+            Some(view::Pick::Resource(id, cell)) => return Some(Target::Resource(id, cell)),
+            Some(view::Pick::Building(id)) => {
+                let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
+                return Some(if building.building.construction.is_some() {
+                    Target::Foundation(id)
+                } else {
+                    Target::Building(id)
+                });
+            }
+            None => {}
         }
         let point = self.ground_at(pixel)?;
         let cell = terrain::cell_at(point.x, point.z)?;
@@ -699,7 +716,12 @@ impl App {
         {
             game.renderer.update_cells(&game.gpu.queue, &rgba, &layers);
         }
-        if std::mem::take(&mut self.view.heights_dirty) {
+        // Rebuilding the ground mesh costs several milliseconds and a large
+        // upload; while villagers explore, exploration grows every tick, so
+        // the mesh catches up at most once a second.
+        if self.view.heights_dirty && now - self.ground_rebuilt_at >= 1.0 {
+            self.view.heights_dirty = false;
+            self.ground_rebuilt_at = now;
             game.renderer
                 .update_ground(&game.gpu.queue, &self.view.heights);
             #[cfg(target_arch = "wasm32")]

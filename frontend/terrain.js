@@ -18,7 +18,9 @@ export const BIOME_COLORS = {
   heath: [166, 176, 104],
   clayland: [214, 142, 92],
   beach: [236, 209, 153],
-  water: [96, 172, 196]
+  water: [96, 172, 196],
+  mountain: [156, 148, 138],
+  river: [86, 166, 200]
 };
 const UNSEEN_COLOR = [233, 216, 176];
 
