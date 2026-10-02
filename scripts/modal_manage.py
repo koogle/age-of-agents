@@ -19,6 +19,7 @@ FRONTEND_FILES = (
     "app.js",
     "controls.js",
     "effects.js",
+    "ground-paint.js",
     "hud.css",
     "hud.js",
     "materials.js",
