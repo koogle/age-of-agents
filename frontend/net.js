@@ -1,7 +1,7 @@
 // WebSocket link to the authoritative server: sequenced snapshots in, typed
 // commands out, each command resolved by its acknowledgement.
 const RETRY_MS = [500, 1000, 2000, 4000];
-const BIOMES = ['meadow', 'forest', 'prairie', 'highland', 'wetland', 'scrubland', 'heath', 'clayland', 'beach', 'water'];
+const BIOMES = ['meadow', 'forest', 'prairie', 'highland', 'wetland', 'scrubland', 'heath', 'clayland', 'beach', 'water', 'mountain', 'river'];
 
 // Snapshots carry terrain as one character per cell (crates/game terrain_codec);
 // this frozen client still reads the per-cell objects it was written for.

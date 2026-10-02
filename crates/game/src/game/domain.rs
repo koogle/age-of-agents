@@ -31,6 +31,17 @@ pub enum TerrainBiome {
     Beach,
     /// Sea and lakes: nobody walks, builds or gathers on water.
     Water,
+    /// Bare rock and snow on the peaks: too steep to walk or build on.
+    Mountain,
+    /// Fresh water running from the hills to the sea, crossed only at fords.
+    River,
+}
+
+impl TerrainBiome {
+    /// Whether villagers may stand, walk and build here.
+    pub fn is_walkable(self) -> bool {
+        !matches!(self, Self::Water | Self::Mountain | Self::River)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -99,7 +110,8 @@ pub struct TerrainCell {
     pub column: u16,
     pub row: u16,
     pub biome: TerrainBiome,
-    /// Land in (0, 1] rising toward the peaks; water in [-1, 0) by depth.
+    /// Land (rivers included) in (0, 1] rising toward the peaks; sea and lakes
+    /// in [-1, 0) by depth.
     pub elevation: f32,
 }
 
