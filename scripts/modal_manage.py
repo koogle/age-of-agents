@@ -68,7 +68,7 @@ def verify_once() -> None:
     state = json.loads(fetch("/state"))
     terrain = state.get("terrain", [])
     units = state.get("units", [])
-    if len(terrain) != 600 or not units or (state.get("columns"), state.get("rows")) != (30, 20):
+    if len(terrain) != 2400 or not units or (state.get("columns"), state.get("rows")) != (60, 40):
         raise RuntimeError(f"unexpected world shape: terrain={len(terrain)}, units={len(units)}")
     cells = [(unit["cell"]["column"], unit["cell"]["row"]) for unit in units]
     if len(set(cells)) != len(cells):
