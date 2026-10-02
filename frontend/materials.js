@@ -1,4 +1,4 @@
-// Shared look: cel-shaded toon materials, inked outlines, and one fog-of-war
+// Shared look: soft matte "painted miniature" materials and one fog-of-war
 // field sampled by every world material so terrain, props, and buildings fade
 // into the unknown together.
 import * as THREE from 'three';
@@ -17,7 +17,10 @@ export const uniforms = {
   uTime: { value: 0 },
   uCells: { value: cellTexture },
   uMapSize: { value: new THREE.Vector2(MAP.columns, MAP.rows) },
-  uGrid: { value: 0 }
+  uGrid: { value: 0 },
+  // Planet curvature: zero while playing, rising as the camera pulls far back.
+  uCurve: { value: 0 },
+  uCurveCenter: { value: new THREE.Vector2() }
 };
 
 export function writeCell(column, row, rgb, visibility) {
@@ -55,16 +58,33 @@ vec3 aoaApplyWorldLight(vec3 color) {
   float seen = smoothstep(0.08, 0.45, vis);
   float lit = smoothstep(0.55, 0.95, vis);
   float grey = dot(color, vec3(0.299, 0.587, 0.114));
-  vec3 remembered = mix(vec3(grey), color, 0.4) * vec3(0.82, 0.8, 0.74);
+  vec3 remembered = mix(mix(vec3(grey), color, 0.5) * 0.85, vec3(0.92, 0.93, 0.95), 0.25);
   color = mix(remembered, color, lit);
-  // Unexplored land is an unfinished map: cream paper with ink cross-hatching.
-  float mist = aoaFbm(vAoaWorld.xz * 0.35 + vec2(uTime * 0.03, -uTime * 0.02));
-  float hatch = smoothstep(0.85, 1.0, sin((vAoaWorld.x + vAoaWorld.z) * 9.0)) * smoothstep(0.35, 0.7, mist);
-  vec3 unknown = mix(vec3(0.84, 0.72, 0.5), vec3(0.93, 0.86, 0.7), mist);
-  unknown = mix(unknown, vec3(0.42, 0.3, 0.18), hatch * 0.55);
+  // Unexplored land lies under a bank of soft, slowly churning cloud.
+  float mist = aoaFbm(vAoaWorld.xz * 0.28 + vec2(uTime * 0.03, -uTime * 0.02));
+  float billow = aoaFbm(vAoaWorld.xz * 0.9 - vec2(uTime * 0.05, uTime * 0.04));
+  // Shaded like cumulus: cool grey in the folds, warm white on the tops.
+  vec3 unknown = mix(vec3(0.6, 0.66, 0.74), vec3(0.98, 0.96, 0.92), smoothstep(0.3, 0.72, mist * 0.65 + billow * 0.35));
   return mix(unknown, color, seen);
 }
 `;
+
+export const CURVE_UNIFORMS = 'uniform float uCurve;\nuniform vec2 uCurveCenter;';
+
+// Bends the world down away from the camera target, so a far zoom shows the
+// island on the curve of a small planet. Exported for materials that are not
+// world-patched (the sea).
+export const CURVE_GLSL = /* glsl */`
+if (uCurve > 0.0) {
+  vec4 bentWorld = vec4(transformed, 1.0);
+  #ifdef USE_INSTANCING
+  bentWorld = instanceMatrix * bentWorld;
+  #endif
+  bentWorld = modelMatrix * bentWorld;
+  vec2 away = bentWorld.xz - uCurveCenter;
+  bentWorld.y -= uCurve * dot(away, away);
+  gl_Position = projectionMatrix * viewMatrix * bentWorld;
+}`;
 
 const WORLD_POSITION_GLSL = /* glsl */`
 vec4 aoaWorld = vec4(transformed, 1.0);
@@ -72,6 +92,7 @@ vec4 aoaWorld = vec4(transformed, 1.0);
 aoaWorld = instanceMatrix * aoaWorld;
 #endif
 vAoaWorld = (modelMatrix * aoaWorld).xyz;
+${CURVE_GLSL}
 `;
 
 // Injects fog of war and cloud shadows. `extra(shader)` may patch further.
@@ -79,7 +100,7 @@ export function patchWorld(material, extra) {
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vAoaWorld;')
+      .replace('#include <common>', `#include <common>\nvarying vec3 vAoaWorld;\n${CURVE_UNIFORMS}`)
       .replace('#include <project_vertex>', `#include <project_vertex>\n${WORLD_POSITION_GLSL}`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${FOG_GLSL}`)
@@ -90,45 +111,20 @@ export function patchWorld(material, extra) {
   return material;
 }
 
-const gradient = new THREE.DataTexture(new Uint8Array([105, 105, 105, 255, 170, 170, 170, 255, 228, 228, 228, 255, 255, 255, 255, 255]), 4, 1);
-gradient.magFilter = THREE.NearestFilter;
-gradient.minFilter = THREE.NearestFilter;
-gradient.needsUpdate = true;
-
-const toonCache = new Map();
-export function toon(color, options = {}) {
+// Soft matte "painted miniature" surfaces: the diorama reference has no ink
+// lines and no hard cel bands, just gentle light falloff on rounded shapes.
+const paintCache = new Map();
+export function paint(color, options = {}) {
   const key = `${color}|${options.emissive || 0}|${options.transparent ? options.opacity : 1}`;
-  if (!toonCache.has(key)) {
-    toonCache.set(key, patchWorld(new THREE.MeshToonMaterial({
+  if (!paintCache.has(key)) {
+    paintCache.set(key, patchWorld(new THREE.MeshStandardMaterial({
       color,
-      gradientMap: gradient,
+      roughness: 0.82,
+      metalness: 0,
       emissive: options.emissive || 0x000000,
       transparent: Boolean(options.transparent),
       opacity: options.opacity ?? 1
     })));
   }
-  return toonCache.get(key);
-}
-
-// Inverted-hull ink line: back faces pushed out along view-space normals so
-// the line keeps a constant world width regardless of a part's scale.
-export const outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x24170c, side: THREE.BackSide });
-outlineMaterial.onBeforeCompile = shader => {
-  shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
-    vec4 mvPosition = vec4(transformed, 1.0);
-    vec3 inkNormal = normal;
-    #ifdef USE_INSTANCING
-    mvPosition = instanceMatrix * mvPosition;
-    inkNormal = mat3(instanceMatrix) * inkNormal;
-    #endif
-    mvPosition = modelViewMatrix * mvPosition;
-    mvPosition.xyz += normalize(normalMatrix * inkNormal) * 0.015;
-    gl_Position = projectionMatrix * mvPosition;`);
-};
-
-export function inked(mesh) {
-  const line = new THREE.Mesh(mesh.geometry, outlineMaterial);
-  line.raycast = () => {};
-  mesh.add(line);
-  return mesh;
+  return paintCache.get(key);
 }
