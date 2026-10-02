@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use rusqlite::{Connection, OptionalExtension, params};
 
-use crate::game::GameWorld;
+use aoa_game::GameWorld;
 
 const DEFAULT_DB_PATH: &str = "age_of_agents.db";
 
@@ -121,7 +121,7 @@ mod tests {
         store.initialize().unwrap();
         let mut world = GameWorld::default();
         world
-            .apply_command(crate::game::Command::Gather {
+            .apply_command(aoa_game::Command::Gather {
                 unit_id: "villager-1".into(),
                 resource_id: "berries-1".into(),
             })
@@ -141,8 +141,8 @@ mod tests {
         assert_eq!(loaded, world);
         assert!(matches!(
             loaded.units[0].action,
-            crate::game::UnitAction::Gather {
-                phase: crate::game::GatherPhase::Gathering,
+            aoa_game::UnitAction::Gather {
+                phase: aoa_game::GatherPhase::Gathering,
                 ..
             }
         ));

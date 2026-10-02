@@ -1,0 +1,36 @@
+[package]
+name = "aoa-client"
+version = "0.1.0"
+edition = "2024"
+description = "Age of Agents renderer: one wgpu client for a native window and WebGL2 in the browser."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "age-of-agents-client"
+path = "src/main.rs"
+
+[dependencies]
+aoa-game = { path = "../game" }
+bytemuck = { version = "1", features = ["derive"] }
+glam = { version = "0.30", features = ["bytemuck"] }
+image = { version = "0.25", default-features = false, features = ["png", "webp"] }
+ab_glyph = "0.2"
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wgpu = { version = "30", default-features = false, features = ["wgsl", "webgl", "vulkan", "metal", "dx12", "gles"] }
+winit = "0.30"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+env_logger = "0.11"
+pollster = "0.4"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1"
+console_log = "1"
+js-sys = "0.3"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["Document", "Window", "Element", "HtmlCanvasElement", "WebSocket", "MessageEvent", "Location", "Response", "Performance"] }
