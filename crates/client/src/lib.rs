@@ -102,6 +102,8 @@ pub struct App {
     last_frame: Option<f64>,
     /// Whether the camera has been moved to the starting town center yet.
     framed: bool,
+    /// Whether the page's loading overlay has been dismissed.
+    revealed: bool,
 }
 
 fn now_seconds() -> f64 {
@@ -151,6 +153,7 @@ impl App {
             clock: 0.0,
             last_frame: None,
             framed: false,
+            revealed: false,
         }
     }
 
@@ -598,7 +601,44 @@ impl App {
             &decals,
             &self.hud.quads,
         );
+        if !self.revealed && self.view.snapshot.is_some() {
+            self.revealed = true;
+            loaded();
+        }
         game.window.request_redraw();
+    }
+}
+
+/// Reports startup progress (0 to 1) to the page's loading overlay.
+#[cfg(target_arch = "wasm32")]
+pub(crate) fn loading(fraction: f64, text: &str) {
+    call_overlay(&[fraction.into(), text.into()]);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) fn loading(_fraction: f64, _text: &str) {}
+
+/// Dismisses the loading overlay once the first world frame is on screen.
+#[cfg(target_arch = "wasm32")]
+fn loaded() {
+    call_overlay(&[1.0.into()]);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn loaded() {}
+
+/// Calls `window.aoaProgress(...)` when the page defines it.
+#[cfg(target_arch = "wasm32")]
+fn call_overlay(args: &[wasm_bindgen::JsValue]) {
+    use wasm_bindgen::JsCast;
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Ok(function) = js_sys::Reflect::get(&window, &"aoaProgress".into()) else {
+        return;
+    };
+    if let Some(function) = function.dyn_ref::<js_sys::Function>() {
+        let _ = function.apply(&window, &args.iter().collect::<js_sys::Array>());
     }
 }
 
@@ -676,6 +716,7 @@ impl ApplicationHandler<Game> for App {
         let assets = self.assets.take().expect("assets");
         let atlas = self.atlas.image.clone();
         let size = window.inner_size();
+        loading(0.92, "Preparing the world");
         let ready = async move {
             let gpu = Gpu::new(window.clone(), size.width, size.height).await;
             let renderer = Renderer::new(&gpu, &assets, &sheet_images(&assets), &atlas);
@@ -692,6 +733,7 @@ impl ApplicationHandler<Game> for App {
     }
 
     fn user_event(&mut self, _event_loop: &ActiveEventLoop, game: Game) {
+        loading(0.97, "Sailing to the island");
         game.window.request_redraw();
         self.game = Some(game);
         self.fit_surface();
