@@ -127,6 +127,7 @@ impl App {
     fn new(assets: Assets, source: Source, proxy: EventLoopProxy<Game>) -> Self {
         let sheets = Sheets::parse(
             assets.bytes("sprites/villager.json"),
+            assets.bytes("sprites/villager_idle_hd.json"),
             assets.bytes("sprites/resources.json"),
             assets.bytes("sprites/towncenter.json"),
         );
@@ -649,6 +650,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/villager_elder.png"),
         assets.image("sprites/resources.png"),
         assets.image("sprites/towncenter.png"),
+        assets.image("sprites/villager_idle_hd.png"),
     ]
 }
 

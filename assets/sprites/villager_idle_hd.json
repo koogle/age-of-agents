@@ -1,0 +1,109 @@
+{
+ "image": "villager_idle_hd.png",
+ "size": [
+  2048,
+  1536
+ ],
+ "cell": [
+  512,
+  512
+ ],
+ "anchor": [
+  256,
+  480
+ ],
+ "figureHeight": 352,
+ "note": "idle frames of villager, villager_woman, villager_elder at exactly 2x villager.json (same anchor pixel after scaling); rows = people, columns = idle front 1, front 2, back 1, back 2",
+ "people": {
+  "villager": {
+   "front": [
+    [
+     0,
+     0,
+     512,
+     512
+    ],
+    [
+     512,
+     0,
+     512,
+     512
+    ]
+   ],
+   "back": [
+    [
+     1024,
+     0,
+     512,
+     512
+    ],
+    [
+     1536,
+     0,
+     512,
+     512
+    ]
+   ]
+  },
+  "villager_woman": {
+   "front": [
+    [
+     0,
+     512,
+     512,
+     512
+    ],
+    [
+     512,
+     512,
+     512,
+     512
+    ]
+   ],
+   "back": [
+    [
+     1024,
+     512,
+     512,
+     512
+    ],
+    [
+     1536,
+     512,
+     512,
+     512
+    ]
+   ]
+  },
+  "villager_elder": {
+   "front": [
+    [
+     0,
+     1024,
+     512,
+     512
+    ],
+    [
+     512,
+     1024,
+     512,
+     512
+    ]
+   ],
+   "back": [
+    [
+     1024,
+     1024,
+     512,
+     512
+    ],
+    [
+     1536,
+     1024,
+     512,
+     512
+    ]
+   ]
+  }
+ }
+}

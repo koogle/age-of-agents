@@ -4,7 +4,9 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-CELL, FOOT_Y, FIG_H = 256, 240, 176          # cell size, feet baseline, idle_front head-to-feet height
+import os as _os
+_K = int(_os.environ.get("HD_SCALE", "1"))      # 2 = same layout at twice the resolution (villager_idle_hd)
+CELL, FOOT_Y, FIG_H = 256 * _K, 240 * _K, 176 * _K   # cell size, feet baseline, idle_front head-to-feet height
 STRIPS = {  # name: (animation, facing, frames)
   "idle_front": ("idle", "front", 2), "idle_back": ("idle", "back", 2),
   "walk_front": ("walk", "front", 4), "walk_back": ("walk", "back", 4),
@@ -63,10 +65,12 @@ for name, frames in data.items():
         al = sub[..., 3] > 40
         foot_rows = al[int(ground - 0.12 * (ground - y0)):int(ground)]
         fx = np.nonzero(foot_rows.any(0))[0]; cx = (fx.min() + fx.max()) / 2 if len(fx) else sub.shape[1] / 2
-        w, h = int(round(sub.shape[1] * scale)), int(round(sub.shape[0] * scale))
+        w, h = int(round(sub.shape[1] * scale / _K)) * _K, int(round(sub.shape[0] * scale / _K)) * _K   # 2x the 1x size exactly
         img = img.resize((w, h), Image.LANCZOS)
         cell = Image.new("RGBA", (CELL, CELL))
-        cell.alpha_composite(img, (int(round(CELL / 2 - cx * scale)), int(round(FOOT_Y - ground * scale))))  # clips at the cell edge
+        # Place at _K x the rounded 1x position so an HD frame lands exactly on 2x the shipped 1x frame.
+        px = int(round(CELL / _K / 2 - cx * scale / _K)) * _K; py = int(round(FOOT_Y / _K - ground * scale / _K)) * _K
+        cell.alpha_composite(img, (px, py))  # clips at the cell edge
         sheet_cells.append(cell)
         meta.setdefault(anim, {}).setdefault(facing, []).append(len(sheet_cells) - 1)
 cols = 8; rows = -(-len(sheet_cells) // cols)

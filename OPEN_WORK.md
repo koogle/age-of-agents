@@ -18,7 +18,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 ## Open work
 
-0. Seeded islands (this branch): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal; HD idle villager sprites once the FAL PR lands.
+0. Seeded islands (merged in PR #22): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal.
 1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, and touch lacks pinch/twist, so mouse and touch are not yet identical): box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
@@ -32,6 +32,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 - On master: `assets/ui/` icon kit and coin buttons, `assets/terrain/` painted ground (revision 2), `assets/sprites/villager{,_woman,_elder}` billboards (drawn by `frontend/villager-sprite.js`), `assets/models/` opt-in GLBs (temple town center on by default via `?glb=`).
 - Branch `claude/fal-sprites-resources` (PR #12): base villager walk fix (no hop, moving carry stride; layout unchanged), and `assets/sprites/resources.{png,json}` resource/tree billboards (9 nodes, 21 sprites, depletion stages, base anchor, per-node world scale), not wired in yet.
 - `assets/sprites/towncenter.{png,json}`: town center billboard (foundation, build33, build66, complete, working; 512 px cells, footprint-centre anchor) for the Rust/wgpu client (branch `claude/fal-towncenter-sprites`).
+- `assets/sprites/villager_idle_hd.{png,json}`: 2× idle frames for all three people, drawn by the Rust client for every standing villager (walk, carry and work still use the 1× sheets).
 - FAL spend about $7.94 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
