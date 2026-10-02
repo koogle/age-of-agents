@@ -231,6 +231,15 @@ impl GameWorld {
                 {
                     return Err(format!("{} builds a missing foundation", unit.id));
                 }
+                UnitAction::Deposit { building_id }
+                    if unit.cargo.is_none()
+                        || !self
+                            .buildings
+                            .iter()
+                            .any(|b| &b.id == building_id && b.is_complete()) =>
+                {
+                    return Err(format!("{} deposits nothing or nowhere", unit.id));
+                }
                 _ => {}
             }
         }

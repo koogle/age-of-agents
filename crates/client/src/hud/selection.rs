@@ -144,6 +144,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 "Dropping off goods first".into()
             }
             UnitAction::Build { .. } => "Building".into(),
+            UnitAction::Deposit { .. } => "Taking goods to unload".into(),
             UnitAction::Gather { phase, .. } => match phase {
                 aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),
                 aoa_game::GatherPhase::Gathering => "Gathering".into(),
