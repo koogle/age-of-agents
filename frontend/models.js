@@ -2,15 +2,8 @@
 // One cell is one world unit; every model stands on y = 0 at its anchor.
 import * as THREE from 'three';
 import { paint } from './materials.js';
-import { random } from './terrain.js';
 
 export const TEAM_COLOR = 0x2f6fe0;
-function seedOf(id) {
-  let h = 0;
-  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return h;
-}
-
 const G = {
   box: new THREE.BoxGeometry(1, 1, 1),
   ball: new THREE.IcosahedronGeometry(1, 3),
@@ -43,12 +36,11 @@ export const ACTIVITY_FOR = { wood: 'chop', stone: 'mine', gold: 'mine', iron: '
 
 // Generated models (assets/models/README.md). Only the temple town center is on by
 // default, because it is the only one that reads better than its procedural model
-// at gameplay zoom; ?glb=towncenter,cypress picks a set, ?glb=all or
+// at gameplay zoom; ?glb=towncenter, ?glb=all or
 // ?glb=none overrides. Procedural models are the fallback if loading fails.
-const GLB_FILES = { towncenter: 'towncenter.glb', cypress: 'cypress.glb' };
+const GLB_FILES = { towncenter: 'towncenter.glb' };
 const GLB_DEFAULT = 'towncenter';
 const TOWN_CENTER_WIDTH = 1.8;
-const CYPRESS_HEIGHT = 1.1;
 const glb = await loadModels(new URLSearchParams(location.search).get('glb') ?? GLB_DEFAULT)
   .catch(error => (console.warn('generated models unavailable, using procedural models', error), {}));
 
@@ -76,8 +68,7 @@ async function loadModels(param) {
     gltf.scene.updateMatrixWorld(true);
     const size = new THREE.Box3().setFromObject(gltf.scene, true);
     const extent = size.getSize(new THREE.Vector3());
-    const scale = name === 'towncenter' ? TOWN_CENTER_WIDTH / Math.max(extent.x, extent.z)
-      : CYPRESS_HEIGHT / extent.y;
+    const scale = TOWN_CENTER_WIDTH / Math.max(extent.x, extent.z);
     assets[name] = { scene: gltf.scene, scale, floor: size.min.y };
   });
   return assets;
@@ -98,99 +89,6 @@ function placeModel(asset) {
   model.scale.multiplyScalar(asset.scale);
   model.position.y = -asset.floor * asset.scale;
   return model;
-}
-
-// ---------- Resources ----------
-// Each resource cell holds a few pieces; pieces disappear as the node depletes.
-function tree(conifer, seed) {
-  const g = new THREE.Group();
-  // Mediterranean pair: tall dark cypress spires, or a gnarled silver-green olive.
-  if (conifer && glb.cypress) {
-    g.add(placeModel(glb.cypress));
-  } else if (conifer) {
-    const green = random(seed) > 0.5 ? 0x2f6b3c : 0x3a7a44;
-    g.add(part(G.cyl, 0x6b4a2e, [0, 0.06, 0], [0.035, 0.12, 0.035]));
-    g.add(part(G.ball, green, [0, 0.5, 0], [0.13, 0.42, 0.13]));
-    g.add(part(G.cone, green, [0, 0.95, 0], [0.09, 0.22, 0.09]));
-  } else {
-    g.add(part(G.cyl, 0x8a7458, [0, 0.14, 0], [0.04, 0.28, 0.04], { rotation: [0, 0, 0.18] }));
-    g.add(part(G.ball, 0x8fa860, [0.04, 0.42, 0], [0.22, 0.15, 0.2]));
-    g.add(part(G.ball, 0xa9bd78, [-0.07, 0.5, 0.04], [0.14, 0.1, 0.13]));
-  }
-  g.userData.stump = part(G.cyl, 0x7a5634, [0, 0.03, 0], [0.05, 0.06, 0.05]);
-  return g;
-}
-
-const PIECE_OFFSETS = [[-0.22, -0.18], [0.2, -0.1], [-0.05, 0.2], [0.24, 0.24]];
-
-export function createResource(resource, biome) {
-  const root = new THREE.Group();
-  const seed = seedOf(resource.id);
-  const pieces = [];
-  const add = (object, index, scale = 1) => {
-    const [dx, dz] = PIECE_OFFSETS[index];
-    object.position.set(dx + (random(seed + index) - 0.5) * 0.08, 0, dz + (random(seed - index) - 0.5) * 0.08);
-    object.rotation.y = random(seed * 3 + index) * Math.PI * 2;
-    object.scale.multiplyScalar(scale * (0.85 + random(seed + index * 7) * 0.3));
-    root.add(object);
-    pieces.push(object);
-  };
-  switch (resource.kind) {
-    case 'wood':
-      for (let i = 0; i < 3; i += 1) add(tree(biome !== 'heath', seed + i), i, 1 + (i === 0 ? 0.15 : 0));
-      break;
-    case 'food':
-      for (let i = 0; i < 3; i += 1) {
-        const bush = group(part(G.ball, 0x4f8f3c, [0, 0.12, 0], [0.17, 0.13, 0.17]));
-        for (let b = 0; b < 5; b += 1) {
-          const a = b * 1.26 + i;
-          bush.add(part(G.ball, 0xe8203a, [Math.cos(a) * 0.13, 0.13 + (b % 2) * 0.06, Math.sin(a) * 0.13], [0.035, 0.035, 0.035]));
-        }
-        add(bush, i);
-      }
-      break;
-    case 'fiber':
-      for (let i = 0; i < 4; i += 1) {
-        const tuft = new THREE.Group();
-        for (let r = 0; r < 5; r += 1) {
-          const a = r * 1.3;
-          tuft.add(part(G.cone, 0xb7c46a, [Math.cos(a) * 0.05, 0.15, Math.sin(a) * 0.05], [0.025, 0.32, 0.025], { rotation: [Math.sin(a) * 0.2, 0, Math.cos(a) * 0.2] }));
-          tuft.add(part(G.ball, 0xf2e6b0, [Math.cos(a) * 0.07, 0.32, Math.sin(a) * 0.07], [0.025, 0.04, 0.025]));
-        }
-        add(tuft, i);
-      }
-      break;
-    case 'clay':
-      root.add(part(G.cyl, 0x8a4f33, [0, 0.005, 0], [0.4, 0.01, 0.4], { shadow: false }));
-      for (let i = 0; i < 3; i += 1) add(group(part(G.ball, 0xc06c45, [0, 0.04, 0], [0.16, 0.09, 0.14])), i);
-      break;
-    default: {
-      const rockColor = { stone: 0xe6e0cc, gold: 0xd8c8a4, iron: 0x8a7a72 }[resource.kind] || 0xaaaaaa;
-      for (let i = 0; i < 4; i += 1) {
-        const piece = group(part(G.rock, rockColor, [0, 0.1, 0], [0.17, 0.14, 0.15]));
-        if (resource.kind === 'gold') piece.add(part(G.gem, 0xffc21a, [0.05, 0.2, 0.03], [0.05, 0.08, 0.05], { emissive: 0x7a5200 }));
-        if (resource.kind === 'iron') piece.add(part(G.box, 0xd0703a, [0, 0.16, 0.1], [0.12, 0.03, 0.03], { rotation: [0.3, 0.4, 0] }));
-        add(piece, i, i === 0 ? 1.2 : 0.9);
-      }
-    }
-  }
-  root.userData.pieces = pieces;
-  return root;
-}
-
-export function setResourceAmount(root, fraction) {
-  const pieces = root.userData.pieces;
-  const shown = fraction <= 0 ? 0 : Math.max(1, Math.ceil(fraction * pieces.length));
-  pieces.forEach((piece, index) => {
-    const alive = index < shown;
-    const stump = piece.userData.stump;
-    if (stump) {
-      piece.children.forEach(child => { if (child !== stump) child.visible = alive; });
-      if (!alive && !stump.parent) piece.add(stump);
-    } else {
-      piece.visible = alive;
-    }
-  });
 }
 
 // ---------- Town center ----------
