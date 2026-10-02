@@ -33,6 +33,8 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 6. The legacy Three.js client at `/` reads the new 60×40 grid but draws it at one world unit per cell (twice the size) and draws water and beach flat; it is frozen until removal.
 7. Anno is now a named second inspiration (calm economy, growing settlement) in `AGENTS.md`.
 
+- PR #20 adds the Stop icon, resource variant sheet, and scenery/work-particle sheet; renderer wiring remains future work.
+
 ## Generated art
 
 - On master: `assets/ui/` icon kit and coin buttons, `assets/terrain/` painted ground (revision 2), `assets/sprites/villager{,_woman,_elder}` billboards (drawn by `frontend/villager-sprite.js`), `assets/models/` opt-in GLBs (temple town center on by default via `?glb=`).
