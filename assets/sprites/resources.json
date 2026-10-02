@@ -1,0 +1,207 @@
+{
+ "image": "resources.png",
+ "size": [
+  2048,
+  768
+ ],
+ "cell": [
+  256,
+  256
+ ],
+ "anchor": [
+  128,
+  248
+ ],
+ "note": "stages run full -> nearly empty; one billboard per node; world size = pixel size * unitsPerPixel (shared by all stages)",
+ "nodes": {
+  "cypress": {
+   "stages": [
+    [
+     0,
+     0,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.006897,
+   "worldSize": 1.6,
+   "measured": "height"
+  },
+  "olive": {
+   "stages": [
+    [
+     256,
+     0,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.004966,
+   "worldSize": 1.15,
+   "measured": "height"
+  },
+  "stump": {
+   "stages": [
+    [
+     512,
+     0,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.00181,
+   "worldSize": 0.42,
+   "measured": "width"
+  },
+  "berry": {
+   "stages": [
+    [
+     768,
+     0,
+     256,
+     256
+    ],
+    [
+     1024,
+     0,
+     256,
+     256
+    ],
+    [
+     1280,
+     0,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.002672,
+   "worldSize": 0.62,
+   "measured": "width"
+  },
+  "stone": {
+   "stages": [
+    [
+     1536,
+     0,
+     256,
+     256
+    ],
+    [
+     1792,
+     0,
+     256,
+     256
+    ],
+    [
+     0,
+     256,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.003233,
+   "worldSize": 0.75,
+   "measured": "width"
+  },
+  "gold": {
+   "stages": [
+    [
+     256,
+     256,
+     256,
+     256
+    ],
+    [
+     512,
+     256,
+     256,
+     256
+    ],
+    [
+     768,
+     256,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.003029,
+   "worldSize": 0.62,
+   "measured": "width"
+  },
+  "iron": {
+   "stages": [
+    [
+     1024,
+     256,
+     256,
+     256
+    ],
+    [
+     1280,
+     256,
+     256,
+     256
+    ],
+    [
+     1536,
+     256,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.003017,
+   "worldSize": 0.7,
+   "measured": "width"
+  },
+  "clay": {
+   "stages": [
+    [
+     1792,
+     256,
+     256,
+     256
+    ],
+    [
+     0,
+     512,
+     256,
+     256
+    ],
+    [
+     256,
+     512,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.003664,
+   "worldSize": 0.85,
+   "measured": "width"
+  },
+  "fiber": {
+   "stages": [
+    [
+     512,
+     512,
+     256,
+     256
+    ],
+    [
+     768,
+     512,
+     256,
+     256
+    ],
+    [
+     1024,
+     512,
+     256,
+     256
+    ]
+   ],
+   "unitsPerPixel": 0.003017,
+   "worldSize": 0.7,
+   "measured": "height"
+  }
+ }
+}

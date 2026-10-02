@@ -42,6 +42,8 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 - `assets/sprites/villager.{png,json}`: illustrated villager billboard sheet (34 frames, 256 px cells, feet anchor 128,240), not wired in.
 - FAL spend about $4.66 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
+- Branch `claude/fal-sprites-resources` (PR #12): villager walk fix, painterly terrain revision carried over, `assets/sprites/resources.{png,json}` resource/tree billboards (9 nodes, 21 sprites), not wired in.
+
 ## Blockers
 
 None.
