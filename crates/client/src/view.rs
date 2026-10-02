@@ -452,8 +452,12 @@ impl WorldView {
                 work_target(heights, snapshot, &unit.unit.action)
             };
             let carrying = unit.unit.cargo.is_some();
-            let mut name = if moving {
-                if carrying { "carry" } else { "walk" }
+            // A villager holding goods shows its load even when it stops
+            // (interrupted, or waiting for a drop site): the carry pose, held still.
+            let mut name = if carrying {
+                "carry"
+            } else if moving {
+                "walk"
             } else {
                 "idle"
             };
@@ -496,7 +500,11 @@ impl WorldView {
             } else {
                 !screen_right
             };
-            let fps = villager.fps.get(name).copied().unwrap_or(4.0);
+            let fps = if name == "carry" && !moving {
+                0.0
+            } else {
+                villager.fps.get(name).copied().unwrap_or(4.0)
+            };
             let (sheet, frames, sheet_size) = if name == "idle" {
                 let idle = &sheets.idle;
                 (

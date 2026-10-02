@@ -198,7 +198,7 @@ impl GameWorld {
                         .map(|building| Goal::Beside(building.footprint()))
                 })
             }
-            UnitAction::Build { building_id } => self
+            UnitAction::Build { building_id } | UnitAction::Deposit { building_id } => self
                 .buildings
                 .iter()
                 .find(|building| &building.id == building_id)

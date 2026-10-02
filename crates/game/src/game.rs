@@ -142,6 +142,12 @@ pub enum Command {
     SetSimulationSpeed {
         multiplier: f64,
     },
+    /// Take the unit's load to a drop site (a town center, or a granary for
+    /// food and fiber) and unload it.
+    Deposit {
+        unit_id: String,
+        building_id: String,
+    },
     /// Abandon the current task. The unit finishes the step it is taking,
     /// keeps any cargo, and leaves foundation progress in place.
     Stop {
@@ -165,6 +171,8 @@ pub enum CommandError {
     NotBuildable,
     NeedsCoast,
     PopulationCapReached,
+    NothingToDeposit,
+    BuildingRefusesCargo,
     BuildingNotFound,
     BuildingBusy,
     BuildingUnderConstruction,
@@ -195,6 +203,8 @@ impl std::fmt::Display for CommandError {
             Self::NotBuildable => "villagers cannot build that",
             Self::NeedsCoast => "a dock must touch the sea",
             Self::PopulationCapReached => "population cap reached",
+            Self::NothingToDeposit => "unit is not carrying anything",
+            Self::BuildingRefusesCargo => "building does not take that cargo",
             Self::BuildingNotFound => "building not found",
             Self::BuildingBusy => "building is already producing",
             Self::BuildingUnderConstruction => "building is still under construction",
@@ -461,6 +471,32 @@ impl GameWorld {
                     elapsed_seconds: 0.0,
                 });
             }
+            Command::Deposit {
+                unit_id,
+                building_id,
+            } => {
+                let unit = self.ordered_unit(&unit_id)?;
+                let cargo = self.units[unit]
+                    .cargo
+                    .as_ref()
+                    .ok_or(CommandError::NothingToDeposit)?
+                    .kind;
+                let building = self
+                    .buildings
+                    .iter()
+                    .find(|building| building.id == building_id)
+                    .ok_or(CommandError::BuildingNotFound)?;
+                if !building.is_complete() {
+                    return Err(CommandError::BuildingUnderConstruction);
+                }
+                if !building.kind.accepts(cargo) {
+                    return Err(CommandError::BuildingRefusesCargo);
+                }
+                if !self.can_reach_beside(unit, building.footprint()) {
+                    return Err(CommandError::TargetUnreachable);
+                }
+                self.units[unit].action = UnitAction::Deposit { building_id };
+            }
             Command::Stop { unit_id } => {
                 let unit = self
                     .units
@@ -577,6 +613,7 @@ impl GameWorld {
                     self.tick_gather(index, resource_id, phase, dt)
                 }
                 UnitAction::Build { building_id } => self.tick_build(index, &building_id, dt),
+                UnitAction::Deposit { building_id } => self.tick_deposit(index, &building_id, dt),
             }
         }
         for index in 0..self.buildings.len() {
