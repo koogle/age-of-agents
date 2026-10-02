@@ -1,4 +1,4 @@
-//! Three-quarter camera rig: pan, zoom and rotate around a ground target. Far
+//! Three-quarter camera rig: pan and zoom around a ground target with a fixed heading. Far
 //! zoom tilts toward the horizon and bends the world into a small planet.
 use glam::{Mat4, Vec2, Vec3, Vec4Swizzles};
 
@@ -9,12 +9,11 @@ const MAX_DISTANCE: f32 = 70.0;
 pub const NEAR: f32 = 0.1;
 pub const FAR: f32 = 200.0;
 const FOV_Y: f32 = 36.0;
+const YAW: f32 = std::f32::consts::FRAC_PI_4;
 
 pub struct Rig {
     pub target: Vec3,
     pub distance: f32,
-    yaw: f32,
-    goal_yaw: f32,
     pitch: f32,
     pub width: f32,
     pub height: f32,
@@ -27,20 +26,16 @@ fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
 
 impl Rig {
     pub fn new() -> Self {
-        let yaw = std::f32::consts::FRAC_PI_4;
         Self {
             target: Vec3::new(15.0, 0.0, 10.5),
             distance: 15.0,
-            yaw,
-            goal_yaw: yaw,
             pitch: 0.92,
             width: 1.0,
             height: 1.0,
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
-        self.yaw += (self.goal_yaw - self.yaw) * (dt * 8.0).min(1.0);
+    pub fn update(&mut self) {
         // Closer views tilt toward the horizon; distant views look down like a
         // map, then ease back so the planet's limb shows.
         let play = ((self.distance - MIN_DISTANCE) / (34.0 - MIN_DISTANCE)).clamp(0.0, 1.0);
@@ -53,9 +48,9 @@ impl Rig {
         let horizontal = self.pitch.cos() * self.distance;
         self.target
             + Vec3::new(
-                self.yaw.sin() * horizontal,
+                YAW.sin() * horizontal,
                 self.pitch.sin() * self.distance,
-                self.yaw.cos() * horizontal,
+                YAW.cos() * horizontal,
             )
     }
 
@@ -172,16 +167,9 @@ impl Rig {
         self.clamp();
     }
 
-    pub fn rotate(&mut self, radians: f32, smooth: bool) {
-        self.goal_yaw += radians;
-        if !smooth {
-            self.yaw = self.goal_yaw;
-        }
-    }
-
     pub fn nudge(&mut self, dx: f32, dz: f32) {
-        let right = Vec3::new(self.yaw.cos(), 0.0, -self.yaw.sin());
-        let forward = Vec3::new(-self.yaw.sin(), 0.0, -self.yaw.cos());
+        let right = Vec3::new(YAW.cos(), 0.0, -YAW.sin());
+        let forward = Vec3::new(-YAW.sin(), 0.0, -YAW.cos());
         self.target += (right * dx + forward * dz) * self.distance * 0.05;
         self.clamp();
     }
@@ -195,5 +183,28 @@ impl Rig {
     pub fn basis(&self) -> (Vec3, Vec3) {
         let view = self.view();
         (view.row(0).xyz(), view.row(1).xyz())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn navigation_preserves_heading() {
+        let mut rig = Rig::new();
+        let heading = |rig: &Rig| {
+            let offset = rig.eye() - rig.target;
+            Vec2::new(offset.x, offset.z).normalize()
+        };
+        let initial = heading(&rig);
+        for factor in [0.4, 2.0, 10.0] {
+            rig.zoom(factor);
+            rig.update();
+            rig.nudge(1.0, -1.0);
+            rig.drag(Vec3::new(10.0, 0.0, 8.0), Vec3::new(9.0, 0.0, 7.0));
+            rig.look_at(12.0, 9.0);
+            assert!(heading(&rig).abs_diff_eq(initial, 1e-6));
+        }
     }
 }

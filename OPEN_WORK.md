@@ -1,7 +1,7 @@
 # Open Work
 
-**Last updated:** 2026-10-02T15:20:00Z
-**Branch:** `claude/rts-frontend-webgl-canvas-gukaet` (seeded islands, on top of master fa6cd43)
+**Last updated:** 2026-10-02T21:13:47+00:00
+**Branch:** `work` (camera rotation removal, on merged master 6d5c347)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
 ## Current goal
@@ -21,7 +21,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 0. Scale: buildings are sized from their art so doors stand about 1.2 villagers tall (town center 8×8, house and granary 4×4, watchtower 3×3, dock 5×5); resources keep 8 cells from the town center's middle; schema 9 drops older saves, so production starts a new island on deploy. The start site may now also sit on scrubland or heath.
 0. Robustness: the web client reconnects after a server restart (a deploy) and accepts the new server's snapshot numbering; every response carries `Cache-Control: no-cache`, so phones revalidate the page, game code and art after a deploy. Deploys queue: the workflow cancels a pending run when a newer merge arrives.
 0. Buildings: villagers build town center, house, granary, watchtower and dock from a menu (greyscale when unaffordable); in-world art reuses `assets/loading/buildings.webp` (256 px cells, so close zoom is soft; a higher-resolution sheet would help). The dock has no function until the fishing boat. The HUD command bar moves above the globe on narrow screens, and the page uses 100dvh so phone toolbars no longer hide it.
-0. Touch: two fingers pinch-zoom, twist-rotate and pan; taps pick the terrain surface (the seeded island's elevation had made taps miss).
+0. Touch: two fingers pinch-zoom and pan; the Rust camera heading is fixed (Q/E, right-drag and twist no longer rotate); taps pick the terrain surface (the seeded island's elevation had made taps miss).
 0. `/play` shows a loading overlay with the generated title and buildings rising through their stages (`assets/loading/`) (game download, then art files fetched in parallel, then world setup) until the first world frame is drawn.
 0. Seeded islands (merged in PR #22): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal.
 1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, so mouse and touch are not yet identical): box select, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
@@ -47,4 +47,4 @@ None.
 
 ## Exact next action
 
-Merge the seeded-island PR, redeploy Modal (schema 7 replaces the persisted world with a generated island on first start), and verify production with `scripts/modal_manage.py verify`.
+Finish verification of the fixed-heading Rust camera: format, workspace tests, native/WebAssembly lint, WebGL mouse/touch checks at DPR 1 and 2. Rotation state and all three input paths were removed; pan, zoom and zoom-driven tilt remain. Modal deployment is blocked here because Modal credentials are not configured. Legacy Three.js at `/` remains frozen.
