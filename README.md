@@ -120,7 +120,7 @@ Every push to `master` runs the same checks in GitHub Actions, deploys through M
 
 ## Art direction
 
-The visual target is a soft 3D tilt-shift diorama of a sunlit Greek island (`assets/reference/diorama_primary.webp`): rounded matte models without outlines, a tilt-shift depth-of-field pass (`frontend/tilt-shift.js`), puffy clouds, a distant volcano and sailing ships (`frontend/sky.js`), turquoise sea, limestone, cypresses, olive trees, and a marble town center with a terracotta roof. Models are procedural code in `frontend/models.js`; generated GLB models and icons from FAL are being evaluated on a separate branch.
+The visual target is a soft 3D tilt-shift diorama of a sunlit Greek island (`assets/reference/diorama_primary.webp`): soft two-tone cel shading (`frontend/materials.js`) with warm ink outlines and a painted brush-stroke ground, a tilt-shift depth-of-field pass (`frontend/tilt-shift.js`), puffy clouds, a distant volcano and sailing ships (`frontend/sky.js`), turquoise sea, limestone, cypresses, olive trees, and a marble town center with a terracotta roof. Models are procedural code in `frontend/models.js`; generated GLB models and icons from FAL are being evaluated on a separate branch.
 
 The interface is painted inside the WebGL canvas (`frontend/hud.js`, `frontend/ui-layer.js`) and stays mostly out of the way: a round globe minimap, a small speed pill, a resource pill that lists only what you have, and glossy medallion buttons that appear at the bottom center only when something is selected. A visually hidden DOM mirror keeps every command reachable by keyboard and screen reader.
 

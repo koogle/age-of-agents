@@ -2,14 +2,15 @@
 // over the sea, a distant snow-capped volcano, and a few sailing ships.
 // Decoration only; none of it can be picked or affects play.
 import * as THREE from 'three';
-import { MAP, paint, patchWorld } from './materials.js';
+import { MAP, celRamp, paint, patchWorld } from './materials.js';
 import { SEA_LEVEL, random } from './terrain.js';
 
 const puff = new THREE.IcosahedronGeometry(1, 3);
 
 function cloud(seed) {
   const group = new THREE.Group();
-  const material = patchWorld(new THREE.MeshStandardMaterial({ color: 0xfff6ea, roughness: 1, emissive: 0x3a3028, emissiveIntensity: 0.35 }));
+  // Cel-shaded cumulus: bright warm tops, flat lavender-blue undersides.
+  const material = patchWorld(new THREE.MeshToonMaterial({ color: 0xfffaf2, gradientMap: celRamp, emissive: 0x4a5a78, emissiveIntensity: 0.28 }));
   const count = 6 + Math.floor(random(seed) * 5);
   for (let i = 0; i < count; i += 1) {
     const mesh = new THREE.Mesh(puff, material);
