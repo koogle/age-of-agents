@@ -31,6 +31,7 @@ jobs:
           python3 -m py_compile modal_app.py scripts/modal_manage.py scripts/process_resource_activity_sprites.py scripts/check_resource_activity_assets.py
           python3 scripts/check_depleted_asset.py
           python3 scripts/check_resource_activity_assets.py
+          python3 scripts/normalize_icons.py --check
 
   deploy:
     needs: quality

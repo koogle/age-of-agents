@@ -62,3 +62,7 @@ Estimated from fal's published unit prices (`api.fal.ai/v1/models/pricing`): abo
 - `resource_stone` and `resource_gold` carry a few stray teal wash spots from the shared palette prompt.
 - The paper keeps faint horizontal laid lines from the source; on large panels they read as paper grain.
 - The frame's terracotta flecks repeat with the strip period.
+
+## Icon alignment
+
+Every icon under `icons/` (portraits excluded) is normalized by `scripts/normalize_icons.py`. Each icon is centred on its optical centre (halfway between the bounding-box centre and the alpha centroid) and scaled to the same visual weight (square root of the covered area). No pixel may leave the coin face's safe circle. After adding or regenerating an icon, run `python3 scripts/normalize_icons.py --write`. CI runs `--check`, and `--sheet out.png` writes a review sheet with coin and safe-circle guides.
