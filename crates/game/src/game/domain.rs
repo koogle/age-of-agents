@@ -148,6 +148,11 @@ pub enum UnitAction {
     Build {
         building_id: String,
     },
+    /// Carry the load to the complete building `building_id`, unload it
+    /// there, and stand idle.
+    Deposit {
+        building_id: String,
+    },
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

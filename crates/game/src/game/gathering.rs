@@ -203,6 +203,33 @@ impl GameWorld {
             .map(|(_, r)| r.id.clone())
     }
 
+    /// Walks a carrier to the building it was sent to and unloads there.
+    pub(super) fn tick_deposit(&mut self, unit_index: usize, building_id: &str, dt: f64) {
+        let site = self
+            .buildings
+            .iter()
+            .find(|building| building.id == building_id && building.is_complete())
+            .map(|building| (building.footprint(), building.kind));
+        let (Some((footprint, kind)), Some(cargo)) = (site, self.units[unit_index].cargo.clone())
+        else {
+            self.units[unit_index].action = UnitAction::Idle;
+            return;
+        };
+        if !kind.accepts(cargo.kind) {
+            self.units[unit_index].action = UnitAction::Idle;
+            return;
+        }
+        match self.travel(unit_index, Goal::Beside(footprint), dt) {
+            Travel::EnRoute => {}
+            Travel::Unreachable => self.units[unit_index].action = UnitAction::Idle,
+            Travel::Arrived { .. } => {
+                self.units[unit_index].cargo = None;
+                self.stockpile.add(cargo.kind, cargo.amount);
+                self.units[unit_index].action = UnitAction::Idle;
+            }
+        }
+    }
+
     /// A builder carrying goods takes them to a drop site before building.
     /// Returns whether the unit is still on that errand. With no reachable
     /// drop site the goods are simply carried along.

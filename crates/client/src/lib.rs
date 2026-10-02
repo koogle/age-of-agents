@@ -296,6 +296,15 @@ impl App {
                 (Vec2::new(c.x, c.z), 1.2, HOVER_WORK)
             }
             Target::Ground(cell) => (terrain::cell_center(cell), 0.24, HOVER_GROUND),
+            Target::Building(id) if !self.carriers_for(&id).is_empty() => {
+                let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
+                let c = view::footprint_center(&self.view.heights, building);
+                (
+                    Vec2::new(c.x, c.z),
+                    building.columns as f32 * terrain::CELL * 0.6,
+                    HOVER_WORK,
+                )
+            }
             Target::Unit(_) | Target::Building(_) => return None,
         };
         Some(render::Decal {
@@ -394,8 +403,20 @@ impl App {
                 }
             }
             Target::Building(building_id) => {
-                self.selection.units.clear();
-                self.selection.building = Some(building_id);
+                // Selected villagers holding goods this building takes unload
+                // there; otherwise the tap selects the building.
+                let carriers = self.carriers_for(&building_id);
+                if carriers.is_empty() {
+                    self.selection.units.clear();
+                    self.selection.building = Some(building_id);
+                    return;
+                }
+                for unit_id in carriers {
+                    self.send(Command::Deposit {
+                        unit_id,
+                        building_id: building_id.clone(),
+                    });
+                }
             }
             Target::Ground(cell) if units.len() == 1 => self.send(Command::Move {
                 unit_id: units[0].clone(),
@@ -406,6 +427,32 @@ impl App {
                 to: cell,
             }),
         }
+    }
+
+    /// Selected villagers carrying goods the complete building `id` accepts.
+    fn carriers_for(&self, id: &str) -> Vec<String> {
+        let Some(snapshot) = self.view.snapshot.as_ref() else {
+            return Vec::new();
+        };
+        let Some(building) = snapshot
+            .buildings
+            .iter()
+            .find(|b| b.building.id == id && b.building.construction.is_none())
+        else {
+            return Vec::new();
+        };
+        snapshot
+            .units
+            .iter()
+            .filter(|u| self.selection.units.contains(&u.unit.id))
+            .filter(|u| {
+                u.unit
+                    .cargo
+                    .as_ref()
+                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
+            })
+            .map(|u| u.unit.id.clone())
+            .collect()
     }
 
     /// Stops every selected villager that is busy.
@@ -796,6 +843,8 @@ fn friendly(error: &str) -> String {
         "insufficient wood" => "Not enough wood for that building.".into(),
         "insufficient stone" => "Not enough stone for that building.".into(),
         "a dock must touch the sea" => "A dock must be built along the shore.".into(),
+        "unit is not carrying anything" => "That villager has nothing to unload.".into(),
+        "building does not take that cargo" => "That building does not take those goods.".into(),
         "population cap reached" => "Build a house to make room for more villagers.".into(),
         "insufficient food" => "You need 50 food to train a villager.".into(),
         other => other.to_string(),
