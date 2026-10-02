@@ -21,6 +21,7 @@ const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
 const SHEET_TOWN_CENTER: usize = 4;
 const SHEET_IDLE_HD: usize = 5;
+const SHEET_BUILDINGS: usize = 6;
 /// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
 const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
 
@@ -32,6 +33,28 @@ struct VillagerSheet {
     figure_height: f32,
     fps: HashMap<String, f32>,
     animations: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
+}
+
+/// Generated buildings in four construction stages (foundation, walls, roof,
+/// complete), one row per building, each drawn to fill its cell.
+#[derive(Deserialize)]
+struct BuildingSheet {
+    size: [f32; 2],
+    cell: [f32; 2],
+    frames: HashMap<String, Vec<[f32; 4]>>,
+}
+
+/// Sheet row, world width of a sheet cell, and the pixel height (from the cell
+/// top) of the footprint centre, for buildings other than the town center.
+fn building_art(kind: aoa_game::BuildingKind) -> Option<(&'static str, f32, f32)> {
+    use aoa_game::BuildingKind::*;
+    Some(match kind {
+        House => ("house", 1.85, 205.0),
+        Granary => ("granary", 2.25, 199.0),
+        Watchtower => ("watchtower", 2.5, 228.0),
+        Dock => ("dock", 2.15, 193.0),
+        _ => return None,
+    })
 }
 
 /// Standing frames at twice the resolution of `villager.json`, with the same
@@ -73,13 +96,21 @@ struct TownCenterSheet {
 pub struct Sheets {
     villager: VillagerSheet,
     idle: IdleSheet,
+    buildings: BuildingSheet,
     resources: ResourceSheet,
     town_center: TownCenterSheet,
 }
 
 impl Sheets {
-    pub fn parse(villager: &[u8], idle: &[u8], resources: &[u8], town_center: &[u8]) -> Self {
+    pub fn parse(
+        villager: &[u8],
+        idle: &[u8],
+        resources: &[u8],
+        town_center: &[u8],
+        buildings: &[u8],
+    ) -> Self {
         Self {
+            buildings: serde_json::from_slice(buildings).expect("buildings.json"),
             villager: serde_json::from_slice(villager).expect("villager.json"),
             idle: serde_json::from_slice(idle).expect("villager_idle_hd.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),
@@ -340,6 +371,40 @@ impl WorldView {
         }
         for building in &snapshot.buildings {
             let center = footprint_center(heights, building);
+            if let Some((row, width, center_px)) = building_art(building.building.kind) {
+                let sheet = &sheets.buildings;
+                let stage = match building.building.construction {
+                    None => 3,
+                    Some(work) => {
+                        let progress = work / aoa_game::BUILD_SECONDS;
+                        if progress < 1.0 / 3.0 {
+                            0
+                        } else if progress < 2.0 / 3.0 {
+                            1
+                        } else {
+                            2
+                        }
+                    }
+                };
+                sprites.push((
+                    SHEET_BUILDINGS,
+                    Sprite {
+                        anchor: center.to_array(),
+                        size: [width, width * sheet.cell[1] / sheet.cell[0]],
+                        pivot: [0.5, 1.0 - center_px / sheet.cell[1]],
+                        uv: uv(sheet.frames[row][stage], sheet.size, false),
+                    },
+                ));
+                if selection.building.as_deref() == Some(building.building.id.as_str()) {
+                    decals.push(Decal {
+                        center: (center + Vec3::Y * 0.03).to_array(),
+                        radius: building.columns as f32 * terrain::CELL * 0.75,
+                        color: TEAM_BLUE,
+                        ring: 1.0,
+                    });
+                }
+                continue;
+            }
             // The temple rises through its drawn stages, then glows while working.
             let tc = &sheets.town_center;
             let frame = town_center_frame(

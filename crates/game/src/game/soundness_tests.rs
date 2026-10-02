@@ -54,6 +54,7 @@ fn random_command(world: &GameWorld, rng: &mut Lcg) -> Command {
             resource_id: rng.pick(&resource_ids).clone(),
         },
         5 => Command::Build {
+            kind: BuildingKind::TownCenter,
             unit_id: rng.pick(&unit_ids).clone(),
             origin: any_cell(rng),
         },

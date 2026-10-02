@@ -37,7 +37,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
-- Tap/click the build button, then valid ground, to issue a build order.
+- Tap/click the build button to open the building menu (town center, house, granary, watchtower, dock; unaffordable ones in greyscale), pick one, then tap valid ground to issue a build order.
 - Tap/click a town center to train a villager or start available research through the medallion buttons that appear at the bottom center.
 - Drag pans. Wheel/pinch zooms. Right-drag, two-finger twist, or Q/E rotates.
 - Mouse and touch semantics must match.

@@ -5,14 +5,14 @@
 use std::collections::HashMap;
 
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
-use aoa_game::{
-    RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind, TOWN_CENTER_WOOD_COST, TechnologyKind,
-    UnitAction, VILLAGER_FOOD_COST, WorldSnapshot,
-};
+use aoa_game::{BUILDABLE, BuildingKind, ResourceKind, TechnologyKind, WorldSnapshot};
 use bytemuck::{Pod, Zeroable};
 use glam::Vec2;
 
 use crate::assets::{Assets, Rgba};
+
+mod selection;
+use selection::{building_info, selection_model};
 
 const ATLAS: u32 = 2048;
 const GLYPH_PX: f32 = 40.0;
@@ -62,10 +62,21 @@ pub struct Quad {
     pub params: [f32; 4],
 }
 
+/// The villager's build flow: closed, choosing a building, or placing one.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum BuildUi {
+    Off,
+    Menu,
+    Placing(BuildingKind),
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Action {
     Speed(f64),
+    /// Open the build menu.
     Build,
+    /// Start placing this building.
+    Place(BuildingKind),
     Cancel,
     Stop,
     Train,
@@ -173,6 +184,31 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
             ),
         );
     }
+    // Building coins show the finished building from the generated sheet.
+    let sheet = assets.image("loading/buildings.webp");
+    let frames: serde_json::Value =
+        serde_json::from_slice(assets.bytes("loading/buildings.json")).expect("buildings.json");
+    for kind in BUILDABLE {
+        let (icon, row, _, _) = building_info(kind);
+        let rect = &frames["frames"][row][3];
+        let [fx, fy, fw, fh] = [0, 1, 2, 3].map(|i| rect[i].as_u64().unwrap_or(0) as u32);
+        let cell = sheet.crop(fx, fy, fw, fh);
+        let (x0, y0, x1, y1) = painted_bounds(&cell);
+        let painted = cell.crop(x0, y0, x1 - x0, y1 - y0);
+        let fit = 160.0 / (painted.width.max(painted.height) as f32);
+        let (w, h) = (
+            ((painted.width as f32 * fit) as u32).max(1),
+            ((painted.height as f32 * fit) as u32).max(1),
+        );
+        let painted = painted.resized(w, h);
+        let at = place(w, h);
+        blit(&mut image, &painted, at);
+        sprites.insert(icon.to_string(), uv(at, w, h));
+        content.insert(
+            icon.to_string(),
+            (uv(at, w, h), Vec2::new(w as f32, h as f32)),
+        );
+    }
     let font = FontRef::try_from_slice(assets.bytes("fonts/Nunito-ExtraBold.ttf")).expect("font");
     let scaled = font.as_scaled(PxScale::from(GLYPH_PX));
     let mut glyphs = HashMap::new();
@@ -230,7 +266,7 @@ pub struct Model<'a> {
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
-    pub build_mode: bool,
+    pub build: BuildUi,
     pub toast: Option<&'a str>,
     pub camera: Vec2,
 }
@@ -253,24 +289,6 @@ fn resource_icon(kind: ResourceKind) -> Option<&'static str> {
         ResourceKind::Fiber => "resource_fiber",
         _ => return None,
     })
-}
-
-fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'static str) {
-    match tech {
-        TechnologyKind::Forestry => ("tech_forestry", "Forestry", "Wood +20%"),
-        TechnologyKind::Agriculture => ("tech_agriculture", "Agriculture", "Food +20%"),
-        TechnologyKind::Masonry => ("tech_masonry", "Masonry", "Stone and clay +20%"),
-        TechnologyKind::Mining => ("tech_mining", "Mining", "Gold and iron +20%"),
-        TechnologyKind::Textiles => ("tech_textiles", "Textiles", "Fiber +20%"),
-    }
-}
-
-struct Command {
-    icon: &'static str,
-    label: String,
-    detail: String,
-    enabled: bool,
-    action: Action,
 }
 
 impl Hud {
@@ -361,10 +379,11 @@ impl Hud {
         let lift = if hot { -3.0 } else { 0.0 };
         let rect = [rect[0], rect[1] + lift, rect[2], rect[3]];
         self.sprite(atlas, frame, rect, [1.0; 4]);
-        let tint = if enabled {
-            [1.0; 4]
+        // Unaffordable or unavailable: the icon is drawn in greyscale.
+        let (tint, grey) = if enabled {
+            ([1.0; 4], 0.0)
         } else {
-            [0.75, 0.75, 0.75, 0.7]
+            ([0.85, 0.85, 0.85, 0.8], 1.0)
         };
         // Fit the painted part of the icon into the same box on every coin.
         let Some(&(uv, size)) = atlas.content.get(icon) else {
@@ -381,7 +400,7 @@ impl Hud {
             ],
             uv,
             color: tint,
-            params: [0.0; 4],
+            params: [0.0, 0.0, grey, 0.0],
         });
     }
 
@@ -532,15 +551,20 @@ impl Hud {
             self.toast(atlas, model.toast, width, s);
             return;
         };
-        let m = 52.0 * s;
         let gap = 10.0 * s;
+        // Coins shrink (down to a thumb-sized minimum) to fit narrow screens.
+        let count = commands.len().max(1) as f32;
+        let m = ((width - 24.0 * s - 28.0 * s + gap) / count - gap).clamp(40.0 * s, 52.0 * s);
         let bar_width = commands.len() as f32 * (m + gap) - gap + 28.0 * s;
-        let bar = [
-            (width - bar_width) / 2.0,
-            height - m - 30.0 * s,
-            bar_width,
-            m + 12.0 * s,
-        ];
+        let left = (width - bar_width) / 2.0;
+        // On a narrow screen the bar would run under the globe, so it sits
+        // above the globe and its speed coins instead.
+        let top = if left + bar_width > gx - 8.0 * s {
+            gy - 48.0 * s - (m + 12.0 * s)
+        } else {
+            height - m - 30.0 * s
+        };
+        let bar = [left, top, bar_width, m + 12.0 * s];
         let mut hover_text = None;
         if !commands.is_empty() {
             self.shape(bar, GLASS, 1.0, bar[3] / 2.0);
@@ -680,197 +704,5 @@ impl Hud {
     /// Pointer release: the action pressed on this HUD element, if any.
     pub fn release(&mut self) -> Option<Action> {
         self.pressed.take()
-    }
-}
-
-type Selected = (&'static str, String, String, Option<f32>, Vec<Command>);
-
-fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> {
-    let stock = &snapshot.stockpile;
-    if !model.units.is_empty() {
-        let busy = snapshot
-            .units
-            .iter()
-            .any(|u| model.units.contains(&u.unit.id) && u.unit.action != UnitAction::Idle);
-        let commands = if model.build_mode {
-            vec![Command {
-                icon: "command_cancel",
-                label: "Cancel placement".into(),
-                detail: "Esc".into(),
-                enabled: true,
-                action: Action::Cancel,
-            }]
-        } else {
-            let mut commands = vec![Command {
-                icon: "command_build",
-                label: "Build town center".into(),
-                detail: format!("{} wood", TOWN_CENTER_WOOD_COST),
-                enabled: stock.wood >= TOWN_CENTER_WOOD_COST,
-                action: Action::Build,
-            }];
-            if busy {
-                commands.push(Command {
-                    icon: "command_cancel",
-                    label: "Stop".into(),
-                    detail: "Drop the current task · X".into(),
-                    enabled: true,
-                    action: Action::Stop,
-                });
-            }
-            commands
-        };
-        if model.units.len() > 1 {
-            let idle = snapshot
-                .units
-                .iter()
-                .filter(|u| model.units.contains(&u.unit.id) && u.unit.action == UnitAction::Idle)
-                .count();
-            return Some((
-                "portrait_group",
-                format!("{} villagers", model.units.len()),
-                format!("{idle} awaiting orders"),
-                None,
-                commands,
-            ));
-        }
-        let unit = snapshot
-            .units
-            .iter()
-            .find(|u| u.unit.id == model.units[0])?;
-        let activity = match &unit.unit.action {
-            UnitAction::Idle => "Awaiting orders".to_string(),
-            UnitAction::Move { .. } => "Walking".into(),
-            UnitAction::Build { .. } => "Building".into(),
-            UnitAction::Gather { phase, .. } => match phase {
-                aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),
-                aoa_game::GatherPhase::Gathering => "Gathering".into(),
-                aoa_game::GatherPhase::Returning => "Carrying goods home".into(),
-                aoa_game::GatherPhase::Depositing => "Unloading".into(),
-            },
-        };
-        let cargo = unit
-            .unit
-            .cargo
-            .as_ref()
-            .map(|c| format!(" · {} carried", c.amount.floor()))
-            .unwrap_or_default();
-        let title = unit.unit.id.replace("villager-", "Villager ");
-        return Some((
-            "portrait_villager",
-            title,
-            format!("{activity}{cargo}"),
-            None,
-            commands,
-        ));
-    }
-    let building = snapshot
-        .buildings
-        .iter()
-        .find(|b| Some(b.building.id.as_str()) == model.building)?;
-    if let Some(work) = building.building.construction {
-        return Some((
-            "portrait_towncenter",
-            "Town center foundation".into(),
-            "Villagers can help build it".into(),
-            Some((work / aoa_game::BUILD_SECONDS) as f32),
-            Vec::new(),
-        ));
-    }
-    let job = building.building.job.as_ref();
-    let busy = job.is_some();
-    let (detail, progress) = match job {
-        Some(aoa_game::BuildingJob::Produce {
-            elapsed_seconds, ..
-        }) => (
-            "Training a villager".to_string(),
-            Some((elapsed_seconds / aoa_game::VILLAGER_PRODUCTION_SECONDS) as f32),
-        ),
-        Some(aoa_game::BuildingJob::Research {
-            technology,
-            elapsed_seconds,
-        }) => (
-            format!("Researching {}", tech_info(*technology).1),
-            Some((elapsed_seconds / aoa_game::RESEARCH_SECONDS) as f32),
-        ),
-        None => ("Ready".to_string(), None),
-    };
-    let mut commands = vec![Command {
-        icon: "command_train",
-        label: "Train villager".into(),
-        detail: format!("{} food", VILLAGER_FOOD_COST),
-        enabled: !busy && stock.food >= VILLAGER_FOOD_COST,
-        action: Action::Train,
-    }];
-    let known = &snapshot.researched_technologies;
-    for tech in TechnologyKind::ALL {
-        let (icon, name, effect) = tech_info(tech);
-        let done = known.contains(&tech);
-        let blocked = tech.prerequisite().filter(|p| !known.contains(p));
-        let detail = if done {
-            "researched".to_string()
-        } else if let Some(p) = blocked {
-            format!("needs {}", tech_info(p).1)
-        } else {
-            format!(
-                "{effect} · {} food, {} wood",
-                RESEARCH_FOOD_COST, RESEARCH_WOOD_COST
-            )
-        };
-        commands.push(Command {
-            icon,
-            label: name.into(),
-            detail,
-            enabled: !done
-                && blocked.is_none()
-                && !busy
-                && stock.food >= RESEARCH_FOOD_COST
-                && stock.wood >= RESEARCH_WOOD_COST,
-            action: Action::Research(tech),
-        });
-    }
-    Some((
-        "portrait_towncenter",
-        "Town center".into(),
-        detail,
-        progress,
-        commands,
-    ))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use aoa_game::GameWorld;
-
-    fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {
-        let snapshot = world.snapshot();
-        let model = Model {
-            snapshot: Some(&snapshot),
-            units: &[],
-            building: Some(&snapshot.buildings[0].building.id),
-            build_mode: false,
-            toast: None,
-            camera: Vec2::ZERO,
-        };
-        selection_model(&snapshot, &model).unwrap().4
-    }
-
-    #[test]
-    fn town_center_coins_follow_costs_and_prerequisites() {
-        let mut world = GameWorld::default();
-        world.stockpile.food = 0.0;
-        world.stockpile.wood = 0.0;
-        let poor = commands_for_town_center(&world);
-        assert!(poor.iter().all(|c| !c.enabled), "nothing is affordable");
-        world.stockpile.food = 100.0;
-        world.stockpile.wood = 100.0;
-        let rich = commands_for_town_center(&world);
-        let enabled = |action: Action| rich.iter().find(|c| c.action == action).unwrap().enabled;
-        assert!(enabled(Action::Train));
-        assert!(enabled(Action::Research(TechnologyKind::Masonry)));
-        assert!(
-            !enabled(Action::Research(TechnologyKind::Mining)),
-            "mining needs masonry"
-        );
     }
 }

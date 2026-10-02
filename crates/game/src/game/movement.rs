@@ -202,7 +202,7 @@ impl GameWorld {
             UnitAction::Gather {
                 phase: GatherPhase::Returning,
                 ..
-            } => self.nearest_reachable_town_center(unit).map(Goal::Beside),
+            } => self.nearest_drop_site(unit).map(Goal::Beside),
             _ => None,
         }
     }
@@ -335,13 +335,21 @@ impl GameWorld {
         self.units[unit].step.is_none() && footprint.is_interaction_cell(self.units[unit].cell)
     }
 
-    /// The complete town center with the cheapest reachable drop-off cell.
-    pub(super) fn nearest_reachable_town_center(&self, unit: usize) -> Option<Footprint> {
+    /// The complete building that takes the unit's cargo (a town center takes
+    /// anything, a granary food and fiber) with the cheapest reachable drop-off cell.
+    pub(super) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
+        let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
         let paths = self.static_paths(unit, &occupancy);
         self.buildings
             .iter()
-            .filter(|building| building.kind == BuildingKind::TownCenter && building.is_complete())
+            .filter(|building| {
+                building.is_complete()
+                    && match cargo {
+                        Some(kind) => building.kind.accepts(kind),
+                        None => building.kind == BuildingKind::TownCenter,
+                    }
+            })
             .filter_map(|building| {
                 let footprint = building.footprint();
                 let goals = self.goal_cells(unit, Goal::Beside(footprint), &occupancy);
