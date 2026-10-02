@@ -295,15 +295,71 @@ pub enum BuildingKind {
     Infirmary,
     Watchtower,
     Monument,
+    House,
+    Granary,
+    Dock,
 }
+
+/// What villagers can construct, in build-menu order.
+pub const BUILDABLE: [BuildingKind; 5] = [
+    BuildingKind::TownCenter,
+    BuildingKind::House,
+    BuildingKind::Granary,
+    BuildingKind::Watchtower,
+    BuildingKind::Dock,
+];
 
 impl BuildingKind {
     /// Footprint in cells.
     pub const fn size(self) -> (u16, u16) {
         match self {
             Self::TownCenter => (4, 4),
+            Self::Granary | Self::Dock => (3, 3),
+            Self::House | Self::Watchtower => (2, 2),
             _ => (1, 1),
         }
+    }
+
+    /// Resources reserved when the foundation is placed.
+    pub const fn cost(self) -> &'static [(ResourceKind, f64)] {
+        match self {
+            Self::TownCenter => &[(ResourceKind::Wood, super::TOWN_CENTER_WOOD_COST)],
+            Self::House => &[(ResourceKind::Wood, 15.0)],
+            Self::Granary => &[(ResourceKind::Wood, 25.0)],
+            Self::Watchtower => &[(ResourceKind::Wood, 15.0), (ResourceKind::Stone, 15.0)],
+            Self::Dock => &[(ResourceKind::Wood, 30.0)],
+            _ => &[],
+        }
+    }
+
+    /// Villagers this building houses once complete.
+    pub const fn housing(self) -> usize {
+        match self {
+            Self::TownCenter | Self::House => 5,
+            _ => 0,
+        }
+    }
+
+    /// Whether gatherers may drop this resource here once it is complete.
+    pub const fn accepts(self, resource: ResourceKind) -> bool {
+        match self {
+            Self::TownCenter => true,
+            Self::Granary => matches!(resource, ResourceKind::Food | ResourceKind::Fiber),
+            _ => false,
+        }
+    }
+
+    /// How far a complete building sees, in world units.
+    pub const fn sight_radius(self) -> f64 {
+        match self {
+            Self::Watchtower => 20.0,
+            _ => super::BUILDING_SIGHT_RADIUS,
+        }
+    }
+
+    /// A dock must stand on land with open water along one side.
+    pub const fn needs_coast(self) -> bool {
+        matches!(self, Self::Dock)
     }
 }
 
@@ -395,6 +451,30 @@ impl Stockpile {
         ]
     }
 
+    pub fn amount(&self, kind: ResourceKind) -> f64 {
+        match kind {
+            ResourceKind::Wood => self.wood,
+            ResourceKind::Food => self.food,
+            ResourceKind::Stone => self.stone,
+            ResourceKind::Gold => self.gold,
+            ResourceKind::Iron => self.iron,
+            ResourceKind::Coal => self.coal,
+            ResourceKind::Clay => self.clay,
+            ResourceKind::Fiber => self.fiber,
+            ResourceKind::Timber => self.timber,
+            ResourceKind::Steel => self.steel,
+            ResourceKind::Bricks => self.bricks,
+            ResourceKind::Cloth => self.cloth,
+            ResourceKind::Rations => self.rations,
+        }
+    }
+
+    /// Whether every cost is covered.
+    pub fn affords(&self, cost: &[(ResourceKind, f64)]) -> bool {
+        cost.iter()
+            .all(|(kind, amount)| self.amount(*kind) >= *amount)
+    }
+
     pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
         match kind {
             ResourceKind::Wood => self.wood += amount,
@@ -458,7 +538,7 @@ pub const ROADMAP_RESOURCES: [ResourceKind; 13] = [
     ResourceKind::Rations,
 ];
 
-pub const ROADMAP_BUILDINGS: [BuildingKind; 14] = [
+pub const ROADMAP_BUILDINGS: [BuildingKind; 17] = [
     BuildingKind::TownCenter,
     BuildingKind::MiningCamp,
     BuildingKind::Farm,
@@ -473,6 +553,9 @@ pub const ROADMAP_BUILDINGS: [BuildingKind; 14] = [
     BuildingKind::Infirmary,
     BuildingKind::Watchtower,
     BuildingKind::Monument,
+    BuildingKind::House,
+    BuildingKind::Granary,
+    BuildingKind::Dock,
 ];
 
 pub const ROADMAP_UNITS: [UnitKind; 5] = [

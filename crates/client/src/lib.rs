@@ -95,7 +95,8 @@ pub struct App {
     sheets: Sheets,
     atlas: hud::Atlas,
     hud: hud::Hud,
-    build_mode: bool,
+    /// The villager build menu, or the building being placed.
+    build: hud::BuildUi,
     toast: Option<(String, f64)>,
     game: Option<Game>,
     proxy: Option<EventLoopProxy<Game>>,
@@ -145,6 +146,7 @@ impl App {
             assets.bytes("sprites/villager_idle_hd.json"),
             assets.bytes("sprites/resources.json"),
             assets.bytes("sprites/towncenter.json"),
+            assets.bytes("loading/buildings.json"),
         );
         let atlas = hud::build_atlas(&assets);
         Self {
@@ -152,7 +154,7 @@ impl App {
             sheets,
             atlas,
             hud: hud::Hud::new(),
-            build_mode: false,
+            build: hud::BuildUi::Off,
             toast: None,
             game: None,
             proxy: Some(proxy),
@@ -182,11 +184,15 @@ impl App {
         self.source.send(command);
     }
 
-    /// The town center site under the cursor (centred on it) and whether it is clear.
-    fn placement(&self, pixel: Vec2) -> Option<(CellCoordinate, bool)> {
+    /// The site for `kind` under the cursor (centred on it) and whether it is clear.
+    fn placement(
+        &self,
+        pixel: Vec2,
+        kind: aoa_game::BuildingKind,
+    ) -> Option<(CellCoordinate, bool)> {
         let snapshot = self.view.snapshot.as_ref()?;
         let point = self.ground_at(pixel)?;
-        let (columns, rows) = aoa_game::BuildingKind::TownCenter.size();
+        let (columns, rows) = kind.size();
         let column = (point.x / terrain::CELL - columns as f32 / 2.0).round();
         let row = (point.z / terrain::CELL - rows as f32 / 2.0).round();
         if column < 0.0
@@ -222,9 +228,23 @@ impl App {
                         * snapshot.columns as usize
                         + (origin.column + dx) as usize];
                     cell.visibility == aoa_game::CellVisibility::Unseen
+                        || cell.biome == Some(aoa_game::TerrainBiome::Water)
                 })
             });
-        Some((origin, !blocked))
+        let water = |column: i32, row: i32| {
+            column >= 0
+                && row >= 0
+                && column < i32::from(snapshot.columns)
+                && row < i32::from(snapshot.rows)
+                && snapshot.terrain[row as usize * snapshot.columns as usize + column as usize]
+                    .biome
+                    == Some(aoa_game::TerrainBiome::Water)
+        };
+        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
+        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
+        let coast = (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
+            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r));
+        Some((origin, !blocked && (coast || !kind.needs_coast())))
     }
 
     /// What a tap at `pixel` would land on.
@@ -261,7 +281,7 @@ impl App {
     /// tap would order them to do.
     fn hover_decal(&self) -> Option<render::Decal> {
         if self.selection.units.is_empty()
-            || self.build_mode
+            || self.build != hud::BuildUi::Off
             || self.hud.covers(self.cursor)
             || self.pointer.as_ref().is_some_and(|p| p.dragging)
         {
@@ -293,8 +313,9 @@ impl App {
     fn act(&mut self, action: hud::Action) {
         match action {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
-            hud::Action::Build => self.build_mode = true,
-            hud::Action::Cancel => self.build_mode = false,
+            hud::Action::Build => self.build = hud::BuildUi::Menu,
+            hud::Action::Place(kind) => self.build = hud::BuildUi::Placing(kind),
+            hud::Action::Cancel => self.build = hud::BuildUi::Off,
             hud::Action::Stop => self.stop(),
             hud::Action::Train => {
                 if let Some(building_id) = self.selection.building.clone() {
@@ -317,15 +338,22 @@ impl App {
     }
 
     fn tap(&mut self, pixel: Vec2, additive: bool) {
-        if self.build_mode {
-            if let (Some((origin, _)), Some(unit_id)) =
-                (self.placement(pixel), self.selection.units.first().cloned())
-            {
-                self.send(Command::Build { unit_id, origin });
-                self.build_mode = false;
+        if let hud::BuildUi::Placing(kind) = self.build {
+            if let (Some((origin, _)), Some(unit_id)) = (
+                self.placement(pixel, kind),
+                self.selection.units.first().cloned(),
+            ) {
+                self.send(Command::Build {
+                    unit_id,
+                    origin,
+                    kind,
+                });
+                self.build = hud::BuildUi::Off;
             }
             return;
         }
+        // A tap on the world closes the build menu.
+        self.build = hud::BuildUi::Off;
         let Some(target) = self.target_at(pixel) else {
             return;
         };
@@ -427,7 +455,9 @@ impl App {
             Key::Character("0") => self.send(Command::SetSimulationSpeed { multiplier: 0.0 }),
             Key::Character("1") => self.send(Command::SetSimulationSpeed { multiplier: 1.0 }),
             Key::Character("2") => self.send(Command::SetSimulationSpeed { multiplier: 2.0 }),
-            Key::Named(NamedKey::Escape) if self.build_mode => self.build_mode = false,
+            Key::Named(NamedKey::Escape) if self.build != hud::BuildUi::Off => {
+                self.build = hud::BuildUi::Off
+            }
             Key::Named(NamedKey::Escape) => self.selection = Selection::default(),
             _ => {}
         }
@@ -598,10 +628,11 @@ impl App {
         }
         self.rig.update(dt as f32);
         self.view.frame(dt as f32);
-        let ghost = if self.build_mode {
-            self.placement(self.cursor)
-        } else {
-            None
+        let ghost = match self.build {
+            hud::BuildUi::Placing(kind) => self
+                .placement(self.cursor, kind)
+                .map(|(origin, ok)| (kind, origin, ok)),
+            _ => None,
         };
         let hover = self.hover_decal();
         let Some(game) = self.game.as_mut() else {
@@ -652,8 +683,8 @@ impl App {
             &self.selection,
         );
         decals.extend(hover);
-        if let Some((origin, ok)) = ghost {
-            let (columns, rows) = aoa_game::BuildingKind::TownCenter.size();
+        if let Some((kind, origin, ok)) = ghost {
+            let (columns, rows) = kind.size();
             let x = (origin.column as f32 + columns as f32 / 2.0) * terrain::CELL;
             let z = (origin.row as f32 + rows as f32 / 2.0) * terrain::CELL;
             let color = if ok {
@@ -663,7 +694,7 @@ impl App {
             };
             decals.push(render::Decal {
                 center: [x, self.view.heights.at(x, z) + 0.04, z],
-                radius: 1.35,
+                radius: columns as f32 * terrain::CELL * 0.68,
                 color,
                 ring: 1.0,
             });
@@ -672,7 +703,7 @@ impl App {
             snapshot: self.view.snapshot.as_ref(),
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
-            build_mode: self.build_mode,
+            build: self.build,
             toast: self.toast.as_ref().map(|(text, _)| text.as_str()),
             camera: Vec2::new(self.rig.target.x, self.rig.target.z),
         };
@@ -760,9 +791,12 @@ fn friendly(error: &str) -> String {
         "destination cell is occupied" => "Something already stands there.".into(),
         "target is unreachable" => "No path leads there.".into(),
         "build site is blocked or outside the world" => {
-            "The town center needs a clear 2×2 site.".into()
+            "That spot is not clear for building.".into()
         }
-        "insufficient wood" => "You need 20 wood to build.".into(),
+        "insufficient wood" => "Not enough wood for that building.".into(),
+        "insufficient stone" => "Not enough stone for that building.".into(),
+        "a dock must touch the sea" => "A dock must be built along the shore.".into(),
+        "population cap reached" => "Build a house to make room for more villagers.".into(),
         "insufficient food" => "You need 50 food to train a villager.".into(),
         other => other.to_string(),
     }
@@ -776,6 +810,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/resources.png"),
         assets.image("sprites/towncenter.png"),
         assets.image("sprites/villager_idle_hd.png"),
+        assets.image("loading/buildings.webp"),
     ]
 }
 
