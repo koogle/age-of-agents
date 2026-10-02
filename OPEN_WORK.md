@@ -18,7 +18,7 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 ## Open work
 
 1. Parity before `/` switches to the Rust client: box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
-2. Town center: placeholder sheet `assets/game/building_town_center.png` until the FAL temple billboard (foundation/33/66/complete/working) lands; then draw construction stages.
+2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
 4. Liveness beyond pairwise standoffs is untested.
 
