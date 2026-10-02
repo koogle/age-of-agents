@@ -213,3 +213,9 @@ Verified: decoded construction pixels unchanged, identical finished roof pixels,
 RGBA PNG with transparent corners, gameplay-scale contact sheet, and Chromium
 WebGL2 at 1280×800 and 390×844 with no page errors. Town-center selection still
 shows the command medallions. Rust workspace tests, formatting and Clippy pass.
+
+## Gameplay building atlas (2026-10-02)
+
+`buildings_hd.png` and `buildings_hd.json` hold house, granary, watchtower, and dock foundation/walls/roof/completed frames in lossless 512 px cells. They are repacked from the original 1024 px FAL cutouts, recovering detail lost when those sources were reduced to the 256 px loading-screen sheet and compressed as lossy WebP. The town center continues to use its dedicated atlas.
+
+Sources are checked in under `building_sources/`; `provenance.json` records the original request IDs. Recovery incurred no new generation spend. Reproduce with `python scripts/pack_building_sprites.py` (Pillow, NumPy and SciPy). One scale and baseline per building preserves construction-stage proportions.
