@@ -78,7 +78,6 @@ pub fn debug_screen_of(x: f32, y: f32, z: f32) -> Vec<f32> {
 struct Pointer {
     on_hud: bool,
     down_at: Vec2,
-    last: Vec2,
     button: MouseButton,
     grabbed: Option<Vec3>,
     dragging: bool,
@@ -502,12 +501,6 @@ impl App {
 
     fn key(&mut self, key: &Key) {
         match key.as_ref() {
-            Key::Character("q") | Key::Character("Q") => {
-                self.rig.rotate(-std::f32::consts::FRAC_PI_4, true)
-            }
-            Key::Character("e") | Key::Character("E") => {
-                self.rig.rotate(std::f32::consts::FRAC_PI_4, true)
-            }
             Key::Character("w") | Key::Named(NamedKey::ArrowUp) => self.rig.nudge(0.0, 1.0),
             Key::Character("s") | Key::Named(NamedKey::ArrowDown) => self.rig.nudge(0.0, -1.0),
             Key::Character("a") | Key::Named(NamedKey::ArrowLeft) => self.rig.nudge(-1.0, 0.0),
@@ -537,7 +530,6 @@ impl App {
         self.pointer = Some(Pointer {
             on_hud,
             down_at: pixel,
-            last: pixel,
             button,
             grabbed: self.ground_at(pixel),
             dragging: false,
@@ -545,7 +537,7 @@ impl App {
     }
 
     /// One finger pans, taps and presses the HUD like the mouse; two fingers
-    /// pinch to zoom, twist to rotate and move together to pan.
+    /// pinch to zoom and move together to pan.
     fn touch(&mut self, id: u64, phase: TouchPhase, pixel: Vec2) {
         let previous = self.touches.clone();
         match phase {
@@ -595,8 +587,6 @@ impl App {
         if span0.length() > 8.0 && span1.length() > 8.0 {
             self.rig
                 .zoom((span0.length() / span1.length()).clamp(0.8, 1.25));
-            let turn = span1.y.atan2(span1.x) - span0.y.atan2(span0.x);
-            self.rig.rotate(turn.sin().atan2(turn.cos()), false);
         }
         let (mid0, mid1) = ((before.0 + before.1) * 0.5, (after.0 + after.1) * 0.5);
         if let Some(grabbed) = self.ground_at(mid0)
@@ -618,16 +608,13 @@ impl App {
         if pointer.down_at.distance(pixel) > DRAG_THRESHOLD {
             pointer.dragging = true;
         }
-        if pointer.dragging {
-            if pointer.button == MouseButton::Right {
-                self.rig.rotate((pixel.x - pointer.last.x) * 0.008, false);
-            } else if let Some(grabbed) = pointer.grabbed
-                && let Some(now) = self.rig.plane_at(pixel, grabbed.y)
-            {
-                self.rig.drag(grabbed, now);
-            }
+        if pointer.dragging
+            && pointer.button != MouseButton::Right
+            && let Some(grabbed) = pointer.grabbed
+            && let Some(now) = self.rig.plane_at(pixel, grabbed.y)
+        {
+            self.rig.drag(grabbed, now);
         }
-        pointer.last = pixel;
     }
 
     fn release(&mut self, pixel: Vec2, additive: bool) {
@@ -695,7 +682,7 @@ impl App {
         if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {
             self.toast = None;
         }
-        self.rig.update(dt as f32);
+        self.rig.update();
         self.view.frame(dt as f32);
         let ghost = match self.build {
             hud::BuildUi::Placing(kind) => self

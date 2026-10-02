@@ -4,6 +4,8 @@
 
 Grow the proven gather/build demo into one compact, coherent RTS scenario. Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real WebGL UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
 
+- Camera navigation uses pan and zoom with a fixed heading.
+
 ## Released baseline — Gather, build, research, and route
 
 - [x] Persisted 600-cell isometric world with eight biomes and explored/visible/unseen fog privacy.
