@@ -276,8 +276,16 @@ function __wbg_get_imports() {
         __wbg_clear_cb96796cc568b7c8: function(arg0, arg1) {
             arg0.clear(arg1 >>> 0);
         },
+        __wbg_clientHeight_33dd2a2c8630a1f1: function(arg0) {
+            const ret = arg0.clientHeight;
+            return ret;
+        },
         __wbg_clientWaitSync_73122aa040ce343d: function(arg0, arg1, arg2, arg3) {
             const ret = arg0.clientWaitSync(arg1, arg2 >>> 0, arg3 >>> 0);
+            return ret;
+        },
+        __wbg_clientWidth_08d5512595aacb73: function(arg0) {
+            const ret = arg0.clientWidth;
             return ret;
         },
         __wbg_close_910d189411ba5062: function(arg0) {
@@ -786,6 +794,10 @@ function __wbg_get_imports() {
             return ret;
         },
         __wbg_height_c9feb8f4a9a61abc: function(arg0) {
+            const ret = arg0.height;
+            return ret;
+        },
+        __wbg_height_fc97e1a0c2e7331f: function(arg0) {
             const ret = arg0.height;
             return ret;
         },
@@ -1552,6 +1564,10 @@ function __wbg_get_imports() {
         __wbg_webkitRequestFullscreen_c4ec4df7be373ffd: function(arg0) {
             arg0.webkitRequestFullscreen();
         },
+        __wbg_width_3d0dce3d9892e35e: function(arg0) {
+            const ret = arg0.width;
+            return ret;
+        },
         __wbg_width_bf3733dbc880874d: function(arg0) {
             const ret = arg0.width;
             return ret;
@@ -1592,7 +1608,7 @@ function __wbg_get_imports() {
             return ret;
         },
         __wbindgen_generic_0000000000000008: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("MessageEvent")], shim_idx: 190, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("MessageEvent")], shim_idx: 347, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_a9fe348812a5dff7___convert__closures_____invoke___web_sys_9b3f5b5c46df23de___features__gen_MessageEvent__MessageEvent______true_);
             return ret;
         },

@@ -364,7 +364,23 @@ impl App {
         }
     }
 
+    /// Keeps the surface, render targets and camera at the window's physical
+    /// size, so the picture is sharp and pointer pixels match what is drawn.
+    fn fit_surface(&mut self) {
+        let Some(game) = self.game.as_mut() else {
+            return;
+        };
+        let (width, height) = physical_size(&game.window);
+        if (width, height) != (game.gpu.config.width, game.gpu.config.height) {
+            game.gpu.resize(width, height);
+            game.renderer.resize(&game.gpu.device, width, height);
+        }
+        self.rig.width = width as f32;
+        self.rig.height = height as f32;
+    }
+
     fn redraw(&mut self) {
+        self.fit_surface();
         let now = now_seconds();
         let dt = self
             .last_frame
@@ -469,6 +485,32 @@ impl App {
     }
 }
 
+/// The drawable size in device pixels. In the browser winit can leave the
+/// canvas at its CSS size on high-DPI screens while pointer events arrive in
+/// device pixels, so the canvas is sized here from its layout box instead.
+#[cfg(not(target_arch = "wasm32"))]
+fn physical_size(window: &Window) -> (u32, u32) {
+    let size = window.inner_size();
+    (size.width.max(1), size.height.max(1))
+}
+
+#[cfg(target_arch = "wasm32")]
+fn physical_size(window: &Window) -> (u32, u32) {
+    use winit::platform::web::WindowExtWebSys;
+    let Some(canvas) = window.canvas() else {
+        let size = window.inner_size();
+        return (size.width.max(1), size.height.max(1));
+    };
+    let scale = window.scale_factor();
+    let width = ((canvas.client_width() as f64 * scale).round() as u32).max(1);
+    let height = ((canvas.client_height() as f64 * scale).round() as u32).max(1);
+    if canvas.width() != width || canvas.height() != height {
+        canvas.set_width(width);
+        canvas.set_height(height);
+    }
+    (width, height)
+}
+
 /// Plain-language versions of the server's rejection reasons.
 fn friendly(error: &str) -> String {
     match error {
@@ -532,25 +574,15 @@ impl ApplicationHandler<Game> for App {
     }
 
     fn user_event(&mut self, _event_loop: &ActiveEventLoop, game: Game) {
-        let size = game.window.inner_size();
-        self.rig.width = size.width as f32;
-        self.rig.height = size.height as f32;
         game.window.request_redraw();
         self.game = Some(game);
+        self.fit_surface();
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
-            WindowEvent::Resized(size) => {
-                if let Some(game) = self.game.as_mut() {
-                    game.gpu.resize(size.width, size.height);
-                    game.renderer
-                        .resize(&game.gpu.device, size.width.max(1), size.height.max(1));
-                }
-                self.rig.width = size.width.max(1) as f32;
-                self.rig.height = size.height.max(1) as f32;
-            }
+            WindowEvent::Resized(_) => self.fit_surface(),
             WindowEvent::RedrawRequested => self.redraw(),
             WindowEvent::CursorMoved { position, .. } => {
                 self.moved(Vec2::new(position.x as f32, position.y as f32))
