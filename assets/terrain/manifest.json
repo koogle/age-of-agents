@@ -8,16 +8,16 @@
       "file": "meadow.webp",
       "master": "masters/meadow.webp",
       "target_mean": [
-        176,
-        204,
-        92
+        172,
+        196,
+        100
       ],
       "mean": [
-        175,
-        204,
-        92
+        172,
+        196,
+        100
       ],
-      "prompt_ground": "lush yellow-green meadow grass with tiny scattered painted wildflowers in white and yellow"
+      "prompt_ground": "soft warm yellow-green meadow grass like sunny Mediterranean hillsides, clearly visible brushed grass strokes in several greens and golden-greens, tiny scattered painted wildflowers in white and yellow"
     },
     "forest": {
       "file": "forest.webp",
@@ -45,7 +45,7 @@
       "mean": [
         230,
         200,
-        103
+        104
       ],
       "prompt_ground": "golden dry summer grass with soft ochre tones"
     },
@@ -75,7 +75,7 @@
       "mean": [
         118,
         184,
-        127
+        128
       ],
       "prompt_ground": "damp lush green grass with tiny reeds and small soft puddle glints"
     },
@@ -90,7 +90,7 @@
       "mean": [
         206,
         180,
-        112
+        111
       ],
       "prompt_ground": "ochre dry soil with sparse small dry shrub tufts"
     },
@@ -148,7 +148,7 @@
         190
       ],
       "mean": [
-        119,
+        120,
         196,
         189
       ],
@@ -162,6 +162,16 @@
       "assets/reference/mediterranean_4.webp crop (700,900)-(1500,1500)"
     ],
     "seed": "not supported by the endpoint",
-    "estimated_cost_usd": 0.595
+    "estimated_cost_usd": 0.635,
+    "postprocess": {
+      "contrast": 1.0,
+      "flatten": 0.5,
+      "flatten_strong": {
+        "forest": 0.85,
+        "clayland": 0.85,
+        "scrubland": 0.75
+      },
+      "flatten_blur_px": 160
+    }
   }
 }
