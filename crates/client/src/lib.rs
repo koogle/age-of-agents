@@ -100,6 +100,8 @@ pub struct App {
     incoming: VecDeque<WorldSnapshot>,
     clock: f64,
     last_frame: Option<f64>,
+    /// Whether the camera has been moved to the starting town center yet.
+    framed: bool,
 }
 
 fn now_seconds() -> f64 {
@@ -147,6 +149,7 @@ impl App {
             incoming: VecDeque::new(),
             clock: 0.0,
             last_frame: None,
+            framed: false,
         }
     }
 
@@ -244,7 +247,7 @@ impl App {
             Target::Resource(_, cell) => (terrain::cell_center(cell), 0.36, HOVER_WORK),
             Target::Foundation(id) => {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
-                let c = view::footprint_center(building);
+                let c = view::footprint_center(&self.view.heights, building);
                 (Vec2::new(c.x, c.z), 1.2, HOVER_WORK)
             }
             Target::Ground(cell) => (terrain::cell_center(cell), 0.24, HOVER_GROUND),
@@ -253,7 +256,7 @@ impl App {
         Some(render::Decal {
             center: [
                 center.x,
-                terrain::height_at(center.x, center.y) + 0.035,
+                self.view.heights.at(center.x, center.y) + 0.035,
                 center.y,
             ],
             radius,
@@ -468,6 +471,19 @@ impl App {
         self.rig.height = height as f32;
     }
 
+    /// Opens the game looking at the player's town center: the seeded island
+    /// can start anywhere on the map.
+    fn frame_town_center(&mut self) {
+        let Some(snapshot) = self.view.snapshot.as_ref() else {
+            return;
+        };
+        if let Some(town_center) = snapshot.buildings.first() {
+            let center = view::footprint_center(&self.view.heights, town_center);
+            self.rig.look_at(center.x, center.z);
+            self.framed = true;
+        }
+    }
+
     fn redraw(&mut self) {
         self.fit_surface();
         let now = now_seconds();
@@ -480,6 +496,9 @@ impl App {
         self.source.poll(dt, &mut self.incoming);
         while let Some(snapshot) = self.incoming.pop_front() {
             self.view.sync(snapshot);
+            if !self.framed {
+                self.frame_town_center();
+            }
         }
         for result in self.source.take_results() {
             if let Err(error) = result {
@@ -504,6 +523,10 @@ impl App {
             && let Some((rgba, layers)) = self.view.cell_data()
         {
             game.renderer.update_cells(&game.gpu.queue, &rgba, &layers);
+        }
+        if std::mem::take(&mut self.view.heights_dirty) {
+            game.renderer
+                .update_ground(&game.gpu.queue, &self.view.heights);
         }
         let (right, up) = self.rig.basis();
         let eye = self.rig.eye();
@@ -549,7 +572,7 @@ impl App {
                 [0.85, 0.3, 0.25, 0.85]
             };
             decals.push(render::Decal {
-                center: [x, terrain::height_at(x, z) + 0.04, z],
+                center: [x, self.view.heights.at(x, z) + 0.04, z],
                 radius: 1.35,
                 color,
                 ring: 1.0,
@@ -733,7 +756,11 @@ fn run(assets: Assets, source: Source) {
 pub fn run_native() {
     env_logger::init();
     let assets = pollster::block_on(Assets::load());
-    run(assets, Source::local());
+    let seed = std::env::var("AGE_OF_AGENTS_SEED")
+        .ok()
+        .and_then(|seed| seed.parse().ok())
+        .unwrap_or(aoa_game::DEFAULT_SEED);
+    run(assets, Source::local(seed));
 }
 
 /// Browser entry point: the hosted server, or the in-page simulation with `?local`.
@@ -747,8 +774,14 @@ pub fn start() {
         let search = web_sys::window()
             .and_then(|w| w.location().search().ok())
             .unwrap_or_default();
+        // `?local&seed=42` plays the island grown from seed 42 in the page.
+        let seed = search
+            .trim_start_matches('?')
+            .split('&')
+            .find_map(|pair| pair.strip_prefix("seed=")?.parse().ok())
+            .unwrap_or(aoa_game::DEFAULT_SEED);
         let source = if search.contains("local") {
-            Source::local()
+            Source::local(seed)
         } else {
             Source::Remote(source::remote::Remote::connect())
         };

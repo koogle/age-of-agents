@@ -46,8 +46,8 @@ fn run(world: &mut GameWorld, seconds: f64) {
 
 #[test]
 fn voronoi_terrain_is_fixed_and_deterministic() {
-    assert_eq!(GameWorld::default().terrain, GameWorld::default().terrain);
-    let world = GameWorld::default();
+    assert_eq!(fixture::fixture().terrain, fixture::fixture().terrain);
+    let world = fixture::fixture();
     let coordinates: BTreeSet<_> = world.terrain.iter().map(|cell| cell.coordinate()).collect();
     assert_eq!(world.terrain.len(), 2400);
     assert_eq!(coordinates.len(), 2400);
@@ -57,7 +57,7 @@ fn voronoi_terrain_is_fixed_and_deterministic() {
 
 #[test]
 fn every_voronoi_biome_is_one_coherent_region() {
-    let world = GameWorld::default();
+    let world = fixture::fixture();
     let mut regions: BTreeMap<_, BTreeSet<_>> = BTreeMap::new();
     for terrain in &world.terrain {
         regions
@@ -87,8 +87,8 @@ fn every_voronoi_biome_is_one_coherent_region() {
 
 #[test]
 fn resources_are_deterministic_clustered_and_biome_compatible() {
-    let world = GameWorld::default();
-    assert_eq!(world.resources, GameWorld::default().resources);
+    let world = fixture::fixture();
+    assert_eq!(world.resources, fixture::fixture().resources);
     let mut counts = BTreeMap::new();
     for resource in &world.resources {
         *counts.entry(resource.kind).or_insert(0) += 1;
@@ -113,7 +113,7 @@ fn resources_are_deterministic_clustered_and_biome_compatible() {
         let biome = world.terrain[usize::from(resource.cell.row) * usize::from(WORLD_COLUMNS)
             + usize::from(resource.cell.column)]
         .biome;
-        assert!(compatible_biomes(resource.kind).contains(&biome));
+        assert!(fixture::compatible_biomes(resource.kind).contains(&biome));
         assert!(resource.cell.center().distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE);
         assert_eq!(resource.amount, resource.capacity);
         for other in &world.resources[index + 1..] {
@@ -136,7 +136,7 @@ fn resources_are_deterministic_clustered_and_biome_compatible() {
 
 #[test]
 fn default_world_is_valid_and_has_a_productive_base() {
-    let world = GameWorld::default();
+    let world = fixture::fixture();
     world.validate().unwrap();
     assert_eq!(world.buildings.len(), 1);
     let base = &world.buildings[0];
@@ -151,7 +151,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
 
 #[test]
 fn idle_world_is_invariant_except_tick() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     let initial = world.clone();
     world.tick(10.0);
     world.tick = 0;
@@ -161,7 +161,7 @@ fn idle_world_is_invariant_except_tick() {
 
 #[test]
 fn move_walks_cell_by_cell_to_the_exact_destination() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     let destination = cell(14, 15);
     world
         .apply_command(Command::Move {
@@ -187,7 +187,7 @@ fn move_walks_cell_by_cell_to_the_exact_destination() {
 
 #[test]
 fn move_rejects_invalid_destinations_without_mutation() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Move {
             unit_id: "villager-2".into(),
@@ -218,7 +218,7 @@ fn move_rejects_invalid_destinations_without_mutation() {
 
 #[test]
 fn walled_off_destination_is_unreachable() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     for (index, origin) in [cell(0, 4), cell(4, 4), cell(4, 0)].into_iter().enumerate() {
         world
@@ -238,7 +238,7 @@ fn walled_off_destination_is_unreachable() {
 
 #[test]
 fn walkers_route_around_buildings_and_never_enter_them() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Move {
             unit_id: "villager-1".into(),
@@ -257,7 +257,7 @@ fn walkers_route_around_buildings_and_never_enter_them() {
 
 #[test]
 fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 15.0);
     world.tick(15.0 / GATHER_RATE);
     assert_eq!(
@@ -280,7 +280,7 @@ fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
 
 #[test]
 fn full_loads_deposit_once_resume_and_finish_after_depletion() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 45.0);
     for expected in [20.0, 40.0, 45.0] {
         world.tick(100.0);
@@ -298,7 +298,7 @@ fn full_loads_deposit_once_resume_and_finish_after_depletion() {
 
 #[test]
 fn gatherer_stays_beside_the_node_until_the_load_is_full() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 100.0);
     let spot = world.units[0].cell;
     world.tick(4.0);
@@ -311,7 +311,7 @@ fn gatherer_stays_beside_the_node_until_the_load_is_full() {
 
 #[test]
 fn deleted_resource_returns_existing_cargo_and_then_finishes() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 20.0);
     world.tick(0.5);
     world.resources.remove(0);
@@ -336,7 +336,7 @@ fn deleted_resource_returns_existing_cargo_and_then_finishes() {
 
 #[test]
 fn missing_town_center_retains_cargo_until_a_deposit_is_possible() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 10.0);
     world.tick(10.0 / GATHER_RATE);
     let spot = world.units[0].cell;
@@ -363,7 +363,7 @@ fn deposits_route_each_resource_to_its_typed_stockpile() {
         ResourceKind::Clay,
         ResourceKind::Fiber,
     ] {
-        let mut world = GameWorld::default();
+        let mut world = fixture::fixture();
         let index = world
             .resources
             .iter()
@@ -384,7 +384,7 @@ fn deposits_route_each_resource_to_its_typed_stockpile() {
 
 #[test]
 fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.stockpile.food = 100.0;
     let produce = Command::Produce {
         building_id: "base-1".into(),
@@ -414,7 +414,7 @@ fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
 
 #[test]
 fn trained_villager_waits_for_a_free_cell_beside_the_building() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     let ring: Vec<_> = interaction_cells(world.buildings[0].footprint()).collect();
     world.units = ring
@@ -448,7 +448,7 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
 
 #[test]
 fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.stockpile.food = 100.0;
     world.stockpile.wood = 100.0;
     let research = |technology| Command::Research {
@@ -493,7 +493,7 @@ fn researched_technologies_make_their_resources_twenty_percent_faster() {
     ] {
         let mut world = GameWorld {
             researched_technologies: vec![technology],
-            ..GameWorld::default()
+            ..fixture::fixture()
         };
         let index = world
             .resources
@@ -511,7 +511,7 @@ fn researched_technologies_make_their_resources_twenty_percent_faster() {
 
 #[test]
 fn simulation_speed_is_authoritative_validated_and_can_pause() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::SetSimulationSpeed { multiplier: 0.0 })
         .unwrap();
@@ -534,7 +534,7 @@ fn simulation_speed_is_authoritative_validated_and_can_pause() {
 
 #[test]
 fn busy_unit_rejects_commands_without_mutation() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Gather {
             unit_id: "villager-1".into(),
@@ -554,7 +554,7 @@ fn busy_unit_rejects_commands_without_mutation() {
 
 #[test]
 fn build_places_one_foundation_immediately_and_charges_once() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.stockpile.wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Build {
@@ -604,7 +604,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
 
 #[test]
 fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     let build = |origin| Command::Build {
         unit_id: "villager-1".into(),
         origin,
@@ -644,7 +644,7 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
 
 #[test]
 fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     world.stockpile.wood = 100.0;
     world.units[0].cell = cell(0, 0);
@@ -667,7 +667,7 @@ fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
 
 #[test]
 fn a_second_villager_can_help_and_construction_completes_exactly_once() {
-    let mut solo = GameWorld::default();
+    let mut solo = fixture::fixture();
     solo.stockpile.wood = TOWN_CENTER_WOOD_COST;
     solo.apply_command(Command::Build {
         unit_id: "villager-1".into(),
@@ -710,7 +710,7 @@ fn a_second_villager_can_help_and_construction_completes_exactly_once() {
 
 #[test]
 fn a_cell_someone_is_walking_through_can_be_reserved_and_is_reached() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Move {
             unit_id: "villager-1".into(),
@@ -740,7 +740,7 @@ fn a_cell_someone_is_walking_through_can_be_reserved_and_is_reached() {
 
 #[test]
 fn a_unit_whose_order_ends_on_a_reserved_cell_makes_way() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Move {
             unit_id: "villager-1".into(),
@@ -772,7 +772,7 @@ fn a_unit_whose_order_ends_on_a_reserved_cell_makes_way() {
 
 #[test]
 fn head_on_walkers_in_a_corridor_pass_each_other() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     world.buildings.clear();
     // A one-cell-wide corridor along row 5 with a pocket at column 10.
@@ -806,7 +806,7 @@ fn head_on_walkers_in_a_corridor_pass_each_other() {
 
 #[test]
 fn snapshots_round_trip_through_json_for_remote_clients() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     start_gather_at_resource(&mut world, 0, 40.0);
     run(&mut world, 3.0);
     let snapshot = world.snapshot();
@@ -817,7 +817,7 @@ fn snapshots_round_trip_through_json_for_remote_clients() {
 
 #[test]
 fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.stockpile.wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Gather {

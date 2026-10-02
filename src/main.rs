@@ -6,8 +6,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
-use axum::extract::State;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
+use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
@@ -87,7 +87,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let store = Store::configured();
     store.initialize()?;
-    let world = store.load()?.unwrap_or_default();
+    let world = match store.load()? {
+        Some(world) => world,
+        None => GameWorld::generate(configured_seed()),
+    };
     tracing::info!(database = %store.path().display(), "world store ready");
 
     let (snapshots, _) = broadcast::channel(32);
@@ -169,11 +172,32 @@ async fn get_state(State(state): State<SharedState>) -> Json<WorldSnapshot> {
     Json(state.world.lock().await.snapshot())
 }
 
+/// The seed for a brand-new world: `AGE_OF_AGENTS_SEED`, else the default island.
+fn configured_seed() -> u64 {
+    std::env::var("AGE_OF_AGENTS_SEED")
+        .ok()
+        .and_then(|seed| seed.parse().ok())
+        .unwrap_or(aoa_game::DEFAULT_SEED)
+}
+
+#[derive(Deserialize)]
+struct ResetQuery {
+    seed: Option<u64>,
+}
+
+/// Starts over on the island `?seed=` names, or on a fresh island.
 async fn reset_world(
     State(state): State<SharedState>,
+    Query(query): Query<ResetQuery>,
 ) -> Result<Json<WorldSnapshot>, (StatusCode, String)> {
+    let seed = query.seed.unwrap_or_else(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|elapsed| elapsed.as_nanos() as u64)
+            .unwrap_or_default()
+    });
+    let fresh = GameWorld::generate(seed);
     let mut world = state.world.lock().await;
-    let fresh = GameWorld::default();
     state.store.save(&fresh).map_err(|error| {
         tracing::error!(%error, "world reset could not be saved");
         (
@@ -302,7 +326,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn reset_replaces_and_persists_the_default_world() {
+    async fn reset_replaces_and_persists_a_world_on_the_requested_island() {
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -324,11 +348,13 @@ mod tests {
             store: store.clone(),
         });
 
-        let Json(snapshot) = reset_world(State(state)).await.unwrap();
+        let Json(snapshot) = reset_world(State(state), Query(ResetQuery { seed: Some(9) }))
+            .await
+            .unwrap();
 
         assert_eq!(snapshot.tick, 0);
         assert_eq!(snapshot.stockpile.wood, 0.0);
-        assert_eq!(store.load().unwrap(), Some(GameWorld::default()));
+        assert_eq!(store.load().unwrap(), Some(GameWorld::generate(9)));
         std::fs::remove_file(path).unwrap();
     }
 
@@ -374,19 +400,28 @@ mod tests {
         assert_eq!(json["sequence"], 4);
         assert_eq!(json["world"]["columns"], 60);
         assert_eq!(json["world"]["rows"], 40);
-        let unit = &json["world"]["units"][0];
-        assert_eq!(unit["cell"], serde_json::json!({"column": 29, "row": 21}));
-        assert_eq!(unit["position"], serde_json::json!({"x": 29.5, "y": 21.5}));
+        let unit = &world.units[0];
+        assert_eq!(
+            json["world"]["units"][0]["cell"],
+            serde_json::json!({"column": unit.cell.column, "row": unit.cell.row})
+        );
         assert_eq!(json["world"]["buildings"][0]["columns"], 4);
-        let terrain = json["world"]["terrain"].as_array().unwrap();
-        assert!(terrain.iter().all(|cell| matches!(
-            cell["visibility"].as_str(),
-            Some("unseen" | "explored" | "visible")
-        )));
-        assert!(terrain.iter().all(|cell| {
-            let is_unseen = cell["visibility"] == "unseen";
-            is_unseen == cell.get("biome").is_none()
-        }));
+        // Terrain is one character per cell: unseen cells reveal neither biome nor height.
+        let terrain = &json["world"]["terrain"];
+        let (cells, heights) = (
+            terrain["cells"].as_str().unwrap(),
+            terrain["heights"].as_str().unwrap(),
+        );
+        assert_eq!(cells.len(), 2400);
+        assert_eq!(heights.len(), 2400);
+        assert!(
+            cells
+                .bytes()
+                .zip(heights.bytes())
+                .all(|(c, h)| (c == b'.') == (h == b'.'))
+        );
+        assert!(cells.contains('.') && cells.bytes().any(|c| c.is_ascii_uppercase()));
+        assert!(serde_json::to_string(&json).unwrap().len() < 20_000);
         assert!(json["world"]["resources"].as_array().unwrap().len() < world.resources.len());
     }
 }
