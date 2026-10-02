@@ -135,8 +135,23 @@ struct UnitEntry {
     lean: Vec2,
 }
 
+/// Something a tap can land on by its drawn picture, not the ground under it.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Pick {
+    Resource(String, aoa_game::CellCoordinate),
+    Building(String),
+}
+
+/// A drawn picture that answers taps: what it is, plus its sprite geometry.
+struct Pickable {
+    pick: Pick,
+    sprite: Sprite,
+}
+
 pub struct WorldView {
     pub snapshot: Option<WorldSnapshot>,
+    /// Last frame's resource and building pictures, for tap picking.
+    pickables: Vec<Pickable>,
     units: HashMap<String, UnitEntry>,
     render_tick: Option<f64>,
     latest_tick: f64,
@@ -192,6 +207,7 @@ impl WorldView {
     pub fn new() -> Self {
         Self {
             snapshot: None,
+            pickables: Vec::new(),
             units: HashMap::new(),
             render_tick: None,
             latest_tick: 0.0,
@@ -313,6 +329,7 @@ impl WorldView {
     ) -> (Vec<(usize, Sprite)>, Vec<Decal>) {
         let mut sprites = Vec::new();
         let mut decals = Vec::new();
+        let mut picks = Vec::new();
         let heights = &self.heights;
         let Some(snapshot) = self.snapshot.as_ref() else {
             return (sprites, decals);
@@ -354,25 +371,31 @@ impl WorldView {
                 let x = center.x + (random(seed) - 0.5) * 0.12;
                 let z = center.y + (random(seed + 1.0) - 0.5) * 0.12;
                 let scale = base * (0.9 + random(seed + 7.0) * 0.25);
-                sprites.push((
-                    SHEET_RESOURCES,
-                    resource_sprite(
-                        node,
-                        resources.nodes[node].stages[0],
-                        ground(heights, x, z),
-                        scale,
-                    ),
-                ));
+                let sprite = resource_sprite(
+                    node,
+                    resources.nodes[node].stages[0],
+                    ground(heights, x, z),
+                    scale,
+                );
+                if fraction > 0.0 {
+                    picks.push(Pickable {
+                        pick: Pick::Resource(resource.id.clone(), resource.cell),
+                        sprite,
+                    });
+                }
+                sprites.push((SHEET_RESOURCES, sprite));
             } else if fraction > 0.0 {
                 let node = node_for(resource.kind);
                 let stages = &resources.nodes[node].stages;
                 let stage = (((1.0 - fraction) * stages.len() as f32).floor() as usize)
                     .min(stages.len() - 1);
                 let at = ground(heights, center.x, center.y);
-                sprites.push((
-                    SHEET_RESOURCES,
-                    resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08),
-                ));
+                let sprite = resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08);
+                picks.push(Pickable {
+                    pick: Pick::Resource(resource.id.clone(), resource.cell),
+                    sprite,
+                });
+                sprites.push((SHEET_RESOURCES, sprite));
             }
         }
         for building in &snapshot.buildings {
@@ -396,16 +419,18 @@ impl WorldView {
                 // edge nearest the camera (see `grounded`).
                 const BASE_PX: f32 = 248.0;
                 let drop = (BASE_PX - center_px) / sheet.cell[1] * width;
-                sprites.push((
-                    SHEET_BUILDINGS,
-                    Sprite {
-                        anchor: grounded(heights, center, rig.eye(), drop).to_array(),
-                        size: [width, width * sheet.cell[1] / sheet.cell[0]],
-                        pivot: [0.5, 1.0 - BASE_PX / sheet.cell[1]],
-                        uv: uv(sheet.frames[row][stage], sheet.size, false),
-                        pull: 0.08 * width,
-                    },
-                ));
+                let sprite = Sprite {
+                    anchor: grounded(heights, center, rig.eye(), drop).to_array(),
+                    size: [width, width * sheet.cell[1] / sheet.cell[0]],
+                    pivot: [0.5, 1.0 - BASE_PX / sheet.cell[1]],
+                    uv: uv(sheet.frames[row][stage], sheet.size, false),
+                    pull: 0.08 * width,
+                };
+                picks.push(Pickable {
+                    pick: Pick::Building(building.building.id.clone()),
+                    sprite,
+                });
+                sprites.push((SHEET_BUILDINGS, sprite));
                 if selection.building.as_deref() == Some(building.building.id.as_str()) {
                     decals.push(Decal {
                         center: (center + Vec3::Y * 0.03).to_array(),
@@ -426,25 +451,27 @@ impl WorldView {
             // The temple sheet is drawn for a 4-cell footprint; scale it to
             // the town center's real one.
             let size = tc.cell[0] * tc.units_per_pixel * building.columns as f32 / 4.0;
-            sprites.push((
-                SHEET_TOWN_CENTER,
-                Sprite {
-                    anchor: grounded(
-                        heights,
-                        center,
-                        rig.eye(),
-                        (tc.base_bottom[1] - tc.anchor[1]) / tc.cell[1] * size,
-                    )
-                    .to_array(),
-                    size: [size, size * tc.cell[1] / tc.cell[0]],
-                    pivot: [
-                        tc.anchor[0] / tc.cell[0],
-                        1.0 - tc.base_bottom[1] / tc.cell[1],
-                    ],
-                    uv: uv(tc.frames[frame], tc.size, false),
-                    pull: 0.08 * size,
-                },
-            ));
+            let sprite = Sprite {
+                anchor: grounded(
+                    heights,
+                    center,
+                    rig.eye(),
+                    (tc.base_bottom[1] - tc.anchor[1]) / tc.cell[1] * size,
+                )
+                .to_array(),
+                size: [size, size * tc.cell[1] / tc.cell[0]],
+                pivot: [
+                    tc.anchor[0] / tc.cell[0],
+                    1.0 - tc.base_bottom[1] / tc.cell[1],
+                ],
+                uv: uv(tc.frames[frame], tc.size, false),
+                pull: 0.08 * size,
+            };
+            picks.push(Pickable {
+                pick: Pick::Building(building.building.id.clone()),
+                sprite,
+            });
+            sprites.push((SHEET_TOWN_CENTER, sprite));
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
                 decals.push(Decal {
                     center: (center + Vec3::Y * 0.03).to_array(),
@@ -571,10 +598,43 @@ impl WorldView {
                 });
             }
         }
+        self.pickables = picks;
         (sprites, decals)
     }
 
     /// The unit whose sprite covers a screen pixel, nearest the camera first.
+    /// The resource or building whose drawn picture is under a screen pixel,
+    /// nearest the camera first. Pictures stand up from the ground, so a tap on
+    /// a tree's crown or a temple's roof must not fall through to the ground
+    /// behind it. Only the middle of each cell counts, where the art is.
+    pub fn sprite_at(&self, rig: &Rig, pixel: Vec2) -> Option<Pick> {
+        let (right, up) = rig.basis();
+        let mut best: Option<(f32, &Pick)> = None;
+        for Pickable { pick, sprite } in &self.pickables {
+            let anchor = Vec3::from(sprite.anchor);
+            let corner = |fx: f32, fy: f32| {
+                anchor
+                    + right * (fx - sprite.pivot[0]) * sprite.size[0]
+                    + up * (fy - sprite.pivot[1]) * sprite.size[1]
+            };
+            let (Some(low), Some(high)) = (
+                rig.screen_of(corner(0.25, 0.04)),
+                rig.screen_of(corner(0.75, 0.85)),
+            ) else {
+                continue;
+            };
+            let inside = pixel.x > low.x.min(high.x)
+                && pixel.x < low.x.max(high.x)
+                && pixel.y > high.y.min(low.y)
+                && pixel.y < high.y.max(low.y);
+            let depth = rig.eye().distance(anchor);
+            if inside && best.is_none_or(|(d, _)| depth < d) {
+                best = Some((depth, pick));
+            }
+        }
+        best.map(|(_, pick)| pick.clone())
+    }
+
     pub fn unit_at(&self, rig: &Rig, pixel: Vec2) -> Option<String> {
         let (_, up) = rig.basis();
         let mut best: Option<(f32, &String)> = None;
