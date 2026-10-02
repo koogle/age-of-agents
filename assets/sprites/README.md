@@ -45,10 +45,7 @@ All three share the same layout, anchor, frame order and royal-blue team scarf, 
 
 - **Identity:** consistent within each sheet, and the three people read as distinct at about 56 px (headscarf, grey hair). The base villager's face, curly hair, tunic, belt, sandals and blue scarf match in all 34 frames, and the style matches the icon kit.
 - **Variant back views:** the woman's and elder's idle and walk backs show the back. Their **carry_back** strips stayed near-profile (walking right, face hidden or in profile) after three tries, so they read as walking away sideways rather than a true three-quarter back.
-- **Motion:** weaker.
-  - Walk frame 2 (front and back) is an exaggerated knee lift that reads like a hop.
-  - carry_front frames 2–4 barely change stride.
-  - The chop strip is about 10% larger than idle; its scale comes from the scarf landmark.
+- **Motion:** the base villager's walk_front, walk_back and carry_front were regenerated (revision 2) with an explicit low, natural stride (feet near the ground, no knee lift, sack held in every frame). The earlier knee-lift "hop" and carry_front's static stride are gone. The woman and elder sheets still have their original walks.
 - **Facings:** front and back are hard to tell apart at 56 px; the face and scarf knot are the only cues.
 
 ## Cost
@@ -56,5 +53,43 @@ All three share the same layout, anchor, frame order and royal-blue team scarf, 
 About **$2.68** in total:
 - Base villager: about $0.75 (three masters, thirteen strips including two redos, thirteen BiRefNet runs).
 - Two variants: about $1.93 (four masters including the back views, 22 strips, eleven back-view redos, 33 BiRefNet runs). The per-request ledger is `tools/ledger.jsonl`.
+- Base villager revision 2 (two walk strips, two carry_front tries, three cutouts): about $0.23.
 
 The other images in this folder (`agent_*.png`, `sprite_*.png`, `tile_*.png`, `building_towncenter.png`, `test_bg_removed.png`) are older experiments and are not part of this sheet.
+
+# Resource and tree billboards
+
+`resources.png` (2048×768 RGBA, 256 px cells, 8 columns) and `resources.json`: generated billboards for the gatherable nodes and trees, in the same illustrated style, three-quarter view and upper-left light as the villager. Fine internal pen lines only, with no heavy outer stroke, because the game adds its own one-pixel ink pass. Not wired into the client.
+
+## Layout (`resources.json`)
+
+- `nodes.<name>.stages`: cell rects running from full to nearly empty.
+  - Three stages: berry, stone, gold, iron, clay, fiber.
+  - One stage: cypress (a pair), olive, stump. The stump is the depleted tree.
+- `anchor [128, 248]`: the base bottom-centre in every cell.
+- `unitsPerPixel`: world units per sprite pixel, shared by all stages of a node so they shrink honestly. Multiply by 256 for the billboard's world size. The suggested full-stage size is `worldSize`, measured along `measured` (height for the trees and fiber, width for the rest; one cell = 1 unit, villager = 0.78).
+
+## Pipeline
+
+1. **One strip per node** (`tools/res_strips.py`): `fal-ai/nano-banana/edit` draws all stages, or the three tree types, in one image, so they share scale, light and style. References are the villager master (style) and a `mediterranean_4.webp` crop (palette). The prompt asks for fine internal ink lines, two-tone fills, warm light from the upper left and cool teal shadows, with no outer outline, ground line or shadows. The berry strip was regenerated once (the first try drew a tree, and its middle stage didn't look picked).
+2. **Cutout:** `fal-ai/birefnet/v2`.
+3. **Pack** (`tools/res_pack.py`):
+   - Remove drawn ground lines with a vertical-element morphological opening, which keeps thin upright stalks.
+   - Drop specks.
+   - Split stages by empty columns.
+   - Scale each node by one shared factor so its largest stage fits 232 px.
+   - Seat each stage on y = 248, centred.
+4. **Review** (`tools/res_contact.py`, `resources_contact.jpg`): every stage at its suggested world size (60 px per cell) beside an idle villager, on meadow and prairie.
+
+## Verdict
+
+- **Style:** consistent with the villager and the Mediterranean palette. Nodes are distinct and their silhouettes read at game size; depletion stages shrink visibly for stone, gold, iron, clay and fiber.
+- **Weak spots:**
+  - Red berries are barely visible at about 60 px per cell; the full bush mostly reads as darker. Berry stages 2 and 3 are close.
+  - Stone stage 3 is tiny rubble that nearly disappears.
+  - Gold's full stage is an oddly cubic block.
+  - Fiber's full stage had a small baked shadow, mostly removed by the cutout.
+
+## Cost
+
+About $0.39: eight nano-banana/edit strips including the berry redo, and seven BiRefNet runs.

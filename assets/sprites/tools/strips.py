@@ -12,12 +12,13 @@ IDENT = {
 PREFIX = f"spr/{VARIANT + '_' if VARIANT else ''}"
 FRONT = "Three-quarter FRONT view (facing the viewer, turned slightly to the viewer's left), seen from slightly above like an RTS camera."
 BACK = "Three-quarter BACK view (walking away from the viewer, turned slightly to the viewer's right, back of the head visible, face hidden), seen from slightly above like an RTS camera."
+GAIT = ('a calm, natural walking stride seen in four frames: frame 1 left foot forward and right foot back, both heels near the ground; frame 2 legs closer together mid-step, the moving foot only slightly lifted just above the ground; frame 3 right foot forward and left foot back; frame 4 legs closer together mid-step again. Knees stay low, no high knee lift, no hopping, no jumping, every foot stays close to the ground line; arms swing gently opposite to the legs')
 STRIPS = {
   "idle_front":  (2, FRONT, "standing idle, relaxed; frame 1 neutral, frame 2 a slight breath and weight shift"),
   "idle_back":   (2, BACK,  "standing idle, relaxed; frame 1 neutral, frame 2 a slight breath and weight shift"),
-  "walk_front":  (4, FRONT, "a walk cycle: contact, passing, opposite contact, passing; arms swinging naturally"),
-  "walk_back":   (4, BACK,  "a walk cycle: contact, passing, opposite contact, passing; arms swinging naturally"),
-  "carry_front": (4, FRONT, "a walk cycle while carrying a bulging brown cloth sack of goods over one shoulder, held with both hands; the sack is on the shoulder in EVERY frame"),
+  "walk_front":  (4, FRONT, GAIT),
+  "walk_back":   (4, BACK,  GAIT),
+  "carry_front": (4, FRONT, "carrying a bulging brown cloth sack of goods over one shoulder, held with both hands, the SAME sack stays on the shoulder in ALL FOUR frames including the last one (never put it down), while walking with " + GAIT.replace("; arms swing gently opposite to the legs", "")),
   "carry_back":  (4, BACK,  "a walk cycle while carrying a bulging brown cloth sack of goods over one shoulder, held with both hands"),
   "chop":        (3, FRONT, "chopping wood with a wooden-handled axe held in both hands: axe raised high behind the head, mid swing, axe down at knee height"),
   "mine":        (3, FRONT, "mining with a pickaxe held in both hands: pickaxe raised overhead, mid swing, pickaxe striking the ground in front"),
