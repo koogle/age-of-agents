@@ -1,13 +1,13 @@
-// Procedural low-poly models in the soft matte miniature (diorama) style.
+// Procedural low-poly models, cel-shaded with thin linework (Ghibli style).
 // One cell is one world unit; every model stands on y = 0 at its anchor.
 import * as THREE from 'three';
-import { paint } from './materials.js';
+import { lined, paint } from './materials.js';
 import { random } from './terrain.js';
 
 export const TEAM_COLOR = 0x2f6fe0;
 const G = {
   box: new THREE.BoxGeometry(1, 1, 1),
-  ball: new THREE.IcosahedronGeometry(1, 1),
+  ball: new THREE.IcosahedronGeometry(1, 3),
   rock: new THREE.DodecahedronGeometry(1, 0),
   gem: new THREE.OctahedronGeometry(1, 0),
   cyl: new THREE.CylinderGeometry(1, 1, 1, 8),
@@ -24,6 +24,8 @@ function part(geometry, color, [x, y, z], [sx, sy, sz], options = {}) {
   if (options.rotation) mesh.rotation.set(...options.rotation);
   mesh.castShadow = options.shadow !== false;
   mesh.receiveShadow = true;
+  // Linework on everything but tiny details, which would turn to dark specks.
+  if (options.line !== false && Math.max(sx, sy, sz) > 0.03) lined(mesh);
   return mesh;
 }
 function group(...children) {

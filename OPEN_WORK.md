@@ -1,6 +1,6 @@
 # Open Work
 
-**Last updated:** 2026-10-01T21:30:00Z
+**Last updated:** 2026-10-02T12:00:00Z
 **Branch:** `claude/rts-frontend-webgl-canvas-gukaet`
 **Base commit:** `477bb8a`
 **Overall status:** Direction change implemented on a feature branch; not merged, not deployed.
@@ -25,7 +25,7 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Open work
 
-0. Art: the HUD is canvas-drawn (diorama style: globe, pills, medallions) with placeholder vector icons. Session "Age of Agents: FAL asset generation (retry)" is generating the UI icon kit and a villager model on branch `claude/fal-generated-assets` (PR into this branch); wire `assets/ui/manifest.json` into `frontend/hud-content.js` once it lands.
+0. Art (Ghibli cel direction): cel ramp, rim light, ink outlines, brush-stroke ground and softer tilt-shift are in. Remaining gap is assets, not models: the FAL session (branch `claude/fal-generated-assets`) is producing villager billboard sprite sheets and 9 painted seamless biome textures. Next: camera-facing villager sprites (feet anchor, mirrored facings, activity frames, blob shadow) and texture-blended terrain under the existing fog field.
 
 1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
 2. Production verification after deploy (`python3 scripts/modal_manage.py verify`) plus a real phone check of touch rotate/pinch.

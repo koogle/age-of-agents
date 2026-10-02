@@ -22,17 +22,18 @@ renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
 scene.background = skyTexture();
-scene.fog = new THREE.Fog(0xdde8ee, 26, 62);
+scene.fog = new THREE.Fog(0xcfe5f2, 26, 62);
 const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
 
 // Warm late-afternoon sun with a soft sky fill, like a lit tabletop model.
-scene.add(new THREE.HemisphereLight(0xcfe4ff, 0x8a8070, 1.5));
-const sun = new THREE.DirectionalLight(0xffe2b4, 2.6);
+scene.add(new THREE.HemisphereLight(0x9fc8ff, 0x8c7f6a, 1.25));
+const sun = new THREE.DirectionalLight(0xfff0d4, 3.0);
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(mobile ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 });
 sun.shadow.bias = -0.0008;
-sun.shadow.radius = 6;
+sun.shadow.radius = 4;
+sun.shadow.intensity = 0.8;
 sun.shadow.blurSamples = 12;
 sun.shadow.normalBias = 0.02;
 scene.add(sun, sun.target);
@@ -295,10 +296,10 @@ function skyTexture() {
   sky.height = 256;
   const context = sky.getContext('2d');
   const gradient = context.createLinearGradient(0, 0, 0, 256);
-  gradient.addColorStop(0, '#7fb3d6');
-  gradient.addColorStop(0.5, '#b8d4e4');
-  gradient.addColorStop(0.85, '#e6ecee');
-  gradient.addColorStop(1, '#f2e8d8');
+  gradient.addColorStop(0, '#3a8ad4');
+  gradient.addColorStop(0.45, '#79bde9');
+  gradient.addColorStop(0.8, '#cfe8f4');
+  gradient.addColorStop(1, '#f4ecd6');
   context.fillStyle = gradient;
   context.fillRect(0, 0, 2, 256);
   const texture = new THREE.CanvasTexture(sky);

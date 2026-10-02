@@ -24,7 +24,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - **Transport:** WebSocket typed commands, command acknowledgements, and full world snapshots. `GET /state` exists for debugging.
 - **Persistence:** SQLite stores the authoritative world snapshot. Respect `AGE_OF_AGENTS_DB` everywhere.
 - **Frontend:** Fullscreen WebGL canvas rendered with Three.js (vendored as one ES module under `frontend/vendor/`), plain ES modules, no build step. Three.js is the only framework; models are procedural code, not imported asset pipelines.
-- **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Soft matte materials, a tilt-shift post-process, and one shared fog-of-war shader field (unexplored land lies under cloud). The interface is painted inside the WebGL canvas (an orthographic overlay of canvas-textured panels with hit regions); a visually hidden DOM mirror of every button keeps keyboard and screen-reader access.
+- **Rendering:** Three-quarter perspective camera with pan, zoom, and rotation. Soft two-tone cel shading with warm ink linework, a tilt-shift post-process, and one shared fog-of-war shader field (unexplored land lies under cloud). The interface is painted inside the WebGL canvas (an orthographic overlay of canvas-textured panels with hit regions); a visually hidden DOM mirror of every button keeps keyboard and screen-reader access.
 - **Spatial authority:** Every unit, step target, building footprint, and live resource exclusively claims its cells; move destinations are reservations. `GameWorld::validate` must hold after every command and tick.
 - **Deployment:** Modal. Verify locally before deploying.
 
@@ -46,7 +46,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 
 The target is a soft 3D tilt-shift diorama of a sunlit Greek island. `assets/reference/diorama_primary.webp` is the primary reference; the older `mediterranean_*.webp` images only support the palette.
 
-- Rounded, matte "painted miniature" models with gentle light falloff; no ink outlines and no hard cel bands.
+- Studio Ghibli-leaning cel look: soft two-tone toon ramp (no hard multi-band posterization), a warm rim light, thin warm-brown ink outlines whose width stays constant on screen, and a painted brush-stroke ground. The look is driven by rendering, palette, painted textures and sprites more than by model detail.
 - Tilt-shift depth of field, puffy cumulus clouds, a distant snow-capped volcano, ships on a deep blue-teal sea.
 - White limestone and marble, terracotta roofs, dark cypresses, olive trees, yellow-green and ochre land; striking accents against soft pastel-leaning tones.
 - The interface is mostly hidden: a round globe minimap, a small speed pill, a resource pill listing only what the player has, and glossy round medallion buttons that appear only when something is selected. Icons and ornament should come from generated art (FAL/Midjourney), not hand-drawn code shapes.

@@ -1,4 +1,4 @@
-// Shared look: soft matte "painted miniature" materials and one fog-of-war
+// Shared look: Ghibli-style cel materials with thin linework and one fog-of-war
 // field sampled by every world material so terrain, props, and buildings fade
 // into the unknown together.
 import * as THREE from 'three';
@@ -111,20 +111,72 @@ export function patchWorld(material, extra) {
   return material;
 }
 
-// Soft matte "painted miniature" surfaces: the diorama reference has no ink
-// lines and no hard cel bands, just gentle light falloff on rounded shapes.
+// Ghibli-style cel shading: two flat light bands joined by a short soft edge
+// (a painted terminator, not a hard toon step). Cool shadow colour comes from
+// the blue sky light; a warm rim catches silhouettes against the sun.
+const ramp = new THREE.DataTexture(new Uint8Array([
+  118, 118, 118, 255, 118, 118, 118, 255, 124, 124, 124, 255, 196, 196, 196, 255,
+  246, 246, 246, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+]), 8, 1);
+ramp.magFilter = THREE.LinearFilter;
+ramp.minFilter = THREE.LinearFilter;
+ramp.needsUpdate = true;
+export const celRamp = ramp;
+
+const RIM_GLSL = /* glsl */`
+#ifdef AOA_RIM
+{
+  float facing = clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0);
+  gl_FragColor.rgb += smoothstep(0.62, 0.95, 1.0 - facing) * vec3(1.0, 0.82, 0.58) * 0.22;
+}
+#endif
+`;
+
 const paintCache = new Map();
 export function paint(color, options = {}) {
   const key = `${color}|${options.emissive || 0}|${options.transparent ? options.opacity : 1}`;
   if (!paintCache.has(key)) {
-    paintCache.set(key, patchWorld(new THREE.MeshStandardMaterial({
+    const material = patchWorld(new THREE.MeshToonMaterial({
       color,
-      roughness: 0.82,
-      metalness: 0,
+      gradientMap: ramp,
       emissive: options.emissive || 0x000000,
       transparent: Boolean(options.transparent),
       opacity: options.opacity ?? 1
-    })));
+    }), shader => {
+      shader.fragmentShader = shader.fragmentShader.replace('#include <tonemapping_fragment>', `${RIM_GLSL}\n#include <tonemapping_fragment>`);
+    });
+    material.defines = { AOA_RIM: '' };
+    paintCache.set(key, material);
   }
   return paintCache.get(key);
+}
+
+// Thin warm-brown linework, as on hand-drawn characters and buildings: back
+// faces pushed out along view-space normals by a depth-scaled amount so the
+// line keeps a constant on-screen width.
+const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x3b2a1e, side: THREE.BackSide });
+lineMaterial.onBeforeCompile = shader => {
+  Object.assign(shader.uniforms, { uCurve: uniforms.uCurve, uCurveCenter: uniforms.uCurveCenter });
+  shader.vertexShader = shader.vertexShader
+    .replace('#include <common>', `#include <common>\n${CURVE_UNIFORMS}`)
+    .replace('#include <project_vertex>', `
+    vec4 mvPosition = vec4(transformed, 1.0);
+    vec3 lineNormal = normal;
+    #ifdef USE_INSTANCING
+    mvPosition = instanceMatrix * mvPosition;
+    lineNormal = mat3(instanceMatrix) * lineNormal;
+    #endif
+    mvPosition = modelViewMatrix * mvPosition;
+    // Width scales with depth so the line stays about 1.5 px on screen.
+    float lineWidth = 0.0021 * -mvPosition.z;
+    mvPosition.xyz += normalize(normalMatrix * lineNormal) * lineWidth;
+    gl_Position = projectionMatrix * mvPosition;
+    ${CURVE_GLSL.replace('gl_Position = projectionMatrix * viewMatrix * bentWorld;', 'gl_Position = projectionMatrix * (viewMatrix * bentWorld + vec4(normalize(normalMatrix * lineNormal) * lineWidth, 0.0));')}`);
+};
+
+export function lined(mesh) {
+  const line = new THREE.Mesh(mesh.geometry, lineMaterial);
+  line.raycast = () => {};
+  mesh.add(line);
+  return mesh;
 }
