@@ -290,10 +290,11 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         total >= cost * 1.5
     });
     let near_start = |kind: ResourceKind| {
+        let (columns, rows) = BuildingKind::TownCenter.size();
         let base = Footprint {
             origin: town_center,
-            columns: 4,
-            rows: 4,
+            columns,
+            rows,
         }
         .center();
         resources
@@ -309,7 +310,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
     })
 }
 
-/// A flat, dry, central 4x4 site for the town center, with two villager spots
+/// A flat, dry, central site for the town center, with two villager spots
 /// in front of it.
 fn choose_start(
     terrain: &[TerrainCell],
@@ -317,20 +318,30 @@ fn choose_start(
 ) -> Option<(CellCoordinate, [CellCoordinate; 2])> {
     let settles = |c: usize, r: usize| {
         let cell = &terrain[at(c, r)];
-        matches!(cell.biome, TerrainBiome::Meadow | TerrainBiome::Prairie) && coast[at(c, r)] >= 3
+        matches!(
+            cell.biome,
+            TerrainBiome::Meadow
+                | TerrainBiome::Prairie
+                | TerrainBiome::Scrubland
+                | TerrainBiome::Heath
+        ) && coast[at(c, r)] >= 3
     };
     let center = (COLUMNS as f64 / 2.0, ROWS as f64 / 2.0);
+    let size = usize::from(BuildingKind::TownCenter.size().0);
     let mut best: Option<(f64, usize, usize)> = None;
-    for row in 1..ROWS - 7 {
-        for column in 1..COLUMNS - 5 {
+    for row in 1..ROWS - (size + 3) {
+        for column in 1..COLUMNS - (size + 1) {
             // Footprint plus a one-cell apron and the villager row in front.
-            let site = (column - 1..column + 5).all(|c| (row - 1..row + 7).all(|r| settles(c, r)));
+            let site = (column - 1..column + size + 1)
+                .all(|c| (row - 1..row + size + 3).all(|r| settles(c, r)));
             if !site {
                 continue;
             }
-            let (x, y) = (column as f64 + 2.0, row as f64 + 2.0);
-            let heights = (column..column + 4)
-                .flat_map(|c| (row..row + 4).map(move |r| f64::from(terrain[at(c, r)].elevation)));
+            let half = size as f64 / 2.0;
+            let (x, y) = (column as f64 + half, row as f64 + half);
+            let heights = (column..column + size).flat_map(|c| {
+                (row..row + size).map(move |r| f64::from(terrain[at(c, r)].elevation))
+            });
             let (lo, hi) = heights.fold((f64::MAX, f64::MIN), |(lo, hi), h| (lo.min(h), hi.max(h)));
             let score = (x - center.0).hypot((y - center.1) * 1.4) + (hi - lo) * 20.0;
             if best.is_none_or(|(s, _, _)| score < s) {
@@ -341,8 +352,8 @@ fn choose_start(
     let (_, column, row) = best?;
     let origin = CellCoordinate::new(column as u16, row as u16);
     let villagers = [
-        CellCoordinate::new(column as u16 + 1, row as u16 + 4),
-        CellCoordinate::new(column as u16 + 3, row as u16 + 4),
+        CellCoordinate::new((column + 1) as u16, (row + size) as u16),
+        CellCoordinate::new((column + size - 2) as u16, (row + size) as u16),
     ];
     Some((origin, villagers))
 }

@@ -318,9 +318,9 @@ impl BuildingKind {
     /// Footprint in cells.
     pub const fn size(self) -> (u16, u16) {
         match self {
-            Self::TownCenter => (4, 4),
-            Self::Granary | Self::Dock => (3, 3),
-            Self::House | Self::Watchtower => (2, 2),
+            Self::TownCenter => (6, 6),
+            Self::Granary | Self::Dock => (4, 4),
+            Self::House | Self::Watchtower => (3, 3),
             _ => (1, 1),
         }
     }
