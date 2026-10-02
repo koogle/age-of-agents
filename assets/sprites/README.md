@@ -128,3 +128,23 @@ About $0.39: eight nano-banana/edit strips including the berry redo, and seven B
 ## Cost
 
 About $0.30: seven nano-banana/edit images (the complete temple, four stages, two redos) and five BiRefNet runs.
+
+# Idle villagers in HD
+
+`villager_idle_hd.png` (2048×1536 RGBA, 512 px cells) and `villager_idle_hd.json`: the idle frames of all three people at twice the resolution, for the poses on screen most of the time.
+
+- **Layout:** rows are `villager`, `villager_woman`, `villager_elder`; columns are idle front 1, front 2, back 1, back 2. `people.<who>.{front,back}` gives the cell rects.
+- **Scale:** `cell [512,512]`, `anchor [256,480]` and `figureHeight 352` are exactly 2× `villager.json`. Feet land on the same pixel after scaling, so the client can swap in the HD cell for idle with the same world size (draw the 512 px cell at the size it draws the 256 px cell).
+- **Within limits:** 2048 px per side, the WebGL2 target limit.
+
+## How it was made (no FAL spend)
+
+No upscaler was needed: the original nano-banana strip generations are about 2.1× the HD figure height (figures about 740–760 px tall), so the HD frames are **downsampled from the original generation pixels**, not upscaled. That keeps the real pen lines, faces, hands, sandals and scarf edges, with no upscaler artifacts to clean up.
+
+- `tools/pack.py` gained `HD_SCALE=2`: the same cutouts, speck removal, per-strip scale and feet anchoring as the shipped 1× sheets, at twice the cell size. Sizes and positions are snapped to exactly 2× the rounded 1× values; the 1× output stays byte-identical to the shipped sheets.
+- `tools/hd_idle.py` collects the idle cells. As a check, each HD frame downsampled 2× matches the shipped 1× frame (mean alpha difference 0.03–0.04 levels, RGB about 0.3).
+- Edge check on a dark background: 0.1% of semi-transparent edge pixels are bright, so there's no light matte fringe.
+
+`villager_idle_hd_contact.jpg` compares the old and new frames at 60 px and 200 px tall on meadow, plus a 1:1 detail crop of the HD frame against the 1× frame stretched 2×.
+
+**Limitation:** if the idle strips are regenerated later (for example by animation fixes), rerun `pack.py` with `HD_SCALE=2` and `hd_idle.py` on the new cutouts. Only idle frames are HD; the other animations stay at 1×.
