@@ -1160,3 +1160,54 @@ fn a_builder_drops_off_carried_goods_before_building() {
     assert!(world.units[0].cargo.is_none());
     assert!(world.buildings.last().unwrap().is_complete());
 }
+
+#[test]
+fn a_carrier_sent_to_the_town_center_unloads_and_idles() {
+    let mut world = fixture::fixture();
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Wood,
+        amount: 9.0,
+    });
+    world
+        .apply_command(Command::Deposit {
+            unit_id: "villager-1".into(),
+            building_id: "base-1".into(),
+        })
+        .unwrap();
+    run(&mut world, 30.0);
+    assert_eq!(world.stockpile.wood, 9.0);
+    assert!(world.units[0].cargo.is_none());
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+}
+
+#[test]
+fn deposit_orders_are_rejected_untouched_when_they_cannot_work() {
+    let mut world = fixture::fixture();
+    let deposit = |building: &str| Command::Deposit {
+        unit_id: "villager-1".into(),
+        building_id: building.into(),
+    };
+    let before = world.clone();
+    assert_eq!(
+        world.apply_command(deposit("base-1")),
+        Err(CommandError::NothingToDeposit)
+    );
+    assert_eq!(world, before);
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Wood,
+        amount: 5.0,
+    });
+    let capacity = world.housing() + 1;
+    house(&mut world, capacity);
+    let house_id = world.buildings.last().unwrap().id.clone();
+    let with_house = world.clone();
+    assert_eq!(
+        world.apply_command(deposit(&house_id)),
+        Err(CommandError::BuildingRefusesCargo)
+    );
+    assert_eq!(world, with_house);
+    assert_eq!(
+        world.apply_command(deposit("nowhere")),
+        Err(CommandError::BuildingNotFound)
+    );
+}
