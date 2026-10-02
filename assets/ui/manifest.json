@@ -4,7 +4,8 @@
     "command": {
       "build": "icons/command_build.png",
       "cancel": "icons/command_cancel.png",
-      "train": "icons/command_train.png"
+      "train": "icons/command_train.png",
+      "stop": "icons/command_stop.png"
     },
     "portrait": {
       "group": "icons/portrait_group.png",

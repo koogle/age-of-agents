@@ -128,3 +128,36 @@ About $0.39: eight nano-banana/edit strips including the berry redo, and seven B
 ## Cost
 
 About $0.30: seven nano-banana/edit images (the complete temple, four stages, two redos) and five BiRefNet runs.
+
+# Resource variants (round 3)
+
+`resources_variants.png` (2048×1536 RGBA, 256 px cells, 8 columns) and `resources_variants.json`: extra individuals per node so the dense 60×40 clusters (woodlines, berry patches, 2×2 clumps, 3-cell patches) don't look stamped. Same conventions as `resources.json`: base anchor `[128, 248]`, stages from full to nearly empty, and `unitsPerPixel` sized like the base node (same `worldSize` along the same axis).
+
+- `nodes.<name>` is a **list** of variants, each `{stages, unitsPerPixel}`: cypress ×4 (single trees), olive ×3, and berry, stone, gold, iron, clay and fiber ×2 each, with three stages.
+- **Use:** per node, pick deterministically by id hash between the base entry in `resources.json` and these variants. Keep the client's per-node scale factor; the variants' `unitsPerPixel` already matches the base node's size convention.
+- **Pipeline** (`tools/var_gen.py`, `tools/var_pack.py`):
+  - nano-banana/edit with the node's existing strip as the reference, asking for a different individual (wider and lower, or narrower and taller) with the same style, scale and stages.
+  - Trees: one strip of distinct cypresses and one of distinct olives.
+  - BiRefNet cutout, then the same ground-line removal and stage splitting as `res_pack.py`.
+  - One berry strip was regenerated once (it dropped a stage).
+- **Limitations:**
+  - A few stone, gold and fiber variants keep a faint teal ground tint at their base from the cool-shadow style.
+  - One clay variant's full stage is a mound without the pit rim.
+
+# Scenery and effects (round 3)
+
+`scenery.png` (2048×654 RGBA, shelf-packed) and `scenery.json`: `sprites.<name>` gives `rect` [x,y,w,h], `anchor` in sprite pixels, `anchorKind` (`bottom` = base or waterline centre, `center`), a suggested `worldWidth`, and `unitsPerPixel` = worldWidth / rect width.
+
+| Sprite | Use |
+| --- | --- |
+| `volcano` | Distant backdrop billboard, bottom-anchored on the horizon or far sea; suggested 24 units wide. Fade it with distance fog. |
+| `ship_small`, `ship_merchant`, `ship_striped` | Waterline-anchored billboards drifting slowly on the deep sea (1.0–1.5 units long). Mirror them for heading. |
+| `cloud_1` … `cloud_4` | Puffy cumulus cards (2.5–5.5 units) floating above the island or sea; centre-anchored. They can also feed the cloud-shadow pass. |
+| `fx_wood_chips`, `fx_stone_dust`, `fx_berry_leaves`, `fx_smoke_puff` | Small work particles (0.25–0.4 units): spawn at the work point, scale, rise and fade. The smoke puff is for the working town center's chimney. |
+
+- **Pipeline** (`tools/scen_gen.py`, `tools/scen_pack.py`): nano-banana/edit with `res/trees.png` (style) and `diorama_primary.webp` (palette) as references, one strip per group. BiRefNet cutout, part splitting, a stem trimmed off the smoke puff, then shelf packing.
+- **Limitations:** the volcano's summit smoke wisp was lost in the cutout; the cloud cards have a faint ink line along their flat bottoms.
+
+`variety_scenery_contact.jpg` shows mixed clusters on the half-unit grid (base plus variants at about 0.45 units per node, 120 px per unit), the scenery as a composition preview (not to scale), and the effects.
+
+Round 3 cost about $1.02 for 40 FAL calls; the stop icon is included. The per-request ledger is `tools/ledger.jsonl`.
