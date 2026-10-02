@@ -190,7 +190,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
     let base = &world.buildings[0];
     assert_eq!(base.kind, BuildingKind::TownCenter);
     assert!(base.is_complete());
-    assert_eq!(base.footprint().cells().count(), 64);
+    assert_eq!(base.footprint().cells().count(), 49);
     assert_eq!(base.researches, TechnologyKind::ALL);
     for unit in &world.units {
         assert!(base.footprint().is_interaction_cell(unit.cell));
@@ -268,7 +268,11 @@ fn move_rejects_invalid_destinations_without_mutation() {
 fn walled_off_destination_is_unreachable() {
     let mut world = fixture::fixture();
     world.resources.clear();
-    for (index, origin) in [cell(0, 8), cell(8, 8), cell(8, 0)].into_iter().enumerate() {
+    let edge = BuildingKind::TownCenter.size().0;
+    for (index, origin) in [cell(0, edge), cell(edge, edge), cell(edge, 0)]
+        .into_iter()
+        .enumerate()
+    {
         world
             .buildings
             .push(town_center(&format!("wall-{index}"), origin, None));
@@ -719,7 +723,8 @@ fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
     world.stockpile.wood = 100.0;
     world.units[0].cell = cell(0, 0);
     // Seal villager-1 into the north-west pocket.
-    for (index, origin) in [cell(8, 0), cell(0, 10), cell(8, 8)]
+    let edge = BuildingKind::TownCenter.size().0;
+    for (index, origin) in [cell(edge, 0), cell(0, edge), cell(edge, edge)]
         .into_iter()
         .enumerate()
     {
@@ -1056,7 +1061,7 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     assert_eq!(world.stockpile.wood, 0.0);
     let house = world.buildings.last().unwrap();
     assert_eq!(house.kind, BuildingKind::House);
-    assert_eq!(house.footprint().columns, 4);
+    assert_eq!(house.footprint().columns, 3);
     assert!(house.produces.is_empty() && house.researches.is_empty());
     assert_eq!(
         build(&mut world, BuildingKind::Monument, cell(30, 30)),

@@ -280,6 +280,7 @@ mod tests {
             building: Some(&snapshot.buildings[0].building.id),
             build: BuildUi::Off,
             reset_armed: false,
+            show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
         };
@@ -318,6 +319,7 @@ mod tests {
             building: None,
             build: BuildUi::Menu,
             reset_armed: false,
+            show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
         };

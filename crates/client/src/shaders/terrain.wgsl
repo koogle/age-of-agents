@@ -115,5 +115,24 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     color = mix(color, vec3<f32>(1.0), foam * 0.85);
     color *= cel_light(n);
     color = world_light(color, xz);
+    // Square simulation cells project as diamonds. Paint their lines on the
+    // terrain itself so the grid follows hills rather than floating above them.
+    let cell = xz * 2.0;
+    let pixel = max(fwidth(cell), vec2<f32>(0.0001));
+    let distance_to_line = min(fract(cell), 1.0 - fract(cell));
+    let lines = 1.0 - smoothstep(vec2<f32>(0.0), pixel * 1.2, distance_to_line);
+    let line = max(lines.x, lines.y) * (1.0 - smoothstep(0.2, 0.6, max(pixel.x, pixel.y)));
+    let q = xz - g.placement.xy;
+    let edge = min(q, g.placement.zw - q);
+    let near = all(q >= vec2<f32>(-2.0)) && all(q <= g.placement.zw + 2.0);
+    let placing = g.placement_color.a > 0.0;
+    let known = layer_at(floor(cell)) <= MOUNTAIN && wild < 0.01;
+    if known && (g.grid.x > 0.5 || (placing && near)) {
+        color = mix(color, vec3<f32>(0.88, 0.92, 0.82), line * 0.4);
+    }
+    if known && placing && all(edge >= vec2<f32>(0.0)) {
+        let boundary = 1.0 - smoothstep(0.0, max(pixel.x, pixel.y), min(edge.x, edge.y) * 2.0);
+        color = mix(color, g.placement_color.rgb, 0.18 + boundary * 0.65);
+    }
     return vec4<f32>(distance_fog(color, in.world), 1.0);
 }

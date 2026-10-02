@@ -28,10 +28,10 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
 
 @fragment
 fn fs(in: VOut) -> @location(0) vec4<f32> {
-    let r = length(in.local);
+    let r = select(length(in.local), max(abs(in.local.x), abs(in.local.y)), in.ring > 1.5);
     var alpha: f32;
     if in.ring > 0.5 {
-        alpha = smoothstep(0.72, 0.8, r) * (1.0 - smoothstep(0.92, 1.0, r));
+        alpha = smoothstep(0.90, 0.94, r) * (1.0 - smoothstep(0.92, 1.0, r));
     } else {
         alpha = 1.0 - smoothstep(0.55, 1.0, r);
     }

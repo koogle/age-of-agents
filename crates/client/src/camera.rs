@@ -1,5 +1,4 @@
-//! Three-quarter camera rig: pan and zoom around a ground target with a fixed heading. Far
-//! zoom tilts toward the horizon and bends the world into a small planet.
+//! Fixed-angle isometric camera: pan and zoom around a ground target.
 use glam::{Mat4, Vec2, Vec3, Vec4Swizzles};
 
 use crate::terrain::{COLUMNS, ROWS};
@@ -10,18 +9,13 @@ pub const NEAR: f32 = 0.1;
 pub const FAR: f32 = 200.0;
 const FOV_Y: f32 = 36.0;
 const YAW: f32 = std::f32::consts::FRAC_PI_4;
+pub(crate) const PITCH: f32 = 0.86;
 
 pub struct Rig {
     pub target: Vec3,
     pub distance: f32,
-    pitch: f32,
     pub width: f32,
     pub height: f32,
-}
-
-fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
-    let t = ((x - edge0) / (edge1 - edge0)).clamp(0.0, 1.0);
-    t * t * (3.0 - 2.0 * t)
 }
 
 impl Rig {
@@ -29,27 +23,17 @@ impl Rig {
         Self {
             target: Vec3::new(15.0, 0.0, 10.5),
             distance: 15.0,
-            pitch: 0.92,
             width: 1.0,
             height: 1.0,
         }
     }
 
-    pub fn update(&mut self) {
-        // Closer views tilt toward the horizon; distant views look down like a
-        // map, then ease back so the planet's limb shows.
-        let play = ((self.distance - MIN_DISTANCE) / (34.0 - MIN_DISTANCE)).clamp(0.0, 1.0);
-        let orbit = smoothstep(34.0, MAX_DISTANCE, self.distance);
-        let near_pitch = 0.72 + (1.12 - 0.72) * play;
-        self.pitch = near_pitch + (0.78 - near_pitch) * orbit;
-    }
-
     pub fn eye(&self) -> Vec3 {
-        let horizontal = self.pitch.cos() * self.distance;
+        let horizontal = PITCH.cos() * self.distance;
         self.target
             + Vec3::new(
                 YAW.sin() * horizontal,
-                self.pitch.sin() * self.distance,
+                PITCH.sin() * self.distance,
                 YAW.cos() * horizontal,
             )
     }
@@ -59,9 +43,13 @@ impl Rig {
     }
 
     pub fn projection(&self) -> Mat4 {
-        Mat4::perspective_rh(
-            FOV_Y.to_radians(),
-            self.width / self.height.max(1.0),
+        let half_height = self.distance * (FOV_Y.to_radians() * 0.5).tan();
+        let half_width = half_height * self.width / self.height.max(1.0);
+        Mat4::orthographic_rh(
+            -half_width,
+            half_width,
+            -half_height,
+            half_height,
             NEAR,
             FAR,
         )
@@ -69,11 +57,6 @@ impl Rig {
 
     pub fn view_proj(&self) -> Mat4 {
         self.projection() * self.view()
-    }
-
-    /// Planet bend strength for the current zoom.
-    pub fn curve(&self) -> f32 {
-        smoothstep(24.0, 70.0, self.distance) * 0.014
     }
 
     /// Screen pixel (top-left origin) of a world point.
@@ -147,11 +130,6 @@ impl Rig {
 
     fn clamp(&mut self) {
         self.distance = self.distance.clamp(MIN_DISTANCE, MAX_DISTANCE);
-        if self.distance > 30.0 {
-            self.target = self
-                .target
-                .lerp(Vec3::new(COLUMNS / 2.0, 0.0, ROWS / 2.0), 0.08);
-        }
         self.target.x = self.target.x.clamp(-1.0, COLUMNS + 1.0);
         self.target.z = self.target.z.clamp(-1.0, ROWS + 1.0);
     }
@@ -200,7 +178,6 @@ mod tests {
         let initial = heading(&rig);
         for factor in [0.4, 2.0, 10.0] {
             rig.zoom(factor);
-            rig.update();
             rig.nudge(1.0, -1.0);
             rig.drag(Vec3::new(10.0, 0.0, 8.0), Vec3::new(9.0, 0.0, 7.0));
             rig.look_at(12.0, 9.0);

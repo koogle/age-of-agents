@@ -73,6 +73,7 @@ pub enum BuildUi {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Action {
     Speed(f64),
+    Grid,
     /// Open the build menu.
     Build,
     /// Start placing this building.
@@ -273,6 +274,7 @@ pub struct Model<'a> {
     pub build: BuildUi,
     /// The "New island" pill was tapped once and waits for confirmation.
     pub reset_armed: bool,
+    pub show_grid: bool,
     pub toast: Option<&'a str>,
     pub camera: Vec2,
 }
@@ -576,6 +578,26 @@ impl Hud {
                 enabled: true,
             });
         }
+
+        let grid = [12.0 * s, 50.0 * s, 76.0 * s, 28.0 * s];
+        self.shape(grid, GLASS, 1.0, 14.0 * s);
+        self.text(
+            atlas,
+            if model.show_grid {
+                "Grid: on"
+            } else {
+                "Grid: off"
+            },
+            (grid[0] + grid[2] / 2.0, grid[1] + 18.5 * s),
+            12.0 * s,
+            if model.show_grid { ACCENT } else { MUTED },
+            true,
+        );
+        self.regions.push(Region {
+            rect: grid,
+            action: Action::Grid,
+            enabled: true,
+        });
 
         // While paused, a pill at the top says so; tapping it resumes, since a
         // stray tap on the pause coin otherwise looks like stuck villagers.
