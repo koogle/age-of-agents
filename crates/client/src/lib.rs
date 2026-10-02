@@ -46,6 +46,14 @@ enum Target {
 #[cfg(target_arch = "wasm32")]
 thread_local! {
     static LAST_VIEW: std::cell::RefCell<(glam::Mat4, f32, f32, usize, usize)> = const { std::cell::RefCell::new((glam::Mat4::IDENTITY, 1.0, 1.0, 0, 0)) };
+    static LAST_HEIGHTS: std::cell::RefCell<Option<terrain::Heights>> = const { std::cell::RefCell::new(None) };
+}
+
+/// Test hook: the drawn ground height at a world point.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn debug_height_at(x: f32, z: f32) -> f32 {
+    LAST_HEIGHTS.with(|heights| heights.borrow().as_ref().map_or(0.0, |h| h.at(x, z)))
 }
 
 /// Test hook: screen pixel (CSS px) of a world point, plus selection counts.
@@ -104,6 +112,11 @@ pub struct App {
     framed: bool,
     /// Whether the page's loading overlay has been dismissed.
     revealed: bool,
+    /// Fingers currently down, by touch id.
+    touches: Vec<(u64, Vec2)>,
+    /// A two-finger pinch/twist is (or was, until every finger lifts) in progress,
+    /// so lifting the last finger must not count as a tap.
+    gesture: bool,
 }
 
 fn now_seconds() -> f64 {
@@ -154,7 +167,15 @@ impl App {
             last_frame: None,
             framed: false,
             revealed: false,
+            touches: Vec::new(),
+            gesture: false,
         }
+    }
+
+    /// The terrain point under a screen pixel.
+    fn ground_at(&self, pixel: Vec2) -> Option<Vec3> {
+        let heights = &self.view.heights;
+        self.rig.ground_at(pixel, |x, z| heights.at(x, z))
     }
 
     fn send(&mut self, command: Command) {
@@ -164,7 +185,7 @@ impl App {
     /// The town center site under the cursor (centred on it) and whether it is clear.
     fn placement(&self, pixel: Vec2) -> Option<(CellCoordinate, bool)> {
         let snapshot = self.view.snapshot.as_ref()?;
-        let point = self.rig.ground_at(pixel)?;
+        let point = self.ground_at(pixel)?;
         let (columns, rows) = aoa_game::BuildingKind::TownCenter.size();
         let column = (point.x / terrain::CELL - columns as f32 / 2.0).round();
         let row = (point.z / terrain::CELL - rows as f32 / 2.0).round();
@@ -212,7 +233,7 @@ impl App {
         if let Some(id) = self.view.unit_at(&self.rig, pixel) {
             return Some(Target::Unit(id));
         }
-        let point = self.rig.ground_at(pixel)?;
+        let point = self.ground_at(pixel)?;
         let cell = terrain::cell_at(point.x, point.z)?;
         if let Some(resource) = snapshot
             .resources
@@ -419,9 +440,71 @@ impl App {
             down_at: pixel,
             last: pixel,
             button,
-            grabbed: self.rig.ground_at(pixel),
+            grabbed: self.ground_at(pixel),
             dragging: false,
         });
+    }
+
+    /// One finger pans, taps and presses the HUD like the mouse; two fingers
+    /// pinch to zoom, twist to rotate and move together to pan.
+    fn touch(&mut self, id: u64, phase: TouchPhase, pixel: Vec2) {
+        let previous = self.touches.clone();
+        match phase {
+            TouchPhase::Started => self.touches.push((id, pixel)),
+            TouchPhase::Moved => {
+                if let Some(entry) = self.touches.iter_mut().find(|(t, _)| *t == id) {
+                    entry.1 = pixel;
+                }
+            }
+            TouchPhase::Ended | TouchPhase::Cancelled => self.touches.retain(|(t, _)| *t != id),
+        }
+        if self.touches.len() >= 2 || (self.gesture && !self.touches.is_empty()) {
+            if !self.gesture {
+                // A second finger turns the press into a gesture: nothing is tapped.
+                self.gesture = true;
+                self.pointer = None;
+                self.hud.release();
+            }
+            if let ([(a, a0), (b, b0), ..], [(c, a1), (d, b1), ..]) =
+                (previous.as_slice(), self.touches.as_slice())
+                && a == c
+                && b == d
+            {
+                self.pinch((*a0, *b0), (*a1, *b1));
+            }
+            return;
+        }
+        if self.gesture {
+            // The last finger of a gesture lifted.
+            self.gesture = false;
+            return;
+        }
+        match phase {
+            TouchPhase::Started => {
+                self.cursor = pixel;
+                self.press(pixel, MouseButton::Left);
+            }
+            TouchPhase::Moved => self.moved(pixel),
+            TouchPhase::Ended => self.release(pixel, false),
+            TouchPhase::Cancelled => self.pointer = None,
+        }
+    }
+
+    /// Two fingers moved from `before` to `after`.
+    fn pinch(&mut self, before: (Vec2, Vec2), after: (Vec2, Vec2)) {
+        let (span0, span1) = (before.1 - before.0, after.1 - after.0);
+        if span0.length() > 8.0 && span1.length() > 8.0 {
+            self.rig
+                .zoom((span0.length() / span1.length()).clamp(0.8, 1.25));
+            let turn = span1.y.atan2(span1.x) - span0.y.atan2(span0.x);
+            self.rig.rotate(turn.sin().atan2(turn.cos()), false);
+        }
+        let (mid0, mid1) = ((before.0 + before.1) * 0.5, (after.0 + after.1) * 0.5);
+        if let Some(grabbed) = self.ground_at(mid0)
+            && let Some(now) = self.rig.plane_at(mid1, grabbed.y)
+        {
+            self.rig.drag(grabbed, now);
+        }
     }
 
     fn moved(&mut self, pixel: Vec2) {
@@ -439,7 +522,8 @@ impl App {
         if pointer.dragging {
             if pointer.button == MouseButton::Right {
                 self.rig.rotate((pixel.x - pointer.last.x) * 0.008, false);
-            } else if let (Some(grabbed), Some(now)) = (pointer.grabbed, self.rig.ground_at(pixel))
+            } else if let Some(grabbed) = pointer.grabbed
+                && let Some(now) = self.rig.plane_at(pixel, grabbed.y)
             {
                 self.rig.drag(grabbed, now);
             }
@@ -531,6 +615,8 @@ impl App {
         if std::mem::take(&mut self.view.heights_dirty) {
             game.renderer
                 .update_ground(&game.gpu.queue, &self.view.heights);
+            #[cfg(target_arch = "wasm32")]
+            LAST_HEIGHTS.with(|heights| *heights.borrow_mut() = Some(self.view.heights.clone()));
         }
         let (right, up) = self.rig.basis();
         let eye = self.rig.eye();
@@ -760,15 +846,7 @@ impl ApplicationHandler<Game> for App {
             }
             WindowEvent::Touch(touch) => {
                 let pixel = Vec2::new(touch.location.x as f32, touch.location.y as f32);
-                match touch.phase {
-                    TouchPhase::Started => {
-                        self.cursor = pixel;
-                        self.press(pixel, MouseButton::Left);
-                    }
-                    TouchPhase::Moved => self.moved(pixel),
-                    TouchPhase::Ended => self.release(pixel, false),
-                    TouchPhase::Cancelled => self.pointer = None,
-                }
+                self.touch(touch.id, touch.phase, pixel);
             }
             WindowEvent::KeyboardInput { event, .. } if event.state == ElementState::Pressed => {
                 self.key(&event.logical_key)

@@ -94,8 +94,9 @@ impl Rig {
         ))
     }
 
-    /// The point on the y = 0 plane under a screen pixel.
-    pub fn ground_at(&self, pixel: Vec2) -> Option<Vec3> {
+    /// The view ray through a screen pixel: origin on the near plane and the
+    /// (unnormalized) direction to the far plane.
+    fn ray(&self, pixel: Vec2) -> (Vec3, Vec3) {
         let ndc = Vec2::new(
             pixel.x / self.width * 2.0 - 1.0,
             1.0 - pixel.y / self.height * 2.0,
@@ -103,12 +104,50 @@ impl Rig {
         let inverse = self.view_proj().inverse();
         let near = inverse.project_point3(ndc.extend(0.0));
         let far = inverse.project_point3(ndc.extend(1.0));
-        let direction = far - near;
+        (near, far - near)
+    }
+
+    /// The point on the horizontal plane at `height` under a screen pixel.
+    pub fn plane_at(&self, pixel: Vec2, height: f32) -> Option<Vec3> {
+        let (near, direction) = self.ray(pixel);
         if direction.y.abs() < 1e-6 {
             return None;
         }
-        let t = -near.y / direction.y;
+        let t = (height - near.y) / direction.y;
         (t > 0.0).then(|| near + direction * t)
+    }
+
+    /// The first point where the view ray through a pixel meets the terrain
+    /// surface `height(x, z)`: marched from above the highest hill, then refined.
+    pub fn ground_at(&self, pixel: Vec2, height: impl Fn(f32, f32) -> f32) -> Option<Vec3> {
+        const TOP: f32 = 2.0;
+        const BOTTOM: f32 = -0.5;
+        let (near, _) = self.ray(pixel);
+        let mut from = self.plane_at(pixel, TOP).unwrap_or(near);
+        let to = self.plane_at(pixel, BOTTOM)?;
+        let steps = ((to - from).length() / 0.05).ceil().max(1.0) as usize;
+        let step = (to - from) / steps as f32;
+        let below = |p: Vec3| p.y <= height(p.x, p.z);
+        if below(from) {
+            return Some(from);
+        }
+        for _ in 0..steps {
+            let next = from + step;
+            if below(next) {
+                let (mut above, mut under) = (from, next);
+                for _ in 0..8 {
+                    let middle = (above + under) * 0.5;
+                    if below(middle) {
+                        under = middle;
+                    } else {
+                        above = middle;
+                    }
+                }
+                return Some(under);
+            }
+            from = next;
+        }
+        Some(to)
     }
 
     fn clamp(&mut self) {
