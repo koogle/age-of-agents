@@ -12,7 +12,7 @@ STYLE = ("The attached images are STYLE references only (a sunlit Greek island d
   "the same warm Mediterranean palette as the references. The texture fills the entire frame edge to edge with an even, uniform density, "
   "no horizon, no perspective, no vignette, no strong shadows, no objects (no trees, no large rocks, no buildings, no paths, no people), no text. Ground: ")
 BIOMES = {
-  "meadow":   ((176, 204, 92),  "lush yellow-green meadow grass with tiny scattered painted wildflowers in white and yellow"),
+  "meadow":   ((172, 196, 100), "soft warm yellow-green meadow grass like sunny Mediterranean hillsides, clearly visible brushed grass strokes in several greens and golden-greens, tiny scattered painted wildflowers in white and yellow"),
   "forest":   ((108, 156, 74),  "darker green forest-floor grass with fallen pine needles and small leaf litter"),
   "prairie":  ((230, 200, 104), "golden dry summer grass with soft ochre tones"),
   "highland": ((214, 206, 182), "pale cream limestone ground with tiny pebbles and thin sparse grass"),
@@ -23,8 +23,9 @@ BIOMES = {
   "beach":    ((237, 209, 153), "warm pale fine beach sand with very faint ripples and a few tiny shell specks"),
   "shallows": ((120, 196, 190), "clear turquoise shallow sea water over pale sand, soft light ripples, seen from directly above"),
 }
-CONTRAST = 0.75           # keep detail but soften it so units stay readable
-FLATTEN = 0.75            # share of large-scale blotchiness removed
+CONTRAST = 1.0            # keep the painted strokes; the shader already lifts contrast about 1.8x
+FLATTEN = 0.5             # share of very-large-scale blotchiness removed
+FLATTEN_STRONG = {"forest": 0.85, "clayland": 0.85, "scrubland": 0.75}   # big blotches that showed the repeat
 OUT = "terrain"
 
 def make(name):
@@ -42,8 +43,8 @@ def finish(name):
     img = raw.crop((m, m, w - m, h - m)).resize((1024, 1024), Image.LANCZOS)
     a = np.asarray(img).astype(np.float32)
     # Flatten large blotches (they make the repeat visible); keep brush-scale detail.
-    low = np.asarray(img.filter(ImageFilter.GaussianBlur(56))).astype(np.float32)
-    a = a - FLATTEN * (low - low.reshape(-1, 3).mean(0))
+    low = np.asarray(img.filter(ImageFilter.GaussianBlur(160))).astype(np.float32)
+    a = a - FLATTEN_STRONG.get(name, FLATTEN) * (low - low.reshape(-1, 3).mean(0))
     # Seamless: blend with the half-offset copy, whose seams sit where this copy is fully opaque.
     rolled = np.roll(np.roll(a, 512, 0), 512, 1)
     t = np.abs(np.linspace(-1, 1, 1024)); w1 = np.clip((1 - t) / 0.45, 0, 1); w1 = w1 * w1 * (3 - 2 * w1)
