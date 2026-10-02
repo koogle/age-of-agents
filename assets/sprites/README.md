@@ -19,20 +19,19 @@
 4. **Pack** (`tools/pack.py`):
    - Drop specks (berries, dirt, ground lines) by connected-component area.
    - Split frames by empty columns.
-   - Scale each strip to the idle_front reference: by head-to-feet height for idle/walk/carry; by height × 0.62 for the forage crouch; by √(blue scarf area) for the tool strips, where raised tools inflate the height.
+   - Scale each strip to the idle_front reference: by head-to-feet height for idle/walk/carry; by height × 0.62 for the forage crouch; for the tool strips, by the geometric mean of the height estimate and the √(blue scarf area) estimate, because raised tools inflate height.
    - Put the feet on y = 240, using each strip's median ground line, and centre on the feet.
 5. **Review sheet** (`tools/spr_contact.py`): `villager_contact.jpg` shows every frame at in-game size (figure about 56 px) on the meadow, prairie and beach textures.
 
 ## Verdict
 
 - **Identity:** consistent. The face, curly dark hair, cream tunic, belt, sandals and blue scarf match in all 34 frames, and the style matches the icon kit.
-- **Motion:** weaker.
-  - Walk frame 2 (front and back) is an exaggerated knee lift that reads like a hop.
-  - carry_front frames 2–4 barely change stride.
-  - The chop strip is about 10% larger than idle; its scale comes from the scarf landmark.
+- **Motion:** walk_front, walk_back and carry_front were regenerated (revision 2) with an explicit low, natural stride (feet near the ground, no knee lift, sack held in every frame). The earlier knee-lift "hop" and carry_front's static stride are gone. Tool strips now scale by the geometric mean described above, which removed the chop strip's 10% oversize.
 - **Facings:** front and back are hard to tell apart at 56 px; the face and scarf knot are the only cues.
 
 ## Cost
+
+Revision 2 (two walk strips, two carry_front tries, three cutouts): about $0.23.
 
 About $0.75: three masters, thirteen strips including two redos, and thirteen BiRefNet runs. The per-request ledger is `tools/ledger.jsonl`.
 
