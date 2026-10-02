@@ -3,23 +3,20 @@
 // three-quarter frame from the walking direction relative to the camera and
 // mirroring for the other two diagonals.
 import * as THREE from 'three';
+import { billboard, loadSheet, showFrame } from './billboard.js';
+import { patchWorld } from './materials.js';
 
 // Three people share one sheet layout; each villager keeps one by id.
 const SHEETS = ['villager', 'villager_woman', 'villager_elder'];
 const sheet = await fetch('/assets/sprites/villager.json').then(response => response.json());
-const textures = SHEETS.map(name => {
-  const texture = new THREE.TextureLoader().load(`/assets/sprites/${name}.png`);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
-});
-const [SHEET_W, SHEET_H] = [2048, 1280];
+const textures = SHEETS.map(name => loadSheet(`/assets/sprites/${name}.png`));
+const SHEET_SIZE = [2048, 1280];
 const [CELL_W, CELL_H] = sheet.cell;
 // The figure is drawn figureHeight px tall inside its cell; in the world it is this tall.
 const FIGURE_HEIGHT = 0.78;
 const WORLD_CELL = FIGURE_HEIGHT * CELL_H / sheet.figureHeight;
 const shadowGeometry = new THREE.CircleGeometry(0.17, 20).rotateX(-Math.PI / 2);
-const shadowMaterial = new THREE.MeshBasicMaterial({ color: 0x2a2a1e, transparent: true, opacity: 0.28, depthWrite: false });
+const shadowMaterial = patchWorld(new THREE.MeshBasicMaterial({ color: 0x2a2a1e, transparent: true, opacity: 0.28, depthWrite: false }));
 
 let camera = null;
 export function setVillagerCamera(next) {
@@ -34,13 +31,9 @@ function seedOf(id) {
 
 export function createVillager(id) {
   const root = new THREE.Group();
-  const map = textures[seedOf(id) % textures.length].clone();
-  map.repeat.set(CELL_W / SHEET_W, CELL_H / SHEET_H);
-  // alphaTest keeps depth to the painted figure, so the ink pass outlines it.
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, alphaTest: 0.5 }));
+  const sprite = billboard(textures[seedOf(id) % textures.length], SHEET_SIZE);
   sprite.center.set(sheet.anchor[0] / CELL_W, 1 - sheet.anchor[1] / CELL_H);
   sprite.scale.set(WORLD_CELL, WORLD_CELL, 1);
-  sprite.raycast = () => {};
   const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
   shadow.position.y = 0.015;
   shadow.raycast = () => {};
@@ -66,8 +59,5 @@ export function poseVillager(root, activity, carrying, facing, time) {
   // Front frames look toward viewer-left, back frames toward viewer-right.
   const mirror = view === 'front' ? screenRight : !screenRight;
   const frames = facings[view];
-  const [x, y] = frames[Math.floor(time * sheet.fps[name]) % frames.length];
-  const map = sprite.material.map;
-  map.repeat.x = (mirror ? -CELL_W : CELL_W) / SHEET_W;
-  map.offset.set((mirror ? x + CELL_W : x) / SHEET_W, 1 - (y + CELL_H) / SHEET_H);
+  showFrame(sprite, frames[Math.floor(time * sheet.fps[name]) % frames.length], mirror);
 }

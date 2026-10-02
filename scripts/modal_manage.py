@@ -28,6 +28,8 @@ FRONTEND_FILES = (
     "terrain.js",
     "world-view.js",
     "villager-sprite.js",
+    "resource-sprites.js",
+    "billboard.js",
     "vendor/three.min.js",
     "vendor/GLTFLoader.js",
     "vendor/BufferGeometryUtils.js",

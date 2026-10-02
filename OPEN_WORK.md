@@ -25,7 +25,7 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Open work
 
-0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Villagers are now generated illustrated billboards (`frontend/villager-sprite.js`, `assets/sprites/villager.*`). Next: resource and tree sprites; meadow texture is still flatter than prairie.
+0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Villagers are now generated illustrated billboards (`frontend/villager-sprite.js`, `assets/sprites/villager.*`). Trees and resource nodes are illustrated billboards too (`frontend/resource-sprites.js`). Next: rim scenery and the sky props are still procedural; sprites are not tinted by the explored/remembered fog; meadow texture is still flatter than prairie.
 0b. Smoothness: units are drawn ~1.6 ticks behind the newest snapshot on a self-correcting presentation clock (`frontend/world-view.js`); verify on a real phone over Modal.
 
 1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
@@ -33,14 +33,11 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 3. Liveness beyond pairwise standoffs (e.g. three-way jams in dead ends) is untested.
 4. Decide whether to delete the unused 2D sprites under `assets/game/` and their Python checks.
 
-## Generated art (branch `claude/fal-generated-assets`, PR into this branch)
+## Generated art
 
-- `assets/ui/`: FAL-generated illustrated icon kit (18 icons at 128 px, paper tile, Greek-key strip and 9-slice frame, `manifest.json`); the canvas HUD draws the icons.
-- `assets/ui/buttons/`: blank coin button frames (normal, hover, pressed, disabled).
-- `assets/models/`: generated GLBs selected with `?glb=`; the temple town center (126 KB) is on by default, while the rigged villager (275 KB, 5 clips) and the cypress (22 KB) are opt-in because they don't read better than the procedural ones at gameplay zoom.
-- `assets/terrain/`: ten seamless painted ground textures (512 webp plus 1024 masters) for `frontend/ground-paint.js`.
-- `assets/sprites/villager{,_woman,_elder}.{png,json}`: three illustrated villager billboard sheets, same layout (34 frames, 256 px cells, feet anchor 128,240), not wired in.
-- FAL spend about $6.63 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+- On master: `assets/ui/` icon kit and coin buttons, `assets/terrain/` painted ground (revision 2), `assets/sprites/villager{,_woman,_elder}` billboards (drawn by `frontend/villager-sprite.js`), `assets/models/` opt-in GLBs (temple town center on by default via `?glb=`).
+- Branch `claude/fal-sprites-resources` (PR #12): base villager walk fix (no hop, moving carry stride; layout unchanged), and `assets/sprites/resources.{png,json}` resource/tree billboards (9 nodes, 21 sprites, depletion stages, base anchor, per-node world scale), not wired in yet.
+- FAL spend about $7.21 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
 
