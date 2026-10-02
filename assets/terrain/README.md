@@ -26,9 +26,11 @@ Names: meadow, forest, prairie, highland, wetland, scrubland, heath, clayland (t
 `finish()` in `tools/terrain.py` is deterministic and free:
 
 1. Crop a 3% border, because the model tends to paint a darker frame or vignette; resample to 1024.
-2. Flatten large blotches: subtract 75% of the 56 px Gaussian low-pass deviation. Big light and dark patches are what make a repeat visible.
+2. Flatten only very large blotches: subtract 50% of the 160 px Gaussian low-pass deviation (85% for forest and clayland, 75% for scrubland, whose big patches showed the repeat at 3×3). Brush-scale strokes are kept, because the shader lifts contrast about 1.8× itself.
 3. Make it seamless: blend with the half-offset copy using a smoothstep weight that is 1 in the middle and 0 at the edges. The output wraps exactly by construction, and the blend zone is soft enough not to show on these homogeneous textures.
-4. Recolour: move the mean onto the target colour and scale deviations by 0.75 (low contrast, so units read on top). The targets are `BIOME_COLORS`, beach (237,209,153) to match the shader's sand, and shallows (120,196,190).
+4. Recolour: move the mean onto the target colour at full contrast (1.0). The targets are `BIOME_COLORS`, except meadow, which uses a softer, warmer (172,196,100) as asked after the in-game review instead of (176,204,92). Beach is (237,209,153) to match the shader's sand, and shallows is (120,196,190).
+
+Revision 2: after an in-game review, the first pass (contrast 0.75, 56 px flattening at 75%) read as flat lime. Meadow was regenerated with a prompt asking for clearly visible brushed grass strokes, and all ten were re-processed with the settings above.
 
 Rejected: inpainting the offset seam with `fal-ai/flux-pro/v1/fill`. It read the cross-shaped mask as an object and painted a raised plank cross into the beach. The first clayland was regenerated once because its pebbles came in two horizontal bands that striped the tile.
 
@@ -36,14 +38,15 @@ Rejected: inpainting the offset seam with `fal-ai/flux-pro/v1/fill`. It read the
 
 - Every texture was checked tiled 2×2 (contact sheet) and with 1:1 crops across the wrap edges.
 - Mean colours land within ±1 of their targets (measured on the 512 webp).
+- Repeat checked on 3×3 tilings; forest keeps a faint medium-scale pattern, which the shader's second rotated sample breaks up.
 - In-game, headless Chromium at gameplay and closest zoom: the shader picks up all ten files (no 404s), and villagers, resources and the town center stay readable on the painted ground.
 
 ## Cost
 
-About **$0.60**: eleven nano-banana/edit generations (ten textures plus the clayland redo) and three Flux Fill attempts that were thrown away. Branch total so far is about $3.92.
+About **$0.64**: twelve nano-banana/edit generations (ten textures plus the clayland and meadow redos) and three Flux Fill attempts that were thrown away.
 
 ## Known limitations
 
 - Scrubland's dry-earth crackle forms a polygon mosaic that is visible at the closest zoom.
 - Highland is very pale and quiet; it may want slightly more texture if it reads as blank.
-- Forest's fallen-needle detail mostly turns into small dark specks after recolouring.
+- Forest keeps a faint medium-scale repeat in a plain 3×3 tiling.

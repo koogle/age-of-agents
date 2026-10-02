@@ -1,13 +1,18 @@
-// Villagers are generated illustrated billboards (assets/sprites/villager.*):
+// Villagers are generated illustrated billboards (assets/sprites/villager*.*):
 // camera-facing sprites anchored at the feet, picking the front or back
 // three-quarter frame from the walking direction relative to the camera and
 // mirroring for the other two diagonals.
 import * as THREE from 'three';
 
+// Three people share one sheet layout; each villager keeps one by id.
+const SHEETS = ['villager', 'villager_woman', 'villager_elder'];
 const sheet = await fetch('/assets/sprites/villager.json').then(response => response.json());
-const texture = new THREE.TextureLoader().load(`/assets/sprites/${sheet.image}`);
-texture.colorSpace = THREE.SRGBColorSpace;
-texture.anisotropy = 4;
+const textures = SHEETS.map(name => {
+  const texture = new THREE.TextureLoader().load(`/assets/sprites/${name}.png`);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+});
 const [SHEET_W, SHEET_H] = [2048, 1280];
 const [CELL_W, CELL_H] = sheet.cell;
 // The figure is drawn figureHeight px tall inside its cell; in the world it is this tall.
@@ -21,9 +26,15 @@ export function setVillagerCamera(next) {
   camera = next;
 }
 
-export function createVillager() {
+function seedOf(id) {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+export function createVillager(id) {
   const root = new THREE.Group();
-  const map = texture.clone();
+  const map = textures[seedOf(id) % textures.length].clone();
   map.repeat.set(CELL_W / SHEET_W, CELL_H / SHEET_H);
   // alphaTest keeps depth to the painted figure, so the ink pass outlines it.
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, alphaTest: 0.5 }));
