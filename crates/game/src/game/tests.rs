@@ -17,7 +17,13 @@ pub(super) fn stand_beside(world: &mut GameWorld, unit: usize, footprint: Footpr
     world.units[unit].step = None;
 }
 
+/// Starts villager-1 gathering at a node with `amount` left. Every other node of
+/// the same kind is emptied, so the gatherer cannot move on to a neighbour.
 fn start_gather_at_resource(world: &mut GameWorld, resource_index: usize, amount: f64) {
+    let kind = world.resources[resource_index].kind;
+    for resource in world.resources.iter_mut().filter(|r| r.kind == kind) {
+        resource.amount = 0.0;
+    }
     world.resources[resource_index].amount = amount;
     world.resources[resource_index].capacity = amount.max(1.0);
     let footprint = world.resources[resource_index].footprint();
@@ -533,7 +539,25 @@ fn simulation_speed_is_authoritative_validated_and_can_pause() {
 }
 
 #[test]
-fn busy_unit_rejects_commands_without_mutation() {
+fn a_new_order_replaces_a_busy_units_task() {
+    let mut world = fixture::fixture();
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "tree-1".into(),
+        })
+        .unwrap();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(5, 5),
+        })
+        .unwrap();
+    assert_eq!(world.units[0].action, UnitAction::Move { to: cell(5, 5) });
+}
+
+#[test]
+fn a_rejected_order_keeps_the_busy_units_task() {
     let mut world = fixture::fixture();
     world
         .apply_command(Command::Gather {
@@ -543,11 +567,11 @@ fn busy_unit_rejects_commands_without_mutation() {
         .unwrap();
     let before = world.clone();
     assert_eq!(
-        world.apply_command(Command::Move {
+        world.apply_command(Command::Gather {
             unit_id: "villager-1".into(),
-            to: cell(5, 5),
+            resource_id: "missing".into(),
         }),
-        Err(CommandError::UnitBusy)
+        Err(CommandError::ResourceNotFound)
     );
     assert_eq!(world, before);
 }
@@ -887,4 +911,69 @@ fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
             building_id: "building-2".into(),
         })
         .unwrap();
+}
+
+#[test]
+fn exhausting_a_node_moves_on_to_the_nearest_of_the_same_kind() {
+    let mut world = fixture::fixture();
+    let first = world
+        .resources
+        .iter()
+        .position(|r| r.id == "tree-1")
+        .unwrap();
+    world.resources[first].amount = 3.0;
+    let (kind, cell) = (world.resources[first].kind, world.resources[first].cell);
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "tree-1".into(),
+        })
+        .unwrap();
+    let mut next = None;
+    for _ in 0..600 {
+        world.tick(0.1);
+        if let UnitAction::Gather { resource_id, .. } = &world.units[0].action
+            && resource_id != "tree-1"
+        {
+            next = Some(resource_id.clone());
+            break;
+        }
+    }
+    let next = next.expect("the gatherer moves on to another node");
+    let node = world.resources.iter().find(|r| r.id == next).unwrap();
+    assert_eq!(node.kind, kind);
+    let (dc, dr) = (
+        u32::from(node.cell.column.abs_diff(cell.column)),
+        u32::from(node.cell.row.abs_diff(cell.row)),
+    );
+    assert!(dc * dc + dr * dr <= NEXT_RESOURCE_RADIUS * NEXT_RESOURCE_RADIUS);
+    assert_eq!(world.resources[first].amount, 0.0);
+}
+
+#[test]
+fn a_gatherer_idles_when_no_node_of_the_same_kind_is_near() {
+    let mut world = fixture::fixture();
+    let first = world
+        .resources
+        .iter()
+        .position(|r| r.id == "tree-1")
+        .unwrap();
+    let kind = world.resources[first].kind;
+    world.resources[first].amount = 3.0;
+    for resource in world.resources.iter_mut() {
+        if resource.kind == kind && resource.id != "tree-1" {
+            resource.amount = 0.0;
+        }
+    }
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "tree-1".into(),
+        })
+        .unwrap();
+    for _ in 0..600 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    assert!(world.units[0].cargo.is_none());
 }

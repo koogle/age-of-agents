@@ -25,7 +25,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
 4. Liveness beyond pairwise standoffs is untested.
-5. Small resource nodes (30 per tree or bush) deplete quickly and the gatherer then goes idle; consider continuing to the nearest node of the same patch (AoE behaviour) if playtesting confirms the micromanagement hurts. Not done: it is close to autonomous task selection, which the milestone forbids.
+5. Done on Jakob's request: gatherers move on to the nearest same-kind node within 10 cells; new orders replace a busy villager's task; sprites take their depth from a point in front of the anchor so slopes no longer cut off building bases.
 6. The legacy Three.js client at `/` reads the new 60×40 grid but draws it at one world unit per cell (twice the size) and draws water and beach flat; it is frozen until removal.
 7. Anno is now a named second inspiration (calm economy, growing settlement) in `AGENTS.md`.
 
