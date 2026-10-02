@@ -139,3 +139,6 @@ The interface is painted inside the WebGL canvas (`frontend/hud.js`, `frontend/u
 The fog of war is one shared shader field: unexplored land lies under a bank of soft cloud, and explored-but-unwatched land is muted. Terrain heights come from fixed noise rather than biome data, so the shape of the land never leaks unexplored information.
 
 The 2D sprites under `assets/game/` are no longer used by the client.
+
+For Midjourney CLI/MCP installation and account setup, see
+[Midjourney asset tools](docs/MIDJOURNEY.md).
