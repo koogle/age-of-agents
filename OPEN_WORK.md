@@ -25,7 +25,7 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 
 ## Open work
 
-0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Next: villager and resource sprites from generated renders; meadow texture is still flatter than prairie.
+0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Villagers are now generated illustrated billboards (`frontend/villager-sprite.js`, `assets/sprites/villager.*`). Next: resource and tree sprites; meadow texture is still flatter than prairie.
 0b. Smoothness: units are drawn ~1.6 ticks behind the newest snapshot on a self-correcting presentation clock (`frontend/world-view.js`); verify on a real phone over Modal.
 
 1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
@@ -39,7 +39,8 @@ Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make pl
 - `assets/ui/buttons/`: blank coin button frames (normal, hover, pressed, disabled).
 - `assets/models/`: generated GLBs selected with `?glb=`; the temple town center (126 KB) is on by default, while the rigged villager (275 KB, 5 clips) and the cypress (22 KB) are opt-in because they don't read better than the procedural ones at gameplay zoom.
 - `assets/terrain/`: ten seamless painted ground textures (512 webp plus 1024 masters) for `frontend/ground-paint.js`.
-- FAL spend about $3.92 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
+- `assets/sprites/villager.{png,json}`: illustrated villager billboard sheet (34 frames, 256 px cells, feet anchor 128,240), not wired in.
+- FAL spend about $4.66 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
 

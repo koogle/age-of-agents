@@ -3,9 +3,9 @@
 import * as THREE from 'three';
 import { heightAt } from './terrain.js';
 import {
-  ACTIVITY_FOR, TEAM_COLOR, createRing, createResource, createTownCenter, createVillager,
-  poseTownCenter, poseVillager, setResourceAmount
+  ACTIVITY_FOR, TEAM_COLOR, createRing, createResource, createTownCenter, poseTownCenter, setResourceAmount
 } from './models.js';
+import { createVillager, poseVillager } from './villager-sprite.js';
 
 const TICK_MS = 100;
 // Units are drawn this many ticks behind the newest snapshot, so jittery
@@ -99,7 +99,7 @@ export function createWorldView(scene, effects) {
       const target = ground(unit.position.x, unit.position.y);
       let entry = units.get(unit.id);
       if (!entry) {
-        const root = createVillager(unit.id);
+        const root = createVillager();
         root.position.copy(target);
         root.add(proxy(unitProxy, 'unit', unit.id));
         const ring = createRing(0.3, TEAM_COLOR);
@@ -193,8 +193,7 @@ export function createWorldView(scene, effects) {
       }
       const turn = Math.atan2(Math.sin(desired - entry.facing), Math.cos(desired - entry.facing));
       entry.facing += turn * Math.min(1, dt * 12);
-      entry.root.rotation.y = entry.facing;
-      poseVillager(entry.root, activity, work?.kind, unit.cargo?.kind || null, time);
+      poseVillager(entry.root, activity, Boolean(unit.cargo), entry.facing, time);
       const selected = selection.units.has(unit.id);
       entry.ring.visible = selected;
       if (selected) entry.ring.scale.setScalar(0.3 + Math.sin(time * 5) * 0.015);
