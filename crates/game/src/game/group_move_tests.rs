@@ -87,10 +87,6 @@ fn group_move_is_atomic_when_any_member_is_invalid() {
             vec!["villager-1".into(), "ghost".into()],
             CommandError::UnitNotFound,
         ),
-        (
-            vec!["villager-1".into(), "villager-2".into()],
-            CommandError::UnitBusy,
-        ),
     ] {
         assert_eq!(
             world.apply_command(Command::GroupMove {

@@ -23,7 +23,8 @@ Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
 - [x] Finer grid: 60×40 half-unit cells (a villager is about 1.5 cells tall), 4×4 town centers, clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
-- [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a busy villager still rejects replacement orders.
+- [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
+- [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells when theirs runs out.
 - [x] Seeded island worldgen: deterministic integer-hash noise, sea, beaches, elevation, biome-placed resource clusters, and a guaranteed fishing-boat budget (wood 300, food 150, stone 80, iron 60, fiber 60, clay 40, with 50% headroom) reachable from the start; compact terrain snapshots.
 - [x] Liveness: head-on standoffs resolve by deterministic yielding (lower index side-steps, highest index wins a contested cell); idle units never rest on another unit's reservation; a destination may be reserved while someone only walks through it.
 
