@@ -20,7 +20,7 @@ fn train_until(world: &mut GameWorld, count: usize) {
 
 #[test]
 fn group_move_assigns_distinct_deterministic_reachable_destinations() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     train_until(&mut world, 6);
     let ids: Vec<_> = world
         .units
@@ -69,7 +69,7 @@ fn group_move_assigns_distinct_deterministic_reachable_destinations() {
 
 #[test]
 fn group_move_is_atomic_when_any_member_is_invalid() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Gather {
             unit_id: "villager-2".into(),
@@ -105,7 +105,7 @@ fn group_move_is_atomic_when_any_member_is_invalid() {
 
 #[test]
 fn crossing_groups_never_share_a_cell() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     train_until(&mut world, 8);
     let (west, east): (Vec<_>, Vec<_>) = world

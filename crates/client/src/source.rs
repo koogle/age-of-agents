@@ -22,9 +22,10 @@ pub enum Source {
 pub type CommandResult = Result<(), String>;
 
 impl Source {
-    pub fn local() -> Self {
+    /// The simulation in-process, on the island grown from `seed`.
+    pub fn local(seed: u64) -> Self {
         Source::Local {
-            world: Box::default(),
+            world: Box::new(GameWorld::generate(seed)),
             accumulator: 0.0,
             fresh: true,
             results: Vec::new(),
@@ -195,7 +196,7 @@ mod tests {
 
     #[test]
     fn the_local_source_ticks_ten_times_a_second_and_reports_rejections() {
-        let mut source = Source::local();
+        let mut source = Source::local(aoa_game::DEFAULT_SEED);
         let mut out = VecDeque::new();
         source.poll(0.0, &mut out);
         assert_eq!(out.len(), 1, "the first poll publishes the starting world");

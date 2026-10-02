@@ -88,7 +88,7 @@ fn material(world: &GameWorld) -> BTreeMap<ResourceKind, f64> {
 /// exercised the interesting paths rather than rejecting everything.
 fn play(seed: u64, steps: usize) -> (usize, usize) {
     let mut rng = Lcg(seed);
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.stockpile.wood = 400.0;
     world.stockpile.food = 400.0;
     let mut accepted_builds = 0;
@@ -140,7 +140,7 @@ fn random_play_preserves_every_invariant() {
 
 #[test]
 fn validation_rejects_overlapping_or_inconsistent_worlds() {
-    let valid = GameWorld::default();
+    let valid = fixture::fixture();
     type Corruption = (&'static str, fn(&mut GameWorld));
     let corrupt: [Corruption; 9] = [
         ("units share a cell", |w| w.units[1].cell = w.units[0].cell),

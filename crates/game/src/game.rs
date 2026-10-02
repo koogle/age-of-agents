@@ -3,6 +3,8 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 mod domain;
+#[cfg(test)]
+mod fixture;
 mod gathering;
 #[cfg(test)]
 mod group_move_tests;
@@ -12,9 +14,12 @@ mod occupancy;
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
+mod terrain_codec;
+mod worldgen;
 
 pub use domain::*;
 use movement::{Goal, Travel};
+pub use worldgen::FISHING_BOAT_COST;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -40,11 +45,14 @@ pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 6.0;
 const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
-const STARTING_TOWN_CENTER: CellCoordinate = CellCoordinate::new(28, 17);
+/// The island new worlds get unless a seed is given.
+pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GameWorld {
+    /// The island this world was generated from.
+    pub seed: u64,
     pub tick: u64,
     pub simulation_speed: f64,
     pub terrain: Vec<TerrainCell>,
@@ -82,6 +90,7 @@ pub struct WorldSnapshot {
     pub rows: u16,
     pub tick: u64,
     pub simulation_speed: f64,
+    #[serde(with = "terrain_codec")]
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
     pub resources: Vec<ResourceNode>,
@@ -194,23 +203,34 @@ impl std::fmt::Display for CommandError {
 
 impl Default for GameWorld {
     fn default() -> Self {
-        let terrain = generate_terrain();
-        let villager = |number: u64, column, row| Unit {
+        Self::generate(DEFAULT_SEED)
+    }
+}
+
+impl GameWorld {
+    /// A fresh world on the island grown from `seed`.
+    pub fn generate(seed: u64) -> Self {
+        let island = worldgen::generate(seed);
+        let villager = |number: u64, cell: CellCoordinate| Unit {
             id: format!("villager-{number}"),
             kind: UnitKind::Villager,
-            cell: CellCoordinate::new(column, row),
+            cell,
             step: None,
             action: UnitAction::Idle,
             cargo: None,
         };
         let mut world = Self {
+            seed: island.seed,
             tick: 0,
             simulation_speed: 1.0,
-            terrain: terrain.clone(),
+            terrain: island.terrain,
             explored_cells: Vec::new(),
-            units: vec![villager(1, 29, 21), villager(2, 31, 21)],
-            resources: generate_resources(&terrain),
-            buildings: vec![town_center("base-1", STARTING_TOWN_CENTER, None)],
+            units: vec![
+                villager(1, island.villagers[0]),
+                villager(2, island.villagers[1]),
+            ],
+            resources: island.resources,
+            buildings: vec![town_center("base-1", island.town_center, None)],
             stockpile: Stockpile::default(),
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
@@ -232,137 +252,6 @@ fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> B
         researches: TechnologyKind::ALL.to_vec(),
         job: None,
     }
-}
-
-fn generate_terrain() -> Vec<TerrainCell> {
-    const SITES: [(u16, u16, TerrainBiome); 8] = [
-        (6, 6, TerrainBiome::Meadow),
-        (22, 4, TerrainBiome::Forest),
-        (42, 6, TerrainBiome::Prairie),
-        (54, 14, TerrainBiome::Highland),
-        (8, 28, TerrainBiome::Wetland),
-        (24, 34, TerrainBiome::Scrubland),
-        (40, 26, TerrainBiome::Heath),
-        (54, 34, TerrainBiome::Clayland),
-    ];
-
-    let mut terrain = Vec::with_capacity(usize::from(WORLD_COLUMNS * WORLD_ROWS));
-    for row in 0..WORLD_ROWS {
-        for column in 0..WORLD_COLUMNS {
-            let (_, _, biome) = SITES
-                .iter()
-                .min_by_key(|(site_column, site_row, _)| {
-                    let dx = i32::from(column) - i32::from(*site_column);
-                    let dy = i32::from(row) - i32::from(*site_row);
-                    dx * dx + dy * dy
-                })
-                .expect("the fixed Voronoi map has sites");
-            terrain.push(TerrainCell {
-                column,
-                row,
-                biome: *biome,
-            });
-        }
-    }
-    terrain
-}
-
-fn compatible_biomes(kind: ResourceKind) -> &'static [TerrainBiome] {
-    match kind {
-        ResourceKind::Wood => &[TerrainBiome::Forest, TerrainBiome::Heath],
-        ResourceKind::Food => &[TerrainBiome::Meadow, TerrainBiome::Prairie],
-        ResourceKind::Stone => &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        ResourceKind::Gold => &[TerrainBiome::Highland],
-        ResourceKind::Iron => &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        ResourceKind::Clay => &[TerrainBiome::Clayland, TerrainBiome::Wetland],
-        ResourceKind::Fiber => &[TerrainBiome::Wetland, TerrainBiome::Prairie],
-        ResourceKind::Coal
-        | ResourceKind::Timber
-        | ResourceKind::Steel
-        | ResourceKind::Bricks
-        | ResourceKind::Cloth
-        | ResourceKind::Rations => &[],
-    }
-}
-
-/// Resource kinds and how they cluster: (kind, id prefix, clusters, nodes per
-/// cluster, amount per node, preferred distance from the base in cells).
-/// Woodlines stretch east-west; the rest are clumps.
-const RESOURCE_CLUSTERS: [(ResourceKind, &str, usize, usize, f64, f64); 7] = [
-    (ResourceKind::Wood, "tree", 3, 10, 30.0, 11.0),
-    (ResourceKind::Food, "berries", 2, 5, 30.0, 8.0),
-    (ResourceKind::Stone, "stone", 2, 4, 40.0, 14.0),
-    (ResourceKind::Gold, "gold", 1, 4, 40.0, 15.0),
-    (ResourceKind::Iron, "iron", 1, 4, 40.0, 16.0),
-    (ResourceKind::Clay, "clay", 2, 3, 40.0, 17.0),
-    (ResourceKind::Fiber, "fiber", 2, 3, 30.0, 17.0),
-];
-
-fn generate_resources(terrain: &[TerrainCell]) -> Vec<ResourceNode> {
-    let base = Position {
-        x: f64::from(WORLD_COLUMNS) / 2.0,
-        y: f64::from(WORLD_ROWS) / 2.0,
-    };
-    let squared = |a: CellCoordinate, b: CellCoordinate, stretch: i32| {
-        let dx = i32::from(a.column) - i32::from(b.column);
-        let dy = i32::from(a.row) - i32::from(b.row);
-        dx * dx + stretch * dy * dy
-    };
-
-    let mut resources: Vec<ResourceNode> = Vec::new();
-    for (kind, prefix, clusters, size, amount, preferred) in RESOURCE_CLUSTERS {
-        let stretch = if kind == ResourceKind::Wood { 4 } else { 1 };
-        let mut number = 0;
-        for _ in 0..clusters {
-            // A cell is free for this cluster when it suits the kind, keeps the
-            // base clear, and stays well away from every earlier cluster.
-            let taken = resources.len();
-            let free = |cell: &&TerrainCell, resources: &[ResourceNode]| {
-                let center = cell.coordinate().center();
-                compatible_biomes(kind).contains(&cell.biome)
-                    && center.distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE
-                    && resources[..taken].iter().all(|resource| {
-                        resource.cell.center().distance(center) + f64::EPSILON
-                            >= RESOURCE_CLUSTER_SEPARATION
-                    })
-                    && resources[taken..]
-                        .iter()
-                        .all(|resource| resource.cell != cell.coordinate())
-            };
-            let site = terrain
-                .iter()
-                .filter(|cell| free(cell, &resources))
-                .min_by_key(|cell| {
-                    let off = (cell.coordinate().center().distance(base) - preferred).abs();
-                    ((off * 16.0).round() as i64, cell.row, cell.column)
-                })
-                .expect("fixed terrain has room for every resource cluster")
-                .coordinate();
-            for _ in 0..size {
-                let cell = terrain
-                    .iter()
-                    .filter(|cell| free(cell, &resources))
-                    .min_by_key(|cell| {
-                        (
-                            squared(cell.coordinate(), site, stretch),
-                            cell.row,
-                            cell.column,
-                        )
-                    })
-                    .expect("fixed terrain has room for every resource node")
-                    .coordinate();
-                number += 1;
-                resources.push(ResourceNode {
-                    id: format!("{prefix}-{number}"),
-                    kind,
-                    cell,
-                    amount,
-                    capacity: amount,
-                });
-            }
-        }
-    }
-    resources
 }
 
 impl GameWorld {
@@ -637,6 +526,8 @@ impl GameWorld {
                         column: cell.column,
                         row: cell.row,
                         biome: (visibility != CellVisibility::Unseen).then_some(cell.biome),
+                        elevation: (visibility != CellVisibility::Unseen)
+                            .then(|| terrain_codec::quantize(cell.elevation)),
                         visibility,
                     }
                 })

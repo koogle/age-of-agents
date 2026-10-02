@@ -6,7 +6,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 ## Milestone 1
 
-- Persistent deterministic 60×40-cell Voronoi-style island with eight connected biomes; cells are finer than a villager is tall, and resources grow in tight woodlines, berry patches and mine clumps
+- Seeded island generation on a 60×40-cell map: value-noise elevation sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water is impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
@@ -98,13 +98,15 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Zoom:** pinch or use the mouse wheel.
 - **Rotate:** two-finger twist, right-drag, or Q/E.
 - **Recover view:** reload to center the camera on the currently visible villagers.
-- **Reset world:** press **Reset world** and confirm to erase progress and restore the deterministic starting state.
+- **Reset world:** press **Reset world** and confirm to erase progress and start a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
 - **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed.
 - **Cancel build placement:** press the cancel button or Escape.
 
 Mouse and touch use the same command semantics.
 
-Schema version 6 stores units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, or the coarser 30×20 grid of version 5) are intentionally dropped because they cannot be translated safely.
+Schema version 7 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, or the all-land map of version 6) are intentionally dropped because they cannot be translated safely.
+
+Snapshots encode terrain compactly (one character per cell for biome and fog, one for quantized elevation of explored cells), so a full snapshot is about 8 KB rather than over 100 KB.
 
 ## Development checks
 
