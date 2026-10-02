@@ -55,7 +55,7 @@ pub struct GameWorld {
     next_unit_id: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UnitView {
     #[serde(flatten)]
     pub unit: Unit,
@@ -63,7 +63,7 @@ pub struct UnitView {
     pub position: Position,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BuildingView {
     #[serde(flatten)]
     pub building: Building,
@@ -71,7 +71,8 @@ pub struct BuildingView {
     pub rows: u16,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+// Clients decode snapshots too; the catalog is static data they already have.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldSnapshot {
     pub columns: u16,
     pub rows: u16,
@@ -83,11 +84,12 @@ pub struct WorldSnapshot {
     pub buildings: Vec<BuildingView>,
     pub stockpile: Stockpile,
     pub researched_technologies: Vec<TechnologyKind>,
+    #[serde(skip_deserializing, default = "DomainCatalog::roadmap")]
     pub catalog: DomainCatalog,
     pub scenario: ScenarioState,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
     Move {
