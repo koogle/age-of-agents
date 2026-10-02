@@ -2,7 +2,8 @@
 // and sea. Heights come from a fixed noise field (never from biome data) so the
 // shape of the land reveals nothing about unexplored terrain.
 import * as THREE from 'three';
-import { CURVE_GLSL, CURVE_UNIFORMS, MAP, patchWorld, paint, uniforms, writeCell, cellTexture } from './materials.js';
+import { GROUND_GLSL, BEACH_LAYER, flushGroundCells, groundUniforms, loadGroundTextures, writeGroundCell } from './ground-paint.js';
+import { CURVE_GLSL, CURVE_UNIFORMS, MAP, celRamp, patchWorld, paint, uniforms, writeCell, cellTexture } from './materials.js';
 
 export const SEA_LEVEL = -0.32;
 const MARGIN = 9;
@@ -64,12 +65,14 @@ function buildGround() {
   geometry.setAttribute('aShade', new THREE.BufferAttribute(shade, 1));
   geometry.computeVertexNormals();
 
-  const material = patchWorld(new THREE.MeshLambertMaterial({ color: 0xffffff }), shader => {
+  const material = patchWorld(new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: celRamp }), shader => {
+    Object.assign(shader.uniforms, groundUniforms);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float aShade;\nvarying float vShade;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvShade = aShade;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vShade;\nuniform float uGrid;')
+      .replace('void main() {', `${GROUND_GLSL}\nvoid main() {`)
       .replace('vec4 diffuseColor = vec4( diffuse, opacity );', /* glsl */`
         vec2 xz = vAoaWorld.xz;
         vec2 outside = max(max(-xz, xz - uMapSize), 0.0);
@@ -77,9 +80,22 @@ function buildGround() {
         // Cell colors are stored as sRGB bytes; light in linear space.
         vec3 biome = pow(texture2D(uCells, clamp(xz / uMapSize, 0.0, 1.0)).rgb, vec3(2.2));
         vec3 land = mix(biome, vec3(0.38, 0.55, 0.16), wild);
-        land *= vShade * (0.92 + 0.16 * aoaNoise(xz * 3.1));
+        land *= vShade * (0.94 + 0.1 * aoaNoise(xz * 3.1));
+        // Painted grass: broad warm and cool patches, then short directional
+        // brush strokes and a few light flecks, like a Ghibli background.
+        float patchTone = aoaFbm(xz * 0.32);
+        land = mix(land * vec3(0.9, 1.0, 0.97), land * vec3(1.1, 1.05, 0.84), patchTone);
+        float stroke = aoaFbm(vec2(xz.x * 7.0 + xz.y * 2.5, xz.y * 1.6 - xz.x * 0.6));
+        land *= 0.9 + 0.2 * stroke;
+        float fleck = step(0.86, aoaNoise(xz * 23.0)) * smoothstep(0.4, 0.8, stroke);
+        land = mix(land, land * vec3(1.18, 1.16, 1.0), fleck * 0.6);
+        // Generated painted ground replaces the procedural strokes where loaded.
+        vec4 painted = groundPaint(xz) * (1.0 - wild);
+        land = land * (1.0 - painted.a) + painted.rgb * vShade * mix(0.94, 1.06, patchTone);
         float h = vAoaWorld.y;
         vec3 sand = vec3(0.93, 0.82, 0.6) * (0.96 + 0.08 * aoaNoise(xz * 6.0));
+        vec4 beach = groundSample(xz, ${BEACH_LAYER}.0);
+        sand = sand * (1.0 - beach.a) + beach.rgb;
         vec3 color = mix(sand, land, smoothstep(-0.2, -0.08, h));
         color = mix(color * vec3(0.35, 0.8, 0.85), color, smoothstep(${SEA_LEVEL - 0.25}, ${SEA_LEVEL}, h));
         float foam = smoothstep(0.03, 0.0, abs(h - ${SEA_LEVEL} - 0.012 * sin(uTime * 1.4 + xz.x * 2.0 + xz.y)));
@@ -134,6 +150,7 @@ const DECOR_BY_BIOME = {
 };
 
 export function createTerrain(scene) {
+  loadGroundTextures();
   scene.add(buildGround());
   scene.add(buildSea());
   scene.add(buildScenery());
@@ -146,8 +163,10 @@ export function createTerrain(scene) {
       const visibility = cell.visibility === 'visible' ? 255 : cell.visibility === 'explored' ? 128 : 0;
       if (visibility) explored += 1;
       writeCell(cell.column, cell.row, cell.biome ? BIOME_COLORS[cell.biome] : UNSEEN_COLOR, visibility);
+      writeGroundCell(cell.column, cell.row, cell.biome);
     }
     cellTexture.needsUpdate = true;
+    flushGroundCells();
     const key = `${explored}:${blockedCells.size}`;
     if (key === decorKey) return;
     decorKey = key;

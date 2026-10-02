@@ -27,7 +27,7 @@ function pass(fragment, toneMapped) {
   return new THREE.ShaderMaterial({
     uniforms: {
       uImage: { value: null }, uStep: { value: new THREE.Vector2() },
-      uFocus: { value: 0.46 }, uBand: { value: 0.42 }, uStrength: { value: 2.4 }
+      uFocus: { value: 0.46 }, uBand: { value: 0.6 }, uStrength: { value: 1.1 }
     },
     vertexShader: VERTEX,
     fragmentShader: fragment,
