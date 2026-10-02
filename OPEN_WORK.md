@@ -18,9 +18,10 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 ## Open work
 
+0. Touch: two fingers pinch-zoom, twist-rotate and pan; taps pick the terrain surface (the seeded island's elevation had made taps miss).
 0. `/play` shows a loading overlay (game download, then art files fetched in parallel, then world setup) until the first world frame is drawn.
 0. Seeded islands (merged in PR #22): `crates/game/src/game/worldgen.rs` generates the island from `AGE_OF_AGENTS_SEED`, `POST /reset?seed=N`, or `/play?local&seed=N`; schema 7 drops older saves. Next: a fishing boat (`FISHING_BOAT_COST`) as the island's goal.
-1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, and touch lacks pinch/twist, so mouse and touch are not yet identical): box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
+1. Parity before `/` switches to the Rust client (review blockers: the HUD has no accessible DOM button mirror yet, so mouse and touch are not yet identical): box select, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
 2. Town center: illustrated temple stages are wired (foundation, 33%, 66%, complete, working); add a client-side doorway glow or smoke for the working state.
 3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
 4. Liveness beyond pairwise standoffs is untested.
