@@ -12,6 +12,7 @@ pub enum Source {
         world: Box<GameWorld>,
         accumulator: f64,
         fresh: bool,
+        results: Vec<CommandResult>,
     },
     #[cfg(target_arch = "wasm32")]
     Remote(remote::Remote),
@@ -26,21 +27,18 @@ impl Source {
             world: Box::default(),
             accumulator: 0.0,
             fresh: true,
+            results: Vec::new(),
         }
     }
 
     /// Advances the clock and returns every new snapshot.
-    pub fn poll(
-        &mut self,
-        dt: f64,
-        out: &mut VecDeque<WorldSnapshot>,
-        results: &mut Vec<CommandResult>,
-    ) {
+    pub fn poll(&mut self, dt: f64, out: &mut VecDeque<WorldSnapshot>) {
         match self {
             Source::Local {
                 world,
                 accumulator,
                 fresh,
+                ..
             } => {
                 if std::mem::take(fresh) {
                     out.push_back(world.snapshot());
@@ -53,14 +51,27 @@ impl Source {
                 }
             }
             #[cfg(target_arch = "wasm32")]
-            Source::Remote(remote) => remote.drain(out, results),
+            Source::Remote(remote) => remote.drain(out),
         }
-        let _ = results;
     }
 
-    pub fn send(&mut self, command: Command, results: &mut Vec<CommandResult>) {
+    /// Outcomes of commands sent since the last call.
+    pub fn take_results(&mut self) -> Vec<CommandResult> {
         match self {
-            Source::Local { world, fresh, .. } => {
+            Source::Local { results, .. } => std::mem::take(results),
+            #[cfg(target_arch = "wasm32")]
+            Source::Remote(remote) => std::mem::take(&mut remote.inbox.borrow_mut().results),
+        }
+    }
+
+    pub fn send(&mut self, command: Command) {
+        match self {
+            Source::Local {
+                world,
+                fresh,
+                results,
+                ..
+            } => {
                 results.push(
                     world
                         .apply_command(command)
@@ -102,15 +113,15 @@ pub mod remote {
     }
 
     #[derive(Default)]
-    struct Inbox {
+    pub(super) struct Inbox {
         snapshots: VecDeque<WorldSnapshot>,
-        results: Vec<CommandResult>,
+        pub(super) results: Vec<CommandResult>,
         last_sequence: u64,
     }
 
     pub struct Remote {
         socket: web_sys::WebSocket,
-        inbox: Rc<RefCell<Inbox>>,
+        pub(super) inbox: Rc<RefCell<Inbox>>,
         request: u64,
         _on_message: Closure<dyn FnMut(web_sys::MessageEvent)>,
     }
@@ -161,14 +172,8 @@ pub mod remote {
             }
         }
 
-        pub fn drain(
-            &mut self,
-            out: &mut VecDeque<WorldSnapshot>,
-            results: &mut Vec<CommandResult>,
-        ) {
-            let mut inbox = self.inbox.borrow_mut();
-            out.extend(inbox.snapshots.drain(..));
-            results.append(&mut inbox.results);
+        pub fn drain(&mut self, out: &mut VecDeque<WorldSnapshot>) {
+            out.extend(self.inbox.borrow_mut().snapshots.drain(..));
         }
 
         pub fn send(&mut self, command: &Command) {
@@ -181,5 +186,25 @@ pub mod remote {
                     .push(Err("not connected".into()));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_local_source_ticks_ten_times_a_second_and_reports_rejections() {
+        let mut source = Source::local();
+        let mut out = VecDeque::new();
+        source.poll(0.0, &mut out);
+        assert_eq!(out.len(), 1, "the first poll publishes the starting world");
+        out.clear();
+        source.poll(0.35, &mut out);
+        assert_eq!(out.len(), 3);
+        source.send(Command::SetSimulationSpeed { multiplier: 7.0 });
+        assert!(source.take_results()[0].is_err());
+        source.send(Command::SetSimulationSpeed { multiplier: 2.0 });
+        assert_eq!(source.take_results(), vec![Ok(())]);
     }
 }
