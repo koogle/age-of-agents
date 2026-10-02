@@ -18,6 +18,7 @@ Core loop: start on a seeded island that holds everything a fishing boat needs, 
 
 ## Open work
 
+0. Robustness: the web client reconnects after a server restart (a deploy) and accepts the new server's snapshot numbering; every response carries `Cache-Control: no-cache`, so phones revalidate the page, game code and art after a deploy. Deploys queue: the workflow cancels a pending run when a newer merge arrives.
 0. Buildings: villagers build town center, house, granary, watchtower and dock from a menu (greyscale when unaffordable); in-world art reuses `assets/loading/buildings.webp` (256 px cells, so close zoom is soft; a higher-resolution sheet would help). The dock has no function until the fishing boat. The HUD command bar moves above the globe on narrow screens, and the page uses 100dvh so phone toolbars no longer hide it.
 0. Touch: two fingers pinch-zoom, twist-rotate and pan; taps pick the terrain surface (the seeded island's elevation had made taps miss).
 0. `/play` shows a loading overlay with the generated title and buildings rising through their stages (`assets/loading/`) (game download, then art files fetched in parallel, then world setup) until the first world frame is drawn.
