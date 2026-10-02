@@ -196,8 +196,8 @@ async fn reset_world(
             .map(|elapsed| elapsed.as_nanos() as u64)
             .unwrap_or_default()
     });
-    let mut world = state.world.lock().await;
     let fresh = GameWorld::generate(seed);
+    let mut world = state.world.lock().await;
     state.store.save(&fresh).map_err(|error| {
         tracing::error!(%error, "world reset could not be saved");
         (
