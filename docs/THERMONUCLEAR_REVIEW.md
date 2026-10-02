@@ -17,7 +17,7 @@ Use this review before committing meaningful changes. It is intentionally severe
 7. Can an entity or building be created more than once?
 8. Does persistence use the configured path on every path and fail clearly on corrupt data?
 9. Did any file cross 1,000 lines? If so, decompose it unless there is an exceptional structural reason.
-10. Did the frontend add a framework beyond Three.js, a build step, an asset pipeline, or an interaction mode the current slice does not need?
+10. Did the client add a dependency, engine layer, or interaction mode the current slice does not need? (The Rust client is wgpu + winit; the only build step is `scripts/build_web.sh`.)
 11. Are mouse and touch semantics identical?
 12. Are models judged at real gameplay zoom on desktop and phone, with consistent identity across animations?
 13. Can any path leave two claims on one cell, a unit inside a footprint, or a reservation that can never be reached?
@@ -34,11 +34,13 @@ Use this review before committing meaningful changes. It is intentionally severe
 - Use deterministic demo data; avoid randomness that makes behavior and tests hard to inspect.
 - Do not silently recover from state corruption by replacing the world.
 
-## Frontend standards
+## Client standards
 
-- Renderer, networking, input, and UI state should remain understandable in one reading; each module owns one of them.
+- Game rules live only in `crates/game`; `crates/client` renders, interpolates, and sends typed commands.
+- Renderer, world source, input, view, and HUD state should remain understandable in one reading; each module owns one of them.
+- The native window and the WebGL2 build share every line except entry points and the WebSocket source.
 - Use plain data and functions before classes or abstractions.
-- Picking raycasts only invisible per-entity proxies and the ground plane; the server re-validates every intent.
+- Picking uses sprite screen rectangles and the ground plane; the simulation re-validates every intent.
 - Presentation (interpolation, animation, particles) never decides gameplay outcomes.
 - Avoid duplicate gesture paths for desktop and mobile.
 - UI buttons must remain accessible real buttons, not invisible canvas regions.
