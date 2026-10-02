@@ -66,3 +66,10 @@ Estimated from fal's published unit prices (`api.fal.ai/v1/models/pricing`): abo
 ## Icon alignment
 
 Every icon under `icons/` (portraits excluded) is normalized by `scripts/normalize_icons.py`. Each icon is centred on its optical centre (halfway between the bounding-box centre and the alpha centroid) and scaled to the same visual weight (square root of the covered area). No pixel may leave the coin face's safe circle. After adding or regenerating an icon, run `python3 scripts/normalize_icons.py --write`. CI runs `--check`, and `--sheet out.png` writes a review sheet with coin and safe-circle guides.
+
+## Round 3: `command_stop`
+
+`icons/command_stop.png` (manifest `icons.command.stop`): a raised open palm, meaning "stop the current task". It replaces the reuse of `command_cancel` (the red X, which also means "cancel placement").
+- Made with `fal-ai/nano-banana/edit` using `resource_wood` and `command_train` as style references, then a BiRefNet cutout, `tools/norm.py` and `scripts/normalize_icons.py --write`.
+- Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
+- It reads distinctly from the X down to 24 px.

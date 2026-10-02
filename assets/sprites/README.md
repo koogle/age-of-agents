@@ -129,6 +129,59 @@ About $0.39: eight nano-banana/edit strips including the berry redo, and seven B
 
 About $0.30: seven nano-banana/edit images (the complete temple, four stages, two redos) and five BiRefNet runs.
 
+# Idle villagers in HD
+
+`villager_idle_hd.png` (2048×1536 RGBA, 512 px cells) and `villager_idle_hd.json`: the idle frames of all three people at twice the resolution, for the poses on screen most of the time.
+
+- **Layout:** rows are `villager`, `villager_woman`, `villager_elder`; columns are idle front 1, front 2, back 1, back 2. `people.<who>.{front,back}` gives the cell rects.
+- **Scale:** `cell [512,512]`, `anchor [256,480]` and `figureHeight 352` are exactly 2× `villager.json`. Feet land on the same pixel after scaling, so the client can swap in the HD cell for idle with the same world size (draw the 512 px cell at the size it draws the 256 px cell).
+- **Within limits:** 2048 px per side, the WebGL2 target limit.
+
+## How it was made (no FAL spend)
+
+No upscaler was needed: the original nano-banana strip generations are about 2.1× the HD figure height (figures about 740–760 px tall), so the HD frames are **downsampled from the original generation pixels**, not upscaled. That keeps the real pen lines, faces, hands, sandals and scarf edges, with no upscaler artifacts to clean up.
+
+- `tools/pack.py` gained `HD_SCALE=2`: the same cutouts, speck removal, per-strip scale and feet anchoring as the shipped 1× sheets, at twice the cell size. Sizes and positions are snapped to exactly 2× the rounded 1× values; the 1× output stays byte-identical to the shipped sheets.
+- `tools/hd_idle.py` collects the idle cells. As a check, each HD frame downsampled 2× matches the shipped 1× frame (mean alpha difference 0.03–0.04 levels, RGB about 0.3).
+- Edge check on a dark background: 0.1% of semi-transparent edge pixels are bright, so there's no light matte fringe.
+
+`villager_idle_hd_contact.jpg` compares the old and new frames at 60 px and 200 px tall on meadow, plus a 1:1 detail crop of the HD frame against the 1× frame stretched 2×.
+
+**Limitation:** if the idle strips are regenerated later (for example by animation fixes), rerun `pack.py` with `HD_SCALE=2` and `hd_idle.py` on the new cutouts. Only idle frames are HD; the other animations stay at 1×.
+
+# Resource variants (round 3)
+
+`resources_variants.png` (2048×1536 RGBA, 256 px cells, 8 columns) and `resources_variants.json`: extra individuals per node so the dense 60×40 clusters (woodlines, berry patches, 2×2 clumps, 3-cell patches) don't look stamped. Same conventions as `resources.json`: base anchor `[128, 248]`, stages from full to nearly empty, and `unitsPerPixel` sized like the base node (same `worldSize` along the same axis).
+
+- `nodes.<name>` is a **list** of variants, each `{stages, unitsPerPixel}`: cypress ×4 (single trees), olive ×3, and berry, stone, gold, iron, clay and fiber ×2 each, with three stages.
+- **Use:** per node, pick deterministically by id hash between the base entry in `resources.json` and these variants. Keep the client's per-node scale factor; the variants' `unitsPerPixel` already matches the base node's size convention.
+- **Pipeline** (`tools/var_gen.py`, `tools/var_pack.py`):
+  - nano-banana/edit with the node's existing strip as the reference, asking for a different individual (wider and lower, or narrower and taller) with the same style, scale and stages.
+  - Trees: one strip of distinct cypresses and one of distinct olives.
+  - BiRefNet cutout, then the same ground-line removal and stage splitting as `res_pack.py`.
+  - One berry strip was regenerated once (it dropped a stage).
+- **Limitations:**
+  - A few stone, gold and fiber variants keep a faint teal ground tint at their base from the cool-shadow style.
+  - One clay variant's full stage is a mound without the pit rim.
+
+# Scenery and effects (round 3)
+
+`scenery.png` (2048×654 RGBA, shelf-packed) and `scenery.json`: `sprites.<name>` gives `rect` [x,y,w,h], `anchor` in sprite pixels, `anchorKind` (`bottom` = base or waterline centre, `center`), a suggested `worldWidth`, and `unitsPerPixel` = worldWidth / rect width.
+
+| Sprite | Use |
+| --- | --- |
+| `volcano` | Distant backdrop billboard, bottom-anchored on the horizon or far sea; suggested 24 units wide. Fade it with distance fog. |
+| `ship_small`, `ship_merchant`, `ship_striped` | Waterline-anchored billboards drifting slowly on the deep sea (1.0–1.5 units long). Mirror them for heading. |
+| `cloud_1` … `cloud_4` | Puffy cumulus cards (2.5–5.5 units) floating above the island or sea; centre-anchored. They can also feed the cloud-shadow pass. |
+| `fx_wood_chips`, `fx_stone_dust`, `fx_berry_leaves`, `fx_smoke_puff` | Small work particles (0.25–0.4 units): spawn at the work point, scale, rise and fade. The smoke puff is for the working town center's chimney. |
+
+- **Pipeline** (`tools/scen_gen.py`, `tools/scen_pack.py`): nano-banana/edit with `res/trees.png` (style) and `diorama_primary.webp` (palette) as references, one strip per group. BiRefNet cutout, part splitting, a stem trimmed off the smoke puff, then shelf packing.
+- **Limitations:** the volcano's summit smoke wisp was lost in the cutout; the cloud cards have a faint ink line along their flat bottoms.
+
+`variety_scenery_contact.jpg` shows mixed clusters on the half-unit grid (base plus variants at about 0.45 units per node, 120 px per unit), the scenery as a composition preview (not to scale), and the effects.
+
+Round 3 cost about $1.02 for 40 FAL calls; the stop icon is included. The per-request ledger is `tools/ledger.jsonl`.
+
 ## Roof cleanup, revision 2 (2026-10-02)
 
 The Rust client's completed and working frames now use a simpler terracotta

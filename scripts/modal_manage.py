@@ -66,18 +66,20 @@ def verify_once() -> None:
         raise RuntimeError("production does not serve the Rust web client")
 
     state = json.loads(fetch("/state"))
-    terrain = state.get("terrain", [])
+    # Terrain is compact: one character per cell ('.' unseen) plus one per height.
+    encoded = state.get("terrain", {})
+    terrain = list(zip(encoded.get("cells", ""), encoded.get("heights", "")))
     units = state.get("units", [])
     if len(terrain) != 2400 or not units or (state.get("columns"), state.get("rows")) != (60, 40):
         raise RuntimeError(f"unexpected world shape: terrain={len(terrain)}, units={len(units)}")
     cells = [(unit["cell"]["column"], unit["cell"]["row"]) for unit in units]
     if len(set(cells)) != len(cells):
         raise RuntimeError("production units share a cell")
-    unseen = [cell for cell in terrain if cell.get("visibility") == "unseen"]
+    unseen = [cell for cell in terrain if cell[0] == "."]
     if not unseen:
         raise RuntimeError("production state has no unseen terrain to verify")
-    if any("biome" in cell for cell in unseen):
-        raise RuntimeError("production leaks biome data for unseen terrain")
+    if any(height != "." for _, height in unseen):
+        raise RuntimeError("production leaks elevation for unseen terrain")
     if state.get("simulation_speed") not in (0.0, 1.0, 2.0):
         raise RuntimeError(f"invalid production simulation speed: {state.get('simulation_speed')}")
     expected_resources = {

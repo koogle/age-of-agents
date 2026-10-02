@@ -1,0 +1,190 @@
+{
+ "image": "scenery.png",
+ "size": [
+  2048,
+  654
+ ],
+ "note": "rect = [x,y,w,h] in the sheet; anchor in sprite pixels (bottom = base/waterline centre, center = sprite centre); worldWidth is a suggestion, unitsPerPixel = worldWidth / rect width",
+ "sprites": {
+  "volcano": {
+   "rect": [
+    0,
+    0,
+    1016,
+    320
+   ],
+   "anchor": [
+    508.0,
+    320
+   ],
+   "anchorKind": "bottom",
+   "worldWidth": 24.0,
+   "unitsPerPixel": 0.023622
+  },
+  "ship_small": {
+   "rect": [
+    1020,
+    0,
+    232,
+    248
+   ],
+   "anchor": [
+    116.0,
+    248
+   ],
+   "anchorKind": "bottom",
+   "worldWidth": 1.0,
+   "unitsPerPixel": 0.00431
+  },
+  "ship_merchant": {
+   "rect": [
+    1256,
+    0,
+    222,
+    248
+   ],
+   "anchor": [
+    111.0,
+    248
+   ],
+   "anchorKind": "bottom",
+   "worldWidth": 1.5,
+   "unitsPerPixel": 0.006757
+  },
+  "ship_striped": {
+   "rect": [
+    849,
+    324,
+    248,
+    241
+   ],
+   "anchor": [
+    124.0,
+    241
+   ],
+   "anchorKind": "bottom",
+   "worldWidth": 1.3,
+   "unitsPerPixel": 0.005242
+  },
+  "cloud_1": {
+   "rect": [
+    1482,
+    0,
+    494,
+    248
+   ],
+   "anchor": [
+    247.0,
+    124.0
+   ],
+   "anchorKind": "center",
+   "worldWidth": 5.0,
+   "unitsPerPixel": 0.010121
+  },
+  "cloud_2": {
+   "rect": [
+    0,
+    324,
+    402,
+    248
+   ],
+   "anchor": [
+    201.0,
+    124.0
+   ],
+   "anchorKind": "center",
+   "worldWidth": 2.5,
+   "unitsPerPixel": 0.006219
+  },
+  "cloud_3": {
+   "rect": [
+    1101,
+    324,
+    504,
+    229
+   ],
+   "anchor": [
+    252.0,
+    114.5
+   ],
+   "anchorKind": "center",
+   "worldWidth": 5.5,
+   "unitsPerPixel": 0.010913
+  },
+  "cloud_4": {
+   "rect": [
+    406,
+    324,
+    439,
+    248
+   ],
+   "anchor": [
+    219.5,
+    124.0
+   ],
+   "anchorKind": "center",
+   "worldWidth": 2.5,
+   "unitsPerPixel": 0.005695
+  },
+  "fx_wood_chips": {
+   "rect": [
+    1609,
+    324,
+    120,
+    102
+   ],
+   "anchor": [
+    60.0,
+    51.0
+   ],
+   "anchorKind": "center",
+   "worldWidth": 0.3,
+   "unitsPerPixel": 0.0025
+  },
+  "fx_stone_dust": {
+   "rect": [
+    0,
+    576,
+    120,
+    78
+   ],
+   "anchor": [
+    60.0,
+    39.0
+   ],
+   "anchorKind": "center",
+   "worldWidth": 0.3,
+   "unitsPerPixel": 0.0025
+  },
+  "fx_berry_leaves": {
+   "rect": [
+    1857,
+    324,
+    120,
+    89
+   ],
+   "anchor": [
+    60.0,
+    44.5
+   ],
+   "anchorKind": "center",
+   "worldWidth": 0.25,
+   "unitsPerPixel": 0.002083
+  },
+  "fx_smoke_puff": {
+   "rect": [
+    1733,
+    324,
+    120,
+    97
+   ],
+   "anchor": [
+    60.0,
+    48.5
+   ],
+   "anchorKind": "center",
+   "worldWidth": 0.4,
+   "unitsPerPixel": 0.003333
+  }
+ }
+}

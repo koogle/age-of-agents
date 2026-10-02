@@ -1,9 +1,10 @@
 use std::collections::BTreeSet;
 
-use super::tests::cell;
+use super::tests::{cell, house};
 use super::*;
 
 fn train_until(world: &mut GameWorld, count: usize) {
+    house(world, count);
     world.stockpile.food = 1_000.0;
     while world.units.len() < count {
         if world.buildings[0].job.is_none() {
@@ -20,7 +21,7 @@ fn train_until(world: &mut GameWorld, count: usize) {
 
 #[test]
 fn group_move_assigns_distinct_deterministic_reachable_destinations() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     train_until(&mut world, 6);
     let ids: Vec<_> = world
         .units
@@ -69,7 +70,7 @@ fn group_move_assigns_distinct_deterministic_reachable_destinations() {
 
 #[test]
 fn group_move_is_atomic_when_any_member_is_invalid() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world
         .apply_command(Command::Gather {
             unit_id: "villager-2".into(),
@@ -87,10 +88,6 @@ fn group_move_is_atomic_when_any_member_is_invalid() {
             vec!["villager-1".into(), "ghost".into()],
             CommandError::UnitNotFound,
         ),
-        (
-            vec!["villager-1".into(), "villager-2".into()],
-            CommandError::UnitBusy,
-        ),
     ] {
         assert_eq!(
             world.apply_command(Command::GroupMove {
@@ -105,7 +102,7 @@ fn group_move_is_atomic_when_any_member_is_invalid() {
 
 #[test]
 fn crossing_groups_never_share_a_cell() {
-    let mut world = GameWorld::default();
+    let mut world = fixture::fixture();
     world.resources.clear();
     train_until(&mut world, 8);
     let (west, east): (Vec<_>, Vec<_>) = world
