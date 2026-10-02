@@ -20,9 +20,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify Rust
         run: |
-          cargo fmt --check
-          cargo test --locked
-          cargo clippy --all-targets --all-features --locked -- -D warnings
+          rustup target add wasm32-unknown-unknown
+          cargo fmt --all --check
+          cargo test --workspace --locked
+          cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+          cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnings
       - name: Install asset-check dependencies
         run: python3 -m pip install --disable-pip-version-check numpy==2.4.3 Pillow==12.3.0
       - name: Verify frontend and deployment files

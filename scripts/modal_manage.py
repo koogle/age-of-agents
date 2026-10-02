@@ -53,6 +53,7 @@ def fetch(path: str, timeout: int = 120) -> bytes:
 def verify_once() -> None:
     comparisons = {
         "/": ROOT / "frontend/index.html",
+        "/play": ROOT / "web/index.html",
         **{f"/frontend/{name}": ROOT / "frontend" / name for name in FRONTEND_FILES},
     }
     for remote_path, local_path in comparisons.items():
@@ -60,6 +61,9 @@ def verify_once() -> None:
         local = local_path.read_bytes()
         if remote != local:
             raise RuntimeError(f"production {remote_path} does not match {local_path.relative_to(ROOT)}")
+
+    if not fetch("/web/pkg/aoa_client_bg.wasm").startswith(b"\0asm"):
+        raise RuntimeError("production does not serve the Rust web client")
 
     state = json.loads(fetch("/state"))
     terrain = state.get("terrain", [])

@@ -27,24 +27,22 @@ See [ROADMAP.md](ROADMAP.md) for the exact acceptance criteria and later milesto
 ## Architecture
 
 ```text
-WebGL client (Three.js, vendored)
-  ├─ pointer/touch input and camera rig
-  ├─ procedural cel-shaded 3D models and animation
-  └─ WebSocket commands/snapshots
-              │
-              ▼
-Rust + Axum server
-  ├─ deterministic game domain
-  ├─ fixed timestep
-  ├─ command validation
-  └─ SQLite snapshot persistence
+crates/game      deterministic simulation (shared, no I/O)
+   ├─ crates/client  wgpu renderer: native window or WebGL2 (wasm)
+   │     ├─ painted ground, illustrated sprite billboards, ink + tilt-shift
+   │     ├─ camera, pointer/touch input, GPU-painted HUD
+   │     └─ world source: in-process simulation, or WebSocket to the server
+   └─ src/ (server)  Axum: fixed timestep, command validation, SQLite
 ```
 
-The server owns the world. The browser renders snapshots and sends player intent; it does not simulate authoritative outcomes.
+Everything is Rust. The server owns the hosted world; the native client and the
+browser's `?local` mode run the same `aoa-game` simulation in-process, so the
+game also runs without any server. The older Three.js client under `frontend/`
+is still served at `/` until the Rust client reaches full parity.
 
 ### World soundness
 
-The world is a 30×20 grid of cells. One derived occupancy map (`src/game/occupancy.rs`) is the single source of truth for who owns which cell:
+The world is a 30×20 grid of cells. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
 
 - Every building footprint (complete or foundation), live resource node, unit cell, and in-progress step target is an **exclusive claim**.
 - A unit claims the next cell **before** stepping into it and releases its old cell only when the step completes, so two bodies never overlap, even mid-stride. Diagonal steps never cut past an occupied corner.
@@ -62,11 +60,23 @@ Requirements:
 - Rust 1.85 or newer
 - A modern browser
 
+Native window, simulation in-process (no server, no browser):
+
 ```bash
-cargo run
+cargo run -p aoa-client --release
 ```
 
-Open <http://localhost:8000>.
+Hosted-style server plus the Rust web client:
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --version 0.2.129 --locked   # matches Cargo.lock
+./scripts/build_web.sh
+cargo run --release
+```
+
+Open <http://localhost:8000/play> (server world) or <http://localhost:8000/play?local>
+(simulation in the page). The legacy Three.js client stays at <http://localhost:8000>.
 
 The default SQLite file is `age_of_agents.db`. Override it with:
 

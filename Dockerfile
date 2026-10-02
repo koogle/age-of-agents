@@ -3,16 +3,14 @@ FROM rust:latest AS builder
 
 WORKDIR /app
 
-# Copy manifest files first for layer caching
+# The workspace: server (root), shared simulation and the wgpu client.
+RUN rustup target add wasm32-unknown-unknown && cargo install wasm-bindgen-cli --version 0.2.129 --locked
 COPY Cargo.toml Cargo.lock ./
-
-# Create a dummy main.rs to build dependencies (cached layer)
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release 2>/dev/null || true
-
-# Now copy the real source and rebuild (only changed files)
 COPY src/ src/
-RUN cargo build --release --bin age-of-agents
+COPY crates/ crates/
+COPY scripts/ scripts/
+COPY web/index.html web/index.html
+RUN cargo build --release --locked -p age-of-agents && ./scripts/build_web.sh
 
 # ── Stage 2: Runtime ────────────────────────────────────────────────
 FROM debian:bookworm-slim
@@ -31,6 +29,7 @@ COPY --from=builder /app/target/release/age-of-agents /app/age-of-agents
 # Copy frontend and assets (sprites, textures, isometric)
 COPY frontend/ /app/frontend/
 COPY assets/ /app/assets/
+COPY --from=builder /app/web/ /app/web/
 
 EXPOSE 8000
 

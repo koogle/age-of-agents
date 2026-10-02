@@ -1,9 +1,14 @@
+[workspace]
+members = [".", "crates/game", "crates/client"]
+resolver = "3"
+
 [package]
 name = "age-of-agents"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+aoa-game = { path = "crates/game" }
 axum = { version = "0.8", features = ["ws"] }
 rusqlite = { version = "0.31", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }

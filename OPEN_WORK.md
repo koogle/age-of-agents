@@ -1,37 +1,26 @@
 # Open Work
 
-**Last updated:** 2026-10-02T14:00:00Z
+**Last updated:** 2026-10-02T09:30:00Z
 **Branch:** `claude/rts-frontend-webgl-canvas-gukaet`
-**Base commit:** `477bb8a`
-**Overall status:** Direction change implemented on a feature branch; not merged, not deployed.
+**Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
 ## Current goal
 
-Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make placement, movement, and actions provably sound in the Rust domain.
+Run as much as possible in Rust: one wgpu client (native window and WebGL2) over the shared `crates/game` simulation, so the game is easy to run locally (`cargo run -p aoa-client`).
 
-## Completed on the branch
+## Done
 
-- Spatial core rebuilt on exclusive cell claims (`src/game/occupancy.rs`, `src/game/movement.rs`, `src/navigation.rs`); schema version 5.
-- 2×2 town center footprints, immediate foundations, `Construct` command for helpers.
-- `GameWorld::validate` on load, after accepted commands, and after ticks in debug builds; randomized deterministic play test.
-- New frontend modules: `app.js`, `controls.js`, `effects.js`, `hud.js`, `materials.js`, `models.js`, `net.js`, `terrain.js`, `world-view.js`, plus vendored `vendor/three.min.js` (r186).
-- CI, `scripts/modal_manage.py verify`, README, ROADMAP, AGENTS.md, and the thermonuclear review updated for the new client.
-
-## Verification completed
-
-- `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test` (53 tests) pass.
-- `node --check` passes for every frontend module.
-- Local server + headless Chromium (SwiftShader): gather, deposit, build foundation, complete town center, train villager, all through real clicks; no console errors; desktop and phone screenshots reviewed.
+- Workspace: `crates/game` (simulation + navigation, 54 tests), root server, `crates/client` (wgpu 30, winit 0.30).
+- Client renders painted biome ground (texture array, ragged blends, fog of war, cloud shadows), sea, illustrated villager/resource/tree billboards, blob shadows and selection rings, depth-based ink lines, tilt-shift and ACES; HUD (resource coins, globe minimap, speed coins, info pill, command coins, toasts) painted on the GPU from the generated kit and Nunito.
+- Sources: in-process simulation (native default, `/play?local`) or the hosted server over WebSocket.
+- Verified in headless Chromium/WebGL2: select, gather, train via HUD, build placement via HUD, speed coins; no page errors.
 
 ## Open work
 
-0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Villagers are now generated illustrated billboards (`frontend/villager-sprite.js`, `assets/sprites/villager.*`). Trees and resource nodes are illustrated billboards too (`frontend/resource-sprites.js`). Next: rim scenery and the sky props are still procedural; sprites are not tinted by the explored/remembered fog; meadow texture is still flatter than prairie.
-0b. Smoothness: units are drawn ~1.6 ticks behind the newest snapshot on a self-correcting presentation clock (`frontend/world-view.js`); verify on a real phone over Modal.
-
-1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
-2. Production verification after deploy (`python3 scripts/modal_manage.py verify`) plus a real phone check of touch rotate/pinch.
-3. Liveness beyond pairwise standoffs (e.g. three-way jams in dead ends) is untested.
-4. Decide whether to delete the unused 2D sprites under `assets/game/` and their Python checks.
+1. Parity before `/` switches to the Rust client: box select, pinch/twist touch gestures, globe drag, DOM accessibility mirror, clouds/volcano/ships, float texts and work particles, persistence for native local play.
+2. Town center: placeholder sheet `assets/game/building_town_center.png` until the FAL temple billboard (foundation/33/66/complete/working) lands; then draw construction stages.
+3. Native window not exercised in CI or this container (no display); verify `cargo run -p aoa-client` on a desktop.
+4. Liveness beyond pairwise standoffs is untested.
 
 ## Generated art
 
