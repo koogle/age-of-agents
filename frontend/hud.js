@@ -121,9 +121,10 @@ export function createHud(renderer, actions) {
   // A coin button in the style of the generated portrait coins: bronze-gold
   // rim, ivory face, and the illustrated icon in the middle.
   function coin(c, x, y, d, image, { enabled = true, hot = false, done = false, label = '', active = false } = {}) {
+    // Whole-pixel centres keep every coin and icon crisp and on one line.
     const r = d / 2;
-    const cx = x + r;
-    const cy = y + r - (hot ? 3 : 0);
+    const cx = Math.round(x + r);
+    const cy = Math.round(y + r) - (hot ? 3 : 0);
     c.save();
     if (!enabled && !done) {
       c.globalAlpha = 0.62;
@@ -155,7 +156,11 @@ export function createHud(renderer, actions) {
     c.arc(cx, cy, r - 1, 0, Math.PI * 2);
     c.strokeStyle = 'rgba(90,60,20,0.6)';
     c.stroke();
-    if (image) c.drawImage(image, cx - r * 0.66, cy - r * 0.66, r * 1.32, r * 1.32);
+    // Icons are normalized (scripts/normalize_icons.py) to sit inside the face.
+    if (image) {
+      const box = Math.round(r * 1.5);
+      c.drawImage(image, cx - box / 2, cy - box / 2, box, box);
+    }
     if (label) {
       if (active) {
         c.fillStyle = STYLE.accent;
