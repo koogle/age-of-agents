@@ -1,6 +1,7 @@
-// Tilt-shift finish: the world is rendered off-screen, then blurred more the
-// further each pixel sits from a horizontal focus band, so the island reads as
-// a miniature diorama. Tone mapping and sRGB output happen in the final pass.
+// Finish passes: fine ink linework found from the depth buffer (silhouettes
+// and creases, one pixel wide like a pen drawing), then a tilt-shift blur that
+// grows away from a horizontal focus band so the island reads as a miniature
+// diorama. Tone mapping and sRGB output happen in the final pass.
 import * as THREE from 'three';
 
 const VERTEX = /* glsl */`
@@ -23,6 +24,38 @@ vec4 blurred() {
   return sum;
 }`;
 
+// Creases and silhouettes are where the screen-space Laplacian of inverse
+// depth is non-zero: inverse depth is linear across any flat surface.
+const INK = /* glsl */`
+uniform sampler2D uImage;
+uniform sampler2D uDepth;
+uniform vec2 uTexel;
+uniform float uNear;
+uniform float uFar;
+uniform float uInk;
+varying vec2 vUv;
+float inverseDepth(vec2 uv) {
+  float z = texture2D(uDepth, uv).x * 2.0 - 1.0;
+  float viewZ = 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear));
+  return 1.0 / viewZ;
+}
+float crease(vec2 step) {
+  float c = inverseDepth(vUv);
+  float a = inverseDepth(vUv + step);
+  float b = inverseDepth(vUv - step);
+  return abs(a + b - 2.0 * c) / c;
+}
+void main() {
+  vec4 color = texture2D(uImage, vUv);
+  float edge = max(max(crease(vec2(uTexel.x, 0.0)), crease(vec2(0.0, uTexel.y))),
+                   max(crease(uTexel), crease(vec2(uTexel.x, -uTexel.y))));
+  float ink = smoothstep(0.0025, 0.012, edge) * uInk;
+  // Lines thin out over far, dense detail rather than turning it to soot.
+  ink *= mix(1.0, 0.55, smoothstep(30.0, 90.0, 1.0 / inverseDepth(vUv)));
+  color.rgb = mix(color.rgb, color.rgb * vec3(0.16, 0.11, 0.08), ink);
+  gl_FragColor = color;
+}`;
+
 function pass(fragment, toneMapped) {
   return new THREE.ShaderMaterial({
     uniforms: {
@@ -40,7 +73,20 @@ function pass(fragment, toneMapped) {
 export function createTiltShift(renderer) {
   const options = { type: THREE.HalfFloatType, samples: 4 };
   const scene = new THREE.WebGLRenderTarget(1, 1, options);
+  scene.depthTexture = new THREE.DepthTexture(1, 1, THREE.FloatType);
+  const inked = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
   const half = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+  const ink = new THREE.ShaderMaterial({
+    uniforms: {
+      uImage: { value: scene.texture }, uDepth: { value: scene.depthTexture }, uTexel: { value: new THREE.Vector2() },
+      uNear: { value: 0.1 }, uFar: { value: 1000 }, uInk: { value: 0.9 }
+    },
+    vertexShader: VERTEX,
+    fragmentShader: INK,
+    depthTest: false,
+    depthWrite: false,
+    toneMapped: false
+  });
   const horizontal = pass(`${BLUR}\nvoid main() { gl_FragColor = blurred(); }`, false);
   const vertical = pass(`${BLUR}
     void main() {
@@ -64,6 +110,8 @@ export function createTiltShift(renderer) {
     setSize(width, height) {
       const dpr = renderer.getPixelRatio();
       scene.setSize(Math.round(width * dpr), Math.round(height * dpr));
+      inked.setSize(Math.round(width * dpr), Math.round(height * dpr));
+      ink.uniforms.uTexel.value.set(1 / (width * dpr), 1 / (height * dpr));
       half.setSize(Math.round(width * dpr), Math.round(height * dpr));
       horizontal.uniforms.uStep.value.set(1 / (width * dpr), 0);
       vertical.uniforms.uStep.value.set(0, 1 / (height * dpr));
@@ -71,8 +119,13 @@ export function createTiltShift(renderer) {
     render(world, camera) {
       renderer.setRenderTarget(scene);
       renderer.render(world, camera);
+      quad.material = ink;
+      ink.uniforms.uNear.value = camera.near;
+      ink.uniforms.uFar.value = camera.far;
+      renderer.setRenderTarget(inked);
+      renderer.render(quadScene, quadCamera);
       quad.material = horizontal;
-      horizontal.uniforms.uImage.value = scene.texture;
+      horizontal.uniforms.uImage.value = inked.texture;
       renderer.setRenderTarget(half);
       renderer.render(quadScene, quadCamera);
       quad.material = vertical;

@@ -7,7 +7,11 @@ import {
   poseTownCenter, poseVillager, setResourceAmount
 } from './models.js';
 
-const SNAPSHOT_MS = 100;
+const TICK_MS = 100;
+// Units are drawn this many ticks behind the newest snapshot, so jittery
+// arrivals still always have a sample to interpolate toward.
+const PLAYOUT_TICKS = 1.6;
+const HISTORY = 6;
 const proxyMaterial = new THREE.MeshBasicMaterial({ visible: false });
 const unitProxy = new THREE.CylinderGeometry(0.28, 0.28, 0.75, 8).translate(0, 0.37, 0);
 const resourceProxy = new THREE.BoxGeometry(0.9, 0.7, 0.9).translate(0, 0.35, 0);
@@ -20,6 +24,10 @@ export function createWorldView(scene, effects) {
   const buildings = new Map();
   const markers = [];
   let world = null;
+  // Presentation clock in server ticks; advanced smoothly every frame and
+  // nudged toward the newest tick, never reset by an individual snapshot.
+  let renderTick = null;
+  let latestTick = 0;
 
   function proxy(geometry, type, id) {
     const mesh = new THREE.Mesh(geometry, proxyMaterial);
@@ -36,6 +44,8 @@ export function createWorldView(scene, effects) {
   function sync(next, now) {
     const firstSync = world === null;
     world = next;
+    latestTick = next.tick;
+    if (renderTick === null || Math.abs(latestTick - PLAYOUT_TICKS - renderTick) > 8) renderTick = latestTick - PLAYOUT_TICKS;
     const terrainBiome = cell => next.terrain[cell.row * next.columns + cell.column]?.biome;
 
     const seenResources = new Set();
@@ -97,7 +107,7 @@ export function createWorldView(scene, effects) {
         ring.visible = false;
         root.add(ring);
         scene.add(root);
-        entry = { root, ring, from: target.clone(), to: target.clone(), t0: now, facing: 0, nextFx: 0 };
+        entry = { root, ring, samples: [], velocity: new THREE.Vector3(), facing: 0, nextFx: 0 };
         units.set(unit.id, entry);
         // A villager appearing after the first snapshot was just trained.
         if (!firstSync) effects.burst('dust', target);
@@ -108,9 +118,11 @@ export function createWorldView(scene, effects) {
           effects.floatText(`+${Math.round(cargo.amount)} ${LABEL[cargo.kind] || cargo.kind}`, target.clone().setY(target.y + 0.8));
         }
       }
-      entry.from.copy(entry.root.position);
-      entry.to.copy(target);
-      entry.t0 = now;
+      // A command snapshot repeats the current tick: replace that sample.
+      const last = entry.samples[entry.samples.length - 1];
+      if (last && last.tick >= next.tick) last.position.copy(target);
+      else entry.samples.push({ tick: next.tick, position: target });
+      if (entry.samples.length > HISTORY) entry.samples.shift();
       entry.data = unit;
     }
     removeMissing(units, seenUnits);
@@ -138,18 +150,37 @@ export function createWorldView(scene, effects) {
     return null;
   }
 
+  function sampleAt(samples, tick, out) {
+    let i = samples.length - 1;
+    while (i > 0 && samples[i - 1].tick > tick) i -= 1;
+    const b = samples[i];
+    const a = samples[i - 1];
+    if (!a || tick >= b.tick) return out.copy(b.position);
+    if (tick <= a.tick) return out.copy(a.position);
+    return out.lerpVectors(a.position, b.position, (tick - a.tick) / (b.tick - a.tick));
+  }
+
+  const previous = new THREE.Vector3();
   function frame(now, time, dt, selection) {
+    if (renderTick !== null) {
+      // Run slightly fast or slow to hold the playout buffer; stop at the
+      // newest tick when the simulation pauses.
+      const lag = latestTick - PLAYOUT_TICKS - renderTick;
+      const rate = THREE.MathUtils.clamp(1 + lag * 0.35, 0.6, 1.6);
+      renderTick = Math.min(latestTick, renderTick + (dt * 1000 / TICK_MS) * rate);
+    }
     for (const entry of units.values()) {
       const unit = entry.data;
-      const k = Math.min(1, (now - entry.t0) / SNAPSHOT_MS);
-      entry.root.position.lerpVectors(entry.from, entry.to, k);
-      const dx = entry.to.x - entry.from.x;
-      const dz = entry.to.z - entry.from.z;
-      const moving = unit.step !== null || Math.hypot(dx, dz) > 0.002;
+      previous.copy(entry.root.position);
+      sampleAt(entry.samples, renderTick, entry.root.position);
+      if (dt > 0) entry.velocity.lerp(previous.sub(entry.root.position).multiplyScalar(-1 / dt), Math.min(1, dt * 10));
+      const dx = entry.velocity.x;
+      const dz = entry.velocity.z;
+      const moving = Math.hypot(dx, dz) > 0.05;
       const work = moving ? null : workTarget(unit);
       let activity = moving ? 'walk' : 'idle';
       let desired = entry.facing;
-      if (moving && Math.hypot(dx, dz) > 0.002) desired = Math.atan2(dx, dz);
+      if (moving) desired = Math.atan2(dx, dz);
       if (work) {
         activity = work.kind ? ACTIVITY_FOR[work.kind] || 'forage' : 'build';
         desired = Math.atan2(work.x - entry.root.position.x, work.z - entry.root.position.z);
