@@ -87,6 +87,9 @@ struct TownCenterSheet {
     size: [f32; 2],
     cell: [f32; 2],
     anchor: [f32; 2],
+    /// Lowest painted pixel of the front step, in cell pixels.
+    #[serde(rename = "baseBottom")]
+    base_bottom: [f32; 2],
     #[serde(rename = "unitsPerPixel")]
     units_per_pixel: f32,
     frames: HashMap<String, [f32; 4]>,
@@ -326,6 +329,7 @@ impl WorldView {
                 size: [size, size],
                 pivot,
                 uv: uv(rect, resources.size, false),
+                pull: 0.3 * size,
             }
         };
         for resource in &snapshot.resources {
@@ -388,13 +392,18 @@ impl WorldView {
                         }
                     }
                 };
+                // The art's base bottom is BASE_PX; stand it on the footprint
+                // edge nearest the camera (see `grounded`).
+                const BASE_PX: f32 = 248.0;
+                let drop = (BASE_PX - center_px) / sheet.cell[1] * width;
                 sprites.push((
                     SHEET_BUILDINGS,
                     Sprite {
-                        anchor: center.to_array(),
+                        anchor: grounded(heights, center, rig.eye(), drop).to_array(),
                         size: [width, width * sheet.cell[1] / sheet.cell[0]],
-                        pivot: [0.5, 1.0 - center_px / sheet.cell[1]],
+                        pivot: [0.5, 1.0 - BASE_PX / sheet.cell[1]],
                         uv: uv(sheet.frames[row][stage], sheet.size, false),
+                        pull: 0.08 * width,
                     },
                 ));
                 if selection.building.as_deref() == Some(building.building.id.as_str()) {
@@ -420,10 +429,20 @@ impl WorldView {
             sprites.push((
                 SHEET_TOWN_CENTER,
                 Sprite {
-                    anchor: center.to_array(),
+                    anchor: grounded(
+                        heights,
+                        center,
+                        rig.eye(),
+                        (tc.base_bottom[1] - tc.anchor[1]) / tc.cell[1] * size,
+                    )
+                    .to_array(),
                     size: [size, size * tc.cell[1] / tc.cell[0]],
-                    pivot: [tc.anchor[0] / tc.cell[0], 1.0 - tc.anchor[1] / tc.cell[1]],
+                    pivot: [
+                        tc.anchor[0] / tc.cell[0],
+                        1.0 - tc.base_bottom[1] / tc.cell[1],
+                    ],
                     uv: uv(tc.frames[frame], tc.size, false),
+                    pull: 0.08 * size,
                 },
             ));
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
@@ -519,6 +538,13 @@ impl WorldView {
             } else {
                 (entry.variant, &animation[view], [2048.0, 1280.0])
             };
+            // The second standing frame from behind is mid-step, so a villager
+            // seen from the back holds the first one instead of walking on the spot.
+            let frames = if name == "idle" && view == "back" {
+                &frames[..1]
+            } else {
+                &frames[..]
+            };
             let rect = frames[(time * fps) as usize % frames.len()];
             sprites.push((
                 sheet,
@@ -527,6 +553,7 @@ impl WorldView {
                     size: [cell_size, cell_size],
                     pivot,
                     uv: uv(rect, sheet_size, mirror),
+                    pull: 0.3 * cell_size,
                 },
             ));
             decals.push(Decal {
@@ -600,6 +627,24 @@ fn work_target(
         }
         _ => None,
     }
+}
+
+/// Where a building's picture stands. A flat picture anchored at the middle
+/// of its footprint hangs its front steps below the ground, and those points
+/// swim against the terrain whenever the camera pans, zooms or turns. Instead
+/// the bottom of the art stands on the ground on the camera's side of the
+/// footprint, `drop` (its on-screen distance below the middle, in world units)
+/// divided by the sine of a typical view pitch away from the middle. A fixed
+/// distance keeps it from creeping as the pitch changes with zoom.
+fn grounded(heights: &Heights, center: Vec3, eye: Vec3, drop: f32) -> Vec3 {
+    const TYPICAL_PITCH_SINE: f32 = 0.8;
+    let toward = Vec2::new(eye.x - center.x, eye.z - center.z).normalize_or_zero();
+    let distance = drop / TYPICAL_PITCH_SINE;
+    ground(
+        heights,
+        center.x + toward.x * distance,
+        center.z + toward.y * distance,
+    )
 }
 
 /// World point at the middle of a building's footprint.
