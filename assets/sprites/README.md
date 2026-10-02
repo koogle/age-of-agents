@@ -45,7 +45,7 @@ All three share the same layout, anchor, frame order and royal-blue team scarf, 
 
 - **Identity:** consistent within each sheet, and the three people read as distinct at about 56 px (headscarf, grey hair). The base villager's face, curly hair, tunic, belt, sandals and blue scarf match in all 34 frames, and the style matches the icon kit.
 - **Variant back views:** the woman's and elder's idle and walk backs show the back. Their **carry_back** strips stayed near-profile (walking right, face hidden or in profile) after three tries, so they read as walking away sideways rather than a true three-quarter back.
-- **Motion:** the base villager's walk_front, walk_back and carry_front were regenerated (revision 2) with an explicit low, natural stride (feet near the ground, no knee lift, sack held in every frame). The earlier knee-lift "hop" and carry_front's static stride are gone. The woman and elder sheets still have their original walks.
+- **Motion:** the base villager's walk_front, walk_back and carry_front were regenerated (revision 2) with an explicit low, natural stride (feet near the ground, no knee lift, sack held in every frame). The earlier knee-lift "hop" and carry_front's static stride are gone. Revision 3 gave the woman and elder the same low-stride walk_front, walk_back and carry_front, except the elder's walk_back: its regeneration drifted into a side profile, so his earlier back-turned walk_back (which already had a normal stride) was kept.
 - **Facings:** front and back are hard to tell apart at 56 px; the face and scarf knot are the only cues.
 
 ## Cost
@@ -54,6 +54,7 @@ About **$2.68** in total:
 - Base villager: about $0.75 (three masters, thirteen strips including two redos, thirteen BiRefNet runs).
 - Two variants: about $1.93 (four masters including the back views, 22 strips, eleven back-view redos, 33 BiRefNet runs). The per-request ledger is `tools/ledger.jsonl`.
 - Base villager revision 2 (two walk strips, two carry_front tries, three cutouts): about $0.23.
+- Variant stride fix, revision 3 (six strips, five cutouts): about $0.29.
 
 The other images in this folder (`agent_*.png`, `sprite_*.png`, `tile_*.png`, `building_towncenter.png`, `test_bg_removed.png`) are older experiments and are not part of this sheet.
 
@@ -84,12 +85,15 @@ The other images in this folder (`agent_*.png`, `sprite_*.png`, `tile_*.png`, `b
 ## Verdict
 
 - **Style:** consistent with the villager and the Mediterranean palette. Nodes are distinct and their silhouettes read at game size; depletion stages shrink visibly for stone, gold, iron, clay and fiber.
+- **Revision 2:**
+  - Berry was regenerated with large, bold berries and explicit counts per stage (many, three, none), so berries read as red dots at about 60 px per cell and the three stages are clearly different.
+  - Gold was regenerated as an irregular, lumpy boulder instead of a cube; its `unitsPerPixel` changed accordingly.
+  - Rects are unchanged.
 - **Weak spots:**
-  - Red berries are barely visible at about 60 px per cell; the full bush mostly reads as darker. Berry stages 2 and 3 are close.
-  - Stone stage 3 is tiny rubble that nearly disappears.
-  - Gold's full stage is an oddly cubic block.
+  - Stone stage 3 is tiny rubble that nearly disappears (kept on purpose).
+  - Gold's middle stage shows only a little gold.
   - Fiber's full stage had a small baked shadow, mostly removed by the cutout.
 
 ## Cost
 
-About $0.39: eight nano-banana/edit strips including the berry redo, and seven BiRefNet runs.
+About $0.39: eight nano-banana/edit strips including the berry redo, and seven BiRefNet runs. Revision 2 (three berry tries, one gold strip, two cutouts): about $0.18.
