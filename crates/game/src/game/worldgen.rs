@@ -455,10 +455,11 @@ fn place_resources(
     town_center: CellCoordinate,
     rng: &mut Rng,
 ) -> Vec<ResourceNode> {
+    let (columns, rows) = BuildingKind::TownCenter.size();
     let base = Footprint {
         origin: town_center,
-        columns: 4,
-        rows: 4,
+        columns,
+        rows,
     }
     .center();
     let mut taken = vec![false; terrain.len()];
@@ -542,10 +543,11 @@ fn reachable_only(
     town_center: CellCoordinate,
     start: CellCoordinate,
 ) -> Vec<ResourceNode> {
+    let (columns, rows) = BuildingKind::TownCenter.size();
     let footprint = Footprint {
         origin: town_center,
-        columns: 4,
-        rows: 4,
+        columns,
+        rows,
     };
     let mut blocked: Vec<bool> = terrain
         .iter()
