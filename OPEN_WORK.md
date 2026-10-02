@@ -1,38 +1,50 @@
 # Open Work
 
-**Last updated:** 2026-08-13T18:43:00Z
-**Branch:** `master`
-**Base commit:** `f46ee17`
-**Overall status:** In progress — Slices A+B pushed; local browser and production release gates active
+**Last updated:** 2026-10-02T14:00:00Z
+**Branch:** `claude/rts-frontend-webgl-canvas-gukaet`
+**Base commit:** `477bb8a`
+**Overall status:** Direction change implemented on a feature branch; not merged, not deployed.
 
 ## Current goal
 
-Release the integrated expandable domain foundation and multi-unit controls, then continue with a steel economy vertical slice plus one low-overlap roadmap lane.
+Replace the Canvas 2D client with a fullscreen Three.js WebGL client and make placement, movement, and actions provably sound in the Rust domain.
 
-## Completed in the working tree
+## Completed on the branch
 
-- `master` and `origin/master` both point to `f46ee17`; the primary checkout was clean when this checkpoint was refreshed.
-- Slice A is integrated: explicit 13-resource/14-building/5-unit catalogs, five recipes, scenario state, save migration, and regressions.
-- Slice B is integrated: Shift-box selection, explicit touch long-press additive selection, atomic typed group move, deterministic distinct destinations, and collision regressions.
-- PR #6 (`af6a3fb`) and PR #7 (`c6d0d79`) remain open for audit only. Their reviewed work was integrated directly; neither PR was merged.
+- Spatial core rebuilt on exclusive cell claims (`src/game/occupancy.rs`, `src/game/movement.rs`, `src/navigation.rs`); schema version 5.
+- 2×2 town center footprints, immediate foundations, `Construct` command for helpers.
+- `GameWorld::validate` on load, after accepted commands, and after ticks in debug builds; randomized deterministic play test.
+- New frontend modules: `app.js`, `controls.js`, `effects.js`, `hud.js`, `materials.js`, `models.js`, `net.js`, `terrain.js`, `world-view.js`, plus vendored `vendor/three.min.js` (r186).
+- CI, `scripts/modal_manage.py verify`, README, ROADMAP, AGENTS.md, and the thermonuclear review updated for the new client.
 
 ## Verification completed
 
-- `cargo fmt --check && cargo test && cargo clippy --all-targets --all-features -- -D warnings` — formatting and strict Clippy passed; 56/56 Rust tests passed at `f46ee17`.
-- GitHub Actions run `31731879535` for `f46ee17`: quality job passed; deploy job was still running at this checkpoint.
-- Cache-bypassed production `/state` already exposes the integrated 13-key stockpile and scenario/catalog shape.
+- `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test` (53 tests) pass.
+- `node --check` passes for every frontend module.
+- Local server + headless Chromium (SwiftShader): gather, deposit, build foundation, complete town center, train villager, all through real clicks; no console errors; desktop and phone screenshots reviewed.
 
 ## Open work
 
-1. Fix the production verifier's stale seven-resource assertion, which now rejects the correct 13-resource Slice A state.
-2. Complete real isolated local Chromium gameplay: Shift-box two villagers, issue one group move, sample intermediate authoritative movement, inspect console, and capture desktop plus phone screenshots.
-3. Resolve final audit reviews, push the verifier fix, wait for CI/deploy, hard-reload, and repeat hands-on production verification.
-4. Implement and gate steel economy plus one low-overlap roadmap lane in isolated delegated worktrees.
+0. Art: ten painted ground textures, the FAL temple town center, and a depth-based fine ink-line pass are in. Next: villager and resource sprites from generated renders; meadow texture is still flatter than prairie.
+0b. Smoothness: units are drawn ~1.6 ticks behind the newest snapshot on a self-correcting presentation clock (`frontend/world-view.js`); verify on a real phone over Modal.
+
+1. Jakob reviews the branch; merge to `master` triggers CI deploy to Modal (old saves drop because of schema 5).
+2. Production verification after deploy (`python3 scripts/modal_manage.py verify`) plus a real phone check of touch rotate/pinch.
+3. Liveness beyond pairwise standoffs (e.g. three-way jams in dead ends) is untested.
+4. Decide whether to delete the unused 2D sprites under `assets/game/` and their Python checks.
+
+## Generated art (branch `claude/fal-generated-assets`, PR into this branch)
+
+- `assets/ui/`: FAL-generated illustrated icon kit (18 icons at 128 px, paper tile, Greek-key strip and 9-slice frame, `manifest.json`); the canvas HUD draws the icons.
+- `assets/ui/buttons/`: blank coin button frames (normal, hover, pressed, disabled).
+- `assets/models/`: generated GLBs selected with `?glb=`; the temple town center (126 KB) is on by default, while the rigged villager (275 KB, 5 clips) and the cypress (22 KB) are opt-in because they don't read better than the procedural ones at gameplay zoom.
+- `assets/terrain/`: ten seamless painted ground textures (512 webp plus 1024 masters) for `frontend/ground-paint.js`.
+- FAL spend about $3.92 in total; per-call ledgers live in `assets/*/tools/ledger.jsonl`.
 
 ## Blockers
 
-None external. The current deployment verifier is internally stale: `scripts/modal_manage.py` still requires exactly seven stockpile keys even though Slice A intentionally exposes thirteen.
+None.
 
 ## Exact next action
 
-Update the verifier to the explicit 13-resource contract, run its checks, then launch the isolated local server and Chromium interaction harness.
+Review and merge the branch, then verify production.
