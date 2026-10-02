@@ -117,6 +117,7 @@ fn world_height(elevation: f32) -> f32 {
 }
 
 /// Per-cell heights, interpolated between cell centres.
+#[derive(Clone)]
 pub struct Heights {
     cells: Vec<f32>,
 }
