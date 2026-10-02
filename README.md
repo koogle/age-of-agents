@@ -101,7 +101,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Rotate:** two-finger twist, right-drag, or Q/E.
 - **Recover view:** reload to center the camera on the currently visible villagers.
 - **Reset world:** press **Reset world** and confirm to erase progress and start a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
-- **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed.
+- **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed. While paused, a **Paused · tap to resume** pill shows at the top; tap it to continue at 1×.
 - **Cancel build placement:** press the cancel button or Escape.
 
 Mouse and touch use the same command semantics.

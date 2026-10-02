@@ -212,7 +212,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
     let font = FontRef::try_from_slice(assets.bytes("fonts/Nunito-ExtraBold.ttf")).expect("font");
     let scaled = font.as_scaled(PxScale::from(GLYPH_PX));
     let mut glyphs = HashMap::new();
-    for ch in (32u8..127).map(char::from).chain(['×']) {
+    for ch in (32u8..127).map(char::from).chain(['×', '·']) {
         let id = scaled.glyph_id(ch);
         let advance = scaled.h_advance(id);
         let glyph = id.with_scale_and_position(GLYPH_PX, ab_glyph::point(0.0, 0.0));
@@ -541,6 +541,34 @@ impl Hud {
             self.regions.push(Region {
                 rect,
                 action: Action::Speed(speed),
+                enabled: true,
+            });
+        }
+
+        // While paused, a pill at the top says so; tapping it resumes, since a
+        // stray tap on the pause coin otherwise looks like stuck villagers.
+        if snapshot.simulation_speed == 0.0 {
+            let text = "Paused · tap to resume";
+            let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
+            let pill = [(width - w) / 2.0, 92.0 * s, w, 34.0 * s];
+            let hot = self.hovered(pill);
+            self.shape(
+                pill,
+                if hot { [1.0, 1.0, 1.0, 0.95] } else { GLASS },
+                1.0,
+                17.0 * s,
+            );
+            self.text(
+                atlas,
+                text,
+                (width / 2.0, pill[1] + 22.0 * s),
+                14.0 * s,
+                ACCENT,
+                true,
+            );
+            self.regions.push(Region {
+                rect: pill,
+                action: Action::Speed(1.0),
                 enabled: true,
             });
         }
