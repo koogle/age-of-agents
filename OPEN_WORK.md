@@ -1,6 +1,6 @@
 # Open Work
 
-**Last updated:** 2026-10-02T21:24:34+00:00
+**Last updated:** 2026-10-02T21:49:33+00:00
 **Branch:** `master` (fixed camera heading; PRs #20 and #21 merged)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
@@ -53,6 +53,6 @@ None.
 ## Current building-placement work
 
 - Implemented: compact rectangular plots (town center 7×7, house/granary/watchtower 3×3, dock 4×4); moderately smaller art; lossless 512 px building/construction sprites repacked from the original 1024 px cutouts without new FAL spend; green/red translucent ghosts sharing actual building geometry; local placement grid and optional full Grid pill/G toggle.
-- Stable rendering: orthographic camera with a fixed isometric angle, no zoom recentering or planet bend; front anchors fixed in world space rather than recalculated toward the camera. Pan/zoom no longer move a building relative to its cells.
-- Verification: 83 workspace tests, native/WebAssembly lint and formatting passed. Adjacency test completes houses sharing an edge on both axes, rejects overlap atomically, and checks world invariants. First browser house built through the HUD; finishing adjacent-house and mobile touch checks. Thermonuclear review: shared geometry and placement module remove duplication; no new gameplay autonomy or dependencies.
+- Stable rendering: orthographic camera with a fixed isometric angle (30-degree projected cell edges matching the art), no zoom recentering or planet bend; front anchors fixed in world space rather than recalculated toward the camera. Pan/zoom no longer move a building relative to its cells.
+- Verification: 84 workspace tests, native/WebAssembly lint and formatting passed. Adjacency test completes houses sharing an edge on both axes, rejects overlap atomically, and checks world invariants. Desktop HUD checks passed: blocked ghost rejection, completed shared-edge houses, Grid on/off, pan and zoom, no page errors. Final mobile touch checks are running. Thermonuclear review: shared geometry and placement module remove duplication; no new gameplay autonomy or dependencies.
 - All work is committed/pushed to `master` as milestones complete; pushes trigger production CI/deployment. Finish browser verification and check the latest deployment workflow before reporting production status.

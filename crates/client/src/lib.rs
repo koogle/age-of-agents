@@ -651,7 +651,7 @@ impl App {
         }
         self.view.frame(dt as f32);
         let ghost = match self.build {
-            hud::BuildUi::Placing(kind) => self
+            hud::BuildUi::Placing(kind) if !self.hud.covers(self.cursor) => self
                 .placement(self.cursor, kind)
                 .map(|(origin, ok)| (kind, origin, ok)),
             _ => None,
