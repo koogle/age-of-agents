@@ -49,10 +49,10 @@ struct BuildingSheet {
 fn building_art(kind: aoa_game::BuildingKind) -> Option<(&'static str, f32, f32)> {
     use aoa_game::BuildingKind::*;
     Some(match kind {
-        House => ("house", 1.85, 205.0),
-        Granary => ("granary", 2.25, 199.0),
-        Watchtower => ("watchtower", 2.5, 228.0),
-        Dock => ("dock", 2.15, 193.0),
+        House => ("house", 2.8, 205.0),
+        Granary => ("granary", 3.0, 199.0),
+        Watchtower => ("watchtower", 3.75, 228.0),
+        Dock => ("dock", 2.9, 193.0),
         _ => return None,
     })
 }
@@ -412,7 +412,9 @@ impl WorldView {
                 building.building.construction,
                 building.building.job.is_some(),
             );
-            let size = tc.cell[0] * tc.units_per_pixel;
+            // The temple sheet is drawn for a 4-cell footprint; scale it to
+            // the town center's real one.
+            let size = tc.cell[0] * tc.units_per_pixel * building.columns as f32 / 4.0;
             sprites.push((
                 SHEET_TOWN_CENTER,
                 Sprite {
@@ -425,7 +427,7 @@ impl WorldView {
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
                 decals.push(Decal {
                     center: (center + Vec3::Y * 0.03).to_array(),
-                    radius: 1.5,
+                    radius: building.columns as f32 * terrain::CELL * 0.75,
                     color: TEAM_BLUE,
                     ring: 1.0,
                 });

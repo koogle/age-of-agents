@@ -87,7 +87,7 @@
       const start = performance.now();
       const frame = now => {
         if (!overlay.isConnected) return;
-        const elapsed = now - start;
+        const elapsed = Math.max(0, now - start);
         const stages = sheet.frames[names[Math.floor(elapsed / cycle) % names.length]];
         let t = elapsed % cycle;
         context.clearRect(0, 0, canvas.width, canvas.height);
