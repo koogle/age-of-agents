@@ -5,14 +5,14 @@
 use std::collections::HashMap;
 
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
-use aoa_game::{
-    RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind, TOWN_CENTER_WOOD_COST, TechnologyKind,
-    UnitAction, VILLAGER_FOOD_COST, WorldSnapshot,
-};
+use aoa_game::{BUILDABLE, BuildingKind, ResourceKind, TechnologyKind, WorldSnapshot};
 use bytemuck::{Pod, Zeroable};
 use glam::Vec2;
 
 use crate::assets::{Assets, Rgba};
+
+mod selection;
+use selection::{building_info, selection_model};
 
 const ATLAS: u32 = 2048;
 const GLYPH_PX: f32 = 40.0;
@@ -62,16 +62,31 @@ pub struct Quad {
     pub params: [f32; 4],
 }
 
+/// The villager's build flow: closed, choosing a building, or placing one.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum BuildUi {
+    Off,
+    Menu,
+    Placing(BuildingKind),
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Action {
     Speed(f64),
+    /// Open the build menu.
     Build,
+    /// Start placing this building.
+    Place(BuildingKind),
     Cancel,
     Stop,
     Train,
     Research(TechnologyKind),
     /// Globe click: look at this map point.
     LookAt(Vec2),
+    /// The "New island" pill: arms on the first tap, resets on the second.
+    Reset,
+    /// A tap on an unavailable command: say why in the toast line.
+    Explain(String),
 }
 
 struct Region {
@@ -173,10 +188,35 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
             ),
         );
     }
+    // Building coins show the finished building from the generated sheet.
+    let sheet = assets.image("loading/buildings.webp");
+    let frames: serde_json::Value =
+        serde_json::from_slice(assets.bytes("loading/buildings.json")).expect("buildings.json");
+    for kind in BUILDABLE {
+        let (icon, row, _, _) = building_info(kind);
+        let rect = &frames["frames"][row][3];
+        let [fx, fy, fw, fh] = [0, 1, 2, 3].map(|i| rect[i].as_u64().unwrap_or(0) as u32);
+        let cell = sheet.crop(fx, fy, fw, fh);
+        let (x0, y0, x1, y1) = painted_bounds(&cell);
+        let painted = cell.crop(x0, y0, x1 - x0, y1 - y0);
+        let fit = 160.0 / (painted.width.max(painted.height) as f32);
+        let (w, h) = (
+            ((painted.width as f32 * fit) as u32).max(1),
+            ((painted.height as f32 * fit) as u32).max(1),
+        );
+        let painted = painted.resized(w, h);
+        let at = place(w, h);
+        blit(&mut image, &painted, at);
+        sprites.insert(icon.to_string(), uv(at, w, h));
+        content.insert(
+            icon.to_string(),
+            (uv(at, w, h), Vec2::new(w as f32, h as f32)),
+        );
+    }
     let font = FontRef::try_from_slice(assets.bytes("fonts/Nunito-ExtraBold.ttf")).expect("font");
     let scaled = font.as_scaled(PxScale::from(GLYPH_PX));
     let mut glyphs = HashMap::new();
-    for ch in (32u8..127).map(char::from).chain(['×']) {
+    for ch in (32u8..127).map(char::from).chain(['×', '·']) {
         let id = scaled.glyph_id(ch);
         let advance = scaled.h_advance(id);
         let glyph = id.with_scale_and_position(GLYPH_PX, ab_glyph::point(0.0, 0.0));
@@ -230,7 +270,9 @@ pub struct Model<'a> {
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
-    pub build_mode: bool,
+    pub build: BuildUi,
+    /// The "New island" pill was tapped once and waits for confirmation.
+    pub reset_armed: bool,
     pub toast: Option<&'a str>,
     pub camera: Vec2,
 }
@@ -253,24 +295,6 @@ fn resource_icon(kind: ResourceKind) -> Option<&'static str> {
         ResourceKind::Fiber => "resource_fiber",
         _ => return None,
     })
-}
-
-fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'static str) {
-    match tech {
-        TechnologyKind::Forestry => ("tech_forestry", "Forestry", "Wood +20%"),
-        TechnologyKind::Agriculture => ("tech_agriculture", "Agriculture", "Food +20%"),
-        TechnologyKind::Masonry => ("tech_masonry", "Masonry", "Stone and clay +20%"),
-        TechnologyKind::Mining => ("tech_mining", "Mining", "Gold and iron +20%"),
-        TechnologyKind::Textiles => ("tech_textiles", "Textiles", "Fiber +20%"),
-    }
-}
-
-struct Command {
-    icon: &'static str,
-    label: String,
-    detail: String,
-    enabled: bool,
-    action: Action,
 }
 
 impl Hud {
@@ -361,10 +385,11 @@ impl Hud {
         let lift = if hot { -3.0 } else { 0.0 };
         let rect = [rect[0], rect[1] + lift, rect[2], rect[3]];
         self.sprite(atlas, frame, rect, [1.0; 4]);
-        let tint = if enabled {
-            [1.0; 4]
+        // Unaffordable or unavailable: the icon is drawn in greyscale.
+        let (tint, grey) = if enabled {
+            ([1.0; 4], 0.0)
         } else {
-            [0.75, 0.75, 0.75, 0.7]
+            ([0.85, 0.85, 0.85, 0.8], 1.0)
         };
         // Fit the painted part of the icon into the same box on every coin.
         let Some(&(uv, size)) = atlas.content.get(icon) else {
@@ -381,7 +406,7 @@ impl Hud {
             ],
             uv,
             color: tint,
-            params: [0.0; 4],
+            params: [0.0, 0.0, grey, 0.0],
         });
     }
 
@@ -526,34 +551,116 @@ impl Hud {
             });
         }
 
+        // A small "New island" pill top-left; the first tap asks to confirm.
+        {
+            let text = if model.reset_armed {
+                "Tap again for a new island"
+            } else {
+                "New island"
+            };
+            let w = Self::text_width(atlas, text, 12.0 * s) + 28.0 * s;
+            let pill = [12.0 * s, 14.0 * s, w, 28.0 * s];
+            self.shape(pill, GLASS, 1.0, 14.0 * s);
+            let ink = if model.reset_armed { ACCENT } else { MUTED };
+            self.text(
+                atlas,
+                text,
+                (pill[0] + w / 2.0, pill[1] + 18.5 * s),
+                12.0 * s,
+                ink,
+                true,
+            );
+            self.regions.push(Region {
+                rect: pill,
+                action: Action::Reset,
+                enabled: true,
+            });
+        }
+
+        // While paused, a pill at the top says so; tapping it resumes, since a
+        // stray tap on the pause coin otherwise looks like stuck villagers.
+        if snapshot.simulation_speed == 0.0 {
+            let text = "Paused · tap to resume";
+            let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
+            let pill = [(width - w) / 2.0, 92.0 * s, w, 34.0 * s];
+            let hot = self.hovered(pill);
+            self.shape(
+                pill,
+                if hot { [1.0, 1.0, 1.0, 0.95] } else { GLASS },
+                1.0,
+                17.0 * s,
+            );
+            self.text(
+                atlas,
+                text,
+                (width / 2.0, pill[1] + 22.0 * s),
+                14.0 * s,
+                ACCENT,
+                true,
+            );
+            self.regions.push(Region {
+                rect: pill,
+                action: Action::Speed(1.0),
+                enabled: true,
+            });
+        }
+
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
         else {
             self.toast(atlas, model.toast, width, s);
             return;
         };
-        let m = 52.0 * s;
         let gap = 10.0 * s;
-        let bar_width = commands.len() as f32 * (m + gap) - gap + 28.0 * s;
-        let bar = [
-            (width - bar_width) / 2.0,
-            height - m - 30.0 * s,
-            bar_width,
-            m + 12.0 * s,
-        ];
+        let margin = 12.0 * s;
+        // Phones: the selection sits bottom-left beside the globe, its coins
+        // wrapping into rows; wide screens keep one centred row.
+        let narrow = width < 600.0 * s;
+        let count = commands.len().max(1);
+        let (m, per_row) = if narrow {
+            let m = 48.0 * s;
+            let room = gx - 10.0 * s - margin - 28.0 * s + gap;
+            (m, ((room / (m + gap)).floor() as usize).max(1))
+        } else {
+            let m = ((width - 24.0 * s - 28.0 * s + gap) / count as f32 - gap)
+                .clamp(40.0 * s, 52.0 * s);
+            (m, count)
+        };
+        let rows = count.div_ceil(per_row);
+        let columns = count.min(per_row);
+        let bar_width = columns as f32 * (m + gap) - gap + 28.0 * s;
+        let bar_height = rows as f32 * (m + gap) - gap + 12.0 * s;
+        let bar = if narrow {
+            [
+                margin,
+                height - 18.0 * s - bar_height,
+                bar_width,
+                bar_height,
+            ]
+        } else {
+            let left = (width - bar_width) / 2.0;
+            // A centred bar that would run under the globe sits above it.
+            let top = if left + bar_width > gx - 8.0 * s {
+                gy - 48.0 * s - bar_height
+            } else {
+                height - m - 30.0 * s
+            };
+            [left, top, bar_width, bar_height]
+        };
         let mut hover_text = None;
         if !commands.is_empty() {
-            self.shape(bar, GLASS, 1.0, bar[3] / 2.0);
+            self.shape(bar, GLASS, 1.0, (m + 12.0 * s) / 2.0);
             for (index, command) in commands.iter().enumerate() {
+                let (column, row) = (index % per_row, index / per_row);
                 let rect = [
-                    bar[0] + 14.0 * s + index as f32 * (m + gap),
-                    bar[1] + 6.0 * s,
+                    bar[0] + 14.0 * s + column as f32 * (m + gap),
+                    bar[1] + 6.0 * s + row as f32 * (m + gap),
                     m,
                     m,
                 ];
                 // The hit area spans half the gap on each side, so sweeping
                 // across the bar never falls back to the selection text.
-                let hit = [rect[0] - gap / 2.0, bar[1], m + gap, bar[3]];
+                let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, m + gap];
                 let hot = self.hovered(hit);
                 if hot {
                     hover_text = Some((command.label.clone(), command.detail.clone()));
@@ -565,10 +672,16 @@ impl Hud {
                     command.enabled,
                     hot && command.enabled,
                 );
+                // An unavailable coin still answers a tap, with the reason:
+                // phones have no hover to show it.
                 self.regions.push(Region {
                     rect: hit,
-                    action: command.action.clone(),
-                    enabled: command.enabled,
+                    action: if command.enabled {
+                        command.action.clone()
+                    } else {
+                        Action::Explain(format!("{}: {}", command.label, command.detail))
+                    },
+                    enabled: true,
                 });
             }
         }
@@ -580,14 +693,24 @@ impl Hud {
                 Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
             })
             .fold(0.0, f32::max);
-        let info_width = (widest + 84.0 * s).max(200.0 * s);
+        let info_width = (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin);
         let (title, detail) = hover_text.unwrap_or((title, detail));
-        let info = [
-            (width - info_width) / 2.0,
-            bar[1] - 64.0 * s,
-            info_width,
-            52.0 * s,
-        ];
+        let info = if narrow {
+            // Above the coins; lifted clear of the speed coins when it is
+            // wide enough to reach over the globe.
+            let mut top = bar[1] - 64.0 * s;
+            if margin + info_width > gx - 10.0 * s {
+                top = top.min(gy - 56.0 * s - 60.0 * s);
+            }
+            [margin, top, info_width, 52.0 * s]
+        } else {
+            [
+                (width - info_width) / 2.0,
+                bar[1] - 64.0 * s,
+                info_width,
+                52.0 * s,
+            ]
+        };
         self.shape(info, GLASS, 1.0, 26.0 * s);
         self.sprite(
             atlas,
@@ -631,14 +754,19 @@ impl Hud {
 
     fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32) {
         if let Some(text) = toast {
+            // Below the resource coins (and the paused pill), so it never
+            // covers the counts on a narrow screen.
             let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
-            self.shape(
-                [(width - w) / 2.0, 16.0 * s, w, 34.0 * s],
-                GLASS,
-                1.0,
-                17.0 * s,
+            let top = 134.0 * s;
+            self.shape([(width - w) / 2.0, top, w, 34.0 * s], GLASS, 1.0, 17.0 * s);
+            self.text(
+                atlas,
+                text,
+                (width / 2.0, top + 22.0 * s),
+                14.0 * s,
+                INK,
+                true,
             );
-            self.text(atlas, text, (width / 2.0, 38.0 * s), 14.0 * s, INK, true);
         }
     }
 
@@ -680,197 +808,5 @@ impl Hud {
     /// Pointer release: the action pressed on this HUD element, if any.
     pub fn release(&mut self) -> Option<Action> {
         self.pressed.take()
-    }
-}
-
-type Selected = (&'static str, String, String, Option<f32>, Vec<Command>);
-
-fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> {
-    let stock = &snapshot.stockpile;
-    if !model.units.is_empty() {
-        let busy = snapshot
-            .units
-            .iter()
-            .any(|u| model.units.contains(&u.unit.id) && u.unit.action != UnitAction::Idle);
-        let commands = if model.build_mode {
-            vec![Command {
-                icon: "command_cancel",
-                label: "Cancel placement".into(),
-                detail: "Esc".into(),
-                enabled: true,
-                action: Action::Cancel,
-            }]
-        } else {
-            let mut commands = vec![Command {
-                icon: "command_build",
-                label: "Build town center".into(),
-                detail: format!("{} wood", TOWN_CENTER_WOOD_COST),
-                enabled: stock.wood >= TOWN_CENTER_WOOD_COST,
-                action: Action::Build,
-            }];
-            if busy {
-                commands.push(Command {
-                    icon: "command_cancel",
-                    label: "Stop".into(),
-                    detail: "Drop the current task · X".into(),
-                    enabled: true,
-                    action: Action::Stop,
-                });
-            }
-            commands
-        };
-        if model.units.len() > 1 {
-            let idle = snapshot
-                .units
-                .iter()
-                .filter(|u| model.units.contains(&u.unit.id) && u.unit.action == UnitAction::Idle)
-                .count();
-            return Some((
-                "portrait_group",
-                format!("{} villagers", model.units.len()),
-                format!("{idle} awaiting orders"),
-                None,
-                commands,
-            ));
-        }
-        let unit = snapshot
-            .units
-            .iter()
-            .find(|u| u.unit.id == model.units[0])?;
-        let activity = match &unit.unit.action {
-            UnitAction::Idle => "Awaiting orders".to_string(),
-            UnitAction::Move { .. } => "Walking".into(),
-            UnitAction::Build { .. } => "Building".into(),
-            UnitAction::Gather { phase, .. } => match phase {
-                aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),
-                aoa_game::GatherPhase::Gathering => "Gathering".into(),
-                aoa_game::GatherPhase::Returning => "Carrying goods home".into(),
-                aoa_game::GatherPhase::Depositing => "Unloading".into(),
-            },
-        };
-        let cargo = unit
-            .unit
-            .cargo
-            .as_ref()
-            .map(|c| format!(" · {} carried", c.amount.floor()))
-            .unwrap_or_default();
-        let title = unit.unit.id.replace("villager-", "Villager ");
-        return Some((
-            "portrait_villager",
-            title,
-            format!("{activity}{cargo}"),
-            None,
-            commands,
-        ));
-    }
-    let building = snapshot
-        .buildings
-        .iter()
-        .find(|b| Some(b.building.id.as_str()) == model.building)?;
-    if let Some(work) = building.building.construction {
-        return Some((
-            "portrait_towncenter",
-            "Town center foundation".into(),
-            "Villagers can help build it".into(),
-            Some((work / aoa_game::BUILD_SECONDS) as f32),
-            Vec::new(),
-        ));
-    }
-    let job = building.building.job.as_ref();
-    let busy = job.is_some();
-    let (detail, progress) = match job {
-        Some(aoa_game::BuildingJob::Produce {
-            elapsed_seconds, ..
-        }) => (
-            "Training a villager".to_string(),
-            Some((elapsed_seconds / aoa_game::VILLAGER_PRODUCTION_SECONDS) as f32),
-        ),
-        Some(aoa_game::BuildingJob::Research {
-            technology,
-            elapsed_seconds,
-        }) => (
-            format!("Researching {}", tech_info(*technology).1),
-            Some((elapsed_seconds / aoa_game::RESEARCH_SECONDS) as f32),
-        ),
-        None => ("Ready".to_string(), None),
-    };
-    let mut commands = vec![Command {
-        icon: "command_train",
-        label: "Train villager".into(),
-        detail: format!("{} food", VILLAGER_FOOD_COST),
-        enabled: !busy && stock.food >= VILLAGER_FOOD_COST,
-        action: Action::Train,
-    }];
-    let known = &snapshot.researched_technologies;
-    for tech in TechnologyKind::ALL {
-        let (icon, name, effect) = tech_info(tech);
-        let done = known.contains(&tech);
-        let blocked = tech.prerequisite().filter(|p| !known.contains(p));
-        let detail = if done {
-            "researched".to_string()
-        } else if let Some(p) = blocked {
-            format!("needs {}", tech_info(p).1)
-        } else {
-            format!(
-                "{effect} · {} food, {} wood",
-                RESEARCH_FOOD_COST, RESEARCH_WOOD_COST
-            )
-        };
-        commands.push(Command {
-            icon,
-            label: name.into(),
-            detail,
-            enabled: !done
-                && blocked.is_none()
-                && !busy
-                && stock.food >= RESEARCH_FOOD_COST
-                && stock.wood >= RESEARCH_WOOD_COST,
-            action: Action::Research(tech),
-        });
-    }
-    Some((
-        "portrait_towncenter",
-        "Town center".into(),
-        detail,
-        progress,
-        commands,
-    ))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use aoa_game::GameWorld;
-
-    fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {
-        let snapshot = world.snapshot();
-        let model = Model {
-            snapshot: Some(&snapshot),
-            units: &[],
-            building: Some(&snapshot.buildings[0].building.id),
-            build_mode: false,
-            toast: None,
-            camera: Vec2::ZERO,
-        };
-        selection_model(&snapshot, &model).unwrap().4
-    }
-
-    #[test]
-    fn town_center_coins_follow_costs_and_prerequisites() {
-        let mut world = GameWorld::default();
-        world.stockpile.food = 0.0;
-        world.stockpile.wood = 0.0;
-        let poor = commands_for_town_center(&world);
-        assert!(poor.iter().all(|c| !c.enabled), "nothing is affordable");
-        world.stockpile.food = 100.0;
-        world.stockpile.wood = 100.0;
-        let rich = commands_for_town_center(&world);
-        let enabled = |action: Action| rich.iter().find(|c| c.action == action).unwrap().enabled;
-        assert!(enabled(Action::Train));
-        assert!(enabled(Action::Research(TechnologyKind::Masonry)));
-        assert!(
-            !enabled(Action::Research(TechnologyKind::Mining)),
-            "mining needs masonry"
-        );
     }
 }
