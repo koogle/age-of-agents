@@ -99,7 +99,7 @@ export function createWorldView(scene, effects) {
       const target = ground(unit.position.x, unit.position.y);
       let entry = units.get(unit.id);
       if (!entry) {
-        const root = createVillager();
+        const root = createVillager(unit.id);
         root.position.copy(target);
         root.add(proxy(unitProxy, 'unit', unit.id));
         const ring = createRing(0.3, TEAM_COLOR);
