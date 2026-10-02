@@ -1,7 +1,7 @@
 # Open Work
 
-**Last updated:** 2026-10-02T10:05:00Z
-**Branch:** `claude/epic-feynman-n716xd` (merged with master at 3fa4555)
+**Last updated:** 2026-10-02T11:45:17Z
+**Branch:** `codex/towncenter-roof-midjourney`
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
 ## Current goal
@@ -15,6 +15,11 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 - Sources: in-process simulation (native default, `/play?local`) or the hosted server over WebSocket.
 - Verified in headless Chromium/WebGL2: select, gather, train via HUD, build placement via HUD, speed coins; no page errors.
 - Playtest fixes (this branch): canvas follows device pixels (speed coins and all clicks were dead on devicePixelRatio 2); 60×40 half-unit grid with clustered resources and 4×4 town centers (schema 6); `Command::Stop` with a Stop medallion and X; hover target ring while villagers are selected; working villagers lean toward their work; HUD icons fitted by painted bounds, gap-free command bar, fixed-width info pill (no flicker); serde_json `float_roundtrip` so saves reload bit-identical. Verified at DPR 1 and 2, mouse and touch.
+- Town-center roof revision 2: clean straight ridge/eaves and sparse seams in
+  complete/working frames, identical roof pixels, preserved construction frames
+  and manifest. Reviewed at desktop/mobile gameplay size and verified selection;
+  workspace formatting, tests and Clippy pass. Source renders and packing recipe
+  are documented in `assets/sprites/README.md`. Legacy GLB remains unchanged.
 
 ## Open work
 
@@ -35,8 +40,14 @@ Run as much as possible in Rust: one wgpu client (native window and WebGL2) over
 
 ## Blockers
 
-None.
+- Midjourney 0.11.1 CLI/MCP installed in `/workspace/bin` and registered with
+  Codex; browser bootstrap and login remain incomplete. The enforced cloud
+  network policy blocks Midjourney and FAL, despite a ready FAL key. Setup and
+  reproduction instructions: `docs/MIDJOURNEY.md`.
+- Modal is not installed and no Modal credential binding is available in this
+  environment; production deployment has not been performed in this session.
 
 ## Exact next action
 
-Review and merge `claude/epic-feynman-n716xd`, redeploy Modal (schema 6 drops the persisted 30×20 world on first start), then verify production on a high-DPI phone.
+Enable provider network access and complete Midjourney browser login on a
+desktop; restore Modal credentials/tooling to deploy and verify the roof change.
