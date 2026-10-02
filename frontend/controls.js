@@ -7,7 +7,8 @@ import { MAP } from './materials.js';
 const DRAG_THRESHOLD = 8;
 const LONG_PRESS_MS = 450;
 const MIN_DISTANCE = 5;
-const MAX_DISTANCE = 34;
+// Beyond about 24 the world starts to curve into a small planet.
+const MAX_DISTANCE = 70;
 
 export function createCameraRig(camera) {
   const target = new THREE.Vector3(15, 0, 10.5);
@@ -27,6 +28,7 @@ export function createCameraRig(camera) {
   }
   function clamp() {
     target.x = THREE.MathUtils.clamp(target.x, -1, MAP.columns + 1);
+    if (state.distance > 30) target.lerp(new THREE.Vector3(MAP.columns / 2, 0, MAP.rows / 2), 0.08);
     target.z = THREE.MathUtils.clamp(target.z, -1, MAP.rows + 1);
     state.distance = THREE.MathUtils.clamp(state.distance, MIN_DISTANCE, MAX_DISTANCE);
   }
@@ -43,7 +45,11 @@ export function createCameraRig(camera) {
       const turn = state.goalYaw - state.yaw;
       state.yaw += turn * Math.min(1, dt * 8);
       // Closer views tilt toward the horizon; distant views look down like a map.
-      state.pitch = THREE.MathUtils.lerp(0.72, 1.12, (state.distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE));
+      // Play zoom tilts from near-horizon (close) to map-like (34); beyond that
+      // the view eases back toward the horizon so the planet's limb shows.
+      const play = THREE.MathUtils.clamp((state.distance - MIN_DISTANCE) / (34 - MIN_DISTANCE), 0, 1);
+      const orbit = THREE.MathUtils.smoothstep(state.distance, 34, MAX_DISTANCE);
+      state.pitch = THREE.MathUtils.lerp(THREE.MathUtils.lerp(0.72, 1.12, play), 0.78, orbit);
       place();
     },
     // Keep the ground point grabbed at `from` under the pointer at `to`.

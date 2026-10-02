@@ -42,3 +42,16 @@ export const ACTIVITY_TEXT = {
   idle: 'Awaiting orders', move: 'Walking', build: 'Building',
   to_resource: 'Heading out to gather', gathering: 'Gathering', returning: 'Carrying goods home', depositing: 'Unloading'
 };
+
+// Generated illustrations under assets/ui (see assets/ui/manifest.json), keyed
+// like the placeholders above.
+export const ART = {
+  wood: 'icons/resource_wood.png', food: 'icons/resource_food.png', stone: 'icons/resource_stone.png',
+  gold: 'icons/resource_gold.png', iron: 'icons/resource_iron.png', clay: 'icons/resource_clay.png',
+  fiber: 'icons/resource_fiber.png',
+  build: 'icons/command_build.png', cancel: 'icons/command_cancel.png', train: 'icons/command_train.png',
+  forestry: 'icons/tech_forestry.png', agriculture: 'icons/tech_agriculture.png', masonry: 'icons/tech_masonry.png',
+  mining: 'icons/tech_mining.png', textiles: 'icons/tech_textiles.png',
+  portrait_villager: 'icons/portrait_villager.png', portrait_group: 'icons/portrait_group.png',
+  portrait_townCenter: 'icons/portrait_towncenter.png'
+};

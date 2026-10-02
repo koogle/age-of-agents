@@ -2,7 +2,7 @@
 // and sea. Heights come from a fixed noise field (never from biome data) so the
 // shape of the land reveals nothing about unexplored terrain.
 import * as THREE from 'three';
-import { MAP, patchWorld, paint, uniforms, writeCell, cellTexture } from './materials.js';
+import { CURVE_GLSL, CURVE_UNIFORMS, MAP, patchWorld, paint, uniforms, writeCell, cellTexture } from './materials.js';
 
 export const SEA_LEVEL = -0.32;
 const MARGIN = 9;
@@ -101,11 +101,12 @@ function buildSea() {
   geometry.translate(MAP.columns / 2, SEA_LEVEL, MAP.rows / 2);
   const material = new THREE.MeshPhongMaterial({ color: 0x2c8db2, transparent: true, opacity: 0.9, shininess: 70, specular: 0xcfe8f0 });
   material.onBeforeCompile = shader => {
-    shader.uniforms.uTime = uniforms.uTime;
+    Object.assign(shader.uniforms, { uTime: uniforms.uTime, uCurve: uniforms.uCurve, uCurveCenter: uniforms.uCurveCenter });
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uTime;')
+      .replace('#include <common>', `#include <common>\nuniform float uTime;\n${CURVE_UNIFORMS}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>
-        transformed.y += sin(position.x * 0.9 + uTime * 1.1) * 0.025 + cos(position.z * 0.7 + uTime * 0.8) * 0.025;`);
+        transformed.y += sin(position.x * 0.9 + uTime * 1.1) * 0.025 + cos(position.z * 0.7 + uTime * 0.8) * 0.025;`)
+      .replace('#include <project_vertex>', `#include <project_vertex>\n${CURVE_GLSL}`);
   };
   const mesh = new THREE.Mesh(geometry, material);
   mesh.receiveShadow = true;

@@ -17,7 +17,10 @@ export const uniforms = {
   uTime: { value: 0 },
   uCells: { value: cellTexture },
   uMapSize: { value: new THREE.Vector2(MAP.columns, MAP.rows) },
-  uGrid: { value: 0 }
+  uGrid: { value: 0 },
+  // Planet curvature: zero while playing, rising as the camera pulls far back.
+  uCurve: { value: 0 },
+  uCurveCenter: { value: new THREE.Vector2() }
 };
 
 export function writeCell(column, row, rgb, visibility) {
@@ -66,12 +69,30 @@ vec3 aoaApplyWorldLight(vec3 color) {
 }
 `;
 
+export const CURVE_UNIFORMS = 'uniform float uCurve;\nuniform vec2 uCurveCenter;';
+
+// Bends the world down away from the camera target, so a far zoom shows the
+// island on the curve of a small planet. Exported for materials that are not
+// world-patched (the sea).
+export const CURVE_GLSL = /* glsl */`
+if (uCurve > 0.0) {
+  vec4 bentWorld = vec4(transformed, 1.0);
+  #ifdef USE_INSTANCING
+  bentWorld = instanceMatrix * bentWorld;
+  #endif
+  bentWorld = modelMatrix * bentWorld;
+  vec2 away = bentWorld.xz - uCurveCenter;
+  bentWorld.y -= uCurve * dot(away, away);
+  gl_Position = projectionMatrix * viewMatrix * bentWorld;
+}`;
+
 const WORLD_POSITION_GLSL = /* glsl */`
 vec4 aoaWorld = vec4(transformed, 1.0);
 #ifdef USE_INSTANCING
 aoaWorld = instanceMatrix * aoaWorld;
 #endif
 vAoaWorld = (modelMatrix * aoaWorld).xyz;
+${CURVE_GLSL}
 `;
 
 // Injects fog of war and cloud shadows. `extra(shader)` may patch further.
@@ -79,7 +100,7 @@ export function patchWorld(material, extra) {
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vAoaWorld;')
+      .replace('#include <common>', `#include <common>\nvarying vec3 vAoaWorld;\n${CURVE_UNIFORMS}`)
       .replace('#include <project_vertex>', `#include <project_vertex>\n${WORLD_POSITION_GLSL}`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${FOG_GLSL}`)
