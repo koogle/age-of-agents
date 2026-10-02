@@ -14,7 +14,9 @@ pub fn manifest() -> Vec<String> {
         files.push(format!("sprites/{sheet}.png"));
     }
     files.push("sprites/towncenter.png".into());
+    files.push("sprites/villager_idle_hd.png".into());
     files.push("sprites/villager.json".into());
+    files.push("sprites/villager_idle_hd.json".into());
     files.push("sprites/resources.json".into());
     files.push("sprites/towncenter.json".into());
     files.extend(crate::hud::files());
