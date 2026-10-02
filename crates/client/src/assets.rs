@@ -13,10 +13,10 @@ pub fn manifest() -> Vec<String> {
     for sheet in ["villager", "villager_woman", "villager_elder", "resources"] {
         files.push(format!("sprites/{sheet}.png"));
     }
+    files.push("sprites/towncenter.png".into());
     files.push("sprites/villager.json".into());
     files.push("sprites/resources.json".into());
-    // Placeholder until the generated town-center sheet lands.
-    files.push("game/building_town_center.png".into());
+    files.push("sprites/towncenter.json".into());
     files.extend(crate::hud::files());
     files
 }
