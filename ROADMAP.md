@@ -10,7 +10,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Next: starter-island progression, ships and villager transport, persistent destination islands, then local inventories and trade. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Next: starter-island progression, ships and villager transport, persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
