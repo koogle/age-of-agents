@@ -1,10 +1,11 @@
 """Pack resource/tree strips into one billboard sheet + JSON (assets/sprites/resources.*)."""
-import json, sys
+import json, sys, os
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-CELL, BASE_Y, FIT = 256, 248, 232      # cell size, base line, max content size inside a cell
+K = int(os.environ.get("HD_SCALE", "1"))
+CELL, BASE_Y, FIT = 256 * K, 248 * K, 232 * K      # cell size, base line, max content size inside a cell
 # node: (strip, frame indices in the strip, world size, measured along "h"eight or "w"idth of the first frame)
 NODES = {
   "cypress": ("trees", [0], 1.6, "h"), "olive": ("trees", [1], 1.15, "h"), "stump": ("trees", [2], 0.42, "w"),
@@ -41,6 +42,8 @@ for node, (strip, idx, size, axis) in NODES.items():
     fr = cache.setdefault(strip, frames(strip))
     subs = [fr[i] for i in idx]
     scale = min(FIT / max(s.shape[0] for s in subs), FIT / max(s.shape[1] for s in subs))   # shared by all stages
+    if K > 1:
+        scale = min(scale, 1.0)  # Recover source detail; never enlarge a source crop.
     rects = []
     for s in subs:
         img = Image.fromarray(np.clip(s, 0, 255).astype(np.uint8), "RGBA")
