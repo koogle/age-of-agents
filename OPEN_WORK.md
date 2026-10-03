@@ -1,5 +1,13 @@
 # Open Work
 
+## Building placement trapping villagers (2026-10-03)
+
+User requested a fix, PR, and merge into the main branch (`master`). PR #46 (`fix/building-traps`) rejects a foundation before mutation when it disconnects any unit from previously reachable ground or consumes its last walking space. Reuses corner-safe static pathfinding, checks each occupied connected region once, and ignores temporary unit traffic. Edge-sharing and existing separate islands remain supported. Existing trapped saves are unchanged.
+
+Integrated concurrent reset/seed PR #45 and farm-field release c85a85a without reverting either; regenerated combined WASM. Seven placement regressions cover builder/bystander traps, diagonal exits, mid-step orders, last walking space, safe completion/movement, separate islands, and touching buildings. Final verification passes: 132 workspace tests (87 domain, 32 client, 13 server), strict native/WASM Clippy, formatting, and rebuilt WASM. Structural review: docs/BUILDING_PLACEMENT_REVIEW.md.
+
+Actual WebGL2 Build → Town → House flow rejects the coastal trap without spending wood, accepts a safe house for exactly 15 wood, and walks the builder to (28,13). Rechecked with the farm-field integration: all gameplay assertions pass; the final screenshot timed out under software rendering. Earlier successful screenshots are `/tmp/aoa-trap-desktop.png` and `/tmp/aoa-trap-safe-exit.png`. Next: merge #46 and monitor production deployment.
+
 ## Replenishable farm fields (2026-10-03)
 
 Implemented typed PlantField/Cultivate commands and persistent 3×3 food plots unlocked by completed farms. Planting or replenishing costs 10 wood + 5 stone and 12 villager-seconds, producing 120 food. Empty plots retain occupancy; shared/interrupted labor reserves materials once and idles on completion. Existing gathering/deposits harvest them normally. Build → Gathering includes Field with prerequisite/affordability feedback; click depleted plots with selected villagers to replenish. Existing 512px farm stages render soil/preparation/ripe crops. Old resources default to no field state; saves are preserved.
