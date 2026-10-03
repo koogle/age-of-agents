@@ -901,7 +901,9 @@ mod tests {
         let mut view = WorldView::new();
         view.sync(snapshot.clone());
         let (_, before) = view.cell_data().unwrap();
-        let at = |column: usize, row: usize| before[(row * 60 + column) * 2 + 1];
+        let at = |column: usize, row: usize| {
+            before[(row * usize::from(aoa_game::WORLD_COLUMNS) + column) * 2 + 1]
+        };
         assert_eq!(at(29, 25), 0);
         assert_eq!(at(30, 24), 0);
         assert_eq!(at(30, 25), 255);

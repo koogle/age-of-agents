@@ -25,8 +25,8 @@ pub use worldgen::FISHING_BOAT_COST;
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
 /// resources pack into tight woodlines, berry patches and mine clumps.
-pub const WORLD_COLUMNS: u16 = 60;
-pub const WORLD_ROWS: u16 = 40;
+pub const WORLD_COLUMNS: u16 = 120;
+pub const WORLD_ROWS: u16 = 80;
 /// Sight radii in cells.
 pub const UNIT_SIGHT_RADIUS: f64 = 8.0;
 pub const BUILDING_SIGHT_RADIUS: f64 = 12.0;
