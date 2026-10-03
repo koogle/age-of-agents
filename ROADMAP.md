@@ -6,7 +6,7 @@ Grow the proven gather/build demo into one compact, coherent RTS scenario. Every
 
 - Reset game opens a native seed input and progress-loss confirmation on desktop and WebGL; blank chooses a random island, and explicit seeds reproduce an island.
 
-- Camera navigation uses pan and zoom with a fixed orthographic angle, stable building anchors, and an optional diamond-shaped square grid.
+- Camera navigation uses pan and zoom with a fixed orthographic angle, stable building anchors, and an optional diamond-shaped square grid. Distant zoom transitions into the curved planet overview.
 
 ## Released baseline — Gather, build, research, and route
 
@@ -69,7 +69,7 @@ User-directed implementation activates construction of all 17 catalog buildings.
 
 The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. New building/unit art remains a separate PR; this implementation uses the existing renderer fallbacks and does not change sprite assets. Costs and recipe quantities are initial balance values.
 
-This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. Animals/adversaries follow that economy/transport loop.
+This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. After ships and persistent island travel are implemented, add each newly discovered island to the globe while retaining previous discoveries. Animals/adversaries follow that economy/transport loop.
 
 ## Slice C — Steel economy vertical slice
 

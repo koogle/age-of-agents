@@ -662,7 +662,7 @@ impl WorldView {
             let Some(at) = rig.screen_of(anchor) else {
                 continue;
             };
-            let screen_scale = (rig.screen_of(anchor + right).unwrap() - at).length();
+            let screen_scale = (rig.screen_offset(anchor, right).unwrap() - at).length();
             let projected = Vec2::new(pixel.x - at.x, at.y - pixel.y) / screen_scale;
             let local = projected / Vec2::from(sprite.size) + Vec2::from(sprite.pivot);
             let inside = local.x > 0.25 && local.x < 0.75 && local.y > 0.04 && local.y < 0.85;
@@ -680,7 +680,7 @@ impl WorldView {
         for (id, entry) in &self.units {
             let (Some(foot), Some(head)) = (
                 rig.screen_of(entry.position),
-                rig.screen_of(entry.position + up * VILLAGER_HEIGHT),
+                rig.screen_offset(entry.position, up * VILLAGER_HEIGHT),
             ) else {
                 continue;
             };

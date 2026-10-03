@@ -171,3 +171,5 @@ For Midjourney CLI/MCP installation and account setup, see
 Rust client presentation uses two walking/carrying poses paced by distance traveled and a neutral pose at rest. Painted sprites preserve their authored colors; terrain retains its grading and placement previews remain translucent. Pause and speed labels are centered by visible glyph bounds.
 
 The loading animation reuses the lossless 512 px gameplay building sheets. Non-HQ completed and partial roofs have cleaned curved tile linework, retaining the illustrated designs.
+
+Zooming out beyond the settlement overview smoothly restores the curved planet view, with a wider zoom range for the 120×80 island. Wheel and pinch share the same camera and terrain picking. Adding discovered islands to this world view is deferred until ships and persistent island travel are implemented.

@@ -4,9 +4,9 @@ use glam::{Mat4, Vec2, Vec3, Vec4Swizzles};
 use crate::terrain::{COLUMNS, ROWS};
 
 const MIN_DISTANCE: f32 = 5.0;
-const MAX_DISTANCE: f32 = 70.0;
+const MAX_DISTANCE: f32 = 140.0;
 pub const NEAR: f32 = 0.1;
-pub const FAR: f32 = 200.0;
+pub const FAR: f32 = 400.0;
 const FOV_Y: f32 = 36.0;
 const YAW: f32 = std::f32::consts::FRAC_PI_4;
 // atan(1 / sqrt(2)): square-cell edges project at the art's 30-degree angle.
@@ -27,6 +27,25 @@ impl Rig {
             width: 1.0,
             height: 1.0,
         }
+    }
+
+    /// Keep settlement views flat; ease into the distant planet view.
+    pub fn curve(&self) -> f32 {
+        let t = ((self.distance - 60.0) / (MAX_DISTANCE - 60.0)).clamp(0.0, 1.0);
+        t * t * (3.0 - 2.0 * t) * 0.007
+    }
+
+    /// Match common.wgsl so picking and overlays follow the rendered ground.
+    fn bend(&self, mut world: Vec3) -> Vec3 {
+        let away = Vec2::new(world.x - self.target.x, world.z - self.target.z);
+        world.y -= self.curve() * away.length_squared();
+        world
+    }
+
+    fn unbend(&self, mut world: Vec3) -> Vec3 {
+        let away = Vec2::new(world.x - self.target.x, world.z - self.target.z);
+        world.y += self.curve() * away.length_squared();
+        world
     }
 
     pub fn eye(&self) -> Vec3 {
@@ -62,7 +81,12 @@ impl Rig {
 
     /// Screen pixel (top-left origin) of a world point.
     pub fn screen_of(&self, world: Vec3) -> Option<Vec2> {
-        let clip = self.view_proj() * world.extend(1.0);
+        self.screen_offset(world, Vec3::ZERO)
+    }
+
+    /// Billboards bend at their anchor, then extend in the camera plane.
+    pub fn screen_offset(&self, anchor: Vec3, offset: Vec3) -> Option<Vec2> {
+        let clip = self.view_proj() * (self.bend(anchor) + offset).extend(1.0);
         if clip.w <= 0.0 {
             return None;
         }
@@ -86,14 +110,33 @@ impl Rig {
         (near, far - near)
     }
 
-    /// The point on the horizontal plane at `height` under a screen pixel.
+    /// The point at unbent ground `height` under a pixel; sky has no hit.
     pub fn plane_at(&self, pixel: Vec2, height: f32) -> Option<Vec3> {
         let (near, direction) = self.ray(pixel);
-        if direction.y.abs() < 1e-6 {
-            return None;
-        }
-        let t = (height - near.y) / direction.y;
-        (t > 0.0).then(|| near + direction * t)
+        // Intersect the ray with y = height - curve * distance_from_target².
+        let away = Vec2::new(near.x - self.target.x, near.z - self.target.z);
+        let horizontal = Vec2::new(direction.x, direction.z);
+        let a = self.curve() * horizontal.length_squared();
+        let b = direction.y + 2.0 * self.curve() * away.dot(horizontal);
+        let c = near.y - height + self.curve() * away.length_squared();
+        let t = if a < 1e-6 {
+            if b.abs() < 1e-6 {
+                return None;
+            }
+            -c / b
+        } else {
+            let discriminant = b * b - 4.0 * a * c;
+            if discriminant < 0.0 {
+                return None; // Sky above the curved horizon.
+            }
+            let root = discriminant.sqrt();
+            // Avoid cancellation as the curve first eases away from zero.
+            let q = -0.5 * (b + root.copysign(b));
+            let first = (q / a).min(c / q);
+            let second = (q / a).max(c / q);
+            if first > 0.0 { first } else { second }
+        };
+        (t > 0.0 && t <= 1.0).then(|| self.unbend(near + direction * t))
     }
 
     /// The first point where the view ray through a pixel meets the terrain
@@ -102,13 +145,16 @@ impl Rig {
         const TOP: f32 = 2.0;
         const BOTTOM: f32 = -0.5;
         let (near, _) = self.ray(pixel);
-        let mut from = self.plane_at(pixel, TOP).unwrap_or(near);
-        let to = self.plane_at(pixel, BOTTOM)?;
+        let mut from = self
+            .plane_at(pixel, TOP)
+            .map(|p| self.bend(p))
+            .unwrap_or(near);
+        let to = self.bend(self.plane_at(pixel, BOTTOM)?);
         let steps = ((to - from).length() / 0.05).ceil().max(1.0) as usize;
         let step = (to - from) / steps as f32;
-        let below = |p: Vec3| p.y <= height(p.x, p.z);
+        let below = |p: Vec3| self.unbend(p).y <= height(p.x, p.z);
         if below(from) {
-            return Some(from);
+            return Some(self.unbend(from));
         }
         for _ in 0..steps {
             let next = from + step;
@@ -122,11 +168,11 @@ impl Rig {
                         above = middle;
                     }
                 }
-                return Some(under);
+                return Some(self.unbend(under));
             }
             from = next;
         }
-        Some(to)
+        Some(self.unbend(to))
     }
 
     fn clamp(&mut self) {
@@ -190,6 +236,53 @@ mod tests {
         rig.zoom(4.0);
         assert_eq!(rig.target, target);
         assert!(edge(&rig).abs_diff_eq(before / 4.0, 1e-4));
+    }
+
+    #[test]
+    fn distant_view_preserves_ground_picking_on_desktop_and_phone() {
+        for (width, height) in [(1280.0, 800.0), (390.0, 844.0)] {
+            let mut rig = Rig::new();
+            rig.width = width;
+            rig.height = height;
+            rig.look_at(COLUMNS / 2.0, ROWS / 2.0);
+            assert_eq!(rig.curve(), 0.0);
+            rig.zoom(100.0);
+            assert_eq!(rig.distance, MAX_DISTANCE);
+            assert!(rig.curve() > 0.0);
+            for offset in [
+                Vec3::ZERO,
+                Vec3::new(8.0, 0.0, -5.0),
+                Vec3::new(-12.0, 0.0, 4.0),
+            ] {
+                let point = rig.target + offset;
+                let pixel = rig.screen_of(point).unwrap();
+                let picked = rig.ground_at(pixel, |_, _| 0.0).unwrap();
+                assert!(picked.abs_diff_eq(point, 0.002), "{picked:?} != {point:?}");
+                let clip = rig.view_proj() * rig.bend(point).extend(1.0);
+                assert!((0.0..1.0).contains(&clip.z));
+            }
+            rig.zoom(0.001);
+            assert_eq!(rig.curve(), 0.0);
+            assert_eq!(rig.distance, MIN_DISTANCE);
+        }
+    }
+
+    #[test]
+    fn curve_transition_and_horizon_have_stable_picking() {
+        let mut rig = Rig::new();
+        rig.width = 1280.0;
+        rig.height = 800.0;
+        for distance in [60.0, 60.001, 60.1, 80.0, 100.0, MAX_DISTANCE] {
+            rig.distance = distance;
+            let point = rig.target + Vec3::new(5.0, 0.7, -3.0);
+            let pixel = rig.screen_of(point).unwrap();
+            assert!(
+                rig.plane_at(pixel, point.y)
+                    .unwrap()
+                    .abs_diff_eq(point, 0.002)
+            );
+        }
+        assert!(rig.ground_at(Vec2::new(640.0, 0.0), |_, _| 0.0).is_none());
     }
 
     #[test]
