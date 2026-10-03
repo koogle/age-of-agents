@@ -161,3 +161,5 @@ Gameplay acceptance:
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
+
+- [x] Building-plot paving matches the illustrated cream-limestone palette, with light mortar and seamless mirrored repetition.
