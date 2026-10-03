@@ -13,6 +13,7 @@ fn world() -> GameWorld {
 
 fn node(id: &str, at: CellCoordinate, amount: f64) -> ResourceNode {
     ResourceNode {
+        field: None,
         id: id.into(),
         kind: ResourceKind::Food,
         cell: at,

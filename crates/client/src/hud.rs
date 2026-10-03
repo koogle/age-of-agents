@@ -73,6 +73,7 @@ pub enum BuildUi {
     Categories,
     Group(BuildingGroup),
     Placing(BuildingKind),
+    PlacingField,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -83,6 +84,7 @@ pub enum Action {
     Build,
     /// Start placing this building.
     Place(BuildingKind),
+    PlaceField,
     Cancel,
     Stop,
     Produce(aoa_game::ProductKind),

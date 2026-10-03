@@ -108,8 +108,16 @@ impl GameWorld {
             }
         }
         for (index, resource) in self.resources.iter().enumerate() {
-            if resource.amount > 0.0 {
-                claim(resource.cell, Claim::Resource(index))?;
+            if resource.amount > 0.0 || resource.field.is_some() {
+                let footprint = resource.footprint();
+                if footprint.origin.column > WORLD_COLUMNS - footprint.columns
+                    || footprint.origin.row > WORLD_ROWS - footprint.rows
+                {
+                    return Err(format!("{} footprint is outside the world", resource.id));
+                }
+                for cell in footprint.cells() {
+                    claim(cell, Claim::Resource(index))?;
+                }
             }
         }
         for (index, unit) in self.units.iter().enumerate() {
@@ -180,6 +188,14 @@ impl GameWorld {
             }
         }
         for resource in &self.resources {
+            if let Some(field) = &resource.field
+                && (resource.kind != ResourceKind::Food
+                    || field.work.is_some_and(|work| {
+                        !(0.0..FIELD_WORK_SECONDS).contains(&work) || resource.amount != 0.0
+                    }))
+            {
+                return Err(format!("{} has invalid field state", resource.id));
+            }
             if !(resource.capacity.is_finite()
                 && resource.capacity > 0.0
                 && (0.0..=resource.capacity).contains(&resource.amount))
@@ -239,7 +255,9 @@ impl GameWorld {
                 return Err(format!("{} carries an invalid load", unit.id));
             }
             match &unit.action {
-                UnitAction::Gather { .. } | UnitAction::Build { .. }
+                UnitAction::Gather { .. }
+                | UnitAction::Build { .. }
+                | UnitAction::Cultivate { .. }
                     if unit.kind != UnitKind::Villager =>
                 {
                     return Err(format!("{} is not a worker", unit.id));
@@ -248,6 +266,13 @@ impl GameWorld {
                     if !self.resources.iter().any(|r| &r.id == resource_id) =>
                 {
                     return Err(format!("{} gathers a missing resource", unit.id));
+                }
+                UnitAction::Cultivate { resource_id }
+                    if !self.resources.iter().any(|r| {
+                        &r.id == resource_id && r.field.as_ref().is_some_and(|f| f.work.is_some())
+                    }) =>
+                {
+                    return Err(format!("{} cultivates no unfinished field", unit.id));
                 }
                 UnitAction::Build { building_id }
                     if !self

@@ -197,6 +197,21 @@ impl GameWorld {
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
             UnitAction::Move { to } => Some(Goal::Cell(*to)),
+            UnitAction::Cultivate { resource_id } => {
+                let field_goal = || {
+                    self.resources
+                        .iter()
+                        .find(|r| &r.id == resource_id)
+                        .map(|r| Goal::Beside(r.footprint()))
+                };
+                if self.units[unit].cargo.is_some() {
+                    self.nearest_drop_site(unit)
+                        .map(Goal::Beside)
+                        .or_else(field_goal)
+                } else {
+                    field_goal()
+                }
+            }
             UnitAction::Build { .. } if self.units[unit].cargo.is_some() => {
                 // Dropping goods off first; see `drop_off_before_building`.
                 self.nearest_drop_site(unit).map(Goal::Beside).or_else(|| {
@@ -255,6 +270,18 @@ impl GameWorld {
             let after = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
                 !footprint.contains(cell) && !occupancy.is_static(cell)
             });
+            // Even if every lost cell belongs to the new building, a unit
+            // that could walk before must still have somewhere to step.
+            let body = Footprint {
+                origin: start,
+                columns: 1,
+                rows: 1,
+            };
+            if before.nearest(interaction_cells(body)).is_some()
+                && after.nearest(interaction_cells(body)).is_none()
+            {
+                return false;
+            }
             let preserved = self.terrain.iter().all(|terrain| {
                 let cell = terrain.coordinate();
                 footprint.contains(cell)

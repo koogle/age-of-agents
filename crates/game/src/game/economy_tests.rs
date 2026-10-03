@@ -155,6 +155,7 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
             let cell = cell(column, row);
             if footprint.is_interaction_cell(cell) {
                 world.resources.push(ResourceNode {
+                    field: None,
                     id: format!("block-{column}-{row}"),
                     kind: ResourceKind::Stone,
                     cell,
@@ -261,6 +262,7 @@ fn unavailable_jobs_and_corrupt_job_capabilities_are_rejected() {
 fn farm_bonus_changes_gathering_and_camp_accepts_actual_deposits() {
     let mut farm = world_with(BuildingKind::Farm);
     farm.resources.push(ResourceNode {
+        field: None,
         id: "crop".into(),
         kind: ResourceKind::Food,
         cell: cell(14, 14),

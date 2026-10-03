@@ -7,7 +7,7 @@ claim the same cells, so completion could leave the villager with no way out.
 The authoritative Build command now compares static reachability before and
 after the proposed footprint, before changing any state. Every unit retains
 access to its formerly reachable ground except the cells the building occupies.
-This also prevents cutting off another villager or closing a narrow passage.
+A unit that could walk before placement must also retain a reachable neighboring cell, even if the footprint consumes all its former walking space. This prevents cutting off another villager or closing a narrow passage.
 Existing disconnected islands are compared independently. A moving unit is
 checked from the step destination it will finish occupying. Temporary traffic
 and reservations are ignored for connectivity; existing exclusive-claim and
@@ -22,6 +22,6 @@ legal when they preserve routes. No changed implementation file crosses 1,000
 lines. Existing traps in saved worlds are not repaired by this prevention fix.
 
 Focused tests cover builder and bystander traps, blocked diagonal exits,
-in-flight orders, safe construction followed by movement, already disconnected
+in-flight orders, consuming all remaining walking space, safe construction followed by movement, already disconnected
 land, and the existing touching-house regression. Full verification results are
 recorded in OPEN_WORK.md and the PR.

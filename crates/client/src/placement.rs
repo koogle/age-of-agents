@@ -24,6 +24,20 @@ impl App {
                 ]
             })
             .collect();
+        bounds.extend(
+            snapshot
+                .resources
+                .iter()
+                .filter(|r| r.field.is_some())
+                .map(|r| {
+                    [
+                        r.cell.column as f32 * terrain::CELL,
+                        r.cell.row as f32 * terrain::CELL,
+                        3.0 * terrain::CELL,
+                        3.0 * terrain::CELL,
+                    ]
+                }),
+        );
         if let Some((kind, origin, _)) = ghost {
             let (columns, rows) = kind.size();
             bounds.push([
@@ -64,23 +78,20 @@ impl App {
             (origin.column..origin.column + columns).contains(&c.column)
                 && (origin.row..origin.row + rows).contains(&c.row)
         };
-        let blocked = snapshot
-            .resources
-            .iter()
-            .any(|r| r.amount > 0.0 && covers(r.cell))
-            || snapshot.units.iter().any(|u| {
+        let blocked =
+            snapshot.resources.iter().any(|r| {
+                (r.amount > 0.0 || r.field.is_some()) && r.footprint().cells().any(covers)
+            }) || snapshot.units.iter().any(|u| {
                 covers(u.unit.cell)
                     || u.unit.step.is_some_and(|step| covers(step.to))
                     || matches!(u.unit.action, UnitAction::Move { to } if covers(to))
-            })
-            || snapshot.buildings.iter().any(|b| {
+            }) || snapshot.buildings.iter().any(|b| {
                 let o = b.building.origin;
                 o.column < origin.column + columns
                     && origin.column < o.column + b.columns
                     && o.row < origin.row + rows
                     && origin.row < o.row + b.rows
-            })
-            || (0..rows).any(|dy| {
+            }) || (0..rows).any(|dy| {
                 (0..columns).any(|dx| {
                     let cell = &snapshot.terrain[(origin.row + dy) as usize
                         * snapshot.columns as usize
@@ -104,7 +115,19 @@ impl App {
             || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r));
         Some((
             origin,
-            !blocked && snapshot.stockpile.affords(kind.cost()) && (coast || !kind.needs_coast()),
+            !blocked
+                && snapshot
+                    .stockpile
+                    .affords(if self.build == crate::hud::BuildUi::PlacingField {
+                        aoa_game::FIELD_COST
+                    } else {
+                        kind.cost()
+                    })
+                && (coast || !kind.needs_coast())
+                && (self.build != crate::hud::BuildUi::PlacingField
+                    || snapshot.buildings.iter().any(|b| {
+                        b.building.kind == aoa_game::BuildingKind::Farm && b.building.is_complete()
+                    })),
         ))
     }
 }
