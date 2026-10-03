@@ -1,5 +1,11 @@
 # Open Work
 
+## Transport ship (2026-10-03)
+
+Implemented local dock transport: 60 wood + 20 timber, 20-second queued production, four reserved passenger seats and a 200-good hold. Typed atomic sail/stop/board/land/transfer commands preserve passenger IDs, carried loads, housing and save compatibility. Native/WebGL controls and FAL-derived transparent front/rear sprites are integrated. Persistent destination islands (B3), local inventories/trade (B4), and cumulative globe discovery remain future work. First-completion destination generation is recorded as the future contract, not claimed as implemented.
+
+Verification in progress: full workspace suite, native/WASM lint, sprite audit, desktop/phone browser flow and review. Modal credentials have not been established.
+
 ## Retire the unused frontend (2026-10-03)
 
 User requested removal of unused legacy code, then PR creation and merge. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend/vendor libraries, unused GLBs/model builders, processed `assets/game/` sprites, obsolete asset pipelines/checks, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, and docs now use the Rust client only.
@@ -24,19 +30,17 @@ Order by prerequisites first, then estimated complexity within each stage. Small
 | A1 | Remaining release and platform verification — small | Successful runtime deployment; target desktops for native checks | Independently check deployed starter economy, camera controls, gathering animations, loading title and NPC selection-ring occlusion. Check native reset-dialog appearance on macOS/Windows when those desktops are available. Follow the release checklist below; use isolated worlds and never reset the shared production save. |
 | A2 | Field placement safety — small | None | Make `plant_field` preserve existing ground routes as building placement does. Cover trapped bystanders and the last exit with regressions; preserve wood/stone charges, shared labor and manual replenishment. |
 | A3 | Touch selection and accessibility — medium | None; coordinate client edits with B5 | Add additive touch selection and accessible keyboard/screen-reader equivalents for canvas controls. Preserve desktop Shift-click/Shift-drag, mouse/touch parity and camera gestures. Explicit blocking/non-blocking task classification remains open; scope it separately if it requires new domain semantics. |
-| A4 | Ship action/facing sprites — asset workload | B1/B2 ship-state requirements | Generate/refine ship-state art once action/facing requirements are agreed. Require detailed authored sources, at least 512×512 frames and provenance. Run resolution/asset checks and inspect maximum-zoom desktop and DPR-2 phone. |
 
 ### Stage 2 — Core dependency chain
 
-Use one integration owner for shared domain, occupancy and save-schema changes. Agree on B1 before parallel implementation; merge B2 → B3 → B4. B5 can develop against agreed command/snapshot interfaces, but each core PR still needs enough actual UI to exercise its own playable slice.
+Local dock transport (B2) and its generated sprites (A4) are implemented in the current change. Use one integration owner for remaining island, occupancy and save-schema changes; agree on B1 before B3 → B4. Each core PR needs enough actual UI to exercise its playable slice.
 
 | ID | Task / complexity | Dependencies | Acceptance criteria |
 | --- | --- | --- | --- |
-| B1 | Transport/island contracts — small design task, high coordination | None | Agree on island IDs, land-versus-aboard unit location, passenger/resource manifests, inventory ownership, typed commands and save compatibility. Resolve the trigger discrepancy: the conversation proposes generation on first ship completion; ROADMAP currently says first departure reveals island two. Recommended contract: completion generates a destination once; departure travels there. Synchronize ROADMAP/decisions when adopting it. Keep this a minimal contract, not a generic engine. |
-| B2 | Dock-built transport and passengers — large | B1 | Implement the planned first transport at 60 wood + 20 timber, water navigation, bounded goods/passenger capacity, boarding and safe unloading. Preserve original NPC IDs and carried goods; boarding releases land claims, unloading reserves valid shore cells. Invalid commands are atomic; blocked landing, interruption and save/reload cannot lose or duplicate goods/units. No metal or cloth prerequisite. |
+| B1 | Remaining island/inventory contracts | Local transport | Local passenger ownership, manifests, typed commands and compatible saves are implemented. Finalize persistent island IDs and settlement inventory ownership for B3/B4. Adopted trigger: first transport completion generates a destination once; departure travels there. Generation is still future work. |
 | B3 | Persistent destination islands and founding — large | B1, B2 | Generate destinations deterministically once, preserving prior islands, settlements and fog. Support travel and initial landing without requiring an existing destination dock; allow enough transported supplies to found an outpost. Introduce complementary iron/coal, then clay and fiber on further islands. Do not replace the old world via Reset or make island two supply everything. Avoid a fixed long-term island limit. |
 | B4 | Local inventories and trading posts — large | B1–B3 | Replace global spending/deposits with explicit settlement inventories; construction and processing consume local inputs. Ship loading/unloading transfers goods atomically between inventories, with conservation and save/reload tests. Remote stock cannot fund local construction. Demonstrate a round trip that makes trade necessary; no automatic shipping in this slice. |
-| B5 | Transport UI, globe and guidance — medium/large | B1 interfaces; B2–B4 for completion | Ship selection, manifests, passenger/goods controls, destinations, local stocks, missing-input/blocked-action explanations and cumulative globe discoveries. Verify build → board/load → travel → land/found → return/trade through actual desktop and touch controls. Coordinate accessible controls with A3. |
+| B5 | Transport UI, globe and guidance — medium/large | B1 interfaces; B2–B4 for completion | Local ship selection, manifests, passenger/goods controls and blocked-action explanations are implemented. Add destinations, local stocks and cumulative globe discoveries. Verify build → board/load → travel → land/found → return/trade through actual desktop and touch controls. Coordinate accessible controls with A3. |
 
 ### Stage 3 — Progression after working transport and trade
 
@@ -53,7 +57,7 @@ Later, split pirates, mythical creatures, calamities, treasures and permanent up
 - **Independent live browser acceptance:** verify fresh starter-island resources/build menu in an isolated world using deployed assets; check hosted camera controls, partial-load gathering animations, loading-title cleanup, HD sprites and field stages at maximum zoom, and selected NPC rings above raised terrain but behind opaque buildings. Check building queues/cancellation refunds and the one-shot unloading announcement alongside resource-gain feedback. Record desktop/DPR-2 phone evidence and the checked bundle; the final combined phone replay of unloading feedback remains unconfirmed. Do not reset the shared production save. Existing scoped evidence: [HD sprites](docs/HD_SPRITES_REVIEW.md), [field art](docs/FIELD_ART_REVIEW.md), [building queues](docs/BUILDING_QUEUES_REVIEW.md), and `/workspace/scratch/status-check/`.
 - **Native platform appearance:** macOS and Windows reset-dialog appearance remains unverified. Check the warning, seed entry, invalid-input retry, cancellation and confirmation on those target desktops.
 
-Already-closed Linux/Zenity reset, live desktop globe and browser zigzag direction/pose checks are recorded in [presentation verification](docs/PRESENTATION_VERIFICATION.md) (merged PR #60); they are not outstanding tasks. Their platform/bundle scope does not certify the newer combined release. Fresh runs still cannot depart until B2/B3 are implemented.
+Already-closed Linux/Zenity reset, live desktop globe and browser zigzag direction/pose checks are recorded in [presentation verification](docs/PRESENTATION_VERIFICATION.md) (merged PR #60); they are not outstanding tasks. Their platform/bundle scope does not certify the newer combined release. Local transport is implemented in this work; fresh runs cannot travel to another island until B3 is implemented.
 
 ## Working constraints
 

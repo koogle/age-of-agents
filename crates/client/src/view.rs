@@ -14,6 +14,7 @@ mod buildings;
 mod catalog;
 mod fields;
 mod selection;
+mod ships;
 pub(crate) use buildings::sprite as building_sprite;
 pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
@@ -184,6 +185,7 @@ impl View {
 /// Something a tap can land on by its drawn picture, not the ground under it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Pick {
+    Ship(String),
     Resource(String),
     Building(String),
 }
@@ -665,6 +667,7 @@ impl WorldView {
                 });
             }
         }
+        ships::draw(snapshot, selection, &mut sprites, &mut decals, &mut picks);
         self.pickables = picks;
         (sprites, decals)
     }
