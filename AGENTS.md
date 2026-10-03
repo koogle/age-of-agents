@@ -14,8 +14,8 @@ The current playable demo proves these loops:
 
 1. Isometric terrain tiles render cleanly on desktop and mobile.
 2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across eight biome-compatible raw resources.
-3. A player can construct a town center and train villagers through its single authoritative job slot.
-4. A player can research five bounded gathering improvements through that same job slot.
+3. A player can construct a town center and train villagers through its authoritative task queue.
+4. A player can research five bounded gathering improvements through that same task queue.
 
 Keep the simulation deterministic. The long-term world should keep expanding as the player discovers islands, without a fixed island limit; the current single-island map is a prototype constraint. Treat combat, island expansion, calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 

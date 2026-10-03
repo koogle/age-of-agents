@@ -22,6 +22,8 @@ mod progression;
 #[cfg(test)]
 mod progression_tests;
 #[cfg(test)]
+mod queue_tests;
+#[cfg(test)]
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
@@ -164,6 +166,11 @@ pub enum Command {
         building_id: String,
         technology: TechnologyKind,
     },
+    /// Cancel a waiting task by stable ID; active work cannot be cancelled.
+    CancelQueuedJob {
+        building_id: String,
+        queue_id: u64,
+    },
     SetSimulationSpeed {
         multiplier: f64,
     },
@@ -201,7 +208,8 @@ pub enum CommandError {
     NothingToDeposit,
     BuildingRefusesCargo,
     BuildingNotFound,
-    BuildingBusy,
+    BuildingQueueFull,
+    QueuedJobNotFound,
     BuildingUnderConstruction,
     BuildingAlreadyComplete,
     ProductUnavailable,
@@ -239,7 +247,8 @@ impl std::fmt::Display for CommandError {
             Self::NothingToDeposit => "unit is not carrying anything",
             Self::BuildingRefusesCargo => "building does not take that cargo",
             Self::BuildingNotFound => "building not found",
-            Self::BuildingBusy => "building is already producing",
+            Self::BuildingQueueFull => "building queue is full",
+            Self::QueuedJobNotFound => "queued task is no longer waiting",
             Self::BuildingUnderConstruction => "building is still under construction",
             Self::BuildingAlreadyComplete => "building is already complete",
             Self::ProductUnavailable => "building cannot produce that item",
@@ -334,6 +343,8 @@ fn building(
             }
         },
         job: None,
+        queue: Vec::new(),
+        next_queue_id: 0,
     }
 }
 
@@ -487,7 +498,7 @@ impl GameWorld {
                 building_id,
                 product,
             } => {
-                let building = self.building_index_and_idle(&building_id)?;
+                let building = self.building_index_with_queue_space(&building_id)?;
                 if !self.buildings[building].kind.products().contains(&product)
                     || !self.building_available(self.buildings[building].kind)
                 {
@@ -507,7 +518,7 @@ impl GameWorld {
                 for &(kind, amount) in product.cost() {
                     self.stockpile.add(kind, -amount);
                 }
-                self.buildings[building].job = Some(BuildingJob::Produce {
+                self.buildings[building].enqueue(BuildingJob::Produce {
                     product,
                     elapsed_seconds: 0.0,
                 });
@@ -516,7 +527,7 @@ impl GameWorld {
                 building_id,
                 technology,
             } => {
-                let building = self.building_index_and_idle(&building_id)?;
+                let building = self.building_index_with_queue_space(&building_id)?;
                 if !self.buildings[building].researches.contains(&technology)
                     || !self.technology_available(technology)
                 {
@@ -525,7 +536,7 @@ impl GameWorld {
                 if self.researched_technologies.contains(&technology) {
                     return Err(CommandError::TechnologyAlreadyResearched);
                 }
-                if self.buildings.iter().any(|b| matches!(b.job, Some(BuildingJob::Research { technology: t, .. }) if t == technology)) {
+                if self.buildings.iter().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
                     return Err(CommandError::TechnologyInProgress);
                 }
                 if technology
@@ -541,10 +552,16 @@ impl GameWorld {
                 }
                 self.stockpile.food -= RESEARCH_FOOD_COST;
                 self.stockpile.wood -= RESEARCH_WOOD_COST;
-                self.buildings[building].job = Some(BuildingJob::Research {
+                self.buildings[building].enqueue(BuildingJob::Research {
                     technology,
                     elapsed_seconds: 0.0,
                 });
+            }
+            Command::CancelQueuedJob {
+                building_id,
+                queue_id,
+            } => {
+                self.cancel_queued_job(&building_id, queue_id)?;
             }
             Command::Deposit {
                 unit_id,
@@ -605,7 +622,8 @@ impl GameWorld {
             + self
                 .buildings
                 .iter()
-                .filter(|b| matches!(b.job, Some(BuildingJob::Produce { product, .. }) if product.unit_kind().is_some()))
+                .flat_map(Building::jobs)
+                .filter(|job| matches!(job, BuildingJob::Produce { product, .. } if product.unit_kind().is_some()))
                 .count()
     }
 
@@ -638,7 +656,7 @@ impl GameWorld {
         format!("villager-{}", self.next_unit_id)
     }
 
-    fn building_index_and_idle(&self, building_id: &str) -> Result<usize, CommandError> {
+    fn building_index_with_queue_space(&self, building_id: &str) -> Result<usize, CommandError> {
         let index = self
             .buildings
             .iter()
@@ -647,8 +665,10 @@ impl GameWorld {
         if !self.buildings[index].is_complete() {
             return Err(CommandError::BuildingUnderConstruction);
         }
-        if self.buildings[index].job.is_some() {
-            return Err(CommandError::BuildingBusy);
+        if self.buildings[index].queue.len() >= MAX_QUEUED_JOBS
+            || self.buildings[index].next_queue_id == u64::MAX
+        {
+            return Err(CommandError::BuildingQueueFull);
         }
         Ok(index)
     }
