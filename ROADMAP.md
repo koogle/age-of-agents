@@ -21,6 +21,7 @@ Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 
 - [x] One derived occupancy map: buildings (rectangular footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
 - [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
+- [x] Building placement preserves every unit’s existing ground routes, preventing builders or bystanders from being enclosed by a foundation.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
