@@ -2,11 +2,11 @@
 
 A Greek strategy roguelike inspired by Age of Empires and Anno. Build an island settlement, grow its economy, and explore further islands while trying to survive an increasingly hostile world.
 
-The current prototype is a small RTS economy with a shared Rust simulation and native/browser clients.
+The current prototype is a single-island RTS economy with a shared Rust simulation and native/browser clients.
 
 ## Proposed gameplay loop
 
-Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings.
+Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. The long-term world keeps expanding as you discover islands, without a fixed island limit.
 
 Time keeps moving as you expand. Islands have local dangers such as wolves; later threats include pirates and mythical creatures such as a cyclops. Train warriors and archers to protect your settlements. Calamities grow stronger over time: a hurricane might destroy your fleet, famine might kill villagers and halve your stores, or fire might devastate an island.
 
@@ -83,6 +83,6 @@ cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnin
 
 For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks frontend syntax and assets.
 
-Asset changes must pass the relevant checks in `scripts/`. Sprite frames require 512×512 authored pixels; several villager and military sheets still need an HD repack. Use `python3 scripts/check_sprite_resolution.py --report-only` to inspect those gaps. See [Midjourney tooling](docs/MIDJOURNEY.md) for asset setup.
+Asset changes must pass the relevant checks in `scripts/`. Sprite frames require 512×512 authored pixels; several villager and military sheets still need an HD repack. Use `python3 scripts/check_sprite_resolution.py --report-only` to inspect those gaps. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
 Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment: `python3 scripts/modal_manage.py deploy`.
