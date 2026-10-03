@@ -1,5 +1,11 @@
 # Open Work
 
+## Building near-plane visibility (2026-10-03)
+
+User requested a PR and merge into the main branch (`master`). Reproduced in the Rust WebGL2 client: at minimum camera distance, pan the town center down until its front ground anchor passes the near plane; the whole sprite vanished while its roof still occupied the viewport. Clamp billboard vertex depth and building fragment depth at the near plane. Screen bounds, alpha testing, far clipping and per-column footprint depth still determine rendering. Native and browser share this shader; no simulation or asset changes.
+
+Integrated current master c85a85a (farm fields and reset seed), rebuilt tracked WASM. Desktop before/after regression passes: the affected roof region changes from 828 to over 16,000 roof-colored pixels; fully offscreen control has zero. DPR-2 touch pan passed before upstream integration; integrated browser/touch and full workspace tests/native-WASM lint are finishing. Evidence and regression driver: /workspace/scratch/building-visibility/. Formatting and asset checks pass. Thermonuclear review: two direct depth clamps, no extra culling layer/dependency, authoritative state and spatial rules unchanged, no client file over 1,000 lines. Open draft PR, complete final checks, then merge and monitor the configured Modal deployment.
+
 ## Replenishable farm fields (2026-10-03)
 
 Implemented typed PlantField/Cultivate commands and persistent 3×3 food plots unlocked by completed farms. Planting or replenishing costs 10 wood + 5 stone and 12 villager-seconds, producing 120 food. Empty plots retain occupancy; shared/interrupted labor reserves materials once and idles on completion. Existing gathering/deposits harvest them normally. Build → Gathering includes Field with prerequisite/affordability feedback; click depleted plots with selected villagers to replenish. Existing 512px farm stages render soil/preparation/ripe crops. Old resources default to no field state; saves are preserved.

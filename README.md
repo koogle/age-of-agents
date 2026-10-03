@@ -57,6 +57,9 @@ browser's `?local` mode run the same `aoa-game` simulation in-process, so the
 game also runs without any server. The older Three.js client under `frontend/`
 is still served at `/` until the Rust client reaches full parity.
 
+In the Rust client, building sprites remain visible when their roofs overlap the
+viewport, even when their ground anchors pass the near clipping plane at close zoom.
+
 ### World soundness
 
 The world is a 120×80 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:

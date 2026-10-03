@@ -167,6 +167,7 @@ Gameplay acceptance:
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs.
 - [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
+- [x] Keep partially visible buildings on screen when their ground anchors pass the near clipping plane at close zoom.
 - [x] Shift-drag from empty ground draws a selection box and adds enclosed visible units in native and WebGL2 clients.
 - [ ] Additive touch selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
