@@ -54,6 +54,8 @@ def verify_once() -> None:
     comparisons = {
         "/": ROOT / "frontend/index.html",
         "/play": ROOT / "web/index.html",
+        "/assets/loading/favicon.png": ROOT / "assets/loading/favicon.png",
+        "/assets/loading/favicon.ico": ROOT / "assets/loading/favicon.ico",
         **{f"/frontend/{name}": ROOT / "frontend" / name for name in FRONTEND_FILES},
     }
     for remote_path, local_path in comparisons.items():
