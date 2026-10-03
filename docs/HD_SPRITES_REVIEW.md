@@ -2,7 +2,7 @@
 
 The resolution audit found 183 undersized frames: 102 villager frames, 60 military
 frames and 21 base-resource frames. All are now packed in 512×512 lossless RGBA
-cells; the strict audit covers 264 frames and reports zero below minimum.
+cells; the strict audit covers 268 frames and reports zero below minimum.
 
 ## Sources and refinement
 
@@ -42,14 +42,14 @@ clipping. Resource pixel-to-world scale preserves node size.
 
 ## Verification
 
-All 151 workspace tests, strict native/WASM Clippy and formatting passed. Existing
+All 152 workspace tests, strict native/WASM Clippy and formatting passed. Existing
 activity-frame regressions use manifest dimensions; all villager variants and
-resource work poses remain covered. The strict 264-frame audit and existing
+resource work poses remain covered. The strict 268-frame audit and existing
 resource-activity, depleted-tree and icon checks pass. All 183 repacked frames
 have clear cell edges after the raised-pickaxe correction.
 
 Browser verification evidence and drivers are under `/workspace/scratch/hd-sprites/`.
-Maximum-zoom desktop and DPR-2 phone checks pass for three villager identities (idle, front/back walking, carry, chop, mine, dig and forage) and all four military types (idle and front/back walking). Actual WebGL2 uploads include 4096×2560 and 4096×4096 textures, with no runtime errors. Reviewed screenshots show clean silhouettes and aligned feet. Final military checks repeat after the fringe cleanup and integration of master `aba4c6d` (selection-ring fixes). A separate actual UI selection → gather flow reaches the partial-cargo gathering phase successfully. The integrated client passes all 43 tests and strict native/WASM lint; no domain code changed during integration.
+Maximum-zoom desktop and DPR-2 phone checks pass for three villager identities (idle, front/back walking, carry, chop, mine, dig and forage) and all four military types (idle and front/back walking). Actual WebGL2 uploads include 4096×2560 and 4096×4096 textures, with no runtime errors. Reviewed screenshots show clean silhouettes and aligned feet. Final military checks repeat after the fringe cleanup and integration of master `aba4c6d` (selection-ring fixes). A separate actual UI selection → gather flow reaches the partial-cargo gathering phase successfully. The integrated client passes all 44 tests and strict native/WASM lint; no domain code changed during integration.
 
 ## Limits
 
@@ -59,3 +59,5 @@ resource-variant/scenery sheets and legacy combined activity assets are outside
 this audit. Ship-state art remains dependent on transport requirements. A native
 window and physical phone are not available here; browser phone checks use DPR-2
 Chromium emulation.
+
+The final integration also preserves custom-field art from master `4255568`. Its four new 512 px field stages bring the combined strict audit to 268 frames; the 183-frame HD migration scope is unchanged. All 152 combined workspace tests and strict native/WASM lint pass; the combined desktop/phone 4K-texture smoke checks also pass.

@@ -214,10 +214,26 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         (name, (assets.image(&format!("sprites/{name}.png")), frames))
     })
     .collect();
-    for kind in BUILDABLE {
-        let (icon, row, _, _) = building_info(kind);
-        let (sheet, frames) = &sheets[build_menu::atlas(kind)];
-        let rect = if kind == BuildingKind::TownCenter {
+    let portraits = BUILDABLE
+        .into_iter()
+        .map(|kind| {
+            let (icon, row, _, _) = building_info(kind);
+            (
+                icon,
+                build_menu::atlas(kind),
+                row,
+                kind == BuildingKind::TownCenter,
+            )
+        })
+        .chain(std::iter::once((
+            "field",
+            "buildings_economy",
+            "field",
+            false,
+        )));
+    for (icon, atlas, row, town_center) in portraits {
+        let (sheet, frames) = &sheets[atlas];
+        let rect = if town_center {
             &frames["frames"]["complete"]
         } else {
             &frames["frames"][row][3]

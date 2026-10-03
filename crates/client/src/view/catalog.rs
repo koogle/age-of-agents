@@ -39,6 +39,10 @@ impl Catalog {
         }
     }
 
+    pub fn field(&self) -> (usize, &BuildingSheet) {
+        (7, &self.economy)
+    }
+
     pub fn unit(&self, kind: UnitKind) -> &VillagerSheet {
         let name = match kind {
             UnitKind::Guard => "guard",
