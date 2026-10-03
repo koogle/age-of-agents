@@ -36,7 +36,7 @@ Keep the simulation deterministic. The long-term world should keep expanding as 
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
 - Tap/click a foundation with villagers selected to have them help build it.
-- Tap/click a town center (or a granary, for food and fiber) with villagers selected to have those carrying goods unload there. A villager holding goods always shows the carry pose, even when stopped.
+- Tap/click a town center (or a granary, for food and fiber) with villagers selected to have those carrying goods unload there. A villager holding goods shows the carry pose, even when stopped, except while actively gathering; partial loads must keep the work animation.
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: given a new gather, build, or field-preparation assignment, it delivers its cargo to a compatible completed drop site before starting, including partial loads of the same kind. It retains and resumes the new assignment automatically.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
