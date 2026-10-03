@@ -26,6 +26,7 @@ winit = "0.30"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 env_logger = "0.11"
 pollster = "0.4"
+tinyfiledialogs = "3.9"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1"
