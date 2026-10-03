@@ -64,6 +64,7 @@ pub struct Decal {
     pub center: [f32; 3],
     pub radius: f32,
     pub color: [f32; 4],
+    /// 0: shadow, 1: pointer ring, 2: building outline, 3: selected unit ring.
     pub ring: f32,
 }
 

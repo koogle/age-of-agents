@@ -1,5 +1,11 @@
 # Open Work
 
+## Clear selected NPC highlight (2026-10-03)
+
+User requested a clearer active NPC highlight, a PR and merge into `master`. Selected units now use a larger, broad ivory ground ring with a dark team-blue border and derivative-smoothed edges in the shared native/WebGL2 renderer. Pointer previews, building outlines, shadows and selection semantics retain their existing paths. No gameplay, dependencies or generated art changes.
+
+Thermonuclear review: one direct branch in the existing decal shader, no new rendering layer; all client files remain below 1,000 lines. Rebuilt WASM and desktop single/group selection visually verified. Frontend syntax and existing asset checks pass. Full Rust checks and desktop/phone browser verification are running; integrate the latest camera-control master changes before final verification, PR and authorized merge. Browser evidence and driver: `/workspace/scratch/highlight-*`.
+
 Updated 2026-10-03. Keep this file to current status, remaining work, and blockers; completed implementation and verification history lives in Git and the reviews under `docs/`.
 
 Use `master` as the integration branch and PR base. The branch rename is cancelled; agents should preserve ongoing feature work and continue targeting `origin/master`.
