@@ -1,0 +1,6 @@
+{"t": 1791058164.792229, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-refined:siege_cart_motion", "est_usd": 0.001, "request_id": "01a10362-b35e-7853-b6a1-1a9a3a6d2e1a", "seconds": 2.2}
+{"t": 1791058165.5271032, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-refined:siege_cart_action", "est_usd": 0.001, "request_id": "01a10362-b630-7ea0-b096-6abdb767758e", "seconds": 2.2}
+{"t": 1791058170.1801212, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-refined:guard_action", "est_usd": 0.001, "request_id": "01a10362-b026-74f2-b384-ad6fae8666f6", "seconds": 8.4}
+{"t": 1791059138.029924, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-white-cutout:guard_action", "est_usd": 0.001, "request_id": "01a10371-8c83-7680-baff-3a2133ac3923", "seconds": 2.4}
+{"t": 1791059140.2335496, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-white-cutout:siege_cart_motion", "est_usd": 0.001, "request_id": "01a10371-9565-7231-81ac-d8bf55844734", "seconds": 2.3}
+{"t": 1791059151.57225, "endpoint": "fal-ai/birefnet/v2", "tag": "hd-white-cutout:siege_cart_action", "est_usd": 0.001, "request_id": "01a10371-9137-7a33-98dc-d9c1b937f6a4", "seconds": 14.7}

@@ -14,6 +14,8 @@ import argparse
 import json
 from pathlib import Path
 
+from PIL import Image
+
 MANIFESTS = (
     "villager.json", "villager_woman.json", "villager_elder.json",
     "villager_idle_hd.json", "resources.json", "towncenter.json",
@@ -46,6 +48,17 @@ def audit(path: Path, minimum: int) -> tuple[int, int]:
     if not found:
         print(f"FAIL {path.name}: no frame rectangles")
         return 0, 1
+    with Image.open(path.with_suffix(".png")) as image:
+        if image.format != "PNG" or image.mode != "RGBA":
+            raise ValueError(f"{path.name}: expected lossless RGBA PNG")
+        if "size" in data and list(image.size) != data["size"]:
+            raise ValueError(f"{path.name}: manifest size does not match actual pixels")
+        for name, (x, y, w, h) in found:
+            if min(x, y) < 0 or min(w, h) <= 0 or x + w > image.width or y + h > image.height:
+                raise ValueError(f"{path.name}/{name}: frame outside actual image")
+            alpha = image.crop((x, y, x + w, y + h)).getchannel("A")
+            if alpha.getbbox() is None:
+                raise ValueError(f"{path.name}/{name}: empty frame")
     low = [(name, rect) for name, rect in found if min(rect[2:]) < minimum]
     dimensions = sorted({(rect[2], rect[3]) for _, rect in found})
     status = "NEEDS HD REPACK" if low else "PASS"
@@ -70,7 +83,11 @@ def main() -> int:
     for name in MANIFESTS:
         path = args.root / name
         if path.exists():
-            count, low = audit(path, args.min_frame_px)
+            try:
+                count, low = audit(path, args.min_frame_px)
+            except ValueError as error:
+                print(f"FAIL {error}")
+                return 1
             checked += count
             failed += low
     if not checked:
