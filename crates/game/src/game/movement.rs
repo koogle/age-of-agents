@@ -97,6 +97,17 @@ impl GameWorld {
         }
         let through = self.static_paths(unit, occupancy);
         let Some(target) = through.nearest(goals) else {
+            // Reservations are temporary. Keep the order when the geometry
+            // still allows an approach once the reserving unit moves away.
+            if let Goal::Beside(footprint) = goal
+                && through
+                    .nearest(
+                        interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell)),
+                    )
+                    .is_some()
+            {
+                return NextStep::Wait;
+            }
             return NextStep::Unreachable;
         };
         match through.first_step(target) {
@@ -229,7 +240,7 @@ impl GameWorld {
     /// Whether `unit` could stand beside `footprint` once other units move aside.
     pub(super) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
         let occupancy = self.occupancy();
-        let goals = self.goal_cells(unit, Goal::Beside(footprint), &occupancy);
+        let goals = interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell));
         self.static_paths(unit, &occupancy).nearest(goals).is_some()
     }
 
@@ -348,11 +359,15 @@ impl GameWorld {
     }
 
     /// The complete building that takes the unit's cargo (a town center takes
-    /// anything, a granary food and fiber) with the cheapest reachable drop-off cell.
+    /// anything, a granary food and fiber) with the cheapest available route.
+    /// Prefer routes clear of other villagers; wait only when all sites are busy.
     pub(super) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
         let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
         let paths = self.static_paths(unit, &occupancy);
+        let clear = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, self.units[unit].cell, |cell| {
+            !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit)
+        });
         self.buildings
             .iter()
             .filter(|building| {
@@ -365,8 +380,22 @@ impl GameWorld {
             .filter_map(|building| {
                 let footprint = building.footprint();
                 let goals = self.goal_cells(unit, Goal::Beside(footprint), &occupancy);
-                let cost = paths.cost(paths.nearest(goals)?)?;
-                Some(((cost, &building.id), footprint))
+                let available = clear
+                    .nearest(
+                        goals
+                            .iter()
+                            .copied()
+                            .filter(|cell| !occupancy.has_other_unit(*cell, unit)),
+                    )
+                    .and_then(|cell| clear.cost(cell));
+                let cost = available.or_else(|| {
+                    paths
+                        .nearest(
+                            interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell)),
+                        )
+                        .and_then(|cell| paths.cost(cell))
+                })?;
+                Some(((available.is_none(), cost, &building.id), footprint))
             })
             .min_by(|left, right| left.0.cmp(&right.0))
             .map(|(_, footprint)| footprint)

@@ -7,6 +7,8 @@ mod domain;
 mod fixture;
 mod gathering;
 #[cfg(test)]
+mod gathering_tests;
+#[cfg(test)]
 mod group_move_tests;
 mod movement;
 mod occupancy;
