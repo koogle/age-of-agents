@@ -1,5 +1,14 @@
 # Open Work
 
+## Retire the unused frontend (2026-10-03)
+
+User requested removal of unused legacy code, including the old frontend. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend and vendor libraries, its GLBs and model builders, unused processed `assets/game/` sprites, the retired asset generation/processing/check scripts, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, README, roadmap, and contributor instructions now use the Rust client only.
+
+Verification: all 139 workspace tests (13 server, 35 client, 91 game), formatting, strict native/WASM Clippy, server build, browser-binding/Python syntax, current UI icon checks, and whitespace pass. Isolated SQLite server: `/`, `/play`, and both `?local` variants serve the exact Rust bootstrap with no-cache; removed frontend/sprite/GLB URLs return 404. The deployment verifier passes against that local server. Real Chromium desktop and DPR-2 phone load hosted and local modes without page errors, failed assets, or legacy requests; screenshots are `/tmp/aoa-cleanup-{desktop,phone}{,-local}.png`. Existing HD repack gaps remain as reported by `check_sprite_resolution.py --report-only`. Client source and tracked WASM are unchanged.
+
+Thermonuclear review: deletes the duplicate presentation stack and obsolete pipelines, adds no dependencies or gameplay behavior, preserves typed commands/persistence and `/play` links, and retains art provenance. Project source falls from 19,364 to about 16,233 code lines; total text removal is about 15,000 lines including vendor code, plus 2.1 MB of obsolete binary assets. User authorized a PR and merge. Rebased the cleanup onto current master (54bf023), retaining HD art, custom fields, task queues, progression, favicon, and drop-off feedback. Revalidating the integrated release before opening and merging the PR.
+
+
 ## Overhead resource drop-off status (2026-10-03)
 
 Replaced the initial persistent pill with a one-shot “Dropping off wood” announcement using the exact existing resource-gain font, stroke, upward drift and 1.4-second fade. It appears when a villager enters unloading, including gather reassignment, construction, field preparation and explicit deposits. Repeated snapshots and Returning → Depositing do not replay it; actual delivery retains its separate +resource message. Loading an existing state does not replay old announcements. Removed the dedicated status HUD/view code; no domain, dependency or art changes.

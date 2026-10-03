@@ -26,7 +26,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 ICONS = ROOT / "assets/ui/icons"
 SIZE = 128
-SAFE_RADIUS = 0.47  # of SIZE: keeps every pixel inside the coin face (hud.js draws the icon box at 1.5 r, so 0.47 reaches 0.7 r of a 0.8 r face)
+SAFE_RADIUS = 0.47  # of SIZE: keeps every pixel inside the coin face
 WEIGHT = 0.52  # sqrt(covered area) as a fraction of SIZE
 ALPHA = 40  # alpha counted as "ink"
 CENTER_TOLERANCE = 1.5  # px

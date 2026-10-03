@@ -1,6 +1,6 @@
 # Voronoi terrain texture sources
 
-Generated through FAL with `scripts/generate_terrain_textures.py`. Temporary result URLs are retained only as provenance; runtime files were downloaded immediately.
+Historical sources from the retired Three.js terrain pipeline. The generation script and processed `assets/game/` files below have been removed; URLs and former paths are retained as provenance.
 
 - `assets/game/terrain_meadow.png` — https://v3b.fal.media/files/b/0aa55b4b/QhMvFoQNziHb21ZTC_blm.jpg
 - `assets/game/terrain_grassland.png` — https://v3b.fal.media/files/b/0aa55b4b/MBHugsGGpzx1sqsr0bAQI.jpg

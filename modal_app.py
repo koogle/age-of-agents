@@ -31,7 +31,6 @@ image = (
         ". $HOME/.cargo/env && cargo build --release --locked -p age-of-agents",
         ". $HOME/.cargo/env && ./scripts/build_web.sh",
     )
-    .add_local_dir("frontend", "/app/frontend", copy=True)
     .add_local_dir("assets", "/app/assets", copy=True)
 )
 
