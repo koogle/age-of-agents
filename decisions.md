@@ -18,4 +18,4 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Camera:** Use a fixed orthographic isometric angle with pan and zoom. Building art keeps its proportions within level footprint plots.
 - **Art:** Aim for a painted Greek island diorama with soft cel shading, fine ink lines, and tilt-shift depth of field. Generated sprites and textures replace procedural placeholders.
 - **Sprite quality:** Require at least 512×512 authored pixels for every action, facing, and construction frame. Upscaling and DPI metadata do not recover missing source detail.
-- **Deployment:** Host on Modal with quality checks and production verification after merges to `main`.
+- **Deployment:** Host on Modal with quality checks and production verification after merges to `master`.
