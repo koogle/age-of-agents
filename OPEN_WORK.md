@@ -22,6 +22,10 @@ Push the building-art correction after combined verification; production push tr
 
 `BuildingKind::build_seconds()` replaces the flat 4 s `BUILD_SECONDS`: total cost × 0.3 s (house 4.5, town center 6, granary 7.5, watchtower/dock 9). All are at least 4 s, so saved foundations stay valid. Client progress bars and construction stages use the per-kind time; legacy frontend divides by 6 (town center only). 94 tests, native/WASM clippy pass; web/pkg rebuilt; `/play` loads without console errors.
 
+## New-island villager freeze (fixed 2026-10-03)
+
+On the hosted game, villagers on a freshly reset island looked frozen when ordered to move. The new world restarts at tick 0 but reuses `villager-1`/`villager-2`, and the async `POST /reset` let old-world snapshots refill the view first, so stale high-tick samples stayed "newest" forever and the camera framed the old base. `WorldView::sync` now starts over (and returns true) when the tick goes backwards; the app then re-frames the new town center. Regression test in view.rs; 96 tests, native/WASM clippy pass; WASM rebuilt; headless browser reset plus WebSocket move verified (camera on new island, villager walks).
+
 ## Villager direction hold (merged 2026-10-03)
 
 Walking villagers no longer flicker between sprite directions on zigzag grid routes: the heading is smoothed over about a quarter second, the drawn direction flips only about 17 degrees past a boundary and at most every 0.5 s, and a stop must last 0.2 s before the standing or working pose shows (the stride frame freezes meanwhile, so there is no walking in place). Stride-paced walk frames and raw velocity are unchanged. Client tests, clippy and the WASM rebuild pass; not yet eyeballed in a browser.
