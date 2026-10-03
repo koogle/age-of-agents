@@ -2,7 +2,7 @@ name: Deploy production
 
 on:
   push:
-    branches: [master]
+    branches: [main, master] # Keep master during the GitHub default-branch transition.
   workflow_dispatch:
 
 concurrency:
