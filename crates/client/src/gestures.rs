@@ -101,7 +101,11 @@ impl App {
         if pointer.on_hud {
             return;
         }
-        if matches!(self.build, hud::BuildUi::Placing(_)) && pointer.button == MouseButton::Left {
+        if matches!(
+            self.build,
+            hud::BuildUi::Placing(_) | hud::BuildUi::PlacingField
+        ) && pointer.button == MouseButton::Left
+        {
             return;
         }
         if pointer.down_at.distance(pixel) > DRAG_THRESHOLD {

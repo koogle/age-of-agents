@@ -1,5 +1,11 @@
 # Open Work
 
+## Replenishable farm fields (2026-10-03)
+
+Implemented typed PlantField/Cultivate commands and persistent 3×3 food plots unlocked by completed farms. Planting or replenishing costs 10 wood + 5 stone and 12 villager-seconds, producing 120 food. Empty plots retain occupancy; shared/interrupted labor reserves materials once and idles on completion. Existing gathering/deposits harvest them normally. Build → Gathering includes Field with prerequisite/affordability feedback; click depleted plots with selected villagers to replenish. Existing 512px farm stages render soil/preparation/ripe crops. Old resources default to no field state; saves are preserved.
+
+All 124 workspace tests (13 server, 30 client, 81 game), strict native/WASM lint, formatting, release WASM/server builds and existing asset checks pass. Six focused field tests cover lifecycle, persistence, atomicity and extreme/unreachable sites. Desktop UI planting, harvest/depletion and paid replenishment pass; DPR-2 phone menu and planting pass, completion check in progress. Screenshots under /tmp/aoa-fields-*.png visually reviewed. Review: docs/FIELDS_REVIEW.md. Preserve concurrent reset-seed release 31fd7c2 before pushing; combined rebuild and deployment pending. No new art, field dependencies, autonomous planting, or transport changes.
+
 ## Building menu and deployment fix (2026-10-03)
 
 User requested visible catalog sprites, buildings grouped by type, and push to main (`master` in this repository). Previous production run 37137096419 failed: catalog.rs embedded four asset JSON files before Modal copied assets into its build image. The game stayed on the earlier release. Fixed catalog manifests to load through the runtime Assets manifest like existing sheets.

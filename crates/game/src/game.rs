@@ -6,6 +6,9 @@ mod domain;
 mod economy;
 #[cfg(test)]
 mod economy_tests;
+mod fields;
+#[cfg(test)]
+mod fields_tests;
 #[cfg(test)]
 mod fixture;
 mod gathering;
@@ -23,6 +26,7 @@ mod terrain_codec;
 mod worldgen;
 
 pub use domain::*;
+pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use worldgen::FISHING_BOAT_COST;
@@ -125,6 +129,14 @@ pub enum Command {
         unit_id: String,
         resource_id: String,
     },
+    PlantField {
+        unit_id: String,
+        origin: CellCoordinate,
+    },
+    Cultivate {
+        unit_id: String,
+        resource_id: String,
+    },
     /// Place a foundation of `kind` (a town center when omitted) with its
     /// north-west corner at `origin`.
     Build {
@@ -169,6 +181,8 @@ pub enum CommandError {
     DuplicateUnit,
     ResourceNotFound,
     ResourceDepleted,
+    FarmRequired,
+    FieldNotDepleted,
     InvalidDestination,
     DestinationOccupied,
     TargetUnreachable,
@@ -205,6 +219,8 @@ impl std::fmt::Display for CommandError {
             Self::DuplicateUnit => "unit group contains a duplicate member",
             Self::ResourceNotFound => "resource not found",
             Self::ResourceDepleted => "resource is depleted",
+            Self::FarmRequired => "a completed farm is required for fields",
+            Self::FieldNotDepleted => "harvest the field before replenishing it",
             Self::InvalidDestination => "destination is outside the world",
             Self::DestinationOccupied => "destination cell is occupied",
             Self::TargetUnreachable => "target is unreachable",
@@ -380,6 +396,11 @@ impl GameWorld {
                     phase: GatherPhase::ToResource,
                 };
             }
+            Command::PlantField { unit_id, origin } => self.plant_field(&unit_id, origin)?,
+            Command::Cultivate {
+                unit_id,
+                resource_id,
+            } => self.cultivate(&unit_id, &resource_id)?,
             Command::Build {
                 unit_id,
                 origin,
@@ -649,6 +670,9 @@ impl GameWorld {
                     self.tick_gather(index, resource_id, phase, dt)
                 }
                 UnitAction::Build { building_id } => self.tick_build(index, &building_id, dt),
+                UnitAction::Cultivate { resource_id } => {
+                    self.tick_cultivate(index, &resource_id, dt)
+                }
                 UnitAction::Deposit { building_id } => self.tick_deposit(index, &building_id, dt),
             }
         }
