@@ -50,7 +50,7 @@ fn building_depth(in: VOut) -> f32 {
     }
     let toward_camera = normalize(cross(g.camera_right.xyz, g.camera_up.xyz));
     let clip = g.view_proj * vec4<f32>(point + toward_camera * in.pull, 1.0);
-    return clip.z / clip.w;
+    return max(0.0, clip.z / clip.w);
 }
 
 @vertex
@@ -64,7 +64,10 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
     out.clip = g.view_proj * vec4<f32>(anchor + offset, 1.0);
     let toward_camera = normalize(cross(g.camera_right.xyz, g.camera_up.xyz));
     let front = g.view_proj * vec4<f32>(anchor + toward_camera * inst.pull, 1.0);
-    out.clip.z = front.z / front.w * out.clip.w;
+    // At close zoom the ground anchor can pass the near plane while the
+    // roof still overlaps the viewport. Keep the quad for rasterization;
+    // its screen bounds, alpha and per-column depth decide what is drawn.
+    out.clip.z = max(0.0, front.z / front.w) * out.clip.w;
     out.uv = vec2<f32>(mix(inst.uv.x, inst.uv.z, q.x), mix(inst.uv.w, inst.uv.y, q.y));
     out.anchor = inst.anchor;
     out.tint = inst.tint;
