@@ -149,7 +149,7 @@ Gameplay acceptance:
 
 - LLM-controlled villagers, autonomous planning, multiplayer, mod/plugin APIs, generic ECS/content engines, procedural world generation, and a large branching tech tree.
 
-- [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). Original illustrated building and construction sprites render without skewing inside cobblestone plots that mark the exact claim, including construction and previews; touching plots share one level foundation height.
+- [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). Original-style building sprites render without skewing inside cobblestone plots; houses are visually smaller and the completed granary displays stored grain. Plots mark the exact claim, including construction and previews; touching plots share one level foundation height.
 
 ## Integrated native presentation fixes
 

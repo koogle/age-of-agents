@@ -32,7 +32,10 @@ def main():
     footprints = {}
     source_corners = json.loads((SOURCE / "footprints.json").read_text())["footprints"]
     for row, kind in enumerate(KINDS):
-        cutouts = [cutout(SOURCE / f"{kind}_{stage}.png") for stage in STAGES]
+        cutouts = [cutout(SOURCE / (
+            "granary_grain_complete.png" if kind == "granary" and stage == "complete"
+            else f"{kind}_{stage}.png"
+        )) for stage in STAGES]
         images = [im for im, _ in cutouts]
         scale = min(FIT_H / max(im.height for im in images), FIT_W / max(im.width for im in images))
         frames[kind] = []

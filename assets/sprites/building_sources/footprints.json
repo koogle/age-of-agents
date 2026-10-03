@@ -1,5 +1,5 @@
 {
-  "note": "Source pixels [left, front, right, rear] of the structural ground footprint in stage order. Excludes steps, pots, scaffolding and loose materials. Hidden rear corners continue the structural wall axes. Circular towers use corners of the circumscribed ground square; docks use deck level (posts extend below).",
+  "note": "Source pixels [left, front, right, rear] of the structural ground footprint in stage order. Excludes steps, pots, scaffolding and loose materials. Hidden rear corners continue the structural wall axes. Circular towers use corners of the circumscribed ground square; docks use deck level (posts extend below). Completed granary corners refer to granary_grain_complete.png (1254 px); original sources remain archived.",
   "footprints": {
     "house": [
       [
@@ -132,20 +132,20 @@
       ],
       [
         [
-          154,
-          690
+          181,
+          830
         ],
         [
-          498,
-          842
+          602,
+          1030
         ],
         [
-          869,
-          655
+          1065,
+          801
         ],
         [
-          525,
-          503
+          644,
+          601
         ]
       ]
     ],
