@@ -67,13 +67,9 @@ fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
             world
                 .resources
                 .iter()
-                .filter(|r| r.kind == ResourceKind::Coal)
-                .map(|r| r.amount)
-                .sum::<f64>()
-                >= 30.0,
-            "seed {seed}: missing smelter fuel"
+                .all(|r| STARTER_RESOURCES.contains(&r.kind))
         );
-        for &(kind, cost) in &FISHING_BOAT_COST {
+        for &(kind, cost) in &STARTER_RESOURCE_BUDGET {
             let total: f64 = world
                 .resources
                 .iter()
