@@ -66,7 +66,14 @@ pub(crate) fn sprite(
     let points = corners.map(|[x, y]| ground_projection.inverse() * Vec2::new(x, -y));
     let low = points.into_iter().reduce(Vec2::min).unwrap();
     let high = points.into_iter().reduce(Vec2::max).unwrap();
-    let scale = (Vec2::new(width, depth) / (high - low)).min_element() * 0.94;
+    // Houses are modest homes inside the same claimed plot; storage buildings
+    // keep their larger silhouette. Apply equally to construction and ghosts.
+    let plot_fill = if kind == BuildingKind::House {
+        0.72
+    } else {
+        0.94
+    };
+    let scale = (Vec2::new(width, depth) / (high - low)).min_element() * plot_fill;
     let base_center = ground_projection * ((low + high) * 0.5);
     // Take depth from the plot's front, while centering the unmodified art on
     // the plot. This keeps the front wall clear of the ground's depth buffer.
