@@ -393,7 +393,11 @@ impl GameWorld {
                 }
                 self.units[unit].action = UnitAction::Gather {
                     resource_id,
-                    phase: GatherPhase::ToResource,
+                    phase: if self.units[unit].cargo.is_some() {
+                        GatherPhase::Returning
+                    } else {
+                        GatherPhase::ToResource
+                    },
                 };
             }
             Command::PlantField { unit_id, origin } => self.plant_field(&unit_id, origin)?,

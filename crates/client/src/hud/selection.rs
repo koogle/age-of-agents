@@ -238,17 +238,35 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
             UnitAction::Build { .. } if unit.unit.cargo.is_some() => {
-                "Dropping off goods first".into()
+                format!(
+                    "Unloading {} before building",
+                    resource_name(unit.unit.cargo.as_ref().unwrap().kind)
+                )
             }
             UnitAction::Build { .. } => "Building".into(),
             UnitAction::Cultivate { .. } if unit.unit.cargo.is_some() => {
-                "Dropping off goods first".into()
+                format!(
+                    "Unloading {} before preparing field",
+                    resource_name(unit.unit.cargo.as_ref().unwrap().kind)
+                )
             }
             UnitAction::Cultivate { .. } => "Preparing field".into(),
             UnitAction::Deposit { .. } => "Taking goods to unload".into(),
-            UnitAction::Gather { phase, .. } => match phase {
+            UnitAction::Gather { resource_id, phase } => match phase {
                 aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),
                 aoa_game::GatherPhase::Gathering => "Gathering".into(),
+                aoa_game::GatherPhase::Returning | aoa_game::GatherPhase::Depositing
+                    if unit.unit.cargo.is_some() =>
+                {
+                    let carried = resource_name(unit.unit.cargo.as_ref().unwrap().kind);
+                    match snapshot.resources.iter().find(|r| &r.id == resource_id) {
+                        Some(resource) => format!(
+                            "Unloading {carried} before gathering {}",
+                            resource_name(resource.kind)
+                        ),
+                        None => format!("Unloading {carried} first"),
+                    }
+                }
                 aoa_game::GatherPhase::Returning => "Carrying goods home".into(),
                 aoa_game::GatherPhase::Depositing => "Unloading".into(),
             },
@@ -370,11 +388,71 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
     Some((portrait, name.into(), detail, progress, commands))
 }
 
+fn resource_name(kind: ResourceKind) -> &'static str {
+    match kind {
+        ResourceKind::Wood => "wood",
+        ResourceKind::Food => "food",
+        ResourceKind::Stone => "stone",
+        ResourceKind::Gold => "gold",
+        ResourceKind::Iron => "iron",
+        ResourceKind::Coal => "coal",
+        ResourceKind::Clay => "clay",
+        ResourceKind::Fiber => "fiber",
+        ResourceKind::Timber => "timber",
+        ResourceKind::Steel => "steel",
+        ResourceKind::Bricks => "bricks",
+        ResourceKind::Cloth => "cloth",
+        ResourceKind::Rations => "rations",
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use aoa_game::{BUILDABLE, GameWorld};
     use glam::Vec2;
+
+    #[test]
+    fn reassignment_status_explains_unloading_and_then_the_new_task() {
+        let mut world = GameWorld::default();
+        let visible = world.snapshot().resources[0].id.clone();
+        world
+            .resources
+            .iter_mut()
+            .find(|r| r.id == visible)
+            .unwrap()
+            .kind = ResourceKind::Food;
+        world.units[0].cargo = Some(aoa_game::CarriedResource {
+            kind: ResourceKind::Wood,
+            amount: 7.0,
+        });
+        world.units[0].action = UnitAction::Gather {
+            resource_id: visible,
+            phase: aoa_game::GatherPhase::Returning,
+        };
+        assert!(unit_detail(&world).starts_with("Unloading wood before gathering food"));
+        world.units[0].cargo = None;
+        world.units[0].action = UnitAction::Gather {
+            resource_id: "outside-fog".into(),
+            phase: aoa_game::GatherPhase::ToResource,
+        };
+        assert_eq!(unit_detail(&world), "Heading out to gather");
+    }
+
+    fn unit_detail(world: &GameWorld) -> String {
+        let snapshot = world.snapshot();
+        let units = [snapshot.units[0].unit.id.clone()];
+        let model = Model {
+            snapshot: Some(&snapshot),
+            units: &units,
+            building: None,
+            build: BuildUi::Off,
+            show_grid: false,
+            toast: None,
+            camera: Vec2::ZERO,
+        };
+        selection_model(&snapshot, &model).unwrap().2
+    }
 
     #[test]
     fn grouped_menu_exposes_every_building_once() {
