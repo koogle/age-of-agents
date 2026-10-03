@@ -1,6 +1,6 @@
 # Open Work
 
-Updated 2026-10-03. Keep only outstanding work, blockers and verification follow-ups here. Implemented features are summarized in [README.md](README.md); completed history lives in Git and `docs/`.
+Updated 2026-10-03 at 22:30 Europe/Madrid. Keep only outstanding work, blockers and verification follow-ups here. Implemented features are summarized in [README.md](README.md); completed history lives in Git and `docs/`.
 
 Use `master` as the integration branch and PR base.
 
@@ -12,7 +12,7 @@ Order by prerequisites first, then estimated complexity within each stage. Small
 
 | ID | Task / complexity | Dependencies | Acceptance criteria |
 | --- | --- | --- | --- |
-| A1 | Release and presentation verification — small | Latest runtime deployment | Confirm the latest release containing #55 succeeds, then check fresh-island `/play`, camera controls, gathering animations and loading-title cleanup. Also record native reset-dialog appearance, deployed globe behavior, and villager direction/pose holds on zigzag routes. Use isolated worlds; never reset the shared production save. |
+| A1 | Remaining release and platform verification — small | Successful runtime deployment; target desktops for native checks | Independently check deployed starter economy, camera controls, gathering animations, loading title and NPC selection-ring occlusion. Check native reset-dialog appearance on macOS/Windows when those desktops are available. Follow the release checklist below; use isolated worlds and never reset the shared production save. |
 | A2 | Field placement safety — small | None | Make `plant_field` preserve existing ground routes as building placement does. Cover trapped bystanders and the last exit with regressions; preserve wood/stone charges, shared labor and manual replenishment. |
 | A3 | Touch selection and accessibility — medium | None; coordinate client edits with B5 | Add additive touch selection and accessible keyboard/screen-reader equivalents for canvas controls. Preserve desktop Shift-click/Shift-drag, mouse/touch parity and camera gestures. Explicit blocking/non-blocking task classification remains open; scope it separately if it requires new domain semantics. |
 | A4 | Ship action/facing sprites — asset workload | B1/B2 ship-state requirements | Generate/refine ship-state art once action/facing requirements are agreed. Require detailed authored sources, at least 512×512 frames and provenance. Run resolution/asset checks and inspect maximum-zoom desktop and DPR-2 phone. |
@@ -38,13 +38,16 @@ Use one integration owner for shared domain, occupancy and save-schema changes. 
 
 Later, split pirates, mythical creatures, calamities, treasures and permanent upgrades into separate proposals/PRs after C2. Timing, balance and upgrade rules remain open; follow the [proposed gameplay loop](README.md#proposed-gameplay-loop).
 
-## Release verification handoff
+## Remaining release and platform checks
 
-HD sprite repack [PR #62](https://github.com/koogle/age-of-agents/pull/62): all 183 undersized audited frames now use 512 px cells from recovered sources and reviewed refinements. Strict audit, workspace tests, native/WASM lint and desktop/DPR-2 phone rendering checks pass. Combined verification preserves the latest selection-ring fixes, and actual UI selection → gathering with partial cargo passes. Merge/deployment remain outstanding. Review: `docs/HD_SPRITES_REVIEW.md`.
+- **HD sprite release:** [PR #62](https://github.com/koogle/age-of-agents/pull/62) is ready for review and merge, then deployment verification. All 183 undersized audited frames are repacked from recovered sources and reviewed refinements; strict audit passes 264/264. Workspace tests, native/WASM lint, desktop/DPR-2 phone rendering and actual UI gathering checks pass. Latest selection-ring fixes are preserved. Review: [HD sprites](docs/HD_SPRITES_REVIEW.md).
 
-Verify the next production release for the NPC ring terrain-occlusion correction: selection rings draw above terrain/raised plots without writing depth, before billboards so buildings and units still cover them. All 151 workspace tests, formatting, strict native/WASM lint and desktop/phone browser checks pass; rebuilt WASM included. Before/after pixels confirm repaired ground arcs and unchanged opaque building regions. Structural review: six lines in the existing shader, no new passes, dependencies or gameplay changes. Evidence: `/workspace/scratch/highlight-depth-*`. User authorized PR merge into `master`.
+- **Deployment status:** [runtime run 37150837150](https://github.com/koogle/age-of-agents/actions/runs/37150837150) succeeded for `aba4c6d`, including the starter economy, camera/activity/title changes and NPC ring terrain-occlusion fix. Deployment and automated production verification passed; independent browser acceptance of those combined changes is still open.
+- **Current workflow:** [verification-record run 37151048374](https://github.com/koogle/age-of-agents/actions/runs/37151048374), for merged PR #60 at `d7dd0de`, is still running its quality job at this update. Confirm its final outcome; it adds documentation/evidence, with no runtime changes. Follow any newer superseding release instead of cancelled runs.
+- **Independent live browser acceptance:** verify fresh starter-island resources/build menu in an isolated world using deployed assets; check hosted camera controls, partial-load gathering animations, loading-title cleanup, and selected NPC rings above raised terrain but behind opaque buildings. Record desktop/phone evidence and the checked bundle. Do not reset the shared production save.
+- **Native platform appearance:** macOS and Windows reset-dialog appearance remains unverified. Check the warning, seed entry, invalid-input retry, cancellation and confirmation on those target desktops.
 
-At this edit, [run 37150225436](https://github.com/koogle/age-of-agents/actions/runs/37150225436), containing #55, is pending behind [camera/activity run 37149731725](https://github.com/koogle/age-of-agents/actions/runs/37149731725). The original #55 run 37150108528 was cancelled/superseded. A1 must follow the latest successful runtime release rather than wait on a superseded run. Local desktop/phone checks passed; merged, deployed and live-verified states must stay distinct. Fresh runs cannot depart until B2/B3 land.
+Already-closed Linux/Zenity reset, live desktop globe and browser zigzag direction/pose checks are recorded in [presentation verification](docs/PRESENTATION_VERIFICATION.md) (merged PR #60); they are not outstanding tasks. Their platform/bundle scope does not certify the newer combined release. Fresh runs still cannot depart until B2/B3 are implemented.
 
 ## Working constraints
 
