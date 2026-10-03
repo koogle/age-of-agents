@@ -38,4 +38,4 @@ Prompt:
 
 The source sheets were divided into quadrants. Sprite backgrounds were converted to soft alpha from their uniform white matte, low-contrast generation noise was removed, and each sprite was normalized to a shared canvas and bottom-center anchor. Terrain quadrants were inset to remove generated divider lines and downsampled to 96×96.
 
-Runtime assets live under `assets/game/`. The source sheets remain under `assets/generated/` for inspection and future reprocessing.
+These sheets belong to the retired frontend. Its processed `assets/game/` output and processing scripts have been removed. Source sheets remain under `assets/generated/` as generation provenance; current runtime art lives under `assets/sprites/`, `assets/terrain/`, `assets/ui/`, and `assets/loading/`.

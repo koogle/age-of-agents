@@ -40,14 +40,14 @@ Remaining acceptance criteria:
 
 ## Direction change — 3D client and spatial soundness
 
-Status: integrated into the current prototype; Three.js presentation is now legacy.
+Status: integrated into the current prototype; the shared Rust renderer has replaced the retired Three.js client.
 
 - [x] One derived occupancy map: buildings (rectangular footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
 - [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
 - [x] Building placement preserves every unit’s existing ground routes, preventing builders or bystanders from being enclosed by a foundation.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
-- [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
+- [x] Shared native/WebGL2 Rust client: painted sprites, island terrain with fog-of-war shader, minimap, and mouse/touch controls. The original Three.js implementation is retired.
 - [x] Finer grid: 120×80 half-unit cells (a villager is about 1.5 cells tall), 5×5 town centers (houses/granaries 3×3, watchtowers 2×2, docks 4×4; neighboring plots may share edges), clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
 - [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
 - [x] Villager build menu: town center, house (+5 housing), granary (food and fiber drop-off), watchtower (sight 20), dock (must touch the sea; the fishing boat comes later). Training respects housing.
@@ -175,7 +175,7 @@ Gameplay acceptance:
 
 1. Focused Rust regressions for every domain rule and bounded transition.
 2. `cargo fmt --check`, `cargo test`, and `cargo clippy --all-targets --all-features -- -D warnings`.
-3. Frontend syntax plus focused presentation/control contract checks; Python asset checks; `git diff --check`.
+3. Browser-binding syntax plus focused presentation/control contract checks; Python asset checks; `git diff --check`.
 4. Independent specification review, code-quality review, and thermonuclear maintainability review with all blockers fixed.
 5. Real isolated local server plus Chromium: use actual controls/WebSocket, inspect intermediate authoritative state, browser console, desktop and phone screenshots, and play the delivered loop.
 6. Push `master`, observe CI, deploy through `python3 scripts/modal_manage.py`, then verify production assets byte-for-byte, state/protocol, hard-reloaded Chromium interactions/screenshots, and restoration of reversible controls.

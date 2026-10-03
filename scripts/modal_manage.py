@@ -15,27 +15,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 APP_NAME = "age-of-agents"
 BASE_URL = "https://koogle-frick--age-of-agents-web.modal.run"
-FRONTEND_FILES = (
-    "app.js",
-    "controls.js",
-    "effects.js",
-    "ground-paint.js",
-    "hud.css",
-    "hud.js",
-    "materials.js",
-    "models.js",
-    "net.js",
-    "terrain.js",
-    "world-view.js",
-    "villager-sprite.js",
-    "resource-sprites.js",
-    "billboard.js",
-    "vendor/three.min.js",
-    "vendor/GLTFLoader.js",
-    "vendor/BufferGeometryUtils.js",
-    "vendor/SkeletonUtils.js",
-    "vendor/meshopt_decoder.js",
-)
 
 
 def modal(*arguments: str) -> None:
@@ -52,11 +31,10 @@ def fetch(path: str, timeout: int = 120) -> bytes:
 
 def verify_once() -> None:
     comparisons = {
-        "/": ROOT / "frontend/index.html",
+        "/": ROOT / "web/index.html",
         "/play": ROOT / "web/index.html",
         "/assets/loading/favicon.png": ROOT / "assets/loading/favicon.png",
         "/assets/loading/favicon.ico": ROOT / "assets/loading/favicon.ico",
-        **{f"/frontend/{name}": ROOT / "frontend" / name for name in FRONTEND_FILES},
     }
     for remote_path, local_path in comparisons.items():
         remote = fetch(remote_path)
@@ -115,7 +93,7 @@ def verify_once() -> None:
     print(
         "PASS production matches checkout; "
         f"terrain={len(terrain)}, units={len(units)}, unseen={len(unseen)}, "
-        f"frontend_files={len(FRONTEND_FILES)}, speed={state['simulation_speed']}"
+        f"speed={state['simulation_speed']}"
     )
 
 

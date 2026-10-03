@@ -104,12 +104,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     tokio::spawn(game_loop(state.clone()));
 
     let app = Router::new()
-        .route("/", get(index))
+        .route("/", get(play))
         .route("/state", get(get_state))
         .route("/reset", post(reset_world))
         .route("/ws", get(websocket))
         .nest_service("/assets", ServeDir::new("assets"))
-        .nest_service("/frontend", ServeDir::new("frontend"))
         .route("/play", get(play))
         .nest_service("/web", ServeDir::new("web"))
         // Browsers must revalidate everything (cheap with Last-Modified), so a
@@ -157,13 +156,6 @@ async fn game_loop(state: SharedState) {
         // Publish while holding the same lock that orders world mutations. This
         // prevents a command snapshot from overtaking a tick snapshot.
         state.publish_snapshot(&world);
-    }
-}
-
-async fn index() -> Html<String> {
-    match tokio::fs::read_to_string("frontend/index.html").await {
-        Ok(content) => Html(content),
-        Err(_) => Html("<h1>Age of Agents</h1><p>Frontend not found.</p>".into()),
     }
 }
 

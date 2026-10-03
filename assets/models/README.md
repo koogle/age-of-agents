@@ -1,3 +1,7 @@
+# Archived 3D model experiments
+
+The Three.js client, runtime GLBs, and their optimization scripts were retired on 2026-10-03. The current Rust renderer uses painted sprite sheets under `assets/sprites/`. Concept images, the generation ledger, and the historical notes below are retained as provenance; commands and client references below describe the retired implementation.
+
 # Generated 3D models
 
 The client picks generated models with `?glb=` (`frontend/models.js`): a comma-separated subset of `villager,towncenter,cypress`, `all`, or `none`. **Default: `towncenter` only**, the one model that reads better than its procedural counterpart at gameplay zoom. Loaders (`frontend/vendor/GLTFLoader.js`, `meshopt_decoder.js`, `SkeletonUtils.js`) and GLBs are fetched only for the selected models. If loading fails, the client warns once and uses the procedural models.
