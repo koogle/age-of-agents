@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-03",
+  "generator": "OpenAI image_gen",
+  "generation": "exec-bb6a6455-6832-40cf-92a7-47d1667c4162",
+  "reference": "assets/sprites/building_sources/house_complete.png",
+  "art_direction": "Warm cream limestone cobbles, fine brown contours, light sandy mortar, subtle sage shading and paper texture. Flat overhead illustration matching original building art.",
+  "runtime": "Opaque 1254px RGB PNG, sampled with world-space mirrored repetition and clamp filtering to avoid edge seams without blurred or doubled outlines.",
+  "fal_attempt": {
+    "endpoint": "fal-ai/nano-banana/edit",
+    "request_id": "01a10209-fef2-7533-bc0f-2d70b3d3985b",
+    "result": "HTTP 422 content_policy_violation; no image returned"
+  }
+}

@@ -189,7 +189,7 @@ impl GameWorld {
         }
         for building in &self.buildings {
             if let Some(work) = building.construction
-                && !(0.0..BUILD_SECONDS).contains(&work)
+                && !(0.0..building.kind.build_seconds()).contains(&work)
             {
                 return Err(format!("{} has invalid construction progress", building.id));
             }

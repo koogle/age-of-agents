@@ -74,7 +74,7 @@ export function createHud(renderer, actions) {
       return { portrait: 'group', title: `${units.length} villagers`, detail: `${idle} awaiting orders`, commands };
     }
     if (building && building.construction !== null) {
-      return { portrait: 'townCenter', title: 'Town center foundation', detail: 'Villagers can help build it', job: building.construction / 4, commands: [] };
+      return { portrait: 'townCenter', title: 'Town center foundation', detail: 'Villagers can help build it', job: building.construction / 6, commands: [] };
     }
     if (building) {
       const job = building.job;

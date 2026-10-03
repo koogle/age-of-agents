@@ -639,7 +639,11 @@ impl App {
         while let Some(snapshot) = self.incoming.pop_front() {
             self.feedback
                 .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
-            self.view.sync(snapshot);
+            // The hosted server resets after a delay, so the view may have
+            // framed the old island meanwhile: look again at the new one.
+            if self.view.sync(snapshot) {
+                self.framed = false;
+            }
             if !self.framed {
                 self.frame_town_center();
             }
