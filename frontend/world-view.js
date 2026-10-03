@@ -203,7 +203,7 @@ export function createWorldView(scene, effects) {
       const building = entry.data;
       const complete = building.construction === null;
       const working = complete && building.job !== null;
-      poseTownCenter(entry.root, complete ? null : building.construction / 4, working, time);
+      poseTownCenter(entry.root, complete ? null : building.construction / 6, working, time);
       entry.ring.visible = selection.building === building.id;
       if (complete && time >= entry.smokeAt) {
         entry.smokeAt = time + (working ? 0.35 : 0.9);

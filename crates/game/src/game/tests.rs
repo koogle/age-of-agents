@@ -789,6 +789,19 @@ fn a_second_villager_can_help_and_construction_completes_exactly_once() {
 }
 
 #[test]
+fn construction_time_scales_with_cost() {
+    let total = |kind: BuildingKind| kind.cost().iter().map(|(_, amount)| amount).sum::<f64>();
+    for kind in BUILDABLE {
+        assert_eq!(
+            kind.build_seconds(),
+            total(kind) * BUILD_SECONDS_PER_RESOURCE
+        );
+    }
+    assert!(BuildingKind::House.build_seconds() < BuildingKind::Granary.build_seconds());
+    assert!(BuildingKind::Granary.build_seconds() < BuildingKind::Dock.build_seconds());
+}
+
+#[test]
 fn a_cell_someone_is_walking_through_can_be_reserved_and_is_reached() {
     let mut world = fixture::fixture();
     world

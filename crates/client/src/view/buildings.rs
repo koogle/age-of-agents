@@ -36,7 +36,7 @@ fn frame(
     };
     let sheet = &sheets.buildings;
     let stage = construction.map_or(3, |work| {
-        ((work / aoa_game::BUILD_SECONDS * 3.0) as usize).min(2)
+        ((work / kind.build_seconds() * 3.0) as usize).min(2)
     });
     (
         SHEET_BUILDINGS,
@@ -70,7 +70,7 @@ pub(crate) fn sprite(
     // finished house. Later walls/roofs and completed placement ghosts retain
     // the approved building scale.
     let foundation = construction.is_some_and(|work| {
-        work < aoa_game::BUILD_SECONDS
+        work < kind.build_seconds()
             * if kind == BuildingKind::TownCenter {
                 0.15
             } else {
@@ -137,8 +137,8 @@ mod tests {
             let center = ground(&heights, 10.0 + extent.x * 0.5, 12.0 + extent.y * 0.5);
             for (work, working) in [
                 (Some(0.0), false),
-                (Some(aoa_game::BUILD_SECONDS * 0.34), false),
-                (Some(aoa_game::BUILD_SECONDS * 0.68), false),
+                (Some(kind.build_seconds() * 0.34), false),
+                (Some(kind.build_seconds() * 0.68), false),
                 (None, false),
                 (None, true),
             ] {

@@ -11,7 +11,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 - Selectable villagers; Shift-click adds or removes villagers, and a resource/foundation order sends the selected group to shared work
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases; ivory italic resource labels rise when loads are deposited
-- Command-driven construction of five building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
+- Command-driven construction of five building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea; construction takes 0.3 villager-seconds per resource of cost (house 4.5 s, town center 6 s, granary 7.5 s, watchtower and dock 9 s)
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
