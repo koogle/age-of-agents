@@ -235,17 +235,17 @@ impl GameWorld {
 
     /// A builder carrying goods takes them to a drop site before building.
     /// Returns whether the unit is still on that errand. With no reachable
-    /// drop site the goods are simply carried along.
+    /// drop site the new assignment waits with its cargo intact.
     pub(super) fn drop_off_before_building(&mut self, unit_index: usize, dt: f64) -> bool {
         if self.units[unit_index].cargo.is_none() {
             return false;
         }
         let Some(site) = self.nearest_drop_site(unit_index) else {
-            return false;
+            return true;
         };
         match self.travel(unit_index, Goal::Beside(site), dt) {
             Travel::EnRoute => true,
-            Travel::Unreachable => false,
+            Travel::Unreachable => true,
             Travel::Arrived { .. } => {
                 if let Some(cargo) = self.units[unit_index].cargo.take() {
                     self.stockpile.add(cargo.kind, cargo.amount);
