@@ -1,5 +1,5 @@
 {
-  "note": "Recovered original cutouts from existing FAL request results; no new generation spend.",
+  "note": "Original FAL cutouts retained for provenance. House/granary gameplay frames now come from the reviewed orthogonal sheet.",
   "files": {
     "house_foundation.png": {
       "endpoint": "fal-ai/birefnet/v2",
@@ -64,6 +64,14 @@
     "dock_complete.png": {
       "endpoint": "fal-ai/birefnet/v2",
       "request_id": "01a0fd3d-cd44-7571-8ab5-da9d504cf22a"
+    },
+    "orthogonal_house_granary.png": {
+      "generator": "OpenAI image_gen",
+      "date": "2026-10-03",
+      "layout": "4 columns (foundation, walls, roof, complete), 2 rows (house, granary)",
+      "purpose": "Recreated straight vertical walls and consistent orthographic ground axes; transparent background removal by image_gen. Packed without geometric warping.",
+      "source_generation": "exec-b8e1b818-8b84-4405-8647-16122251a52c",
+      "transparent_generation": "exec-8fa45087-703d-4f65-93b1-2b6918906ee2"
     }
   }
 }
