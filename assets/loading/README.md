@@ -4,7 +4,7 @@ Art for the `/play` loading screen (`web/index.html`): a painted title and build
 
 | File | Size | Use |
 | --- | --- | --- |
-| `title.webp` | 1600×279, lossy WebP with alpha | The "Age of Agents" wordmark: carved cream marble letters with a terracotta bevel, fine ink outlines, and an olive sprig under "of". Transparent background. Display it about 500–760 px wide. |
+| `title.webp` | 1600×279, lossless WebP with alpha | The "Age of Agents" wordmark: carved cream marble letters with a terracotta bevel, fine ink outlines, and an olive sprig under "of". Transparent background. Display it about 500–760 px wide. |
 | `buildings.webp` | 1024×1280, lossy WebP with alpha | Five buildings × four stages, in 256 px cells, for display at about 240 px tall. |
 | `buildings.json` | | The layout, below. |
 | `contact_sheet.jpg` | | The title and every frame on the loading gradient (#f4f0e2 → #cfe5f2) at 240 px. |
@@ -36,6 +36,7 @@ Art for the `/play` loading screen (`web/index.html`): a painted title and build
   - Generation: `fal-ai/ideogram/v3` (`DESIGN`, `QUALITY`, 1536×512, seeds 41 and 42), asking for exactly "Age of Agents" in carved marble letters with a terracotta edge, ink outlines and an olive sprig. Both renders spelled it correctly. Seed 41 added a stray "™" mark, so seed 42 was used. Two nano-banana/edit candidates in serif type were also made and rejected as less in style.
   - Cutout: `fal-ai/birefnet/v2` turned some near-white marble highlights partly transparent, so they showed as dark smudges on dark backgrounds. `tools/title_fix.py` fills those holes, keeps the real letter counters (the "O" of "of") clear by classifying each hole by colour and alpha, and takes colour from the original render with edges un-composited from the paper background.
   - Final: `fal-ai/esrgan` (2×, anime model) for resolution. A second cutout at 2× is bounded by the repaired 1× alpha (`tools/title_final.py`), which removed ghost leaves the 2× cutout had picked up. Then resized to 1600 wide.
+  - 2026-10-03 correction: removed the isolated leaf over the first "A" using an image-generation repair, composited only into the 64×54 px region at (15, 122). The rest of the wordmark, including the sprig under "of", is preserved; the corrected 1600×279 RGBA asset is encoded as lossless WebP.
 - **Buildings:**
   - Complete stage: `fal-ai/nano-banana/edit` with the temple (`complete`) as the style and camera reference.
   - Earlier stages: edits of each complete image, asking for the same footprint, camera and scale (`tools/bld_gen.py`).

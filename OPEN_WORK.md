@@ -4,6 +4,12 @@
 
 Jakob requested renaming `master` to `main` and directing agents to shift over. Prepared `main` from current upstream `master`, updated contributor/agent instructions and deployment policy, and enabled production CI on `main` while retaining the `master` trigger during the transition. Agents should fetch `origin/main`, target their PRs and integration pushes at `main`, and preserve ongoing feature work. GitHub rejected both branch rename and default-branch updates with HTTP 403 (Resource not accessible by integration); the default remains `master` until an administrator completes the settings change. Direct cross-chat messaging is unavailable in this session, so the instructions are recorded here and in AGENTS.md. Verification: reviewed the configuration/documentation diff and whitespace; no gameplay changes. Remaining: set GitHub's default branch to `main`, remove the legacy branch and its deployment trigger after all agents have shifted over.
 
+## Loading-screen stray leaf (2026-10-03)
+
+Removed the isolated olive leaf overlapping the first "A" in `assets/loading/title.webp`. Used a generated repair only within a 64×54 px patch; visible pixels outside that patch and the central sprig are unchanged. Title dimensions, transparency, loading behavior and layout remain intact. Provenance is recorded in `assets/loading/README.md`.
+
+Desktop (1280×800) and DPR-2 phone (390×844) loading-screen previews pass, with the WASM download held to inspect the animation and title. Screenshots are in `/workspace/scratch/loading-leaf/after-{desktop,phone}.png`. Existing depleted-resource, activity-asset and icon checks pass; pixel comparison verifies the repair bounds and unchanged remainder. Thermonuclear review: asset-only subtraction, no code/dependencies or gameplay changes. Rust tools are unavailable in this environment; merge CI runs quality and Modal deployment. Delivery is PR #51 against `main`, ready for review; no merge or deployment performed.
+
 ## Restore distant planet zoom (2026-10-03)
 
 User requested retaining the globe overview; incrementally adding discovered islands belongs after ships. The shared Rust renderer had hard-coded curvature to zero. Restored a smooth far-zoom curve, extended camera distance from 70 to 140 for the larger island, and extended depth clipping consistently. Settlement distances through 60 retain the fixed orthographic view. Ground picking intersects the curved surface; billboard hit areas, feedback and browser projection hooks follow their rendered anchors. Wheel and pinch retain the shared camera path.
