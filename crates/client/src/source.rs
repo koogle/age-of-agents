@@ -65,16 +65,25 @@ impl Source {
         }
     }
 
-    /// Starts over on a new island. The hosted server picks the seed.
-    pub fn reset(&mut self) {
+    /// Starts over on the specified island, or chooses a fresh seed when blank.
+    pub fn reset(&mut self, seed: Option<u64>) {
         match self {
-            Source::Local { world, fresh, .. } => {
-                let seed = (crate::now_seconds() * 1000.0) as u64 ^ world.seed.rotate_left(17);
+            Source::Local {
+                world,
+                accumulator,
+                fresh,
+                results,
+            } => {
+                let seed = seed.unwrap_or_else(|| {
+                    (crate::now_seconds() * 1000.0) as u64 ^ world.seed.rotate_left(17)
+                });
                 **world = GameWorld::generate(seed);
+                *accumulator = 0.0;
+                results.clear();
                 *fresh = true;
             }
             #[cfg(target_arch = "wasm32")]
-            Source::Remote(remote) => remote.reset(),
+            Source::Remote(remote) => remote.reset(seed),
         }
     }
 
@@ -226,14 +235,28 @@ pub mod remote {
         }
 
         /// Asks the server for a new island; the next snapshots carry it.
-        pub fn reset(&mut self) {
+        pub fn reset(&mut self, seed: Option<u64>) {
             let Some(window) = web_sys::window() else {
                 return;
             };
             let init = web_sys::RequestInit::new();
             init.set_method("POST");
-            let _ = window.fetch_with_str_and_init("/reset", &init);
-            self.inbox.borrow_mut().last_sequence = 0;
+            let url = seed.map_or_else(|| "/reset".into(), |seed| format!("/reset?seed={seed}"));
+            let request = window.fetch_with_str_and_init(&url, &init);
+            let inbox = self.inbox.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let result = wasm_bindgen_futures::JsFuture::from(request).await;
+                let succeeded = result
+                    .ok()
+                    .and_then(|value| value.dyn_into::<web_sys::Response>().ok())
+                    .is_some_and(|response| response.ok());
+                if !succeeded {
+                    inbox
+                        .borrow_mut()
+                        .results
+                        .push(Err("Could not reset the game. Try again.".into()));
+                }
+            });
         }
 
         pub fn send(&mut self, command: &Command) {
@@ -252,6 +275,28 @@ pub mod remote {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn seeded_reset_restarts_the_world_and_discards_old_tick_and_command_state() {
+        let mut source = Source::local(1);
+        let mut out = VecDeque::new();
+        source.poll(0.19, &mut out);
+        source.send(Command::SetSimulationSpeed { multiplier: 7.0 });
+        source.reset(Some(u64::MAX));
+        assert!(source.take_results().is_empty());
+        out.clear();
+        source.poll(0.02, &mut out);
+        assert_eq!(
+            out.len(),
+            1,
+            "old fractional ticks must not advance the new world"
+        );
+        let expected = GameWorld::generate(u64::MAX).snapshot();
+        assert_eq!(out.pop_front().unwrap(), expected);
+        source.reset(Some(0));
+        source.poll(0.0, &mut out);
+        assert_eq!(out.pop_front().unwrap(), GameWorld::generate(0).snapshot());
+    }
 
     #[test]
     fn the_local_source_ticks_ten_times_a_second_and_reports_rejections() {

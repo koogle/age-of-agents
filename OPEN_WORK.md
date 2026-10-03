@@ -1,5 +1,9 @@
 # Open Work
 
+## Reset game seed input (2026-10-03)
+
+User authorized merging this change into master. Reset game opens native seed input on desktop and web; blank selects a random island, cancel preserves progress, and invalid unsigned 64-bit seeds are retried. Local and hosted sources receive the selected seed. Rebased onto the latest grouped building-menu release (e28dcaf), preserving its changes. All 119 integrated tests (13 server, 31 client, 75 game), strict native/WASM lint, formatting, release builds and hosted/local/mobile browser checks pass; web/pkg regenerated. Ready for the user-authorized PR merge. Review: docs/RESET_SEED_REVIEW.md. Native dialog appearance remains unverified here. Direct Modal credentials are absent; merging triggers the repository deployment workflow.
+
 ## Building menu and deployment fix (2026-10-03)
 
 User requested visible catalog sprites, buildings grouped by type, and push to main (`master` in this repository). Previous production run 37137096419 failed: catalog.rs embedded four asset JSON files before Modal copied assets into its build image. The game stayed on the earlier release. Fixed catalog manifests to load through the runtime Assets manifest like existing sheets.
