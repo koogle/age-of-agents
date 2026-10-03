@@ -48,8 +48,12 @@ Requires Rust 1.85+ and a modern browser for the web client.
 Native:
 
 ```bash
-cargo run -p aoa-client --release
+./scripts/run_native.sh
 ```
+
+The script rebuilds changed code and launches the app. To build without launching,
+run `cargo build -p aoa-client --release --locked`; the executable is
+`target/release/age-of-agents-client` (`.exe` on Windows).
 
 On Linux, install `zenity` or `kdialog` for the native reset dialog.
 
