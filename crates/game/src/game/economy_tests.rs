@@ -87,7 +87,7 @@ fn processing_reserves_inputs_finishes_once_and_survives_mid_job_reload() {
         let reserved = world.clone();
         assert_eq!(
             produce(&mut world, product),
-            Err(CommandError::BuildingBusy)
+            Err(CommandError::InsufficientProductionResources)
         );
         assert_eq!(world, reserved);
         world.tick(1.0);
@@ -145,8 +145,9 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
     let mut world = world_with(BuildingKind::Barracks);
     let product = ProductKind::Guard;
     for &(resource, amount) in product.cost() {
-        world.stockpile.add(resource, amount);
+        world.stockpile.add(resource, amount * 2.0);
     }
+    produce(&mut world, product).unwrap();
     produce(&mut world, product).unwrap();
     // Ring the barracks with resources so every adjacent spawn cell is occupied.
     let footprint = world.buildings[1].footprint();
@@ -170,13 +171,27 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
     }
     assert_eq!(world.units.len(), 2);
     assert!(world.buildings[1].job.is_some());
+    assert_eq!(world.buildings[1].queue.len(), 1);
+    assert_eq!(
+        world.buildings[1].queue[0].job,
+        BuildingJob::Produce {
+            product,
+            elapsed_seconds: 0.0
+        }
+    );
+    assert_eq!(world.stockpile.food, 0.0);
     world.resources.clear();
     world.tick(0.1);
     assert_eq!(world.units.len(), 3);
-    assert!(world.buildings[1].job.is_none());
+    assert!(world.buildings[1].job.is_some());
+    assert!(world.buildings[1].queue.is_empty());
     world.tick(0.1);
     assert_eq!(world.units.len(), 3);
     assert_eq!(world.stockpile.food, 0.0);
+    world.tick(product.seconds());
+    assert_eq!(world.units.len(), 4);
+    assert!(world.buildings[1].job.is_none());
+    world.validate().unwrap();
 }
 
 #[test]

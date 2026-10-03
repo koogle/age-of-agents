@@ -446,12 +446,9 @@ fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
     };
     world.apply_command(produce.clone()).unwrap();
     assert_eq!(world.stockpile.food, 50.0);
-    let before = world.clone();
-    assert_eq!(
-        world.apply_command(produce),
-        Err(CommandError::BuildingBusy)
-    );
-    assert_eq!(world, before);
+    world.apply_command(produce).unwrap();
+    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.buildings[0].queue.len(), 1);
     world.tick(VILLAGER_PRODUCTION_SECONDS - 0.1);
     assert_eq!(world.units.len(), 2);
     world.tick(0.1);
@@ -462,8 +459,12 @@ fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
             .footprint()
             .is_interaction_cell(world.units[2].cell)
     );
+    assert!(world.buildings[0].job.is_some());
+    assert!(world.buildings[0].queue.is_empty());
+    assert_eq!(world.stockpile.food, 0.0);
+    world.tick(VILLAGER_PRODUCTION_SECONDS);
+    assert_eq!(world.units.len(), 4);
     assert_eq!(world.buildings[0].job, None);
-    assert_eq!(world.stockpile.food, 50.0);
 }
 
 #[test]
@@ -520,13 +521,14 @@ fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
         .apply_command(research(TechnologyKind::Masonry))
         .unwrap();
     assert_eq!((world.stockpile.food, world.stockpile.wood), (60.0, 80.0));
-    assert_eq!(
-        world.apply_command(Command::Produce {
+    world
+        .apply_command(Command::Produce {
             building_id: "base-1".into(),
             product: ProductKind::Villager,
-        }),
-        Err(CommandError::BuildingBusy)
-    );
+        })
+        .unwrap();
+    assert_eq!(world.stockpile.food, 10.0);
+    assert_eq!(world.buildings[0].queue.len(), 1);
     world.tick(RESEARCH_SECONDS - 0.1);
     assert!(world.researched_technologies.is_empty());
     world.tick(0.1);

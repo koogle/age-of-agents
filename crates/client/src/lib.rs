@@ -322,6 +322,14 @@ impl App {
                     });
                 }
             }
+            hud::Action::CancelQueuedJob(queue_id) => {
+                if let Some(building_id) = self.selection.building.clone() {
+                    self.send(Command::CancelQueuedJob {
+                        building_id,
+                        queue_id,
+                    });
+                }
+            }
             hud::Action::LookAt(point) => self.rig.look_at(point.x, point.y),
             hud::Action::Explain(reason) => self.toast = Some((reason, now_seconds() + 3.0)),
             hud::Action::Reset => {

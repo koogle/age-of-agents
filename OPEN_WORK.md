@@ -16,6 +16,14 @@ Updated 2026-10-03 at 22:30 Europe/Madrid. Keep only outstanding work, blockers 
 
 Use `master` as the integration branch and PR base.
 
+## Building task queues and selection portraits — release verification pending
+
+[PR #64](https://github.com/koogle/age-of-agents/pull/64), branch `fix/building-task-queues`, adds one active task plus five paid waiting tasks per building. Cancelling a waiting coin refunds full inputs and releases trainee housing; stable IDs protect against repeated/stale clicks, and existing saves default to empty queues. Portraits stay inside the rounded progress pill; queued controls fit desktop and DPR-2 phone layouts. Current master’s starter-resource/discovery gates and selection rendering are preserved. Review: [Building queues](docs/BUILDING_QUEUES_REVIEW.md).
+
+Verified: all 157 workspace tests, strict native/WASM Clippy, formatting, relevant existing asset checks, rebuilt release WASM and the native server. Real desktop clicks and phone taps verify full queues, immediate costs, exact production/research refunds, housing reuse, stale cancellation, reconnect, and completion without charging twice or activating trained units. No browser errors. Screenshots and drivers: `/workspace/scratch/building-queues/`. No new assets or dependencies. Only waiting tasks can be cancelled; active work continues.
+
+User authorized merging PR #64. Integrated master 1f61c21, preserving custom field art, HD sprites, the favicon and the revised gameplay description. All 44 combined client tests, strict native/WASM lint, the 268-frame HD audit, formatting and rebuilt WASM pass; real desktop and DPR-2 phone queue/refund checks pass with no browser errors. Game rules are unchanged from the 157-test verification above. Combined screenshots: `/workspace/scratch/building-queues/integrated-{desktop,phone}.png`. Follow the PR merge’s automated Modal release and confirm production; direct Modal credentials are unavailable here.
+
 ## Ordered agent backlog
 
 Order by prerequisites first, then estimated complexity within each stage. Small means a bounded fix/check; medium means one substantial subsystem; large means coordinated simulation, persistence and client work. These are relative sizes, not time estimates. Independent tasks may run alongside the main chain. No task below is implemented merely because it is listed here; see [README.md](README.md#implemented-roadmap) for completed features.
