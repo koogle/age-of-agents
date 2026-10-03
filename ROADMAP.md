@@ -2,11 +2,19 @@
 
 ## Product principle
 
-Grow the proven gather/build demo into one compact, coherent RTS scenario. Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real WebGL UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
+Grow the gather/build demo into the Greek strategy roguelike described in [README.md](README.md#proposed-gameplay-loop). Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real WebGL UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
 
 - Reset game opens a native seed input and progress-loss confirmation on desktop and WebGL; blank chooses a random island, and explicit seeds reproduce an island.
 
 - Camera navigation uses pan and zoom with a fixed orthographic angle, stable building anchors, and an optional diamond-shaped square grid.
+
+## Current direction
+
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Next: starter-island progression, ships and villager transport, persistent destination islands, then local inventories and trade. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+
+Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
+
+The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
 
 ## Released baseline — Gather, build, research, and route
 
@@ -19,10 +27,11 @@ Grow the proven gather/build demo into one compact, coherent RTS scenario. Every
 
 ## Direction change — 3D client and spatial soundness
 
-Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
+Status: integrated into the current prototype; Three.js presentation is now legacy.
 
 - [x] One derived occupancy map: buildings (rectangular footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
 - [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
+- [x] Building placement preserves every unit’s existing ground routes, preventing builders or bystanders from being enclosed by a foundation.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
@@ -35,7 +44,7 @@ Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 
 ## Slice A — Expandable domain foundation
 
-Status: implemented on `feature/expanded-domain-foundation`; not released.
+Status: domain catalogs and scenario scaffolding are integrated; scenario objectives are not playable.
 
 Deliver the smallest explicit catalogs and persisted state needed by later slices.
 
@@ -53,7 +62,7 @@ Engineering acceptance:
 
 ## Slice B — Multi-unit control
 
-Status: implemented on `feature/multi-unit-control`; not released.
+Status: desktop selection and group orders are integrated; additive touch selection remains open.
 
 Gameplay acceptance:
 
@@ -67,7 +76,7 @@ Gameplay acceptance:
 
 User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Exhausted plots persist and require the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds generate coal. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
-The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. New building/unit art remains a separate PR; this implementation uses the existing renderer fallbacks and does not change sprite assets. Costs and recipe quantities are initial balance values.
+The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. Catalog building and unit sprites are integrated; some unit action sheets still need the HD repack. Costs and recipe quantities are initial balance values.
 
 This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. Animals/adversaries follow that economy/transport loop.
 
@@ -157,7 +166,7 @@ Gameplay acceptance:
 
 ## Explicitly deferred
 
-- LLM-controlled villagers, autonomous planning, multiplayer, mod/plugin APIs, generic ECS/content engines, procedural world generation, and a large branching tech tree.
+- LLM-controlled villagers, autonomous planning, multiplayer, mod/plugin APIs, generic ECS/content engines, and a large branching tech tree.
 
 - [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). Original-style building sprites render without skewing inside cobblestone plots; houses are visually smaller and the completed granary displays stored grain. Plots mark the exact claim, including construction and previews; touching plots share one level foundation height.
 

@@ -4,7 +4,21 @@
 
 User requested a PR and merge into the main branch (`master`). Reproduced in the Rust WebGL2 client: at minimum camera distance, pan the town center down until its front ground anchor passes the near plane; the whole sprite vanished while its roof still occupied the viewport. Clamp billboard vertex depth and building fragment depth at the near plane. Screen bounds, alpha testing, far clipping and per-column footprint depth still determine rendering. Native and browser share this shader; no simulation or asset changes.
 
-Integrated current master c85a85a (farm fields and reset seed), rebuilt tracked WASM. Desktop before/after regression passes: the affected roof region changes from 828 to over 16,000 roof-colored pixels; fully offscreen control has zero. DPR-2 touch pan passed before upstream integration; integrated browser/touch and full workspace tests/native-WASM lint are finishing. Evidence and regression driver: /workspace/scratch/building-visibility/. Formatting and asset checks pass. Thermonuclear review: two direct depth clamps, no extra culling layer/dependency, authoritative state and spatial rules unchanged, no client file over 1,000 lines. Open draft PR, complete final checks, then merge and monitor the configured Modal deployment.
+Integrated master 9ce5f17, preserving farm fields, placement safety and the new README direction; rebuilt tracked WASM. All 132 workspace tests, strict native/WASM Clippy, formatting and existing asset checks pass. Actual WebGL2 before/after regression: the affected roof region changes from 828 to over 16,000 roof-colored pixels; fully offscreen control has zero. Desktop and DPR-2 touch panning pass without runtime errors; final integrated bundle repeats the desktop regression successfully. Evidence and regression driver: /workspace/scratch/building-visibility/. Thermonuclear review: two direct depth clamps, no extra culling layer/dependency, authoritative state and spatial rules unchanged, no client file over 1,000 lines. PR #48 is verified and authorized for merge; merging triggers Modal deployment, which remains to be checked.
+
+## README and game direction (2026-10-03)
+
+Documentation-only: shortened README to the goal, proposed loop, implemented roadmap, architecture, setup, and contribution guide. Added `decisions.md` with brief design choices; AGENTS now requires reading the README gameplay loop. Roadmap prioritizes island transport/expansion before threats, calamities, and permanent progression, and marks earlier fixed-scenario plans as superseded. Latest fields/reset implementation is included in the feature summary; no gameplay changes.
+
+User requested PR #49 and merge into the default branch (`master`); rebased onto the concurrent building-trap fix, retaining its handoff and escape-route documentation. Verification: documentation links, setup versions against Cargo.lock, feature claims against current code/handoff, diff whitespace, and the thermonuclear review. Local Rust tools are unavailable; merge CI runs the repository quality/deployment checks.
+
+## Building placement trapping villagers (2026-10-03)
+
+User requested a fix, PR, and merge into the main branch (`master`). PR #46 (`fix/building-traps`) rejects a foundation before mutation when it disconnects any unit from previously reachable ground or consumes its last walking space. Reuses corner-safe static pathfinding, checks each occupied connected region once, and ignores temporary unit traffic. Edge-sharing and existing separate islands remain supported. Existing trapped saves are unchanged.
+
+Integrated concurrent reset/seed PR #45 and farm-field release c85a85a without reverting either; regenerated combined WASM. Seven placement regressions cover builder/bystander traps, diagonal exits, mid-step orders, last walking space, safe completion/movement, separate islands, and touching buildings. Final verification passes: 132 workspace tests (87 domain, 32 client, 13 server), strict native/WASM Clippy, formatting, and rebuilt WASM. Structural review: docs/BUILDING_PLACEMENT_REVIEW.md.
+
+Actual WebGL2 Build → Town → House flow rejects the coastal trap without spending wood, accepts a safe house for exactly 15 wood, and walks the builder to (28,13). Rechecked with the farm-field integration: all gameplay assertions pass; the final screenshot timed out under software rendering. Earlier successful screenshots are `/tmp/aoa-trap-desktop.png` and `/tmp/aoa-trap-safe-exit.png`. Next: merge #46 and monitor production deployment.
 
 ## Replenishable farm fields (2026-10-03)
 
