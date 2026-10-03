@@ -2,12 +2,11 @@
 //! large landmass ringed by sea, rolling hills cut by winding valleys, several
 //! ranges of impassable peaks with highlands around them, rivers running from
 //! there to the sea (crossed at sandbar fords), forests and wetland where it
-//! is moist, beaches on the coast, and resources where they belong (stone and
-//! ore in the hills, clay by the water, berries at forest edges). Only wood and
-//! berries grow near the start; everything else lies out in the island for the
-//! player to find. Every island is checked to hold enough of every resource to
-//! reach a fishing boat, all of it reachable on foot from the starting town
-//! center; a seed that fails is deterministically re-rolled.
+//! is moist, beaches on the coast, and starter resources where they belong.
+//! Only wood and berries grow near the start; stone requires exploration.
+//! Each island supplies the raw settlement and proposed transport budget,
+//! including wood to process into timber, reachable from the town center.
+//! Advanced materials belong to future islands. Failed seeds are re-rolled.
 //!
 //! Only integer hashing, `+ - * /` and `sqrt` (all exactly rounded under IEEE
 //! 754) are used, so the result is bit-identical
@@ -16,17 +15,6 @@
 use std::collections::VecDeque;
 
 use super::*;
-
-/// What leaving the island will cost. The generator guarantees the island
-/// holds at least this much of each kind (plus the founding economy's needs).
-pub const FISHING_BOAT_COST: [(ResourceKind, f64); 6] = [
-    (ResourceKind::Wood, 300.0),
-    (ResourceKind::Food, 150.0),
-    (ResourceKind::Stone, 80.0),
-    (ResourceKind::Iron, 60.0),
-    (ResourceKind::Fiber, 60.0),
-    (ResourceKind::Clay, 40.0),
-];
 
 /// Share of the map that is land.
 const LAND_SHARE: f64 = 0.55;
@@ -363,7 +351,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
     let (town_center, villagers) = choose_start(&terrain, &coast)?;
     let resources = place_resources(&terrain, &ford, town_center, &mut rng);
     let resources = reachable_only(&terrain, resources, town_center, villagers[0]);
-    let enough = FISHING_BOAT_COST.iter().all(|&(kind, cost)| {
+    let enough = STARTER_RESOURCE_BUDGET.iter().all(|&(kind, cost)| {
         let total: f64 = resources
             .iter()
             .filter(|r| r.kind == kind)
@@ -383,13 +371,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
             .iter()
             .any(|r| r.kind == kind && r.cell.center().distance(base) <= NEAR_START)
     };
-    (enough
-        && resources
-            .iter()
-            .any(|r| r.kind == ResourceKind::Coal && r.amount >= 30.0)
-        && near_start(ResourceKind::Wood)
-        && near_start(ResourceKind::Food))
-    .then_some(Island {
+    (enough && near_start(ResourceKind::Wood) && near_start(ResourceKind::Food)).then_some(Island {
         seed,
         terrain,
         resources,
@@ -676,6 +658,9 @@ fn place_resources(
     let mut taken = ford.to_vec();
     let mut resources: Vec<ResourceNode> = Vec::new();
     for (kind, prefix, biomes, near, far, size, amount) in RESOURCE_PLAN {
+        if !STARTER_RESOURCES.contains(&kind) {
+            continue;
+        }
         let mut number = 0;
         for cluster in 0..near + far {
             // Seeds suit the kind, keep the base clear and stay apart from

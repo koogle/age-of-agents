@@ -13,6 +13,8 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Persistence:** Save authoritative snapshots in SQLite and respect `AGE_OF_AGENTS_DB`. Corrupt state is an error; incompatible historical schemas are intentionally discarded rather than translated unsafely.
 - **Current economy:** Direct gathering remains available alongside farm/mining-camp drop-offs and non-stacking local bonuses. Processing costs and quantities are initial balance values.
 - **Fields:** Planting and replenishing fields require paid, explicit villager orders. Idle villagers never replant automatically.
+- **Starter economy:** New islands supply food, wood and stone, with timber as the sole processed resource. Reserve metal, brick and cloth chains for complementary later islands; defer rations until provisioning is playable.
+- **First departure:** The planned first transport consumes wood and timber only, so departure cannot depend on resources found elsewhere. Later trading posts need separate inventories and explicit shipping.
 - **Island progression:** Plan transport and persistent destination islands before local inventories and inter-island trade. The long-term world keeps expanding through discovered islands without a fixed island limit; the prototype currently uses one island and shared stockpiles.
 - **Globe overview:** Retain distant planet zoom during exploration. Add newly discovered islands cumulatively after ships and persistent island travel are implemented.
 - **Camera:** Use a fixed orthographic isometric angle with pan and zoom. Building art keeps its proportions within level footprint plots.
