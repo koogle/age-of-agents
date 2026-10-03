@@ -205,24 +205,14 @@ impl GameWorld {
                         .map(|r| Goal::Beside(r.footprint()))
                 };
                 if self.units[unit].cargo.is_some() {
-                    self.nearest_drop_site(unit)
-                        .map(Goal::Beside)
-                        .or_else(field_goal)
+                    self.nearest_drop_site(unit).map(Goal::Beside)
                 } else {
                     field_goal()
                 }
             }
             UnitAction::Build { .. } if self.units[unit].cargo.is_some() => {
                 // Dropping goods off first; see `drop_off_before_building`.
-                self.nearest_drop_site(unit).map(Goal::Beside).or_else(|| {
-                    let UnitAction::Build { building_id } = &self.units[unit].action else {
-                        return None;
-                    };
-                    self.buildings
-                        .iter()
-                        .find(|building| &building.id == building_id)
-                        .map(|building| Goal::Beside(building.footprint()))
-                })
+                self.nearest_drop_site(unit).map(Goal::Beside)
             }
             UnitAction::Build { building_id } | UnitAction::Deposit { building_id } => self
                 .buildings
