@@ -11,6 +11,14 @@ use crate::{
 
 type Corners = [[f32; 2]; 4];
 
+pub(super) struct Frame {
+    pub sheet: usize,
+    pub rect: [f32; 4],
+    pub atlas: [f32; 2],
+    pub cell: [f32; 2],
+    pub corners: Corners,
+}
+
 fn frame(
     sheets: &Sheets,
     kind: BuildingKind,
@@ -58,14 +66,6 @@ pub(crate) fn sprite(
     let (sheet, rect, atlas, cell, corners) = frame(sheets, kind, construction, working);
     let (columns, rows) = kind.size();
     let (width, depth) = (columns as f32 * CELL, rows as f32 * CELL);
-    let (right, up) = Rig::new().basis();
-    let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
-    let ground_projection = Mat2::from_cols(project(Vec3::X), project(Vec3::Z));
-    // Measure the painted base in ground coordinates, then fit its bounding
-    // rectangle uniformly. The image keeps its original angles and proportions.
-    let points = corners.map(|[x, y]| ground_projection.inverse() * Vec2::new(x, -y));
-    let low = points.into_iter().reduce(Vec2::min).unwrap();
-    let high = points.into_iter().reduce(Vec2::max).unwrap();
     // Initial construction plots fill the claim, independently of the smaller
     // finished house. Later walls/roofs and completed placement ghosts retain
     // the approved building scale.
@@ -84,6 +84,45 @@ pub(crate) fn sprite(
     } else {
         0.94
     };
+    on_plot(
+        Frame {
+            sheet,
+            rect,
+            atlas,
+            cell,
+            corners,
+        },
+        heights,
+        center,
+        Vec2::new(width, depth),
+        plot_fill,
+    )
+}
+
+/// Fit authored ground corners uniformly; buildings and crop plots share depth/anchoring.
+pub(super) fn on_plot(
+    frame: Frame,
+    heights: &Heights,
+    center: Vec3,
+    extent: Vec2,
+    plot_fill: f32,
+) -> (usize, Sprite) {
+    let Frame {
+        sheet,
+        rect,
+        atlas,
+        cell,
+        corners,
+    } = frame;
+    let (width, depth) = (extent.x, extent.y);
+    let (right, up) = Rig::new().basis();
+    let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
+    let ground_projection = Mat2::from_cols(project(Vec3::X), project(Vec3::Z));
+    // Measure the painted base in ground coordinates, then fit its bounding
+    // rectangle uniformly. The image keeps its original angles and proportions.
+    let points = corners.map(|[x, y]| ground_projection.inverse() * Vec2::new(x, -y));
+    let low = points.into_iter().reduce(Vec2::min).unwrap();
+    let high = points.into_iter().reduce(Vec2::max).unwrap();
     let scale = (Vec2::new(width, depth) / (high - low)).min_element() * plot_fill;
     let base_center = ground_projection * ((low + high) * 0.5);
     // Take depth from the plot's front, while centering the unmodified art on
@@ -167,6 +206,70 @@ mod tests {
                         "{kind:?} {work:?}: base corner {ground_offset:?} outside plot {extent:?}"
                     );
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn field_stages_share_registration_and_fit_their_three_cell_plot() {
+        use aoa_game::{
+            CellCoordinate, FIELD_WORK_SECONDS, FieldState, ResourceKind, ResourceNode,
+        };
+        let sheets = sheets();
+        let mut heights = Heights::unknown();
+        heights.set_plots(vec![[10.0, 12.0, 1.5, 1.5]], false);
+        let mut field = ResourceNode {
+            id: "field-art-test".into(),
+            kind: ResourceKind::Food,
+            cell: CellCoordinate {
+                column: 20,
+                row: 24,
+            },
+            amount: 0.0,
+            capacity: 120.0,
+            field: Some(FieldState { work: None }),
+        };
+        let center = ground(&heights, 10.75, 12.75);
+        let initial = crate::view::fields::sprite(&sheets, &heights, &field).1;
+        let (sheet, art) = sheets.catalog.field();
+        let (right, up) = Rig::new().basis();
+        let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
+        let inverse = Mat2::from_cols(project(Vec3::X), project(Vec3::Z)).inverse();
+        for (work, amount, stage) in [
+            (None, 0.0, 0),
+            (Some(0.0), 0.0, 0),
+            (Some(FIELD_WORK_SECONDS / 3.0), 0.0, 1),
+            (Some(FIELD_WORK_SECONDS * 2.0 / 3.0), 0.0, 2),
+            (Some(FIELD_WORK_SECONDS), 0.0, 2),
+            (None, 120.0, 3),
+            (None, 0.1, 3),
+        ] {
+            field.field.as_mut().unwrap().work = work;
+            field.amount = amount;
+            let (actual_sheet, sprite) = crate::view::fields::sprite(&sheets, &heights, &field);
+            assert_eq!(actual_sheet, sheet);
+            assert_eq!(sprite.uv, uv(art.frames["field"][stage], art.size, false));
+            assert_ne!(sprite.uv, uv(art.frames["farm"][stage], art.size, false));
+            assert_eq!(sprite.anchor, initial.anchor);
+            assert_eq!(sprite.pivot, initial.pivot);
+            assert_eq!(sprite.size, initial.size);
+            assert_eq!(sprite.footprint, [1.5, 1.5]);
+            for [x, y] in art.footprints["field"][stage] {
+                let q =
+                    Vec2::new(x / art.cell[0], 1.0 - y / art.cell[1]) - Vec2::from(sprite.pivot);
+                let offset =
+                    project(Vec3::from(sprite.anchor) - center) + q * Vec2::from(sprite.size);
+                assert!(
+                    (inverse * offset)
+                        .abs()
+                        .cmple(Vec2::splat(0.75 + 1e-5))
+                        .all()
+                );
+            }
+            if stage == 3 {
+                let preview = crate::view::field_preview(&sheets, &heights, center).1;
+                assert_eq!(preview.uv, sprite.uv);
+                assert_eq!(preview.pivot, sprite.pivot);
             }
         }
     }

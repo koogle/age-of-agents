@@ -98,7 +98,7 @@ pub(super) fn commands(
     };
     if build == BuildUi::Group(BuildingGroup::Gathering) {
         commands.push(Command {
-            icon: "building_farm",
+            icon: "field",
             label: "Field".into(),
             detail: if has_farm {
                 format!(
