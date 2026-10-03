@@ -79,14 +79,14 @@ pub struct Footprint {
 }
 
 impl Footprint {
-    pub(super) fn cells(self) -> impl Iterator<Item = CellCoordinate> {
+    pub fn cells(self) -> impl Iterator<Item = CellCoordinate> {
         (self.origin.row..self.origin.row + self.rows).flat_map(move |row| {
             (self.origin.column..self.origin.column + self.columns)
                 .map(move |column| CellCoordinate::new(column, row))
         })
     }
 
-    pub(super) fn contains(self, cell: CellCoordinate) -> bool {
+    pub fn contains(self, cell: CellCoordinate) -> bool {
         (self.origin.column..self.origin.column + self.columns).contains(&cell.column)
             && (self.origin.row..self.origin.row + self.rows).contains(&cell.row)
     }
@@ -97,7 +97,7 @@ impl Footprint {
         !self.contains(cell) && self.cells().any(|inner| inner.touches(cell))
     }
 
-    pub(super) fn center(self) -> Position {
+    pub fn center(self) -> Position {
         Position {
             x: f64::from(self.origin.column) + f64::from(self.columns) / 2.0,
             y: f64::from(self.origin.row) + f64::from(self.rows) / 2.0,
@@ -159,6 +159,10 @@ pub enum UnitAction {
     /// Walk beside the foundation `building_id` and raise it.
     Build {
         building_id: String,
+    },
+    /// Prepare or replenish a cultivated food field.
+    Cultivate {
+        resource_id: String,
     },
     /// Carry the load to the complete building `building_id`, unload it
     /// there, and stand idle.
@@ -226,14 +230,22 @@ pub struct ResourceNode {
     pub cell: CellCoordinate,
     pub amount: f64,
     pub capacity: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field: Option<FieldState>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FieldState {
+    /// Reserved preparation work; None means harvestable or depleted.
+    pub work: Option<f64>,
 }
 
 impl ResourceNode {
-    pub(super) fn footprint(&self) -> Footprint {
+    pub fn footprint(&self) -> Footprint {
         Footprint {
             origin: self.cell,
-            columns: 1,
-            rows: 1,
+            columns: if self.field.is_some() { 3 } else { 1 },
+            rows: if self.field.is_some() { 3 } else { 1 },
         }
     }
 }

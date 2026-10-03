@@ -67,6 +67,8 @@ def verify_once() -> None:
         raise RuntimeError("production does not serve the Rust web client")
     if b"All types" not in wasm:
         raise RuntimeError("production does not serve the grouped building menu")
+    if b"Place field" not in wasm:
+        raise RuntimeError("production does not serve replenishable fields")
     for sheet in ("buildings_economy", "buildings_crafts", "buildings_civic", "units"):
         for extension in ("json", "png"):
             path = f"assets/sprites/{sheet}.{extension}"

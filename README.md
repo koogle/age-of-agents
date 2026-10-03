@@ -11,6 +11,7 @@ The Rust client exposes all 17 catalog buildings in four purpose-based groups: T
 - Mining camps accept stone, gold, iron and coal; farms accept food and fiber. Completed camps/farms improve matching gathering by 25% within six cells of their footprint; bonuses do not stack. Existing direct gathering remains available.
 - Lumber mill: 10 wood → 5 timber (8 s). Smelter: 5 iron + 5 coal → 5 steel (10 s). Kiln: 10 clay + 5 wood → 5 bricks (8 s). Weaver: 10 fiber → 5 cloth (8 s). Kitchen: 10 food → 5 rations (8 s).
 - Barracks train guards; ranges train archers; workshops build siege carts; infirmaries train healers. These units can move and stop; combat and healing are deferred. Only villagers gather and build. All units and queued trainees consume housing; processing jobs do not.
+- A completed farm unlocks **Field** under Build → Gathering. Each 3×3 plot costs 10 wood + 5 stone and 12 villager-seconds of preparation, then holds 120 harvestable food. Select villagers and tap a ripe field to gather; tap a depleted field to pay the same cost and replenish it. Helpers share work, interrupted preparation retains progress, and idle villagers never replant automatically.
 - Farms, mining camps, lumber mills, kilns and weavers offer matching existing research. Town centers retain all five technologies. The same technology cannot be queued twice.
 - Monuments consume timber, bricks, cloth, gold and steel and provide a sight radius of 24 cells. Docks retain coastal placement; ship production is a subsequent slice.
 
