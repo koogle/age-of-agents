@@ -1,5 +1,13 @@
 # Open Work
 
+## Pointer-anchored zoom (2026-10-03)
+
+User requested a fresh branch and a PR ready to merge into `master`. Branch `fix/pointer-anchored-zoom` starts from master and includes latest upstream `1bcdc03`. Mouse wheel captures the terrain under the cursor before zoom, then shifts the camera target to keep that ground point under the cursor. Touch pinch uses the same camera method at the fingers’ midpoint and retains two-finger panning. Existing zoom/pan limits and center-zoom fallback over sky remain. No simulation, save, asset, or dependency changes.
+
+Browser reproduction with the original bundle: one off-center zoom moves the terrain anchor 65.37 CSS pixels on desktop and 13.76 on a DPR-2 phone. Regression driver and screenshots: `/workspace/scratch/pointer-zoom/`. Two focused camera regressions cover raised terrain, both zoom directions, minimum/maximum distance, globe transition, desktop/DPR-2 viewport sizes, sky fallback and pan bounds. All 141 workspace tests pass (13 server, 37 client, 91 game), including the randomized invariant test. Rebuilt tracked release WASM. Actual WebGL2 wheel zoom in/out keeps the anchor within 0.004 CSS pixels; DPR-2 phone pinch stays within 0.008 CSS pixels, with no page errors. Screenshots visually reviewed. Formatting, frontend syntax, existing asset checks and diff checks pass; strict native/WASM Clippy passes without warnings. Delivered through PR #52: https://github.com/koogle/age-of-agents/pull/52. GitHub reports the PR mergeable with a clean merge state against `master`; merge/deployment remain pending.
+
+Thermonuclear review: one camera method reuses terrain picking, plane intersection, zoom and bounded drag; both input paths share it. No new interaction mode or domain behavior; changed client files remain below 1,000 lines. README/ROADMAP describe cursor/midpoint anchoring. Production deployment remains the existing merge-triggered Modal workflow.
+
 ## Keep master as the integration branch (2026-10-03)
 
 Jakob decided to keep the branch named `master` everywhere. Restored the deployment trigger, contributor instructions and deployment policy to `master`; agents should continue using `origin/master` as their integration target and PR base, preserving ongoing feature work. The attempted rename is cancelled. Verification: reviewed the configuration/documentation diff and whitespace; no gameplay changes.

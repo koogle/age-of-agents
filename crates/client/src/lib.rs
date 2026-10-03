@@ -828,7 +828,11 @@ impl ApplicationHandler<Game> for App {
                     MouseScrollDelta::LineDelta(_, y) => y,
                     MouseScrollDelta::PixelDelta(p) => p.y as f32 / 60.0,
                 };
-                self.rig.zoom((1.0 - lines * 0.1).clamp(0.5, 1.5));
+                let heights = &self.view.heights;
+                self.rig
+                    .zoom_at(self.cursor, (1.0 - lines * 0.1).clamp(0.5, 1.5), |x, z| {
+                        heights.at(x, z)
+                    });
             }
             WindowEvent::Touch(touch) => {
                 let pixel = Vec2::new(touch.location.x as f32, touch.location.y as f32);
