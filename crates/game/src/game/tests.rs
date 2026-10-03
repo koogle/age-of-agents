@@ -1076,10 +1076,13 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     assert_eq!(house.kind, BuildingKind::House);
     assert_eq!(house.footprint().columns, 3);
     assert!(house.produces.is_empty() && house.researches.is_empty());
+    world.resources.clear();
+    let before = world.clone();
     assert_eq!(
-        build(&mut world, BuildingKind::Monument, cell(30, 30)),
-        Err(CommandError::NotBuildable)
+        build(&mut world, BuildingKind::Monument, cell(10, 10)),
+        Err(CommandError::InsufficientResources(ResourceKind::Timber))
     );
+    assert_eq!(world, before);
 }
 
 #[test]

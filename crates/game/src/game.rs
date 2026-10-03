@@ -3,6 +3,9 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 mod domain;
+mod economy;
+#[cfg(test)]
+mod economy_tests;
 #[cfg(test)]
 mod fixture;
 mod gathering;
@@ -181,8 +184,12 @@ pub enum CommandError {
     BuildingAlreadyComplete,
     ProductUnavailable,
     InsufficientFood,
+    InsufficientResources(ResourceKind),
+    InsufficientProductionResources,
+    VillagerRequired,
     TechnologyUnavailable,
     TechnologyAlreadyResearched,
+    TechnologyInProgress,
     MissingTechnologyPrerequisite,
     InsufficientResearchResources,
     InvalidSimulationSpeed,
@@ -213,8 +220,12 @@ impl std::fmt::Display for CommandError {
             Self::BuildingAlreadyComplete => "building is already complete",
             Self::ProductUnavailable => "building cannot produce that item",
             Self::InsufficientFood => "insufficient food",
+            Self::InsufficientResources(kind) => return write!(f, "insufficient {}", kind.name()),
+            Self::InsufficientProductionResources => "insufficient resources for production",
+            Self::VillagerRequired => "only villagers can gather or build",
             Self::TechnologyUnavailable => "building cannot research that technology",
             Self::TechnologyAlreadyResearched => "technology is already researched",
+            Self::TechnologyInProgress => "technology is already being researched",
             Self::MissingTechnologyPrerequisite => "technology prerequisite is not researched",
             Self::InsufficientResearchResources => "research requires 40 food and 20 wood",
             Self::InvalidSimulationSpeed => "simulation speed must be 0, 1, or 2",
@@ -284,15 +295,18 @@ fn building(
         kind,
         origin,
         construction,
-        produces: if town_center {
-            vec![ProductKind::Villager]
-        } else {
-            Vec::new()
-        },
+        produces: kind.products().to_vec(),
         researches: if town_center {
             TechnologyKind::ALL.to_vec()
         } else {
-            Vec::new()
+            match kind {
+                BuildingKind::MiningCamp => vec![TechnologyKind::Mining],
+                BuildingKind::Farm => vec![TechnologyKind::Agriculture],
+                BuildingKind::LumberMill => vec![TechnologyKind::Forestry],
+                BuildingKind::Kiln => vec![TechnologyKind::Masonry],
+                BuildingKind::Weaver => vec![TechnologyKind::Textiles],
+                _ => Vec::new(),
+            }
         },
         job: None,
     }
@@ -345,6 +359,9 @@ impl GameWorld {
                 resource_id,
             } => {
                 let unit = self.ordered_unit(&unit_id)?;
+                if self.units[unit].kind != UnitKind::Villager {
+                    return Err(CommandError::VillagerRequired);
+                }
                 let resource = self
                     .resources
                     .iter()
@@ -367,6 +384,9 @@ impl GameWorld {
                 kind,
             } => {
                 let unit = self.ordered_unit(&unit_id)?;
+                if self.units[unit].kind != UnitKind::Villager {
+                    return Err(CommandError::VillagerRequired);
+                }
                 if !BUILDABLE.contains(&kind) {
                     return Err(CommandError::NotBuildable);
                 }
@@ -386,7 +406,8 @@ impl GameWorld {
                     if self.stockpile.amount(resource) < amount {
                         return Err(match resource {
                             ResourceKind::Stone => CommandError::InsufficientStone,
-                            _ => CommandError::InsufficientWood,
+                            ResourceKind::Wood => CommandError::InsufficientWood,
+                            kind => CommandError::InsufficientResources(kind),
                         });
                     }
                 }
@@ -409,6 +430,9 @@ impl GameWorld {
                 building_id,
             } => {
                 let unit = self.ordered_unit(&unit_id)?;
+                if self.units[unit].kind != UnitKind::Villager {
+                    return Err(CommandError::VillagerRequired);
+                }
                 let building = self
                     .buildings
                     .iter()
@@ -427,17 +451,22 @@ impl GameWorld {
                 product,
             } => {
                 let building = self.building_index_and_idle(&building_id)?;
-                if !self.buildings[building].produces.contains(&product) {
+                if !self.buildings[building].kind.products().contains(&product) {
                     return Err(CommandError::ProductUnavailable);
                 }
-                match product {
-                    ProductKind::Villager if self.villagers_and_trainees() >= self.housing() => {
-                        return Err(CommandError::PopulationCapReached);
-                    }
-                    ProductKind::Villager if self.stockpile.food < VILLAGER_FOOD_COST => {
-                        return Err(CommandError::InsufficientFood);
-                    }
-                    ProductKind::Villager => self.stockpile.food -= VILLAGER_FOOD_COST,
+                if product.unit_kind().is_some() && self.villagers_and_trainees() >= self.housing()
+                {
+                    return Err(CommandError::PopulationCapReached);
+                }
+                if !self.stockpile.affords(product.cost()) {
+                    return Err(if product == ProductKind::Villager {
+                        CommandError::InsufficientFood
+                    } else {
+                        CommandError::InsufficientProductionResources
+                    });
+                }
+                for &(kind, amount) in product.cost() {
+                    self.stockpile.add(kind, -amount);
                 }
                 self.buildings[building].job = Some(BuildingJob::Produce {
                     product,
@@ -454,6 +483,9 @@ impl GameWorld {
                 }
                 if self.researched_technologies.contains(&technology) {
                     return Err(CommandError::TechnologyAlreadyResearched);
+                }
+                if self.buildings.iter().any(|b| matches!(b.job, Some(BuildingJob::Research { technology: t, .. }) if t == technology)) {
+                    return Err(CommandError::TechnologyInProgress);
                 }
                 if technology
                     .prerequisite()
@@ -526,13 +558,13 @@ impl GameWorld {
             .sum()
     }
 
-    /// Living villagers plus those in training.
+    /// Living units plus those in training; processing jobs do not consume housing.
     pub fn villagers_and_trainees(&self) -> usize {
         self.units.len()
             + self
                 .buildings
                 .iter()
-                .filter(|b| matches!(b.job, Some(BuildingJob::Produce { .. })))
+                .filter(|b| matches!(b.job, Some(BuildingJob::Produce { product, .. }) if product.unit_kind().is_some()))
                 .count()
     }
 
@@ -786,63 +818,6 @@ impl GameWorld {
                 }
             }
         }
-    }
-
-    fn tick_building_job(&mut self, building_index: usize, dt: f64) {
-        let Some(job) = self.buildings[building_index].job.clone() else {
-            return;
-        };
-        match job {
-            BuildingJob::Produce {
-                product,
-                mut elapsed_seconds,
-            } => {
-                elapsed_seconds += dt;
-                if elapsed_seconds + f64::EPSILON < VILLAGER_PRODUCTION_SECONDS {
-                    self.buildings[building_index].job = Some(BuildingJob::Produce {
-                        product,
-                        elapsed_seconds,
-                    });
-                    return;
-                }
-                match product {
-                    ProductKind::Villager => {
-                        let Some(cell) = self.spawn_cell(building_index) else {
-                            self.buildings[building_index].job = Some(BuildingJob::Produce {
-                                product,
-                                elapsed_seconds,
-                            });
-                            return;
-                        };
-                        self.units.push(Unit {
-                            id: self.next_unit_name(),
-                            kind: UnitKind::Villager,
-                            cell,
-                            step: None,
-                            action: UnitAction::Idle,
-                            cargo: None,
-                        });
-                        self.next_unit_id += 1;
-                    }
-                }
-            }
-            BuildingJob::Research {
-                technology,
-                mut elapsed_seconds,
-            } => {
-                elapsed_seconds += dt;
-                if elapsed_seconds + f64::EPSILON < RESEARCH_SECONDS {
-                    self.buildings[building_index].job = Some(BuildingJob::Research {
-                        technology,
-                        elapsed_seconds,
-                    });
-                    return;
-                }
-                self.researched_technologies.push(technology);
-                self.researched_technologies.sort_unstable();
-            }
-        }
-        self.buildings[building_index].job = None;
     }
 }
 

@@ -289,15 +289,16 @@ impl App {
         match action {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Grid => self.show_grid = !self.show_grid,
-            hud::Action::Build => self.build = hud::BuildUi::Menu,
+            hud::Action::Build => self.build = hud::BuildUi::Menu(0),
+            hud::Action::BuildPage(page) => self.build = hud::BuildUi::Menu(page),
             hud::Action::Place(kind) => self.build = hud::BuildUi::Placing(kind),
             hud::Action::Cancel => self.build = hud::BuildUi::Off,
             hud::Action::Stop => self.stop(),
-            hud::Action::Train => {
+            hud::Action::Produce(product) => {
                 if let Some(building_id) = self.selection.building.clone() {
                     self.send(Command::Produce {
                         building_id,
-                        product: aoa_game::ProductKind::Villager,
+                        product,
                     });
                 }
             }

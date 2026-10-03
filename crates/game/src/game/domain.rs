@@ -318,12 +318,24 @@ pub enum BuildingKind {
 }
 
 /// What villagers can construct, in build-menu order.
-pub const BUILDABLE: [BuildingKind; 5] = [
+pub const BUILDABLE: [BuildingKind; 17] = [
     BuildingKind::TownCenter,
     BuildingKind::House,
     BuildingKind::Granary,
     BuildingKind::Watchtower,
     BuildingKind::Dock,
+    BuildingKind::MiningCamp,
+    BuildingKind::Farm,
+    BuildingKind::LumberMill,
+    BuildingKind::Smelter,
+    BuildingKind::Kiln,
+    BuildingKind::Weaver,
+    BuildingKind::Kitchen,
+    BuildingKind::Barracks,
+    BuildingKind::Range,
+    BuildingKind::Workshop,
+    BuildingKind::Infirmary,
+    BuildingKind::Monument,
 ];
 
 impl BuildingKind {
@@ -335,7 +347,16 @@ impl BuildingKind {
             Self::Dock => (4, 4),
             Self::House | Self::Granary => (3, 3),
             Self::Watchtower => (2, 2),
-            _ => (1, 1),
+            Self::Monument => (5, 5),
+            Self::MiningCamp
+            | Self::Farm
+            | Self::Kiln
+            | Self::Weaver
+            | Self::Kitchen
+            | Self::Infirmary => (3, 3),
+            Self::LumberMill | Self::Smelter | Self::Barracks | Self::Range | Self::Workshop => {
+                (4, 4)
+            }
         }
     }
 
@@ -347,7 +368,24 @@ impl BuildingKind {
             Self::Granary => &[(ResourceKind::Wood, 25.0)],
             Self::Watchtower => &[(ResourceKind::Wood, 15.0), (ResourceKind::Stone, 15.0)],
             Self::Dock => &[(ResourceKind::Wood, 30.0)],
-            _ => &[],
+            Self::MiningCamp => &[(ResourceKind::Wood, 30.0), (ResourceKind::Stone, 10.0)],
+            Self::Farm => &[(ResourceKind::Wood, 25.0)],
+            Self::LumberMill => &[(ResourceKind::Wood, 40.0), (ResourceKind::Stone, 10.0)],
+            Self::Smelter => &[(ResourceKind::Wood, 30.0), (ResourceKind::Stone, 30.0)],
+            Self::Kiln => &[(ResourceKind::Wood, 30.0), (ResourceKind::Stone, 20.0)],
+            Self::Weaver | Self::Kitchen => &[(ResourceKind::Wood, 30.0)],
+            Self::Barracks | Self::Range => {
+                &[(ResourceKind::Timber, 20.0), (ResourceKind::Stone, 20.0)]
+            }
+            Self::Workshop => &[(ResourceKind::Timber, 25.0), (ResourceKind::Bricks, 15.0)],
+            Self::Infirmary => &[(ResourceKind::Timber, 15.0), (ResourceKind::Cloth, 10.0)],
+            Self::Monument => &[
+                (ResourceKind::Timber, 30.0),
+                (ResourceKind::Bricks, 30.0),
+                (ResourceKind::Cloth, 15.0),
+                (ResourceKind::Gold, 20.0),
+                (ResourceKind::Steel, 15.0),
+            ],
         }
     }
 
@@ -369,7 +407,13 @@ impl BuildingKind {
     pub const fn accepts(self, resource: ResourceKind) -> bool {
         match self {
             Self::TownCenter => true,
-            Self::Granary => matches!(resource, ResourceKind::Food | ResourceKind::Fiber),
+            Self::Granary | Self::Farm => {
+                matches!(resource, ResourceKind::Food | ResourceKind::Fiber)
+            }
+            Self::MiningCamp => matches!(
+                resource,
+                ResourceKind::Stone | ResourceKind::Gold | ResourceKind::Iron | ResourceKind::Coal
+            ),
             _ => false,
         }
     }
@@ -378,6 +422,7 @@ impl BuildingKind {
     pub const fn sight_radius(self) -> f64 {
         match self {
             Self::Watchtower => 20.0,
+            Self::Monument => 24.0,
             _ => super::BUILDING_SIGHT_RADIUS,
         }
     }
@@ -392,6 +437,15 @@ impl BuildingKind {
 #[serde(rename_all = "snake_case")]
 pub enum ProductKind {
     Villager,
+    Guard,
+    Archer,
+    Healer,
+    SiegeCart,
+    Timber,
+    Steel,
+    Bricks,
+    Cloth,
+    Rations,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
