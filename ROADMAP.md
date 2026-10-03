@@ -159,3 +159,5 @@ Gameplay acceptance:
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
 - [ ] Additive touch selection, box selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
+
+- [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
