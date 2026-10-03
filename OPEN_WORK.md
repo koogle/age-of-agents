@@ -4,6 +4,14 @@ Updated 2026-10-03. Keep this file to current status, remaining work, and blocke
 
 Use `master` as the integration branch and PR base. The branch rename is cancelled; agents should preserve ongoing feature work and continue targeting `origin/master`.
 
+## Mouse camera controls — PR #52
+
+Branch `fix/pointer-anchored-zoom`, PR https://github.com/koogle/age-of-agents/pull/52, targets `master`. Wheel zoom stays anchored under the mouse, pinch zoom under the fingers’ midpoint. Mouse hover within a 32-logical-pixel edge band gently pans in that direction; corners pan diagonally with bounded speed. The speed ramps near the border and follows frame time. HUD hover, dragging, touch input, pointer exit and focus loss suspend edge panning. Existing camera bounds and globe view remain; no simulation, save, asset or dependency changes.
+
+Verification: all 146 combined workspace tests, formatting, strict native/WASM Clippy and rebuilt release WASM pass. Four focused camera/input regressions cover zoom anchoring, globe/limits, edge/corner directions, speed ramp and DPR/outside/interior positions. Actual desktop wheel in/out drift stays below 0.004 CSS pixels and DPR-2 phone pinch below 0.008. Browser corner panning passes at DPR 1 and 2, with zero drift in the interior, outside the view, over HUD controls, on focus loss and while holding a drag. DPR-2 phone touch at the edge produces zero camera drift. No browser runtime errors; screenshots reviewed. Evidence: `/workspace/scratch/pointer-zoom/`. Existing asset/syntax checks passed during zoom work.
+
+Thermonuclear review: one zoom method and one direct edge-direction function reuse existing camera picking/drag/nudge; native/browser share the implementation, no new engine layer, all changed client files below 1,000 lines. Integrated master `27c44ff`, preserving gathering work animations, the loading-title cleanup, documentation and the native launch script. Combined formatting, all 146 tests, strict native/WASM lint, rebuilt WASM and desktop/phone zoom smoke checks pass. User authorized merging PR #52 into `master`; the existing Modal workflow deploys after merge.
+
 ## Activity sprite restoration (verified; publishing)
 
 The farm-field commit `9ff0087` disabled work poses whenever cargo existed, freezing gatherers in the carry pose after their first collected item. The shared renderer now keeps active gathering animated with a partial load, while preserving cargo-first construction/cultivation and stopped/unloading carry poses. No asset or simulation changes.
