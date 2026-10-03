@@ -37,7 +37,7 @@ See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [dec
 | `crates/client` | Shared wgpu renderer, input, and HUD for native and WebGL2 builds. |
 | `src` | Axum/Tokio server, fixed simulation ticks, WebSocket commands/snapshots, and SQLite persistence. |
 | `assets` | Painted sprites, terrain textures, UI art, and generation provenance. |
-| `frontend` | Legacy Three.js client served at `/`; new client work belongs in Rust. |
+| `web` | Browser bootstrap and generated WebAssembly bindings; served at `/` and `/play`. |
 
 Hosted games use the server's authoritative world. Native games and browser `?local` mode run the same simulation in-process. Game rules live in `crates/game`; the client handles presentation. `GameWorld::validate` checks occupancy and state invariants.
 
@@ -68,7 +68,7 @@ cargo install wasm-bindgen-cli --version 0.2.129 --locked
 cargo run --release
 ```
 
-Open <http://localhost:8000/play>, or <http://localhost:8000/play?local> for an in-page simulation. The legacy client is at <http://localhost:8000>.
+Open <http://localhost:8000>, or <http://localhost:8000/?local> for an in-page simulation. Existing `/play` links serve the same Rust client.
 
 Existing saves keep their terrain, resources, buildings and economy rules; choose Reset game only when you want a fresh starter island (this erases that world). Saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run`. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use the Reset game dialog.
 
@@ -87,7 +87,7 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnings
 ```
 
-For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks frontend syntax and assets.
+For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks browser bindings and current UI assets.
 
 Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 268 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
