@@ -85,4 +85,4 @@ For client changes, rebuild the web client and test the affected flow on desktop
 
 Asset changes must pass the relevant checks in `scripts/`. Sprite frames require 512×512 authored pixels; several villager and military sheets still need an HD repack. Use `python3 scripts/check_sprite_resolution.py --report-only` to inspect those gaps. See [Midjourney tooling](docs/MIDJOURNEY.md) for asset setup.
 
-Open a PR against `main`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment: `python3 scripts/modal_manage.py deploy`.
+Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment: `python3 scripts/modal_manage.py deploy`.

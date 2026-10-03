@@ -1,8 +1,8 @@
 # Open Work
 
-## Main branch transition (2026-10-03)
+## Keep master as the integration branch (2026-10-03)
 
-Jakob requested renaming `master` to `main` and directing agents to shift over. Prepared `main` from current upstream `master`, updated contributor/agent instructions and deployment policy, and enabled production CI on `main` while retaining the `master` trigger during the transition. Agents should fetch `origin/main`, target their PRs and integration pushes at `main`, and preserve ongoing feature work. GitHub rejected both branch rename and default-branch updates with HTTP 403 (Resource not accessible by integration); the default remains `master` until an administrator completes the settings change. Direct cross-chat messaging is unavailable in this session, so the instructions are recorded here and in AGENTS.md. Verification: reviewed the configuration/documentation diff and whitespace; no gameplay changes. Remaining: set GitHub's default branch to `main`, remove the legacy branch and its deployment trigger after all agents have shifted over.
+Jakob decided to keep the branch named `master` everywhere. Restored the deployment trigger, contributor instructions and deployment policy to `master`; agents should continue using `origin/master` as their integration target and PR base, preserving ongoing feature work. The attempted rename is cancelled. Verification: reviewed the configuration/documentation diff and whitespace; no gameplay changes.
 
 ## Restore distant planet zoom (2026-10-03)
 
