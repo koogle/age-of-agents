@@ -117,6 +117,12 @@ mod tests {
             include_bytes!("../../../../assets/sprites/resources.json"),
             include_bytes!("../../../../assets/sprites/towncenter.json"),
             include_bytes!("../../../../assets/sprites/buildings_hd.json"),
+            [
+                include_bytes!("../../../../assets/sprites/buildings_economy.json"),
+                include_bytes!("../../../../assets/sprites/buildings_crafts.json"),
+                include_bytes!("../../../../assets/sprites/buildings_civic.json"),
+                include_bytes!("../../../../assets/sprites/units.json"),
+            ],
         )
     }
 

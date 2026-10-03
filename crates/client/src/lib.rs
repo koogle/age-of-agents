@@ -150,6 +150,13 @@ impl App {
             assets.bytes("sprites/resources.json"),
             assets.bytes("sprites/towncenter.json"),
             assets.bytes("sprites/buildings_hd.json"),
+            [
+                "buildings_economy",
+                "buildings_crafts",
+                "buildings_civic",
+                "units",
+            ]
+            .map(|name| assets.bytes(&format!("sprites/{name}.json"))),
         );
         let atlas = hud::build_atlas(&assets);
         Self {
@@ -282,8 +289,8 @@ impl App {
         match action {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Grid => self.show_grid = !self.show_grid,
-            hud::Action::Build => self.build = hud::BuildUi::Menu(0),
-            hud::Action::BuildPage(page) => self.build = hud::BuildUi::Menu(page),
+            hud::Action::Build => self.build = hud::BuildUi::Categories,
+            hud::Action::BuildGroup(group) => self.build = hud::BuildUi::Group(group),
             hud::Action::Place(kind) => self.build = hud::BuildUi::Placing(kind),
             hud::Action::Cancel => self.build = hud::BuildUi::Off,
             hud::Action::Stop => self.stop(),

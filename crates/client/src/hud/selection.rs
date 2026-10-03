@@ -2,7 +2,7 @@
 //! the command coins for a villager (build menu, stop) or a building (train,
 //! research). Pure functions of the snapshot, tested without a GPU.
 use aoa_game::{
-    BUILDABLE, BuildingKind, ProductKind, RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind,
+    BuildingKind, ProductKind, RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind,
     TechnologyKind, UnitAction, WorldSnapshot,
 };
 
@@ -14,74 +14,74 @@ pub(super) fn building_info(
 ) -> (&'static str, &'static str, &'static str, &'static str) {
     match kind {
         BuildingKind::MiningCamp => (
-            "building_towncenter",
-            "towncenter",
+            "building_mining_camp",
+            "mining_camp",
             "Mining camp",
             "Mineral drop-off; nearby gathering +25%",
         ),
         BuildingKind::Farm => (
-            "building_granary",
-            "granary",
+            "building_farm",
+            "farm",
             "Farm",
             "Food/fiber drop-off; nearby gathering +25%",
         ),
         BuildingKind::LumberMill => (
-            "building_towncenter",
-            "towncenter",
+            "building_lumber_mill",
+            "lumber_mill",
             "Lumber mill",
             "Turns wood into timber",
         ),
         BuildingKind::Smelter => (
-            "building_towncenter",
-            "towncenter",
+            "building_smelter",
+            "smelter",
             "Smelter",
             "Turns iron and coal into steel",
         ),
         BuildingKind::Kiln => (
-            "building_towncenter",
-            "towncenter",
+            "building_kiln",
+            "kiln",
             "Kiln",
             "Turns clay and wood into bricks",
         ),
         BuildingKind::Weaver => (
-            "building_towncenter",
-            "towncenter",
+            "building_weaver",
+            "weaver",
             "Weaver",
             "Turns fiber into cloth",
         ),
         BuildingKind::Kitchen => (
-            "building_granary",
-            "granary",
+            "building_kitchen",
+            "kitchen",
             "Kitchen",
             "Turns food into rations",
         ),
         BuildingKind::Barracks => (
-            "building_watchtower",
-            "watchtower",
+            "building_barracks",
+            "barracks",
             "Barracks",
             "Trains guards; combat comes later",
         ),
         BuildingKind::Range => (
-            "building_watchtower",
-            "watchtower",
+            "building_range",
+            "range",
             "Range",
             "Trains archers; combat comes later",
         ),
         BuildingKind::Workshop => (
-            "building_towncenter",
-            "towncenter",
+            "building_workshop",
+            "workshop",
             "Workshop",
             "Builds siege carts; combat comes later",
         ),
         BuildingKind::Infirmary => (
-            "building_towncenter",
-            "towncenter",
+            "building_infirmary",
+            "infirmary",
             "Infirmary",
             "Trains healers; healing comes later",
         ),
         BuildingKind::Monument => (
-            "building_towncenter",
-            "towncenter",
+            "building_monument",
+            "monument",
             "Monument",
             "A landmark with sight radius 24",
         ),
@@ -166,48 +166,8 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 enabled: true,
                 action: Action::Cancel,
             }],
-            BuildUi::Menu(page) => {
-                let mut menu: Vec<Command> = BUILDABLE
-                    .into_iter()
-                    .skip(page * 5)
-                    .take(5)
-                    .map(|kind| {
-                        let (icon, _, name, _) = building_info(kind);
-                        Command {
-                            icon,
-                            label: name.into(),
-                            detail: cost_text(kind.cost()),
-                            enabled: stock.affords(kind.cost()),
-                            action: Action::Place(kind),
-                        }
-                    })
-                    .collect();
-                if page > 0 {
-                    menu.push(Command {
-                        icon: "command_cancel",
-                        label: "Previous buildings".into(),
-                        detail: format!("Page {} of 4", page),
-                        enabled: true,
-                        action: Action::BuildPage(page - 1),
-                    });
-                }
-                if (page + 1) * 5 < BUILDABLE.len() {
-                    menu.push(Command {
-                        icon: "command_build",
-                        label: "More buildings".into(),
-                        detail: format!("Page {} of 4", page + 2),
-                        enabled: true,
-                        action: Action::BuildPage(page + 1),
-                    });
-                }
-                menu.push(Command {
-                    icon: "command_cancel",
-                    label: "Back".into(),
-                    detail: "Close the build menu".into(),
-                    enabled: true,
-                    action: Action::Cancel,
-                });
-                menu
+            BuildUi::Categories | BuildUi::Group(_) => {
+                super::build_menu::commands(model.build, stock)
             }
             BuildUi::Off => vec![Command {
                 icon: "command_build",
@@ -217,6 +177,16 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 action: Action::Build,
             }],
         };
+        if workers && matches!(model.build, BuildUi::Categories | BuildUi::Group(_)) {
+            let (title, detail) = match model.build {
+                BuildUi::Group(group) => (
+                    group.name(),
+                    "Choose a building · Costs shown on hover or tap",
+                ),
+                _ => ("Build", "Choose a building type"),
+            };
+            return Some(("command_build", title.into(), detail.into(), None, commands));
+        }
         if !workers {
             commands.clear();
         }
@@ -382,21 +352,21 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoa_game::GameWorld;
+    use aoa_game::{BUILDABLE, GameWorld};
     use glam::Vec2;
 
     #[test]
-    fn paged_menu_exposes_every_building_once() {
+    fn grouped_menu_exposes_every_building_once() {
         let world = GameWorld::default();
         let snapshot = world.snapshot();
         let units = [snapshot.units[0].unit.id.clone()];
         let mut seen = Vec::new();
-        for page in 0..BUILDABLE.len().div_ceil(5) {
+        for group in super::super::BuildingGroup::ALL {
             let model = Model {
                 snapshot: Some(&snapshot),
                 units: &units,
                 building: None,
-                build: BuildUi::Menu(page),
+                build: BuildUi::Group(group),
                 reset_armed: false,
                 show_grid: false,
                 toast: None,
@@ -410,7 +380,10 @@ mod tests {
                 }
             }
         }
-        assert_eq!(seen, BUILDABLE);
+        assert_eq!(seen.len(), BUILDABLE.len());
+        for kind in BUILDABLE {
+            assert_eq!(seen.iter().filter(|&&item| item == kind).count(), 1);
+        }
     }
 
     #[test]
@@ -478,7 +451,7 @@ mod tests {
             snapshot: Some(&snapshot),
             units: &units,
             building: None,
-            build: BuildUi::Menu(0),
+            build: BuildUi::Group(super::super::BuildingGroup::Town),
             reset_armed: false,
             show_grid: false,
             toast: None,
@@ -495,8 +468,8 @@ mod tests {
         assert!(enabled(BuildingKind::House));
         assert!(!enabled(BuildingKind::TownCenter));
         assert!(!enabled(BuildingKind::Granary));
-        assert!(!enabled(BuildingKind::Watchtower));
+        assert!(!enabled(BuildingKind::Monument));
         assert!(!enabled(BuildingKind::Dock));
-        assert!(commands.iter().any(|c| c.action == Action::Cancel));
+        assert!(commands.iter().any(|c| c.action == Action::Build));
     }
 }

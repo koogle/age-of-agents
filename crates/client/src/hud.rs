@@ -11,7 +11,9 @@ use glam::Vec2;
 
 use crate::assets::{Assets, Rgba};
 
+mod build_menu;
 mod layout;
+pub use build_menu::BuildingGroup;
 mod selection;
 use selection::{building_info, selection_model};
 
@@ -68,7 +70,8 @@ pub struct Quad {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BuildUi {
     Off,
-    Menu(usize),
+    Categories,
+    Group(BuildingGroup),
     Placing(BuildingKind),
 }
 
@@ -83,7 +86,7 @@ pub enum Action {
     Cancel,
     Stop,
     Produce(aoa_game::ProductKind),
-    BuildPage(usize),
+    BuildGroup(BuildingGroup),
     Research(TechnologyKind),
     /// Globe click: look at this map point.
     LookAt(Vec2),
@@ -194,16 +197,31 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         );
     }
     // Building coins show the finished building from the generated sheet.
-    let sheet = assets.image("loading/buildings.webp");
-    let frames: serde_json::Value =
-        serde_json::from_slice(assets.bytes("loading/buildings.json")).expect("buildings.json");
+    let sheets: HashMap<_, _> = [
+        "towncenter",
+        "buildings_hd",
+        "buildings_economy",
+        "buildings_crafts",
+        "buildings_civic",
+    ]
+    .into_iter()
+    .map(|name| {
+        let frames: serde_json::Value =
+            serde_json::from_slice(assets.bytes(&format!("sprites/{name}.json")))
+                .expect("building frames");
+        (name, (assets.image(&format!("sprites/{name}.png")), frames))
+    })
+    .collect();
     for kind in BUILDABLE {
         let (icon, row, _, _) = building_info(kind);
-        if sprites.contains_key(icon) {
-            continue;
-        }
-        let rect = &frames["frames"][row][3];
-        let [fx, fy, fw, fh] = [0, 1, 2, 3].map(|i| rect[i].as_u64().unwrap_or(0) as u32);
+        let (sheet, frames) = &sheets[build_menu::atlas(kind)];
+        let rect = if kind == BuildingKind::TownCenter {
+            &frames["frames"]["complete"]
+        } else {
+            &frames["frames"][row][3]
+        };
+        let [fx, fy, fw, fh] =
+            [0, 1, 2, 3].map(|i| rect[i].as_u64().expect("frame rectangle") as u32);
         let cell = sheet.crop(fx, fy, fw, fh);
         let (x0, y0, x1, y1) = painted_bounds(&cell);
         let painted = cell.crop(x0, y0, x1 - x0, y1 - y0);

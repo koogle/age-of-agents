@@ -1,5 +1,13 @@
 # Open Work
 
+## Building menu and deployment fix (2026-10-03)
+
+User requested visible catalog sprites, buildings grouped by type, and push to main (`master` in this repository). Previous production run 37137096419 failed: catalog.rs embedded four asset JSON files before Modal copied assets into its build image. The game stayed on the earlier release. Fixed catalog manifests to load through the runtime Assets manifest like existing sheets.
+
+Build now opens Town / Gathering / Production / Military groups. Each group has 2–5 buildings and All types navigation. All 17 building menu/selection portraits now crop the correct completed HD frame; previous icons reused the old five-building loading atlas despite world sprites being connected. World stage/placement rendering is retained. Known 256-pixel military/villager action-frame HD repack remains outstanding.
+
+Verification passed: 29 client tests including all-17 grouped coverage, distinct runtime atlas portraits, affordability and navigation; native/WASM strict Clippy, formatting and rebuilt WASM; cloud-style release compilation with no assets directory present. Desktop and DPR-2 phone navigated every group and back; all eight catalog PNG/JSON requests succeeded with no runtime errors. Screenshots under /tmp/aoa-groups-* visually reviewed. Thermonuclear review: direct typed groups and existing atlas cropping, no new dependencies or domain changes, all client files under 1,000 lines. Production verification now checks catalog bytes and grouped-menu WASM marker. Next: push and follow the production workflow through live verification.
+
 ## Villager drop-off routing (completed 2026-10-03)
 
 PR #44 merged at `d09c852` and pushed. Automatic unloading chooses the shortest available route to a completed compatible building, falls back to waiting with cargo when all sites are busy, and gathering preserves its order through reserved approaches. All 103 workspace tests, strict native/WASM lint, formatting and the actual WebGL2 three-load granary loop passed. Actions run `37136857766` passed quality and Modal deployment/verification; a separate production check passed (120×80, 9,600 terrain cells, distinct units and fog privacy). Review: `docs/GATHERING_ROUTING_REVIEW.md`. Browser evidence remains under `/workspace/scratch/gathering-check/`. Concurrent building integration at `5bd1859` explicitly preserves this fix. No remaining work for this request.
