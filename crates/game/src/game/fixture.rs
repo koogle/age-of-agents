@@ -18,6 +18,7 @@ pub(super) fn fixture() -> GameWorld {
         cargo: None,
     };
     let mut world = GameWorld::generate(DEFAULT_SEED);
+    world.economy_rules = EconomyRules::Unrestricted;
     world.terrain = terrain.clone();
     let south = STARTING_TOWN_CENTER.row + BuildingKind::TownCenter.size().1;
     world.units = vec![villager(1, 29, south), villager(2, 31, south)];

@@ -10,11 +10,24 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Next: starter-island progression, ships and villager transport, persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Next: ships and villager transport, persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
 The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
+
+## Resource-based island progression
+
+Implemented for fresh games: food/wood/stone nodes; wood → timber as the sole processing chain; six starter buildings plus fields; Forestry/Agriculture/Masonry research. Metal industries require discovered iron and coal, kilns require clay, and weaving requires fiber. Discovery survives resource depletion and saving. Hidden deposits and stockpile quantities do not reveal or bypass unlocks. Old saves default to unrestricted economy rules without terrain resets. Rations/infirmaries stay deferred in new games until provisioning/healing have a playable purpose.
+
+The first transport has a reserved design budget of 60 wood + 20 timber; it is not yet a playable recipe. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields still consume wood, stone and labor for ordinary food.
+
+Remaining acceptance criteria:
+
+1. Dock-built transport loads/unloads existing villagers and goods, retaining identities and cargo. Departure needs no cloth or metal.
+2. First departure reveals a persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
+3. Each settlement owns an inventory; ships explicitly transfer goods between trading posts. The current global stockpile is temporary. Give new arrivals enough basic supplies to found an outpost without allowing the destination to replace every earlier supply chain.
+4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
 
 ## Released baseline — Gather, build, research, and route
 
@@ -74,7 +87,7 @@ Gameplay acceptance:
 
 ## Building expansion — deployed
 
-User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Exhausted plots persist and require the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds generate coal. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Exhausted plots persist and require the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
 The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. Catalog building and unit sprites are integrated; some unit action sheets still need the HD repack. Costs and recipe quantities are initial balance values.
 
