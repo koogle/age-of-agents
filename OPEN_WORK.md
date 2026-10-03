@@ -40,7 +40,7 @@ Later, split pirates, mythical creatures, calamities, treasures and permanent up
 
 ## Release verification handoff
 
-Verify the production release containing [NPC highlight PR #56](https://github.com/koogle/age-of-agents/pull/56): larger ivory ground rings with blue borders. Its combined build passes all 151 workspace tests, strict native/WASM lint, formatting, asset checks and desktop/phone browser verification; structural review passed. Evidence: `/workspace/scratch/highlight-*`. The user authorized merging it into `master`.
+Verify the next production release for the NPC ring terrain-occlusion correction: selection rings draw above terrain/raised plots without writing depth, before billboards so buildings and units still cover them. All 151 workspace tests, formatting, strict native/WASM lint and desktop/phone browser checks pass; rebuilt WASM included. Before/after pixels confirm repaired ground arcs and unchanged opaque building regions. Structural review: six lines in the existing shader, no new passes, dependencies or gameplay changes. Evidence: `/workspace/scratch/highlight-depth-*`. User authorized PR merge into `master`.
 
 At this edit, [run 37150225436](https://github.com/koogle/age-of-agents/actions/runs/37150225436), containing #55, is pending behind [camera/activity run 37149731725](https://github.com/koogle/age-of-agents/actions/runs/37149731725). The original #55 run 37150108528 was cancelled/superseded. A1 must follow the latest successful runtime release rather than wait on a superseded run. Local desktop/phone checks passed; merged, deployed and live-verified states must stay distinct. Fresh runs cannot depart until B2/B3 land.
 
