@@ -61,6 +61,14 @@ Gameplay acceptance:
 4. Accepted group movement assigns deterministic distinct reachable destinations, respects reservations/occupancy, and visibly moves every selected unit without stacking.
 5. The HUD reports the selected count and group orders survive snapshots/reconnects.
 
+## Building expansion — current checkout, not released
+
+User-directed implementation activates construction of all 17 catalog buildings. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. New worlds generate coal. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+
+The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. New building/unit art remains a separate PR; this implementation uses the existing renderer fallbacks and does not change sprite assets. Costs and recipe quantities are initial balance values.
+
+This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. Animals/adversaries follow that economy/transport loop.
+
 ## Slice C — Steel economy vertical slice
 
 Status: planned.

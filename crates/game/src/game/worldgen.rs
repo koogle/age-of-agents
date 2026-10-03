@@ -345,7 +345,13 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
             .iter()
             .any(|r| r.kind == kind && r.cell.center().distance(base) <= 16.0)
     };
-    (enough && near_start(ResourceKind::Wood) && near_start(ResourceKind::Food)).then_some(Island {
+    (enough
+        && resources
+            .iter()
+            .any(|r| r.kind == ResourceKind::Coal && r.amount >= 30.0)
+        && near_start(ResourceKind::Wood)
+        && near_start(ResourceKind::Food))
+    .then_some(Island {
         seed,
         terrain,
         resources,
@@ -511,7 +517,7 @@ type Plan = (
     f64,
 );
 
-const RESOURCE_PLAN: [Plan; 7] = [
+const RESOURCE_PLAN: [Plan; 8] = [
     (
         ResourceKind::Wood,
         "tree",
@@ -551,6 +557,14 @@ const RESOURCE_PLAN: [Plan; 7] = [
     (
         ResourceKind::Iron,
         "iron",
+        &[TerrainBiome::Highland, TerrainBiome::Scrubland],
+        2,
+        3,
+        40.0,
+    ),
+    (
+        ResourceKind::Coal,
+        "coal",
         &[TerrainBiome::Highland, TerrainBiome::Scrubland],
         2,
         3,
@@ -781,6 +795,16 @@ mod tests {
     fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
         for seed in 0..24 {
             let world = GameWorld::generate(seed);
+            assert!(
+                world
+                    .resources
+                    .iter()
+                    .filter(|r| r.kind == ResourceKind::Coal)
+                    .map(|r| r.amount)
+                    .sum::<f64>()
+                    >= 30.0,
+                "seed {seed}: missing smelter fuel"
+            );
             for &(kind, cost) in &FISHING_BOAT_COST {
                 let total: f64 = world
                     .resources

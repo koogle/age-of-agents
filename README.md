@@ -4,6 +4,22 @@ A deliberately small, mobile-first 3D RTS vertical slice built with a Rust autho
 
 The current vertical slice is intentionally bounded: command villagers through a seven-resource gather/carry/deposit economy, construct town centers, train villagers, and research five gathering improvements. There are no LLM agents or autonomous NPC policies. Villagers remain idle until commanded.
 
+## Building expansion in the current checkout
+
+The Rust client exposes all 17 catalog buildings in four labelled build-menu pages. Every building has a cost, a real footprint, cost-scaled construction, and authoritative placement/occupancy checks. New artwork is being delivered separately; the added buildings and units currently reuse existing sprites.
+
+- Mining camps accept stone, gold, iron and coal; farms accept food and fiber. Completed camps/farms improve matching gathering by 25% within six cells of their footprint; bonuses do not stack. Existing direct gathering remains available.
+- Lumber mill: 10 wood → 5 timber (8 s). Smelter: 5 iron + 5 coal → 5 steel (10 s). Kiln: 10 clay + 5 wood → 5 bricks (8 s). Weaver: 10 fiber → 5 cloth (8 s). Kitchen: 10 food → 5 rations (8 s).
+- Barracks train guards; ranges train archers; workshops build siege carts; infirmaries train healers. These units can move and stop; combat and healing are deferred. Only villagers gather and build. All units and queued trainees consume housing; processing jobs do not.
+- Farms, mining camps, lumber mills, kilns and weavers offer matching existing research. Town centers retain all five technologies. The same technology cannot be queued twice.
+- Monuments consume timber, bricks, cloth, gold and steel and provide a sight radius of 24 cells. Docks retain coastal placement; ship production is a subsequent slice.
+
+Select a completed production building and tap its production button. Inputs are reserved once, and the single job slot shows progress. Unit production waits for a free adjacent cell if blocked. Processed goods appear in the resource HUD with names and counts. Jobs, foundations and unit kinds survive saving/reloading.
+
+Fresh islands include coal in highland/scrubland deposits. Existing saves retain their terrain and resources; a previous island without coal needs a new island to use the smelter. Starter-island resource restrictions, transport, multiple islands and local trading inventories are still subsequent work. This checkout has not yet been production verified.
+
+Sprite integration must preserve at least 512×512 authored pixels per frame across **every action, facing and construction stage**, using the original high-resolution renders. Screen sharpness depends on frame pixels and gameplay size, not DPI metadata; upscaling 256-pixel art does not restore detail. Run `python3 scripts/check_sprite_resolution.py` as the strict integration gate (`--report-only` for the current migration inventory), then inspect desktop and DPR-2 phone gameplay at maximum zoom. The audit of `claude/fal-catalog-sprites` at `c968f69` found 48 building frames at 512 pixels but 60 military-unit frames at 256 pixels. Current villager walking, carrying and work frames also remain 256 pixels. The original renders are absent from this checkout, so those sheets still need an HD source repack in the sprite PR. Resolution checks do not replace source-quality and visual review.
+
 ## Milestone 1
 
 - Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall

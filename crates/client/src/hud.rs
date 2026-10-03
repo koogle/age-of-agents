@@ -11,6 +11,7 @@ use glam::Vec2;
 
 use crate::assets::{Assets, Rgba};
 
+mod layout;
 mod selection;
 use selection::{building_info, selection_model};
 
@@ -67,7 +68,7 @@ pub struct Quad {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BuildUi {
     Off,
-    Menu,
+    Menu(usize),
     Placing(BuildingKind),
 }
 
@@ -81,7 +82,8 @@ pub enum Action {
     Place(BuildingKind),
     Cancel,
     Stop,
-    Train,
+    Produce(aoa_game::ProductKind),
+    BuildPage(usize),
     Research(TechnologyKind),
     /// Globe click: look at this map point.
     LookAt(Vec2),
@@ -197,6 +199,9 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         serde_json::from_slice(assets.bytes("loading/buildings.json")).expect("buildings.json");
     for kind in BUILDABLE {
         let (icon, row, _, _) = building_info(kind);
+        if sprites.contains_key(icon) {
+            continue;
+        }
         let rect = &frames["frames"][row][3];
         let [fx, fy, fw, fh] = [0, 1, 2, 3].map(|i| rect[i].as_u64().unwrap_or(0) as u32);
         let cell = sheet.crop(fx, fy, fw, fh);
@@ -304,8 +309,8 @@ pub struct Hud {
     pressed: Option<Action>,
 }
 
-fn resource_icon(kind: ResourceKind) -> Option<&'static str> {
-    Some(match kind {
+fn resource_icon(kind: ResourceKind) -> &'static str {
+    match kind {
         ResourceKind::Wood => "resource_wood",
         ResourceKind::Food => "resource_food",
         ResourceKind::Stone => "resource_stone",
@@ -313,8 +318,12 @@ fn resource_icon(kind: ResourceKind) -> Option<&'static str> {
         ResourceKind::Iron => "resource_iron",
         ResourceKind::Clay => "resource_clay",
         ResourceKind::Fiber => "resource_fiber",
-        _ => return None,
-    })
+        ResourceKind::Coal | ResourceKind::Steel => "resource_iron",
+        ResourceKind::Timber => "resource_wood",
+        ResourceKind::Bricks => "resource_clay",
+        ResourceKind::Cloth => "resource_fiber",
+        ResourceKind::Rations => "resource_food",
+    }
 }
 
 impl Hud {
@@ -522,376 +531,59 @@ impl Hud {
         );
     }
 
-    /// Lays out the whole interface for this frame.
-    pub fn layout(&mut self, atlas: &Atlas, model: &Model, width: f32, height: f32, scale: f32) {
-        self.quads.clear();
-        self.regions.clear();
-        let Some(snapshot) = model.snapshot else {
-            return;
-        };
-        let s = scale;
-        let stock = &snapshot.stockpile;
-
-        // Resource coins with count tabs, top-right: wood and food always, others once owned.
-        let shown: Vec<(ResourceKind, f64)> = [
-            (ResourceKind::Wood, stock.wood),
-            (ResourceKind::Food, stock.food),
-            (ResourceKind::Stone, stock.stone),
-            (ResourceKind::Gold, stock.gold),
-            (ResourceKind::Iron, stock.iron),
-            (ResourceKind::Clay, stock.clay),
-            (ResourceKind::Fiber, stock.fiber),
-        ]
-        .into_iter()
-        .filter(|(kind, amount)| {
-            matches!(kind, ResourceKind::Wood | ResourceKind::Food) || *amount >= 1.0
-        })
-        .collect();
-        let d = 46.0 * s;
-        let step = d + 18.0 * s;
-        for (index, (kind, amount)) in shown.iter().enumerate() {
-            let x = width - 16.0 * s - (shown.len() - index) as f32 * step + (step - d) / 2.0;
-            let icon = resource_icon(*kind).unwrap_or("resource_wood");
-            self.coin(atlas, icon, [x, 10.0 * s, d, d], true, false);
-            let text = format!("{}", amount.floor() as i64);
-            let tab = (Self::text_width(atlas, &text, 13.0 * s) + 14.0 * s).max(26.0 * s);
-            self.shape(
-                [
-                    x + d / 2.0 - tab / 2.0,
-                    10.0 * s + d - 2.0 * s,
-                    tab,
-                    18.0 * s,
-                ],
-                GLASS,
-                1.0,
-                9.0 * s,
-            );
-            self.text(
-                atlas,
-                &text,
-                (x + d / 2.0, 10.0 * s + d + 12.0 * s),
-                13.0 * s,
-                INK,
-                true,
-            );
-        }
-
-        // Globe minimap bottom-right, gold rim, speed coins on its shoulder.
-        let r = 68.0 * s;
-        let (gx, gy) = (width - 18.0 * s - r * 2.0, height - 18.0 * s - r * 2.0);
-        let globe = [gx, gy, r * 2.0, r * 2.0];
-        let span = 38.0;
-        let (cx, cz) = (15.0, 10.0);
-        self.quads.push(Quad {
-            rect: globe,
-            uv: [
-                (cx - span / 2.0) / 30.0,
-                (cz - span / 2.0) / 20.0,
-                (cx + span / 2.0) / 30.0,
-                (cz + span / 2.0) / 20.0,
-            ],
-            color: [1.0; 4],
-            params: [3.0, 0.0, 0.0, 0.0],
-        });
-        self.shape(globe, [0.79, 0.59, 0.25, 1.0], 2.0, 6.0 * s);
-        let camera = Vec2::new(
-            gx + r + (model.camera.x - cx) / span * r * 2.0,
-            gy + r + (model.camera.y - cz) / span * r * 2.0,
-        );
-        self.shape(
-            [camera.x - 5.0 * s, camera.y - 5.0 * s, 10.0 * s, 10.0 * s],
-            [1.0, 1.0, 1.0, 0.95],
-            2.0,
-            2.0 * s,
-        );
-        self.regions.push(Region {
-            rect: globe,
-            action: Action::LookAt(Vec2::new(cx - span / 2.0, cz - span / 2.0)),
-            enabled: true,
-        });
-        let speeds = [(0.0, "II"), (1.0, "1×"), (2.0, "2×")];
-        for (index, (speed, label)) in speeds.into_iter().enumerate() {
-            let angle = std::f32::consts::PI * (1.0 + 0.16 + index as f32 * 0.17);
-            let c = 30.0 * s;
-            let center = Vec2::new(
-                gx + r + angle.cos() * (r + 22.0 * s),
-                gy + r + angle.sin() * (r + 22.0 * s),
-            );
-            let rect = [center.x - c / 2.0, center.y - c / 2.0, c, c];
-            let active = (snapshot.simulation_speed - speed).abs() < 1e-6;
-            self.sprite(
-                atlas,
-                if self.hovered(rect) {
-                    "coin_hover"
-                } else {
-                    "coin_normal"
-                },
-                rect,
-                [1.0; 4],
-            );
-            if active {
-                self.shape(
-                    [
-                        rect[0] + 4.0 * s,
-                        rect[1] + 4.0 * s,
-                        c - 8.0 * s,
-                        c - 8.0 * s,
-                    ],
-                    ACCENT,
-                    1.0,
-                    (c - 8.0 * s) / 2.0,
-                );
-            }
-            self.centered_label(
-                atlas,
-                label,
-                center,
-                12.0 * s,
-                if active { [1.0; 4] } else { INK },
-            );
-            self.regions.push(Region {
-                rect,
-                action: Action::Speed(speed),
-                enabled: true,
-            });
-        }
-
-        // A small "New island" pill top-left; the first tap asks to confirm.
-        {
-            let text = if model.reset_armed {
-                "Tap again for a new island"
+    fn wrapped_lines(atlas: &Atlas, text: &str, size: f32, width: f32) -> Vec<String> {
+        let mut lines = Vec::new();
+        let mut line = String::new();
+        for word in text.split_whitespace() {
+            let candidate = if line.is_empty() {
+                word.to_string()
             } else {
-                "New island"
+                format!("{line} {word}")
             };
-            let w = Self::text_width(atlas, text, 12.0 * s) + 28.0 * s;
-            let pill = [12.0 * s, 14.0 * s, w, 28.0 * s];
-            self.shape(pill, GLASS, 1.0, 14.0 * s);
-            let ink = if model.reset_armed { ACCENT } else { MUTED };
-            self.text(
-                atlas,
-                text,
-                (pill[0] + w / 2.0, pill[1] + 18.5 * s),
-                12.0 * s,
-                ink,
-                true,
-            );
-            self.regions.push(Region {
-                rect: pill,
-                action: Action::Reset,
-                enabled: true,
-            });
-        }
-
-        let grid = [12.0 * s, 50.0 * s, 76.0 * s, 28.0 * s];
-        self.shape(grid, GLASS, 1.0, 14.0 * s);
-        self.text(
-            atlas,
-            if model.show_grid {
-                "Grid: on"
+            if !line.is_empty() && Self::text_width(atlas, &candidate, size) > width {
+                lines.push(std::mem::take(&mut line));
+                line = word.to_string();
             } else {
-                "Grid: off"
-            },
-            (grid[0] + grid[2] / 2.0, grid[1] + 18.5 * s),
-            12.0 * s,
-            if model.show_grid { ACCENT } else { MUTED },
-            true,
-        );
-        self.regions.push(Region {
-            rect: grid,
-            action: Action::Grid,
-            enabled: true,
-        });
-
-        // While paused, a pill at the top says so; tapping it resumes, since a
-        // stray tap on the pause coin otherwise looks like stuck villagers.
-        if snapshot.simulation_speed == 0.0 {
-            let text = "Paused · tap to resume";
-            let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
-            let pill = [(width - w) / 2.0, 92.0 * s, w, 34.0 * s];
-            let hot = self.hovered(pill);
-            self.shape(
-                pill,
-                if hot { [1.0, 1.0, 1.0, 0.95] } else { GLASS },
-                1.0,
-                17.0 * s,
-            );
-            self.text(
-                atlas,
-                text,
-                (width / 2.0, pill[1] + 22.0 * s),
-                14.0 * s,
-                ACCENT,
-                true,
-            );
-            self.regions.push(Region {
-                rect: pill,
-                action: Action::Speed(1.0),
-                enabled: true,
-            });
-        }
-
-        // Selection: info pill plus a glass bar of command coins.
-        let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
-        else {
-            self.toast(atlas, model.toast, width, s);
-            return;
-        };
-        let gap = 10.0 * s;
-        let margin = 12.0 * s;
-        // Phones: the selection sits bottom-left beside the globe, its coins
-        // wrapping into rows; wide screens keep one centred row.
-        let narrow = width < 600.0 * s;
-        let count = commands.len().max(1);
-        let (m, per_row) = if narrow {
-            let m = 48.0 * s;
-            let room = gx - 10.0 * s - margin - 28.0 * s + gap;
-            (m, ((room / (m + gap)).floor() as usize).max(1))
-        } else {
-            let m = ((width - 24.0 * s - 28.0 * s + gap) / count as f32 - gap)
-                .clamp(40.0 * s, 52.0 * s);
-            (m, count)
-        };
-        let rows = count.div_ceil(per_row);
-        let columns = count.min(per_row);
-        let bar_width = columns as f32 * (m + gap) - gap + 28.0 * s;
-        let bar_height = rows as f32 * (m + gap) - gap + 12.0 * s;
-        let bar = if narrow {
-            [
-                margin,
-                height - 18.0 * s - bar_height,
-                bar_width,
-                bar_height,
-            ]
-        } else {
-            let left = (width - bar_width) / 2.0;
-            // A centred bar that would run under the globe sits above it.
-            let top = if left + bar_width > gx - 8.0 * s {
-                gy - 48.0 * s - bar_height
-            } else {
-                height - m - 30.0 * s
-            };
-            [left, top, bar_width, bar_height]
-        };
-        let mut hover_text = None;
-        if !commands.is_empty() {
-            self.shape(bar, GLASS, 1.0, (m + 12.0 * s) / 2.0);
-            for (index, command) in commands.iter().enumerate() {
-                let (column, row) = (index % per_row, index / per_row);
-                let rect = [
-                    bar[0] + 14.0 * s + column as f32 * (m + gap),
-                    bar[1] + 6.0 * s + row as f32 * (m + gap),
-                    m,
-                    m,
-                ];
-                // The hit area spans half the gap on each side, so sweeping
-                // across the bar never falls back to the selection text.
-                let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, m + gap];
-                let hot = self.hovered(hit);
-                if hot {
-                    hover_text = Some((command.label.clone(), command.detail.clone()));
-                }
-                self.coin(
-                    atlas,
-                    command.icon,
-                    rect,
-                    command.enabled,
-                    hot && command.enabled,
-                );
-                // An unavailable coin still answers a tap, with the reason:
-                // phones have no hover to show it.
-                self.regions.push(Region {
-                    rect: hit,
-                    action: if command.enabled {
-                        command.action.clone()
-                    } else {
-                        Action::Explain(format!("{}: {}", command.label, command.detail))
-                    },
-                    enabled: true,
-                });
+                line = candidate;
             }
         }
-        // One width for every text this selection can show, so hovering
-        // commands changes the words but never resizes the pill.
-        let widest = std::iter::once((&title, &detail))
-            .chain(commands.iter().map(|c| (&c.label, &c.detail)))
-            .map(|(t, d)| {
-                Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
-            })
-            .fold(0.0, f32::max);
-        let info_width = (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin);
-        let (title, detail) = hover_text.unwrap_or((title, detail));
-        let info = if narrow {
-            // Above the coins; lifted clear of the speed coins when it is
-            // wide enough to reach over the globe.
-            let mut top = bar[1] - 64.0 * s;
-            if margin + info_width > gx - 10.0 * s {
-                top = top.min(gy - 56.0 * s - 60.0 * s);
-            }
-            [margin, top, info_width, 52.0 * s]
-        } else {
-            [
-                (width - info_width) / 2.0,
-                bar[1] - 64.0 * s,
-                info_width,
-                52.0 * s,
-            ]
-        };
-        self.shape(info, GLASS, 1.0, 26.0 * s);
-        self.sprite(
-            atlas,
-            portrait,
-            [info[0] - 2.0 * s, info[1] - 2.0 * s, 56.0 * s, 56.0 * s],
-            [1.0; 4],
-        );
-        self.text(
-            atlas,
-            &title,
-            (info[0] + 64.0 * s, info[1] + 23.0 * s),
-            15.0 * s,
-            INK,
-            false,
-        );
-        self.text(
-            atlas,
-            &detail,
-            (info[0] + 64.0 * s, info[1] + 40.0 * s),
-            12.0 * s,
-            MUTED,
-            false,
-        );
-        if let Some(progress) = progress {
-            let track = [
-                info[0] + 64.0 * s,
-                info[1] + 45.0 * s,
-                info_width - 84.0 * s,
-                3.0 * s,
-            ];
-            self.shape(track, [0.24, 0.2, 0.16, 0.15], 1.0, 1.5 * s);
-            self.shape(
-                [track[0], track[1], track[2] * progress.min(1.0), track[3]],
-                ACCENT,
-                1.0,
-                1.5 * s,
-            );
+        if !line.is_empty() {
+            lines.push(line);
         }
-        self.toast(atlas, model.toast, width, s);
+        lines
     }
 
-    fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32) {
+    fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32, top: f32) {
         if let Some(text) = toast {
             // Below the resource coins (and the paused pill), so it never
             // covers the counts on a narrow screen.
-            let w = Self::text_width(atlas, text, 14.0 * s) + 36.0 * s;
-            let top = 134.0 * s;
-            self.shape([(width - w) / 2.0, top, w, 34.0 * s], GLASS, 1.0, 17.0 * s);
-            self.text(
-                atlas,
-                text,
-                (width / 2.0, top + 22.0 * s),
-                14.0 * s,
-                INK,
-                true,
+            let lines = Self::wrapped_lines(atlas, text, 14.0 * s, width - 60.0 * s);
+            let w = lines
+                .iter()
+                .map(|line| Self::text_width(atlas, line, 14.0 * s))
+                .fold(0.0_f32, f32::max)
+                + 36.0 * s;
+            self.shape(
+                [
+                    (width - w) / 2.0,
+                    top,
+                    w,
+                    (18.0 + 18.0 * lines.len() as f32) * s,
+                ],
+                GLASS,
+                1.0,
+                17.0 * s,
             );
+            for (index, line) in lines.iter().enumerate() {
+                self.text(
+                    atlas,
+                    line,
+                    (width / 2.0, top + (22.0 + index as f32 * 18.0) * s),
+                    14.0 * s,
+                    INK,
+                    true,
+                );
+            }
         }
     }
 

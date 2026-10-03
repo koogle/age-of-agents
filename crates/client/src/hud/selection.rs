@@ -2,8 +2,8 @@
 //! the command coins for a villager (build menu, stop) or a building (train,
 //! research). Pure functions of the snapshot, tested without a GPU.
 use aoa_game::{
-    BUILDABLE, BuildingKind, RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind, TechnologyKind,
-    UnitAction, VILLAGER_FOOD_COST, WorldSnapshot,
+    BUILDABLE, BuildingKind, ProductKind, RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind,
+    TechnologyKind, UnitAction, WorldSnapshot,
 };
 
 use super::{Action, BuildUi, Model};
@@ -13,6 +13,78 @@ pub(super) fn building_info(
     kind: BuildingKind,
 ) -> (&'static str, &'static str, &'static str, &'static str) {
     match kind {
+        BuildingKind::MiningCamp => (
+            "building_towncenter",
+            "towncenter",
+            "Mining camp",
+            "Mineral drop-off; nearby gathering +25%",
+        ),
+        BuildingKind::Farm => (
+            "building_granary",
+            "granary",
+            "Farm",
+            "Food/fiber drop-off; nearby gathering +25%",
+        ),
+        BuildingKind::LumberMill => (
+            "building_towncenter",
+            "towncenter",
+            "Lumber mill",
+            "Turns wood into timber",
+        ),
+        BuildingKind::Smelter => (
+            "building_towncenter",
+            "towncenter",
+            "Smelter",
+            "Turns iron and coal into steel",
+        ),
+        BuildingKind::Kiln => (
+            "building_towncenter",
+            "towncenter",
+            "Kiln",
+            "Turns clay and wood into bricks",
+        ),
+        BuildingKind::Weaver => (
+            "building_towncenter",
+            "towncenter",
+            "Weaver",
+            "Turns fiber into cloth",
+        ),
+        BuildingKind::Kitchen => (
+            "building_granary",
+            "granary",
+            "Kitchen",
+            "Turns food into rations",
+        ),
+        BuildingKind::Barracks => (
+            "building_watchtower",
+            "watchtower",
+            "Barracks",
+            "Trains guards; combat comes later",
+        ),
+        BuildingKind::Range => (
+            "building_watchtower",
+            "watchtower",
+            "Range",
+            "Trains archers; combat comes later",
+        ),
+        BuildingKind::Workshop => (
+            "building_towncenter",
+            "towncenter",
+            "Workshop",
+            "Builds siege carts; combat comes later",
+        ),
+        BuildingKind::Infirmary => (
+            "building_towncenter",
+            "towncenter",
+            "Infirmary",
+            "Trains healers; healing comes later",
+        ),
+        BuildingKind::Monument => (
+            "building_towncenter",
+            "towncenter",
+            "Monument",
+            "A landmark with sight radius 24",
+        ),
         BuildingKind::House => ("building_house", "house", "House", "Room for 5 villagers"),
         BuildingKind::Granary => (
             "building_granary",
@@ -37,9 +109,9 @@ pub(super) fn building_info(
 }
 
 /// "15 wood, 15 stone".
-fn cost_text(cost: &[(ResourceKind, f64)]) -> String {
+pub(super) fn cost_text(cost: &[(ResourceKind, f64)]) -> String {
     cost.iter()
-        .map(|(kind, amount)| format!("{amount} {}", format!("{kind:?}").to_lowercase()))
+        .map(|(kind, amount)| format!("{amount} {}", kind.name()))
         .collect::<Vec<_>>()
         .join(", ")
 }
@@ -51,6 +123,16 @@ pub(super) fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'
         TechnologyKind::Masonry => ("tech_masonry", "Masonry", "Stone and clay +20%"),
         TechnologyKind::Mining => ("tech_mining", "Mining", "Gold and iron +20%"),
         TechnologyKind::Textiles => ("tech_textiles", "Textiles", "Fiber +20%"),
+    }
+}
+
+fn product_label(product: ProductKind) -> String {
+    if let Some(kind) = product.unit_kind() {
+        format!("Train {}", kind.name().to_lowercase())
+    } else if let Some((kind, amount)) = product.output() {
+        format!("Make {amount} {}", kind.name())
+    } else {
+        unreachable!("every product has an output")
     }
 }
 
@@ -71,6 +153,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .units
             .iter()
             .any(|u| model.units.contains(&u.unit.id) && u.unit.action != UnitAction::Idle);
+        let workers = snapshot
+            .units
+            .iter()
+            .filter(|u| model.units.contains(&u.unit.id))
+            .all(|u| u.unit.kind == aoa_game::UnitKind::Villager);
         let mut commands = match model.build {
             BuildUi::Placing(kind) => vec![Command {
                 icon: "command_cancel",
@@ -79,20 +166,40 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 enabled: true,
                 action: Action::Cancel,
             }],
-            BuildUi::Menu => {
+            BuildUi::Menu(page) => {
                 let mut menu: Vec<Command> = BUILDABLE
                     .into_iter()
+                    .skip(page * 5)
+                    .take(5)
                     .map(|kind| {
-                        let (icon, _, name, purpose) = building_info(kind);
+                        let (icon, _, name, _) = building_info(kind);
                         Command {
                             icon,
                             label: name.into(),
-                            detail: format!("{} · {purpose}", cost_text(kind.cost())),
+                            detail: cost_text(kind.cost()),
                             enabled: stock.affords(kind.cost()),
                             action: Action::Place(kind),
                         }
                     })
                     .collect();
+                if page > 0 {
+                    menu.push(Command {
+                        icon: "command_cancel",
+                        label: "Previous buildings".into(),
+                        detail: format!("Page {} of 4", page),
+                        enabled: true,
+                        action: Action::BuildPage(page - 1),
+                    });
+                }
+                if (page + 1) * 5 < BUILDABLE.len() {
+                    menu.push(Command {
+                        icon: "command_build",
+                        label: "More buildings".into(),
+                        detail: format!("Page {} of 4", page + 2),
+                        enabled: true,
+                        action: Action::BuildPage(page + 1),
+                    });
+                }
                 menu.push(Command {
                     icon: "command_cancel",
                     label: "Back".into(),
@@ -110,6 +217,9 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 action: Action::Build,
             }],
         };
+        if !workers {
+            commands.clear();
+        }
         if busy && model.build == BuildUi::Off {
             commands.push(Command {
                 icon: "command_cancel",
@@ -127,7 +237,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 .count();
             return Some((
                 "portrait_group",
-                format!("{} villagers", model.units.len()),
+                format!("{} units", model.units.len()),
                 format!("{idle} awaiting orders"),
                 None,
                 commands,
@@ -158,7 +268,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .as_ref()
             .map(|c| format!(" · {} carried", c.amount.floor()))
             .unwrap_or_default();
-        let title = unit.unit.id.replace("villager-", "Villager ");
+        let title = format!(
+            "{} {}",
+            unit.unit.kind.name(),
+            unit.unit.id.rsplit('-').next().unwrap_or("")
+        );
         return Some((
             "portrait_villager",
             title,
@@ -172,22 +286,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         .iter()
         .find(|b| Some(b.building.id.as_str()) == model.building)?;
     let kind = building.building.kind;
-    if kind != BuildingKind::TownCenter {
-        let (icon, _, name, purpose) = building_info(kind);
-        let (title, detail, progress) = match building.building.construction {
-            Some(work) => (
-                format!("{name} foundation"),
-                "Villagers can help build it".to_string(),
-                Some((work / kind.build_seconds()) as f32),
-            ),
-            None => (name.to_string(), purpose.to_string(), None),
-        };
-        return Some((icon, title, detail, progress, Vec::new()));
-    }
+    let (portrait, _, name, purpose) = building_info(kind);
     if let Some(work) = building.building.construction {
         return Some((
-            "portrait_towncenter",
-            "Town center foundation".into(),
+            portrait,
+            format!("{name} foundation"),
             "Villagers can help build it".into(),
             Some((work / kind.build_seconds()) as f32),
             Vec::new(),
@@ -197,10 +300,15 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
     let busy = job.is_some();
     let (detail, progress) = match job {
         Some(aoa_game::BuildingJob::Produce {
-            elapsed_seconds, ..
+            product,
+            elapsed_seconds,
         }) => (
-            "Training a villager".to_string(),
-            Some((elapsed_seconds / aoa_game::VILLAGER_PRODUCTION_SECONDS) as f32),
+            if *elapsed_seconds >= product.seconds() && product.unit_kind().is_some() {
+                "Waiting for a free spawn cell".to_string()
+            } else {
+                format!("Producing {}", product_label(*product))
+            },
+            Some((elapsed_seconds / product.seconds()).min(1.0) as f32),
         ),
         Some(aoa_game::BuildingJob::Research {
             technology,
@@ -209,34 +317,44 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             format!("Researching {}", tech_info(*technology).1),
             Some((elapsed_seconds / aoa_game::RESEARCH_SECONDS) as f32),
         ),
-        None => ("Ready".to_string(), None),
+        None => (purpose.to_string(), None),
     };
     let housing: usize = snapshot
         .buildings
         .iter()
-        .filter(|b| b.building.construction.is_none())
+        .filter(|b| b.building.is_complete())
         .map(|b| b.building.kind.housing())
         .sum();
-    let crowded = snapshot.units.len() >= housing;
-    let detail = format!("{detail} · {}/{housing} villagers", snapshot.units.len());
-    let mut commands = vec![Command {
-        icon: "command_train",
-        label: "Train villager".into(),
-        detail: if crowded {
-            "Needs a house first".into()
-        } else {
-            format!("{} food", VILLAGER_FOOD_COST)
-        },
-        enabled: !busy && !crowded && stock.food >= VILLAGER_FOOD_COST,
-        action: Action::Train,
-    }];
+    let population = snapshot.units.len() + snapshot.buildings.iter().filter(|b| matches!(b.building.job, Some(aoa_game::BuildingJob::Produce { product, .. }) if product.unit_kind().is_some())).count();
+    let mut commands = Vec::new();
+    for &product in kind.products() {
+        let crowded = product.unit_kind().is_some() && population >= housing;
+        commands.push(Command {
+            icon: "command_train",
+            label: product_label(product),
+            detail: if crowded {
+                "Needs a house first".into()
+            } else {
+                format!(
+                    "{} · {} seconds",
+                    cost_text(product.cost()),
+                    product.seconds()
+                )
+            },
+            enabled: !busy && !crowded && stock.affords(product.cost()),
+            action: Action::Produce(product),
+        });
+    }
     let known = &snapshot.researched_technologies;
-    for tech in TechnologyKind::ALL {
+    for &tech in &building.building.researches {
         let (icon, name, effect) = tech_info(tech);
         let done = known.contains(&tech);
+        let queued = snapshot.buildings.iter().any(|b| matches!(b.building.job, Some(aoa_game::BuildingJob::Research { technology, .. }) if technology == tech));
         let blocked = tech.prerequisite().filter(|p| !known.contains(p));
         let detail = if done {
             "researched".to_string()
+        } else if queued {
+            "research in progress".to_string()
         } else if let Some(p) = blocked {
             format!("needs {}", tech_info(p).1)
         } else {
@@ -250,6 +368,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             label: name.into(),
             detail,
             enabled: !done
+                && !queued
                 && blocked.is_none()
                 && !busy
                 && stock.food >= RESEARCH_FOOD_COST
@@ -257,13 +376,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             action: Action::Research(tech),
         });
     }
-    Some((
-        "portrait_towncenter",
-        "Town center".into(),
-        detail,
-        progress,
-        commands,
-    ))
+    Some((portrait, name.into(), detail, progress, commands))
 }
 
 #[cfg(test)]
@@ -271,6 +384,54 @@ mod tests {
     use super::*;
     use aoa_game::GameWorld;
     use glam::Vec2;
+
+    #[test]
+    fn paged_menu_exposes_every_building_once() {
+        let world = GameWorld::default();
+        let snapshot = world.snapshot();
+        let units = [snapshot.units[0].unit.id.clone()];
+        let mut seen = Vec::new();
+        for page in 0..BUILDABLE.len().div_ceil(5) {
+            let model = Model {
+                snapshot: Some(&snapshot),
+                units: &units,
+                building: None,
+                build: BuildUi::Menu(page),
+                reset_armed: false,
+                show_grid: false,
+                toast: None,
+                camera: Vec2::ZERO,
+            };
+            let commands = selection_model(&snapshot, &model).unwrap().4;
+            assert!(commands.len() <= 8);
+            for command in commands {
+                if let Action::Place(kind) = command.action {
+                    seen.push(kind);
+                }
+            }
+        }
+        assert_eq!(seen, BUILDABLE);
+    }
+
+    #[test]
+    fn processor_commands_use_recipe_costs_and_show_blocked_jobs() {
+        let mut world = GameWorld::default();
+        world.buildings[0].kind = BuildingKind::Smelter;
+        world.buildings[0].produces = BuildingKind::Smelter.products().to_vec();
+        world.buildings[0].researches.clear();
+        let poor = commands_for_town_center(&world);
+        assert_eq!(poor.len(), 1);
+        assert_eq!(poor[0].action, Action::Produce(ProductKind::Steel));
+        assert!(!poor[0].enabled);
+        world.stockpile.iron = 5.0;
+        world.stockpile.coal = 5.0;
+        assert!(commands_for_town_center(&world)[0].enabled);
+        world.buildings[0].job = Some(aoa_game::BuildingJob::Produce {
+            product: ProductKind::Steel,
+            elapsed_seconds: 1.0,
+        });
+        assert!(!commands_for_town_center(&world)[0].enabled);
+    }
 
     fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {
         let snapshot = world.snapshot();
@@ -298,7 +459,7 @@ mod tests {
         world.stockpile.wood = 100.0;
         let rich = commands_for_town_center(&world);
         let enabled = |action: Action| rich.iter().find(|c| c.action == action).unwrap().enabled;
-        assert!(enabled(Action::Train));
+        assert!(enabled(Action::Produce(ProductKind::Villager)));
         assert!(enabled(Action::Research(TechnologyKind::Masonry)));
         assert!(
             !enabled(Action::Research(TechnologyKind::Mining)),
@@ -317,7 +478,7 @@ mod tests {
             snapshot: Some(&snapshot),
             units: &units,
             building: None,
-            build: BuildUi::Menu,
+            build: BuildUi::Menu(0),
             reset_armed: false,
             show_grid: false,
             toast: None,

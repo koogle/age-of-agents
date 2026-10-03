@@ -187,6 +187,7 @@ impl GameWorld {
                 return Err(format!("{} has an invalid amount", resource.id));
             }
         }
+        let mut queued_research = BTreeSet::new();
         for building in &self.buildings {
             if let Some(work) = building.construction
                 && !(0.0..building.kind.build_seconds()).contains(&work)
@@ -205,6 +206,25 @@ impl GameWorld {
                 if !(building.is_complete() && elapsed.is_finite() && elapsed >= 0.0) {
                     return Err(format!("{} has an invalid job", building.id));
                 }
+                if let BuildingJob::Research { technology, .. } = job
+                    && !queued_research.insert(*technology)
+                {
+                    return Err("a technology is queued more than once".into());
+                }
+                match job {
+                    BuildingJob::Produce { product, .. }
+                        if !building.kind.products().contains(product) =>
+                    {
+                        return Err(format!("{} has an unavailable product", building.id));
+                    }
+                    BuildingJob::Research { technology, .. }
+                        if !building.researches.contains(technology)
+                            || self.researched_technologies.contains(technology) =>
+                    {
+                        return Err(format!("{} has invalid research", building.id));
+                    }
+                    _ => {}
+                }
             }
         }
         for unit in &self.units {
@@ -219,6 +239,11 @@ impl GameWorld {
                 return Err(format!("{} carries an invalid load", unit.id));
             }
             match &unit.action {
+                UnitAction::Gather { .. } | UnitAction::Build { .. }
+                    if unit.kind != UnitKind::Villager =>
+                {
+                    return Err(format!("{} is not a worker", unit.id));
+                }
                 UnitAction::Gather { resource_id, .. }
                     if !self.resources.iter().any(|r| &r.id == resource_id) =>
                 {
