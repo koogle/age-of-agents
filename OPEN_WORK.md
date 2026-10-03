@@ -10,7 +10,13 @@ Branch `fix/pointer-anchored-zoom`, PR https://github.com/koogle/age-of-agents/p
 
 Verification: all 143 workspace tests, formatting, strict native/WASM Clippy and rebuilt release WASM pass. Four focused camera/input regressions cover zoom anchoring, globe/limits, edge/corner directions, speed ramp and DPR/outside/interior positions. Actual desktop wheel in/out drift stays below 0.004 CSS pixels and DPR-2 phone pinch below 0.008. Browser corner panning passes at DPR 1 and 2, with zero drift in the interior, outside the view, over HUD controls, on focus loss and while holding a drag. DPR-2 phone touch at the edge produces zero camera drift. No browser runtime errors; screenshots reviewed. Evidence: `/workspace/scratch/pointer-zoom/`. Existing asset/syntax checks passed during zoom work.
 
-Thermonuclear review: one zoom method and one direct edge-direction function reuse existing camera picking/drag/nudge; native/browser share the implementation, no new engine layer, all changed client files below 1,000 lines. Integrated latest master `dddcc08` documentation cleanup and native launch script; merge/deployment pending through the existing merge-triggered Modal workflow.
+Thermonuclear review: one zoom method and one direct edge-direction function reuse existing camera picking/drag/nudge; native/browser share the implementation, no new engine layer, all changed client files below 1,000 lines. Integrated master `44769d8`, preserving gathering work animations, documentation cleanup and the native launch script. Combined verification is in progress; merge/deployment pending through the existing merge-triggered Modal workflow.
+
+## Activity sprite restoration (verified; publishing)
+
+The farm-field commit `9ff0087` disabled work poses whenever cargo existed, freezing gatherers in the carry pose after their first collected item. The shared renderer now keeps active gathering animated with a partial load, while preserving cargo-first construction/cultivation and stopped/unloading carry poses. No asset or simulation changes.
+
+Verification: all 142 workspace tests, formatting, strict native/WASM lint, frontend syntax and existing asset checks pass; release WASM rebuilt. Actual WebGL2 instance uploads confirm the original bundle holds one carry frame for all eight resource kinds, while the repaired bundle advances the correct chopping/mining/digging/foraging frames on desktop and DPR-2 phone with no page errors. Render tests also cover all three villager variants, empty/partial loads and cargo/work controls. Desktop screenshot visually reviewed; browser evidence/driver: `/workspace/scratch/activity-sprites/`. Review: [activity sprites](docs/ACTIVITY_SPRITES_REVIEW.md). Next: push to master and verify the resulting Modal deployment.
 
 ## Current baseline
 
