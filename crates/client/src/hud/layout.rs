@@ -146,17 +146,13 @@ impl Hud {
             });
         }
 
-        // A small "New island" pill top-left; the first tap asks to confirm.
+        // Reset opens native seed input with a progress-loss warning.
         {
-            let text = if model.reset_armed {
-                "Tap again for a new island"
-            } else {
-                "New island"
-            };
+            let text = "Reset game";
             let w = Self::text_width(atlas, text, 12.0 * s) + 28.0 * s;
             let pill = [12.0 * s, 14.0 * s, w, 28.0 * s];
             self.shape(pill, GLASS, 1.0, 14.0 * s);
-            let ink = if model.reset_armed { ACCENT } else { MUTED };
+            let ink = MUTED;
             self.text(
                 atlas,
                 text,

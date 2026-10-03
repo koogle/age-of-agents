@@ -90,7 +90,7 @@ pub enum Action {
     Research(TechnologyKind),
     /// Globe click: look at this map point.
     LookAt(Vec2),
-    /// The "New island" pill: arms on the first tap, resets on the second.
+    /// Opens the reset confirmation and seed input.
     Reset,
     /// A tap on an unavailable command: say why in the toast line.
     Explain(String),
@@ -313,8 +313,6 @@ pub struct Model<'a> {
     pub units: &'a [String],
     pub building: Option<&'a str>,
     pub build: BuildUi,
-    /// The "New island" pill was tapped once and waits for confirmation.
-    pub reset_armed: bool,
     pub show_grid: bool,
     pub toast: Option<&'a str>,
     pub camera: Vec2,
