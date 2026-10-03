@@ -37,6 +37,7 @@ Art for the `/play` loading screen (`web/index.html`): a painted title and build
   - Cutout: `fal-ai/birefnet/v2` turned some near-white marble highlights partly transparent, so they showed as dark smudges on dark backgrounds. `tools/title_fix.py` fills those holes, keeps the real letter counters (the "O" of "of") clear by classifying each hole by colour and alpha, and takes colour from the original render with edges un-composited from the paper background.
   - Final: `fal-ai/esrgan` (2×, anime model) for resolution. A second cutout at 2× is bounded by the repaired 1× alpha (`tools/title_final.py`), which removed ghost leaves the 2× cutout had picked up. Then resized to 1600 wide.
   - 2026-10-03 correction: removed the isolated leaf over the first "A" using an image-generation repair, composited only into the 64×54 px region at (15, 122). The rest of the wordmark, including the sprig under "of", is preserved; the corrected 1600×279 RGBA asset is encoded as lossless WebP.
+  - Follow-up: removed faint shadow pixels and the pale cutout fringe inside the "O" of "of". Applied only the repaired opening's alpha mask from an image-generation edit, confined to 40×40 px at (568, 107), preserving the original marble colors and all other title pixels.
 - **Buildings:**
   - Complete stage: `fal-ai/nano-banana/edit` with the temple (`complete`) as the style and camera reference.
   - Earlier stages: edits of each complete image, asking for the same footprint, camera and scale (`tools/bld_gen.py`).
