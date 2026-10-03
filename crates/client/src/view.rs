@@ -10,6 +10,7 @@ use serde::Deserialize;
 
 mod buildings;
 mod catalog;
+mod fields;
 mod selection;
 pub(crate) use buildings::sprite as building_sprite;
 pub use selection::Selection;
@@ -179,7 +180,7 @@ impl View {
 /// Something a tap can land on by its drawn picture, not the ground under it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Pick {
-    Resource(String, aoa_game::CellCoordinate),
+    Resource(String),
     Building(String),
 }
 
@@ -435,6 +436,15 @@ impl WorldView {
             }
         };
         for resource in &snapshot.resources {
+            if resource.field.is_some() {
+                let (sheet, sprite) = fields::sprite(sheets, heights, resource);
+                picks.push(Pickable {
+                    pick: Pick::Resource(resource.id.clone()),
+                    sprite,
+                });
+                sprites.push((sheet, sprite));
+                continue;
+            }
             let (column, row) = (resource.cell.column, resource.cell.row);
             let seed = seed_of(&resource.id) as f32;
             let fraction = if resource.capacity > 0.0 {
@@ -464,7 +474,7 @@ impl WorldView {
                 );
                 if fraction > 0.0 {
                     picks.push(Pickable {
-                        pick: Pick::Resource(resource.id.clone(), resource.cell),
+                        pick: Pick::Resource(resource.id.clone()),
                         sprite,
                     });
                 }
@@ -477,7 +487,7 @@ impl WorldView {
                 let at = ground(heights, center.x, center.y);
                 let sprite = resource_sprite(node, stages[stage], at, 0.6 + random(seed) * 0.08);
                 picks.push(Pickable {
-                    pick: Pick::Resource(resource.id.clone(), resource.cell),
+                    pick: Pick::Resource(resource.id.clone()),
                     sprite,
                 });
                 sprites.push((SHEET_RESOURCES, sprite));
@@ -527,7 +537,7 @@ impl WorldView {
                 1.0 - villager.anchor[1] / villager.cell[1],
             ];
             let moving = entry.moving;
-            let work = if moving {
+            let work = if moving || unit.unit.cargo.is_some() {
                 None
             } else {
                 work_target(heights, snapshot, &unit.unit.action)
@@ -710,11 +720,13 @@ fn work_target(
             phase: GatherPhase::Gathering,
         } => {
             let resource = snapshot.resources.iter().find(|r| &r.id == resource_id)?;
-            Some((
-                terrain::cell_center(resource.cell),
-                activity_for(resource.kind),
-            ))
+            Some((fields::center(resource), activity_for(resource.kind)))
         }
+        UnitAction::Cultivate { resource_id } => snapshot
+            .resources
+            .iter()
+            .find(|r| &r.id == resource_id)
+            .map(|r| (fields::center(r), "build")),
         UnitAction::Build { building_id } => {
             let building = snapshot
                 .buildings

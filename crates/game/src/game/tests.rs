@@ -373,6 +373,7 @@ fn deleted_resource_returns_existing_cargo_and_then_finishes() {
         phase: GatherPhase::Gathering,
     };
     world.resources.push(ResourceNode {
+        field: None,
         id: "gone".into(),
         kind: ResourceKind::Wood,
         cell: cell(0, 0),
@@ -874,6 +875,7 @@ fn head_on_walkers_in_a_corridor_pass_each_other() {
         for row in [4, 6] {
             if !(column == 10 && row == 6) {
                 world.resources.push(ResourceNode {
+                    field: None,
                     id: format!("wall-{column}-{row}"),
                     kind: ResourceKind::Stone,
                     cell: cell(column, row),

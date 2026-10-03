@@ -727,6 +727,7 @@ fn place_resources(
                     grown += 1;
                     number += 1;
                     resources.push(ResourceNode {
+                        field: None,
                         id: format!("{prefix}-{number}"),
                         kind,
                         cell: coordinate(cell),

@@ -179,3 +179,27 @@ fn existing_disconnected_land_does_not_prevent_safe_building() {
         .unwrap();
     world.validate().unwrap();
 }
+
+#[test]
+fn building_cannot_consume_all_of_a_villagers_remaining_walking_space() {
+    let mut world = bottleneck_world();
+    world.units.truncate(1);
+    for terrain in &mut world.terrain {
+        if terrain.coordinate() != cell(11, 10)
+            && !((12..15).contains(&terrain.column) && (10..13).contains(&terrain.row))
+        {
+            terrain.biome = TerrainBiome::Water;
+        }
+    }
+    world.validate().unwrap();
+    let before = world.clone();
+    assert_eq!(
+        world.apply_command(Command::Build {
+            unit_id: "villager-1".into(),
+            origin: cell(12, 10),
+            kind: BuildingKind::House,
+        }),
+        Err(CommandError::TargetUnreachable)
+    );
+    assert_eq!(world, before);
+}
