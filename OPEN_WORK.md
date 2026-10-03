@@ -1,5 +1,11 @@
 # Open Work
 
+## Building near-plane visibility (2026-10-03)
+
+User requested a PR and merge into the main branch (`master`). Reproduced in the Rust WebGL2 client: at minimum camera distance, pan the town center down until its front ground anchor passes the near plane; the whole sprite vanished while its roof still occupied the viewport. Clamp billboard vertex depth and building fragment depth at the near plane. Screen bounds, alpha testing, far clipping and per-column footprint depth still determine rendering. Native and browser share this shader; no simulation or asset changes.
+
+Integrated master b881a03, preserving farm fields, placement safety, unload-before-reassignment and the new README direction; rebuilt tracked WASM. All 137 workspace tests, strict native/WASM Clippy, formatting and existing asset checks pass. Actual WebGL2 before/after regression: the affected roof region changes from 828 to over 16,000 roof-colored pixels; fully offscreen control has zero. Desktop and DPR-2 touch panning pass without runtime errors; final integrated bundle repeats the desktop regression successfully. Evidence and regression driver: /workspace/scratch/building-visibility/. Thermonuclear review: two direct depth clamps, no extra culling layer/dependency, authoritative state and spatial rules unchanged, no client file over 1,000 lines. Verified fix is delivered through PR #48. Merging runs the configured Modal quality/deployment workflow.
+
 ## README and game direction (2026-10-03)
 
 Documentation-only: shortened README to the goal, proposed loop, implemented roadmap, architecture, setup, and contribution guide. Added `decisions.md` with brief design choices; AGENTS now requires reading the README gameplay loop. Roadmap prioritizes island transport/expansion before threats, calamities, and permanent progression, and marks earlier fixed-scenario plans as superseded. Latest fields/reset implementation is included in the feature summary; no gameplay changes.
