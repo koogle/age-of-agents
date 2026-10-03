@@ -6,6 +6,8 @@ Updated 2026-10-03. Branch master, including native-fixes commit 97a04d7 (deploy
 
 Shift-click group selection; centered speed labels; rising ivory/brown italic deposit feedback with Alegreya/OFL; movement-paced two-picture walk/carry with immediate velocity and neutral idle; authored sprite color preservation. Feedback covers all current unloading paths and uses current terrain heights. Ghost opacity, current calibrated buildings/plots, terrain occlusion and cloud camera/input/domain behavior preserved. Small window module keeps client files below 1,000 lines. Two equivalent old occupancy lint simplifications included.
 
+- Occlusion: building sprites write per-column depth from the footprint's front edge (`Sprite::footprint`, `building_depth` in billboard.wgsl); a silhouette pass draws hidden villager parts in team blue (depth greater, no depth write).
+
 ## Verification
 
 92 workspace tests pass; fmt, strict native/WASM Clippy, release native/WASM builds and diff check pass. Browser WebGL2 verified Shift-group/shared gathering/deposits, movement, navigation, time labels and rejected translucent ghost without console errors. Mac locked, so new native window inspection unavailable; native binary builds. Review: docs/NATIVE_FIXES_REVIEW.md. Rebuilt tracked web/pkg matches integrated source.

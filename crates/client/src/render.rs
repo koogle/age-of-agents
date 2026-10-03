@@ -49,6 +49,12 @@ pub struct Sprite {
     pub pull: f32,
     /// White/opaque for world sprites; tinted/translucent for placement ghosts.
     pub tint: [f32; 4],
+    /// For buildings: the footprint's world width (x) and depth (z), with the
+    /// anchor at its corner nearest the camera. Each screen column then takes
+    /// the depth of the footprint's front edge below it, so villagers in front
+    /// of a wall draw over it and those behind it are hidden (and silhouetted).
+    /// Zero for everything else.
+    pub footprint: [f32; 2],
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -98,6 +104,10 @@ pub struct Renderer {
     sea: (wgpu::Buffer, wgpu::Buffer, u32),
     sky_pipeline: wgpu::RenderPipeline,
     sprite_pipeline: wgpu::RenderPipeline,
+    /// Villagers hidden behind a building (or anything nearer) show through as
+    /// flat team-blue shapes, as in Age of Empires II: depth test greater, no
+    /// depth write, drawn after every sprite.
+    silhouette_pipeline: wgpu::RenderPipeline,
     ghost_pipeline: wgpu::RenderPipeline,
     sheets: Vec<Sheet>,
     sprite_buffer: wgpu::Buffer,
@@ -366,7 +376,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4, 6 => Float32x2];
         let make_sprite_pipeline = |ghost: bool| {
             pipeline(
                 device,
@@ -409,6 +419,32 @@ impl Renderer {
         };
         let sprite_pipeline = make_sprite_pipeline(false);
         let ghost_pipeline = make_sprite_pipeline(true);
+        let silhouette_pipeline = pipeline(
+            device,
+            PipelineSpec {
+                label: "silhouette",
+                module: &sprite_module,
+                layouts: &[Some(&globals_layout), Some(&sheet_layout)],
+                buffers: &[Some(wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Sprite>() as u64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &sprite_attributes,
+                })],
+                format: SCENE_FORMAT,
+                // Tint the colour only; scene alpha (the grading weight) stays.
+                blend: Some(wgpu::BlendState {
+                    color: wgpu::BlendComponent::OVER,
+                    alpha: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::Zero,
+                        dst_factor: wgpu::BlendFactor::One,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                }),
+                depth: Some((false, wgpu::CompareFunction::Greater)),
+                vs: "vs",
+                fs: "fs_silhouette",
+            },
+        );
         let decal_module = shader(device, "decal", include_str!("shaders/decal.wgsl"));
         let decal_attributes =
             wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32, 2 => Float32x4, 3 => Float32];
@@ -588,6 +624,7 @@ impl Renderer {
             sea,
             sky_pipeline,
             sprite_pipeline,
+            silhouette_pipeline,
             ghost_pipeline,
             sheets,
             sprite_buffer,
@@ -836,6 +873,22 @@ impl Renderer {
                         .count();
                 pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
                 pass.draw(0..6, start as u32..end as u32);
+                start = end;
+            }
+            // Then the parts of villagers that something nearer covers.
+            pass.set_pipeline(&self.silhouette_pipeline);
+            let mut start = 0;
+            while start < sprites.len() {
+                let sheet = sprites[start].0;
+                let end = start
+                    + sprites[start..]
+                        .iter()
+                        .take_while(|(s, _)| *s == sheet)
+                        .count();
+                if crate::view::VILLAGER_SHEETS.contains(&sheet) {
+                    pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
+                    pass.draw(0..6, start as u32..end as u32);
+                }
                 start = end;
             }
         }
