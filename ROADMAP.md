@@ -24,7 +24,7 @@ Status: implemented on `claude/rts-frontend-webgl-canvas-gukaet`; not released.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Fullscreen Three.js client: procedural cel-shaded models and activity animations for every unit, resource, and building state; island terrain with fog-of-war shader; minimap; mouse and touch controls.
-- [x] Finer grid: 60×40 half-unit cells (a villager is about 1.5 cells tall), 5×5 town centers (houses/granaries 3×3, watchtowers 2×2, docks 4×4; neighboring plots may share edges), clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
+- [x] Finer grid: 120×80 half-unit cells (a villager is about 1.5 cells tall), 5×5 town centers (houses/granaries 3×3, watchtowers 2×2, docks 4×4; neighboring plots may share edges), clustered resources (woodlines, berry patches, mine clumps), so workers stand right against their work.
 - [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
 - [x] Villager build menu: town center, house (+5 housing), granary (food and fiber drop-off), watchtower (sight 20), dock (must touch the sea; the fishing boat comes later). Training respects housing.
 - [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells when theirs runs out.
@@ -165,7 +165,8 @@ Gameplay acceptance:
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs.
 - [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
-- [ ] Additive touch selection, box selection and accessible DOM controls in the wgpu client remain open.
+- [x] Shift-drag from empty ground draws a selection box and adds enclosed visible units in native and WebGL2 clients.
+- [ ] Additive touch selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.

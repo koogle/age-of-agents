@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn connected_plots_and_preview_share_one_level_without_changing_distant_land() {
         let mut heights =
-            Heights::from_cells((0..2400).map(|i| (Some(0.2 + (i % 60) as f32 * 0.008), None)));
+            Heights::from_cells((0..9600).map(|i| (Some(0.2 + (i % 120) as f32 * 0.008), None)));
         let original = heights.clone();
         let first = [10.0, 10.0, 1.5, 1.5];
         let across = [11.5, 10.0, 1.5, 1.5];

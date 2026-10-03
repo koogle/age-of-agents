@@ -94,10 +94,8 @@ const RESOURCE_CLUSTERS: [(ResourceKind, &str, usize, usize, f64, f64); 7] = [
 ];
 
 fn generate_resources(terrain: &[TerrainCell]) -> Vec<ResourceNode> {
-    let base = Position {
-        x: f64::from(WORLD_COLUMNS) / 2.0,
-        y: f64::from(WORLD_ROWS) / 2.0,
-    };
+    // Clusters ring the town center's neighbourhood, not the map's middle.
+    let base = Position { x: 30.0, y: 20.0 };
     let squared = |a: CellCoordinate, b: CellCoordinate, stretch: i32| {
         let dx = i32::from(a.column) - i32::from(b.column);
         let dy = i32::from(a.row) - i32::from(b.row);

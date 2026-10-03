@@ -1,12 +1,13 @@
 //! Seeded island generation. One seed always yields the same island: a single
-//! landmass ringed by sea, rolling hills, a ridge of impassable peaks with
-//! highlands around it, rivers running from there to the sea (crossed at
-//! sandbar fords), forests and
-//! wetland where it is moist, beaches on the coast, and resources where they
-//! belong (stone and ore in the hills, clay by the water, berries at forest
-//! edges). Every island is checked to hold enough of every resource to reach
-//! a fishing boat, all of it reachable on foot from the starting town center;
-//! a seed that fails is deterministically re-rolled.
+//! large landmass ringed by sea, rolling hills cut by winding valleys, several
+//! ranges of impassable peaks with highlands around them, rivers running from
+//! there to the sea (crossed at sandbar fords), forests and wetland where it
+//! is moist, beaches on the coast, and resources where they belong (stone and
+//! ore in the hills, clay by the water, berries at forest edges). Only wood and
+//! berries grow near the start; everything else lies out in the island for the
+//! player to find. Every island is checked to hold enough of every resource to
+//! reach a fishing boat, all of it reachable on foot from the starting town
+//! center; a seed that fails is deterministically re-rolled.
 //!
 //! Only integer hashing, `+ - * /` and `sqrt` (all exactly rounded under IEEE
 //! 754) are used, so the result is bit-identical
@@ -29,12 +30,14 @@ pub const FISHING_BOAT_COST: [(ResourceKind, f64); 6] = [
 
 /// Share of the map that is land.
 const LAND_SHARE: f64 = 0.55;
+/// How many mountain ranges an island has, at least and at most.
+const RANGES: (usize, usize) = (3, 4);
 const MAX_ATTEMPTS: u64 = 64;
 /// Land above this height rank is bare mountain; above the next, highland.
 const MOUNTAIN_RANK: f64 = 0.93;
 const HIGHLAND_RANK: f64 = 0.8;
-const RIVERS: usize = 2;
-const MIN_RIVER_LENGTH: usize = 12;
+const RIVERS: usize = 4;
+const MIN_RIVER_LENGTH: usize = 14;
 const FORD_SPACING: usize = 9;
 
 pub(super) struct Island {
@@ -167,16 +170,40 @@ fn distance_from(
 fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
     let mut rng = Rng(roll);
     let (width, height) = (COLUMNS as f64, ROWS as f64);
-    // A mountain ridge runs through a point inland, broken into peaks by
-    // ridged noise; rolling hills cover the rest; the coast is a warped ellipse.
-    let peak = (width * rng.range(0.3, 0.7), height * rng.range(0.3, 0.7));
-    let (dx, dy) = (rng.range(-1.0, 1.0), rng.range(-1.0, 1.0));
-    let norm = (dx * dx + dy * dy).sqrt().max(1e-6);
-    let half = width * rng.range(0.1, 0.2);
-    let ridge = (
-        (peak.0 - dx / norm * half, peak.1 - dy / norm * half),
-        (peak.0 + dx / norm * half, peak.1 + dy / norm * half),
-    );
+    // Several mountain ranges stand out from the middle, each a ridge broken
+    // into peaks by ridged noise, so the start is ringed by high ground but
+    // never sits on it. Rolling hills and winding valleys cover the rest; the
+    // coast is a warped ellipse.
+    let ranges = RANGES.0 + rng.below(RANGES.1 - RANGES.0 + 1);
+    let mut ridges: Vec<((f64, f64), (f64, f64))> = Vec::new();
+    for _ in 0..ranges * 40 {
+        if ridges.len() == ranges {
+            break;
+        }
+        let (rx, ry) = (rng.range(-0.75, 0.75), rng.range(-0.75, 0.75));
+        let reach = (rx * rx + ry * ry).sqrt();
+        let peak = (
+            width / 2.0 + rx * width * 0.44,
+            height / 2.0 + ry * height * 0.42,
+        );
+        let apart = ridges.iter().all(|(a, b)| {
+            let (mx, my) = ((a.0 + b.0) / 2.0, (a.1 + b.1) / 2.0);
+            ((mx - peak.0) * (mx - peak.0) + (my - peak.1) * (my - peak.1)).sqrt() >= width * 0.28
+        });
+        if !(0.35..=0.75).contains(&reach) || !apart {
+            continue;
+        }
+        let (dx, dy) = (rng.range(-1.0, 1.0), rng.range(-1.0, 1.0));
+        let norm = (dx * dx + dy * dy).sqrt().max(1e-6);
+        let half = width * rng.range(0.06, 0.12);
+        ridges.push((
+            (peak.0 - dx / norm * half, peak.1 - dy / norm * half),
+            (peak.0 + dx / norm * half, peak.1 + dy / norm * half),
+        ));
+    }
+    if ridges.len() < RANGES.0 {
+        return None;
+    }
     let (shape_seed, detail_seed, hill_seed, crag_seed, moisture_seed, clay_seed, meander_seed) = (
         rng.next(),
         rng.next(),
@@ -186,6 +213,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         rng.next(),
         rng.next(),
     );
+    let valley_seed = rng.next();
     let raw: Vec<f64> = (0..COLUMNS * ROWS)
         .map(|index| {
             let (x, y) = (
@@ -193,16 +221,26 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
                 (index / COLUMNS) as f64 + 0.5,
             );
             let (nx, ny) = (
-                (x - width / 2.0) / (width * 0.44),
-                (y - height / 2.0) / (height * 0.42),
+                (x - width / 2.0) / (width * 0.46),
+                (y - height / 2.0) / (height * 0.44),
             );
-            let warp = (fbm(shape_seed, x / 9.0, y / 9.0) - 0.5) * 0.55;
+            let warp = (fbm(shape_seed, x / 16.0, y / 16.0) - 0.5) * 0.55;
             let falloff = 1.0 - (nx * nx + ny * ny) - warp;
-            let d = distance_to_segment((x, y), ridge) / 3.5;
             let crags = 1.0 - (2.0 * noise(crag_seed, x / 5.0, y / 5.0) - 1.0).abs();
-            let mountain = 0.8 / (1.0 + d * d) * (0.45 + 0.9 * crags);
-            let hills = (fbm(hill_seed, x / 11.0, y / 11.0) - 0.5) * 0.6;
-            falloff * 0.9 + mountain + hills + (fbm(detail_seed, x / 6.0, y / 6.0) - 0.5) * 0.2
+            let mountain = ridges
+                .iter()
+                .map(|&ridge| {
+                    let d = distance_to_segment((x, y), ridge) / 4.0;
+                    0.8 / (1.0 + d * d)
+                })
+                .fold(0.0, f64::max)
+                * (0.45 + 0.9 * crags);
+            let hills = (fbm(hill_seed, x / 13.0, y / 13.0) - 0.5) * 0.9;
+            // Valleys follow the creases of ridged noise; rivers find them.
+            let crease = 1.0 - (2.0 * fbm(valley_seed, x / 22.0, y / 22.0) - 1.0).abs();
+            let valley = crease * crease * crease * crease * 0.3;
+            falloff * 0.9 + mountain + hills - valley
+                + (fbm(detail_seed, x / 6.0, y / 6.0) - 0.5) * 0.2
         })
         .collect();
 
@@ -343,7 +381,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         .center();
         resources
             .iter()
-            .any(|r| r.kind == kind && r.cell.center().distance(base) <= 16.0)
+            .any(|r| r.kind == kind && r.cell.center().distance(base) <= NEAR_START)
     };
     (enough
         && resources
@@ -506,12 +544,19 @@ fn choose_start(
     Some((origin, villagers))
 }
 
-/// (kind, id prefix, biomes it grows in, clusters, nodes per cluster, amount per node).
-/// Kind, id prefix, host biomes, cluster count, cluster size, amount per node.
+/// Only wood and food grow around the start; everything else lies at least
+/// this many cells out, so the player has to explore to find it.
+const FAR_FROM_START: f64 = 24.0;
+/// The starting woodline and berries lie within this many cells.
+const NEAR_START: f64 = 16.0;
+
+/// Kind, id prefix, host biomes, clusters near the start, clusters further
+/// out, cluster size, amount per node.
 type Plan = (
     ResourceKind,
     &'static str,
     &'static [TerrainBiome],
+    usize,
     usize,
     usize,
     f64,
@@ -522,7 +567,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
         ResourceKind::Wood,
         "tree",
         &[TerrainBiome::Forest, TerrainBiome::Heath],
-        6,
+        2,
+        14,
         9,
         30.0,
     ),
@@ -534,7 +580,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
             TerrainBiome::Forest,
             TerrainBiome::Heath,
         ],
-        4,
+        1,
+        8,
         5,
         30.0,
     ),
@@ -542,7 +589,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
         ResourceKind::Stone,
         "stone",
         &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        3,
+        0,
+        6,
         4,
         40.0,
     ),
@@ -550,7 +598,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
         ResourceKind::Gold,
         "gold",
         &[TerrainBiome::Highland],
-        1,
+        0,
+        3,
         3,
         40.0,
     ),
@@ -558,7 +607,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
         ResourceKind::Iron,
         "iron",
         &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        2,
+        0,
+        4,
         3,
         40.0,
     ),
@@ -566,7 +616,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
         ResourceKind::Coal,
         "coal",
         &[TerrainBiome::Highland, TerrainBiome::Scrubland],
-        2,
+        0,
+        4,
         3,
         40.0,
     ),
@@ -578,7 +629,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
             TerrainBiome::Wetland,
             TerrainBiome::Beach,
         ],
-        2,
+        0,
+        4,
         3,
         40.0,
     ),
@@ -590,7 +642,8 @@ const RESOURCE_PLAN: [Plan; 8] = [
             TerrainBiome::Prairie,
             TerrainBiome::Meadow,
         ],
-        3,
+        0,
+        6,
         3,
         30.0,
     ),
@@ -622,16 +675,24 @@ fn place_resources(
     // Fords stay open so both banks keep their crossing.
     let mut taken = ford.to_vec();
     let mut resources: Vec<ResourceNode> = Vec::new();
-    for (kind, prefix, biomes, clusters, size, amount) in RESOURCE_PLAN {
+    for (kind, prefix, biomes, near, far, size, amount) in RESOURCE_PLAN {
         let mut number = 0;
-        for _ in 0..clusters {
+        for cluster in 0..near + far {
             // Seeds suit the kind, keep the base clear and stay apart from
-            // other clusters; ore prefers the highest ground.
+            // other clusters; ore prefers the highest ground. The first few
+            // ring the start; the rest wait out in the unexplored island.
+            let (closest, furthest) = if cluster < near {
+                (STARTING_BASE_RESOURCE_CLEARANCE + 2.0, NEAR_START - 2.0)
+            } else if near > 0 {
+                (STARTING_BASE_RESOURCE_CLEARANCE + 2.0, f64::MAX)
+            } else {
+                (FAR_FROM_START, f64::MAX)
+            };
             let candidates: Vec<usize> = (0..terrain.len())
                 .filter(|&i| {
                     let center = coordinate(i).center();
                     biomes.contains(&terrain[i].biome)
-                        && center.distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE + 2.0
+                        && (closest..=furthest).contains(&center.distance(base))
                         && resources.iter().all(|r| {
                             r.cell.center().distance(center) >= RESOURCE_CLUSTER_SEPARATION
                         })
@@ -681,7 +742,7 @@ fn place_resources(
                 }
                 for n in next {
                     if biomes.contains(&terrain[n].biome)
-                        && coordinate(n).center().distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE
+                        && coordinate(n).center().distance(base) >= closest - 2.0
                     {
                         seen.push(n);
                         queue.push_back(n);
@@ -729,218 +790,4 @@ fn reachable_only(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn index(cell: CellCoordinate) -> usize {
-        at(usize::from(cell.column), usize::from(cell.row))
-    }
-
-    #[test]
-    fn one_seed_always_grows_the_same_island_and_seeds_differ() {
-        assert_eq!(GameWorld::generate(7), GameWorld::generate(7));
-        assert_ne!(
-            GameWorld::generate(7).terrain,
-            GameWorld::generate(8).terrain
-        );
-        assert_eq!(GameWorld::default().seed, DEFAULT_SEED);
-    }
-
-    #[test]
-    fn every_island_is_one_landmass_ringed_by_sea_and_beach() {
-        for seed in 0..24 {
-            let world = GameWorld::generate(seed);
-            world.validate().unwrap();
-            let land: Vec<bool> = world
-                .terrain
-                .iter()
-                .map(|c| c.biome != TerrainBiome::Water)
-                .collect();
-            for (i, cell) in world.terrain.iter().enumerate() {
-                let edge = cell.column == 0
-                    || cell.row == 0
-                    || cell.column == WORLD_COLUMNS - 1
-                    || cell.row == WORLD_ROWS - 1;
-                assert!(!(edge && land[i]), "seed {seed}: land touches the map edge");
-                assert_eq!(
-                    land[i],
-                    cell.elevation > 0.0,
-                    "seed {seed}: elevation disagrees with water"
-                );
-            }
-            let first = land.iter().position(|&l| l).unwrap();
-            let reached = distance_from(std::iter::once(first), |i| land[i]);
-            assert!(
-                land.iter()
-                    .zip(&reached)
-                    .all(|(&l, &d)| !l || d != u32::MAX),
-                "seed {seed}: more than one island"
-            );
-            let share = land.iter().filter(|&&l| l).count() as f64 / land.len() as f64;
-            assert!(
-                (0.35..0.6).contains(&share),
-                "seed {seed}: land share {share}"
-            );
-            assert!(world.terrain.iter().any(|c| c.biome == TerrainBiome::Beach));
-            assert!(
-                world
-                    .terrain
-                    .iter()
-                    .any(|c| c.biome == TerrainBiome::Highland)
-            );
-        }
-    }
-
-    #[test]
-    fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
-        for seed in 0..24 {
-            let world = GameWorld::generate(seed);
-            assert!(
-                world
-                    .resources
-                    .iter()
-                    .filter(|r| r.kind == ResourceKind::Coal)
-                    .map(|r| r.amount)
-                    .sum::<f64>()
-                    >= 30.0,
-                "seed {seed}: missing smelter fuel"
-            );
-            for &(kind, cost) in &FISHING_BOAT_COST {
-                let total: f64 = world
-                    .resources
-                    .iter()
-                    .filter(|r| r.kind == kind)
-                    .map(|r| r.amount)
-                    .sum();
-                assert!(total >= cost * 1.5, "seed {seed}: only {total} {kind:?}");
-            }
-            for (number, resource) in world.resources.iter().enumerate() {
-                assert!(
-                    grows_in(resource.kind).contains(&world.terrain[index(resource.cell)].biome)
-                );
-                // Villager 1 can walk to every node (the real pathfinder, not the generator's check).
-                assert!(
-                    world.can_reach_beside(0, resource.footprint()),
-                    "seed {seed}: {} unreachable",
-                    resource.id
-                );
-                assert!(
-                    world.resources[number + 1..]
-                        .iter()
-                        .all(|other| other.id != resource.id)
-                );
-            }
-            let base = world.buildings[0].footprint();
-            assert!(world.units.iter().all(|u| base.is_interaction_cell(u.cell)));
-            for kind in [ResourceKind::Wood, ResourceKind::Food] {
-                assert!(
-                    world
-                        .resources
-                        .iter()
-                        .any(|r| r.kind == kind && r.cell.center().distance(base.center()) <= 16.0)
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn every_island_has_peaks_and_rivers_that_reach_the_water() {
-        for seed in 0..24 {
-            let world = GameWorld::generate(seed);
-            let biome = |i: usize| world.terrain[i].biome;
-            let count = |b: TerrainBiome| world.terrain.iter().filter(|c| c.biome == b).count();
-            assert!(count(TerrainBiome::Mountain) > 0, "seed {seed}: no peaks");
-            assert!(
-                count(TerrainBiome::River) >= MIN_RIVER_LENGTH,
-                "seed {seed}: no river"
-            );
-            // Following river cells (and the fords across them) leads to the water.
-            let wet = |i: usize| matches!(biome(i), TerrainBiome::River | TerrainBiome::Beach);
-            let mouth = distance_from(
-                (0..world.terrain.len()).filter(|&i| biome(i) == TerrainBiome::Water),
-                wet,
-            );
-            for (i, cell) in world.terrain.iter().enumerate() {
-                if cell.biome == TerrainBiome::River {
-                    assert!(mouth[i] != u32::MAX, "seed {seed}: river cut off at {i}");
-                    assert!(cell.elevation > 0.0);
-                }
-            }
-            // Every peak towers over the land around it on average.
-            let mean = |b: TerrainBiome| {
-                let cells = world.terrain.iter().filter(|c| c.biome == b);
-                cells.clone().map(|c| f64::from(c.elevation)).sum::<f64>() / cells.count() as f64
-            };
-            assert!(mean(TerrainBiome::Mountain) > mean(TerrainBiome::Highland));
-            assert!(mean(TerrainBiome::Highland) > mean(TerrainBiome::Meadow));
-        }
-    }
-
-    #[test]
-    fn nobody_walks_or_builds_on_peaks_or_rivers() {
-        let world = GameWorld::generate(1);
-        for biome in [TerrainBiome::Mountain, TerrainBiome::River] {
-            let cell = world
-                .terrain
-                .iter()
-                .find(|c| c.biome == biome)
-                .unwrap()
-                .coordinate();
-            let mut moved = world.clone();
-            assert!(
-                moved
-                    .apply_command(Command::Move {
-                        unit_id: "villager-1".into(),
-                        to: cell
-                    })
-                    .is_err()
-            );
-            let mut built = world.clone();
-            built.stockpile.wood = 1000.0;
-            built.stockpile.stone = 1000.0;
-            let origin =
-                CellCoordinate::new(cell.column.saturating_sub(1), cell.row.saturating_sub(1));
-            assert!(
-                built
-                    .apply_command(Command::Build {
-                        kind: BuildingKind::House,
-                        unit_id: "villager-1".into(),
-                        origin
-                    })
-                    .is_err()
-            );
-            let mut stranded = world.clone();
-            stranded.units[0].cell = cell;
-            assert!(stranded.validate().is_err());
-        }
-    }
-
-    #[test]
-    fn nobody_walks_or_builds_on_water() {
-        let mut world = GameWorld::generate(3);
-        let water = world
-            .terrain
-            .iter()
-            .find(|c| c.biome == TerrainBiome::Water && c.column > 2)
-            .unwrap()
-            .coordinate();
-        let before = world.clone();
-        let moved = world.apply_command(Command::Move {
-            unit_id: "villager-1".into(),
-            to: water,
-        });
-        assert!(moved.is_err());
-        world.stockpile.wood = 100.0;
-        let built = world.apply_command(Command::Build {
-            kind: BuildingKind::TownCenter,
-            unit_id: "villager-1".into(),
-            origin: water,
-        });
-        assert!(built.is_err());
-        world.stockpile.wood = before.stockpile.wood;
-        assert_eq!(world, before);
-        let mut drowned = before.clone();
-        drowned.units[0].cell = water;
-        assert!(drowned.validate().is_err());
-    }
-}
+mod tests;
