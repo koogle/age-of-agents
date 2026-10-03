@@ -30,6 +30,18 @@ pub const VILLAGER_SHEETS: [usize; 4] = [0, 1, 2, SHEET_IDLE_HD];
 const SHEET_BUILDINGS: usize = 6;
 /// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
 const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
+/// A drawn direction (front or back, mirrored or not) is held at least this
+/// long, so a zigzag route on the cell grid does not flicker between sprites.
+const VIEW_HOLD_SECONDS: f32 = 0.5;
+/// How far (as a sine) a heading must cross a sprite boundary before the
+/// drawn direction flips, about 17 degrees.
+const VIEW_MARGIN: f32 = 0.3;
+/// A villager counts as walking above this speed (world units per second) and
+/// as stopped only after staying below `STOP_SPEED` for `STOP_SECONDS`, so a
+/// one-tick wait mid-route does not flash the standing or working pose.
+const WALK_SPEED: f32 = 0.2;
+const STOP_SPEED: f32 = 0.05;
+const STOP_SECONDS: f32 = 0.2;
 
 #[derive(Deserialize)]
 struct VillagerSheet {
@@ -116,11 +128,44 @@ struct UnitEntry {
     position: Vec3,
     velocity: Vec3,
     walked: f32,
+    /// Slowly smoothed ground velocity: the walking direction, averaged over
+    /// the straight and diagonal steps of a grid route.
+    heading: Vec2,
+    moving: bool,
+    still_for: f32,
     facing: f32,
+    view: View,
+    view_age: f32,
     variant: usize,
     /// Eased offset toward the thing being worked on, so a working villager
     /// stands right against it rather than at its cell centre.
     lean: Vec2,
+}
+
+/// Which of the four drawn directions a villager shows.
+#[derive(Clone, Copy, PartialEq, Debug)]
+struct View {
+    toward_viewer: bool,
+    screen_right: bool,
+}
+
+impl View {
+    /// The direction for a heading given in screen terms (`right` toward
+    /// viewer-right, `toward` toward the camera), keeping the current one
+    /// until the heading is clearly past a boundary.
+    fn follow(self, right: f32, toward: f32) -> Self {
+        let past = |held: bool, along: f32| {
+            if held {
+                along > -VIEW_MARGIN
+            } else {
+                along > VIEW_MARGIN
+            }
+        };
+        Self {
+            toward_viewer: past(self.toward_viewer, toward),
+            screen_right: past(self.screen_right, right),
+        }
+    }
 }
 
 /// Something a tap can land on by its drawn picture, not the ground under it.
@@ -242,7 +287,15 @@ impl WorldView {
                     position: target,
                     velocity: Vec3::ZERO,
                     walked: 0.0,
+                    heading: Vec2::ZERO,
+                    moving: false,
+                    still_for: 0.0,
                     facing: 0.0,
+                    view: View {
+                        toward_viewer: true,
+                        screen_right: false,
+                    },
+                    view_age: VIEW_HOLD_SECONDS,
                     lean: Vec2::ZERO,
                     variant: (seed_of(&view.unit.id) % 3) as usize,
                 });
@@ -278,6 +331,17 @@ impl WorldView {
             let delta = entry.position - previous;
             entry.velocity = if dt > 0.0 { delta / dt } else { Vec3::ZERO };
             entry.walked += Vec2::new(delta.x, delta.z).length();
+            let planar = Vec2::new(entry.velocity.x, entry.velocity.z);
+            entry.heading = entry.heading.lerp(planar, (dt * 4.0).min(1.0));
+            if planar.length() > WALK_SPEED {
+                entry.moving = true;
+                entry.still_for = 0.0;
+            } else if planar.length() < STOP_SPEED {
+                entry.still_for += dt;
+                if entry.still_for >= STOP_SECONDS {
+                    entry.moving = false;
+                }
+            }
         }
     }
 
@@ -441,7 +505,7 @@ impl WorldView {
             let Some(entry) = self.units.get_mut(&unit.unit.id) else {
                 continue;
             };
-            let moving = Vec2::new(entry.velocity.x, entry.velocity.z).length() > 0.001;
+            let moving = entry.moving;
             let work = if moving {
                 None
             } else {
@@ -458,8 +522,8 @@ impl WorldView {
                 "idle"
             };
             let mut desired = entry.facing;
-            if moving {
-                desired = entry.velocity.x.atan2(entry.velocity.z);
+            if moving && entry.heading.length() > STOP_SPEED {
+                desired = entry.heading.x.atan2(entry.heading.y);
             }
             let mut lean = Vec2::ZERO;
             if let Some((target, activity)) = work {
@@ -480,8 +544,19 @@ impl WorldView {
                 .animations
                 .get(name)
                 .unwrap_or(&villager.animations["idle"]);
-            let toward_viewer = direction.dot(forward) < 0.0;
-            let screen_right = direction.dot(Vec3::new(right.x, 0.0, right.z)) > 0.0;
+            let next = entry.view.follow(
+                direction.dot(Vec3::new(right.x, 0.0, right.z).normalize_or_zero()),
+                -direction.dot(forward),
+            );
+            entry.view_age += dt;
+            if next != entry.view && entry.view_age >= VIEW_HOLD_SECONDS {
+                entry.view = next;
+                entry.view_age = 0.0;
+            }
+            let View {
+                toward_viewer,
+                screen_right,
+            } = entry.view;
             let view = if toward_viewer || !animation.contains_key("back") {
                 "front"
             } else {
@@ -693,6 +768,21 @@ impl Selection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn drawn_direction_flips_only_past_the_margin() {
+        let front_left = View {
+            toward_viewer: true,
+            screen_right: false,
+        };
+        // A heading wobbling just across the left/right boundary keeps its side.
+        assert_eq!(front_left.follow(0.2, 0.9), front_left);
+        assert_eq!(front_left.follow(-0.2, -0.2), front_left);
+        // Clearly across, it flips.
+        let back_right = front_left.follow(0.7, -0.7);
+        assert!(back_right.screen_right && !back_right.toward_viewer);
+        assert_eq!(back_right.follow(-0.2, 0.2), back_right);
+    }
+
     #[test]
     fn walking_uses_only_two_stride_pictures_in_every_direction() {
         let sheet: VillagerSheet =

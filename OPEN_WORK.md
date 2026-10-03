@@ -16,7 +16,11 @@ Prior native-fix session used /tmp/age-of-agents-integration-20261003.db. This a
 
 ## Remaining / next action
 
-Push the building-art correction after combined verification; production push triggers Modal deploy. Additive touch, box selection and DOM accessibility remain gaps. Explicit blocking/non-blocking task classification remains absent (valid replacement orders already work); remote direction-hold branch remains separate. Older expanded prototype is preserved separately, not part of this push.
+Push the building-art correction after combined verification; production push triggers Modal deploy. Additive touch, box selection and DOM accessibility remain gaps. Explicit blocking/non-blocking task classification remains absent (valid replacement orders already work). Older expanded prototype is preserved separately, not part of this push.
+
+## Villager direction hold (merged 2026-10-03)
+
+Walking villagers no longer flicker between sprite directions on zigzag grid routes: the heading is smoothed over about a quarter second, the drawn direction flips only about 17 degrees past a boundary and at most every 0.5 s, and a stop must last 0.2 s before the standing or working pose shows (the stride frame freezes meanwhile, so there is no walking in place). Stride-paced walk frames and raw velocity are unchanged. Client tests, clippy and the WASM rebuild pass; not yet eyeballed in a browser.
 
 ## Current building-placement work
 
