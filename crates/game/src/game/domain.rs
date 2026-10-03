@@ -290,9 +290,40 @@ pub struct Building {
     pub produces: Vec<ProductKind>,
     pub researches: Vec<TechnologyKind>,
     pub job: Option<BuildingJob>,
+    /// Paid tasks waiting behind the active job, in submission order.
+    #[serde(default)]
+    pub queue: Vec<QueuedBuildingJob>,
+    #[serde(default)]
+    pub next_queue_id: u64,
+}
+
+pub const MAX_QUEUED_JOBS: usize = 5;
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct QueuedBuildingJob {
+    pub id: u64,
+    pub job: BuildingJob,
 }
 
 impl Building {
+    pub fn jobs(&self) -> impl Iterator<Item = &BuildingJob> {
+        self.job
+            .iter()
+            .chain(self.queue.iter().map(|entry| &entry.job))
+    }
+
+    pub(super) fn enqueue(&mut self, job: BuildingJob) {
+        if self.job.is_none() {
+            self.job = Some(job);
+        } else {
+            self.queue.push(QueuedBuildingJob {
+                id: self.next_queue_id,
+                job,
+            });
+            self.next_queue_id += 1;
+        }
+    }
+
     pub fn footprint(&self) -> Footprint {
         let (columns, rows) = self.kind.size();
         Footprint {
