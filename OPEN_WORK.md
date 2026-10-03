@@ -1,5 +1,11 @@
 # Open Work
 
+## README and game direction (2026-10-03)
+
+Documentation-only: shortened README to the goal, proposed loop, implemented roadmap, architecture, setup, and contribution guide. Added `decisions.md` with brief design choices; AGENTS now requires reading the README gameplay loop. Roadmap prioritizes island transport/expansion before threats, calamities, and permanent progression, and marks earlier fixed-scenario plans as superseded. Latest fields/reset implementation is included in the feature summary; no gameplay changes.
+
+User requested PR #49 and merge into the default branch (`master`); rebased onto the concurrent building-trap fix, retaining its handoff and escape-route documentation. Verification: documentation links, setup versions against Cargo.lock, feature claims against current code/handoff, diff whitespace, and the thermonuclear review. Local Rust tools are unavailable; merge CI runs the repository quality/deployment checks.
+
 ## Building placement trapping villagers (2026-10-03)
 
 User requested a fix, PR, and merge into the main branch (`master`). PR #46 (`fix/building-traps`) rejects a foundation before mutation when it disconnects any unit from previously reachable ground or consumes its last walking space. Reuses corner-safe static pathfinding, checks each occupied connected region once, and ignores temporary unit traffic. Edge-sharing and existing separate islands remain supported. Existing trapped saves are unchanged.
