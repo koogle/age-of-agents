@@ -118,10 +118,11 @@ impl Sheets {
         resources: &[u8],
         town_center: &[u8],
         buildings: &[u8],
+        catalog: [&[u8]; 4],
     ) -> Self {
         Self {
             buildings: serde_json::from_slice(buildings).expect("buildings.json"),
-            catalog: catalog::Catalog::parse(),
+            catalog: catalog::Catalog::parse(catalog),
             villager: serde_json::from_slice(villager).expect("villager.json"),
             idle: serde_json::from_slice(idle).expect("villager_idle_hd.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),

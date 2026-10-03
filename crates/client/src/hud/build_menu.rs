@@ -1,0 +1,141 @@
+//! Purpose-based build groups; every building keeps its own authored portrait.
+use super::{
+    Action, BuildUi,
+    selection::{Command, building_info, cost_text},
+};
+use aoa_game::{BuildingKind, Stockpile};
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum BuildingGroup {
+    Town,
+    Gathering,
+    Production,
+    Military,
+}
+
+impl BuildingGroup {
+    pub const ALL: [Self; 4] = [
+        Self::Town,
+        Self::Gathering,
+        Self::Production,
+        Self::Military,
+    ];
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Town => "Town",
+            Self::Gathering => "Gathering",
+            Self::Production => "Production",
+            Self::Military => "Military",
+        }
+    }
+    fn buildings(self) -> &'static [BuildingKind] {
+        use BuildingKind::*;
+        match self {
+            Self::Town => &[TownCenter, House, Granary, Dock, Monument],
+            Self::Gathering => &[Farm, MiningCamp],
+            Self::Production => &[LumberMill, Smelter, Kiln, Weaver, Kitchen],
+            Self::Military => &[Watchtower, Barracks, Range, Workshop, Infirmary],
+        }
+    }
+}
+
+pub(super) fn atlas(kind: BuildingKind) -> &'static str {
+    use BuildingKind::*;
+    match kind {
+        TownCenter => "towncenter",
+        House | Granary | Watchtower | Dock => "buildings_hd",
+        MiningCamp | Farm | LumberMill | Smelter => "buildings_economy",
+        Kiln | Weaver | Kitchen | Monument => "buildings_crafts",
+        Barracks | Range | Workshop | Infirmary => "buildings_civic",
+    }
+}
+
+pub(super) fn commands(build: BuildUi, stock: &Stockpile) -> Vec<Command> {
+    let mut commands = if let BuildUi::Group(group) = build {
+        group
+            .buildings()
+            .iter()
+            .map(|&kind| {
+                let (icon, _, name, _) = building_info(kind);
+                Command {
+                    icon,
+                    label: name.into(),
+                    detail: cost_text(kind.cost()),
+                    enabled: stock.affords(kind.cost()),
+                    action: Action::Place(kind),
+                }
+            })
+            .collect()
+    } else {
+        BuildingGroup::ALL
+            .into_iter()
+            .map(|group| Command {
+                icon: building_info(group.buildings()[0]).0,
+                label: group.name().into(),
+                detail: group
+                    .buildings()
+                    .iter()
+                    .map(|&kind| building_info(kind).2)
+                    .collect::<Vec<_>>()
+                    .join(", "),
+                enabled: true,
+                action: Action::BuildGroup(group),
+            })
+            .collect::<Vec<_>>()
+    };
+    commands.push(Command {
+        icon: "command_cancel",
+        label: if build == BuildUi::Categories {
+            "Close"
+        } else {
+            "All types"
+        }
+        .into(),
+        detail: "Back to building types".into(),
+        enabled: true,
+        action: if build == BuildUi::Categories {
+            Action::Cancel
+        } else {
+            Action::Build
+        },
+    });
+    commands
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn every_building_has_a_distinct_authored_portrait_in_the_runtime_atlas() {
+        let assets = pollster::block_on(crate::assets::Assets::load());
+        let atlas = super::super::build_atlas(&assets);
+        let mut icons = HashSet::new();
+        for kind in aoa_game::BUILDABLE {
+            let icon = building_info(kind).0;
+            assert!(
+                icons.insert(icon),
+                "placeholder portrait reused for {kind:?}"
+            );
+            let &(uv, size) = &atlas.content[icon];
+            assert!(uv.iter().all(|v| (0.0..=1.0).contains(v)));
+            assert!(size.x > 0.0 && size.y > 0.0);
+        }
+    }
+
+    #[test]
+    fn categories_and_back_navigation_are_available_without_resources() {
+        let stock = Stockpile::default();
+        let categories = commands(BuildUi::Categories, &stock);
+        assert_eq!(categories.len(), 5);
+        for (command, group) in categories.iter().zip(BuildingGroup::ALL) {
+            assert_eq!(command.action, Action::BuildGroup(group));
+            assert!(command.enabled);
+            let menu = commands(BuildUi::Group(group), &stock);
+            assert!(menu.len() <= 6);
+            assert_eq!(menu.last().unwrap().action, Action::Build);
+        }
+        assert_eq!(categories.last().unwrap().action, Action::Cancel);
+    }
+}

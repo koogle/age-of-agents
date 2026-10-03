@@ -62,8 +62,16 @@ def verify_once() -> None:
         if remote != local:
             raise RuntimeError(f"production {remote_path} does not match {local_path.relative_to(ROOT)}")
 
-    if not fetch("/web/pkg/aoa_client_bg.wasm").startswith(b"\0asm"):
+    wasm = fetch("/web/pkg/aoa_client_bg.wasm")
+    if not wasm.startswith(b"\0asm"):
         raise RuntimeError("production does not serve the Rust web client")
+    if b"All types" not in wasm:
+        raise RuntimeError("production does not serve the grouped building menu")
+    for sheet in ("buildings_economy", "buildings_crafts", "buildings_civic", "units"):
+        for extension in ("json", "png"):
+            path = f"assets/sprites/{sheet}.{extension}"
+            if fetch(f"/{path}") != (ROOT / path).read_bytes():
+                raise RuntimeError(f"production {path} does not match the catalog")
 
     state = json.loads(fetch("/state"))
     # Terrain is compact: one character per cell ('.' unseen) plus one per height.

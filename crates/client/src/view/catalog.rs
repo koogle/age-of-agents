@@ -24,27 +24,16 @@ pub(super) struct Catalog {
 }
 
 impl Catalog {
-    pub fn parse() -> Self {
-        let mut units: UnitSheet =
-            serde_json::from_slice(include_bytes!("../../../../assets/sprites/units.json"))
-                .expect("units.json");
+    pub fn parse([economy, crafts, civic, units]: [&[u8]; 4]) -> Self {
+        let mut units: UnitSheet = serde_json::from_slice(units).expect("units.json");
         for art in units.units.values_mut() {
             art.cell = units.cell;
             art.anchor = units.anchor;
         }
         Self {
-            economy: serde_json::from_slice(include_bytes!(
-                "../../../../assets/sprites/buildings_economy.json"
-            ))
-            .expect("buildings_economy.json"),
-            crafts: serde_json::from_slice(include_bytes!(
-                "../../../../assets/sprites/buildings_crafts.json"
-            ))
-            .expect("buildings_crafts.json"),
-            civic: serde_json::from_slice(include_bytes!(
-                "../../../../assets/sprites/buildings_civic.json"
-            ))
-            .expect("buildings_civic.json"),
+            economy: serde_json::from_slice(economy).expect("buildings_economy.json"),
+            crafts: serde_json::from_slice(crafts).expect("buildings_crafts.json"),
+            civic: serde_json::from_slice(civic).expect("buildings_civic.json"),
             units,
         }
     }
@@ -85,7 +74,12 @@ mod tests {
 
     #[test]
     fn each_trained_unit_has_idle_walk_and_action_frames_inside_the_atlas() {
-        let catalog = Catalog::parse();
+        let catalog = Catalog::parse([
+            include_bytes!("../../../../assets/sprites/buildings_economy.json"),
+            include_bytes!("../../../../assets/sprites/buildings_crafts.json"),
+            include_bytes!("../../../../assets/sprites/buildings_civic.json"),
+            include_bytes!("../../../../assets/sprites/units.json"),
+        ]);
         for kind in [
             UnitKind::Guard,
             UnitKind::Archer,
