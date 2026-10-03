@@ -1,4 +1,4 @@
-//! Bounded, single-slot production. Inputs are reserved by Produce; each job
+//! Ordered building tasks. Inputs are paid at submission; each active job
 //! completes once, or waits at the building when a unit has no free spawn cell.
 use super::*;
 
@@ -105,6 +105,36 @@ impl ProductKind {
 }
 
 impl GameWorld {
+    pub(super) fn cancel_queued_job(
+        &mut self,
+        building_id: &str,
+        queue_id: u64,
+    ) -> Result<(), CommandError> {
+        let building = self
+            .buildings
+            .iter_mut()
+            .find(|b| b.id == building_id)
+            .ok_or(CommandError::BuildingNotFound)?;
+        let index = building
+            .queue
+            .iter()
+            .position(|entry| entry.id == queue_id)
+            .ok_or(CommandError::QueuedJobNotFound)?;
+        let entry = building.queue.remove(index);
+        match entry.job {
+            BuildingJob::Produce { product, .. } => {
+                for &(kind, amount) in product.cost() {
+                    self.stockpile.add(kind, amount);
+                }
+            }
+            BuildingJob::Research { .. } => {
+                self.stockpile.food += RESEARCH_FOOD_COST;
+                self.stockpile.wood += RESEARCH_WOOD_COST;
+            }
+        }
+        Ok(())
+    }
+
     /// A nearby working farm or mining camp improves matching gathering by 25%.
     /// Multiple buildings do not stack, and foundations confer no benefit.
     pub(super) fn extraction_multiplier(&self, kind: ResourceKind, cell: CellCoordinate) -> f64 {
@@ -176,6 +206,11 @@ impl GameWorld {
                 self.researched_technologies.sort_unstable();
             }
         }
-        self.buildings[index].job = None;
+        let building = &mut self.buildings[index];
+        building.job = if building.queue.is_empty() {
+            None
+        } else {
+            Some(building.queue.remove(0).job)
+        };
     }
 }

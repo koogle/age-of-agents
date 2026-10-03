@@ -317,10 +317,60 @@ impl Hud {
                 });
             }
         }
+        // A separate, ordered row of waiting tasks. Tapping any coin cancels
+        // that task and refunds its paid inputs; the active task stays above.
+        let queued = selection::queued_commands(snapshot, model);
+        let mut queue_height = if queued.is_empty() { 0.0 } else { 72.0 * s };
+        if !queued.is_empty() {
+            let queue_width = (queued.len() as f32 * 44.0 + 24.0).max(168.0) * s;
+            let left = if narrow {
+                margin
+            } else {
+                (width - queue_width) / 2.0
+            };
+            let mut top = bar[1] - queue_height;
+            if narrow && left + queue_width > gx - 8.0 * s {
+                top = top.min(gy - 128.0 * s);
+                queue_height = bar[1] - top;
+            }
+            self.shape([left, top, queue_width, 64.0 * s], GLASS, 1.0, 20.0 * s);
+            self.text(
+                atlas,
+                "Queued · tap to cancel",
+                (left + 12.0 * s, top + 15.0 * s),
+                10.0 * s,
+                MUTED,
+                false,
+            );
+            for (index, command) in queued.iter().enumerate() {
+                let rect = [
+                    left + (12.0 + index as f32 * 44.0) * s,
+                    top + 22.0 * s,
+                    36.0 * s,
+                    36.0 * s,
+                ];
+                let hit = [rect[0] - 4.0 * s, rect[1] - 4.0 * s, 44.0 * s, 44.0 * s];
+                let hot = self.hovered(hit);
+                self.coin(atlas, command.icon, rect, true, hot);
+                if hot {
+                    hover_text = Some((command.label.clone(), command.detail.clone()));
+                }
+                self.regions.push(Region {
+                    rect: hit,
+                    action: command.action.clone(),
+                    enabled: true,
+                });
+            }
+        }
         // One width for every text this selection can show, so hovering
         // commands changes the words but never resizes the pill.
         let widest = std::iter::once((&title, &detail))
-            .chain(commands.iter().map(|c| (&c.label, &c.detail)))
+            .chain(
+                commands
+                    .iter()
+                    .chain(queued.iter())
+                    .map(|c| (&c.label, &c.detail)),
+            )
             .map(|(t, d)| {
                 Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
             })
@@ -332,7 +382,7 @@ impl Hud {
         let info = if narrow {
             // Above the coins; lifted clear of the speed coins when it is
             // wide enough to reach over the globe.
-            let mut top = bar[1] - 64.0 * s - extra;
+            let mut top = bar[1] - queue_height - 64.0 * s - extra;
             if margin + info_width > gx - 10.0 * s {
                 top = top.min(gy - 56.0 * s - 60.0 * s - extra);
             }
@@ -340,7 +390,7 @@ impl Hud {
         } else {
             [
                 (width - info_width) / 2.0,
-                bar[1] - 64.0 * s - extra,
+                bar[1] - queue_height - 64.0 * s - extra,
                 info_width,
                 52.0 * s + extra,
             ]
@@ -349,7 +399,7 @@ impl Hud {
         self.sprite(
             atlas,
             portrait,
-            [info[0] - 2.0 * s, info[1] - 2.0 * s, 56.0 * s, 56.0 * s],
+            [info[0] + 10.0 * s, info[1] + 6.0 * s, 40.0 * s, 40.0 * s],
             [1.0; 4],
         );
         self.text(
@@ -376,7 +426,7 @@ impl Hud {
         if let Some(progress) = progress {
             let track = [
                 info[0] + 64.0 * s,
-                info[1] + 45.0 * s,
+                info[1] + info[3] - 7.0 * s,
                 info_width - 84.0 * s,
                 3.0 * s,
             ];
