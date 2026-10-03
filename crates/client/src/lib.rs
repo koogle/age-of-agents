@@ -104,6 +104,8 @@ pub struct App {
     selection: Selection,
     pointer: Option<Pointer>,
     cursor: Vec2,
+    mouse_inside: bool,
+    focused: bool,
     modifiers: ModifiersState,
     feedback: feedback::Feedback,
     incoming: VecDeque<WorldSnapshot>,
@@ -174,6 +176,8 @@ impl App {
             selection: Selection::default(),
             pointer: None,
             cursor: Vec2::ZERO,
+            mouse_inside: false,
+            focused: true,
             modifiers: ModifiersState::empty(),
             feedback: feedback::Feedback::default(),
             incoming: VecDeque::new(),
@@ -574,6 +578,7 @@ impl App {
         if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {
             self.toast = None;
         }
+        self.edge_pan(dt as f32);
         self.view.frame(dt as f32);
         let ghost = match self.build {
             hud::BuildUi::PlacingField if !self.hud.covers(self.cursor) => self
@@ -808,8 +813,11 @@ impl ApplicationHandler<Game> for App {
             WindowEvent::Resized(_) => self.fit_surface(),
             WindowEvent::RedrawRequested => self.redraw(),
             WindowEvent::CursorMoved { position, .. } => {
+                self.mouse_inside = true;
                 self.moved(Vec2::new(position.x as f32, position.y as f32))
             }
+            WindowEvent::CursorLeft { .. } => self.mouse_inside = false,
+            WindowEvent::Focused(true) => self.focused = true,
             WindowEvent::MouseInput { state, button, .. } => match state {
                 ElementState::Pressed => {
                     self.press(self.cursor, button, self.modifiers.shift_key())
@@ -818,6 +826,8 @@ impl ApplicationHandler<Game> for App {
             },
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
             WindowEvent::Focused(false) => {
+                self.focused = false;
+                self.mouse_inside = false;
                 self.modifiers = ModifiersState::empty();
                 self.pointer = None;
                 self.touches.clear();
@@ -828,7 +838,11 @@ impl ApplicationHandler<Game> for App {
                     MouseScrollDelta::LineDelta(_, y) => y,
                     MouseScrollDelta::PixelDelta(p) => p.y as f32 / 60.0,
                 };
-                self.rig.zoom((1.0 - lines * 0.1).clamp(0.5, 1.5));
+                let heights = &self.view.heights;
+                self.rig
+                    .zoom_at(self.cursor, (1.0 - lines * 0.1).clamp(0.5, 1.5), |x, z| {
+                        heights.at(x, z)
+                    });
             }
             WindowEvent::Touch(touch) => {
                 let pixel = Vec2::new(touch.location.x as f32, touch.location.y as f32);
