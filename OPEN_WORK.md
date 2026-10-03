@@ -4,7 +4,9 @@
 
 Implemented local dock transport: 60 wood + 20 timber, 20-second queued production, four reserved passenger seats and a 200-good hold. Typed atomic sail/stop/board/land/transfer commands preserve passenger IDs, carried loads, housing and save compatibility. Native/WebGL controls and FAL-derived transparent front/rear sprites are integrated. Persistent destination islands (B3), local inventories/trade (B4), and cumulative globe discovery remain future work. First-completion destination generation is recorded as the future contract, not claimed as implemented.
 
-Verification in progress: full workspace suite, native/WASM lint, sprite audit, desktop/phone browser flow and review. Modal credentials have not been established.
+Verified: all 171 workspace tests (13 server, 47 client, 111 game), strict native/WASM Clippy, formatting/whitespace, rebuilt release WASM, 270-frame resolution audit, transport transparency/registration, and UI icon checks. Rebased onto master a27a564, preserving the legacy-frontend removal; repeated server tests/build and strict native lint pass. Real Chromium desktop clicks and DPR-2 phone taps cover dock production, loading, boarding, sailing, return-to-dock, safe landing and unloading; desktop X stops the ship. Both report zero page errors. Reviewed close-zoom desktop and phone screenshots. Evidence and drivers: `/workspace/scratch/transport/`. Review: [Local transport](docs/TRANSPORT_REVIEW.md).
+
+Release: direct Modal deployment was attempted and rejected with “Token missing. Could not authenticate client.” This environment has no Modal token. PR review/merge and the existing merge-triggered deployment workflow remain pending; do not describe this feature as live.
 
 ## Retire the unused frontend (2026-10-03)
 

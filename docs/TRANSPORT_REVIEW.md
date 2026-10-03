@@ -38,7 +38,9 @@ FAL sources, OpenAI refinement, prompts and request IDs are retained in
 `assets/sprites/transport_sources/`. Two 512px authored frames pass the shared
 270-frame resolution audit and transport transparency/registration checks.
 
-Browser evidence and final release status are recorded in `OPEN_WORK.md`.
+Real desktop mouse controls and DPR-2 phone touch controls passed production, cargo loading, boarding, sailing, docking, landing and unloading against an isolated SQLite server, with no page errors. Desktop stopping and phone pinch zoom were also exercised. Full verification passed 171 tests, strict native/WASM lint, formatting, rebuilt release WASM and asset checks.
+
+Browser evidence and the missing-Modal-token release blocker are recorded in `OPEN_WORK.md`.
 `cargo run -p aoa-game --example transport_fixture` prints an isolated coastal
 save for reproducible acceptance; it never writes to a live database.
 
