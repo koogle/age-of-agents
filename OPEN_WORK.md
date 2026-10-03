@@ -38,3 +38,11 @@ Walking villagers no longer flicker between sprite directions on zigzag grid rou
 - Integrated concurrent master f2bbf32 (villager direction hold and footprint-based sprite depth/silhouettes) and rebuilt WASM. 94 workspace tests, native/WASM clippy, formatting and atlas checks pass. New regression ensures initial house foundations reach plot bounds while completed houses keep 0.72 fill. Desktop gameplay and desktop/DPR-2 phone loading checks pass with no page errors; DPR-2 phone ghost drag/release and snapped foundation placement also pass without page errors, and the full-size foundation was visually checked against the grid.
 - Thermonuclear review passed: existing packer/scale logic and shared loading assets, no extra renderer transformations, dependencies or game rules. All client files remain under 1,000 lines.
 - Next: push verified correction to master, which triggers production deployment.
+
+## Illustrated paving follow-up
+
+- Replaced the grey, heavy-grout cobblestone with warm cream limestone, sandy joints and delicate brown contours matched to the original house art. Source/provenance in `assets/terrain/cobblestone.provenance.json`.
+- FAL nano-banana/edit request 01a10209-fef2-7533-bc0f-2d70b3d3985b returned HTTP 422 content-check rejection, no image. Used OpenAI image_gen fallback. Texture is opaque 1254px RGB PNG.
+- Ground shader mirrors the swatch in world space and clamps sampling within each mip level using the existing sampler, joining identical edge pixels without processing/duplicating the ink lines. Geometry, footprints, buildings and placement rules unchanged.
+- Integrated remote 782beab first. 96 workspace tests, native/WASM lint, formatting and WebAssembly build pass. Repeated 3×3 texture preview and desktop gameplay reviewed; selection and grid checks pass without page errors. The first browser run caught WebGL's single-sampler-per-texture restriction; manual clamping within the selected mip resolves it while retaining minification filtering. DPR-2 phone ghost drag/release and snapped placement pass with no page errors.
+- Thermonuclear review: one texture replacement and localized sampling logic, no new dependencies or rendering paths. Next: push verified correction to master for automatic deployment.
