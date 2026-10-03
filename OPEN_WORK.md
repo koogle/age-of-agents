@@ -1,5 +1,9 @@
 # Open Work
 
+## Villager drop-off routing (completed 2026-10-03)
+
+PR #44 merged at `d09c852` and pushed. Automatic unloading chooses the shortest available route to a completed compatible building, falls back to waiting with cargo when all sites are busy, and gathering preserves its order through reserved approaches. All 103 workspace tests, strict native/WASM lint, formatting and the actual WebGL2 three-load granary loop passed. Actions run `37136857766` passed quality and Modal deployment/verification; a separate production check passed (120×80, 9,600 terrain cells, distinct units and fog privacy). Review: `docs/GATHERING_ROUTING_REVIEW.md`. Browser evidence remains under `/workspace/scratch/gathering-check/`. Concurrent building integration at `5bd1859` explicitly preserves this fix. No remaining work for this request.
+
 ## Current building implementation (2026-10-03)
 
 Branch `work`: building implementation saved in commit `3fe935a`; user authorized merging `claude/fal-catalog-sprites`. Sprite merge committed as `b58ba9d`; user now authorized pushing to `master` and publishing the combined game. Integrated latest production `d09c852`, including the concurrent drop-off routing fix; initial push correctly rejected the newer remote commit. Drop-off fix preserved and verified: 74 domain tests passed, including all five new gathering regressions and economy tests; the earlier full randomized invariant test passed before this upstream-only routing fix. Native/WASM strict lint and rebuilt WASM pass. Retry push and monitor Actions deployment. User requested implementation of existing buildings, with artwork handled separately on `claude/fal-catalog-sprites`, and high-definition sprites for all actions.
