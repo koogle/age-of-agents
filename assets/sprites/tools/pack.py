@@ -60,6 +60,15 @@ for name, frames in data.items():
     scale = {"idle": by_height, "walk": by_height, "carry": by_height, "forage": by_height * 0.62}.get(anim, by_height if os.environ.get("TOOL_SCALE") == "height" else (by_blue * by_height) ** 0.5)
     print(f"{name:12s} blue {by_blue:.3f} height {by_height:.3f}")
     ground = np.median([y1 for _, _, y1 in frames])          # shared ground line of the strip
+    if _K > 1:
+        scale = min(scale, 1.0)
+        for sub, y0, y1 in frames:
+            foot = (sub[..., 3] > 40)[int(ground - 0.12 * (ground - y0)):int(ground)]
+            fx = np.nonzero(foot.any(0))[0]
+            cx = (fx.min() + fx.max()) / 2 if len(fx) else sub.shape[1] / 2
+            scale = min(scale, (CELL / 2 - 8) / max(cx, sub.shape[1] - cx),
+                        (FOOT_Y - 8) / (ground - y0),
+                        (CELL - FOOT_Y - 8) / max(1, y1 - ground))
     for sub, y0, y1 in frames:
         img = Image.fromarray(np.clip(sub, 0, 255).astype(np.uint8), "RGBA")
         al = sub[..., 3] > 40
@@ -77,7 +86,7 @@ cols = 8; rows = -(-len(sheet_cells) // cols)
 sheet = Image.new("RGBA", (cols * CELL, rows * CELL))
 for i, c in enumerate(sheet_cells): sheet.alpha_composite(c, ((i % cols) * CELL, (i // cols) * CELL))
 rect = lambda i: [(i % cols) * CELL, (i // cols) * CELL, CELL, CELL]
-manifest = {"image": os.path.basename(sys.argv[1]) + ".png", "cell": [CELL, CELL], "anchor": [CELL // 2, FOOT_Y], "figureHeight": FIG_H,
+manifest = {"image": os.path.basename(sys.argv[1]) + ".png", "size": list(sheet.size), "cell": [CELL, CELL], "anchor": [CELL // 2, FOOT_Y], "figureHeight": FIG_H,
             "facings": "front = three-quarter front (facing viewer-left), back = three-quarter back (facing viewer-right); mirror for the other two",
             "fps": {"idle": 2, "walk": 8, "carry": 7, "chop": 5, "mine": 5, "forage": 3, "dig": 5, "build": 6},
             "animations": {a: {f: [rect(i) for i in idx] for f, idx in fs.items()} for a, fs in meta.items()}}

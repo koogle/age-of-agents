@@ -15,7 +15,7 @@ Order by prerequisites first, then estimated complexity within each stage. Small
 | A1 | Release and presentation verification — small | Latest runtime deployment | Confirm the latest release containing #55 succeeds, then check fresh-island `/play`, camera controls, gathering animations and loading-title cleanup. Also record native reset-dialog appearance, deployed globe behavior, and villager direction/pose holds on zigzag routes. Use isolated worlds; never reset the shared production save. |
 | A2 | Field placement safety — small | None | Make `plant_field` preserve existing ground routes as building placement does. Cover trapped bystanders and the last exit with regressions; preserve wood/stone charges, shared labor and manual replenishment. |
 | A3 | Touch selection and accessibility — medium | None; coordinate client edits with B5 | Add additive touch selection and accessible keyboard/screen-reader equivalents for canvas controls. Preserve desktop Shift-click/Shift-drag, mouse/touch parity and camera gestures. Explicit blocking/non-blocking task classification remains open; scope it separately if it requires new domain semantics. |
-| A4 | HD action/facing sprites — large asset workload | None for existing units; B1/B2 for ship states | Audit and recover/regenerate/refine remaining low-resolution art, then repack with provenance. Last audit: 183 of 264 frames below 512 px. Require detailed authored sources and at least 512×512 frames, not DPI metadata or a larger canvas alone. Run resolution/asset checks and inspect maximum-zoom desktop and DPR-2 phone. Add ship art once action/facing requirements are agreed. |
+| A4 | Ship action/facing sprites — asset workload | B1/B2 ship-state requirements | Generate/refine ship-state art once action/facing requirements are agreed. Require detailed authored sources, at least 512×512 frames and provenance. Run resolution/asset checks and inspect maximum-zoom desktop and DPR-2 phone. |
 
 ### Stage 2 — Core dependency chain
 
@@ -39,6 +39,8 @@ Use one integration owner for shared domain, occupancy and save-schema changes. 
 Later, split pirates, mythical creatures, calamities, treasures and permanent upgrades into separate proposals/PRs after C2. Timing, balance and upgrade rules remain open; follow the [proposed gameplay loop](README.md#proposed-gameplay-loop).
 
 ## Release verification handoff
+
+HD sprite repack on `art/hd-sprite-repack`: all 183 undersized audited frames now use 512 px cells from recovered sources and reviewed refinements. Strict audit, workspace tests, native/WASM lint and desktop/DPR-2 phone rendering checks pass. Combined verification preserves the latest selection-ring fixes, and actual UI selection → gathering with partial cargo passes. Merge/deployment remain outstanding. Review: `docs/HD_SPRITES_REVIEW.md`.
 
 Verify the next production release for the NPC ring terrain-occlusion correction: selection rings draw above terrain/raised plots without writing depth, before billboards so buildings and units still cover them. All 151 workspace tests, formatting, strict native/WASM lint and desktop/phone browser checks pass; rebuilt WASM included. Before/after pixels confirm repaired ground arcs and unchanged opaque building regions. Structural review: six lines in the existing shader, no new passes, dependencies or gameplay changes. Evidence: `/workspace/scratch/highlight-depth-*`. User authorized PR merge into `master`.
 

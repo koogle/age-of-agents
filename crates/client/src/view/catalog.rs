@@ -27,6 +27,7 @@ impl Catalog {
     pub fn parse([economy, crafts, civic, units]: [&[u8]; 4]) -> Self {
         let mut units: UnitSheet = serde_json::from_slice(units).expect("units.json");
         for art in units.units.values_mut() {
+            art.size = units.size;
             art.cell = units.cell;
             art.anchor = units.anchor;
         }
