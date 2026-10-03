@@ -8,11 +8,11 @@ The current prototype is a single-island RTS economy with a shared Rust simulati
 
 Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. The long-term world keeps expanding as you discover islands, without a fixed island limit.
 
-Time keeps moving as you expand. Islands have local dangers such as wolves; later threats include pirates and mythical creatures such as a cyclops. Train warriors and archers to protect your settlements. Calamities grow stronger over time: a hurricane might destroy your fleet, famine might kill villagers and halve your stores, or fire might devastate an island.
+Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Runs are expected to end in defeat. Treasures and progress unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
+Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite.
 
-This is the intended direction. Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite. Fresh games currently end at the settlement/timber economy; there is no departure option yet.
+Fresh games currently end at the settlement/timber economy; there is no departure option yet.
 
 ## Implemented roadmap
 
@@ -20,7 +20,7 @@ This is the intended direction. Ships, multiple islands, local inventories, comb
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
-- Farms with harvestable, manually replenished fields; mining camps and local gathering bonuses.
+- Farms with harvestable, manually replenished fields and dedicated soil/cultivation/seedling/wheat sprites; mining camps and local gathering bonuses.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Wood → timber processing on starter islands; steel, bricks and cloth await future destination resources. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
