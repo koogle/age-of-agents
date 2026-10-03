@@ -1,151 +1,151 @@
 {
-  "note": "Source pixels [left, front, right, rear] of the structural ground footprint in stage order. Excludes steps, pots, scaffolding and loose materials. Hidden rear corners continue the structural wall axes. Circular towers use corners of the circumscribed ground square; docks use deck level (posts extend below). House and granary coordinates refer to their cropped cells in orthogonal_house_granary.png; other kinds refer to individual original cutouts.",
+  "note": "Source pixels [left, front, right, rear] of the structural ground footprint in stage order. Excludes steps, pots, scaffolding and loose materials. Hidden rear corners continue the structural wall axes. Circular towers use corners of the circumscribed ground square; docks use deck level (posts extend below).",
   "footprints": {
     "house": [
       [
         [
-          50,
-          291
+          166,
+          586
         ],
         [
-          222,
+          498,
+          773
+        ],
+        [
+          846,
+          581
+        ],
+        [
+          518,
           383
-        ],
-        [
-          397,
-          291
-        ],
-        [
-          225,
-          199
         ]
       ],
       [
         [
-          52,
-          292
+          220,
+          690
         ],
         [
-          222,
-          383
+          496,
+          844
         ],
         [
-          393,
-          292
+          800,
+          690
         ],
         [
-          223,
-          201
+          524,
+          536
         ]
       ],
       [
         [
-          50,
-          292
+          211,
+          692
         ],
         [
-          226,
-          383
+          492,
+          843
         ],
         [
-          397,
-          292
+          800,
+          690
         ],
         [
-          221,
-          201
+          519,
+          539
         ]
       ],
       [
         [
-          51,
-          292
+          211,
+          692
         ],
         [
-          225,
-          383
+          492,
+          843
         ],
         [
-          396,
-          292
+          800,
+          690
         ],
         [
-          222,
-          201
+          519,
+          539
         ]
       ]
     ],
     "granary": [
       [
         [
-          50,
-          287
+          166,
+          625
         ],
         [
-          222,
-          377
+          501,
+          789
         ],
         [
-          397,
-          287
+          866,
+          601
         ],
         [
-          225,
-          197
+          525,
+          425
         ]
       ],
       [
         [
-          45,
-          288
+          157,
+          690
         ],
         [
-          222,
-          381
+          489,
+          838
         ],
         [
-          399,
-          288
+          810,
+          652
         ],
         [
-          222,
-          195
+          478,
+          504
         ]
       ],
       [
         [
-          42,
-          288
+          154,
+          690
         ],
         [
-          222,
-          381
+          498,
+          842
         ],
         [
-          402,
-          288
+          869,
+          655
         ],
         [
-          222,
-          195
+          525,
+          503
         ]
       ],
       [
         [
-          41,
-          288
+          154,
+          690
         ],
         [
-          221,
-          381
+          498,
+          842
         ],
         [
-          401,
-          288
+          869,
+          655
         ],
         [
-          221,
-          195
+          525,
+          503
         ]
       ]
     ],
