@@ -53,4 +53,6 @@ About **$0.64**: twelve nano-banana/edit generations (ten textures plus the clay
 
 ## Building plots
 
-`cobblestone.png` reuses the existing painted `assets/sprites/tile_stone.png` art. The original file contains JPEG bytes despite its extension; the runtime copy is a lossless 1024×1024 RGBA PNG conversion for the Rust client's PNG/WebP decoder. No new generation or art edits were needed. The renderer uses world-space repetition beneath exact building claims and placement previews, independently of the optional grid overlay.
+`cobblestone.png` is an opaque 1254×1254 illustrated limestone swatch with warm cream stone, light sandy mortar and fine brown outlines matching the original house art. Generation provenance is in `cobblestone.provenance.json`. FAL nano-banana/edit rejected the initial request with a content-check error; the replacement was generated with OpenAI image_gen.
+
+The renderer mirrors the swatch in world space and clamps sampling inside each mip level, so repeated tiles meet at identical pixels without blurring or doubling the painted contours. It still covers exact building claims and placement previews, independently of the optional grid overlay. Original `assets/sprites/tile_stone.png` is retained but no longer used for paving.
