@@ -1,5 +1,11 @@
 # Open Work
 
+## AoA favicon (2026-10-03)
+
+User requested creating an AoA favicon from the title style, opening a PR and merging into master. Added transparent cream-marble/terracotta monogram assets (256px PNG and 16/32/48/64px ICO), linked from both `/` and `/play` through the existing asset route. Production verification now compares both favicon files. Generation provenance is in `assets/loading/README.md`.
+
+Verification: Chromium desktop and DPR-2 phone loaded both pages, resolved both icon URLs to exact local bytes and decoded the PNG; ICO sizes and transparent corners pass. Visually reviewed 16/32/64px icons on light and dark tab backgrounds (`/workspace/scratch/favicon/tab-sizes.png`). Existing frontend syntax, asset checks, Python compilation and diff whitespace pass. Thermonuclear review: direct static asset links, no dependencies, server routes or gameplay changes. Rust tooling is unavailable locally; the existing master deployment workflow runs the Rust quality gates and deploys/verifies Modal after merge. Next: create and merge the authorized PR; monitor the deployment workflow.
+
 Updated 2026-10-03 at 22:30 Europe/Madrid. Keep only outstanding work, blockers and verification follow-ups here. Implemented features are summarized in [README.md](README.md); completed history lives in Git and `docs/`.
 
 Use `master` as the integration branch and PR base.

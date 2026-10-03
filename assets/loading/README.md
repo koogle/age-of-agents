@@ -4,6 +4,7 @@ Art for the `/play` loading screen (`web/index.html`): a painted title and build
 
 | File | Size | Use |
 | --- | --- | --- |
+| `favicon.png` / `favicon.ico` | 256×256 PNG; 16/32/48/64 px ICO | Transparent "AoA" monogram matching the title, shared by `/` and `/play`. |
 | `title.webp` | 1600×279, lossless WebP with alpha | The "Age of Agents" wordmark: carved cream marble letters with a terracotta bevel, fine ink outlines, and an olive sprig under "of". Transparent background. Display it about 500–760 px wide. |
 | `buildings.webp` | 1024×1280, lossy WebP with alpha | Five buildings × four stages, in 256 px cells, for display at about 240 px tall. |
 | `buildings.json` | | The layout, below. |
@@ -55,3 +56,7 @@ Art for the `/play` loading screen (`web/index.html`): a painted title and build
 - The watchtower foundation ring sits a little left of the cell centre, because the stones and planks beside it widen its bounding box.
 - The dock's foundation posts spread wider than the finished jetty.
 - The title's marble is slightly smoother than the original render after the 2× upscale.
+
+## Favicon
+
+Generated with the image generation tool using `title.webp` as the reference: uppercase A, smaller lowercase o, uppercase A, cream marble faces, terracotta bevels and ink outlines. Trimmed the transparent margin, centered on a transparent square, and exported with Lanczos sampling to PNG and a multi-size ICO. The full generated source remains in the session at `/workspace/generated_images/exec-b8e44f5b-ca42-419f-b0cf-c88a70899606.png`. No runtime dependency or server route is needed.
