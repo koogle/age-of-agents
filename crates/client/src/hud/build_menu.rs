@@ -50,11 +50,17 @@ pub(super) fn atlas(kind: BuildingKind) -> &'static str {
     }
 }
 
-pub(super) fn commands(build: BuildUi, stock: &Stockpile, has_farm: bool) -> Vec<Command> {
+pub(super) fn commands(
+    build: BuildUi,
+    stock: &Stockpile,
+    has_farm: bool,
+    available: &[BuildingKind],
+) -> Vec<Command> {
     let mut commands = if let BuildUi::Group(group) = build {
         group
             .buildings()
             .iter()
+            .filter(|kind| available.contains(kind))
             .map(|&kind| {
                 let (icon, _, name, _) = building_info(kind);
                 Command {
@@ -69,12 +75,19 @@ pub(super) fn commands(build: BuildUi, stock: &Stockpile, has_farm: bool) -> Vec
     } else {
         BuildingGroup::ALL
             .into_iter()
+            .filter(|group| {
+                group
+                    .buildings()
+                    .iter()
+                    .any(|kind| available.contains(kind))
+            })
             .map(|group| Command {
                 icon: building_info(group.buildings()[0]).0,
                 label: group.name().into(),
                 detail: group
                     .buildings()
                     .iter()
+                    .filter(|kind| available.contains(kind))
                     .map(|&kind| building_info(kind).2)
                     .collect::<Vec<_>>()
                     .join(", "),
@@ -126,6 +139,43 @@ mod tests {
     use std::collections::HashSet;
 
     #[test]
+    fn starter_menu_only_shows_relevant_groups_and_buildings() {
+        let stock = Stockpile::default();
+        let categories = commands(
+            BuildUi::Categories,
+            &stock,
+            false,
+            &aoa_game::STARTER_BUILDINGS,
+        );
+        assert_eq!(categories.len(), 4); // Town, Gathering, Production, Close.
+        assert!(
+            !categories
+                .iter()
+                .any(|c| c.action == Action::BuildGroup(BuildingGroup::Military))
+        );
+        let production = commands(
+            BuildUi::Group(BuildingGroup::Production),
+            &stock,
+            false,
+            &aoa_game::STARTER_BUILDINGS,
+        );
+        assert_eq!(production.len(), 2);
+        assert_eq!(
+            production[0].action,
+            Action::Place(BuildingKind::LumberMill)
+        );
+        let gathering = commands(
+            BuildUi::Group(BuildingGroup::Gathering),
+            &stock,
+            false,
+            &aoa_game::STARTER_BUILDINGS,
+        );
+        assert_eq!(gathering.len(), 3); // Farm, Field, All types.
+        assert_eq!(gathering[1].action, Action::PlaceField);
+        assert!(!gathering[1].enabled);
+    }
+
+    #[test]
     fn fields_need_a_farm_and_both_materials() {
         let mut stock = Stockpile {
             wood: 10.0,
@@ -133,10 +183,15 @@ mod tests {
             ..Default::default()
         };
         let field = |stock: &Stockpile, farm| {
-            commands(BuildUi::Group(BuildingGroup::Gathering), stock, farm)
-                .into_iter()
-                .find(|c| c.action == Action::PlaceField)
-                .unwrap()
+            commands(
+                BuildUi::Group(BuildingGroup::Gathering),
+                stock,
+                farm,
+                &aoa_game::BUILDABLE,
+            )
+            .into_iter()
+            .find(|c| c.action == Action::PlaceField)
+            .unwrap()
         };
         assert!(!field(&stock, false).enabled);
         assert!(field(&stock, true).enabled);
@@ -167,12 +222,12 @@ mod tests {
     #[test]
     fn categories_and_back_navigation_are_available_without_resources() {
         let stock = Stockpile::default();
-        let categories = commands(BuildUi::Categories, &stock, false);
+        let categories = commands(BuildUi::Categories, &stock, false, &aoa_game::BUILDABLE);
         assert_eq!(categories.len(), 5);
         for (command, group) in categories.iter().zip(BuildingGroup::ALL) {
             assert_eq!(command.action, Action::BuildGroup(group));
             assert!(command.enabled);
-            let menu = commands(BuildUi::Group(group), &stock, false);
+            let menu = commands(BuildUi::Group(group), &stock, false, &aoa_game::BUILDABLE);
             assert!(menu.len() <= 6);
             assert_eq!(menu.last().unwrap().action, Action::Build);
         }

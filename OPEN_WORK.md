@@ -4,6 +4,12 @@ Updated 2026-10-03. Keep this file to current status, remaining work, and blocke
 
 Use `master` as the integration branch and PR base. The branch rename is cancelled; agents should preserve ongoing feature work and continue targeting `origin/master`.
 
+## First-island economy PR (in progress)
+
+User requested a PR for timber-only starter processing and complementary later islands. Branch `feat/first-island-economy` targets `master`; do not merge or deploy this PR without a new request. Fresh worlds generate only food/wood/stone and use authoritative resource-discovery unlocks. Starter menu: town center, house, granary, farm/fields, lumber mill, dock; research: Forestry/Agriculture/Masonry. Rations/infirmaries deferred. Old saves default to unrestricted rules and keep their world. Ship budget now uses wood/timber with reachable raw-budget coverage; ships, destination islands and local inventories remain explicit follow-ups in ROADMAP.md. No new sprites or asset transformations.
+
+Verification: all 144 workspace tests pass (13 server, 36 client, 95 game), including 24-seed resource reachability, budget/processing and discovery/persistence/atomicity regressions. Native/WASM lint, formatting and release server/WASM builds pass. Desktop actual UI lumber-mill placement, exact 40 wood/10 stone construction cost, 10 wood processing charge and 5 timber completion passed without runtime errors; DPR-2 phone also passes all three menu groups with no runtime errors; screenshots /tmp/aoa-progression-*.png visually reviewed. PR creation pending. Review: docs/STARTER_ECONOMY_REVIEW.md. Preserve the native launch-script update on master. Fresh runs still cannot depart until the transport follow-up lands; README and PR must state this clearly.
+
 ## Current baseline
 
 - Native rebuild/launch is available through `./scripts/run_native.sh`; it runs from any working directory and preserves `AGE_OF_AGENTS_DB`. Shell syntax, native launch, formatting, 139 Rust tests, both lint targets, and the code-quality review passed; live-browser verification was unavailable because this session has no connected browser.

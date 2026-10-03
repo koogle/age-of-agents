@@ -1,0 +1,9 @@
+# Starter economy review
+
+Fresh worlds use food/wood/stone generation and resource-discovery unlocks. Timber is their only available processing chain. Existing saves deserialize the absent economy_rules field as Unrestricted, preserving their resources, buildings, jobs and catalog access. Reset is still an explicit destructive user choice; no schema reset or silent migration was added.
+
+The domain computes available buildings and filters snapshot production/research offers. Build, Produce and Research enforce those same rules inside the existing atomic command transaction. Clients only filter existing menu groups; they neither discover resources nor decide unlocks. Discovery uses explored node coordinates and persists after depletion; hidden nodes and stockpile amounts cannot bypass it. No extra discovery cache, tech ages, simulation framework, dependencies, autonomy or art changes.
+
+The former hypothetical boat budget required unavailable metal/fiber/clay. It is replaced by an explicit wood/timber transport design budget and a reachable raw starter budget, including wood processing. Tests cover 24 generated seeds and demonstrate lumber-mill construction, timber production, starter building costs, research and training while retaining the proposed ship cost. This is not a playable transport recipe: shipping, passengers, island expansion, local inventories and trade are deferred and documented as such.
+
+Focused checks cover legacy/new save round trips, hidden/discovered/exhausted deposits, complementary iron/coal prerequisites, atomic rejection despite abundant materials, blocked rations, filtered starter groups and the retained full legacy menu. Browser verification uses an isolated SQLite world. Current results and PR status live in OPEN_WORK.md. This PR is for review, not an authorization to merge or deploy.
