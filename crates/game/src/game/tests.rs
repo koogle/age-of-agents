@@ -86,7 +86,7 @@ fn assert_gather_phase(unit: &Unit, expected: GatherPhase) {
     );
 }
 
-fn run(world: &mut GameWorld, seconds: f64) {
+pub(super) fn run(world: &mut GameWorld, seconds: f64) {
     for _ in 0..(seconds * 10.0).round() as u32 {
         world.tick(0.1);
     }

@@ -1,21 +1,19 @@
 # Open Work
 
-Updated 2026-10-03. Branch `codex/shift-box-selection`, based on current remote default branch `master` at `b78e279`. Jakob requested a PR for Shift-drag box selection and explicitly authorized merging it into the default branch.
+Updated 2026-10-03. Checkout `work`, based on remote `master` at `c5e65fb` (merged Shift-drag box selection). Current request: fix villagers choosing unsuitable drop-off routes and occasionally abandoning the gathering loop.
 
 ## Current change
 
-Shift-left-drag from empty ground draws a gold rectangle and adds enclosed visible unit ground anchors to the current selection. Empty boxes preserve selection; IDs are deterministic and duplicate-free. Shift-click toggles individual units; ordinary drag pans; touch tap/pan, HUD and placement paths remain intact. Shared native/WebGL2 gesture and selection code extracted into small modules; all client files remain below 1,000 lines. README and ROADMAP synchronized; rebuilt web/pkg.
+Automatic drop-offs rank completed compatible buildings by currently available route length, considering villager traffic, with static fallback when all sites are busy. Temporary approach reservations no longer make a gatherer abandon its order or skip the next nearby node. Cargo, gather phases, save formats, explicit Deposit semantics and idle behavior remain intact. README and ROADMAP synchronized. Review: docs/GATHERING_ROUTING_REVIEW.md.
 
 ## Verification
 
-98 workspace tests pass, including two focused selection regressions. Formatting, strict native/WASM Clippy and release builds pass. Browser DPR 1/2 verifies box/reversed additive selection, Shift-click, Escape and pan without page errors. Review: docs/BOX_SELECTION_REVIEW.md. Evidence and previous handoff: artifacts/box-selection/.
+All 103 workspace tests pass, including five gathering regressions and randomized material/collision invariants. Formatting, strict WASM Clippy, server build, asset checks and diff whitespace checks pass; strict native Clippy passes too. Headless Chromium loaded the actual WebGL2 demo and observed three full food deliveries (20/40/60) at the closer granary, repeated resumption and final idle after depletion, with no page errors. Evidence and an isolated SQLite file are under `/workspace/scratch/gathering-check/`; existing saves remain untouched.
 
 ## Next action
 
-Create the PR, merge into `master` (the repository has no `main` branch), and verify automatic Modal deployment. Refresh/relaunch the local native bundle with the merged source. Additive touch and accessible DOM controls remain prior open gaps.
+Jakob explicitly requested a PR, merge and push. Create the PR, merge it into `master`, synchronize this checkout, and verify the automatic Modal deployment. Direct Modal CLI credentials are not configured in this environment; GitHub authentication is available.
 
 ## Preserved work
 
-Historical root checkout `/Users/jakob/Projects/age-of-agents` retains its older uncommitted prototype/artwork; do not bulk merge or deploy it. Older native work is preserved by recovery commit `da820bb` on `codex/native-sprite-rendering`. Existing server and SQLite saves remain untouched. Previous native app was launched from `b78e279` before this change. Local-change audit: docs/LOCAL_CHANGE_AUDIT.md (historical).
-
-Deployment prerequisite: the previous master workflow failed after deployment because its verification still expected 60×40/2,400 cells. Updated the existing check to the current 120×80/9,600 cells; no runtime or save changes.
+Historical root checkout `/Users/jakob/Projects/age-of-agents` retains its older prototype/artwork; do not bulk merge or deploy it. Older native work is preserved by recovery commit `da820bb` on `codex/native-sprite-rendering`. Prior selection change is merged as PR #43. Additive touch and accessible DOM controls remain prior open gaps.
