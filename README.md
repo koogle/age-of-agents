@@ -12,15 +12,16 @@ Time keeps moving as you expand. Islands have local dangers such as wolves; late
 
 Runs are expected to end in defeat. Treasures and progress unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-This is the intended direction. Ships, multiple islands, combat, calamities, and permanent upgrades are not implemented yet.
+This is the intended direction. Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite. Fresh games currently end at the settlement/timber economy; there is no departure option yet.
 
 ## Implemented roadmap
 
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
-- All 17 catalog buildings, housing, five gathering technologies, and 13 resource/product stockpiles.
+- New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
+- The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
 - Farms with harvestable, manually replenished fields; mining camps and local gathering bonuses.
-- Five processing chains: timber, steel, bricks, cloth, and rations.
+- Wood → timber processing on starter islands; steel, bricks and cloth await future destination resources. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
 - Distant zoom eases into a curved world overview; explored islands will be added after ships and persistent island travel are implemented.
@@ -68,7 +69,7 @@ cargo run --release
 
 Open <http://localhost:8000/play>, or <http://localhost:8000/play?local> for an in-page simulation. The legacy client is at <http://localhost:8000>.
 
-Saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run`. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use the Reset game dialog.
+Existing saves keep their terrain, resources, buildings and economy rules; choose Reset game only when you want a fresh starter island (this erases that world). Saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run`. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use the Reset game dialog.
 
 Select a unit, then tap/click ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Shift-click or Shift-drag adds units on desktop; drag to pan, wheel/pinch to zoom, X to stop, G for the grid, and Escape to cancel placement. Reset game erases the current world's progress. Villagers carrying goods unload first before a new gather, build, or field-preparation assignment, then resume that task automatically; the selection status shows what comes next.
 
