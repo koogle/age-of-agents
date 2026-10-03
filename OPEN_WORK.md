@@ -1,5 +1,11 @@
 # Open Work
 
+## Overhead resource drop-off status (2026-10-03)
+
+Replaced the initial persistent pill with a one-shot “Dropping off wood” announcement using the exact existing resource-gain font, stroke, upward drift and 1.4-second fade. It appears when a villager enters unloading, including gather reassignment, construction, field preparation and explicit deposits. Repeated snapshots and Returning → Depositing do not replay it; actual delivery retains its separate +resource message. Loading an existing state does not replay old announcements. Removed the dedicated status HUD/view code; no domain, dependency or art changes.
+
+Thermonuclear review: one transition check feeds the existing bounded feedback list and animation; no second visual/timer system. Regression coverage checks unloading actions, one-shot transitions, repeat snapshots and subsequent resource gains. Initial implementation passed all 140 workspace tests. Revised verification passes all 37 client tests, strict native/WASM Clippy, formatting, diff whitespace and release WASM rebuild. Timed desktop and DPR-2 phone WebGL2 snapshot fixtures visibly show the matching italic feedback and its expiry while the unit remains in Returning; repeat snapshots do not replay it, and both browsers report zero errors. Evidence: /workspace/scratch/status-check/. Modal SDK/credentials are not configured; no deployment performed.
+
 ## AoA favicon (2026-10-03)
 
 User requested creating an AoA favicon from the title style, opening a PR and merging into master. Added transparent cream-marble/terracotta monogram assets (256px PNG and 16/32/48/64px ICO), linked from both `/` and `/play` through the existing asset route. Production verification now compares both favicon files. Generation provenance is in `assets/loading/README.md`.
