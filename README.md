@@ -91,6 +91,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
 - **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. Giving a busy villager a new order does the same and then starts the new task.
 - **Keep gathering:** when a node runs out, the gatherer moves on to the nearest reachable node of the same kind within 10 cells, and goes idle only when none is left.
+- **Hidden villagers:** a villager behind a building shows through it as a team-blue silhouette, as in Age of Empires II; villagers in front of a building always draw over it.
 - **Unload:** with villagers selected, tap a town center (or a granary for food and fiber) to send those carrying goods to unload there; they then wait for orders. A villager holding goods shows its load even when stopped.
 - **Finish the load:** a villager carrying goods drops them off before gathering a different kind or building.
 - **Target marker:** while villagers are selected, a ring under the pointer shows what a tap would do: gold over a resource or foundation to work on, white over ground to walk to.
