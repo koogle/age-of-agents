@@ -20,6 +20,12 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
     let world = inst.center + vec3<f32>(q.x * inst.radius, 0.0, q.y * inst.radius);
     var out: VOut;
     out.clip = g.view_proj * vec4<f32>(bend(world), 1.0);
+    // Unit selection is painted over terrain, including raised plots. This
+    // pass never writes depth and runs before billboards, so buildings and
+    // unit sprites still cover the ring normally.
+    if inst.ring > 2.5 {
+        out.clip.z = 0.0;
+    }
     out.local = q;
     out.color = inst.color;
     out.ring = inst.ring;

@@ -75,7 +75,7 @@ Engineering acceptance:
 
 ## Slice B — Multi-unit control
 
-Status: selected units use a broad ivory ground ring with a blue border in the shared native/WebGL2 renderer. Desktop selection and group orders are integrated; additive touch selection remains open.
+Status: selected units use a broad ivory ground ring with a blue border in the shared native/WebGL2 renderer; terrain never clips it, while buildings cover it. Desktop selection and group orders are integrated; additive touch selection remains open.
 
 Gameplay acceptance:
 
