@@ -192,6 +192,18 @@ impl Rig {
         self.clamp();
     }
 
+    /// Zoom while keeping the terrain under `pixel` at the same screen position.
+    /// Over the sky, or beyond the pan bounds, retain the normal camera limits.
+    pub fn zoom_at(&mut self, pixel: Vec2, factor: f32, height: impl Fn(f32, f32) -> f32) {
+        let grabbed = self.ground_at(pixel, height);
+        self.zoom(factor);
+        if let Some(grabbed) = grabbed
+            && let Some(now) = self.plane_at(pixel, grabbed.y)
+        {
+            self.drag(grabbed, now);
+        }
+    }
+
     pub fn nudge(&mut self, dx: f32, dz: f32) {
         let right = Vec3::new(YAW.cos(), 0.0, -YAW.sin());
         let forward = Vec3::new(-YAW.sin(), 0.0, -YAW.cos());
@@ -283,6 +295,57 @@ mod tests {
             );
         }
         assert!(rig.ground_at(Vec2::new(640.0, 0.0), |_, _| 0.0).is_none());
+    }
+
+    #[test]
+    fn pointer_zoom_preserves_raised_ground_at_all_distances_and_pixel_scales() {
+        for (width, height) in [(1280.0, 800.0), (780.0, 1688.0)] {
+            for distance in [5.0, 15.0, 60.0, 80.0, MAX_DISTANCE] {
+                for factor in [0.5, 0.9, 1.1, 1.5] {
+                    for offset in [Vec3::new(2.0, 0.7, -1.0), Vec3::new(-2.0, 0.7, 1.0)] {
+                        let mut rig = Rig::new();
+                        rig.width = width;
+                        rig.height = height;
+                        rig.look_at(COLUMNS / 2.0, ROWS / 2.0);
+                        rig.distance = distance;
+                        let point = rig.target + offset;
+                        let pixel = rig.screen_of(point).unwrap();
+                        rig.zoom_at(pixel, factor, |_, _| point.y);
+                        let after = rig.screen_of(point).unwrap();
+                        assert!(
+                            after.abs_diff_eq(pixel, 0.05),
+                            "distance={distance}, factor={factor}: {after:?} != {pixel:?}"
+                        );
+                        assert_eq!(
+                            rig.distance,
+                            (distance * factor).clamp(MIN_DISTANCE, MAX_DISTANCE)
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn pointer_zoom_over_sky_and_at_pan_bounds_stays_finite_and_bounded() {
+        let mut rig = Rig::new();
+        rig.width = 1280.0;
+        rig.height = 800.0;
+        rig.distance = MAX_DISTANCE;
+        let sky = Vec2::new(640.0, 0.0);
+        assert!(rig.ground_at(sky, |_, _| 0.0).is_none());
+        let target = rig.target;
+        rig.zoom_at(sky, 0.9, |_, _| 0.0);
+        assert_eq!(rig.target, target);
+        for (x, z) in [(-1.0, -1.0), (COLUMNS + 1.0, ROWS + 1.0)] {
+            rig.look_at(x, z);
+            for pixel in [Vec2::ZERO, Vec2::new(1280.0, 800.0)] {
+                rig.zoom_at(pixel, 0.5, |_, _| 0.0);
+                assert!(rig.target.is_finite());
+                assert!((-1.0..=COLUMNS + 1.0).contains(&rig.target.x));
+                assert!((-1.0..=ROWS + 1.0).contains(&rig.target.z));
+            }
+        }
     }
 
     #[test]
