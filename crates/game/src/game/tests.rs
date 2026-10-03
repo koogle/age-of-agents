@@ -97,8 +97,9 @@ fn voronoi_terrain_is_fixed_and_deterministic() {
     assert_eq!(fixture::fixture().terrain, fixture::fixture().terrain);
     let world = fixture::fixture();
     let coordinates: BTreeSet<_> = world.terrain.iter().map(|cell| cell.coordinate()).collect();
-    assert_eq!(world.terrain.len(), 2400);
-    assert_eq!(coordinates.len(), 2400);
+    let cells = usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS);
+    assert_eq!(world.terrain.len(), cells);
+    assert_eq!(coordinates.len(), cells);
     let biomes: BTreeSet<_> = world.terrain.iter().map(|cell| cell.biome).collect();
     assert_eq!(biomes.len(), 8);
 }
@@ -245,8 +246,8 @@ fn move_rejects_invalid_destinations_without_mutation() {
     let resource = world.resources[0].cell;
     let before = world.clone();
     for (to, expected) in [
-        (cell(60, 0), CommandError::InvalidDestination),
-        (cell(0, 40), CommandError::InvalidDestination),
+        (cell(WORLD_COLUMNS, 0), CommandError::InvalidDestination),
+        (cell(0, WORLD_ROWS), CommandError::InvalidDestination),
         (cell(28, 17), CommandError::DestinationOccupied),
         (resource, CommandError::DestinationOccupied),
         (cell(31, 21), CommandError::DestinationOccupied),
@@ -699,13 +700,13 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
     let resource = world.resources[0].cell;
     let before = world.clone();
     for origin in [
-        cell(58, 5),  // straddles the east edge
-        cell(5, 38),  // straddles the south edge
-        cell(26, 16), // overlaps the town center
-        resource,     // overlaps a resource
-        cell(27, 18), // overlaps villager-1 and the base
-        cell(30, 18), // overlaps villager-2 and the base
-        cell(38, 28), // covers villager-2's reservation
+        cell(WORLD_COLUMNS - 2, 5), // straddles the east edge
+        cell(5, WORLD_ROWS - 2),    // straddles the south edge
+        cell(26, 16),               // overlaps the town center
+        resource,                   // overlaps a resource
+        cell(27, 18),               // overlaps villager-1 and the base
+        cell(30, 18),               // overlaps villager-2 and the base
+        cell(38, 28),               // covers villager-2's reservation
     ] {
         assert_eq!(
             world.apply_command(build(origin)),
