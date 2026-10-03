@@ -70,17 +70,28 @@
     // through its four stages, then the next building takes its place.
     async function animateBuildings() {
       const canvas = overlay.querySelector('canvas.build');
-      const sheet = await (await fetch('/assets/loading/buildings.json')).json();
-      const image = new Image();
-      image.src = '/assets/loading/' + sheet.image;
-      await image.decode();
-      const names = Object.keys(sheet.frames);
+      // Reuse the lossless 512 px gameplay frames instead of the old 256 px
+      // loading-only sheet. Both views now show exactly the same reviewed art.
+      const sheets = await Promise.all(['towncenter', 'buildings_hd'].map(async name => {
+        const sheet = await (await fetch('/assets/sprites/' + name + '.json')).json();
+        const image = new Image();
+        image.src = '/assets/sprites/' + sheet.image;
+        await image.decode();
+        return { sheet, image };
+      }));
+      const [town, buildings] = sheets;
+      const sequence = [
+        { image: town.image, stages: ['foundation', 'build33', 'build66', 'complete'].map(key => town.sheet.frames[key]) },
+        ...Object.values(buildings.sheet.frames).map(stages => ({ image: buildings.image, stages })),
+      ];
       const scale = window.devicePixelRatio || 1;
       canvas.width = canvas.height = Math.round(240 * scale);
       const context = canvas.getContext('2d');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
       const STAGE = 650, HOLD = 1100, FADE = 250;
       const cycle = 3 * STAGE + HOLD + 2 * FADE;
-      const draw = (rect, alpha) => {
+      const draw = (image, rect, alpha) => {
         context.globalAlpha = alpha;
         context.drawImage(image, rect[0], rect[1], rect[2], rect[3], 0, 0, canvas.width, canvas.height);
       };
@@ -88,20 +99,20 @@
       const frame = now => {
         if (!overlay.isConnected) return;
         const elapsed = Math.max(0, now - start);
-        const stages = sheet.frames[names[Math.floor(elapsed / cycle) % names.length]];
+        const { image, stages } = sequence[Math.floor(elapsed / cycle) % sequence.length];
         let t = elapsed % cycle;
         context.clearRect(0, 0, canvas.width, canvas.height);
         if (t < FADE) {
-          draw(stages[0], t / FADE);
+          draw(image, stages[0], t / FADE);
         } else if ((t -= FADE) < 3 * STAGE) {
           // Each stage blends into the next over the last quarter of its time.
           const stage = Math.floor(t / STAGE), blend = Math.max(0, (t % STAGE) / STAGE - 0.75) * 4;
-          draw(stages[stage], 1);
-          if (blend > 0) draw(stages[stage + 1], blend);
+          draw(image, stages[stage], 1);
+          if (blend > 0) draw(image, stages[stage + 1], blend);
         } else if ((t -= 3 * STAGE) < HOLD) {
-          draw(stages[3], 1);
+          draw(image, stages[3], 1);
         } else {
-          draw(stages[3], 1 - (t - HOLD) / FADE);
+          draw(image, stages[3], 1 - (t - HOLD) / FADE);
         }
         requestAnimationFrame(frame);
       };

@@ -24,8 +24,9 @@ Walking villagers no longer flicker between sprite directions on zigzag grid rou
 
 ## Current building-placement work
 
-- Latest direction: make building types easier to recognize while keeping the original illustrated style. Houses render at 0.72 plot fill instead of 0.94 (about 23% smaller), including all construction stages and ghosts. Authoritative 3×3 claims and full cobblestone pads are unchanged.
-- Completed granary uses a targeted edit of the original architecture: visible wheat sheaves, open grain sacks, grain basket and wheat emblem above the door. Original cutout retained; new source `granary_grain_complete.png` and its structural base corners/provenance are checked in. Construction art remains original. Town center, tower and dock are unchanged.
-- Verification: 92 workspace tests, native/WASM clippy and formatting pass; WebAssembly rebuilt. Desktop Grid/selection/visual review and DPR-2 phone ghost drag/release with exact snapped placement pass without page errors in isolated `/tmp/aoa-identity.db`, with a completed granary beside houses.
-- Thermonuclear review: one per-kind visual scale and one completed-stage asset replacement in the existing packer; no dependencies or gameplay changes. Existing containment and stable-camera tests cover every stage.
-- Next: commit/push to master after browser review; production workflow deploys automatically.
+- Houses retain the approved smaller size (0.72 plot fill) for walls/roofs, completion and placement ghosts. Initial foundations now use full plot fill (1.0), independently of house size. Authoritative claims and exact cobblestone paving are unchanged.
+- Completed granary retains its wheat emblem, wheat sheaves, sacks and basket. Eight non-HQ roof/complete frames use targeted curved-tile line cleanup edits in `building_sources/clean_roofs/`. Original sources retained; HQ untouched. Source corners and generation provenance updated.
+- Loading now shares lossless 512 px gameplay atlases, with high-quality canvas sampling and DPR sizing. Old 256 px loading atlas retained as historical, unused art.
+- Integrated concurrent master f2bbf32 (villager direction hold and footprint-based sprite depth/silhouettes) and rebuilt WASM. 94 workspace tests, native/WASM clippy, formatting and atlas checks pass. New regression ensures initial house foundations reach plot bounds while completed houses keep 0.72 fill. Desktop gameplay and desktop/DPR-2 phone loading checks pass with no page errors; DPR-2 phone ghost drag/release and snapped foundation placement also pass without page errors, and the full-size foundation was visually checked against the grid.
+- Thermonuclear review passed: existing packer/scale logic and shared loading assets, no extra renderer transformations, dependencies or game rules. All client files remain under 1,000 lines.
+- Next: push verified correction to master, which triggers production deployment.

@@ -66,9 +66,20 @@ pub(crate) fn sprite(
     let points = corners.map(|[x, y]| ground_projection.inverse() * Vec2::new(x, -y));
     let low = points.into_iter().reduce(Vec2::min).unwrap();
     let high = points.into_iter().reduce(Vec2::max).unwrap();
-    // Houses are modest homes inside the same claimed plot; storage buildings
-    // keep their larger silhouette. Apply equally to construction and ghosts.
-    let plot_fill = if kind == BuildingKind::House {
+    // Initial construction plots fill the claim, independently of the smaller
+    // finished house. Later walls/roofs and completed placement ghosts retain
+    // the approved building scale.
+    let foundation = construction.is_some_and(|work| {
+        work < aoa_game::BUILD_SECONDS
+            * if kind == BuildingKind::TownCenter {
+                0.15
+            } else {
+                1.0 / 3.0
+            }
+    });
+    let plot_fill = if foundation {
+        1.0
+    } else if kind == BuildingKind::House {
         0.72
     } else {
         0.94
@@ -151,6 +162,30 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    #[test]
+    fn house_foundation_reaches_plot_edges_while_finished_house_stays_small() {
+        let sheets = sheets();
+        let heights = Heights::unknown();
+        let center = ground(&heights, 12.0, 12.0);
+        let (right, up) = Rig::new().basis();
+        let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
+        let inverse = Mat2::from_cols(project(Vec3::X), project(Vec3::Z)).inverse();
+        for (work, expected_fill) in [(Some(0.0), 1.0), (None, 0.72)] {
+            let art = sprite(&sheets, &heights, BuildingKind::House, center, work, false).1;
+            let (_, _, _, cell, corners) = frame(&sheets, BuildingKind::House, work, false);
+            let max_extent = corners
+                .into_iter()
+                .map(|[x, y]| {
+                    let q = Vec2::new(x / cell[0], 1.0 - y / cell[1]) - Vec2::from(art.pivot);
+                    let offset =
+                        project(Vec3::from(art.anchor) - center) + q * Vec2::from(art.size);
+                    (inverse * offset).abs().max_element() / (3.0 * CELL * 0.5)
+                })
+                .fold(0.0_f32, f32::max);
+            assert!((max_extent - expected_fill).abs() < 1e-5);
         }
     }
 
