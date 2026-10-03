@@ -204,3 +204,189 @@ fn reserved_resource_approach_waits_then_resumes_instead_of_idling() {
         );
     }
 }
+
+#[test]
+fn reassignment_unloads_the_old_kind_and_repeats_the_new_gathering_loop() {
+    for speed in [1.0, 2.0] {
+        for amount in [7.0, 20.0] {
+            let mut world = world();
+            world.simulation_speed = speed;
+            world.resources.push(node("berries", cell(8, 10), 100.0));
+            world.units[0].cargo = Some(CarriedResource {
+                kind: ResourceKind::Wood,
+                amount,
+            });
+            world.units[0].step = Some(Step {
+                to: cell(9, 10),
+                progress: 0.5,
+            });
+            world
+                .apply_command(Command::Gather {
+                    unit_id: "villager-1".into(),
+                    resource_id: "berries".into(),
+                })
+                .unwrap();
+            let mut new_deliveries = 0;
+            for _ in 0..600 {
+                let before = world.stockpile.food;
+                world.tick(0.1);
+                if world.stockpile.food - before > 1e-9 {
+                    new_deliveries += 1;
+                }
+                if world.stockpile.wood > 0.0 && world.resources[0].amount > 1e-9 {
+                    assert!(
+                        matches!(world.units[0].action, UnitAction::Gather { .. }),
+                        "reassignment stops after unloading: {:?}",
+                        world.units[0]
+                    );
+                }
+                if new_deliveries >= 2 {
+                    break;
+                }
+            }
+            assert_eq!(world.stockpile.wood, amount);
+            assert!(new_deliveries >= 2, "the reassigned loop must repeat");
+        }
+    }
+}
+
+#[test]
+fn mixed_cargo_group_reassignment_on_the_generated_island_keeps_gathering() {
+    let mut world = GameWorld::generate(DEFAULT_SEED);
+    let target = world
+        .resources
+        .iter()
+        .find(|r| r.kind == ResourceKind::Food)
+        .unwrap()
+        .id
+        .clone();
+    for (i, kind) in [ResourceKind::Wood, ResourceKind::Stone]
+        .into_iter()
+        .enumerate()
+    {
+        world.units[i].cargo = Some(CarriedResource { kind, amount: 7.0 });
+        world
+            .apply_command(Command::Gather {
+                unit_id: world.units[i].id.clone(),
+                resource_id: target.clone(),
+            })
+            .unwrap();
+    }
+    let mut deliveries = [0; 2];
+    let mut stalled = [0; 2];
+    for _ in 0..1200 {
+        let before = world.units.clone();
+        world.tick(0.1);
+        for (i, unit) in world.units.iter().enumerate() {
+            if before[i]
+                .cargo
+                .as_ref()
+                .is_some_and(|c| c.kind == ResourceKind::Food)
+                && unit.cargo.is_none()
+            {
+                deliveries[i] += 1;
+            }
+            if matches!(
+                unit.action,
+                UnitAction::Gather {
+                    phase: GatherPhase::ToResource | GatherPhase::Returning,
+                    ..
+                }
+            ) && unit.cell == before[i].cell
+                && unit.step.is_none()
+            {
+                stalled[i] += 1;
+            } else {
+                stalled[i] = 0;
+            }
+            assert!(
+                stalled[i] < 200,
+                "stalled reassigned villager: {:?}; others: {:?}",
+                unit,
+                world.units
+            );
+        }
+        if deliveries.iter().all(|n| *n >= 2) {
+            break;
+        }
+    }
+    assert!(
+        deliveries.iter().all(|n| *n >= 2),
+        "deliveries={deliveries:?}; units={:?}",
+        world.units
+    );
+}
+
+#[test]
+fn even_a_partial_same_kind_load_is_unloaded_before_the_new_assignment() {
+    let mut world = world();
+    world.resources.push(node("berries", cell(8, 10), 100.0));
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Food,
+        amount: 7.0,
+    });
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "berries".into(),
+        })
+        .unwrap();
+    assert!(matches!(
+        world.units[0].action,
+        UnitAction::Gather {
+            phase: GatherPhase::Returning,
+            ..
+        }
+    ));
+    for _ in 0..300 {
+        world.tick(0.1);
+        assert_eq!(
+            world.resources[0].amount, 100.0,
+            "the new task cannot start while the old load is being delivered"
+        );
+        if world.units[0].cargo.is_none() {
+            break;
+        }
+    }
+    assert_eq!(world.stockpile.food, 7.0);
+    assert!(
+        matches!(&world.units[0].action, UnitAction::Gather { resource_id, phase: GatherPhase::ToResource } if resource_id == "berries")
+    );
+    run(&mut world, 30.0);
+    assert!(
+        world.stockpile.food >= 27.0,
+        "the new assignment continues automatically"
+    );
+}
+
+#[test]
+fn a_builder_waits_for_unloading_instead_of_starting_with_cargo() {
+    let mut world = world();
+    world.buildings = vec![building(
+        BuildingKind::House,
+        "foundation",
+        cell(12, 10),
+        Some(0.0),
+    )];
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Wood,
+        amount: 7.0,
+    });
+    world
+        .apply_command(Command::Construct {
+            unit_id: "villager-1".into(),
+            building_id: "foundation".into(),
+        })
+        .unwrap();
+    run(&mut world, 10.0);
+    assert_eq!(world.buildings[0].construction, Some(0.0));
+    assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 7.0);
+    assert!(matches!(world.units[0].action, UnitAction::Build { .. }));
+    world
+        .buildings
+        .push(town_center("base-1", cell(25, 10), None));
+    run(&mut world, 30.0);
+    assert_eq!(world.stockpile.wood, 7.0);
+    assert!(world.units[0].cargo.is_none());
+    assert!(world.buildings[0].is_complete());
+}

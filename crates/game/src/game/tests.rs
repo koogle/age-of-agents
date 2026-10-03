@@ -1173,7 +1173,6 @@ fn goods_of_another_kind_are_dropped_off_before_gathering() {
             resource_id: berries.clone(),
         })
         .unwrap();
-    world.tick(0.1);
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
     run(&mut world, 60.0);
     assert_eq!(world.stockpile.wood, 12.0);

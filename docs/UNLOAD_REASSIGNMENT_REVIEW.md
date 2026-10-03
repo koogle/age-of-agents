@@ -1,0 +1,9 @@
+# Unload-before-reassignment review
+
+A carrying villager given a new gather order could initially report “Heading out to gather”, and partial cargo of the same kind was gathered onto before delivery. Builders could begin construction with cargo if no working drop site existed. The clarified rule is to unload the existing cargo before starting a new gather/build assignment, retain that assignment, and start it automatically after delivery.
+
+Gather commands now enter Returning immediately when cargo exists, keeping the new resource ID in the existing action. Automatic movement to the next depleted-node neighbor continues filling the existing basket because it is not a new player command. Builders and field workers retain their assignment and cargo while waiting for a compatible drop site; their walking goal follows the same rule. The same rule and walking goal apply to the concurrent field-preparation update. Selected-unit status names the carried resource and intended task. Stop, move and explicit Deposit semantics remain unchanged.
+
+Thermonuclear review: no new action wrapper, pending-order field, serialization format or dependency. Removing the builder's fallback walking goal simplifies the domain flow. All behavior stays in shared Rust; the client only describes the snapshot. Atomic validation, footprint ownership, resource crediting and command replacement semantics remain intact. Idle units get no new tasks. Focused regressions cover partial/full mixed-kind and same-kind reassignment, mid-step changes at both speeds, generated-island group traffic, no-drop-site construction waiting, and the selection status changing after cargo is unloaded. Existing mouse/touch input paths remain shared and the status uses the existing text wrapping.
+
+Verification results are recorded in OPEN_WORK.md.
