@@ -4,11 +4,9 @@ Updated 2026-10-03. Keep only outstanding work, blockers and verification follow
 
 Use `master` as the integration branch and PR base.
 
-## Selected NPC highlight PR #56
-
-Larger ivory ground rings with dark team-blue borders are implemented in the shared renderer; pointer/building marks and game rules retain their existing paths. Desktop single/group selection, zoom and movement visually pass; phone rendering is being checked. Native/WASM lint and all 146 workspace tests passed before the latest starter-economy integration. Rebuild and recheck the combined client, then merge the user-authorized PR into `master` and verify deployment. Structural review: one direct shader branch, no new dependencies or rendering layer, client files remain below 1,000 lines. Evidence: `/workspace/scratch/highlight-*`.
-
 ## Pending release verification
+
+- Merge user-authorized [NPC highlight PR #56](https://github.com/koogle/age-of-agents/pull/56), then confirm its production release. The final combined build passes all 151 workspace tests, strict native/WASM lint, formatting, asset checks and desktop/phone browser verification. Selected units use larger ivory rings with blue borders; existing marks and gameplay retain their paths. Structural review passed; no new dependencies or rendering layers. Evidence: `/workspace/scratch/highlight-*`.
 
 - Confirm [starter-economy production run 37150108528](https://github.com/koogle/age-of-agents/actions/runs/37150108528) succeeds, then verify the fresh-island economy on live `/play`. PR #55 is merged; deployment is pending. Fresh runs still cannot depart until transport is implemented.
 - Confirm [camera/activity production run 37149731725](https://github.com/koogle/age-of-agents/actions/runs/37149731725) succeeds and verify the hosted camera controls, gathering animations and loading-title cleanup. This combined run is in progress; the earlier title-only run was cancelled. Local desktop/phone verification already passed.
