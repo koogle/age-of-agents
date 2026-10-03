@@ -1,5 +1,5 @@
 {
-  "note": "Original FAL cutouts retained for provenance. House/granary gameplay frames now come from the reviewed orthogonal sheet.",
+  "note": "Gameplay uses the original FAL building cutouts and original architectural designs. The recreated orthogonal sheet is retained as an unused experiment; it is not packed or loaded.",
   "files": {
     "house_foundation.png": {
       "endpoint": "fal-ai/birefnet/v2",
@@ -71,7 +71,8 @@
       "layout": "4 columns (foundation, walls, roof, complete), 2 rows (house, granary)",
       "purpose": "Recreated straight vertical walls and consistent orthographic ground axes; transparent background removal by image_gen. Packed without geometric warping.",
       "source_generation": "exec-b8e1b818-8b84-4405-8647-16122251a52c",
-      "transparent_generation": "exec-8fa45087-703d-4f65-93b1-2b6918906ee2"
+      "transparent_generation": "exec-8fa45087-703d-4f65-93b1-2b6918906ee2",
+      "status": "Unused: rejected style experiment. Original house and granary sprites restored at user request."
     }
   }
 }
