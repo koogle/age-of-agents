@@ -61,7 +61,7 @@ Gameplay acceptance:
 4. Accepted group movement assigns deterministic distinct reachable destinations, respects reservations/occupancy, and visibly moves every selected unit without stacking.
 5. The HUD reports the selected count and group orders survive snapshots/reconnects.
 
-## Building expansion — current checkout, not released
+## Building expansion — deployed
 
 User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. New worlds generate coal. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
