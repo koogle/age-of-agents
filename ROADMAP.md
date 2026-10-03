@@ -20,7 +20,7 @@ The slices below retain earlier acceptance criteria as implementation references
 
 - [x] Persisted 600-cell isometric world with eight biomes and explored/visible/unseen fog privacy.
 - [x] Seven biome-compatible raw resources: wood, food, stone, gold, iron, clay, and fiber.
-- [x] Bounded villager carrying, deposits at the closest accessible compatible building, resumption through temporary approach congestion, depletion, construction, training, and five gathering technologies.
+- [x] Bounded villager carrying, deposits at the closest accessible compatible building, resumption through temporary approach congestion, explicit unload-first gather/build reassignment, depletion, construction, training, and five gathering technologies.
 - [x] Deterministic four-neighbor routing, occupancy, reserved destinations/build sites, and blocked-spawn rejection.
 - [x] Typed sequenced WebSocket commands/snapshots, SQLite round-trip, authoritative 0×/1×/2× speed.
 - [x] Terrain/entity presentation, directional movement/gathering animation, fog memory, capability popover, and desktop/mobile controls (Canvas 2D; superseded by the 3D client).
