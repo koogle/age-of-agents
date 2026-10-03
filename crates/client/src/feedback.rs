@@ -1,12 +1,32 @@
-//! Short-lived deposit labels inferred from authoritative cargo transitions.
-use aoa_game::WorldSnapshot;
+//! Drop-off status and short-lived labels from authoritative cargo state.
+use aoa_game::{GatherPhase, Unit, UnitAction, WorldSnapshot};
 use glam::Vec3;
 
 use crate::{camera::Rig, hud, terrain};
 
 const LIFETIME: f64 = 1.4;
 
-struct Gain {
+fn drop_off_status(unit: &Unit) -> Option<String> {
+    let cargo = unit.cargo.as_ref()?;
+    let unloading = matches!(
+        unit.action,
+        UnitAction::Build { .. }
+            | UnitAction::Cultivate { .. }
+            | UnitAction::Deposit { .. }
+            | UnitAction::Gather {
+                phase: GatherPhase::Returning | GatherPhase::Depositing,
+                ..
+            }
+    );
+    (unloading && cargo.amount > 0.0).then(|| {
+        format!(
+            "Dropping off {}",
+            format!("{:?}", cargo.kind).to_lowercase()
+        )
+    })
+}
+
+struct Label {
     text: String,
     at: Vec3,
     born: f64,
@@ -14,7 +34,7 @@ struct Gain {
 
 #[derive(Default)]
 pub struct Feedback {
-    gains: Vec<Gain>,
+    labels: Vec<Label>,
 }
 
 impl Feedback {
@@ -23,7 +43,7 @@ impl Feedback {
             return;
         };
         if next.tick < previous.tick {
-            self.gains.clear();
+            self.labels.clear();
             return;
         }
         for unit in &next.units {
@@ -34,14 +54,23 @@ impl Feedback {
             else {
                 continue;
             };
+            let at = terrain::world_of(unit.position.x, unit.position.y);
+            if let Some(text) = drop_off_status(&unit.unit)
+                && drop_off_status(&before.unit).as_ref() != Some(&text)
+            {
+                self.labels.push(Label {
+                    text,
+                    at: Vec3::new(at.x, 0.8, at.y),
+                    born: now,
+                });
+            }
             let Some(cargo) = &before.unit.cargo else {
                 continue;
             };
             if unit.unit.cargo.is_some() || cargo.amount <= 0.0 {
                 continue;
             }
-            let at = terrain::world_of(unit.position.x, unit.position.y);
-            self.gains.push(Gain {
+            self.labels.push(Label {
                 text: format!(
                     "+{:.0} {}",
                     cargo.amount,
@@ -52,8 +81,8 @@ impl Feedback {
             });
         }
         // Presentation stays bounded even after a burst of network snapshots.
-        if self.gains.len() > 64 {
-            self.gains.drain(..self.gains.len() - 64);
+        if self.labels.len() > 64 {
+            self.labels.drain(..self.labels.len() - 64);
         }
     }
 
@@ -65,10 +94,10 @@ impl Feedback {
         heights: &terrain::Heights,
         now: f64,
     ) {
-        self.gains.retain(|gain| now - gain.born < LIFETIME);
-        for gain in &self.gains {
-            let age = (now - gain.born) as f32;
-            let position = gain.at + Vec3::Y * (heights.at(gain.at.x, gain.at.z) + age * 0.45);
+        self.labels.retain(|label| now - label.born < LIFETIME);
+        for label in &self.labels {
+            let age = (now - label.born) as f32;
+            let position = label.at + Vec3::Y * (heights.at(label.at.x, label.at.z) + age * 0.45);
             if let Some(at) = rig.screen_of(position) {
                 let (_, up) = rig.basis();
                 let Some(top) = rig.screen_offset(position, up) else {
@@ -76,7 +105,7 @@ impl Feedback {
                 };
                 let pixels_per_world = at.distance(top);
                 let alpha = (age * 6.0).min(1.0) * (1.0 - ((age - 0.9) / 0.5).max(0.0));
-                hud.gain_label(atlas, &gain.text, at, pixels_per_world, alpha);
+                hud.gain_label(atlas, &label.text, at, pixels_per_world, alpha);
             }
         }
     }
@@ -86,6 +115,93 @@ impl Feedback {
 mod tests {
     use super::*;
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
+
+    #[test]
+    fn unloading_announces_once_using_the_gain_animation() {
+        let mut before = GameWorld::default().snapshot();
+        before.units[0].unit.cargo = Some(CarriedResource {
+            kind: ResourceKind::Wood,
+            amount: 7.0,
+        });
+        let mut next = before.clone();
+        next.units[0].unit.action = UnitAction::Gather {
+            resource_id: "food-1".into(),
+            phase: GatherPhase::Returning,
+        };
+        let mut feedback = Feedback::default();
+        feedback.observe(None, &next, 0.0);
+        assert!(feedback.labels.is_empty());
+        feedback.observe(Some(&before), &next, 1.0);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Dropping off wood");
+        assert_eq!(feedback.labels[0].born, 1.0);
+        // Repeated snapshots and arrival at the drop site do not replay it.
+        feedback.observe(Some(&next), &next, 2.0);
+        let mut arrived = next.clone();
+        arrived.units[0].unit.action = UnitAction::Gather {
+            resource_id: "food-1".into(),
+            phase: GatherPhase::Depositing,
+        };
+        feedback.observe(Some(&next), &arrived, 3.0);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].born, 1.0);
+        // Actual delivery still gets its separate resource-gain message.
+        let mut delivered = arrived.clone();
+        delivered.units[0].unit.cargo = None;
+        feedback.observe(Some(&arrived), &delivered, 4.0);
+        assert_eq!(feedback.labels.len(), 2);
+        assert_eq!(feedback.labels[1].text, "+7 wood");
+    }
+
+    #[test]
+    fn drop_off_status_tracks_cargo_and_current_orders() {
+        let mut unit = GameWorld::default().snapshot().units[0].unit.clone();
+        let cargo = CarriedResource {
+            kind: ResourceKind::Wood,
+            amount: 7.0,
+        };
+        for action in [
+            UnitAction::Build {
+                building_id: "base-1".into(),
+            },
+            UnitAction::Cultivate {
+                resource_id: "field-1".into(),
+            },
+            UnitAction::Deposit {
+                building_id: "base-1".into(),
+            },
+            UnitAction::Gather {
+                resource_id: "food-1".into(),
+                phase: GatherPhase::Returning,
+            },
+            UnitAction::Gather {
+                resource_id: "food-1".into(),
+                phase: GatherPhase::Depositing,
+            },
+        ] {
+            unit.action = action;
+            unit.cargo = Some(cargo.clone());
+            assert_eq!(drop_off_status(&unit).as_deref(), Some("Dropping off wood"));
+            unit.cargo = None;
+            assert_eq!(drop_off_status(&unit), None);
+        }
+        unit.cargo = Some(cargo);
+        for action in [
+            UnitAction::Idle,
+            UnitAction::Move { to: unit.cell },
+            UnitAction::Gather {
+                resource_id: "tree-1".into(),
+                phase: GatherPhase::ToResource,
+            },
+            UnitAction::Gather {
+                resource_id: "tree-1".into(),
+                phase: GatherPhase::Gathering,
+            },
+        ] {
+            unit.action = action;
+            assert_eq!(drop_off_status(&unit), None);
+        }
+    }
 
     #[test]
     fn every_unloading_task_emits_a_gain() {
@@ -112,7 +228,7 @@ mod tests {
             next.units[0].unit.cargo = None;
             let mut feedback = Feedback::default();
             feedback.observe(Some(&before), &next, 1.0);
-            assert_eq!(feedback.gains.len(), 1);
+            assert_eq!(feedback.labels.len(), 1);
         }
     }
 
@@ -135,17 +251,17 @@ mod tests {
         next.units[0].unit.action = UnitAction::Idle;
         let mut feedback = Feedback::default();
         feedback.observe(None, &before, 0.0);
-        assert!(feedback.gains.is_empty());
+        assert!(feedback.labels.is_empty());
         feedback.observe(Some(&before), &next, 1.0);
-        assert_eq!(feedback.gains.len(), 1);
-        assert_eq!(feedback.gains[0].text, "+20 wood");
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "+20 wood");
         feedback.observe(Some(&next), &next, 1.1);
-        assert_eq!(feedback.gains.len(), 1);
+        assert_eq!(feedback.labels.len(), 1);
         let mut stopped = before.clone();
         stopped.units[0].unit.action = UnitAction::Idle;
         feedback.observe(Some(&before), &stopped, 1.2);
-        assert_eq!(feedback.gains.len(), 1);
+        assert_eq!(feedback.labels.len(), 1);
         feedback.observe(Some(&before), &world.snapshot(), 1.3);
-        assert!(feedback.gains.is_empty());
+        assert!(feedback.labels.is_empty());
     }
 }
