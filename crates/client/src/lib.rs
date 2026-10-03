@@ -51,7 +51,7 @@ enum Target {
 // Last frame's camera, for the browser test hook below.
 #[cfg(target_arch = "wasm32")]
 thread_local! {
-    static LAST_VIEW: std::cell::RefCell<(glam::Mat4, f32, f32, usize, usize)> = const { std::cell::RefCell::new((glam::Mat4::IDENTITY, 1.0, 1.0, 0, 0)) };
+    static LAST_VIEW: std::cell::RefCell<(glam::Mat4, f32, f32, usize, usize, f32, Vec2)> = const { std::cell::RefCell::new((glam::Mat4::IDENTITY, 1.0, 1.0, 0, 0, 0.0, Vec2::ZERO)) };
     static LAST_HEIGHTS: std::cell::RefCell<Option<terrain::Heights>> = const { std::cell::RefCell::new(None) };
 }
 
@@ -67,7 +67,8 @@ pub fn debug_height_at(x: f32, z: f32) -> f32 {
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn debug_screen_of(x: f32, y: f32, z: f32) -> Vec<f32> {
     LAST_VIEW.with(|view| {
-        let (matrix, width, height, units, building) = *view.borrow();
+        let (matrix, width, height, units, building, curve, center) = *view.borrow();
+        let y = y - curve * (Vec2::new(x, z) - center).length_squared();
         let clip = matrix * glam::Vec4::new(x, y, z, 1.0);
         let scale = web_sys::window()
             .map(|w| w.device_pixel_ratio() as f32)
@@ -583,7 +584,7 @@ impl App {
             sun_dir: sun.extend(0.0).to_array(),
             map_size: [terrain::COLUMNS, terrain::ROWS],
             time: self.clock as f32,
-            curve: 0.0,
+            curve: self.rig.curve(),
             curve_center: [self.rig.target.x, self.rig.target.z],
             fog_near: self.rig.distance + 8.0,
             fog_far: self.rig.distance * 2.0 + 60.0,
@@ -613,6 +614,8 @@ impl App {
                 self.rig.height,
                 self.selection.units.len(),
                 self.selection.building.is_some() as usize,
+                self.rig.curve(),
+                Vec2::new(self.rig.target.x, self.rig.target.z),
             )
         });
         let (mut sprites, mut decals) = self.view.draw_list(

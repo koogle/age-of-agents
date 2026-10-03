@@ -1,5 +1,13 @@
 # Open Work
 
+## Restore distant planet zoom (2026-10-03)
+
+User requested retaining the globe overview; incrementally adding discovered islands belongs after ships. The shared Rust renderer had hard-coded curvature to zero. Restored a smooth far-zoom curve, extended camera distance from 70 to 140 for the larger island, and extended depth clipping consistently. Settlement distances through 60 retain the fixed orthographic view. Ground picking intersects the curved surface; billboard hit areas, feedback and browser projection hooks follow their rendered anchors. Wheel and pinch retain the shared camera path.
+
+Integrated upstream `31fd7c2` (native reset seed input) before release. README/ROADMAP now explicitly defer adding discovered islands to the globe until ships and persistent island travel exist. No island generation, ship implementation, fog disclosure, save changes or domain behavior in this patch.
+
+Thermonuclear review: reused the existing shader/uniform and camera, no dependencies or extra interaction modes; unbending the existing terrain ray march keeps height-field picking in one path. All client files stay below 1,000 lines. Verification: all 121 workspace tests passed, including curved-ground picking, curve-transition/horizon and the randomized domain invariant test. Formatting, strict native/WASM Clippy, rebuilt release WASM and diff checks pass. Desktop wheel zoom out/back and DPR-2 phone pinch-out visually restore the curved horizon without revealing unknown land. Browser evidence: /tmp/aoa-globe-{desktop,phone}-{near,far,return}.png. Desktop and phone return-to-close checks also pass with no browser errors. Release pending integration of newer master, push and Modal workflow verification.
+
 ## Reset game seed input (2026-10-03)
 
 User authorized merging this change into master. Reset game opens native seed input on desktop and web; blank selects a random island, cancel preserves progress, and invalid unsigned 64-bit seeds are retried. Local and hosted sources receive the selected seed. Rebased onto the latest grouped building-menu release (e28dcaf), preserving its changes. All 119 integrated tests (13 server, 31 client, 75 game), strict native/WASM lint, formatting, release builds and hosted/local/mobile browser checks pass; web/pkg regenerated. Ready for the user-authorized PR merge. Review: docs/RESET_SEED_REVIEW.md. Native dialog appearance remains unverified here. Direct Modal credentials are absent; merging triggers the repository deployment workflow.

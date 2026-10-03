@@ -71,7 +71,7 @@ impl Feedback {
             let position = gain.at + Vec3::Y * (heights.at(gain.at.x, gain.at.z) + age * 0.45);
             if let Some(at) = rig.screen_of(position) {
                 let (_, up) = rig.basis();
-                let Some(top) = rig.screen_of(position + up) else {
+                let Some(top) = rig.screen_offset(position, up) else {
                     continue;
                 };
                 let pixels_per_world = at.distance(top);
