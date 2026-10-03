@@ -1,5 +1,5 @@
 {
-  "note": "Original FAL architecture retained. Completed granary uses a targeted image_gen edit adding visible stored grain; original cutout is retained. Orthogonal sheet is unused.",
+  "note": "Original architecture retained. Roof/complete stages use targeted roof-line cleanup edits in clean_roofs; originals retained. Completed granary retains grain props. Orthogonal sheet remains unused.",
   "files": {
     "house_foundation.png": {
       "endpoint": "fal-ai/birefnet/v2",
@@ -80,6 +80,62 @@
       "generation": "exec-3e065b2b-9514-42ab-b712-f6e91da56aac",
       "date": "2026-10-03",
       "purpose": "Keep original illustrated architecture; add wheat emblem, sheaves, open sacks and grain basket for recognizability."
+    },
+    "clean_roofs/house_roof.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-9d442e04-bb02-400a-b186-73cc5b25c7e2",
+      "date": "2026-10-03",
+      "source": "house_roof.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/house_complete.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-6e396b65-5e6b-4b5c-ba63-92a4ea4e922a",
+      "date": "2026-10-03",
+      "source": "house_complete.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/granary_roof.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-d24d4ec2-122a-46e8-b095-a9a085c84c3f",
+      "date": "2026-10-03",
+      "source": "granary_roof.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/granary_complete.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-f32bbd42-3200-4bf7-8eaa-9ac7e14cc586",
+      "date": "2026-10-03",
+      "source": "granary_grain_complete.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/watchtower_roof.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-3a092a25-51f9-4ace-a067-39292ca6de47",
+      "date": "2026-10-03",
+      "source": "watchtower_roof.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/watchtower_complete.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-95ed134f-cca2-44bc-b8c1-e75e14bac738",
+      "date": "2026-10-03",
+      "source": "watchtower_complete.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/dock_roof.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-a0df9c9c-10ba-416a-8a42-594e73c3d9cb",
+      "date": "2026-10-03",
+      "source": "dock_roof.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
+    },
+    "clean_roofs/dock_complete.png": {
+      "generator": "OpenAI image_gen",
+      "generation": "exec-cb551cb3-96bf-41e6-8a1b-b5daaae31cf9",
+      "date": "2026-10-03",
+      "source": "dock_complete.png",
+      "purpose": "Clean repeated curved roof tile seams while retaining original architecture, props and illustrated palette."
     }
   }
 }

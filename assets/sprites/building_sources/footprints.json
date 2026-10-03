@@ -1,5 +1,5 @@
 {
-  "note": "Source pixels [left, front, right, rear] of the structural ground footprint in stage order. Excludes steps, pots, scaffolding and loose materials. Hidden rear corners continue the structural wall axes. Circular towers use corners of the circumscribed ground square; docks use deck level (posts extend below). Completed granary corners refer to granary_grain_complete.png (1254 px); original sources remain archived.",
+  "note": "Structural base corners [left, front, right, rear], excluding props. Foundation/walls refer to original source files; roof/complete refer to clean_roofs/<kind>_<stage>.png. Hidden rear corners continue wall axes; tower corners circumscribe its circular base; dock uses deck level.",
   "footprints": {
     "house": [
       [
@@ -40,38 +40,38 @@
       ],
       [
         [
-          211,
-          692
+          258,
+          847
         ],
         [
-          492,
-          843
+          605,
+          1033
         ],
         [
-          800,
-          690
+          983,
+          847
         ],
         [
-          519,
-          539
+          636,
+          661
         ]
       ],
       [
         [
-          211,
-          692
+          223,
+          879
         ],
         [
-          492,
-          843
+          605,
+          1092
         ],
         [
-          800,
-          690
+          1029,
+          879
         ],
         [
-          519,
-          539
+          647,
+          666
         ]
       ]
     ],
@@ -114,20 +114,20 @@
       ],
       [
         [
-          154,
-          690
+          184,
+          832
         ],
         [
-          498,
-          842
+          611,
+          1030
         ],
         [
-          869,
-          655
+          1066,
+          801
         ],
         [
-          525,
-          503
+          639,
+          603
         ]
       ],
       [
@@ -188,38 +188,38 @@
       ],
       [
         [
-          330,
-          869
+          404.1211,
+          1064.1855
         ],
         [
-          512,
-          934
+          627.0,
+          1143.7852
         ],
         [
-          694,
-          869
+          849.8789,
+          1064.1855
         ],
         [
-          512,
-          804
+          627.0,
+          984.5859
         ]
       ],
       [
         [
-          314,
-          865
+          384.5273,
+          1059.2871
         ],
         [
-          504,
-          937
+          617.2031,
+          1147.459
         ],
         [
-          694,
-          865
+          849.8789,
+          1059.2871
         ],
         [
-          504,
-          793
+          617.2031,
+          971.1152
         ]
       ]
     ],
@@ -262,38 +262,38 @@
       ],
       [
         [
-          251,
-          611
+          306,
+          833
         ],
         [
-          445,
-          714
+          540,
+          954
         ],
         [
-          761,
-          542
+          1004,
+          737
         ],
         [
-          567,
-          439
+          770,
+          616
         ]
       ],
       [
         [
-          280,
-          629
+          343,
+          770
         ],
         [
-          448,
-          715
+          550,
+          875
         ],
         [
-          769,
-          544
+          943,
+          665
         ],
         [
-          601,
-          458
+          736,
+          560
         ]
       ]
     ]

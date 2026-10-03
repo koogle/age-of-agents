@@ -256,7 +256,14 @@ impl WorldView {
         }
     }
 
-    pub fn sync(&mut self, next: WorldSnapshot) {
+    /// Takes the next snapshot; returns whether it starts a new world.
+    pub fn sync(&mut self, next: WorldSnapshot) -> bool {
+        // A new island restarts the clock but reuses unit ids: drop the old
+        // world's samples and heights, or villagers replay stale positions.
+        let restarted = self.snapshot.is_some() && (next.tick as f64) < self.latest_tick;
+        if restarted {
+            *self = Self::new();
+        }
         self.latest_tick = next.tick as f64;
         let render_tick = self
             .render_tick
@@ -312,6 +319,7 @@ impl WorldView {
         self.units.retain(|id, _| seen.contains(id));
         self.snapshot = Some(next);
         self.cells_dirty = true;
+        restarted
     }
 
     /// Advances the presentation clock and unit positions.
@@ -715,7 +723,7 @@ pub fn footprint_center(heights: &Heights, building: &aoa_game::BuildingView) ->
 fn town_center_frame(sheet: &TownCenterSheet, construction: Option<f64>, working: bool) -> &str {
     match construction {
         Some(work) => {
-            let progress = work / aoa_game::BUILD_SECONDS;
+            let progress = work / aoa_game::BuildingKind::TownCenter.build_seconds();
             sheet
                 .construction_stages
                 .iter()
@@ -829,6 +837,32 @@ mod tests {
     }
 
     #[test]
+    fn villagers_on_a_new_island_follow_its_snapshots() {
+        let mut view = WorldView::new();
+        let mut old = GameWorld::default().snapshot();
+        for tick in 500..506 {
+            old.tick = tick;
+            view.sync(old.clone());
+        }
+        view.frame(1.0);
+        let mut fresh = GameWorld::generate(9).snapshot();
+        assert!(view.sync(fresh.clone()));
+        for _ in 0..4 {
+            fresh.tick += 1;
+            fresh.units[0].position.y += 1.0;
+            view.sync(fresh.clone());
+            view.frame(0.1);
+        }
+        for _ in 0..20 {
+            view.frame(0.1);
+        }
+        let at = &fresh.units[0].position;
+        let at = terrain::world_of(at.x, at.y);
+        let shown = view.units["villager-1"].position;
+        assert!((shown.x - at.x).abs() < 1e-4 && (shown.z - at.y).abs() < 1e-4);
+    }
+
+    #[test]
     fn shift_selection_toggles_members_and_plain_click_replaces() {
         let mut selection = Selection {
             building: Some("base-1".into()),
@@ -895,8 +929,14 @@ mod tests {
         let sheet = sheet();
         let at = |seconds: f64| town_center_frame(&sheet, Some(seconds), false);
         assert_eq!(at(0.0), "foundation");
-        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.2), "build33");
-        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.6), "build66");
+        assert_eq!(
+            at(aoa_game::BuildingKind::TownCenter.build_seconds() * 0.2),
+            "build33"
+        );
+        assert_eq!(
+            at(aoa_game::BuildingKind::TownCenter.build_seconds() * 0.6),
+            "build66"
+        );
         assert_eq!(town_center_frame(&sheet, None, false), "complete");
         assert_eq!(town_center_frame(&sheet, None, true), "working");
         for frame in ["foundation", "build33", "build66", "complete", "working"] {

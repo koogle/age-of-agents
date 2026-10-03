@@ -178,7 +178,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             Some(work) => (
                 format!("{name} foundation"),
                 "Villagers can help build it".to_string(),
-                Some((work / aoa_game::BUILD_SECONDS) as f32),
+                Some((work / kind.build_seconds()) as f32),
             ),
             None => (name.to_string(), purpose.to_string(), None),
         };
@@ -189,7 +189,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             "portrait_towncenter",
             "Town center foundation".into(),
             "Villagers can help build it".into(),
-            Some((work / aoa_game::BUILD_SECONDS) as f32),
+            Some((work / kind.build_seconds()) as f32),
             Vec::new(),
         ));
     }

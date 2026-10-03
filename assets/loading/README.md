@@ -1,6 +1,6 @@
 # Loading-screen art
 
-Art for the `/play` loading screen (`web/index.html`): a painted title and buildings that rise in four stages while the game downloads. The two runtime files total **306 KB** (`title.webp` 90 KB, `buildings.webp` 216 KB). Nothing here is wired in yet.
+Art for the `/play` loading screen (`web/index.html`): a painted title and buildings that rise in four stages while the game downloads. The runtime uses `title.webp` here and the lossless 512 px frames in `assets/sprites/towncenter.{png,json}` and `assets/sprites/buildings_hd.{png,json}`. The canvas uses device-pixel resolution and high-quality smoothing. The older 256 px `buildings.webp`/JSON and contact sheet are historical sources only, no longer fetched by `/play`.
 
 | File | Size | Use |
 | --- | --- | --- |

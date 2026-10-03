@@ -31,7 +31,9 @@ pub const WORLD_ROWS: u16 = 80;
 pub const UNIT_SIGHT_RADIUS: f64 = 8.0;
 pub const BUILDING_SIGHT_RADIUS: f64 = 12.0;
 pub const TOWN_CENTER_WOOD_COST: f64 = 20.0;
-pub const BUILD_SECONDS: f64 = 4.0;
+/// Construction time per resource unit of a building's cost, so dearer
+/// buildings take longer to raise (a 15-wood house takes 4.5 seconds).
+pub const BUILD_SECONDS_PER_RESOURCE: f64 = 0.3;
 pub const VILLAGER_FOOD_COST: f64 = 50.0;
 pub const VILLAGER_PRODUCTION_SECONDS: f64 = 6.0;
 pub const RESEARCH_FOOD_COST: f64 = 40.0;
@@ -771,7 +773,7 @@ impl GameWorld {
                 Travel::Arrived { remaining } => remaining,
             };
         let work = self.buildings[building].construction.unwrap_or(0.0) + remaining;
-        if work + f64::EPSILON < BUILD_SECONDS {
+        if work + f64::EPSILON < self.buildings[building].kind.build_seconds() {
             self.buildings[building].construction = Some(work);
         } else {
             // Completion releases every builder at once, so no unit is ever
