@@ -90,6 +90,7 @@ pub enum Action {
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
     Research(TechnologyKind),
+    CancelQueuedJob(u64),
     /// Globe click: look at this map point.
     LookAt(Vec2),
     /// Opens the reset confirmation and seed input.

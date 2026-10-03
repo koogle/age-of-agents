@@ -310,7 +310,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         ));
     }
     let job = building.building.job.as_ref();
-    let busy = job.is_some();
+    let queue_full = building.building.queue.len() >= aoa_game::MAX_QUEUED_JOBS;
     let (detail, progress) = match job {
         Some(aoa_game::BuildingJob::Produce {
             product,
@@ -338,14 +338,16 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         .filter(|b| b.building.is_complete())
         .map(|b| b.building.kind.housing())
         .sum();
-    let population = snapshot.units.len() + snapshot.buildings.iter().filter(|b| matches!(b.building.job, Some(aoa_game::BuildingJob::Produce { product, .. }) if product.unit_kind().is_some())).count();
+    let population = snapshot.units.len() + snapshot.buildings.iter().flat_map(|b| b.building.jobs()).filter(|job| matches!(job, aoa_game::BuildingJob::Produce { product, .. } if product.unit_kind().is_some())).count();
     let mut commands = Vec::new();
     for &product in &building.building.produces {
         let crowded = product.unit_kind().is_some() && population >= housing;
         commands.push(Command {
             icon: "command_train",
             label: product_label(product),
-            detail: if crowded {
+            detail: if queue_full {
+                "Queue is full".into()
+            } else if crowded {
                 "Needs a house first".into()
             } else {
                 format!(
@@ -354,7 +356,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                     product.seconds()
                 )
             },
-            enabled: !busy && !crowded && stock.affords(product.cost()),
+            enabled: !queue_full && !crowded && stock.affords(product.cost()),
             action: Action::Produce(product),
         });
     }
@@ -362,12 +364,14 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
     for &tech in &building.building.researches {
         let (icon, name, effect) = tech_info(tech);
         let done = known.contains(&tech);
-        let queued = snapshot.buildings.iter().any(|b| matches!(b.building.job, Some(aoa_game::BuildingJob::Research { technology, .. }) if technology == tech));
+        let queued = snapshot.buildings.iter().flat_map(|b| b.building.jobs()).any(|job| matches!(job, aoa_game::BuildingJob::Research { technology, .. } if *technology == tech));
         let blocked = tech.prerequisite().filter(|p| !known.contains(p));
         let detail = if done {
             "researched".to_string()
         } else if queued {
-            "research in progress".to_string()
+            "research queued or in progress".to_string()
+        } else if queue_full {
+            "Queue is full".to_string()
         } else if let Some(p) = blocked {
             format!("needs {}", tech_info(p).1)
         } else {
@@ -383,13 +387,55 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             enabled: !done
                 && !queued
                 && blocked.is_none()
-                && !busy
+                && !queue_full
                 && stock.food >= RESEARCH_FOOD_COST
                 && stock.wood >= RESEARCH_WOOD_COST,
             action: Action::Research(tech),
         });
     }
     Some((portrait, name.into(), detail, progress, commands))
+}
+
+/// Waiting tasks have stable cancellation IDs, so a stale click never cancels
+/// a different task after the active job finishes.
+pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Command> {
+    let Some(building) = snapshot
+        .buildings
+        .iter()
+        .find(|b| Some(b.building.id.as_str()) == model.building)
+    else {
+        return Vec::new();
+    };
+    building
+        .building
+        .queue
+        .iter()
+        .enumerate()
+        .map(|(index, entry)| {
+            let (icon, name, cost) = match entry.job {
+                aoa_game::BuildingJob::Produce { product, .. } => (
+                    "command_train",
+                    product_label(product),
+                    cost_text(product.cost()),
+                ),
+                aoa_game::BuildingJob::Research { technology, .. } => {
+                    let (icon, name, _) = tech_info(technology);
+                    (
+                        icon,
+                        name.to_string(),
+                        format!("{RESEARCH_FOOD_COST} food, {RESEARCH_WOOD_COST} wood"),
+                    )
+                }
+            };
+            Command {
+                icon,
+                label: format!("Cancel queued {}: {name}", index + 1),
+                detail: format!("Refund {cost}"),
+                enabled: true,
+                action: Action::CancelQueuedJob(entry.id),
+            }
+        })
+        .collect()
 }
 
 fn resource_name(kind: ResourceKind) -> &'static str {
@@ -508,7 +554,41 @@ mod tests {
             product: ProductKind::Steel,
             elapsed_seconds: 1.0,
         });
-        assert!(!commands_for_town_center(&world)[0].enabled);
+        assert!(commands_for_town_center(&world)[0].enabled);
+        let building_id = world.buildings[0].id.clone();
+        for _ in 0..aoa_game::MAX_QUEUED_JOBS {
+            world.stockpile.iron = 5.0;
+            world.stockpile.coal = 5.0;
+            world
+                .apply_command(aoa_game::Command::Produce {
+                    building_id: building_id.clone(),
+                    product: ProductKind::Steel,
+                })
+                .unwrap();
+        }
+        world.stockpile.iron = 5.0;
+        world.stockpile.coal = 5.0;
+        let full = commands_for_town_center(&world);
+        assert!(!full[0].enabled);
+        assert_eq!(full[0].detail, "Queue is full");
+        let snapshot = world.snapshot();
+        let model = Model {
+            snapshot: Some(&snapshot),
+            units: &[],
+            building: Some(&building_id),
+            build: BuildUi::Off,
+            show_grid: false,
+            toast: None,
+            camera: Vec2::ZERO,
+        };
+        let queued = queued_commands(&snapshot, &model);
+        assert_eq!(queued.len(), aoa_game::MAX_QUEUED_JOBS);
+        assert_eq!(
+            queued[2].action,
+            Action::CancelQueuedJob(world.buildings[0].queue[2].id)
+        );
+        assert!(queued[2].detail.contains("iron"));
+        assert!(queued[2].detail.contains("coal"));
     }
 
     fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {

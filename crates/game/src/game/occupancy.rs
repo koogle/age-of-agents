@@ -210,7 +210,27 @@ impl GameWorld {
             {
                 return Err(format!("{} has invalid construction progress", building.id));
             }
-            if let Some(job) = &building.job {
+            if building.queue.len() > MAX_QUEUED_JOBS
+                || (!building.queue.is_empty() && building.job.is_none())
+                || building
+                    .queue
+                    .windows(2)
+                    .any(|pair| pair[0].id >= pair[1].id)
+                || building.queue.iter().any(|entry| {
+                    entry.id >= building.next_queue_id
+                        || match entry.job {
+                            BuildingJob::Produce {
+                                elapsed_seconds, ..
+                            }
+                            | BuildingJob::Research {
+                                elapsed_seconds, ..
+                            } => elapsed_seconds != 0.0,
+                        }
+                })
+            {
+                return Err(format!("{} has an invalid task queue", building.id));
+            }
+            for job in building.jobs() {
                 let elapsed = match job {
                     BuildingJob::Produce {
                         elapsed_seconds, ..

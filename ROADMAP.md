@@ -85,9 +85,13 @@ Gameplay acceptance:
 4. Accepted group movement assigns deterministic distinct reachable destinations, respects reservations/occupancy, and visibly moves every selected unit without stacking.
 5. The HUD reports the selected count and group orders survive snapshots/reconnects.
 
+## Building task queues — implemented, awaiting release
+
+Each building runs one task and holds up to five waiting production/research tasks in submission order. Inputs and trainee housing are reserved when ordered; tapping a queued coin cancels that waiting task and refunds the full cost. Active work continues, including waiting for a free spawn cell.
+
 ## Building expansion — deployed
 
-User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the existing single-slot `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Exhausted plots persist and require the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; 256-pixel military/villager action sheets still need the HD repack. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Exhausted plots persist and require the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
 The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. Catalog building and unit sprites are integrated; some unit action sheets still need the HD repack. Costs and recipe quantities are initial balance values.
 
@@ -102,7 +106,7 @@ Gameplay acceptance:
 1. Coal appears only in compatible terrain and is extracted by villagers only after a Mining Camp is constructed beside it.
 2. Iron extraction also requires a Mining Camp; legacy iron remains discoverable but cannot be hand-gathered.
 3. A Smelter/Forge can queue steel batches; each batch atomically reserves iron plus coal, progresses visibly, and deposits steel exactly once.
-4. Invalid placement, missing inputs, occupied job slots, and inaccessible spawn/interaction cells reject without partial cost/input mutation.
+4. Invalid placement, missing inputs, full task queues, and inaccessible spawn/interaction cells reject without partial cost/input mutation.
 5. The building popover and stockpile HUD make prerequisites, costs, queue progress, blocked reasons, coal, and steel understandable.
 
 ## Slice D — Coherent broader economy and progression
@@ -117,7 +121,7 @@ Gameplay acceptance:
 2. Lumber Mill makes timber from wood; Smelter makes steel from iron+coal; Kiln makes bricks from clay+wood; Weaver makes cloth from fiber; Kitchen makes rations from food.
 3. Town Center, Mining Camp, Farm, Lumber Mill, Smelter, Kiln, Weaver, Kitchen, Barracks, Range, Workshop, Infirmary, Watchtower, and Monument form the complete useful building roster. Buildings not yet active in combat may appear only in the slice that makes them useful.
 4. Building upgrades are bounded to two levels and improve one visible property. Research remains building-specific and every technology enables or improves an immediately playable action.
-5. Costs, one-job-slot queues, prerequisites, progress, and completion are authoritative, persisted, and visible. No giant recipe/technology matrix.
+5. Costs, ordered building queues, prerequisites, progress, and completion are authoritative, persisted, and visible. No giant recipe/technology matrix.
 
 ## Slice E — Bounded scenarios
 
