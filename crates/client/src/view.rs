@@ -657,9 +657,9 @@ impl WorldView {
             if selection.units.contains(&unit.unit.id) {
                 decals.push(Decal {
                     center: (position + Vec3::Y * 0.02).to_array(),
-                    radius: 0.32,
+                    radius: 0.42,
                     color: TEAM_BLUE,
-                    ring: 1.0,
+                    ring: 3.0,
                 });
             }
         }

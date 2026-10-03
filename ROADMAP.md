@@ -75,7 +75,7 @@ Engineering acceptance:
 
 ## Slice B — Multi-unit control
 
-Status: desktop selection and group orders are integrated; additive touch selection remains open.
+Status: selected units use a broad ivory ground ring with a blue border in the shared native/WebGL2 renderer. Desktop selection and group orders are integrated; additive touch selection remains open.
 
 Gameplay acceptance:
 
