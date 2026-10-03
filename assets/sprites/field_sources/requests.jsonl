@@ -1,0 +1,10 @@
+{"t": 1791058309.211197, "endpoint": "fal-ai/nano-banana/edit", "tag": "field:ripe", "est_usd": 0.0398, "request_id": "01a10364-cba9-7652-8f92-bd4f9584c01e", "seconds": 9.3}
+{"t": 1791058354.297937, "endpoint": "fal-ai/nano-banana/edit", "tag": "field:tilled", "est_usd": 0.0398, "request_id": "01a10365-7df5-7633-b50e-0d224e6f1dbd", "seconds": 8.8}
+{"t": 1791058354.3968909, "endpoint": "fal-ai/nano-banana/edit", "tag": "field:cleared", "est_usd": 0.0398, "request_id": "01a10365-7e32-7321-a8f1-53f5e9cf5f1c", "seconds": 8.8}
+{"t": 1791058354.8599834, "endpoint": "fal-ai/nano-banana/edit", "tag": "field:seedlings", "est_usd": 0.0398, "request_id": "01a10365-80bc-72e2-baf0-18294c10942b", "seconds": 8.6}
+{"t": 1791058360.208963, "endpoint": "fal-ai/birefnet/v2", "tag": "field:cutout:tilled", "est_usd": 0.001, "request_id": "01a10365-ae30-7b03-90ee-747c6da9c328", "seconds": 2.3}
+{"t": 1791058362.4257293, "endpoint": "fal-ai/birefnet/v2", "tag": "field:cutout:ripe", "est_usd": 0.001, "request_id": "01a10365-aea0-77e3-9eef-8decab7187ae", "seconds": 4.4}
+{"t": 1791058362.5109057, "endpoint": "fal-ai/birefnet/v2", "tag": "field:cutout:seedlings", "est_usd": 0.001, "request_id": "01a10365-aeb8-77e1-b2dc-0edc7b3e5067", "seconds": 4.5}
+{"t": 1791058362.5692947, "endpoint": "fal-ai/birefnet/v2", "tag": "field:cutout:cleared", "est_usd": 0.001, "request_id": "01a10365-aeae-7a41-916c-0e708f90bf74", "seconds": 4.6}
+{"t": 1791058436.5029166, "endpoint": "fal-ai/nano-banana/edit", "tag": "field:seedlings-small", "est_usd": 0.0398, "request_id": "01a10366-beca-74f3-abca-8c761e3de8b0", "seconds": 8.8}
+{"t": 1791058442.2331545, "endpoint": "fal-ai/birefnet/v2", "tag": "field:cutout:seedlings-small", "est_usd": 0.001, "request_id": "01a10366-ee9e-7d80-88db-5cf42214f692", "seconds": 2.3}

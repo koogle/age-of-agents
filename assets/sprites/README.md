@@ -269,3 +269,7 @@ Front is three-quarter front, facing viewer-left; back is three-quarter back, fa
 **Cost:** 155 FAL calls, about **$3.90** (87 nano-banana/edit, 68 BiRefNet). The ledger is `tools/ledger.jsonl`.
 
 HD integration requirement: all actions/facings/stages must have at least 512×512 authored frame pixels from the high-resolution originals. Current catalog buildings pass; `units.png` and the existing villager action sheets remain 256 pixels and need a source repack. Run `python3 scripts/check_sprite_resolution.py` (or `--report-only` to inventory migration gaps). Changing DPI metadata or enlarging low-resolution frames does not recover detail.
+
+## Crop fields
+
+Dedicated 512px cleared, cultivated, seedling and ripe field frames occupy the fifth row of `buildings_economy.png`. They replace the farm building art for field resources, the Field menu coin and placement ghost. See [source art and fal provenance](field_sources/README.md); rebuild with `python3 scripts/pack_field_sprites.py`.

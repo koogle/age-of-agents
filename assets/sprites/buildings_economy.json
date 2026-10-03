@@ -2,7 +2,7 @@
   "image": "buildings_economy.png",
   "size": [
     2048,
-    2048
+    2560
   ],
   "cell": [
     512,
@@ -119,6 +119,32 @@
       [
         1536,
         1536,
+        512,
+        512
+      ]
+    ],
+    "field": [
+      [
+        0,
+        2048,
+        512,
+        512
+      ],
+      [
+        512,
+        2048,
+        512,
+        512
+      ],
+      [
+        1024,
+        2048,
+        512,
+        512
+      ],
+      [
+        1536,
+        2048,
         512,
         512
       ]
@@ -420,7 +446,87 @@
           333.0174
         ]
       ]
+    ],
+    "field": [
+      [
+        [
+          256.0,
+          179.2
+        ],
+        [
+          503.296,
+          349.696
+        ],
+        [
+          255.488,
+          485.888
+        ],
+        [
+          8.704,
+          350.208
+        ]
+      ],
+      [
+        [
+          256.0,
+          179.2
+        ],
+        [
+          503.296,
+          349.696
+        ],
+        [
+          255.488,
+          485.888
+        ],
+        [
+          8.704,
+          350.208
+        ]
+      ],
+      [
+        [
+          256.0,
+          179.2
+        ],
+        [
+          503.296,
+          349.696
+        ],
+        [
+          255.488,
+          485.888
+        ],
+        [
+          8.704,
+          350.208
+        ]
+      ],
+      [
+        [
+          256.0,
+          179.2
+        ],
+        [
+          503.296,
+          349.696
+        ],
+        [
+          255.488,
+          485.888
+        ],
+        [
+          8.704,
+          350.208
+        ]
+      ]
     ]
   },
-  "note": "Same format as buildings_hd.json. Footprint corners [left, front, right, rear] are estimated automatically from each frame's base outline."
+  "note": "Same format as buildings_hd.json. Footprint corners [left, front, right, rear] are estimated automatically from each frame's base outline.",
+  "fieldStages": [
+    "cleared",
+    "tilled",
+    "seedlings",
+    "ripe"
+  ]
 }
