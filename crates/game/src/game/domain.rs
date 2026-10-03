@@ -351,6 +351,12 @@ impl BuildingKind {
         }
     }
 
+    /// Seconds of villager work to raise the foundation, proportional to its cost.
+    pub fn build_seconds(self) -> f64 {
+        self.cost().iter().map(|(_, amount)| amount).sum::<f64>()
+            * super::BUILD_SECONDS_PER_RESOURCE
+    }
+
     /// Villagers this building houses once complete.
     pub const fn housing(self) -> usize {
         match self {

@@ -715,7 +715,7 @@ pub fn footprint_center(heights: &Heights, building: &aoa_game::BuildingView) ->
 fn town_center_frame(sheet: &TownCenterSheet, construction: Option<f64>, working: bool) -> &str {
     match construction {
         Some(work) => {
-            let progress = work / aoa_game::BUILD_SECONDS;
+            let progress = work / aoa_game::BuildingKind::TownCenter.build_seconds();
             sheet
                 .construction_stages
                 .iter()
@@ -893,8 +893,14 @@ mod tests {
         let sheet = sheet();
         let at = |seconds: f64| town_center_frame(&sheet, Some(seconds), false);
         assert_eq!(at(0.0), "foundation");
-        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.2), "build33");
-        assert_eq!(at(aoa_game::BUILD_SECONDS * 0.6), "build66");
+        assert_eq!(
+            at(aoa_game::BuildingKind::TownCenter.build_seconds() * 0.2),
+            "build33"
+        );
+        assert_eq!(
+            at(aoa_game::BuildingKind::TownCenter.build_seconds() * 0.6),
+            "build66"
+        );
         assert_eq!(town_center_frame(&sheet, None, false), "complete");
         assert_eq!(town_center_frame(&sheet, None, true), "working");
         for frame in ["foundation", "build33", "build66", "complete", "working"] {

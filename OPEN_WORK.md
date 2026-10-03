@@ -18,6 +18,10 @@ Prior native-fix session used /tmp/age-of-agents-integration-20261003.db. This a
 
 Push the building-art correction after combined verification; production push triggers Modal deploy. Additive touch, box selection and DOM accessibility remain gaps. Explicit blocking/non-blocking task classification remains absent (valid replacement orders already work). Older expanded prototype is preserved separately, not part of this push.
 
+## Cost-scaled construction (2026-10-03)
+
+`BuildingKind::build_seconds()` replaces the flat 4 s `BUILD_SECONDS`: total cost × 0.3 s (house 4.5, town center 6, granary 7.5, watchtower/dock 9). All are at least 4 s, so saved foundations stay valid. Client progress bars and construction stages use the per-kind time; legacy frontend divides by 6 (town center only). 94 tests, native/WASM clippy pass; web/pkg rebuilt; `/play` loads without console errors.
+
 ## Villager direction hold (merged 2026-10-03)
 
 Walking villagers no longer flicker between sprite directions on zigzag grid routes: the heading is smoothed over about a quarter second, the drawn direction flips only about 17 degrees past a boundary and at most every 0.5 s, and a stop must last 0.2 s before the standing or working pose shows (the stride frame freezes meanwhile, so there is no walking in place). Stride-paced walk frames and raw velocity are unchanged. Client tests, clippy and the WASM rebuild pass; not yet eyeballed in a browser.
