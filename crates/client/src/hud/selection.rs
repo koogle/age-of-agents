@@ -185,6 +185,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                     .buildings
                     .iter()
                     .any(|b| b.building.kind == BuildingKind::Farm && b.building.is_complete()),
+                &snapshot.available_buildings,
             ),
             BuildUi::Off => vec![Command {
                 icon: "command_build",
@@ -200,6 +201,9 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                     group.name(),
                     "Choose a building · Costs shown on hover or tap",
                 ),
+                _ if snapshot.available_buildings.len() < aoa_game::BUILDABLE.len() => {
+                    ("Build", "Later islands will unlock metal, bricks and cloth")
+                }
                 _ => ("Build", "Choose a building type"),
             };
             return Some(("command_build", title.into(), detail.into(), None, commands));
@@ -336,7 +340,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         .sum();
     let population = snapshot.units.len() + snapshot.buildings.iter().filter(|b| matches!(b.building.job, Some(aoa_game::BuildingJob::Produce { product, .. }) if product.unit_kind().is_some())).count();
     let mut commands = Vec::new();
-    for &product in kind.products() {
+    for &product in &building.building.produces {
         let crowded = product.unit_kind().is_some() && population >= housing;
         commands.push(Command {
             icon: "command_train",
@@ -415,6 +419,7 @@ mod tests {
     #[test]
     fn reassignment_status_explains_unloading_and_then_the_new_task() {
         let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         let visible = world.snapshot().resources[0].id.clone();
         world
             .resources
@@ -456,7 +461,8 @@ mod tests {
 
     #[test]
     fn grouped_menu_exposes_every_building_once() {
-        let world = GameWorld::default();
+        let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         let snapshot = world.snapshot();
         let units = [snapshot.units[0].unit.id.clone()];
         let mut seen = Vec::new();
@@ -487,6 +493,7 @@ mod tests {
     #[test]
     fn processor_commands_use_recipe_costs_and_show_blocked_jobs() {
         let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         world.buildings[0].kind = BuildingKind::Smelter;
         world.buildings[0].produces = BuildingKind::Smelter.products().to_vec();
         world.buildings[0].researches.clear();
@@ -521,6 +528,7 @@ mod tests {
     #[test]
     fn town_center_coins_follow_costs_and_prerequisites() {
         let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         world.stockpile.food = 0.0;
         world.stockpile.wood = 0.0;
         let poor = commands_for_town_center(&world);
@@ -540,6 +548,7 @@ mod tests {
     #[test]
     fn build_menu_greys_out_what_the_stockpile_cannot_cover() {
         let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         world.stockpile = Default::default();
         world.stockpile.wood = 15.0;
         let snapshot = world.snapshot();

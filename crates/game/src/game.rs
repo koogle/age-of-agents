@@ -18,6 +18,9 @@ mod gathering_tests;
 mod group_move_tests;
 mod movement;
 mod occupancy;
+mod progression;
+#[cfg(test)]
+mod progression_tests;
 #[cfg(test)]
 mod slice_a_tests;
 #[cfg(test)]
@@ -29,7 +32,7 @@ pub use domain::*;
 pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
-pub use worldgen::FISHING_BOAT_COST;
+pub use progression::*;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -65,6 +68,8 @@ pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 pub struct GameWorld {
     /// The island this world was generated from.
     pub seed: u64,
+    #[serde(default)]
+    pub economy_rules: EconomyRules,
     pub tick: u64,
     pub simulation_speed: f64,
     pub terrain: Vec<TerrainCell>,
@@ -98,6 +103,7 @@ pub struct BuildingView {
 // Clients decode snapshots too; the catalog is static data they already have.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldSnapshot {
+    pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
     pub tick: u64,
@@ -272,6 +278,7 @@ impl GameWorld {
         };
         let mut world = Self {
             seed: island.seed,
+            economy_rules: EconomyRules::IslandProgression,
             tick: 0,
             simulation_speed: 1.0,
             terrain: island.terrain,
@@ -414,7 +421,7 @@ impl GameWorld {
                 if self.units[unit].kind != UnitKind::Villager {
                     return Err(CommandError::VillagerRequired);
                 }
-                if !BUILDABLE.contains(&kind) {
+                if !self.building_available(kind) {
                     return Err(CommandError::NotBuildable);
                 }
                 let (columns, rows) = kind.size();
@@ -481,7 +488,9 @@ impl GameWorld {
                 product,
             } => {
                 let building = self.building_index_and_idle(&building_id)?;
-                if !self.buildings[building].kind.products().contains(&product) {
+                if !self.buildings[building].kind.products().contains(&product)
+                    || !self.building_available(self.buildings[building].kind)
+                {
                     return Err(CommandError::ProductUnavailable);
                 }
                 if product.unit_kind().is_some() && self.villagers_and_trainees() >= self.housing()
@@ -508,7 +517,9 @@ impl GameWorld {
                 technology,
             } => {
                 let building = self.building_index_and_idle(&building_id)?;
-                if !self.buildings[building].researches.contains(&technology) {
+                if !self.buildings[building].researches.contains(&technology)
+                    || !self.technology_available(technology)
+                {
                     return Err(CommandError::TechnologyUnavailable);
                 }
                 if self.researched_technologies.contains(&technology) {
@@ -707,6 +718,7 @@ impl GameWorld {
         let explored: BTreeSet<_> = self.explored_cells.iter().copied().collect();
 
         WorldSnapshot {
+            available_buildings: self.available_buildings(),
             columns: WORLD_COLUMNS,
             rows: WORLD_ROWS,
             tick: self.tick,
@@ -759,8 +771,13 @@ impl GameWorld {
                 })
                 .map(|building| {
                     let (columns, rows) = building.kind.size();
+                    let mut visible = building.clone();
+                    visible.researches.retain(|&t| self.technology_available(t));
+                    if !self.building_available(visible.kind) {
+                        visible.produces.clear();
+                    }
                     BuildingView {
-                        building: building.clone(),
+                        building: visible,
                         columns,
                         rows,
                     }
