@@ -81,6 +81,7 @@ pub(crate) fn sprite(
             uv: uv(rect, atlas, false),
             pull: 0.08 * width,
             tint: [1.0; 4],
+            footprint: [width, depth],
         },
     )
 }

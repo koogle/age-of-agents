@@ -24,6 +24,9 @@ const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
 const SHEET_TOWN_CENTER: usize = 4;
 const SHEET_IDLE_HD: usize = 5;
+/// Sheets that draw villagers (three variants and the HD idle frames): these
+/// show a silhouette where something hides them.
+pub const VILLAGER_SHEETS: [usize; 4] = [0, 1, 2, SHEET_IDLE_HD];
 const SHEET_BUILDINGS: usize = 6;
 /// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
 const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
@@ -348,6 +351,7 @@ impl WorldView {
                 uv: uv(rect, resources.size, false),
                 pull: 0.3 * size,
                 tint: [1.0; 4],
+                footprint: [0.0; 2],
             }
         };
         for resource in &snapshot.resources {
@@ -521,6 +525,7 @@ impl WorldView {
                     uv: uv(rect, sheet_size, mirror),
                     pull: 0.3 * cell_size,
                     tint: [1.0; 4],
+                    footprint: [0.0; 2],
                 },
             ));
             decals.push(Decal {
