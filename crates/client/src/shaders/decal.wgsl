@@ -28,7 +28,17 @@ fn vs(@builtin(vertex_index) index: u32, inst: Instance) -> VOut {
 
 @fragment
 fn fs(in: VOut) -> @location(0) vec4<f32> {
-    let r = select(length(in.local), max(abs(in.local.x), abs(in.local.y)), in.ring > 1.5);
+    let r = select(length(in.local), max(abs(in.local.x), abs(in.local.y)), in.ring > 1.5 && in.ring < 2.5);
+    let edge = max(fwidth(r), 0.012);
+    if in.ring > 2.5 {
+        // Selected units: a broad ivory band framed in team blue. Derivative
+        // smoothing keeps the contrasting edges readable as the camera zooms.
+        let alpha = smoothstep(0.68 - edge, 0.68 + edge, r)
+            * (1.0 - smoothstep(0.98 - edge, 0.98 + edge, r));
+        let band = smoothstep(0.76 - edge, 0.76 + edge, r)
+            * (1.0 - smoothstep(0.90 - edge, 0.90 + edge, r));
+        return vec4<f32>(mix(in.color.rgb * 0.55, vec3<f32>(1.0, 0.96, 0.78), band), alpha);
+    }
     var alpha: f32;
     if in.ring > 0.5 {
         alpha = smoothstep(0.90, 0.94, r) * (1.0 - smoothstep(0.92, 1.0, r));
