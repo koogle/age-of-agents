@@ -5,7 +5,7 @@ use std::collections::{HashMap, VecDeque};
 use aoa_game::{
     CellVisibility, GatherPhase, ResourceKind, TerrainBiome, UnitAction, WorldSnapshot,
 };
-use glam::{Mat2, Vec2, Vec3};
+use glam::{Vec2, Vec3};
 use serde::Deserialize;
 
 mod buildings;
@@ -272,11 +272,11 @@ impl WorldView {
         }
     }
 
-    /// Fog-of-war cell colours (RGBA) and painted ground layers (255 = unknown).
+    /// Fog colours (RGBA), plus ground layer and occupied-plot mask (RG).
     pub fn cell_data(&self) -> Option<(Vec<u8>, Vec<u8>)> {
         let snapshot = self.snapshot.as_ref()?;
         let count = snapshot.columns as usize * snapshot.rows as usize;
-        let (mut rgba, mut layers) = (vec![0u8; count * 4], vec![255u8; count]);
+        let (mut rgba, mut layers) = (vec![0u8; count * 4], vec![0u8; count * 2]);
         for cell in &snapshot.terrain {
             let index = cell.row as usize * snapshot.columns as usize + cell.column as usize;
             let color = cell
@@ -290,7 +290,16 @@ impl WorldView {
             };
             rgba[index * 4..index * 4 + 4]
                 .copy_from_slice(&[color[0], color[1], color[2], visibility]);
-            layers[index] = cell.biome.map(terrain::biome_layer).unwrap_or(255);
+            layers[index * 2] = cell.biome.map(terrain::biome_layer).unwrap_or(255);
+        }
+        for building in &snapshot.buildings {
+            let origin = building.building.origin;
+            for row in origin.row..origin.row + building.rows {
+                for column in origin.column..origin.column + building.columns {
+                    let index = row as usize * snapshot.columns as usize + column as usize;
+                    layers[index * 2 + 1] = 255;
+                }
+            }
         }
         Some((rgba, layers))
     }
@@ -333,8 +342,6 @@ impl WorldView {
                 uv: uv(rect, resources.size, false),
                 pull: 0.3 * size,
                 tint: [1.0; 4],
-                shear: [0.0; 2],
-                warp: [0.0; 2],
             }
         };
         for resource in &snapshot.resources {
@@ -511,8 +518,6 @@ impl WorldView {
                     uv: uv(rect, sheet_size, mirror),
                     pull: 0.3 * cell_size,
                     tint: [1.0; 4],
-                    shear: [0.0; 2],
-                    warp: [0.0; 2],
                 },
             ));
             decals.push(Decal {
@@ -544,19 +549,12 @@ impl WorldView {
         let mut best: Option<(f32, &Pick)> = None;
         for Pickable { pick, sprite } in &self.pickables {
             let anchor = Vec3::from(sprite.anchor);
-            // Screen -> image uses the same projective map as the shader.
             let Some(at) = rig.screen_of(anchor) else {
                 continue;
             };
             let screen_scale = (rig.screen_of(anchor + right).unwrap() - at).length();
             let projected = Vec2::new(pixel.x - at.x, at.y - pixel.y) / screen_scale;
-            let raw = Mat2::from_cols(
-                Vec2::new(sprite.size[0], sprite.shear[1]),
-                Vec2::new(sprite.shear[0], sprite.size[1]),
-            )
-            .inverse()
-                * projected;
-            let local = raw / (1.0 - raw.dot(Vec2::from(sprite.warp))) + Vec2::from(sprite.pivot);
+            let local = projected / Vec2::from(sprite.size) + Vec2::from(sprite.pivot);
             let inside = local.x > 0.25 && local.x < 0.75 && local.y > 0.04 && local.y < 0.85;
             let depth = rig.eye().distance(anchor);
             if inside && best.is_none_or(|(d, _)| depth < d) {
@@ -677,6 +675,42 @@ mod tests {
 
     fn sheet() -> TownCenterSheet {
         serde_json::from_str(include_str!("../../../assets/sprites/towncenter.json")).unwrap()
+    }
+
+    #[test]
+    fn paving_covers_exact_claims_through_construction_without_repainting_biomes() {
+        let mut snapshot = GameWorld::default().snapshot();
+        let mut house = snapshot.buildings[0].clone();
+        house.building.kind = aoa_game::BuildingKind::House;
+        house.building.origin = aoa_game::CellCoordinate::new(30, 25);
+        house.building.construction = Some(0.0);
+        house.columns = 3;
+        house.rows = 3;
+        snapshot.buildings.push(house.clone());
+        house.building.origin.column += 3;
+        snapshot.buildings.push(house);
+        let mut view = WorldView::new();
+        view.sync(snapshot.clone());
+        let (_, before) = view.cell_data().unwrap();
+        let at = |column: usize, row: usize| before[(row * 60 + column) * 2 + 1];
+        assert_eq!(at(29, 25), 0);
+        assert_eq!(at(30, 24), 0);
+        assert_eq!(at(30, 25), 255);
+        assert_eq!(at(32, 27), 255);
+        assert_eq!(at(33, 27), 255);
+        assert_eq!(at(35, 27), 255);
+        assert_eq!(at(36, 27), 0);
+        assert_eq!(at(35, 28), 0);
+        for (cell, encoded) in snapshot.terrain.iter().zip(before.as_chunks::<2>().0) {
+            assert_eq!(
+                encoded[0],
+                cell.biome.map(terrain::biome_layer).unwrap_or(255)
+            );
+        }
+        snapshot.buildings[1].building.construction = None;
+        snapshot.buildings[2].building.construction = None;
+        view.sync(snapshot);
+        assert_eq!(view.cell_data().unwrap().1, before);
     }
 
     #[test]
