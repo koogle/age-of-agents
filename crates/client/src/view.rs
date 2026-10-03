@@ -8,6 +8,8 @@ use aoa_game::{
 use glam::{Vec2, Vec3};
 use serde::Deserialize;
 
+#[cfg(test)]
+mod activity_tests;
 mod buildings;
 mod catalog;
 mod fields;
@@ -537,14 +539,20 @@ impl WorldView {
                 1.0 - villager.anchor[1] / villager.cell[1],
             ];
             let moving = entry.moving;
-            let work = if moving || unit.unit.cargo.is_some() {
+            let gathering = matches!(
+                unit.unit.action,
+                UnitAction::Gather {
+                    phase: GatherPhase::Gathering,
+                    ..
+                }
+            );
+            let work = if moving || (unit.unit.cargo.is_some() && !gathering) {
                 None
             } else {
                 work_target(heights, snapshot, &unit.unit.action)
             };
             let carrying = unit.unit.cargo.is_some();
-            // A villager holding goods shows its load even when it stops
-            // (interrupted, or waiting for a drop site): the carry pose, held still.
+            // Hold the carry pose when stopped with goods, unless actively gathering.
             let mut name = if carrying {
                 "carry"
             } else if moving {
