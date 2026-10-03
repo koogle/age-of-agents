@@ -10,6 +10,7 @@ use gestures::Pointer;
 mod hud;
 mod placement;
 mod render;
+mod reset;
 mod source;
 mod terrain;
 mod view;
@@ -111,8 +112,6 @@ pub struct App {
     framed: bool,
     /// Whether the page's loading overlay has been dismissed.
     revealed: bool,
-    /// Until when (page seconds) a second tap on "New island" resets.
-    reset_armed_until: f64,
     show_grid: bool,
     /// When the ground mesh was last rebuilt (page seconds).
     ground_rebuilt_at: f64,
@@ -181,7 +180,6 @@ impl App {
             last_frame: None,
             framed: false,
             revealed: false,
-            reset_armed_until: 0.0,
             show_grid: false,
             ground_rebuilt_at: f64::MIN,
             touches: Vec::new(),
@@ -322,19 +320,16 @@ impl App {
             hud::Action::LookAt(point) => self.rig.look_at(point.x, point.y),
             hud::Action::Explain(reason) => self.toast = Some((reason, now_seconds() + 3.0)),
             hud::Action::Reset => {
-                let now = now_seconds();
-                if now < self.reset_armed_until {
-                    self.reset_armed_until = 0.0;
-                    self.source.reset();
-                    // A different island: start the view and selection over.
+                if let Some(seed) = reset::choose_seed() {
+                    self.source.reset(seed);
                     self.view = WorldView::new();
                     self.incoming.clear();
                     self.selection = Selection::default();
                     self.build = hud::BuildUi::Off;
                     self.framed = false;
-                } else {
-                    self.reset_armed_until = now + 4.0;
                 }
+                // Native dialogs can block for a while; don't catch up that time.
+                self.last_frame = None;
             }
         }
     }
@@ -679,7 +674,6 @@ impl App {
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
             build: self.build,
-            reset_armed: now_seconds() < self.reset_armed_until,
             show_grid: self.show_grid,
             toast: self.toast.as_ref().map(|(text, _)| text.as_str()),
             camera: Vec2::new(self.rig.target.x, self.rig.target.z),

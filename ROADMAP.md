@@ -4,6 +4,8 @@
 
 Grow the proven gather/build demo into one compact, coherent RTS scenario. Every slice must add an end-to-end player decision, remain deterministic and authoritative in Rust, preserve fog/collision/persistence rules, and be playable through the real WebGL UI on desktop and phone. Do not build a generic engine, ECS, recipe language, or broad technology matrix.
 
+- Reset game opens a native seed input and progress-loss confirmation on desktop and WebGL; blank chooses a random island, and explicit seeds reproduce an island.
+
 - Camera navigation uses pan and zoom with a fixed orthographic angle, stable building anchors, and an optional diamond-shaped square grid.
 
 ## Released baseline — Gather, build, research, and route
