@@ -146,6 +146,7 @@ fn generate_resources(terrain: &[TerrainCell]) -> Vec<ResourceNode> {
                     .coordinate();
                 number += 1;
                 resources.push(ResourceNode {
+                    field: None,
                     id: format!("{prefix}-{number}"),
                     kind,
                     cell,

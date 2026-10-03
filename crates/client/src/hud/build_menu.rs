@@ -50,7 +50,7 @@ pub(super) fn atlas(kind: BuildingKind) -> &'static str {
     }
 }
 
-pub(super) fn commands(build: BuildUi, stock: &Stockpile) -> Vec<Command> {
+pub(super) fn commands(build: BuildUi, stock: &Stockpile, has_farm: bool) -> Vec<Command> {
     let mut commands = if let BuildUi::Group(group) = build {
         group
             .buildings()
@@ -83,6 +83,24 @@ pub(super) fn commands(build: BuildUi, stock: &Stockpile) -> Vec<Command> {
             })
             .collect::<Vec<_>>()
     };
+    if build == BuildUi::Group(BuildingGroup::Gathering) {
+        commands.push(Command {
+            icon: "building_farm",
+            label: "Field".into(),
+            detail: if has_farm {
+                format!(
+                    "{} · {} s work · {} food; tap depleted fields to replenish",
+                    cost_text(aoa_game::FIELD_COST),
+                    aoa_game::FIELD_WORK_SECONDS,
+                    aoa_game::FIELD_FOOD
+                )
+            } else {
+                "Build a farm first".into()
+            },
+            enabled: has_farm && stock.affords(aoa_game::FIELD_COST),
+            action: Action::PlaceField,
+        });
+    }
     commands.push(Command {
         icon: "command_cancel",
         label: if build == BuildUi::Categories {
@@ -108,6 +126,28 @@ mod tests {
     use std::collections::HashSet;
 
     #[test]
+    fn fields_need_a_farm_and_both_materials() {
+        let mut stock = Stockpile {
+            wood: 10.0,
+            stone: 5.0,
+            ..Default::default()
+        };
+        let field = |stock: &Stockpile, farm| {
+            commands(BuildUi::Group(BuildingGroup::Gathering), stock, farm)
+                .into_iter()
+                .find(|c| c.action == Action::PlaceField)
+                .unwrap()
+        };
+        assert!(!field(&stock, false).enabled);
+        assert!(field(&stock, true).enabled);
+        stock.stone = 4.0;
+        assert!(!field(&stock, true).enabled);
+        stock.stone = 5.0;
+        stock.wood = 9.0;
+        assert!(!field(&stock, true).enabled);
+    }
+
+    #[test]
     fn every_building_has_a_distinct_authored_portrait_in_the_runtime_atlas() {
         let assets = pollster::block_on(crate::assets::Assets::load());
         let atlas = super::super::build_atlas(&assets);
@@ -127,12 +167,12 @@ mod tests {
     #[test]
     fn categories_and_back_navigation_are_available_without_resources() {
         let stock = Stockpile::default();
-        let categories = commands(BuildUi::Categories, &stock);
+        let categories = commands(BuildUi::Categories, &stock, false);
         assert_eq!(categories.len(), 5);
         for (command, group) in categories.iter().zip(BuildingGroup::ALL) {
             assert_eq!(command.action, Action::BuildGroup(group));
             assert!(command.enabled);
-            let menu = commands(BuildUi::Group(group), &stock);
+            let menu = commands(BuildUi::Group(group), &stock, false);
             assert!(menu.len() <= 6);
             assert_eq!(menu.last().unwrap().action, Action::Build);
         }
