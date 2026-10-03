@@ -40,7 +40,7 @@ Later, split pirates, mythical creatures, calamities, treasures and permanent up
 
 ## Release verification handoff
 
-HD sprite repack on `art/hd-sprite-repack`: all 183 undersized audited frames now use 512 px cells from recovered sources and reviewed refinements. Strict audit, workspace tests, native/WASM lint and desktop/DPR-2 phone rendering checks pass. Combined verification preserves the latest selection-ring fixes, and actual UI selection → gathering with partial cargo passes. Merge/deployment remain outstanding. Review: `docs/HD_SPRITES_REVIEW.md`.
+HD sprite repack [PR #62](https://github.com/koogle/age-of-agents/pull/62): all 183 undersized audited frames now use 512 px cells from recovered sources and reviewed refinements. Strict audit, workspace tests, native/WASM lint and desktop/DPR-2 phone rendering checks pass. Combined verification preserves the latest selection-ring fixes, and actual UI selection → gathering with partial cargo passes. Merge/deployment remain outstanding. Review: `docs/HD_SPRITES_REVIEW.md`.
 
 Verify the next production release for the NPC ring terrain-occlusion correction: selection rings draw above terrain/raised plots without writing depth, before billboards so buildings and units still cover them. All 151 workspace tests, formatting, strict native/WASM lint and desktop/phone browser checks pass; rebuilt WASM included. Before/after pixels confirm repaired ground arcs and unchanged opaque building regions. Structural review: six lines in the existing shader, no new passes, dependencies or gameplay changes. Evidence: `/workspace/scratch/highlight-depth-*`. User authorized PR merge into `master`.
 
