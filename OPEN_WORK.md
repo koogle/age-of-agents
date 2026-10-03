@@ -46,3 +46,12 @@ Walking villagers no longer flicker between sprite directions on zigzag grid rou
 - Ground shader mirrors the swatch in world space and clamps sampling within each mip level using the existing sampler, joining identical edge pixels without processing/duplicating the ink lines. Geometry, footprints, buildings and placement rules unchanged.
 - Integrated remote 782beab first. 96 workspace tests, native/WASM lint, formatting and WebAssembly build pass. Repeated 3×3 texture preview and desktop gameplay reviewed; selection and grid checks pass without page errors. The first browser run caught WebGL's single-sampler-per-texture restriction; manual clamping within the selected mip resolves it while retaining minification filtering. DPR-2 phone ghost drag/release and snapped placement pass with no page errors.
 - Thermonuclear review: one texture replacement and localized sampling logic, no new dependencies or rendering paths. Next: push verified correction to master for automatic deployment.
+
+## Catalog sprites (branch `claude/fal-catalog-sprites`, 2026-10-03)
+
+- New art, not wired in:
+  - `assets/sprites/buildings_{economy,crafts,civic}.{png,json}`: the 12 catalog buildings that had no sprites, four construction stages each, in the `buildings_hd` format, with automatically estimated footprint corners.
+  - `assets/sprites/units.{png,json}`: guard, archer, healer and siege cart with idle, walk and action animations in villager conventions.
+- Existing town center, house, granary, watchtower, dock, villagers and ships were not regenerated.
+- About $3.90 of FAL spend this round; details in `assets/sprites/README.md`.
+- Next: merge the building maps into the client's building lookup when those kinds become buildable; render unit kinds from `units.json`.
