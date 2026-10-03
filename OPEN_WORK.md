@@ -1,5 +1,11 @@
 # Open Work
 
+## Building placement trapping villagers (2026-10-03)
+
+User requested a fix, PR, and merge to the main branch (`master`). Branch `fix/building-traps` rejects a foundation before any mutation if its completed footprint disconnects any unit from previously reachable ground. Uses existing corner-safe pathfinding and ignores temporary unit claims; validates each occupied connected region once. Keeps edge-sharing buildings valid and does not impose connectivity between already separate islands. Existing enclosed saves are not altered.
+
+Focused regressions cover builder/bystander enclosure, diagonal corner traps, mid-step orders, existing disconnected land, and successful construction followed by walking out. Verification passed: all 122 workspace tests (80 domain, 29 client, 13 server), six focused placement tests, formatting, strict native/WASM Clippy, and rebuilt WASM. Actual WebGL2 build-menu flow on an isolated coastal fixture sends the unsafe house placement and receives rejection with no foundation or cost; no page errors. Screenshot: `/tmp/aoa-trap-desktop.png`. Successful construction and walking out are covered by the domain regression. Thermonuclear review: `docs/BUILDING_PLACEMENT_REVIEW.md`. Next: open PR, merge and monitor production deployment.
+
 ## Building menu and deployment fix (2026-10-03)
 
 User requested visible catalog sprites, buildings grouped by type, and push to main (`master` in this repository). Previous production run 37137096419 failed: catalog.rs embedded four asset JSON files before Modal copied assets into its build image. The game stayed on the earlier release. Fixed catalog manifests to load through the runtime Assets manifest like existing sheets.

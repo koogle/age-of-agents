@@ -413,6 +413,9 @@ impl GameWorld {
                         });
                     }
                 }
+                if !self.placement_preserves_routes(footprint) {
+                    return Err(CommandError::TargetUnreachable);
+                }
                 // Validate reachability against the world as it will be, with
                 // the foundation in place; roll back if the builder is cut off.
                 let id = self.next_building_name();
