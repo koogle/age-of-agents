@@ -4,7 +4,9 @@
 mod assets;
 mod camera;
 mod feedback;
+mod gestures;
 mod gpu;
+use gestures::Pointer;
 mod hud;
 mod placement;
 mod render;
@@ -20,7 +22,7 @@ use std::sync::Arc;
 use aoa_game::{CellCoordinate, Command, WorldSnapshot};
 use glam::{Vec2, Vec3};
 use winit::application::ApplicationHandler;
-use winit::event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent};
+use winit::event::{ElementState, MouseScrollDelta, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop, EventLoopProxy};
 use winit::keyboard::{Key, ModifiersState, NamedKey};
 use winit::window::{Window, WindowId};
@@ -32,7 +34,6 @@ use render::{Globals, Renderer};
 use source::Source;
 use view::{Selection, Sheets, WorldView};
 
-const DRAG_THRESHOLD: f32 = 8.0;
 /// Hover markers: warm gold over something to work on, soft white over ground.
 const HOVER_WORK: [f32; 4] = [0.98, 0.8, 0.32, 0.95];
 const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
@@ -77,14 +78,6 @@ pub fn debug_screen_of(x: f32, y: f32, z: f32) -> Vec<f32> {
             building as f32,
         ]
     })
-}
-
-struct Pointer {
-    on_hud: bool,
-    down_at: Vec2,
-    button: MouseButton,
-    grabbed: Option<Vec3>,
-    dragging: bool,
 }
 
 struct Game {
@@ -490,114 +483,6 @@ impl App {
         }
     }
 
-    fn press(&mut self, pixel: Vec2, button: MouseButton) {
-        let on_hud = button == MouseButton::Left && self.hud.press(pixel);
-        self.pointer = Some(Pointer {
-            on_hud,
-            down_at: pixel,
-            button,
-            grabbed: self.ground_at(pixel),
-            dragging: false,
-        });
-    }
-
-    /// One finger pans, taps and presses the HUD like the mouse; two fingers
-    /// pinch to zoom and move together to pan.
-    fn touch(&mut self, id: u64, phase: TouchPhase, pixel: Vec2) {
-        let previous = self.touches.clone();
-        match phase {
-            TouchPhase::Started => self.touches.push((id, pixel)),
-            TouchPhase::Moved => {
-                if let Some(entry) = self.touches.iter_mut().find(|(t, _)| *t == id) {
-                    entry.1 = pixel;
-                }
-            }
-            TouchPhase::Ended | TouchPhase::Cancelled => self.touches.retain(|(t, _)| *t != id),
-        }
-        if self.touches.len() >= 2 || (self.gesture && !self.touches.is_empty()) {
-            if !self.gesture {
-                // A second finger turns the press into a gesture: nothing is tapped.
-                self.gesture = true;
-                self.pointer = None;
-                self.hud.release();
-            }
-            if let ([(a, a0), (b, b0), ..], [(c, a1), (d, b1), ..]) =
-                (previous.as_slice(), self.touches.as_slice())
-                && a == c
-                && b == d
-            {
-                self.pinch((*a0, *b0), (*a1, *b1));
-            }
-            return;
-        }
-        if self.gesture {
-            // The last finger of a gesture lifted.
-            self.gesture = false;
-            return;
-        }
-        match phase {
-            TouchPhase::Started => {
-                self.cursor = pixel;
-                self.press(pixel, MouseButton::Left);
-            }
-            TouchPhase::Moved => self.moved(pixel),
-            TouchPhase::Ended => self.release(pixel, false),
-            TouchPhase::Cancelled => self.pointer = None,
-        }
-    }
-
-    /// Two fingers moved from `before` to `after`.
-    fn pinch(&mut self, before: (Vec2, Vec2), after: (Vec2, Vec2)) {
-        let (span0, span1) = (before.1 - before.0, after.1 - after.0);
-        if span0.length() > 8.0 && span1.length() > 8.0 {
-            self.rig
-                .zoom((span0.length() / span1.length()).clamp(0.8, 1.25));
-        }
-        let (mid0, mid1) = ((before.0 + before.1) * 0.5, (after.0 + after.1) * 0.5);
-        if let Some(grabbed) = self.ground_at(mid0)
-            && let Some(now) = self.rig.plane_at(mid1, grabbed.y)
-        {
-            self.rig.drag(grabbed, now);
-        }
-    }
-
-    fn moved(&mut self, pixel: Vec2) {
-        self.cursor = pixel;
-        self.hud.hover = Some(pixel);
-        let Some(pointer) = self.pointer.as_mut() else {
-            return;
-        };
-        if pointer.on_hud {
-            return;
-        }
-        if matches!(self.build, hud::BuildUi::Placing(_)) && pointer.button == MouseButton::Left {
-            return;
-        }
-        if pointer.down_at.distance(pixel) > DRAG_THRESHOLD {
-            pointer.dragging = true;
-        }
-        if pointer.dragging
-            && pointer.button != MouseButton::Right
-            && let Some(grabbed) = pointer.grabbed
-            && let Some(now) = self.rig.plane_at(pixel, grabbed.y)
-        {
-            self.rig.drag(grabbed, now);
-        }
-    }
-
-    fn release(&mut self, pixel: Vec2, additive: bool) {
-        let Some(pointer) = self.pointer.take() else {
-            return;
-        };
-        if pointer.on_hud {
-            if let Some(action) = self.hud.release() {
-                self.act(action);
-            }
-        } else if !pointer.dragging && pointer.button == MouseButton::Left {
-            self.tap(pixel, additive);
-        }
-    }
-
     /// Keeps the surface, render targets and camera at the window's physical
     /// size, so the picture is sharp and pointer pixels match what is drawn.
     fn fit_surface(&mut self) {
@@ -762,6 +647,12 @@ impl App {
         let scale = game.window.scale_factor() as f32;
         self.hud
             .layout(&self.atlas, &model, self.rig.width, self.rig.height, scale);
+        if let Some(pointer) = &self.pointer
+            && pointer.box_select
+            && pointer.dragging
+        {
+            self.hud.selection_box(pointer.down_at, self.cursor, scale);
+        }
         self.feedback.draw(
             &mut self.hud,
             &self.atlas,
@@ -879,7 +770,9 @@ impl ApplicationHandler<Game> for App {
                 self.moved(Vec2::new(position.x as f32, position.y as f32))
             }
             WindowEvent::MouseInput { state, button, .. } => match state {
-                ElementState::Pressed => self.press(self.cursor, button),
+                ElementState::Pressed => {
+                    self.press(self.cursor, button, self.modifiers.shift_key())
+                }
                 ElementState::Released => self.release(self.cursor, self.modifiers.shift_key()),
             },
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),

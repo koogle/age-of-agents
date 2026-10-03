@@ -9,7 +9,9 @@ use glam::{Vec2, Vec3};
 use serde::Deserialize;
 
 mod buildings;
+mod selection;
 pub(crate) use buildings::sprite as building_sprite;
+pub use selection::Selection;
 
 use crate::camera::Rig;
 use crate::render::{Decal, Sprite};
@@ -751,26 +753,6 @@ fn sample_at(samples: &VecDeque<(f64, Vec3)>, tick: f64) -> Vec3 {
         return a.1;
     }
     a.1.lerp(b.1, ((tick - a.0) / (b.0 - a.0)) as f32)
-}
-
-#[derive(Default)]
-pub struct Selection {
-    pub units: Vec<String>,
-    pub building: Option<String>,
-}
-
-impl Selection {
-    pub fn select_unit(&mut self, id: String, additive: bool) {
-        if !additive {
-            self.units.clear();
-        }
-        if let Some(index) = self.units.iter().position(|unit| unit == &id) {
-            self.units.remove(index);
-        } else {
-            self.units.push(id);
-        }
-        self.building = None;
-    }
 }
 
 #[cfg(test)]
