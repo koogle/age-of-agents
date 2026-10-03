@@ -74,8 +74,9 @@ The target is a soft 3D tilt-shift diorama of a sunlit Greek island. `assets/ref
 
 - At the start of every work session, read `OPEN_WORK.md` before acting.
 - Keep `OPEN_WORK.md` current after meaningful milestones, blocker changes, and before commit/push/deploy or ending a session. It is a compact current-state handoff, not an append-only diary.
-- Parent-session work may proceed directly on `master` for this solo project.
-- Every delegated subagent must work on its own feature branch or git worktree, push that branch, and open a pull request for Jakob to review. Subagents must never commit directly to `master`.
+- Use `main` as the integration branch and pull-request base. Existing agents should fetch `origin/main` and shift their integration target from `master` to `main`, preserving uncommitted and feature-branch work. Do not recreate `master` after it is removed.
+- Parent-session work may proceed directly on `main` for this solo project.
+- Every delegated subagent must work on its own feature branch or git worktree, push that branch, and open a pull request for Jakob to review. Subagents must never commit directly to `main`.
 - A subagent PR must describe its scope, verification performed, generated assets, and any known limitations. Do not merge it automatically.
 - After changes: format, test, lint, perform the thermonuclear review, verify the browser demo, and redeploy Modal.
 - Keep `README.md` and `ROADMAP.md` synchronized with actual behavior.
