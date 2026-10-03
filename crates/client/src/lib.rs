@@ -41,6 +41,7 @@ const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
 
 /// What lies under a pointer.
 enum Target {
+    Ship(String),
     Unit(String),
     Resource(String),
     Foundation(String),
@@ -211,6 +212,7 @@ impl App {
         // A tree, rock or building is hit where it is drawn, not where the
         // ground behind it happens to be.
         match self.view.sprite_at(&self.rig, pixel) {
+            Some(view::Pick::Ship(id)) => return Some(Target::Ship(id)),
             Some(view::Pick::Resource(id)) => return Some(Target::Resource(id)),
             Some(view::Pick::Building(id)) => {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
@@ -282,7 +284,7 @@ impl App {
                     HOVER_WORK,
                 )
             }
-            Target::Unit(_) | Target::Building(_) => return None,
+            Target::Unit(_) | Target::Ship(_) | Target::Building(_) => return None,
         };
         Some(render::Decal {
             center: [
@@ -298,6 +300,35 @@ impl App {
 
     fn act(&mut self, action: hud::Action) {
         match action {
+            hud::Action::ShipCargoNext => self.selection.cargo_index += 1,
+            hud::Action::Disembark => {
+                if let Some(ship_id) = self.selection.ship.clone() {
+                    self.send(Command::Disembark { ship_id });
+                }
+            }
+            hud::Action::ShipTransfer(direction) => {
+                if let (Some(ship_id), Some(snapshot)) =
+                    (self.selection.ship.clone(), self.view.snapshot.as_ref())
+                    && let Some(ship) = snapshot.ships.iter().find(|s| s.id == ship_id)
+                {
+                    let kind = snapshot.catalog.resources
+                        [self.selection.cargo_index % snapshot.catalog.resources.len()];
+                    let amount = match direction {
+                        aoa_game::CargoDirection::Load => snapshot
+                            .stockpile
+                            .amount(kind)
+                            .min(20.0)
+                            .min(aoa_game::TRANSPORT_GOODS - ship.goods_total()),
+                        aoa_game::CargoDirection::Unload => ship.goods.amount(kind).min(20.0),
+                    };
+                    self.send(Command::TransferShipCargo {
+                        ship_id,
+                        kind,
+                        amount,
+                        direction,
+                    });
+                }
+            }
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Grid => self.show_grid = !self.show_grid,
             hud::Action::Build => self.build = hud::BuildUi::Categories,
@@ -380,9 +411,44 @@ impl App {
         let Some(target) = self.target_at(pixel) else {
             return;
         };
+        if let Target::Ship(id) = target {
+            if !self.selection.units.is_empty() {
+                for unit_id in self.selection.units.clone() {
+                    self.send(Command::Board {
+                        unit_id,
+                        ship_id: id.clone(),
+                    });
+                }
+            }
+            self.selection.units.clear();
+            self.selection.building = None;
+            self.selection.ship = Some(id);
+            return;
+        }
         if let Target::Unit(id) = target {
             self.selection.select_unit(id, additive);
             return;
+        }
+        if let Some(ship_id) = self.selection.ship.clone() {
+            if let Target::Building(ref building_id) = target
+                && self.view.snapshot.as_ref().is_some_and(|s| {
+                    s.buildings.iter().any(|b| {
+                        &b.building.id == building_id
+                            && b.building.kind == aoa_game::BuildingKind::Dock
+                    })
+                })
+            {
+                self.send(Command::DockShip {
+                    ship_id,
+                    building_id: building_id.clone(),
+                });
+                return;
+            }
+            if let Target::Ground(to) = target {
+                self.send(Command::Sail { ship_id, to });
+                return;
+            }
+            self.selection.ship = None;
         }
         let units = self.selection.units.clone();
         if units.is_empty() {
@@ -393,7 +459,7 @@ impl App {
             return;
         }
         match target {
-            Target::Unit(_) => {}
+            Target::Unit(_) | Target::Ship(_) => {}
             Target::Resource(resource_id) => {
                 for unit_id in units {
                     let depleted_field = self.view.snapshot.as_ref().is_some_and(|s| {
@@ -480,6 +546,10 @@ impl App {
 
     /// Stops every selected villager that is busy.
     fn stop(&mut self) {
+        if let Some(ship_id) = self.selection.ship.clone() {
+            self.send(Command::StopShip { ship_id });
+            return;
+        }
         let busy: Vec<String> = self
             .view
             .snapshot
@@ -692,6 +762,8 @@ impl App {
             snapshot: self.view.snapshot.as_ref(),
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
+            ship: self.selection.ship.as_deref(),
+            cargo_index: self.selection.cargo_index,
             build: self.build,
             show_grid: self.show_grid,
             toast: self.toast.as_ref().map(|(text, _)| text.as_str()),
@@ -770,6 +842,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/buildings_crafts.png"),
         assets.image("sprites/buildings_civic.png"),
         assets.image("sprites/units.png"),
+        assets.image("sprites/transport.png"),
     ]
 }
 

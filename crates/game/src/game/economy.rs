@@ -37,6 +37,7 @@ impl UnitKind {
 impl BuildingKind {
     pub const fn products(self) -> &'static [ProductKind] {
         match self {
+            Self::Dock => &[ProductKind::TransportShip],
             Self::TownCenter => &[ProductKind::Villager],
             Self::LumberMill => &[ProductKind::Timber],
             Self::Smelter => &[ProductKind::Steel],
@@ -77,6 +78,7 @@ impl ProductKind {
 
     pub const fn cost(self) -> &'static [(ResourceKind, f64)] {
         match self {
+            Self::TransportShip => &FIRST_TRANSPORT_COST,
             Self::Villager => &[(ResourceKind::Food, VILLAGER_FOOD_COST)],
             Self::Guard => &[(ResourceKind::Food, 40.0), (ResourceKind::Steel, 2.0)],
             Self::Archer => &[(ResourceKind::Food, 40.0), (ResourceKind::Timber, 5.0)],
@@ -96,6 +98,7 @@ impl ProductKind {
 
     pub const fn seconds(self) -> f64 {
         match self {
+            Self::TransportShip => 20.0,
             Self::Villager => VILLAGER_PRODUCTION_SECONDS,
             Self::SiegeCart => 12.0,
             Self::Steel => 10.0,
@@ -169,7 +172,15 @@ impl GameWorld {
                     });
                     return;
                 }
-                if let Some(kind) = product.unit_kind() {
+                if product == ProductKind::TransportShip {
+                    if !self.spawn_ship(index) {
+                        self.buildings[index].job = Some(BuildingJob::Produce {
+                            product,
+                            elapsed_seconds,
+                        });
+                        return;
+                    }
+                } else if let Some(kind) = product.unit_kind() {
                     let Some(cell) = self.spawn_cell(index) else {
                         self.buildings[index].job = Some(BuildingJob::Produce {
                             product,

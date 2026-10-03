@@ -196,6 +196,7 @@ impl GameWorld {
     /// Where a unit is currently trying to walk, if anywhere.
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
+            UnitAction::Board { ship_id } => self.boarding_goal(unit, ship_id).map(Goal::Cell),
             UnitAction::Move { to } => Some(Goal::Cell(*to)),
             UnitAction::Cultivate { resource_id } => {
                 let field_goal = || {

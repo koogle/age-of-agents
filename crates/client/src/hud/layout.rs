@@ -237,7 +237,8 @@ impl Hud {
                 .clamp(40.0 * s, 52.0 * s);
             (m, count)
         };
-        let labels = matches!(model.build, BuildUi::Categories | BuildUi::Group(_));
+        let labels =
+            model.ship.is_some() || matches!(model.build, BuildUi::Categories | BuildUi::Group(_));
         let row_step = m + gap + if labels { 26.0 * s } else { 0.0 };
         let rows = count.div_ceil(per_row);
         let columns = count.min(per_row);

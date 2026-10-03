@@ -10,9 +10,9 @@ Start on an island, gather resources, and build a settlement. Build ships to exp
 
 Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite.
+Dock-built transports can carry villagers and goods around the current island. Multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet.
 
-Fresh games currently end at the settlement/timber economy; there is no departure option yet.
+Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each holds four passengers plus 200 goods; no metal, cloth or housing is required. Persistent destination islands remain the next step.
 
 ## Implemented roadmap
 
@@ -24,6 +24,7 @@ Fresh games currently end at the settlement/timber economy; there is no departur
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Wood → timber processing on starter islands; steel, bricks and cloth await future destination resources. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
+- Dock transport production through the paid task queue, water-only sailing, four passenger seats, 200 goods, shore landings and dock goods transfers. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
 - Distant zoom eases into a curved world overview; explored islands will be added after ships and persistent island travel are implemented.
 
@@ -73,6 +74,8 @@ Open <http://localhost:8000>, or <http://localhost:8000/?local> for an in-page s
 Existing saves keep their terrain, resources, buildings and economy rules; choose Reset game only when you want a fresh starter island (this erases that world). Saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run`. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use the Reset game dialog.
 
 Selected units have a broad ivory ring with a blue border around their feet, drawn above terrain and hidden by buildings. Select a unit, then tap/click ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Repeated orders join the building’s queue; tap a coin in the queued row to cancel it and refund its cost. Shift-click or Shift-drag adds units on desktop; drag to pan, hold the mouse near an edge or corner to pan gently, wheel to zoom toward the pointer, pinch to zoom around the fingers’ midpoint, X to stop, G for the grid, and Escape to cancel placement. Reset game erases the current world's progress. Gatherers keep chopping, mining, digging, or foraging while filling their load. Villagers carrying goods unload first before a new gather, build, or field-preparation assignment, then resume that task automatically; a brief floating italic message announces the resource being dropped off, and the selection status shows what comes next.
+
+Select villagers and tap a stopped transport to have them walk aboard. Select the ship and tap sea to sail, or tap a completed dock to return to its nearest reachable berth; X or Stop ship finishes its current step and stops. Land passengers unloads the whole manifest onto clear nearby land, including shores without a dock. At a completed dock, tap Cargo to cycle resource types, then Load/Unload to transfer up to 20 goods. The hold is separate from passengers’ carried loads; settlement spending cannot use goods aboard. Island inventories are still shared in this single-island slice.
 
 ## Contributing
 
