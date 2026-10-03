@@ -70,7 +70,7 @@ def verify_once() -> None:
     encoded = state.get("terrain", {})
     terrain = list(zip(encoded.get("cells", ""), encoded.get("heights", "")))
     units = state.get("units", [])
-    if len(terrain) != 2400 or not units or (state.get("columns"), state.get("rows")) != (60, 40):
+    if len(terrain) != 9600 or not units or (state.get("columns"), state.get("rows")) != (120, 80):
         raise RuntimeError(f"unexpected world shape: terrain={len(terrain)}, units={len(units)}")
     cells = [(unit["cell"]["column"], unit["cell"]["row"]) for unit in units]
     if len(set(cells)) != len(cells):

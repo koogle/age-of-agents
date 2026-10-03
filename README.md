@@ -86,7 +86,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 ## Controls
 
-- **Select:** tap/click a villager to replace the selection. On touch, long-press a villager to add or remove it. On desktop, Shift-drag from empty ground box-selects visible villagers, and Shift-click adds or removes. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
+- **Select:** tap/click a villager to replace the selection. On desktop, Shift-drag from empty ground adds visible villagers whose feet fall inside the box; Shift-click adds or removes one villager. Touch uses single-unit tap selection. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
 - **Move:** with one or more villagers selected, tap/click empty ground. Groups receive one atomic authoritative order and spread across distinct reachable cells.
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
 - **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. Giving a busy villager a new order does the same and then starts the new task.
