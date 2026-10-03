@@ -10,6 +10,14 @@ The farm-field commit `9ff0087` disabled work poses whenever cargo existed, free
 
 Verification: all 142 workspace tests, formatting, strict native/WASM lint, frontend syntax and existing asset checks pass; release WASM rebuilt. Actual WebGL2 instance uploads confirm the original bundle holds one carry frame for all eight resource kinds, while the repaired bundle advances the correct chopping/mining/digging/foraging frames on desktop and DPR-2 phone with no page errors. Render tests also cover all three villager variants, empty/partial loads and cargo/work controls. Desktop screenshot visually reviewed; browser evidence/driver: `/workspace/scratch/activity-sprites/`. Review: [activity sprites](docs/ACTIVITY_SPRITES_REVIEW.md). Next: push to master and verify the resulting Modal deployment.
 
+## Loading-screen title cleanup (2026-10-03)
+
+Removed the isolated olive leaf overlapping the first "A" in `assets/loading/title.webp`. Used a generated repair only within a 64×54 px patch; visible pixels outside that patch and the central sprig are unchanged. Title dimensions, transparency, loading behavior and layout remain intact. Provenance is recorded in `assets/loading/README.md`.
+
+Also removed shadow/cutout remnants in the transparent center of the "O" in "of", following user feedback. Used only a generated repair's opening alpha mask within 40×40 px at (568, 107), preserving original marble colors, the ring and central olive sprig. The center is fully transparent; pixel comparison confirms no visible changes outside this region. Desktop and phone `clean-o` previews pass.
+
+Desktop (1280×800) and DPR-2 phone (390×844) loading-screen previews pass, with the WASM download held to inspect the animation and title. Screenshots are in `/workspace/scratch/loading-leaf/`. Existing depleted-resource, activity-asset and icon checks pass; pixel comparison verifies the localized repair bounds and unchanged remainder. Thermonuclear review: asset-only subtraction, no code/dependencies or gameplay changes. Rust tools are unavailable in this environment; merge CI runs quality and Modal deployment. PR #51 was closed when temporary `main` was removed; replacement PR #53 targets `master`. No merge or deployment performed.
+
 ## Current baseline
 
 - Native rebuild/launch is available through `./scripts/run_native.sh`; it runs from any working directory and preserves `AGE_OF_AGENTS_DB`. Shell syntax, native launch, formatting, 139 Rust tests, both lint targets, and the code-quality review passed; live-browser verification was unavailable because this session has no connected browser.
