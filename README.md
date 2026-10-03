@@ -88,6 +88,6 @@ cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnin
 
 For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks frontend syntax and assets.
 
-Asset changes must pass the relevant checks in `scripts/`. Sprite frames require 512×512 authored pixels; several villager and military sheets still need an HD repack. Use `python3 scripts/check_sprite_resolution.py --report-only` to inspect those gaps. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
+Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 264 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
 Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment: `python3 scripts/modal_manage.py deploy`.

@@ -33,7 +33,7 @@ fn assert_pose(sheets: &Sheets, sprite: Sprite, name: &str, frame: usize) {
         sheets.villager.animations[name].values().any(|frames| {
             [false, true]
                 .into_iter()
-                .any(|mirror| sprite.uv == uv(frames[frame], [2048.0, 1280.0], mirror))
+                .any(|mirror| sprite.uv == uv(frames[frame], sheets.villager.size, mirror))
         }),
         "expected {name} frame {frame}, got {:?}",
         sprite.uv

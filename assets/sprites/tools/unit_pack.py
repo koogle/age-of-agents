@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Pack unit strips into units.{png,json}: 256 px cells, villager.json conventions (anchor 128,240; figureHeight 176)."""
-import json, sys
+"""Pack unit strips with villager conventions; HD_SCALE=2 recovers 512px cells."""
+import json, sys, os
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-CELL, FOOT_Y, FIG_H, CART_W = 256, 240, 176, 200
+K = int(os.environ.get("HD_SCALE", "1"))
+CELL, FOOT_Y, FIG_H, CART_W = 256 * K, 240 * K, 176 * K, 200 * K
+SOURCE = os.environ.get("UNIT_SOURCE", "units")
 UNITS = ["guard", "archer", "healer", "siege_cart"]
 STRIPS = [("idle", "front", "idle_front", 2), ("idle", "back", "idle_back", 2), ("walk", "front", "walk_front", 4),
           ("walk", "back", "walk_back", 4), ("action", "front", "action", 3)]
@@ -46,7 +48,16 @@ def frames_of(path, n, select=None, ground=False):
     if len(runs) != n: raise SystemExit(f"{path}: {len(runs)} frames, expected {n}")
     out = []
     for x0, x1 in runs:
-        sub = a[:, x0:x1]; rows = np.nonzero((sub[..., 3] > 40).any(1))[0]
+        sub = a[:, x0:x1].copy()
+        if K > 1:
+            # Splitting overlapping props can leave a tiny neighboring tip in
+            # the cell. Remove isolated cut fragments after splitting, too.
+            solid = sub[..., 3] > 40
+            labels, count = ndimage.label(solid)
+            areas = ndimage.sum(solid, labels, range(1, count + 1))
+            keep = np.isin(labels, 1 + np.nonzero(areas > areas.max() * 0.001)[0])
+            sub[..., 3] *= ndimage.binary_dilation(keep, iterations=2)
+        rows = np.nonzero((sub[..., 3] > 40).any(1))[0]
         out.append((sub, rows[0], rows[-1] + 1))
     return out
 
@@ -54,12 +65,23 @@ cells, units = [], {}
 for u in UNITS:
     units[u] = {"figureHeight": FIG_H, "fps": FPS, "animations": {}}
     for anim, facing, strip, n in STRIPS:
-        fr = frames_of(f"units/{u}_{strip}_cut.png", n, SELECT.get((u, strip)), (u, strip) in GROUND_LINE)
+        fr = frames_of(f"{SOURCE}/{u}_{strip}_cut.png", n, SELECT.get((u, strip)), (u, strip) in GROUND_LINE)
         if u == "siege_cart":
             scale = CART_W / np.median([s.shape[1] for s, _, _ in fr])
         else:
             scale = FIG_H / np.median([y1 - y0 for _, y0, y1 in fr])
         ground = np.median([y1 for _, _, y1 in fr])
+        # Long spears must fit around the feet anchor, including action poses.
+        # Bound one shared scale for the whole strip so animation size stays stable.
+        if K > 1:
+            scale = min(scale, 1.0)
+            for sub, y0, y1 in fr:
+                foot = (sub[..., 3] > 40)[int(ground - 0.12 * (ground - y0)):int(ground)]
+                fx = np.nonzero(foot.any(0))[0]
+                cx = (fx.min() + fx.max()) / 2 if len(fx) else sub.shape[1] / 2
+                scale = min(scale, (CELL / 2 - 8) / max(cx, sub.shape[1] - cx),
+                            (FOOT_Y - 8) / (ground - y0),
+                            (CELL - FOOT_Y - 8) / max(1, y1 - ground))
         for sub, y0, y1 in fr:
             al = sub[..., 3] > 40
             foot = al[int(ground - 0.12 * (ground - y0)):int(ground)]
@@ -78,7 +100,7 @@ for u in units:
     units[u]["animations"] = {a: {f: [rect(i) for i in idx] for f, idx in fs.items()} for a, fs in units[u]["animations"].items()}
 manifest = {"image": "units.png", "size": list(sheet.size), "cell": [CELL, CELL], "anchor": [CELL // 2, FOOT_Y],
   "facings": "front = three-quarter front (facing viewer-left), back = three-quarter back (facing viewer-right); mirror for the other two",
-  "note": "Per unit, the same shape as villager.json (figureHeight, fps, animations.<anim>.<facing> = cell rects). The siege cart is scaled to a 200 px-wide body instead of a figure height.",
+  "note": f"Per unit, the same shape as villager.json (figureHeight, fps, animations.<anim>.<facing> = cell rects). The siege cart is scaled to a {CART_W} px-wide body instead of a figure height.",
   "units": units}
 sheet.save(sys.argv[1] + ".png", optimize=True); json.dump(manifest, open(sys.argv[1] + ".json", "w"), indent=1)
 print(sheet.size, len(cells), "frames")
