@@ -80,11 +80,15 @@ impl App {
     /// Two fingers moved from `before` to `after`.
     fn pinch(&mut self, before: (Vec2, Vec2), after: (Vec2, Vec2)) {
         let (span0, span1) = (before.1 - before.0, after.1 - after.0);
-        if span0.length() > 8.0 && span1.length() > 8.0 {
-            self.rig
-                .zoom((span0.length() / span1.length()).clamp(0.8, 1.25));
-        }
         let (mid0, mid1) = ((before.0 + before.1) * 0.5, (after.0 + after.1) * 0.5);
+        if span0.length() > 8.0 && span1.length() > 8.0 {
+            let heights = &self.view.heights;
+            self.rig.zoom_at(
+                mid0,
+                (span0.length() / span1.length()).clamp(0.8, 1.25),
+                |x, z| heights.at(x, z),
+            );
+        }
         if let Some(grabbed) = self.ground_at(mid0)
             && let Some(now) = self.rig.plane_at(mid1, grabbed.y)
         {
