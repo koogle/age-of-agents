@@ -123,7 +123,7 @@ const RIVER_DEPTH: f32 = 0.14;
 fn world_height(elevation: f32) -> f32 {
     if elevation > 0.0 {
         let peak = elevation * elevation * elevation * elevation;
-        0.04 + elevation * 0.8 + peak * 1.5
+        0.04 + elevation * 1.3 + peak * 1.8
     } else {
         SEA_LEVEL - 0.15 + elevation * 0.6
     }
@@ -241,18 +241,26 @@ pub fn ground_mesh(heights: &Heights) -> Mesh<GroundVertex> {
     let (width, depth) = (COLUMNS + MARGIN * 2.0, ROWS + MARGIN * 2.0);
     let steps = (width as u32 * SUBDIVISIONS, depth as u32 * SUBDIVISIONS);
     let (points, indices) = grid(width, depth, (-MARGIN, -MARGIN), steps);
-    let e = 0.05;
+    // One height sample per vertex; normals come from the neighbouring
+    // vertices, so a rebuild of the whole island stays cheap.
+    let y: Vec<f32> = points.iter().map(|&(x, z)| heights.at(x, z)).collect();
+    let (stride, last) = (steps.0 as usize + 1, (steps.0 as usize, steps.1 as usize));
+    let step = 1.0 / SUBDIVISIONS as f32;
     let vertices = points
-        .into_iter()
-        .map(|(x, z)| {
+        .iter()
+        .enumerate()
+        .map(|(index, &(x, z))| {
+            let (i, j) = (index % stride, index / stride);
+            let (west, east) = (i.saturating_sub(1), (i + 1).min(last.0));
+            let (north, south) = (j.saturating_sub(1), (j + 1).min(last.1));
             let n = [
-                heights.at(x - e, z) - heights.at(x + e, z),
-                2.0 * e,
-                heights.at(x, z - e) - heights.at(x, z + e),
+                (y[j * stride + west] - y[j * stride + east]) / (east - west) as f32,
+                step,
+                (y[north * stride + i] - y[south * stride + i]) / (south - north) as f32,
             ];
             let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
             GroundVertex {
-                position: [x, heights.at(x, z), z],
+                position: [x, y[index], z],
                 normal: [n[0] / len, n[1] / len, n[2] / len],
                 shade: 0.9 + noise(x * 1.7, z * 1.7) * 0.2,
             }
@@ -280,8 +288,12 @@ mod tests {
 
     #[test]
     fn land_stands_above_the_sea_and_water_below_it() {
-        let land = Heights::from_cells((0..2400).map(|_| (Some(0.4), None)));
-        let water = Heights::from_cells((0..2400).map(|_| (Some(-0.4), None)));
+        let land = Heights::from_cells(
+            (0..usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS)).map(|_| (Some(0.4), None)),
+        );
+        let water = Heights::from_cells(
+            (0..usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS)).map(|_| (Some(-0.4), None)),
+        );
         assert!(land.at(15.0, 10.0) > SEA_LEVEL + 0.2);
         assert!(water.at(15.0, 10.0) < SEA_LEVEL - 0.1);
         assert!(
@@ -295,8 +307,14 @@ mod tests {
         assert!(
             world_height(1.0) - world_height(0.8) > (world_height(0.4) - world_height(0.2)) * 1.5
         );
-        let river = Heights::from_cells((0..2400).map(|_| (Some(0.4), Some(TerrainBiome::River))));
-        let banks = Heights::from_cells((0..2400).map(|_| (Some(0.4), Some(TerrainBiome::Meadow))));
+        let river = Heights::from_cells(
+            (0..usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS))
+                .map(|_| (Some(0.4), Some(TerrainBiome::River))),
+        );
+        let banks = Heights::from_cells(
+            (0..usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS))
+                .map(|_| (Some(0.4), Some(TerrainBiome::Meadow))),
+        );
         assert!(river.at(15.0, 10.0) < banks.at(15.0, 10.0) - 0.1);
         assert!(river.at(15.0, 10.0) > SEA_LEVEL, "rivers run above the sea");
     }

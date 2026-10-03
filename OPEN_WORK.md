@@ -1,5 +1,13 @@
 # Open Work
 
+## Bigger island (branch claude/bigger-island, 2026-10-03, not yet on master)
+
+- Map grows from 60×40 to 120×80 cells (island about 4× larger). Worldgen now raises three or four separated mountain ranges away from the start, deeper rolling hills, and winding ridged-noise valleys that rivers follow (up to four rivers). Only wood (2 nearby woodlines) and berries (1 nearby patch) grow within 16 cells of the start; stone, gold, iron, clay and fiber all lie 24+ cells out, so the player must explore. Fishing-boat budget guarantee unchanged.
+- Client: land heights exaggerated (`world_height` 0.8→1.3 linear, 1.5→1.8 peak) so hills read; ground mesh samples height once per vertex (normals from neighbours), so the 4× mesh rebuilds in ~9 ms native, the same as the old map.
+- Store schema 9→10 drops 60×40 worlds; deploying resets the live world. Snapshot JSON grows to ~22 KB at start (was under 20 KB cap; cap now 30 KB). Worldgen tests moved to `worldgen/tests.rs` to keep files under 1,000 lines.
+- Verified: fmt, workspace tests (debug 67 s for aoa-game, was ~14 s release), native and WASM clippy, web/pkg rebuilt, browser WebGL2 at /play with a fully explored scratch DB (no console errors).
+- Next: user decides whether to merge to master (triggers Modal deploy and world reset). Possible follow-up: run-length terrain codec if snapshot bandwidth matters on mobile.
+
 Updated 2026-10-03. Branch master, including native-fixes commit 97a04d7 (deployed successfully). User authorized pushing the missing recent native fixes. Recovery commit da820bb on codex/native-sprite-rendering preserves all older local fixes, docs, fonts and generated WASM. Historical root and gukaet edits/saves remain untouched.
 
 ## Integrated

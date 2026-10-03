@@ -6,7 +6,7 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 ## Milestone 1
 
-- Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
+- Seeded island generation on a 120×80-cell map: value-noise elevation with rolling hills, winding valleys and three or four separate mountain ranges sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to four rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps; only wood and berries grow near the start, while stone, gold, iron, clay and fiber lie at least 24 cells out so they must be found by exploring; every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers; Shift-click adds or removes villagers, and a resource/foundation order sends the selected group to shared work
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
@@ -42,7 +42,7 @@ is still served at `/` until the Rust client reaches full parity.
 
 ### World soundness
 
-The world is a 60×40 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
+The world is a 120×80 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
 
 - Every building footprint (complete or foundation), live resource node, unit cell, and in-progress step target is an **exclusive claim**.
 - A unit claims the next cell **before** stepping into it and releases its old cell only when the step completes, so two bodies never overlap, even mid-stride. Diagonal steps never cut past an occupied corner.
@@ -109,7 +109,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 Mouse and touch use the same command semantics.
 
-Schema version 9 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, or the smaller building footprints of versions 7 and 8) are intentionally dropped because they cannot be translated safely.
+Schema version 10 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 120×80 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, the smaller building footprints of versions 7 and 8, or the smaller 60×40 map of version 9) are intentionally dropped because they cannot be translated safely.
 
 Snapshots encode terrain compactly (one character per cell for biome and fog, one for quantized elevation of explored cells), so a full snapshot is about 8 KB rather than over 100 KB.
 

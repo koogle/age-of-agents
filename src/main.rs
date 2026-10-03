@@ -405,8 +405,8 @@ mod tests {
         let json = serde_json::to_value(message).unwrap();
         assert_eq!(json["type"], "snapshot");
         assert_eq!(json["sequence"], 4);
-        assert_eq!(json["world"]["columns"], 60);
-        assert_eq!(json["world"]["rows"], 40);
+        assert_eq!(json["world"]["columns"], 120);
+        assert_eq!(json["world"]["rows"], 80);
         let unit = &world.units[0];
         assert_eq!(
             json["world"]["units"][0]["cell"],
@@ -419,8 +419,8 @@ mod tests {
             terrain["cells"].as_str().unwrap(),
             terrain["heights"].as_str().unwrap(),
         );
-        assert_eq!(cells.len(), 2400);
-        assert_eq!(heights.len(), 2400);
+        assert_eq!(cells.len(), 9600);
+        assert_eq!(heights.len(), 9600);
         assert!(
             cells
                 .bytes()
@@ -428,7 +428,7 @@ mod tests {
                 .all(|(c, h)| (c == b'.') == (h == b'.'))
         );
         assert!(cells.contains('.') && cells.bytes().any(|c| c.is_ascii_uppercase()));
-        assert!(serde_json::to_string(&json).unwrap().len() < 20_000);
+        assert!(serde_json::to_string(&json).unwrap().len() < 30_000);
         assert!(json["world"]["resources"].as_array().unwrap().len() < world.resources.len());
     }
 }
