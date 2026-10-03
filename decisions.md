@@ -9,7 +9,7 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Scope:** Prefer small, playable slices and direct typed data over a generic engine, ECS, recipe language, or broad technology matrix.
 - **Spatial rules:** Buildings, live resources, units, and step targets claim exclusive cells; move destinations are reservations. Eight-neighbor routing cannot cut occupied corners.
 - **Orders and costs:** Reject invalid commands atomically and reserve costs once. Stop or replacement orders keep cargo and construction progress.
-- **Production:** Each building has one job slot; unit production waits for a free adjacent cell. Units and queued trainees consume housing, processing jobs do not.
+- **Production:** Each building runs one task and holds up to five paid waiting tasks in submission order; cancelling a waiting task refunds its full cost. Unit production waits for a free adjacent cell, and both active and waiting trainees reserve housing.
 - **Persistence:** Save authoritative snapshots in SQLite and respect `AGE_OF_AGENTS_DB`. Corrupt state is an error; incompatible historical schemas are intentionally discarded rather than translated unsafely.
 - **Current economy:** Direct gathering remains available alongside farm/mining-camp drop-offs and non-stacking local bonuses. Processing costs and quantities are initial balance values.
 - **Fields:** Planting and replenishing fields require paid, explicit villager orders. Idle villagers never replant automatically.
