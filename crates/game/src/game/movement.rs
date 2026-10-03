@@ -252,6 +252,47 @@ impl GameWorld {
         })
     }
 
+    /// A foundation must not split any unit's reachable ground. Foundations
+    /// already block the full completed footprint, so check before placing one.
+    /// Ignore temporary unit claims and reservations, just like static routing.
+    pub(super) fn placement_preserves_routes(&self, footprint: Footprint) -> bool {
+        let occupancy = self.occupancy();
+        let mut checked: Vec<PathTree> = Vec::new();
+        self.units.iter().all(|unit| {
+            let start = unit.step.map_or(unit.cell, |step| step.to);
+            // Units sharing connected ground need only one pair of searches.
+            if checked.iter().any(|paths| paths.cost(start).is_some()) {
+                return true;
+            }
+            let before = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+                !occupancy.is_static(cell)
+            });
+            let after = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+                !footprint.contains(cell) && !occupancy.is_static(cell)
+            });
+            // Even if every lost cell belongs to the new building, a unit
+            // that could walk before must still have somewhere to step.
+            let body = Footprint {
+                origin: start,
+                columns: 1,
+                rows: 1,
+            };
+            if before.nearest(interaction_cells(body)).is_some()
+                && after.nearest(interaction_cells(body)).is_none()
+            {
+                return false;
+            }
+            let preserved = self.terrain.iter().all(|terrain| {
+                let cell = terrain.coordinate();
+                footprint.contains(cell)
+                    || before.cost(cell).is_none()
+                    || after.cost(cell).is_some()
+            });
+            checked.push(after);
+            preserved
+        })
+    }
+
     /// Whether `unit` could stand beside `footprint` once other units move aside.
     pub(super) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
         let occupancy = self.occupancy();
