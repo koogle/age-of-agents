@@ -1,5 +1,5 @@
 {
-  "note": "Gameplay uses the original FAL building cutouts and original architectural designs. The recreated orthogonal sheet is retained as an unused experiment; it is not packed or loaded.",
+  "note": "Original FAL architecture retained. Completed granary uses a targeted image_gen edit adding visible stored grain; original cutout is retained. Orthogonal sheet is unused.",
   "files": {
     "house_foundation.png": {
       "endpoint": "fal-ai/birefnet/v2",
@@ -73,6 +73,13 @@
       "source_generation": "exec-b8e1b818-8b84-4405-8647-16122251a52c",
       "transparent_generation": "exec-8fa45087-703d-4f65-93b1-2b6918906ee2",
       "status": "Unused: rejected style experiment. Original house and granary sprites restored at user request."
+    },
+    "granary_grain_complete.png": {
+      "generator": "OpenAI image_gen",
+      "source": "granary_complete.png",
+      "generation": "exec-3e065b2b-9514-42ab-b712-f6e91da56aac",
+      "date": "2026-10-03",
+      "purpose": "Keep original illustrated architecture; add wheat emblem, sheaves, open sacks and grain basket for recognizability."
     }
   }
 }
