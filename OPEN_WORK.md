@@ -1,5 +1,14 @@
 # Open Work
 
+## Retire the unused frontend (2026-10-03)
+
+User requested removal of unused legacy code, then PR creation and merge. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend/vendor libraries, unused GLBs/model builders, processed `assets/game/` sprites, obsolete asset pipelines/checks, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, and docs now use the Rust client only.
+
+Rebased onto master 54bf023, preserving HD sprites, custom fields, building task queues, progression, favicon and drop-off feedback. The diff against that base contains no changes to `crates/`, persistence, active art, dependencies, or the browser bootstrap/WASM. All 160 workspace tests (13 server, 46 client, 101 game), formatting, strict native/WASM Clippy, server build, browser-binding/Python syntax, UI icon checks, all 268 HD sprite checks, and whitespace pass. Isolated SQLite server: root/play and both local variants serve the exact Rust bootstrap with no-cache; retired URLs return 404. Deployment verifier passes locally. Real Chromium desktop/DPR-2 phone loads all four variants without page errors or missing/legacy requests; actual mouse/touch pause, 2×, and resume controls update authoritative state. Screenshots: `/tmp/aoa-cleanup-{desktop,phone}{,-local}.png`.
+
+Thermonuclear review: deletes the duplicate presentation stack and obsolete pipelines, adds no dependency or gameplay behavior, preserves typed commands/persistence and `/play` links, and retains provenance. PR #69: https://github.com/koogle/age-of-agents/pull/69. Integrated the documentation-only handoff refresh from master 9cfa899. Ready for the user-authorized merge; production verification remains pending until the merge-triggered workflow completes.
+
+
 Updated 2026-10-03 at 22:52 Europe/Madrid. Keep only outstanding work, blockers and verification follow-ups here. Implemented features are summarized in [README.md](README.md); completed history lives in Git and `docs/`.
 
 Use `master` as the integration branch and PR base.

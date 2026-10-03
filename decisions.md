@@ -5,7 +5,7 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.
 - **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind.
 - **Shared simulation:** Keep deterministic game rules in `crates/game`, shared by hosted, native, and browser-local games. Rendering never decides gameplay outcomes.
-- **Rust client:** One wgpu client serves native and WebGL2 builds. Keep the Three.js client available during migration, but do not extend it.
+- **Rust client:** One wgpu client serves native and WebGL2 builds. The retired Three.js client and its asset pipeline are removed; `/` and `/play` both serve the Rust client.
 - **Scope:** Prefer small, playable slices and direct typed data over a generic engine, ECS, recipe language, or broad technology matrix.
 - **Spatial rules:** Buildings, live resources, units, and step targets claim exclusive cells; move destinations are reservations. Eight-neighbor routing cannot cut occupied corners.
 - **Orders and costs:** Reject invalid commands atomically and reserve costs once. Stop or replacement orders keep cargo and construction progress.
