@@ -3,6 +3,7 @@
 //! `?local` to simulate in the page).
 mod assets;
 mod camera;
+mod feedback;
 mod gpu;
 mod hud;
 mod placement;
@@ -10,6 +11,8 @@ mod render;
 mod source;
 mod terrain;
 mod view;
+mod window;
+use window::{loaded, physical_size};
 
 use std::collections::VecDeque;
 use std::sync::Arc;
@@ -19,7 +22,7 @@ use glam::{Vec2, Vec3};
 use winit::application::ApplicationHandler;
 use winit::event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop, EventLoopProxy};
-use winit::keyboard::{Key, NamedKey};
+use winit::keyboard::{Key, ModifiersState, NamedKey};
 use winit::window::{Window, WindowId};
 
 use assets::{Assets, Rgba};
@@ -106,6 +109,8 @@ pub struct App {
     selection: Selection,
     pointer: Option<Pointer>,
     cursor: Vec2,
+    modifiers: ModifiersState,
+    feedback: feedback::Feedback,
     incoming: VecDeque<WorldSnapshot>,
     clock: f64,
     last_frame: Option<f64>,
@@ -169,6 +174,8 @@ impl App {
             selection: Selection::default(),
             pointer: None,
             cursor: Vec2::ZERO,
+            modifiers: ModifiersState::empty(),
+            feedback: feedback::Feedback::default(),
             incoming: VecDeque::new(),
             clock: 0.0,
             last_frame: None,
@@ -348,13 +355,7 @@ impl App {
             return;
         };
         if let Target::Unit(id) = target {
-            if !additive {
-                self.selection.units.clear();
-            }
-            if !self.selection.units.contains(&id) {
-                self.selection.units.push(id);
-            }
-            self.selection.building = None;
+            self.selection.select_unit(id, additive);
             return;
         }
         let units = self.selection.units.clone();
@@ -636,6 +637,8 @@ impl App {
         self.clock += dt;
         self.source.poll(dt, &mut self.incoming);
         while let Some(snapshot) = self.incoming.pop_front() {
+            self.feedback
+                .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
             self.view.sync(snapshot);
             if !self.framed {
                 self.frame_town_center();
@@ -755,6 +758,13 @@ impl App {
         let scale = game.window.scale_factor() as f32;
         self.hud
             .layout(&self.atlas, &model, self.rig.width, self.rig.height, scale);
+        self.feedback.draw(
+            &mut self.hud,
+            &self.atlas,
+            &self.rig,
+            &self.view.heights,
+            self.clock,
+        );
         game.renderer.render(
             &game.gpu,
             &globals,
@@ -774,61 +784,11 @@ impl App {
 /// Reports startup progress (0 to 1) to the page's loading overlay.
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn loading(fraction: f64, text: &str) {
-    call_overlay(&[fraction.into(), text.into()]);
+    window::call_overlay(&[fraction.into(), text.into()]);
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn loading(_fraction: f64, _text: &str) {}
-
-/// Dismisses the loading overlay once the first world frame is on screen.
-#[cfg(target_arch = "wasm32")]
-fn loaded() {
-    call_overlay(&[1.0.into()]);
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn loaded() {}
-
-/// Calls `window.aoaProgress(...)` when the page defines it.
-#[cfg(target_arch = "wasm32")]
-fn call_overlay(args: &[wasm_bindgen::JsValue]) {
-    use wasm_bindgen::JsCast;
-    let Some(window) = web_sys::window() else {
-        return;
-    };
-    let Ok(function) = js_sys::Reflect::get(&window, &"aoaProgress".into()) else {
-        return;
-    };
-    if let Some(function) = function.dyn_ref::<js_sys::Function>() {
-        let _ = function.apply(&window, &args.iter().collect::<js_sys::Array>());
-    }
-}
-
-/// The drawable size in device pixels. In the browser winit can leave the
-/// canvas at its CSS size on high-DPI screens while pointer events arrive in
-/// device pixels, so the canvas is sized here from its layout box instead.
-#[cfg(not(target_arch = "wasm32"))]
-fn physical_size(window: &Window) -> (u32, u32) {
-    let size = window.inner_size();
-    (size.width.max(1), size.height.max(1))
-}
-
-#[cfg(target_arch = "wasm32")]
-fn physical_size(window: &Window) -> (u32, u32) {
-    use winit::platform::web::WindowExtWebSys;
-    let Some(canvas) = window.canvas() else {
-        let size = window.inner_size();
-        return (size.width.max(1), size.height.max(1));
-    };
-    let scale = window.scale_factor();
-    let width = ((canvas.client_width() as f64 * scale).round() as u32).max(1);
-    let height = ((canvas.client_height() as f64 * scale).round() as u32).max(1);
-    if canvas.width() != width || canvas.height() != height {
-        canvas.set_width(width);
-        canvas.set_height(height);
-    }
-    (width, height)
-}
 
 /// Plain-language versions of the server's rejection reasons.
 fn friendly(error: &str) -> String {
@@ -916,8 +876,15 @@ impl ApplicationHandler<Game> for App {
             }
             WindowEvent::MouseInput { state, button, .. } => match state {
                 ElementState::Pressed => self.press(self.cursor, button),
-                ElementState::Released => self.release(self.cursor, false),
+                ElementState::Released => self.release(self.cursor, self.modifiers.shift_key()),
             },
+            WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
+            WindowEvent::Focused(false) => {
+                self.modifiers = ModifiersState::empty();
+                self.pointer = None;
+                self.touches.clear();
+                self.gesture = false;
+            }
             WindowEvent::MouseWheel { delta, .. } => {
                 let lines = match delta {
                     MouseScrollDelta::LineDelta(_, y) => y,

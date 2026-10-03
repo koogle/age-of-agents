@@ -8,9 +8,9 @@ The current vertical slice is intentionally bounded: command villagers through a
 
 - Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
-- Selectable villagers
+- Selectable villagers; Shift-click adds or removes villagers, and a resource/foundation order sends the selected group to shared work
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
-- Bounded villager cargo with explicit return and town-center deposit phases
+- Bounded villager cargo with explicit return and town-center deposit phases; ivory italic resource labels rise when loads are deposited
 - Command-driven construction of five building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea
 - Starting town-center base with single-slot villager production
 - Seven typed shared stockpiles and a five-technology gathering tree
@@ -148,3 +148,5 @@ The 2D sprites under `assets/game/` are no longer used by the client.
 
 For Midjourney CLI/MCP installation and account setup, see
 [Midjourney asset tools](docs/MIDJOURNEY.md).
+
+Rust client presentation uses two walking/carrying poses paced by distance traveled and a neutral pose at rest. Painted sprites preserve their authored colors; terrain retains its grading and placement previews remain translucent. Pause and speed labels are centered by visible glyph bounds.
