@@ -15,6 +15,7 @@ mod catalog;
 mod fields;
 mod selection;
 pub(crate) use buildings::sprite as building_sprite;
+pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
 
 use crate::camera::Rig;

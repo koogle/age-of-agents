@@ -38,6 +38,10 @@ Use one integration owner for shared domain, occupancy and save-schema changes. 
 
 Later, split pirates, mythical creatures, calamities, treasures and permanent upgrades into separate proposals/PRs after C2. Timing, balance and upgrade rules remain open; follow the [proposed gameplay loop](README.md#proposed-gameplay-loop).
 
+## Custom field artwork (2026-10-03)
+
+User requested fal-generated field/construction sprites, a PR and merge into `master`. Dedicated cleared, cultivated, seedling and ripe frames replace the farm artwork for fields, their placement ghost and Field menu portrait. Four retained 1024px fal renders/cutouts are packed as 512px cells in the economy atlas; existing building rows remain intact. Shared plot fitting preserves registration through preparation/depletion. Simulation and farm buildings are unchanged. Branch: `art/custom-field`, integrated master `d7dd0de` including the NPC ring fix. All 152 workspace tests pass (13 server, 44 client, 95 game), including field stage/registration/footprint/preview coverage. Formatting, asset checks, deterministic repacking and strict WASM lint pass; integrated WASM rebuilt. Desktop and DPR-2 phone WebGL2 stage galleries have no runtime errors; original building pixels are unchanged. Strict native lint and actual desktop mouse/DPR-2 phone touch placement pass: each creates a distinct field and reserves exactly 10 wood + 5 stone. Final desktop and phone captures are reviewed, with no browser runtime errors. Ready for the authorized PR merge; production deployment will be triggered by that merge. Source/provenance: `assets/sprites/field_sources/`; review: `docs/FIELD_ART_REVIEW.md`; evidence: `/workspace/scratch/field-art/`.
+
 ## Release verification handoff
 
 Completed the three earlier presentation gaps: actual Linux/Zenity reset input/retry/cancel/confirmation, independent read-only production globe out/back zoom, and controlled-clock WebGL zigzag/brief-stop/idle/carry replay. Durable screenshots, 1,275 sprite samples, scope limits and reproduction steps: [presentation verification](docs/PRESENTATION_VERIFICATION.md). These checks do not certify the newer queued releases below.

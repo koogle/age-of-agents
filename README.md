@@ -20,7 +20,7 @@ This is the intended direction. Ships, multiple islands, local inventories, comb
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
-- Farms with harvestable, manually replenished fields; mining camps and local gathering bonuses.
+- Farms with harvestable, manually replenished fields and dedicated soil/cultivation/seedling/wheat sprites; mining camps and local gathering bonuses.
 - Wood → timber processing on starter islands; steel, bricks and cloth await future destination resources. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
