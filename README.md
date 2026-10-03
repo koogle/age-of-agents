@@ -71,7 +71,7 @@ Open <http://localhost:8000/play>, or <http://localhost:8000/play?local> for an 
 
 Existing saves keep their terrain, resources, buildings and economy rules; choose Reset game only when you want a fresh starter island (this erases that world). Saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run`. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use the Reset game dialog.
 
-Select a unit, then tap/click ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Shift-click or Shift-drag adds units on desktop; drag to pan, wheel/pinch to zoom, X to stop, G for the grid, and Escape to cancel placement. Reset game erases the current world's progress. Gatherers keep chopping, mining, digging, or foraging while filling their load. Villagers carrying goods unload first before a new gather, build, or field-preparation assignment, then resume that task automatically; the selection status shows what comes next.
+Select a unit, then tap/click ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Shift-click or Shift-drag adds units on desktop; drag to pan, hold the mouse near an edge or corner to pan gently, wheel to zoom toward the pointer, pinch to zoom around the fingers’ midpoint, X to stop, G for the grid, and Escape to cancel placement. Reset game erases the current world's progress. Gatherers keep chopping, mining, digging, or foraging while filling their load. Villagers carrying goods unload first before a new gather, build, or field-preparation assignment, then resume that task automatically; the selection status shows what comes next.
 
 ## Contributing
 
