@@ -5,6 +5,17 @@ use winit::event::{MouseButton, TouchPhase};
 
 const DRAG_THRESHOLD: f32 = 8.0;
 
+/// Gentle speed ramp through the outer 32 logical pixels; corners pan diagonally.
+fn edge_direction(pixel: Vec2, size: Vec2, scale: f32) -> Vec2 {
+    if pixel.x < 0.0 || pixel.y < 0.0 || pixel.x > size.x || pixel.y > size.y {
+        return Vec2::ZERO;
+    }
+    let band = (32.0 * scale).min(size.min_element() * 0.25).max(1.0);
+    let near = (Vec2::ONE - pixel / band).clamp(Vec2::ZERO, Vec2::ONE);
+    let far = (Vec2::ONE - (size - pixel) / band).clamp(Vec2::ZERO, Vec2::ONE);
+    Vec2::new(far.x - near.x, near.y - far.y).clamp_length_max(1.0)
+}
+
 pub(super) struct Pointer {
     pub(super) on_hud: bool,
     pub(super) down_at: Vec2,
@@ -15,6 +26,29 @@ pub(super) struct Pointer {
 }
 
 impl App {
+    pub(super) fn edge_pan(&mut self, dt: f32) {
+        if !self.focused
+            || !self.mouse_inside
+            || self.pointer.is_some()
+            || !self.touches.is_empty()
+            || self.gesture
+            || self.hud.covers(self.cursor)
+        {
+            return;
+        }
+        let Some(game) = &self.game else {
+            return;
+        };
+        let direction = edge_direction(
+            self.cursor,
+            Vec2::new(self.rig.width, self.rig.height),
+            game.window.scale_factor() as f32,
+        );
+        // Time-based movement stays gentle at every frame rate and zoom level.
+        self.rig
+            .nudge(direction.x * dt * 2.0, direction.y * dt * 2.0);
+    }
+
     pub(super) fn press(&mut self, pixel: Vec2, button: MouseButton, shift: bool) {
         let on_hud = button == MouseButton::Left && self.hud.press(pixel);
         let box_select = shift
@@ -35,6 +69,7 @@ impl App {
     /// One finger pans, taps and presses the HUD like the mouse; two fingers
     /// pinch to zoom and move together to pan.
     pub(super) fn touch(&mut self, id: u64, phase: TouchPhase, pixel: Vec2) {
+        self.mouse_inside = false;
         let previous = self.touches.clone();
         match phase {
             TouchPhase::Started => self.touches.push((id, pixel)),
@@ -138,6 +173,49 @@ impl App {
             self.selection.add_units(ids);
         } else if !pointer.dragging && pointer.button == MouseButton::Left {
             self.tap(pixel, additive);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn edges_and_corners_pan_toward_the_pointer_without_diagonal_speedup() {
+        let size = Vec2::new(1280.0, 800.0);
+        for (pixel, expected) in [
+            (Vec2::new(0.0, 400.0), -Vec2::X),
+            (Vec2::new(1280.0, 400.0), Vec2::X),
+            (Vec2::new(640.0, 0.0), Vec2::Y),
+            (Vec2::new(640.0, 800.0), -Vec2::Y),
+            (Vec2::ZERO, Vec2::new(-1.0, 1.0).normalize()),
+            (size, Vec2::new(1.0, -1.0).normalize()),
+            (Vec2::new(1280.0, 0.0), Vec2::ONE.normalize()),
+            (Vec2::new(0.0, 800.0), -Vec2::ONE.normalize()),
+        ] {
+            assert!(edge_direction(pixel, size, 1.0).abs_diff_eq(expected, 1e-6));
+        }
+    }
+
+    #[test]
+    fn edge_speed_ramps_in_logical_pixels_and_stops_in_the_interior_or_outside() {
+        let size = Vec2::new(1280.0, 800.0);
+        for scale in [1.0, 2.0] {
+            for (x, speed) in [(0.0, -1.0), (16.0, -0.5), (32.0, 0.0), (640.0, 0.0)] {
+                assert_eq!(
+                    edge_direction(Vec2::new(x, 400.0) * scale, size * scale, scale),
+                    Vec2::new(speed, 0.0)
+                );
+            }
+        }
+        for pixel in [
+            Vec2::new(-1.0, 400.0),
+            Vec2::new(1281.0, 400.0),
+            Vec2::new(640.0, -1.0),
+            Vec2::new(640.0, 801.0),
+        ] {
+            assert_eq!(edge_direction(pixel, size, 1.0), Vec2::ZERO);
         }
     }
 }
