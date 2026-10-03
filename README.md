@@ -8,11 +8,11 @@ The current prototype is a single-island RTS economy with a shared Rust simulati
 
 Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. The long-term world keeps expanding as you discover islands, without a fixed island limit.
 
-Time keeps moving as you expand. Islands have local dangers such as wolves; later threats include pirates and mythical creatures such as a cyclops. Train warriors and archers to protect your settlements. Calamities grow stronger over time: a hurricane might destroy your fleet, famine might kill villagers and halve your stores, or fire might devastate an island.
+Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Runs are expected to end in defeat. Treasures and progress unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
+Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite.
 
-This is the intended direction. Ships, multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet. The planned first transport costs wood and timber, with no metal or cloth prerequisite. Fresh games currently end at the settlement/timber economy; there is no departure option yet.
+Fresh games currently end at the settlement/timber economy; there is no departure option yet.
 
 ## Implemented roadmap
 
