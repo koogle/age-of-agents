@@ -82,6 +82,7 @@ Provenance: [sprites](assets/sprites/README.md), [building refinements](assets/s
 
 ## Workflow
 
+- For any visual change (sprites, textures, UI, layout, or rendering), show relevant images directly in the chat alongside status updates to the developer as soon as a preview is available, and include the final visual result when finishing. Use current asset previews or in-game screenshots, label drafts and before/after comparisons clearly, and do not wait for the developer to ask to see the changes.
 - At the start of every work session, read `OPEN_WORK.md` before acting.
 - Keep `OPEN_WORK.md` current after meaningful milestones, blocker changes, and before commit/push/deploy or ending a session. It is a compact current-state handoff, not an append-only diary.
 - Parent-session work may proceed directly on `master` for this solo project.
