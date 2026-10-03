@@ -1,6 +1,6 @@
 # Villager billboard sprites
 
-Three villagers in the illustrated ink-and-wash style of the UI icon kit, for camera-facing billboards. Not wired into the client.
+Three villagers in the illustrated ink-and-wash style of the UI icon kit, rendered as camera-facing billboards in the shared Rust client. All villager actions, military actions/facings and base resource stages now use lossless 512×512 cells.
 
 | Sheet | Who |
 | --- | --- |
@@ -12,14 +12,50 @@ All three share the same layout, anchor, frame order and royal-blue team scarf, 
 
 ## Layout (identical in all three `.json` files)
 
-- 256×256 cells on an 8-column grid. Each animation and facing is a list of `[x, y, w, h]` cell rects in playback order.
-- **Anchor `[128, 240]`:** the feet's bottom-centre in every cell. Head-to-feet height is about 176 px for standing frames. Raised tools reach toward the top of the cell; nothing is clipped.
+- 512×512 cells on an 8-column grid (4096×2560 atlas). Each animation and facing is a list of `[x, y, w, h]` cell rects in playback order.
+- **Anchor `[256, 480]`:** the feet's bottom-centre in every cell. Head-to-feet height is about 352 px for standing frames. Raised tools reach toward the top of the cell; nothing is clipped.
 - **Facings:** `front` is three-quarter front (body turned toward viewer-left); `back` is three-quarter back (turned toward viewer-right). Mirror them for the other two diagonals.
 - **Animations and frame counts:** idle 2 (front, back), walk 4 (front, back), carry 4 (front, back; brown sack on the shoulder), chop 3, mine 3, forage 2 (crouched, basket), dig 3, build 3 (mallet). The gather and build animations are front only.
 - **`fps`:** suggested playback rates per animation.
 - **Team colour:** a saturated royal-blue scarf and chest band, which reads on grass and sand at about 56 px (see `villager_contact.jpg`). No shadow is baked in.
 
-## Pipeline
+## HD recovery and refinement (2026-10-03)
+
+The original FAL/BiRefNet strips are retained in `hd_sources/`, with request IDs,
+URLs, dimensions and SHA-256 hashes in `hd_sources/provenance.json`. Before this
+migration, repacking those sources at 256 px reproduced all five shipped atlases
+pixel-for-pixel. No source regeneration was needed. The originals preserve the
+approved identities and animation poses, recovering detail discarded by packing.
+
+OpenAI image_gen refined the guard action strip (consistent spear direction,
+separated silhouettes) and cart motion/action strips (fixed camera per facing,
+consistent pennants, slender bolts). Reviewed generated sources and BiRefNet
+cutouts are retained in `hd_sources/refined/`. White-background intermediate refinements removed colored matte fringes before the final cutout; that directory's ledger records
+six cutout requests (including the rejected fringe pass), estimated at $0.006 total. Image-tool usage is separate
+from that FAL estimate. Cart idle uses two poses from the matching refined motion
+row, so its chassis and pennant stay consistent across idle/walk.
+
+Reproduce all five HD atlases with Pillow, NumPy and SciPy installed:
+
+```bash
+python3 scripts/pack_hd_sprites.py
+python3 scripts/check_sprite_resolution.py
+```
+
+The packer uses original pixels, caps source scaling at 1, retains a common feet
+baseline and scale per strip, and fits raised tools/long weapons inside their
+cells. The woman's raised pickaxe needed a slightly smaller shared strip scale
+to avoid clipping. Villager world height and normalized anchors are unchanged;
+resource `unitsPerPixel` maintains world size. No low-resolution atlas is enlarged.
+All 268 frames in the strict audit now pass; it also checks decoded PNG dimensions,
+RGBA mode, nonempty frames and rectangle bounds. CI runs this gate.
+
+The dedicated idle HD sheet remains in use. Resource variants/scenery and the
+legacy combined activity sheets are separate assets outside this audit. Existing
+variant carry-back poses remain near-profile; no new directions or playable
+combat/healing animations are introduced.
+
+## Original generation pipeline
 
 1. **Identity master** (`villager_master.jpg`): `fal-ai/nano-banana/edit` with the `command_train` icon (style) and the earlier villager concept (character) attached. The red sash becomes a royal-blue scarf and band. Three candidates; the one with the clearest scarf was kept.
 2. **One strip per animation and facing:** nano-banana/edit with the master attached as the only reference. The prompt asks for exactly N frames of the same villager side by side on a shared ground line (`tools/strips.py` has the prompts). Generating a whole strip in one image is what keeps identity within an animation; the master keeps it across animations. carry_front (frame 1 lost the sack) and forage (a bush was drawn in) were regenerated once with stricter prompts.
@@ -147,7 +183,7 @@ No upscaler was needed: the original nano-banana strip generations are about 2.1
 
 `villager_idle_hd_contact.jpg` compares the old and new frames at 60 px and 200 px tall on meadow, plus a 1:1 detail crop of the HD frame against the 1× frame stretched 2×.
 
-**Limitation:** if the idle strips are regenerated later (for example by animation fixes), rerun `pack.py` with `HD_SCALE=2` and `hd_idle.py` on the new cutouts. Only idle frames are HD; the other animations stay at 1×.
+**Historical note:** this section describes the earlier idle-only upgrade. The full HD recovery above now covers every villager action. If idle sources change, regenerate the dedicated idle sheet with `hd_idle.py` as well.
 
 # Resource variants (round 3)
 
@@ -243,7 +279,7 @@ Three 2048×2048 lossless RGBA atlases in **exactly the `buildings_hd.json` form
 
 ## Units: `units.{png,json}`
 
-One 2048×2048 RGBA sheet, 256 px cells, `anchor [128, 240]`, the same conventions as `villager.json`. `units.<kind>` has `figureHeight` (176), `fps` and `animations.<anim>.<facing>` cell rects:
+One 4096×4096 RGBA sheet, 512 px cells, `anchor [256, 480]`, the same conventions as `villager.json`. `units.<kind>` has `figureHeight` (352), `fps` and `animations.<anim>.<facing>` cell rects:
 
 | Unit | idle (front, back) | walk (front, back) | action (front) |
 | --- | --- | --- | --- |
@@ -252,14 +288,13 @@ One 2048×2048 RGBA sheet, 256 px cells, `anchor [128, 240]`, the same conventio
 | `healer`: older woman, blue mantle, herb satchel, staff | 2, 2 | 4, 4 | 3: kneel, herbs glowing, staff raised glowing |
 | `siege_cart`: two-wheeled ballista cart, blue panels and pennant | 2, 2 (parked) | 4, 4 (rolling) | 3: firing a bolt |
 
-Front is three-quarter front, facing viewer-left; back is three-quarter back, facing viewer-right. Mirror for the other two diagonals, as with villagers. The siege cart is scaled to a 200 px-wide body instead of a figure height.
+Front is three-quarter front, facing viewer-left; back is three-quarter back, facing viewer-right. Mirror for the other two diagonals, as with villagers. The siege cart is scaled to a 400 px-wide body instead of a figure height (bounded to preserve complete silhouettes).
 
 - **Pipeline** (`tools/unit_gen.py`, `tools/unit_pack.py`):
   - A front master and a back master per unit (nano-banana/edit from the villager master), then one strip per animation from the matching master.
   - Rerolls: the guard's walk-back (side profile), the archer's front walk twice (it dropped the bow), the healer's walk-back (lost the staff), and the cart's idle and walk (divider lines, five carts). The guard's walk-back strip came with five frames, so the first four are used, and its drawn ground line is removed.
 - **Limitations:**
-  - The guard's thrust frames overlap in the source strip and were cut at the emptiest columns, so thrust frame 1 keeps a sliver of the neighbouring spear tip.
-  - The cart's back views lost the pennant in the parked frames.
+  - Original guard thrust overlap and cart pennant/orientation defects were corrected in the HD refinement above; the original source strips remain for provenance.
   - Action animations are front-facing only.
 
 `catalog_contact.jpg` shows each completed building next to the existing house, barracks and farm construction stages, and all units at game size (figure about 56 px) and enlarged, with a villager for scale.
@@ -268,7 +303,7 @@ Front is three-quarter front, facing viewer-left; back is three-quarter back, fa
 
 **Cost:** 155 FAL calls, about **$3.90** (87 nano-banana/edit, 68 BiRefNet). The ledger is `tools/ledger.jsonl`.
 
-HD integration requirement: all actions/facings/stages must have at least 512×512 authored frame pixels from the high-resolution originals. Current catalog buildings pass; `units.png` and the existing villager action sheets remain 256 pixels and need a source repack. Run `python3 scripts/check_sprite_resolution.py` (or `--report-only` to inventory migration gaps). Changing DPI metadata or enlarging low-resolution frames does not recover detail.
+HD integration requirement: all actions/facings/stages must have at least 512×512 authored frame pixels from the high-resolution originals. All audited catalog, unit, villager and base-resource sheets now pass. Run `python3 scripts/check_sprite_resolution.py` (or `--report-only` to inventory migration gaps). Changing DPI metadata or enlarging low-resolution frames does not recover detail.
 
 ## Crop fields
 

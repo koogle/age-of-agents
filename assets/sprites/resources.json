@@ -1,16 +1,16 @@
 {
  "image": "resources.png",
  "size": [
-  2048,
-  768
+  4096,
+  1536
  ],
  "cell": [
-  256,
-  256
+  512,
+  512
  ],
  "anchor": [
-  128,
-  248
+  256,
+  496
  ],
  "note": "stages run full -> nearly empty; one billboard per node; world size = pixel size * unitsPerPixel (shared by all stages)",
  "nodes": {
@@ -19,187 +19,187 @@
     [
      0,
      0,
-     256,
-     256
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.006897,
+   "unitsPerPixel": 0.003448,
    "worldSize": 1.6,
    "measured": "height"
   },
   "olive": {
    "stages": [
     [
-     256,
+     512,
      0,
-     256,
-     256
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.004966,
+   "unitsPerPixel": 0.002483,
    "worldSize": 1.15,
    "measured": "height"
   },
   "stump": {
    "stages": [
     [
-     512,
+     1024,
      0,
-     256,
-     256
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.00181,
+   "unitsPerPixel": 0.001414,
    "worldSize": 0.42,
    "measured": "width"
   },
   "berry": {
    "stages": [
     [
-     768,
+     1536,
      0,
-     256,
-     256
+     512,
+     512
     ],
     [
-     1024,
+     2048,
      0,
-     256,
-     256
+     512,
+     512
     ],
     [
-     1280,
+     2560,
      0,
-     256,
-     256
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.002679,
+   "unitsPerPixel": 0.001435,
    "worldSize": 0.62,
    "measured": "width"
   },
   "stone": {
    "stages": [
     [
-     1536,
+     3072,
      0,
-     256,
-     256
+     512,
+     512
     ],
     [
-     1792,
+     3584,
      0,
-     256,
-     256
+     512,
+     512
     ],
     [
      0,
-     256,
-     256,
-     256
+     512,
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.003233,
+   "unitsPerPixel": 0.001943,
    "worldSize": 0.75,
    "measured": "width"
   },
   "gold": {
    "stages": [
     [
-     256,
-     256,
-     256,
-     256
-    ],
-    [
      512,
-     256,
-     256,
-     256
+     512,
+     512,
+     512
     ],
     [
-     768,
-     256,
-     256,
-     256
+     1024,
+     512,
+     512,
+     512
+    ],
+    [
+     1536,
+     512,
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.002672,
+   "unitsPerPixel": 0.001523,
    "worldSize": 0.62,
    "measured": "width"
   },
   "iron": {
    "stages": [
     [
-     1024,
-     256,
-     256,
-     256
+     2048,
+     512,
+     512,
+     512
     ],
     [
-     1280,
-     256,
-     256,
-     256
+     2560,
+     512,
+     512,
+     512
     ],
     [
-     1536,
-     256,
-     256,
-     256
+     3072,
+     512,
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.003017,
+   "unitsPerPixel": 0.00162,
    "worldSize": 0.7,
    "measured": "width"
   },
   "clay": {
    "stages": [
     [
-     1792,
-     256,
-     256,
-     256
+     3584,
+     512,
+     512,
+     512
     ],
     [
      0,
+     1024,
      512,
-     256,
-     256
+     512
     ],
     [
-     256,
      512,
-     256,
-     256
+     1024,
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.003664,
+   "unitsPerPixel": 0.002,
    "worldSize": 0.85,
    "measured": "width"
   },
   "fiber": {
    "stages": [
     [
-     512,
-     512,
-     256,
-     256
-    ],
-    [
-     768,
-     512,
-     256,
-     256
-    ],
-    [
+     1024,
      1024,
      512,
-     256,
-     256
+     512
+    ],
+    [
+     1536,
+     1024,
+     512,
+     512
+    ],
+    [
+     2048,
+     1024,
+     512,
+     512
     ]
    ],
-   "unitsPerPixel": 0.003017,
+   "unitsPerPixel": 0.00157,
    "worldSize": 0.7,
    "measured": "height"
   }
