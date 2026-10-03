@@ -82,6 +82,8 @@ Native window, simulation in-process (no server, no browser):
 cargo run -p aoa-client --release
 ```
 
+The desktop reset dialog uses platform text controls through `tinyfiledialogs`. On Linux, install a dialog helper such as `zenity` or `kdialog` for a graphical input field.
+
 Hosted-style server plus the Rust web client:
 
 ```bash
@@ -119,7 +121,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 - **View:** fixed-angle orthographic isometric view; pan and zoom keep buildings seated on their cells.
 - **Grid:** toggle the **Grid** pill (or G) to show square cells as diamonds. Choosing a building shows a translucent ghost and a green/red rectangular footprint; neighboring building plots can share an edge. Cobblestone marks the exact occupied rectangle even with the grid hidden; building and construction sprites fit inside it without skewing. Finished houses use the original design at a smaller visual scale within the same 3×3 claim; initial foundations fill the plot, while later construction follows the smaller house size; the larger granary shows wheat bundles, grain sacks and a wheat emblem. The rectangular cobblestone plot indicates the exact grid claim. Rendered foundation ground is level, and touching plots share one height; steps and decorations can extend beyond the walls.
 - **Recover view:** reload to center the camera on the currently visible villagers.
-- **Reset world:** in the Rust client (`/play`), tap the **New island** pill top-left, then tap it again within four seconds; the legacy client has a **Reset world** button with a confirmation. Either erases progress and starts a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
+- **Reset world:** in the Rust client (desktop and `/play`), tap **Reset game** top-left. The native input dialog warns that progress will be lost and accepts an island seed (a whole number from 0 to 18446744073709551615). Leave it blank for a random island, confirm to reset, or cancel to keep playing; the legacy client has a **Reset world** button with a confirmation. Either erases progress and starts a new island. `POST /reset?seed=N` regenerates a specific island; without a seed the server picks one. The first world uses `AGE_OF_AGENTS_SEED` (default `0xA6E0F0A6E7`). The Rust client accepts the same variable natively and `/play?local&seed=N` in the browser.
 - **Simulation speed:** use **0×**, **1×**, or **2×** in the top bar to pause or change authoritative simulation speed. While paused, a **Paused · tap to resume** pill shows at the top; tap it to continue at 1×. Tapping a greyed-out command shows why it is unavailable. The web client reconnects by itself when the server restarts (for example during a deploy).
 - **Cancel build placement:** press the cancel button or Escape.
 
