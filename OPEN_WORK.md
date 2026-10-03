@@ -4,22 +4,46 @@ Updated 2026-10-03. Keep only outstanding work, blockers and verification follow
 
 Use `master` as the integration branch and PR base.
 
-## Pending release verification
+## Ordered agent backlog
 
-- Confirm [starter-economy production run 37150108528](https://github.com/koogle/age-of-agents/actions/runs/37150108528) succeeds, then verify the fresh-island economy on live `/play`. PR #55 is merged; deployment is pending. Fresh runs still cannot depart until transport is implemented.
-- Confirm [camera/activity production run 37149731725](https://github.com/koogle/age-of-agents/actions/runs/37149731725) succeeds and verify the hosted camera controls, gathering animations and loading-title cleanup. This combined run is in progress; the earlier title-only run was cancelled. Local desktop/phone verification already passed.
+Order by prerequisites first, then estimated complexity within each stage. Small means a bounded fix/check; medium means one substantial subsystem; large means coordinated simulation, persistence and client work. These are relative sizes, not time estimates. Independent tasks may run alongside the main chain. No task below is implemented merely because it is listed here; see [README.md](README.md#implemented-roadmap) for completed features.
 
-## Remaining work
+### Stage 1 — Independent work, smallest first
 
-- **Island expansion:** starter rules and the reserved ship budget are implemented in #55. Remaining: dock-built transport, boarding/unloading, persistent destination islands and founding; then local inventories and trade. Preserve earlier islands as the world expands, and add discoveries to the globe after transport works.
-- **Transport constraints:** the current generator retains one island, water blocks units, and each unit claims a land cell. Boarding must preserve unit identity/cargo and update occupancy validation; the global stockpile needs explicit local inventories/transfers, and Reset game cannot serve as island expansion.
-- **Threats and progression:** combat, wolves, pirates, mythical creatures, calamities, treasures, and permanent upgrades remain unimplemented. Follow the [proposed gameplay loop](README.md#proposed-gameplay-loop); event timing, upgrades, and balance remain open.
-- **HD assets:** several villager and military action/facing sheets remain 256 px and need source recovery or regeneration, refinement, and repacking. The last recorded audit found 183 of 264 frames below 512 px; rerun `python3 scripts/check_sprite_resolution.py --report-only` before asset work, and use the [asset workflow](AGENTS.md#asset-workflow).
-- **Field placement safety:** `plant_field` checks free space and builder reachability, but does not call the route-preservation check used by building placement. Add bystander/last-exit regressions and prevent field-induced traps.
-- **Useful advanced progression:** connect steel/bricks/cloth to tools, buildings and ship upgrades; the existing discovery gates and processing recipes alone do not complete that progression. Keep rations deferred until provisioning is useful.
-- **Controls/accessibility:** additive touch selection and accessible DOM controls in the wgpu client remain open; desktop Shift-click/Shift-drag is implemented. Explicit blocking/non-blocking task classification is absent, though valid replacement orders work.
-- **Verification gaps:** native reset-dialog appearance and a separate live-browser check of the deployed globe view remain unverified in the handoff. Local desktop/phone globe checks and automated production verification passed. Focused browser verification of villager direction/pose hold on zigzag routes also remains unrecorded.
+| ID | Task / complexity | Dependencies | Acceptance criteria |
+| --- | --- | --- | --- |
+| A1 | Release and presentation verification — small | Latest runtime deployment | Confirm the latest release containing #55 succeeds, then check fresh-island `/play`, camera controls, gathering animations and loading-title cleanup. Also record native reset-dialog appearance, deployed globe behavior, and villager direction/pose holds on zigzag routes. Use isolated worlds; never reset the shared production save. |
+| A2 | Field placement safety — small | None | Make `plant_field` preserve existing ground routes as building placement does. Cover trapped bystanders and the last exit with regressions; preserve wood/stone charges, shared labor and manual replenishment. |
+| A3 | Touch selection and accessibility — medium | None; coordinate client edits with B5 | Add additive touch selection and accessible keyboard/screen-reader equivalents for canvas controls. Preserve desktop Shift-click/Shift-drag, mouse/touch parity and camera gestures. Explicit blocking/non-blocking task classification remains open; scope it separately if it requires new domain semantics. |
+| A4 | HD action/facing sprites — large asset workload | None for existing units; B1/B2 for ship states | Audit and recover/regenerate/refine remaining low-resolution art, then repack with provenance. Last audit: 183 of 264 frames below 512 px. Require detailed authored sources and at least 512×512 frames, not DPI metadata or a larger canvas alone. Run resolution/asset checks and inspect maximum-zoom desktop and DPR-2 phone. Add ship art once action/facing requirements are agreed. |
+
+### Stage 2 — Core dependency chain
+
+Use one integration owner for shared domain, occupancy and save-schema changes. Agree on B1 before parallel implementation; merge B2 → B3 → B4. B5 can develop against agreed command/snapshot interfaces, but each core PR still needs enough actual UI to exercise its own playable slice.
+
+| ID | Task / complexity | Dependencies | Acceptance criteria |
+| --- | --- | --- | --- |
+| B1 | Transport/island contracts — small design task, high coordination | None | Agree on island IDs, land-versus-aboard unit location, passenger/resource manifests, inventory ownership, typed commands and save compatibility. Resolve the trigger discrepancy: the conversation proposes generation on first ship completion; ROADMAP currently says first departure reveals island two. Recommended contract: completion generates a destination once; departure travels there. Synchronize ROADMAP/decisions when adopting it. Keep this a minimal contract, not a generic engine. |
+| B2 | Dock-built transport and passengers — large | B1 | Implement the planned first transport at 60 wood + 20 timber, water navigation, bounded goods/passenger capacity, boarding and safe unloading. Preserve original NPC IDs and carried goods; boarding releases land claims, unloading reserves valid shore cells. Invalid commands are atomic; blocked landing, interruption and save/reload cannot lose or duplicate goods/units. No metal or cloth prerequisite. |
+| B3 | Persistent destination islands and founding — large | B1, B2 | Generate destinations deterministically once, preserving prior islands, settlements and fog. Support travel and initial landing without requiring an existing destination dock; allow enough transported supplies to found an outpost. Introduce complementary iron/coal, then clay and fiber on further islands. Do not replace the old world via Reset or make island two supply everything. Avoid a fixed long-term island limit. |
+| B4 | Local inventories and trading posts — large | B1–B3 | Replace global spending/deposits with explicit settlement inventories; construction and processing consume local inputs. Ship loading/unloading transfers goods atomically between inventories, with conservation and save/reload tests. Remote stock cannot fund local construction. Demonstrate a round trip that makes trade necessary; no automatic shipping in this slice. |
+| B5 | Transport UI, globe and guidance — medium/large | B1 interfaces; B2–B4 for completion | Ship selection, manifests, passenger/goods controls, destinations, local stocks, missing-input/blocked-action explanations and cumulative globe discoveries. Verify build → board/load → travel → land/found → return/trade through actual desktop and touch controls. Coordinate accessible controls with A3. |
+
+### Stage 3 — Progression after working transport and trade
+
+| ID | Task / complexity | Dependencies | Acceptance criteria |
+| --- | --- | --- | --- |
+| C1 | Useful advanced resources — medium | B2–B5 | Give steel/bricks/cloth meaningful uses in tools, buildings and ship improvements, using existing recipes/discovery gates. Balance complementary islands so first-island food/timber remain useful. Keep timber the sole starter processed resource; defer rations until provisioning has a playable purpose. |
+| C2 | Combat and local animal threats — large | Working B2–B5 economy; coordinate with C1 | Start with bounded combat and wolves, including clear feedback and persistence. Existing guards, archers, healers and siege carts only move/stop; their combat/healing behavior remains unfinished. Ship as a separate playable milestone after transport/trade. |
+
+Later, split pirates, mythical creatures, calamities, treasures and permanent upgrades into separate proposals/PRs after C2. Timing, balance and upgrade rules remain open; follow the [proposed gameplay loop](README.md#proposed-gameplay-loop).
+
+## Release verification handoff
+
+At this edit, [run 37150225436](https://github.com/koogle/age-of-agents/actions/runs/37150225436), containing #55, is pending behind [camera/activity run 37149731725](https://github.com/koogle/age-of-agents/actions/runs/37149731725). The original #55 run 37150108528 was cancelled/superseded. A1 must follow the latest successful runtime release rather than wait on a superseded run. Local desktop/phone checks passed; merged, deployed and live-verified states must stay distinct. Fresh runs cannot depart until B2/B3 land.
 
 ## Working constraints
 
 Use an isolated SQLite database for local verification and preserve existing saves. Old recovery work remains on `codex/native-sprite-rendering`; historical root/gukaet edits and saves should remain untouched. Keep changes tied to the [current roadmap](ROADMAP.md#current-direction).
+
+Each implementation agent uses its own branch/worktree from current `origin/master` and opens a scoped PR against `master`; do not auto-merge agent PRs. Reserve an integration owner for B1–B4 and coordinate overlapping client edits. Keep deterministic authoritative rules in `crates/game`, typed atomic commands, valid occupancy and compatible saves. Follow [AGENTS.md](AGENTS.md) and [the review gate](docs/THERMONUCLEAR_REVIEW.md): focused tests, formatting/lint, relevant asset checks, and real desktop/phone verification for runtime changes. State verification, assets and limitations in each PR; remove completed tasks from this file and keep README/ROADMAP synchronized.
