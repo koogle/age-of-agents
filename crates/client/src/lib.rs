@@ -823,6 +823,10 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/towncenter.png"),
         assets.image("sprites/villager_idle_hd.png"),
         assets.image("sprites/buildings_hd.png"),
+        assets.image("sprites/buildings_economy.png"),
+        assets.image("sprites/buildings_crafts.png"),
+        assets.image("sprites/buildings_civic.png"),
+        assets.image("sprites/units.png"),
     ]
 }
 

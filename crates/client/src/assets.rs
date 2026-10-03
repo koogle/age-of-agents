@@ -24,6 +24,14 @@ pub fn manifest() -> Vec<String> {
     files.push("sprites/buildings_hd.json".into());
     files.push("sprites/resources.json".into());
     files.push("sprites/towncenter.json".into());
+    for sheet in [
+        "buildings_economy",
+        "buildings_crafts",
+        "buildings_civic",
+        "units",
+    ] {
+        files.push(format!("sprites/{sheet}.png"));
+    }
     files.extend(crate::hud::files());
     files
 }

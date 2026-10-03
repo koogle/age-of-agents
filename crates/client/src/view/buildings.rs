@@ -17,29 +17,29 @@ fn frame(
     construction: Option<f64>,
     working: bool,
 ) -> (usize, [f32; 4], [f32; 2], [f32; 2], Corners) {
-    let row = match kind {
-        BuildingKind::House => "house",
-        BuildingKind::Granary => "granary",
-        BuildingKind::Watchtower => "watchtower",
-        BuildingKind::Dock => "dock",
-        _ => {
-            let tc = &sheets.town_center;
-            let frame = town_center_frame(tc, construction, working);
-            return (
-                SHEET_TOWN_CENTER,
-                tc.frames[frame],
-                tc.size,
-                tc.cell,
-                tc.footprints[frame],
-            );
-        }
+    if kind == BuildingKind::TownCenter {
+        let tc = &sheets.town_center;
+        let frame = town_center_frame(tc, construction, working);
+        return (
+            SHEET_TOWN_CENTER,
+            tc.frames[frame],
+            tc.size,
+            tc.cell,
+            tc.footprints[frame],
+        );
+    }
+    let (index, sheet, row) = match kind {
+        BuildingKind::House => (SHEET_BUILDINGS, &sheets.buildings, "house"),
+        BuildingKind::Granary => (SHEET_BUILDINGS, &sheets.buildings, "granary"),
+        BuildingKind::Watchtower => (SHEET_BUILDINGS, &sheets.buildings, "watchtower"),
+        BuildingKind::Dock => (SHEET_BUILDINGS, &sheets.buildings, "dock"),
+        _ => sheets.catalog.building(kind),
     };
-    let sheet = &sheets.buildings;
     let stage = construction.map_or(3, |work| {
         ((work / kind.build_seconds() * 3.0) as usize).min(2)
     });
     (
-        SHEET_BUILDINGS,
+        index,
         sheet.frames[row][stage],
         sheet.size,
         sheet.cell,

@@ -119,7 +119,16 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let preview_plot = g.placement_color.a > 0.0
         && all(plot_q >= vec2<f32>(0.0)) && all(plot_q < g.placement.zw);
     let occupied_plot = textureLoad(ground_index, vec2<i32>(floor(xz * 2.0)), 0).g > 0.5;
-    let paving = textureSample(ground_layers, repeat_sampler, xz / 0.9, 10).rgb;
+    // Mirror the illustrated swatch at its edges: neighboring repeats meet at
+    // identical texels, without blurring or doubling the hand-drawn outlines.
+    let paving_uv = 1.0 - abs(fract(xz / 1.8) * 2.0 - 1.0);
+    // WebGL requires one sampler per texture. Clamp inside the selected mip
+    // manually, retaining minification filtering without wrapping edge texels.
+    let texels = vec2<f32>(textureDimensions(ground_layers));
+    let density = max(length(dpdx(xz / 0.9) * texels), length(dpdy(xz / 0.9) * texels));
+    let mip = clamp(ceil(log2(max(density, 1.0))), 0.0, 9.0);
+    let inset = vec2<f32>(0.5 * exp2(mip)) / texels;
+    let paving = textureSampleLevel(ground_layers, repeat_sampler, clamp(paving_uv, inset, 1.0 - inset), 10, mip).rgb;
     if occupied_plot || preview_plot {
         color = paving;
     }

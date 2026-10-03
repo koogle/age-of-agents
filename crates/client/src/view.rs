@@ -9,6 +9,7 @@ use glam::{Vec2, Vec3};
 use serde::Deserialize;
 
 mod buildings;
+mod catalog;
 pub(crate) use buildings::sprite as building_sprite;
 
 use crate::camera::Rig;
@@ -26,7 +27,7 @@ const SHEET_TOWN_CENTER: usize = 4;
 const SHEET_IDLE_HD: usize = 5;
 /// Sheets that draw villagers (three variants and the HD idle frames): these
 /// show a silhouette where something hides them.
-pub const VILLAGER_SHEETS: [usize; 4] = [0, 1, 2, SHEET_IDLE_HD];
+pub const VILLAGER_SHEETS: [usize; 5] = [0, 1, 2, SHEET_IDLE_HD, catalog::SHEET_UNITS];
 const SHEET_BUILDINGS: usize = 6;
 /// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
 const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
@@ -45,7 +46,9 @@ const STOP_SECONDS: f32 = 0.2;
 
 #[derive(Deserialize)]
 struct VillagerSheet {
+    #[serde(default)]
     cell: [f32; 2],
+    #[serde(default)]
     anchor: [f32; 2],
     #[serde(rename = "figureHeight")]
     figure_height: f32,
@@ -101,6 +104,7 @@ pub struct Sheets {
     villager: VillagerSheet,
     idle: IdleSheet,
     buildings: BuildingSheet,
+    catalog: catalog::Catalog,
     resources: ResourceSheet,
     town_center: TownCenterSheet,
 }
@@ -115,6 +119,7 @@ impl Sheets {
     ) -> Self {
         Self {
             buildings: serde_json::from_slice(buildings).expect("buildings.json"),
+            catalog: catalog::Catalog::parse(),
             villager: serde_json::from_slice(villager).expect("villager.json"),
             idle: serde_json::from_slice(idle).expect("villager_idle_hd.json"),
             resources: serde_json::from_slice(resources).expect("resources.json"),
@@ -500,12 +505,6 @@ impl WorldView {
             }
         }
 
-        let villager = &sheets.villager;
-        let cell_size = VILLAGER_HEIGHT * villager.cell[1] / villager.figure_height;
-        let pivot = [
-            villager.anchor[0] / villager.cell[0],
-            1.0 - villager.anchor[1] / villager.cell[1],
-        ];
         let (right, _) = rig.basis();
         let forward = Vec3::new(rig.target.x - rig.eye().x, 0.0, rig.target.z - rig.eye().z)
             .normalize_or_zero();
@@ -513,6 +512,17 @@ impl WorldView {
             let Some(entry) = self.units.get_mut(&unit.unit.id) else {
                 continue;
             };
+            let military = unit.unit.kind != aoa_game::UnitKind::Villager;
+            let villager = if military {
+                sheets.catalog.unit(unit.unit.kind)
+            } else {
+                &sheets.villager
+            };
+            let cell_size = VILLAGER_HEIGHT * villager.cell[1] / villager.figure_height;
+            let pivot = [
+                villager.anchor[0] / villager.cell[0],
+                1.0 - villager.anchor[1] / villager.cell[1],
+            ];
             let moving = entry.moving;
             let work = if moving {
                 None
@@ -581,12 +591,18 @@ impl WorldView {
             } else {
                 villager.fps.get(name).copied().unwrap_or(4.0)
             };
-            let (sheet, frames, sheet_size) = if name == "idle" {
+            let (sheet, frames, sheet_size) = if name == "idle" && !military {
                 let idle = &sheets.idle;
                 (
                     SHEET_IDLE_HD,
                     &idle.people[PEOPLE[entry.variant]][view],
                     idle.size,
+                )
+            } else if military {
+                (
+                    catalog::SHEET_UNITS,
+                    &animation[view],
+                    sheets.catalog.units.size,
                 )
             } else {
                 (entry.variant, &animation[view], [2048.0, 1280.0])

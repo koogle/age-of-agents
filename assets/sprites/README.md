@@ -219,3 +219,53 @@ shows the command medallions. Rust workspace tests, formatting and Clippy pass.
 `buildings_hd.png` and `buildings_hd.json` hold house, granary, watchtower, and dock foundation/walls/roof/completed frames in lossless 512 px cells. They are repacked from the original 1024 px FAL cutouts, recovering detail lost when those sources were reduced to the 256 px loading-screen sheet and compressed as lossy WebP. The town center continues to use its dedicated atlas.
 
 Sources are checked in under `building_sources/`; `provenance.json` records the original request IDs. Recovery incurred no new generation spend. Reproduce with `python scripts/pack_building_sprites.py` (Pillow, NumPy and SciPy). One scale and baseline per building preserves construction-stage proportions.
+
+# Catalog buildings and units (2026-10-03)
+
+Sprites for every catalog entry that had no art yet, in the same illustrated style, camera and light as the existing buildings and villagers. Integrated into the shared Rust native/WebGL client through `view/catalog.rs`: buildings show their four construction stages; military units show idle/walk with occlusion silhouettes. Action frames are available for later combat/healing.
+
+## Buildings: `buildings_{economy,crafts,civic}.{png,json}`
+
+Three 2048×2048 lossless RGBA atlases in **exactly the `buildings_hd.json` format**: 512 px cells, `anchor [256, 496]`, `stages` foundation, walls, roof, complete, `frames.<kind>` (four cell rects) and `footprints.<kind>` (four corners per frame). Keys are the snake_case `BuildingKind` names, so a client can merge these maps into the `buildings_hd` lookup.
+
+| Sheet | Buildings |
+| --- | --- |
+| `buildings_economy` | `mining_camp`, `farm`, `lumber_mill`, `smelter` |
+| `buildings_crafts` | `kiln`, `weaver`, `kitchen`, `monument` |
+| `buildings_civic` | `barracks`, `range`, `workshop`, `infirmary` |
+
+- **Footprint corners** `[left, front, right, rear]` are estimated automatically from each frame's base outline (front = lowest opaque point, left and right = outermost points in the lower 40%, rear completes the parallelogram), not placed by hand like `building_sources/footprints.json`. Props that stick out (the mining cart, amphorae, the kitchen pergola) widen them a little.
+- **Pipeline:**
+  - `tools/cat_gen.py`: `fal-ai/nano-banana/edit` draws each completed building with `building_sources/clean_roofs/house_complete.png` and the temple as style and camera references. The three earlier stages are edits of that image (same footprint, camera and scale).
+  - Five foundations were regenerated once because they came out already built: farm, lumber mill, kiln, range and monument.
+  - Then BiRefNet cutouts and `tools/cat_pack.py`, with the same cell, baseline, fit and one-scale-per-building rule as `scripts/pack_building_sprites.py`.
+  - The 1024 px sources (about 19 MB) are not checked in; the ledger lists every request.
+
+## Units: `units.{png,json}`
+
+One 2048×2048 RGBA sheet, 256 px cells, `anchor [128, 240]`, the same conventions as `villager.json`. `units.<kind>` has `figureHeight` (176), `fps` and `animations.<anim>.<facing>` cell rects:
+
+| Unit | idle (front, back) | walk (front, back) | action (front) |
+| --- | --- | --- | --- |
+| `guard`: hoplite, bronze crested helmet, blue cloak, spear, blue shield | 2, 2 | 4, 4 | 3: spear thrust |
+| `archer`: leather cap, quiver, bow, blue scarf | 2, 2 | 4, 4 | 3: nock, draw, release |
+| `healer`: older woman, blue mantle, herb satchel, staff | 2, 2 | 4, 4 | 3: kneel, herbs glowing, staff raised glowing |
+| `siege_cart`: two-wheeled ballista cart, blue panels and pennant | 2, 2 (parked) | 4, 4 (rolling) | 3: firing a bolt |
+
+Front is three-quarter front, facing viewer-left; back is three-quarter back, facing viewer-right. Mirror for the other two diagonals, as with villagers. The siege cart is scaled to a 200 px-wide body instead of a figure height.
+
+- **Pipeline** (`tools/unit_gen.py`, `tools/unit_pack.py`):
+  - A front master and a back master per unit (nano-banana/edit from the villager master), then one strip per animation from the matching master.
+  - Rerolls: the guard's walk-back (side profile), the archer's front walk twice (it dropped the bow), the healer's walk-back (lost the staff), and the cart's idle and walk (divider lines, five carts). The guard's walk-back strip came with five frames, so the first four are used, and its drawn ground line is removed.
+- **Limitations:**
+  - The guard's thrust frames overlap in the source strip and were cut at the emptiest columns, so thrust frame 1 keeps a sliver of the neighbouring spear tip.
+  - The cart's back views lost the pennant in the parked frames.
+  - Action animations are front-facing only.
+
+`catalog_contact.jpg` shows each completed building next to the existing house, barracks and farm construction stages, and all units at game size (figure about 56 px) and enlarged, with a villager for scale.
+
+**Not generated, because they already exist:** the town center, house, granary, watchtower and dock (`towncenter`, `buildings_hd`), the three villager appearances (`villager*`), and the three ships (`scenery.json`: `ship_small`, `ship_merchant`, `ship_striped`).
+
+**Cost:** 155 FAL calls, about **$3.90** (87 nano-banana/edit, 68 BiRefNet). The ledger is `tools/ledger.jsonl`.
+
+HD integration requirement: all actions/facings/stages must have at least 512×512 authored frame pixels from the high-resolution originals. Current catalog buildings pass; `units.png` and the existing villager action sheets remain 256 pixels and need a source repack. Run `python3 scripts/check_sprite_resolution.py` (or `--report-only` to inventory migration gaps). Changing DPI metadata or enlarging low-resolution frames does not recover detail.
