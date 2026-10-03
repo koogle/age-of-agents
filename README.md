@@ -2,7 +2,7 @@
 
 A deliberately small, mobile-first 3D RTS vertical slice built with a Rust authoritative server, a fullscreen WebGL (Three.js) frontend, WebSocket state streaming, and SQLite persistence.
 
-The current vertical slice is intentionally bounded: command villagers through a seven-resource gather/carry/deposit economy, construct town centers, train villagers, and research five gathering improvements. There are no LLM agents or autonomous NPC policies. Villagers remain idle until commanded.
+The current vertical slice is intentionally bounded: command villagers through a resource gather/carry/deposit economy, construct town centers, train villagers, and research five gathering improvements. There are no LLM agents or autonomous NPC policies. Villagers remain idle until commanded.
 
 ## Building expansion in the current checkout
 
@@ -22,14 +22,14 @@ Sprite integration must preserve at least 512×512 authored pixels per frame acr
 
 ## Milestone 1
 
-- Seeded island generation on a 60×40-cell map: value-noise elevation with rolling hills and a ridge of peaks sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to two rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps, and every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
+- Seeded island generation on a 120×80-cell map: value-noise elevation with rolling hills, winding valleys and three or four separate mountain ranges sets a sea level, the largest landmass becomes the island, beaches ring the coast, and biomes follow height and moisture; the summits are impassable mountain, and up to four rivers rise in the highlands and run downhill to the sea (or into each other) with sandbar fords on their straight reaches, banks turning to wetland; resources grow in biome-appropriate woodlines, berry patches and mine clumps; only wood and berries grow near the start, while stone, gold, iron, coal, clay and fiber lie at least 24 cells out so they must be found by exploring; every accepted island holds at least one and a half times a fishing boat's cost within reach of the start. Water, mountains and rivers (except at fords) are impassable. Cells are finer than a villager is tall
 - Server-authoritative fog with visible, explored-dim, and unseen-dark terrain
 - Selectable villagers; Shift-click adds or removes villagers, and a resource/foundation order sends the selected group to shared work
 - Biome-compatible wood, food, stone, gold, iron, clay, and fiber gathering
 - Bounded villager cargo with explicit return and town-center deposit phases; ivory italic resource labels rise when loads are deposited
-- Command-driven construction of five building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea; construction takes 0.3 villager-seconds per resource of cost (house 4.5 s, town center 6 s, granary 7.5 s, watchtower and dock 9 s)
+- Command-driven construction of all 17 catalog building types (town center 5×5, house and granary 3×3, watchtower 2×2, dock 4×4; compact plots permit shared building edges) through foundations that several villagers can raise together; houses and town centers each house 5 villagers, a granary takes food and fiber, a watchtower sees far, a dock must touch the sea; construction takes 0.3 villager-seconds per resource of cost (house 4.5 s, town center 6 s, granary 7.5 s, watchtower and dock 9 s)
 - Starting town-center base with single-slot villager production
-- Seven typed shared stockpiles and a five-technology gathering tree
+- Thirteen typed shared stockpiles and a five-technology gathering tree
 - Rust-authoritative fixed-timestep simulation
 - Exclusive cell claims for every unit, step, building footprint, and resource, checked by a world validator
 - Deterministic eight-neighbor routing without corner cutting
@@ -58,7 +58,7 @@ is still served at `/` until the Rust client reaches full parity.
 
 ### World soundness
 
-The world is a 60×40 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
+The world is a 120×80 grid of cells, each half a world unit across, so a villager stands about one and a half cells tall. One derived occupancy map (`crates/game/src/game/occupancy.rs`) is the single source of truth for who owns which cell:
 
 - Every building footprint (complete or foundation), live resource node, unit cell, and in-progress step target is an **exclusive claim**.
 - A unit claims the next cell **before** stepping into it and releases its old cell only when the step completes, so two bodies never overlap, even mid-stride. Diagonal steps never cut past an occupied corner.
@@ -102,7 +102,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 ## Controls
 
-- **Select:** tap/click a villager to replace the selection. On touch, long-press a villager to add or remove it. On desktop, Shift-drag from empty ground box-selects visible villagers, and Shift-click adds or removes. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
+- **Select:** tap/click a villager to replace the selection. On desktop, Shift-drag from empty ground adds visible villagers whose feet fall inside the box; Shift-click adds or removes one villager. Touch uses single-unit tap selection. Ordinary mouse and touch drags continue to pan. Tap/click a town center to select it instead.
 - **Move:** with one or more villagers selected, tap/click empty ground. Groups receive one atomic authoritative order and spread across distinct reachable cells.
 - **Gather:** with villagers selected, tap/click a resource. Villagers walk beside it, gather two units per second, wait for a full 20-unit load unless the node depletes, deposit at the nearest town center, and resume until depletion.
 - **Stop:** with busy villagers selected, press the **Stop** medallion (or X). They finish the step they are taking and go idle, keeping any carried goods; a foundation keeps its progress. Giving a busy villager a new order does the same and then starts the new task.
@@ -125,7 +125,7 @@ AGE_OF_AGENTS_DB=/tmp/age-of-agents.db cargo run
 
 Mouse and touch use the same command semantics.
 
-Schema version 9 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 60×40 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, or the smaller building footprints of versions 7 and 8) are intentionally dropped because they cannot be translated safely.
+Schema version 10 stores the seed, per-cell elevation and water alongside units as exclusive cell claims on the 120×80 grid and buildings as footprints. Older persisted worlds (free-floating positions, the coarser 30×20 grid of version 5, the all-land map of version 6, the smaller building footprints of versions 7 and 8, or the smaller 60×40 map of version 9) are intentionally dropped because they cannot be translated safely.
 
 Snapshots encode terrain compactly (one character per cell for biome and fog, one for quantized elevation of explored cells), so a full snapshot is about 8 KB rather than over 100 KB.
 

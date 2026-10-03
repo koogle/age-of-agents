@@ -356,6 +356,27 @@ impl Hud {
         });
     }
 
+    /// Physical-pixel overlay; it has no hit region and never intercepts input.
+    pub fn selection_box(&mut self, from: Vec2, to: Vec2, scale: f32) {
+        let min = from.min(to);
+        let size = (to - from).abs();
+        let edge = 2.0 * scale;
+        self.shape(
+            [min.x, min.y, size.x, size.y],
+            [0.98, 0.8, 0.32, 0.12],
+            1.0,
+            0.0,
+        );
+        for rect in [
+            [min.x, min.y, size.x, edge],
+            [min.x, min.y + size.y - edge, size.x, edge],
+            [min.x, min.y, edge, size.y],
+            [min.x + size.x - edge, min.y, edge, size.y],
+        ] {
+            self.shape(rect, [0.98, 0.8, 0.32, 0.95], 1.0, 0.0);
+        }
+    }
+
     fn text_width(atlas: &Atlas, text: &str, size: f32) -> f32 {
         Self::glyph_width(&atlas.glyphs, text, size)
     }
