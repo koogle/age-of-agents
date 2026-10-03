@@ -1,6 +1,6 @@
 # Open Work
 
-**Last updated:** 2026-10-02T22:10:55+00:00
+**Last updated:** 2026-10-03T11:09:59+02:00
 **Branch:** `master` (fixed camera heading; PRs #20 and #21 merged)
 **Overall status:** Rust/wgpu client working in the browser at `/play`; legacy Three.js client still at `/`.
 
@@ -52,9 +52,9 @@ None.
 
 ## Current building-placement work
 
-- Implemented: town center 5×5, house/granary 3×3, watchtower 2×2, dock 4×4; high-resolution lossless building and construction sprites; green/red translucent ghosts; local placement grid and optional Grid pill/G toggle; fixed orthographic camera with stable pan/zoom.
-- Alignment correction: every stage has measured structural base corners. One four-corner mapping seats the finished art, foundations and ghosts on the authoritative rectangular claim. Transparent bounds, loose materials, steps and scaffolding no longer determine placement or size. The town-center PNG is unchanged.
-- Terrain: rendered foundation plots are level, touching plots share the oldest foundation's height, and a short shoulder joins them to the island. Preview leveling is temporary; pointer snapping uses the permanent ground so the ghost cannot move its own target. Simulation terrain, passability and save data are unchanged by this rendering correction.
-- Verification: 88 workspace tests; native/WebAssembly lint, formatting, Python asset-packer compilation and asset checks passed. Tests cover all four base corners at every stage through pan/zoom, shared house wall endpoints on both axes, every explored build site on three generated islands without folded sprites, and preview-ground isolation. Desktop and DPR-2 phone browser checks passed: Grid on/off, blocked-ghost rejection, shared-edge completed houses, drag/release placement, camera navigation, town-center roof picking; no page errors. An independent snapshot-footprint overlay visually matches painted base edges.
-- Thermonuclear review passed: arbitrary per-kind scales/offsets were removed in favor of one calibration path; leveling stays in the terrain presentation module; no new dependencies or gameplay autonomy; client files remain under 1,000 lines.
-- Prior camera/asset/grid milestones are committed and pushed to `master`, with successful production deployments. The alignment correction passes all local gates; its master push triggers production deployment. Confirm that latest workflow before claiming the correction is live. No open PRs remain.
+- Rectangular claims remain town center 5×5, house/granary 3×3, watchtower 2×2, dock 4×4. The fixed orthographic camera, Grid pill/G toggle, translucent placement ghost and level foundation ground are implemented.
+- Latest correction: preserve the original sprite proportions. Removed the four-corner warp and shear, which tilted houses. Each completed/construction/preview sprite is uniformly scaled and centered inside its rectangular plot using the painted base bounds. The cobblestone surface, rather than distorted art, marks the exact claim. Adjacent plots can touch, while the original image determines the wall outline.
+- Cobblestone is drawn beneath every building and preview, including foundations, and stays visible when Grid is off. The terrain index now carries a separate occupancy channel, keeping biome paint and fog data intact. World-space texture coordinates join adjacent pads. Existing generated `sprites/tile_stone.png` art was converted from its actual JPEG encoding to a genuine RGBA PNG at `terrain/cobblestone.png`; no new generation or visual art edits.
+- Verification: 87 workspace tests passed, plus native/WebAssembly lint and formatting. Tests cover uniform proportions and containment for every stage, stable navigation, exact occupied-cell paving and unchanged biome data across completion. Desktop WebGL checks passed for grid on/off, town-center picking and visual review; DPR-2 phone checks passed for ghost drag/release and snapped foundation placement, with no page errors. The first browser check caught the mislabeled source image format; the genuine PNG runtime copy resolves it.
+- Thermonuclear review passed: removed projective rendering/picking machinery, reused the terrain texture array and cell map, added no dependencies or game rules; client files remain below 1,000 lines.
+- Previous alignment deployment (0c91fcc) succeeded. This correction is verified for master push; confirm the resulting deployment workflow before claiming it is live.

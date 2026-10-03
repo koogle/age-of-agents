@@ -50,3 +50,7 @@ About **$0.64**: twelve nano-banana/edit generations (ten textures plus the clay
 - Scrubland's dry-earth crackle forms a polygon mosaic that is visible at the closest zoom.
 - Highland is very pale and quiet; it may want slightly more texture if it reads as blank.
 - Forest keeps a faint medium-scale repeat in a plain 3×3 tiling.
+
+## Building plots
+
+`cobblestone.png` reuses the existing painted `assets/sprites/tile_stone.png` art. The original file contains JPEG bytes despite its extension; the runtime copy is a lossless 1024×1024 RGBA PNG conversion for the Rust client's PNG/WebP decoder. No new generation or art edits were needed. The renderer uses world-space repetition beneath exact building claims and placement previews, independently of the optional grid overlay.

@@ -113,6 +113,16 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     var color = mix(color0 * vec3<f32>(0.35, 0.8, 0.85), color0, smoothstep(-0.57, -0.32, h));
     let foam = smoothstep(0.03, 0.0, abs(h + 0.32 - 0.012 * sin(g.time * 1.4 + xz.x * 2.0 + xz.y)));
     color = mix(color, vec3<f32>(1.0), foam * 0.85);
+    // The paving, rather than a distorted building image, describes the exact
+    // rectangular claim. World UVs join seamlessly between neighboring plots.
+    let plot_q = xz - g.placement.xy;
+    let preview_plot = g.placement_color.a > 0.0
+        && all(plot_q >= vec2<f32>(0.0)) && all(plot_q < g.placement.zw);
+    let occupied_plot = textureLoad(ground_index, vec2<i32>(floor(xz * 2.0)), 0).g > 0.5;
+    let paving = textureSample(ground_layers, repeat_sampler, xz / 0.9, 10).rgb;
+    if occupied_plot || preview_plot {
+        color = paving;
+    }
     color *= cel_light(n);
     color = world_light(color, xz);
     // Square simulation cells project as diamonds. Paint their lines on the

@@ -49,11 +49,6 @@ pub struct Sprite {
     pub pull: f32,
     /// White/opaque for world sprites; tinted/translucent for placement ghosts.
     pub tint: [f32; 4],
-    /// Cross-axis offsets in camera right/up; zero for ordinary billboards.
-    /// Buildings calibrate this affine transform from their painted base corners.
-    pub shear: [f32; 2],
-    /// Projective correction for the fourth painted footprint corner.
-    pub warp: [f32; 2],
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -132,7 +127,11 @@ impl Renderer {
             mapped_at_creation: false,
         });
         let cells = data_texture(device, wgpu::TextureFormat::Rgba8Unorm, "cells");
-        let ground_index = data_texture(device, wgpu::TextureFormat::R8Unorm, "ground index");
+        let ground_index = data_texture(
+            device,
+            wgpu::TextureFormat::Rg8Unorm,
+            "ground index and building plots",
+        );
         let linear = device.create_sampler(&wgpu::SamplerDescriptor {
             mag_filter: wgpu::FilterMode::Linear,
             min_filter: wgpu::FilterMode::Linear,
@@ -172,7 +171,7 @@ impl Renderer {
         });
 
         // Ground: painted biome textures as one mipmapped array.
-        let layers: Vec<Rgba> = terrain::GROUND_LAYERS
+        let mut layers: Vec<Rgba> = terrain::GROUND_LAYERS
             .iter()
             .map(|name| {
                 assets
@@ -180,6 +179,12 @@ impl Renderer {
                     .resized(GROUND_SIZE, GROUND_SIZE)
             })
             .collect();
+        // Layer 10 is the existing painted cobblestone surface for claimed plots.
+        layers.push(
+            assets
+                .image("terrain/cobblestone.png")
+                .resized(GROUND_SIZE, GROUND_SIZE),
+        );
         let ground_layers = upload_texture(device, &gpu.queue, &layers, "ground layers");
         let repeat = device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::Repeat,
@@ -361,7 +366,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4, 6 => Float32x2, 7 => Float32x2];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4];
         let make_sprite_pipeline = |ghost: bool| {
             pipeline(
                 device,
@@ -682,7 +687,7 @@ impl Renderer {
             );
         };
         write(&self.cells, rgba, 4);
-        write(&self.ground_index, layers, 1);
+        write(&self.ground_index, layers, 2);
     }
 
     /// Draws one frame. `sprites` holds (sheet index, sprite) pairs.
