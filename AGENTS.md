@@ -2,7 +2,9 @@
 
 ## Product
 
-Age of Agents is a deliberately small, mobile-friendly 2D isometric real-time strategy game inspired by late-1990s and early-2000s RTS games. The near-term reference is the clarity and immediacy of an early Age of Empires vertical slice, not a full simulation. The Anno series is the second inspiration: a calm, readable economy and settlement that grows from what the player builds.
+Read [README.md](README.md), especially **Proposed gameplay loop**, at the start of every session. It is the source of truth for the Greek strategy roguelike direction; distinguish proposed features from the implemented roadmap. Read [decisions.md](decisions.md) for design choices and keep new entries to one or two sentences.
+
+Age of Empires informs the RTS controls; Anno informs the settlement economy.
 
 Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle units remain idle until the player commands them.
 
@@ -11,11 +13,11 @@ Despite the project name, the initial game contains **no LLM-controlled or auton
 The current playable demo proves these loops:
 
 1. Isometric terrain tiles render cleanly on desktop and mobile.
-2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across seven biome-compatible resources.
+2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across eight biome-compatible raw resources.
 3. A player can construct a town center and train villagers through its single authoritative job slot.
 4. A player can research five bounded gathering improvements through that same job slot.
 
-Keep the world deterministic and small. Do not add combat, pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
+Keep the world deterministic and small. Treat combat, island expansion, calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
 ## Architecture
 
@@ -38,7 +40,7 @@ Keep the world deterministic and small. Do not add combat, pathfinding framework
 - Villagers carry at most 20 typed units, deposit at a town center, and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: ordered to gather another kind or to build, it delivers its cargo to a drop site before starting.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
-- Tap/click the build button to open the building menu (town center, house, granary, watchtower, dock; unaffordable ones in greyscale), pick one, then tap valid ground to issue a build order.
+- Tap/click the build button to open the grouped building menu (all 17 catalog buildings plus farm fields; unaffordable ones in greyscale), pick one, then tap valid ground to issue a build order.
 - Tap/click a town center to train a villager or start available research through the medallion buttons that appear at the bottom center.
 - Left-drag or touch drag pans. While placing, drag the ghost and release to build. Wheel/pinch zooms. Use the Grid pill (or G) to toggle square cells shown as diamonds; placement always previews its rectangular footprint. The camera heading is fixed; right-drag, two-finger twist, and Q/E do not rotate it.
 - Mouse and touch semantics must match.
