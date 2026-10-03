@@ -112,6 +112,7 @@ struct UnitEntry {
     samples: VecDeque<(f64, Vec3)>,
     position: Vec3,
     velocity: Vec3,
+    walked: f32,
     facing: f32,
     variant: usize,
     /// Eased offset toward the thing being worked on, so a working villager
@@ -187,6 +188,11 @@ fn node_for(kind: ResourceKind) -> &'static str {
     }
 }
 
+const STRIDE_DISTANCE: f32 = 0.3;
+fn walking_frame(walked: f32, frame_count: usize) -> usize {
+    ((walked / STRIDE_DISTANCE) as usize % 2) * (frame_count / 2)
+}
+
 impl WorldView {
     pub fn new() -> Self {
         Self {
@@ -232,6 +238,7 @@ impl WorldView {
                     samples: VecDeque::new(),
                     position: target,
                     velocity: Vec3::ZERO,
+                    walked: 0.0,
                     facing: 0.0,
                     lean: Vec2::ZERO,
                     variant: (seed_of(&view.unit.id) % 3) as usize,
@@ -265,10 +272,9 @@ impl WorldView {
         for entry in self.units.values_mut() {
             let previous = entry.position;
             entry.position = sample_at(&entry.samples, tick);
-            if dt > 0.0 {
-                let instant = (entry.position - previous) / dt;
-                entry.velocity = entry.velocity.lerp(instant, (dt * 10.0).min(1.0));
-            }
+            let delta = entry.position - previous;
+            entry.velocity = if dt > 0.0 { delta / dt } else { Vec3::ZERO };
+            entry.walked += Vec2::new(delta.x, delta.z).length();
         }
     }
 
@@ -431,7 +437,7 @@ impl WorldView {
             let Some(entry) = self.units.get_mut(&unit.unit.id) else {
                 continue;
             };
-            let moving = Vec2::new(entry.velocity.x, entry.velocity.z).length() > 0.05;
+            let moving = Vec2::new(entry.velocity.x, entry.velocity.z).length() > 0.001;
             let work = if moving {
                 None
             } else {
@@ -464,10 +470,7 @@ impl WorldView {
                 entry.position.x + entry.lean.x,
                 entry.position.z + entry.lean.y,
             );
-            let turn = (desired - entry.facing)
-                .sin()
-                .atan2((desired - entry.facing).cos());
-            entry.facing += turn * (dt * 12.0).min(1.0);
+            entry.facing = desired;
             let direction = Vec3::new(entry.facing.sin(), 0.0, entry.facing.cos());
             let animation = villager
                 .animations
@@ -501,14 +504,14 @@ impl WorldView {
             } else {
                 (entry.variant, &animation[view], [2048.0, 1280.0])
             };
-            // The second standing frame from behind is mid-step, so a villager
-            // seen from the back holds the first one instead of walking on the spot.
-            let frames = if name == "idle" && view == "back" {
-                &frames[..1]
+            let frame = if moving && matches!(name, "walk" | "carry") {
+                walking_frame(entry.walked, frames.len())
+            } else if name == "idle" || (name == "carry" && !moving) {
+                0
             } else {
-                &frames[..]
+                (time * fps) as usize % frames.len()
             };
-            let rect = frames[(time * fps) as usize % frames.len()];
+            let rect = frames[frame];
             sprites.push((
                 sheet,
                 Sprite {
@@ -668,9 +671,86 @@ pub struct Selection {
     pub building: Option<String>,
 }
 
+impl Selection {
+    pub fn select_unit(&mut self, id: String, additive: bool) {
+        if !additive {
+            self.units.clear();
+        }
+        if let Some(index) = self.units.iter().position(|unit| unit == &id) {
+            self.units.remove(index);
+        } else {
+            self.units.push(id);
+        }
+        self.building = None;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn walking_uses_only_two_stride_pictures_in_every_direction() {
+        let sheet: VillagerSheet =
+            serde_json::from_str(include_str!("../../../assets/sprites/villager.json")).unwrap();
+        for activity in ["walk", "carry"] {
+            for frames in sheet.animations[activity].values() {
+                assert_ne!(frames[0], frames[frames.len() / 2]);
+                for step in 0..20 {
+                    let distance = (step as f32 + 0.1) * STRIDE_DISTANCE;
+                    assert_eq!(
+                        walking_frame(distance, frames.len()),
+                        (step % 2) * (frames.len() / 2)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn displayed_movement_starts_walking_immediately_and_stops_without_a_tail() {
+        let initial = GameWorld::default().snapshot();
+        for direction in [-1.0, 1.0] {
+            let mut view = WorldView::new();
+            view.sync(initial.clone());
+            let mut moved = initial.clone();
+            moved.tick = 1;
+            moved.units[0].position.y += direction;
+            view.sync(moved);
+            view.frame(0.3);
+            let entry = &view.units["villager-1"];
+            assert_eq!(entry.velocity.z.signum(), direction as f32);
+            assert!(entry.walked > 0.0);
+            let walked = entry.walked;
+            view.frame(0.016);
+            let entry = &view.units["villager-1"];
+            assert_eq!(entry.velocity, Vec3::ZERO);
+            assert_eq!(entry.walked, walked);
+            // Camera motion never advances a unit's gait.
+            let mut rig = Rig::new();
+            rig.nudge(1.0, 1.0);
+            view.frame(0.1);
+            assert_eq!(view.units["villager-1"].walked, walked);
+        }
+    }
+
+    #[test]
+    fn shift_selection_toggles_members_and_plain_click_replaces() {
+        let mut selection = Selection {
+            building: Some("base-1".into()),
+            ..Selection::default()
+        };
+        selection.select_unit("villager-1".into(), false);
+        selection.select_unit("villager-2".into(), true);
+        assert_eq!(selection.units, ["villager-1", "villager-2"]);
+        assert!(selection.building.is_none());
+        selection.select_unit("villager-1".into(), true);
+        assert_eq!(selection.units, ["villager-2"]);
+        selection.select_unit("villager-1".into(), false);
+        assert_eq!(selection.units, ["villager-1"]);
+        selection.select_unit("villager-1".into(), false);
+        assert_eq!(selection.units, ["villager-1"]);
+    }
+
     use aoa_game::GameWorld;
 
     fn sheet() -> TownCenterSheet {

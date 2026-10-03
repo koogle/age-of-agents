@@ -49,6 +49,7 @@ pub fn files() -> Vec<String> {
         .collect();
     files.extend(COINS.iter().map(|name| format!("ui/buttons/{name}.png")));
     files.push("fonts/Nunito-ExtraBold.ttf".into());
+    files.push("fonts/Alegreya-MediumItalic.ttf".into());
     files
 }
 
@@ -110,6 +111,7 @@ pub struct Atlas {
     /// art fills their square differently still line up inside the coins.
     content: HashMap<String, ([f32; 4], Vec2)>,
     glyphs: HashMap<char, Glyph>,
+    gain_glyphs: HashMap<char, Glyph>,
 }
 
 /// The rectangle of `image` whose alpha is visibly painted, in pixels.
@@ -214,55 +216,71 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
             (uv(at, w, h), Vec2::new(w as f32, h as f32)),
         );
     }
-    let font = FontRef::try_from_slice(assets.bytes("fonts/Nunito-ExtraBold.ttf")).expect("font");
-    let scaled = font.as_scaled(PxScale::from(GLYPH_PX));
-    let mut glyphs = HashMap::new();
-    for ch in (32u8..127).map(char::from).chain(['×', '·']) {
-        let id = scaled.glyph_id(ch);
-        let advance = scaled.h_advance(id);
-        let glyph = id.with_scale_and_position(GLYPH_PX, ab_glyph::point(0.0, 0.0));
-        let Some(outline) = font.outline_glyph(glyph) else {
+    let mut fonts = Vec::new();
+    for (path, css_em) in [
+        ("fonts/Nunito-ExtraBold.ttf", false),
+        ("fonts/Alegreya-MediumItalic.ttf", true),
+    ] {
+        let font = FontRef::try_from_slice(assets.bytes(path)).expect("font");
+        // Match Canvas CSS font sizing for the original italic gain label.
+        let pixels = if css_em {
+            GLYPH_PX * font.height_unscaled() / font.units_per_em().expect("font em")
+        } else {
+            GLYPH_PX
+        };
+        let scaled = font.as_scaled(PxScale::from(pixels));
+        let mut glyphs = HashMap::new();
+        for ch in (32u8..127).map(char::from).chain(['×', '·']) {
+            let id = scaled.glyph_id(ch);
+            let advance = scaled.h_advance(id);
+            let glyph = id.with_scale_and_position(pixels, ab_glyph::point(0.0, 0.0));
+            let Some(outline) = font.outline_glyph(glyph) else {
+                glyphs.insert(
+                    ch,
+                    Glyph {
+                        uv: [0.0; 4],
+                        size: Vec2::ZERO,
+                        offset: Vec2::ZERO,
+                        advance,
+                    },
+                );
+                continue;
+            };
+            let bounds = outline.px_bounds();
+            let (w, h) = (
+                bounds.width().ceil() as u32 + 1,
+                bounds.height().ceil() as u32 + 1,
+            );
+            let at = place(w, h);
+            outline.draw(|gx, gy, coverage| {
+                let index = (((at.1 + gy) * ATLAS + at.0 + gx) * 4) as usize;
+                image.pixels[index..index + 4].copy_from_slice(&[
+                    255,
+                    255,
+                    255,
+                    (coverage * 255.0) as u8,
+                ]);
+            });
             glyphs.insert(
                 ch,
                 Glyph {
-                    uv: [0.0; 4],
-                    size: Vec2::ZERO,
-                    offset: Vec2::ZERO,
+                    uv: uv(at, w, h),
+                    size: Vec2::new(w as f32, h as f32),
+                    offset: Vec2::new(bounds.min.x, bounds.min.y),
                     advance,
                 },
             );
-            continue;
-        };
-        let bounds = outline.px_bounds();
-        let (w, h) = (
-            bounds.width().ceil() as u32 + 1,
-            bounds.height().ceil() as u32 + 1,
-        );
-        let at = place(w, h);
-        outline.draw(|gx, gy, coverage| {
-            let index = (((at.1 + gy) * ATLAS + at.0 + gx) * 4) as usize;
-            image.pixels[index..index + 4].copy_from_slice(&[
-                255,
-                255,
-                255,
-                (coverage * 255.0) as u8,
-            ]);
-        });
-        glyphs.insert(
-            ch,
-            Glyph {
-                uv: uv(at, w, h),
-                size: Vec2::new(w as f32, h as f32),
-                offset: Vec2::new(bounds.min.x, bounds.min.y),
-                advance,
-            },
-        );
+        }
+        fonts.push(glyphs);
     }
+    let gain_glyphs = fonts.pop().expect("gain font");
+    let glyphs = fonts.pop().expect("HUD font");
     Atlas {
         image,
         sprites,
         content,
         glyphs,
+        gain_glyphs,
     }
 }
 
@@ -330,14 +348,8 @@ impl Hud {
     }
 
     fn text_width(atlas: &Atlas, text: &str, size: f32) -> f32 {
-        text.chars()
-            .map(|ch| atlas.glyphs.get(&ch).map(|g| g.advance).unwrap_or(0.0))
-            .sum::<f32>()
-            * size
-            / GLYPH_PX
+        Self::glyph_width(&atlas.glyphs, text, size)
     }
-
-    /// Draws `text` with its baseline at `y`, centred on `x` when `center`.
     fn text(
         &mut self,
         atlas: &Atlas,
@@ -347,15 +359,35 @@ impl Hud {
         color: [f32; 4],
         center: bool,
     ) {
+        self.glyph_text(&atlas.glyphs, text, at, size, color, center);
+    }
+    fn glyph_width(glyphs: &HashMap<char, Glyph>, text: &str, size: f32) -> f32 {
+        text.chars()
+            .map(|ch| glyphs.get(&ch).map(|g| g.advance).unwrap_or(0.0))
+            .sum::<f32>()
+            * size
+            / GLYPH_PX
+    }
+
+    /// Draws `text` with its baseline at `y`, centred on `x` when `center`.
+    fn glyph_text(
+        &mut self,
+        glyphs: &HashMap<char, Glyph>,
+        text: &str,
+        at: (f32, f32),
+        size: f32,
+        color: [f32; 4],
+        center: bool,
+    ) {
         let scale = size / GLYPH_PX;
         let (x, y) = at;
         let mut pen = if center {
-            x - Self::text_width(atlas, text, size) / 2.0
+            x - Self::glyph_width(glyphs, text, size) / 2.0
         } else {
             x
         };
         for ch in text.chars() {
-            let Some(glyph) = atlas.glyphs.get(&ch) else {
+            let Some(glyph) = glyphs.get(&ch) else {
                 continue;
             };
             if glyph.size.x > 0.0 {
@@ -373,6 +405,44 @@ impl Hud {
                 });
             }
             pen += glyph.advance * scale;
+        }
+    }
+
+    /// Centre the visible glyph bounds in a control, independent of baseline
+    /// and advance padding (which differ between digits, × and pause bars).
+    fn centered_label(
+        &mut self,
+        atlas: &Atlas,
+        text: &str,
+        center: Vec2,
+        size: f32,
+        color: [f32; 4],
+    ) {
+        let mut min = Vec2::splat(f32::INFINITY);
+        let mut max = Vec2::splat(f32::NEG_INFINITY);
+        let mut pen = 0.0;
+        for ch in text.chars() {
+            let Some(glyph) = atlas.glyphs.get(&ch) else {
+                continue;
+            };
+            if glyph.size.x > 0.0 {
+                let start = Vec2::new(pen, 0.0) + glyph.offset;
+                min = min.min(start);
+                // Atlas glyphs have one extra transparent row and column.
+                max = max.max(start + glyph.size - Vec2::ONE);
+            }
+            pen += glyph.advance;
+        }
+        if min.is_finite() {
+            let baseline = center - (min + max) * (0.5 * size / GLYPH_PX);
+            self.glyph_text(
+                &atlas.glyphs,
+                text,
+                (baseline.x, baseline.y),
+                size,
+                color,
+                false,
+            );
         }
     }
 
@@ -416,6 +486,40 @@ impl Hud {
         self.hover.is_some_and(|p| {
             p.x >= rect[0] && p.x <= rect[0] + rect[2] && p.y >= rect[1] && p.y <= rect[1] + rect[3]
         })
+    }
+
+    /// Original Canvas label: medium italic serif, ivory fill, brown stroke.
+    /// `pixels_per_world` keeps its scale consistent with the painted scene.
+    pub fn gain_label(
+        &mut self,
+        atlas: &Atlas,
+        text: &str,
+        at: Vec2,
+        pixels_per_world: f32,
+        alpha: f32,
+    ) {
+        let size = 34.0 / 110.0 * pixels_per_world;
+        let radius = 2.5 / 110.0 * pixels_per_world;
+        for step in 0..8 {
+            let angle = step as f32 * std::f32::consts::TAU / 8.0;
+            let edge = at + Vec2::new(angle.cos(), angle.sin()) * radius;
+            self.glyph_text(
+                &atlas.gain_glyphs,
+                text,
+                (edge.x, edge.y),
+                size,
+                [74.0 / 255.0, 58.0 / 255.0, 42.0 / 255.0, alpha],
+                true,
+            );
+        }
+        self.glyph_text(
+            &atlas.gain_glyphs,
+            text,
+            (at.x, at.y),
+            size,
+            [246.0 / 255.0, 240.0 / 255.0, 225.0 / 255.0, alpha],
+            true,
+        );
     }
 
     /// Lays out the whole interface for this frame.
@@ -538,13 +642,12 @@ impl Hud {
                     (c - 8.0 * s) / 2.0,
                 );
             }
-            self.text(
+            self.centered_label(
                 atlas,
                 label,
-                (center.x, center.y + 4.5 * s),
+                center,
                 12.0 * s,
                 if active { [1.0; 4] } else { INK },
-                true,
             );
             self.regions.push(Region {
                 rect,

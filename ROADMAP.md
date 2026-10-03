@@ -150,3 +150,12 @@ Gameplay acceptance:
 - LLM-controlled villagers, autonomous planning, multiplayer, mod/plugin APIs, generic ECS/content engines, procedural world generation, and a large branching tech tree.
 
 - [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). Sprites keep their original proportions inside cobblestone plots that mark the exact claim, including construction and previews; touching plots share one level foundation height.
+
+## Integrated native presentation fixes
+
+- [x] Shift-click group selection and existing shared gather/construct commands.
+- [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs.
+- [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
+- [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
+- [ ] Additive touch selection, box selection and accessible DOM controls in the wgpu client remain open.
+- [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.

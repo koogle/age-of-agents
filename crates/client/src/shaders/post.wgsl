@@ -33,7 +33,8 @@ fn vs(@builtin(vertex_index) index: u32) -> VOut {
 fn inverse_depth(pixel: vec2<i32>) -> f32 {
     let size = vec2<i32>(textureDimensions(depth));
     let d = textureLoad(depth, clamp(pixel, vec2<i32>(0), size - 1), 0).r;
-    let view_z = p.near * p.far / (p.far - d * (p.far - p.near));
+    // Orthographic depth is linear between the camera's clipping planes.
+    let view_z = p.near + d * (p.far - p.near);
     return 1.0 / view_z;
 }
 
@@ -50,7 +51,8 @@ fn ink(in: VOut) -> @location(0) vec4<f32> {
                    max(crease(pixel, vec2<i32>(1, 1)), crease(pixel, vec2<i32>(1, -1))));
     var amount = smoothstep(0.0025, 0.012, edge) * 0.9;
     amount *= mix(1.0, 0.55, smoothstep(30.0, 90.0, 1.0 / inverse_depth(pixel)));
-    return vec4<f32>(mix(color.rgb, color.rgb * vec3<f32>(0.16, 0.11, 0.08), amount), 1.0);
+    // Painted sprites already contain ink and authored shading.
+    return vec4<f32>(mix(color.rgb, color.rgb * vec3<f32>(0.16, 0.11, 0.08), amount * color.a), color.a);
 }
 
 fn aces(color_in: vec3<f32>) -> vec3<f32> {
@@ -72,18 +74,21 @@ fn linear_to_srgb(c: vec3<f32>) -> vec3<f32> {
 fn blur(in: VOut) -> @location(0) vec4<f32> {
     let away = smoothstep(0.6 * 0.35, 0.6, abs(in.uv.y - 0.46));
     let s = p.step * away * 1.1;
-    var color = textureSampleLevel(image, image_sampler, in.uv, 0.0).rgb * 0.227;
-    color += (textureSampleLevel(image, image_sampler, in.uv + s * 1.385, 0.0).rgb + textureSampleLevel(image, image_sampler, in.uv - s * 1.385, 0.0).rgb) * 0.316;
-    color += (textureSampleLevel(image, image_sampler, in.uv + s * 3.231, 0.0).rgb + textureSampleLevel(image, image_sampler, in.uv - s * 3.231, 0.0).rgb) * 0.07;
+    // Carry the tone-mapping weight through blur along with the linear color.
+    var sample = textureSampleLevel(image, image_sampler, in.uv, 0.0) * 0.227;
+    sample += (textureSampleLevel(image, image_sampler, in.uv + s * 1.385, 0.0) + textureSampleLevel(image, image_sampler, in.uv - s * 1.385, 0.0)) * 0.316;
+    sample += (textureSampleLevel(image, image_sampler, in.uv + s * 3.231, 0.0) + textureSampleLevel(image, image_sampler, in.uv - s * 3.231, 0.0)) * 0.07;
+    var color = sample.rgb;
     if p.final_pass > 0.5 {
+        let painted = color;
         let grey = dot(color, vec3<f32>(0.299, 0.587, 0.114));
         color = mix(vec3<f32>(grey), color, 1.12);
         let edge = smoothstep(0.95, 0.35, length(in.uv - vec2<f32>(0.5, 0.48)));
         color *= mix(vec3<f32>(0.86, 0.84, 0.8), vec3<f32>(1.0), edge);
-        color = aces(color);
+        color = mix(painted, aces(color), clamp(sample.a, 0.0, 1.0));
         if p.encode_srgb > 0.5 {
             color = linear_to_srgb(color);
         }
     }
-    return vec4<f32>(color, 1.0);
+    return vec4<f32>(color, select(sample.a, 1.0, p.final_pass > 0.5));
 }

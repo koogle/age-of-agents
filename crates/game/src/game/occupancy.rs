@@ -180,8 +180,9 @@ impl GameWorld {
             }
         }
         for resource in &self.resources {
-            if !(resource.capacity.is_finite() && resource.capacity > 0.0)
-                || !(0.0..=resource.capacity).contains(&resource.amount)
+            if !(resource.capacity.is_finite()
+                && resource.capacity > 0.0
+                && (0.0..=resource.capacity).contains(&resource.amount))
             {
                 return Err(format!("{} has an invalid amount", resource.id));
             }
@@ -201,7 +202,7 @@ impl GameWorld {
                         elapsed_seconds, ..
                     } => *elapsed_seconds,
                 };
-                if !building.is_complete() || !(elapsed.is_finite() && elapsed >= 0.0) {
+                if !(building.is_complete() && elapsed.is_finite() && elapsed >= 0.0) {
                     return Err(format!("{} has an invalid job", building.id));
                 }
             }

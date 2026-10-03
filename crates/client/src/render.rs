@@ -381,7 +381,16 @@ impl Renderer {
                     })],
                     format: SCENE_FORMAT,
                     blend: if ghost {
-                        Some(wgpu::BlendState::ALPHA_BLENDING)
+                        Some(wgpu::BlendState {
+                            color: wgpu::BlendComponent::OVER,
+                            // Scene alpha is grading weight. Ghosts replace that
+                            // weight proportionally without adding a matte.
+                            alpha: wgpu::BlendComponent {
+                                src_factor: wgpu::BlendFactor::Zero,
+                                dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+                                operation: wgpu::BlendOperation::Add,
+                            },
+                        })
                     } else {
                         None
                     },

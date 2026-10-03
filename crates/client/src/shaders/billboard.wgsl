@@ -50,5 +50,6 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
         discard;
     }
     let color = world_light(texel.rgb, in.anchor.xz);
-    return vec4<f32>(distance_fog(color, in.anchor) * in.tint.rgb, in.tint.a);
+    // Opaque artwork skips grading. Ghost alpha remains its blend opacity.
+    return vec4<f32>(distance_fog(color, in.anchor) * in.tint.rgb, select(0.0, in.tint.a, in.tint.a < 1.0));
 }
