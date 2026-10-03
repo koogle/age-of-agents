@@ -10,7 +10,7 @@ import { patchWorld } from './materials.js';
 const SHEETS = ['villager', 'villager_woman', 'villager_elder'];
 const sheet = await fetch('/assets/sprites/villager.json').then(response => response.json());
 const textures = SHEETS.map(name => loadSheet(`/assets/sprites/${name}.png`));
-const SHEET_SIZE = [2048, 1280];
+const SHEET_SIZE = sheet.size;
 const [CELL_W, CELL_H] = sheet.cell;
 // The figure is drawn figureHeight px tall inside its cell; in the world it is this tall.
 const FIGURE_HEIGHT = 0.78;

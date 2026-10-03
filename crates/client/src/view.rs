@@ -53,6 +53,8 @@ const STOP_SECONDS: f32 = 0.2;
 #[derive(Deserialize)]
 struct VillagerSheet {
     #[serde(default)]
+    size: [f32; 2],
+    #[serde(default)]
     cell: [f32; 2],
     #[serde(default)]
     anchor: [f32; 2],
@@ -72,8 +74,7 @@ struct BuildingSheet {
     footprints: HashMap<String, Vec<[[f32; 2]; 4]>>,
 }
 
-/// Standing frames at twice the resolution of `villager.json`, with the same
-/// anchor after scaling: idle villagers are on screen most of the time.
+/// Dedicated standing frames with the same normalized anchor as the action sheets.
 #[derive(Deserialize)]
 struct IdleSheet {
     size: [f32; 2],
@@ -627,7 +628,7 @@ impl WorldView {
                     sheets.catalog.units.size,
                 )
             } else {
-                (entry.variant, &animation[view], [2048.0, 1280.0])
+                (entry.variant, &animation[view], villager.size)
             };
             let frame = if moving && matches!(name, "walk" | "carry") {
                 walking_frame(entry.walked, frames.len())
