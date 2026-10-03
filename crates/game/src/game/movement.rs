@@ -197,6 +197,21 @@ impl GameWorld {
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
             UnitAction::Move { to } => Some(Goal::Cell(*to)),
+            UnitAction::Cultivate { resource_id } => {
+                let field_goal = || {
+                    self.resources
+                        .iter()
+                        .find(|r| &r.id == resource_id)
+                        .map(|r| Goal::Beside(r.footprint()))
+                };
+                if self.units[unit].cargo.is_some() {
+                    self.nearest_drop_site(unit)
+                        .map(Goal::Beside)
+                        .or_else(field_goal)
+                } else {
+                    field_goal()
+                }
+            }
             UnitAction::Build { .. } if self.units[unit].cargo.is_some() => {
                 // Dropping goods off first; see `drop_off_before_building`.
                 self.nearest_drop_site(unit).map(Goal::Beside).or_else(|| {
@@ -234,6 +249,47 @@ impl GameWorld {
     pub(super) fn static_paths(&self, unit: usize, occupancy: &Occupancy) -> PathTree {
         PathTree::search(WORLD_COLUMNS, WORLD_ROWS, self.units[unit].cell, |cell| {
             !occupancy.is_static(cell)
+        })
+    }
+
+    /// A foundation must not split any unit's reachable ground. Foundations
+    /// already block the full completed footprint, so check before placing one.
+    /// Ignore temporary unit claims and reservations, just like static routing.
+    pub(super) fn placement_preserves_routes(&self, footprint: Footprint) -> bool {
+        let occupancy = self.occupancy();
+        let mut checked: Vec<PathTree> = Vec::new();
+        self.units.iter().all(|unit| {
+            let start = unit.step.map_or(unit.cell, |step| step.to);
+            // Units sharing connected ground need only one pair of searches.
+            if checked.iter().any(|paths| paths.cost(start).is_some()) {
+                return true;
+            }
+            let before = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+                !occupancy.is_static(cell)
+            });
+            let after = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+                !footprint.contains(cell) && !occupancy.is_static(cell)
+            });
+            // Even if every lost cell belongs to the new building, a unit
+            // that could walk before must still have somewhere to step.
+            let body = Footprint {
+                origin: start,
+                columns: 1,
+                rows: 1,
+            };
+            if before.nearest(interaction_cells(body)).is_some()
+                && after.nearest(interaction_cells(body)).is_none()
+            {
+                return false;
+            }
+            let preserved = self.terrain.iter().all(|terrain| {
+                let cell = terrain.coordinate();
+                footprint.contains(cell)
+                    || before.cost(cell).is_none()
+                    || after.cost(cell).is_some()
+            });
+            checked.push(after);
+            preserved
         })
     }
 

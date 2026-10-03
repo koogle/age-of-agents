@@ -42,7 +42,7 @@ const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
 /// What lies under a pointer.
 enum Target {
     Unit(String),
-    Resource(String, CellCoordinate),
+    Resource(String),
     Foundation(String),
     Building(String),
     Ground(CellCoordinate),
@@ -207,7 +207,7 @@ impl App {
         // A tree, rock or building is hit where it is drawn, not where the
         // ground behind it happens to be.
         match self.view.sprite_at(&self.rig, pixel) {
-            Some(view::Pick::Resource(id, cell)) => return Some(Target::Resource(id, cell)),
+            Some(view::Pick::Resource(id)) => return Some(Target::Resource(id)),
             Some(view::Pick::Building(id)) => {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
                 return Some(if building.building.construction.is_some() {
@@ -223,9 +223,9 @@ impl App {
         if let Some(resource) = snapshot
             .resources
             .iter()
-            .find(|r| r.amount > 0.0 && r.cell == cell)
+            .find(|r| (r.amount > 0.0 || r.field.is_some()) && r.footprint().contains(cell))
         {
-            return Some(Target::Resource(resource.id.clone(), resource.cell));
+            return Some(Target::Resource(resource.id.clone()));
         }
         if let Some(building) = snapshot.buildings.iter().find(|b| {
             let o = b.building.origin;
@@ -254,7 +254,15 @@ impl App {
         }
         let snapshot = self.view.snapshot.as_ref()?;
         let (center, radius, color) = match self.target_at(self.cursor)? {
-            Target::Resource(_, cell) => (terrain::cell_center(cell), 0.36, HOVER_WORK),
+            Target::Resource(id) => {
+                let r = snapshot.resources.iter().find(|r| r.id == id)?;
+                let c = r.footprint().center();
+                (
+                    Vec2::new(c.x as f32, c.y as f32) * terrain::CELL,
+                    if r.field.is_some() { 0.85 } else { 0.36 },
+                    HOVER_WORK,
+                )
+            }
             Target::Foundation(id) => {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
                 let c = view::footprint_center(&self.view.heights, building);
@@ -289,6 +297,7 @@ impl App {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Grid => self.show_grid = !self.show_grid,
             hud::Action::Build => self.build = hud::BuildUi::Categories,
+            hud::Action::PlaceField => self.build = hud::BuildUi::PlacingField,
             hud::Action::BuildGroup(group) => self.build = hud::BuildUi::Group(group),
             hud::Action::Place(kind) => self.build = hud::BuildUi::Placing(kind),
             hud::Action::Cancel => self.build = hud::BuildUi::Off,
@@ -327,15 +336,23 @@ impl App {
     }
 
     fn tap(&mut self, pixel: Vec2, additive: bool) {
-        if let hud::BuildUi::Placing(kind) = self.build {
+        if let Some(kind) = match self.build {
+            hud::BuildUi::Placing(kind) => Some(kind),
+            hud::BuildUi::PlacingField => Some(aoa_game::BuildingKind::Farm),
+            _ => None,
+        } {
             if let (Some((origin, true)), Some(unit_id)) = (
                 self.placement(pixel, kind),
                 self.selection.units.first().cloned(),
             ) {
-                self.send(Command::Build {
-                    unit_id,
-                    origin,
-                    kind,
+                self.send(if self.build == hud::BuildUi::PlacingField {
+                    Command::PlantField { unit_id, origin }
+                } else {
+                    Command::Build {
+                        unit_id,
+                        origin,
+                        kind,
+                    }
                 });
                 self.build = hud::BuildUi::Off;
             } else {
@@ -365,11 +382,23 @@ impl App {
         }
         match target {
             Target::Unit(_) => {}
-            Target::Resource(resource_id, _) => {
+            Target::Resource(resource_id) => {
                 for unit_id in units {
-                    self.send(Command::Gather {
-                        unit_id,
-                        resource_id: resource_id.clone(),
+                    let depleted_field = self.view.snapshot.as_ref().is_some_and(|s| {
+                        s.resources
+                            .iter()
+                            .any(|r| r.id == resource_id && r.field.is_some() && r.amount <= 0.0)
+                    });
+                    self.send(if depleted_field {
+                        Command::Cultivate {
+                            unit_id,
+                            resource_id: resource_id.clone(),
+                        }
+                    } else {
+                        Command::Gather {
+                            unit_id,
+                            resource_id: resource_id.clone(),
+                        }
                     });
                 }
             }
@@ -547,6 +576,9 @@ impl App {
         }
         self.view.frame(dt as f32);
         let ghost = match self.build {
+            hud::BuildUi::PlacingField if !self.hud.covers(self.cursor) => self
+                .placement(self.cursor, aoa_game::BuildingKind::Farm)
+                .map(|(origin, ok)| (aoa_game::BuildingKind::Farm, origin, ok)),
             hud::BuildUi::Placing(kind) if !self.hud.covers(self.cursor) => self
                 .placement(self.cursor, kind)
                 .map(|(origin, ok)| (kind, origin, ok)),

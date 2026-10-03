@@ -23,7 +23,7 @@ pub(super) fn building_info(
             "building_farm",
             "farm",
             "Farm",
-            "Food/fiber drop-off; nearby gathering +25%",
+            "Unlocks food fields; nearby gathering +25%",
         ),
         BuildingKind::LumberMill => (
             "building_lumber_mill",
@@ -159,6 +159,18 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .filter(|u| model.units.contains(&u.unit.id))
             .all(|u| u.unit.kind == aoa_game::UnitKind::Villager);
         let mut commands = match model.build {
+            BuildUi::PlacingField => vec![Command {
+                icon: "command_cancel",
+                label: "Place field".into(),
+                detail: format!(
+                    "{} · {} s work · {} food",
+                    cost_text(aoa_game::FIELD_COST),
+                    aoa_game::FIELD_WORK_SECONDS,
+                    aoa_game::FIELD_FOOD
+                ),
+                enabled: true,
+                action: Action::Cancel,
+            }],
             BuildUi::Placing(kind) => vec![Command {
                 icon: "command_cancel",
                 label: format!("Place the {}", building_info(kind).2.to_lowercase()),
@@ -166,9 +178,14 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 enabled: true,
                 action: Action::Cancel,
             }],
-            BuildUi::Categories | BuildUi::Group(_) => {
-                super::build_menu::commands(model.build, stock)
-            }
+            BuildUi::Categories | BuildUi::Group(_) => super::build_menu::commands(
+                model.build,
+                stock,
+                snapshot
+                    .buildings
+                    .iter()
+                    .any(|b| b.building.kind == BuildingKind::Farm && b.building.is_complete()),
+            ),
             BuildUi::Off => vec![Command {
                 icon: "command_build",
                 label: "Build".into(),
@@ -224,6 +241,10 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 "Dropping off goods first".into()
             }
             UnitAction::Build { .. } => "Building".into(),
+            UnitAction::Cultivate { .. } if unit.unit.cargo.is_some() => {
+                "Dropping off goods first".into()
+            }
+            UnitAction::Cultivate { .. } => "Preparing field".into(),
             UnitAction::Deposit { .. } => "Taking goods to unload".into(),
             UnitAction::Gather { phase, .. } => match phase {
                 aoa_game::GatherPhase::ToResource => "Heading out to gather".into(),
