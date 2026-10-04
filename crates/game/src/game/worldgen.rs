@@ -6,7 +6,7 @@
 //! Only wood and berries grow near the start; stone requires exploration.
 //! Each island supplies the raw settlement and proposed transport budget,
 //! including wood to process into timber, reachable from the town center.
-//! Advanced materials belong to future islands. Failed seeds are re-rolled.
+//! Destinations add complementary advanced materials. Failed seeds are re-rolled.
 //!
 //! Only integer hashing, `+ - * /` and `sqrt` (all exactly rounded under IEEE
 //! 754) are used, so the result is bit-identical
@@ -38,8 +38,12 @@ pub(super) struct Island {
 
 /// The first acceptable island for `seed`, re-rolling deterministically.
 pub(super) fn generate(seed: u64) -> Island {
+    generate_with_resources(seed, &STARTER_RESOURCES)
+}
+
+fn generate_with_resources(seed: u64, kinds: &[ResourceKind]) -> Island {
     (0..MAX_ATTEMPTS)
-        .find_map(|attempt| attempt_island(seed, mix(seed, attempt)))
+        .find_map(|attempt| attempt_island(seed, mix(seed, attempt), kinds))
         .expect("an acceptable island within the re-roll budget")
 }
 
@@ -47,7 +51,7 @@ const COLUMNS: usize = WORLD_COLUMNS as usize;
 const ROWS: usize = WORLD_ROWS as usize;
 
 /// SplitMix64: a tiny, well-mixed, platform-independent hash.
-fn mix(a: u64, b: u64) -> u64 {
+pub(super) fn mix(a: u64, b: u64) -> u64 {
     let mut z = a ^ b.wrapping_mul(0x9E37_79B9_7F4A_7C15);
     z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
     z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
@@ -155,7 +159,7 @@ fn distance_from(
     distance
 }
 
-fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
+fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island> {
     let mut rng = Rng(roll);
     let (width, height) = (COLUMNS as f64, ROWS as f64);
     // Several mountain ranges stand out from the middle, each a ridge broken
@@ -349,7 +353,7 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
         .collect();
 
     let (town_center, villagers) = choose_start(&terrain, &coast)?;
-    let resources = place_resources(&terrain, &ford, town_center, &mut rng);
+    let resources = place_resources(&terrain, &ford, town_center, &mut rng, kinds);
     let resources = reachable_only(&terrain, resources, town_center, villagers[0]);
     let enough = STARTER_RESOURCE_BUDGET.iter().all(|&(kind, cost)| {
         let total: f64 = resources
@@ -359,6 +363,15 @@ fn attempt_island(seed: u64, roll: u64) -> Option<Island> {
             .sum();
         total >= cost * 1.5
     });
+    let enough = enough
+        && kinds.iter().all(|kind| {
+            resources
+                .iter()
+                .filter(|r| r.kind == *kind)
+                .map(|r| r.amount)
+                .sum::<f64>()
+                >= 120.0
+        });
     let near_start = |kind: ResourceKind| {
         let (columns, rows) = BuildingKind::TownCenter.size();
         let base = Footprint {
@@ -646,6 +659,7 @@ fn place_resources(
     ford: &[bool],
     town_center: CellCoordinate,
     rng: &mut Rng,
+    kinds: &[ResourceKind],
 ) -> Vec<ResourceNode> {
     let (columns, rows) = BuildingKind::TownCenter.size();
     let base = Footprint {
@@ -658,7 +672,7 @@ fn place_resources(
     let mut taken = ford.to_vec();
     let mut resources: Vec<ResourceNode> = Vec::new();
     for (kind, prefix, biomes, near, far, size, amount) in RESOURCE_PLAN {
-        if !STARTER_RESOURCES.contains(&kind) {
+        if !kinds.contains(&kind) {
             continue;
         }
         let mut number = 0;
@@ -777,3 +791,15 @@ fn reachable_only(
 
 #[cfg(test)]
 mod tests;
+
+/// Each destination supplies one complementary chain in its native biomes.
+pub(super) fn destination(seed: u64, id: u64) -> Island {
+    let special: &[ResourceKind] = match (id - 1) % 3 {
+        0 => &[ResourceKind::Iron, ResourceKind::Coal],
+        1 => &[ResourceKind::Clay],
+        _ => &[ResourceKind::Fiber],
+    };
+    let mut kinds = STARTER_RESOURCES.to_vec();
+    kinds.extend_from_slice(special);
+    generate_with_resources(seed, &kinds)
+}

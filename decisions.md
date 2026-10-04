@@ -25,3 +25,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 
 - **Local transport:** A dock trains a transport for 60 wood + 20 timber in 20 seconds; four passengers retain IDs, cargo and housing usage, while a separate 200-good hold transfers at completed docks. Ships land passengers at free connected shore cells without needing a dock; boarding orders reserve seats and departure cancels unfinished boarding.
 - **Destination contract:** Future island IDs will derive from deterministic discovery order, with destination generation once on first transport completion and travel on departure. This slice keeps the existing island/stockpile; passengers are owned by either the land-unit list or one ship manifest, never both.
+
+- Persistent islands: discovery-order IDs and mixed root seeds identify generated destinations; explicit voyages exchange local terrain, fog, entities and inventory while research and counters stay global. Away islands pause, and unload-at-shore permits founding an outpost from transported goods; loading still requires a dock.

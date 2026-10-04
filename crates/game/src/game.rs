@@ -12,6 +12,10 @@ mod fields_tests;
 #[cfg(test)]
 mod fixture;
 mod gathering;
+mod islands;
+#[cfg(test)]
+mod islands_tests;
+pub use islands::IslandState;
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
@@ -72,6 +76,10 @@ pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GameWorld {
+    #[serde(default)]
+    pub island_id: u64,
+    #[serde(default)]
+    pub islands: Vec<IslandState>,
     /// The island this world was generated from.
     pub seed: u64,
     #[serde(default)]
@@ -111,6 +119,10 @@ pub struct BuildingView {
 // Clients decode snapshots too; the catalog is static data they already have.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldSnapshot {
+    #[serde(default)]
+    pub island_id: u64,
+    #[serde(default)]
+    pub island_count: usize,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -133,6 +145,10 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    Voyage {
+        ship_id: String,
+        island_id: u64,
+    },
     Sail {
         ship_id: String,
         to: CellCoordinate,
@@ -330,6 +346,8 @@ impl GameWorld {
             cargo: None,
         };
         let mut world = Self {
+            island_id: 0,
+            islands: Vec::new(),
             seed: island.seed,
             economy_rules: EconomyRules::IslandProgression,
             tick: 0,
@@ -411,6 +429,7 @@ impl GameWorld {
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
+            Command::Voyage { ship_id, island_id } => self.voyage(&ship_id, island_id)?,
             Command::Sail { ship_id, to } => self.sail(&ship_id, to)?,
             Command::DockShip {
                 ship_id,
@@ -598,7 +617,7 @@ impl GameWorld {
                 if self.researched_technologies.contains(&technology) {
                     return Err(CommandError::TechnologyAlreadyResearched);
                 }
-                if self.buildings.iter().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
+                if self.all_buildings().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
                     return Err(CommandError::TechnologyInProgress);
                 }
                 if technology
@@ -808,6 +827,8 @@ impl GameWorld {
         let explored: BTreeSet<_> = self.explored_cells.iter().copied().collect();
 
         WorldSnapshot {
+            island_id: self.island_id,
+            island_count: self.islands.len() + 1,
             available_buildings: self.available_buildings(),
             columns: WORLD_COLUMNS,
             rows: WORLD_ROWS,

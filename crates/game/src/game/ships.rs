@@ -1,5 +1,5 @@
-//! Explicit, local transport. Passengers live in exactly one collection: land
-//! units or a ship manifest. Goods transfers require a stopped ship at a dock.
+//! Explicit transport. Passengers live in exactly one collection: land units
+//! or a ship manifest. Loading needs a dock; unloading also works at shore.
 use super::*;
 use crate::navigation::PathTree;
 use movement::interaction_cells;
@@ -70,7 +70,7 @@ impl GameWorld {
             .biome
                 == TerrainBiome::Water
     }
-    fn water_free(&self, cell: CellCoordinate, ship: Option<usize>) -> bool {
+    pub(super) fn water_free(&self, cell: CellCoordinate, ship: Option<usize>) -> bool {
         self.water(cell)
             && self.ships.iter().enumerate().all(|(i, s)| {
                 Some(i) == ship
@@ -104,6 +104,9 @@ impl GameWorld {
             goods: Stockpile::default(),
         });
         self.next_unit_id += 1;
+        if self.islands.is_empty() {
+            self.discover_island();
+        }
         true
     }
     pub(super) fn sail(&mut self, id: &str, to: CellCoordinate) -> Result<(), CommandError> {
@@ -308,7 +311,15 @@ impl GameWorld {
         if !self.ships[ship].stopped() {
             return Err(CommandError::ShipMustBeStopped);
         }
-        if self.dock_for_ship(ship).is_none() {
+        if self.dock_for_ship(ship).is_none()
+            && !(direction == CargoDirection::Unload
+                && self.landing_cells(ship).iter().any(|&c| {
+                    self.terrain
+                        [usize::from(c.row) * usize::from(WORLD_COLUMNS) + usize::from(c.column)]
+                    .biome
+                    .is_walkable()
+                }))
+        {
             return Err(CommandError::DockRequired);
         }
         if !amount.is_finite() || amount <= 0.0 {

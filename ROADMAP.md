@@ -10,7 +10,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Next: persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Persistent destination islands, explicit voyages and island-local inventories are implemented. Next: cumulative archipelago overview and settlement trade refinement. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
@@ -25,8 +25,8 @@ The first transport is a playable dock recipe costing 60 wood + 20 timber, takin
 Remaining acceptance criteria:
 
 1. Implemented: dock-built transport loads/unloads existing villagers and goods, retaining identities and cargo. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
-2. Planned: first transport completion generates a destination once; departure travels to that persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
-3. Each settlement owns an inventory; ships explicitly transfer goods between trading posts. The current global stockpile is temporary. Give new arrivals enough basic supplies to found an outpost without allowing the destination to replace every earlier supply chain.
+2. Implemented: first transport completion generates a destination once; an explicit voyage travels to that persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
+3. Each island now owns an inventory; ships explicitly load at docks and unload at docks or shore. Separate inventories for multiple settlements on one island and trading-post specialization remain planned. Give new arrivals enough basic supplies to found an outpost without allowing the destination to replace every earlier supply chain.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
 
 ## Released baseline — Gather, build, research, and route
@@ -95,7 +95,7 @@ User-directed implementation activates construction of all 17 catalog buildings.
 
 The Rust HUD exposes paged, labelled construction, production costs/progress and all stockpile totals. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
-This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. After ships and persistent island travel are implemented, add each newly discovered island to the globe while retaining previous discoveries. Animals/adversaries follow that economy/transport loop.
+This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying villagers and goods, persistent destination islands, and local inventories connected by trading posts. Persistent voyages are implemented; next add each discovered island to a cumulative globe overview. Away islands currently pause while the active island simulates. Animals/adversaries follow that economy/transport loop.
 
 ## Slice C — Steel economy vertical slice
 

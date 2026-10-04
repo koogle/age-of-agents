@@ -91,6 +91,7 @@ pub enum Action {
     ShipCargoNext,
     ShipTransfer(aoa_game::CargoDirection),
     Disembark,
+    Voyage(u64),
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
     Research(TechnologyKind),
