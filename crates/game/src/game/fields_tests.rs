@@ -165,7 +165,7 @@ fn fields_reject_out_of_bounds_and_unreachable_sites_without_spending() {
     };
     w.units[0].cell = cell(5, 5);
     w.units[1].cell = cell(6, 5);
-    for at in super::movement::interaction_cells(plot) {
+    for at in super::spatial::interaction_cells(plot) {
         w.terrain[usize::from(at.row) * usize::from(WORLD_COLUMNS) + usize::from(at.column)]
             .biome = TerrainBiome::Water;
     }

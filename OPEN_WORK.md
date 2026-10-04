@@ -1,5 +1,13 @@
 # Open Work
 
+## Core module extraction (2026-10-04)
+
+Extracted `spatial` (geometry, occupancy, placement), `units` (NPC state and movement), `jobs` (typed activities and implementations), and `resources` (kinds, nodes, cargo, stockpile, chain catalog). Navigation remains reusable; whole-world validation has its own module. Root exports, serialized fields, command handling and tick order are retained. Client placement uses shared core geometry; field dimensions come from resource footprints. Extreme command coordinates are rejected before iteration.
+
+Branch `refactor/core-modules` is based on master a27a564 and preserves upstream building queues, island progression and current art. Integrated verification: all 163 workspace tests pass (104 game, 46 client, 13 server), including three spatial regressions. Formatting, strict native/WASM Clippy, server build, release WASM build and whitespace checks pass; tracked browser artifacts are rebuilt. Thermonuclear review complete: direct modules, no dependencies or new gameplay, existing atomicity and queue behavior retained.
+
+The earlier pre-integration refactor also matched an original-base deterministic replay of 1,800 commands/5,400 ticks across three seeds, and passed desktop/touch placement and construction checks. Fresh integrated Chromium checks select a villager on desktop and DPR-2 phone with no page errors. Screenshots: `/workspace/scratch/aoa-pr-desktop.png` and `/workspace/scratch/aoa-pr-phone.png`; checks and logs: `/workspace/scratch/aoa-pr-*`. Server is running on port 8000 with isolated database `/workspace/scratch/aoa-pr-integrated.db`. User requested a PR and screenshots; publish for review without merging or deploying.
+
 ## Retire the unused frontend (2026-10-03)
 
 User requested removal of unused legacy code, then PR creation and merge. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend/vendor libraries, unused GLBs/model builders, processed `assets/game/` sprites, obsolete asset pipelines/checks, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, and docs now use the Rust client only.

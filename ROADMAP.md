@@ -70,6 +70,7 @@ Gameplay acceptance:
 
 Engineering acceptance:
 
+- Core code is organized into spatial, unit/movement, job, and resource modules; shared spatial queries drive placement previews. This is a module extraction with the existing activity states and simulation order.
 - Split `game.rs` before it or any frontend file grows beyond 1,000 lines; catalogs are direct typed constants/data, not a generic content engine.
 - Focused migration, catalog-integrity, serialization, and deterministic tick-boundary regressions pass.
 

@@ -1,38 +1,6 @@
 //! Ordered building tasks. Inputs are paid at submission; each active job
 //! completes once, or waits at the building when a unit has no free spawn cell.
-use super::*;
-
-impl ResourceKind {
-    pub const fn name(self) -> &'static str {
-        match self {
-            Self::Wood => "wood",
-            Self::Food => "food",
-            Self::Stone => "stone",
-            Self::Gold => "gold",
-            Self::Iron => "iron",
-            Self::Coal => "coal",
-            Self::Clay => "clay",
-            Self::Fiber => "fiber",
-            Self::Timber => "timber",
-            Self::Steel => "steel",
-            Self::Bricks => "bricks",
-            Self::Cloth => "cloth",
-            Self::Rations => "rations",
-        }
-    }
-}
-
-impl UnitKind {
-    pub const fn name(self) -> &'static str {
-        match self {
-            Self::Villager => "Villager",
-            Self::Guard => "Guard",
-            Self::Archer => "Archer",
-            Self::Healer => "Healer",
-            Self::SiegeCart => "Siege cart",
-        }
-    }
-}
+use crate::game::*;
 
 impl BuildingKind {
     pub const fn products(self) -> &'static [ProductKind] {
@@ -105,7 +73,7 @@ impl ProductKind {
 }
 
 impl GameWorld {
-    pub(super) fn cancel_queued_job(
+    pub(in crate::game) fn cancel_queued_job(
         &mut self,
         building_id: &str,
         queue_id: u64,
@@ -137,7 +105,11 @@ impl GameWorld {
 
     /// A nearby working farm or mining camp improves matching gathering by 25%.
     /// Multiple buildings do not stack, and foundations confer no benefit.
-    pub(super) fn extraction_multiplier(&self, kind: ResourceKind, cell: CellCoordinate) -> f64 {
+    pub(in crate::game) fn extraction_multiplier(
+        &self,
+        kind: ResourceKind,
+        cell: CellCoordinate,
+    ) -> f64 {
         if self.buildings.iter().any(|b| {
             b.is_complete()
                 && b.kind.accepts(kind)
@@ -152,7 +124,7 @@ impl GameWorld {
         }
     }
 
-    pub(super) fn tick_building_job(&mut self, index: usize, dt: f64) {
+    pub(in crate::game) fn tick_building_job(&mut self, index: usize, dt: f64) {
         let Some(job) = self.buildings[index].job.clone() else {
             return;
         };
