@@ -20,7 +20,8 @@ pub(super) fn draw(
         let mirror = dx > dy;
         let sprite = Sprite {
             anchor,
-            size: [2.8, 2.8],
+            // Match the modest boat fitted beside the dock sprite.
+            size: [1.6, 1.6],
             pivot: [0.5, 0.2],
             uv: uv(
                 [if rear { 512.0 } else { 0.0 }, 0.0, 512.0, 512.0],
@@ -39,7 +40,7 @@ pub(super) fn draw(
         if selection.ship.as_deref() == Some(&ship.id) {
             decals.push(Decal {
                 center: anchor,
-                radius: 0.7,
+                radius: 0.4,
                 color: TEAM_BLUE,
                 ring: 3.0,
             });
