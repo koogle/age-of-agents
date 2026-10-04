@@ -1,20 +1,13 @@
+//! Buildings, terrain, research and scenario definitions.
+
 use serde::{Deserialize, Serialize};
 
+use super::{
+    BuildingJob, CellCoordinate, Footprint, ProductKind, ROADMAP_RECIPES, ROADMAP_RESOURCES,
+    ROADMAP_UNITS, RecipeCatalogEntry, ResourceKind, UnitKind,
+};
+
 pub const DEFAULT_SCENARIO_TICK_LIMIT: u64 = 36_000;
-
-/// A continuous point in cell units: `(column + 0.5, row + 0.5)` is a cell center.
-/// Positions are derived for presentation and sight; they are never authoritative.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct Position {
-    pub x: f64,
-    pub y: f64,
-}
-
-impl Position {
-    pub(super) fn distance(self, other: Self) -> f64 {
-        (self.x - other.x).hypot(self.y - other.y)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -41,67 +34,6 @@ impl TerrainBiome {
     /// Whether villagers may stand, walk and build here.
     pub fn is_walkable(self) -> bool {
         !matches!(self, Self::Water | Self::Mountain | Self::River)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct CellCoordinate {
-    pub column: u16,
-    pub row: u16,
-}
-
-impl CellCoordinate {
-    pub const fn new(column: u16, row: u16) -> Self {
-        Self { column, row }
-    }
-
-    pub fn center(self) -> Position {
-        Position {
-            x: f64::from(self.column) + 0.5,
-            y: f64::from(self.row) + 0.5,
-        }
-    }
-
-    /// Chebyshev adjacency: the eight cells around `self`.
-    pub(super) fn touches(self, other: Self) -> bool {
-        self != other
-            && self.column.abs_diff(other.column) <= 1
-            && self.row.abs_diff(other.row) <= 1
-    }
-}
-
-/// An axis-aligned block of cells. Every static thing in the world claims one.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Footprint {
-    pub origin: CellCoordinate,
-    pub columns: u16,
-    pub rows: u16,
-}
-
-impl Footprint {
-    pub fn cells(self) -> impl Iterator<Item = CellCoordinate> {
-        (self.origin.row..self.origin.row + self.rows).flat_map(move |row| {
-            (self.origin.column..self.origin.column + self.columns)
-                .map(move |column| CellCoordinate::new(column, row))
-        })
-    }
-
-    pub fn contains(self, cell: CellCoordinate) -> bool {
-        (self.origin.column..self.origin.column + self.columns).contains(&cell.column)
-            && (self.origin.row..self.origin.row + self.rows).contains(&cell.row)
-    }
-
-    /// A cell from which a villager can work on this footprint: outside it and
-    /// touching it, including diagonally.
-    pub(super) fn is_interaction_cell(self, cell: CellCoordinate) -> bool {
-        !self.contains(cell) && self.cells().any(|inner| inner.touches(cell))
-    }
-
-    pub fn center(self) -> Position {
-        Position {
-            x: f64::from(self.origin.column) + f64::from(self.columns) / 2.0,
-            y: f64::from(self.origin.row) + f64::from(self.rows) / 2.0,
-        }
     }
 }
 
@@ -142,141 +74,6 @@ pub struct SnapshotTerrainCell {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub elevation: Option<f32>,
     pub visibility: CellVisibility,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum UnitAction {
-    Idle,
-    /// Walk to `to`. The destination cell is reserved for this unit until it arrives.
-    Move {
-        to: CellCoordinate,
-    },
-    Gather {
-        resource_id: String,
-        phase: GatherPhase,
-    },
-    /// Walk beside the foundation `building_id` and raise it.
-    Build {
-        building_id: String,
-    },
-    /// Prepare or replenish a cultivated food field.
-    Cultivate {
-        resource_id: String,
-    },
-    /// Carry the load to the complete building `building_id`, unload it
-    /// there, and stand idle.
-    Deposit {
-        building_id: String,
-    },
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum GatherPhase {
-    #[default]
-    ToResource,
-    Gathering,
-    Returning,
-    Depositing,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CarriedResource {
-    pub kind: ResourceKind,
-    pub amount: f64,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Unit {
-    pub id: String,
-    pub kind: UnitKind,
-    /// The cell this unit stands in. It is exclusively claimed by this unit.
-    pub cell: CellCoordinate,
-    /// A step in progress. Its target cell is claimed before the unit leaves
-    /// `cell`, so a unit always owns every cell its body overlaps.
-    pub step: Option<Step>,
-    pub action: UnitAction,
-    pub cargo: Option<CarriedResource>,
-}
-
-impl Unit {
-    pub fn position(&self) -> Position {
-        let from = self.cell.center();
-        match self.step {
-            None => from,
-            Some(step) => {
-                let to = step.to.center();
-                Position {
-                    x: from.x + (to.x - from.x) * step.progress,
-                    y: from.y + (to.y - from.y) * step.progress,
-                }
-            }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct Step {
-    pub to: CellCoordinate,
-    /// Fraction of the step completed, in `[0, 1)`.
-    pub progress: f64,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ResourceNode {
-    pub id: String,
-    pub kind: ResourceKind,
-    pub cell: CellCoordinate,
-    pub amount: f64,
-    pub capacity: f64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub field: Option<FieldState>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FieldState {
-    /// Reserved preparation work; None means harvestable or depleted.
-    pub work: Option<f64>,
-}
-
-impl ResourceNode {
-    pub fn footprint(&self) -> Footprint {
-        Footprint {
-            origin: self.cell,
-            columns: if self.field.is_some() { 3 } else { 1 },
-            rows: if self.field.is_some() { 3 } else { 1 },
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ResourceKind {
-    Wood,
-    Food,
-    Stone,
-    Gold,
-    Iron,
-    Coal,
-    Clay,
-    Fiber,
-    Timber,
-    Steel,
-    Bricks,
-    Cloth,
-    Rations,
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum UnitKind {
-    #[default]
-    Villager,
-    Guard,
-    Archer,
-    Healer,
-    SiegeCart,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -476,34 +273,6 @@ impl BuildingKind {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ProductKind {
-    Villager,
-    Guard,
-    Archer,
-    Healer,
-    SiegeCart,
-    Timber,
-    Steel,
-    Bricks,
-    Cloth,
-    Rations,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum BuildingJob {
-    Produce {
-        product: ProductKind,
-        elapsed_seconds: f64,
-    },
-    Research {
-        technology: TechnologyKind,
-        elapsed_seconds: f64,
-    },
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TechnologyKind {
@@ -537,92 +306,6 @@ impl TechnologyKind {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-pub struct Stockpile {
-    pub wood: f64,
-    pub food: f64,
-    pub stone: f64,
-    pub gold: f64,
-    pub iron: f64,
-    pub coal: f64,
-    pub clay: f64,
-    pub fiber: f64,
-    pub timber: f64,
-    pub steel: f64,
-    pub bricks: f64,
-    pub cloth: f64,
-    pub rations: f64,
-}
-
-impl Stockpile {
-    pub(super) fn entries(&self) -> [(&'static str, f64); 13] {
-        [
-            ("wood", self.wood),
-            ("food", self.food),
-            ("stone", self.stone),
-            ("gold", self.gold),
-            ("iron", self.iron),
-            ("coal", self.coal),
-            ("clay", self.clay),
-            ("fiber", self.fiber),
-            ("timber", self.timber),
-            ("steel", self.steel),
-            ("bricks", self.bricks),
-            ("cloth", self.cloth),
-            ("rations", self.rations),
-        ]
-    }
-
-    pub fn amount(&self, kind: ResourceKind) -> f64 {
-        match kind {
-            ResourceKind::Wood => self.wood,
-            ResourceKind::Food => self.food,
-            ResourceKind::Stone => self.stone,
-            ResourceKind::Gold => self.gold,
-            ResourceKind::Iron => self.iron,
-            ResourceKind::Coal => self.coal,
-            ResourceKind::Clay => self.clay,
-            ResourceKind::Fiber => self.fiber,
-            ResourceKind::Timber => self.timber,
-            ResourceKind::Steel => self.steel,
-            ResourceKind::Bricks => self.bricks,
-            ResourceKind::Cloth => self.cloth,
-            ResourceKind::Rations => self.rations,
-        }
-    }
-
-    /// Whether every cost is covered.
-    pub fn affords(&self, cost: &[(ResourceKind, f64)]) -> bool {
-        cost.iter()
-            .all(|(kind, amount)| self.amount(*kind) >= *amount)
-    }
-
-    pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
-        match kind {
-            ResourceKind::Wood => self.wood += amount,
-            ResourceKind::Food => self.food += amount,
-            ResourceKind::Stone => self.stone += amount,
-            ResourceKind::Gold => self.gold += amount,
-            ResourceKind::Iron => self.iron += amount,
-            ResourceKind::Coal => self.coal += amount,
-            ResourceKind::Clay => self.clay += amount,
-            ResourceKind::Fiber => self.fiber += amount,
-            ResourceKind::Timber => self.timber += amount,
-            ResourceKind::Steel => self.steel += amount,
-            ResourceKind::Bricks => self.bricks += amount,
-            ResourceKind::Cloth => self.cloth += amount,
-            ResourceKind::Rations => self.rations += amount,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct RecipeCatalogEntry {
-    pub building: BuildingKind,
-    pub inputs: &'static [ResourceKind],
-    pub output: ResourceKind,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct DomainCatalog {
     pub resources: &'static [ResourceKind],
@@ -644,22 +327,6 @@ impl DomainCatalog {
     }
 }
 
-pub const ROADMAP_RESOURCES: [ResourceKind; 13] = [
-    ResourceKind::Wood,
-    ResourceKind::Food,
-    ResourceKind::Stone,
-    ResourceKind::Gold,
-    ResourceKind::Iron,
-    ResourceKind::Coal,
-    ResourceKind::Clay,
-    ResourceKind::Fiber,
-    ResourceKind::Timber,
-    ResourceKind::Steel,
-    ResourceKind::Bricks,
-    ResourceKind::Cloth,
-    ResourceKind::Rations,
-];
-
 pub const ROADMAP_BUILDINGS: [BuildingKind; 17] = [
     BuildingKind::TownCenter,
     BuildingKind::MiningCamp,
@@ -678,42 +345,6 @@ pub const ROADMAP_BUILDINGS: [BuildingKind; 17] = [
     BuildingKind::House,
     BuildingKind::Granary,
     BuildingKind::Dock,
-];
-
-pub const ROADMAP_UNITS: [UnitKind; 5] = [
-    UnitKind::Villager,
-    UnitKind::Guard,
-    UnitKind::Archer,
-    UnitKind::Healer,
-    UnitKind::SiegeCart,
-];
-
-pub const ROADMAP_RECIPES: [RecipeCatalogEntry; 5] = [
-    RecipeCatalogEntry {
-        building: BuildingKind::LumberMill,
-        inputs: &[ResourceKind::Wood],
-        output: ResourceKind::Timber,
-    },
-    RecipeCatalogEntry {
-        building: BuildingKind::Smelter,
-        inputs: &[ResourceKind::Iron, ResourceKind::Coal],
-        output: ResourceKind::Steel,
-    },
-    RecipeCatalogEntry {
-        building: BuildingKind::Kiln,
-        inputs: &[ResourceKind::Clay, ResourceKind::Wood],
-        output: ResourceKind::Bricks,
-    },
-    RecipeCatalogEntry {
-        building: BuildingKind::Weaver,
-        inputs: &[ResourceKind::Fiber],
-        output: ResourceKind::Cloth,
-    },
-    RecipeCatalogEntry {
-        building: BuildingKind::Kitchen,
-        inputs: &[ResourceKind::Food],
-        output: ResourceKind::Rations,
-    },
 ];
 
 pub const ROADMAP_TECHNOLOGIES: [TechnologyKind; 5] = [

@@ -1,4 +1,4 @@
-use super::movement::interaction_cells;
+use super::spatial::interaction_cells;
 use super::tests::{cell, run};
 use super::*;
 

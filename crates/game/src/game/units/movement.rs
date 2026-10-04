@@ -4,19 +4,22 @@
 
 use std::collections::BTreeSet;
 
-use super::occupancy::{Occupancy, in_bounds};
-use super::*;
+use crate::game::spatial::{
+    in_bounds, interaction_cells,
+    occupancy::{self, Occupancy},
+};
+use crate::game::*;
 use crate::navigation::{PathTree, offset};
 
 #[derive(Debug, Clone, Copy)]
-pub(super) enum Goal {
+pub(in crate::game) enum Goal {
     Cell(CellCoordinate),
     /// Any free cell touching the footprint, including diagonally.
     Beside(Footprint),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub(super) enum Travel {
+pub(in crate::game) enum Travel {
     Arrived {
         remaining: f64,
     },
@@ -27,7 +30,7 @@ pub(super) enum Travel {
 
 impl GameWorld {
     /// Walks `unit` toward `goal` for up to `dt` seconds.
-    pub(super) fn travel(&mut self, unit: usize, goal: Goal, mut dt: f64) -> Travel {
+    pub(in crate::game) fn travel(&mut self, unit: usize, goal: Goal, mut dt: f64) -> Travel {
         loop {
             if let Some(step) = self.units[unit].step {
                 let length = self.units[unit].cell.center().distance(step.to.center());
@@ -236,61 +239,20 @@ impl GameWorld {
     }
 
     /// Path tree over cells that are not statically blocked.
-    pub(super) fn static_paths(&self, unit: usize, occupancy: &Occupancy) -> PathTree {
+    pub(in crate::game) fn static_paths(&self, unit: usize, occupancy: &Occupancy) -> PathTree {
         PathTree::search(WORLD_COLUMNS, WORLD_ROWS, self.units[unit].cell, |cell| {
             !occupancy.is_static(cell)
         })
     }
 
-    /// A foundation must not split any unit's reachable ground. Foundations
-    /// already block the full completed footprint, so check before placing one.
-    /// Ignore temporary unit claims and reservations, just like static routing.
-    pub(super) fn placement_preserves_routes(&self, footprint: Footprint) -> bool {
-        let occupancy = self.occupancy();
-        let mut checked: Vec<PathTree> = Vec::new();
-        self.units.iter().all(|unit| {
-            let start = unit.step.map_or(unit.cell, |step| step.to);
-            // Units sharing connected ground need only one pair of searches.
-            if checked.iter().any(|paths| paths.cost(start).is_some()) {
-                return true;
-            }
-            let before = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
-                !occupancy.is_static(cell)
-            });
-            let after = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
-                !footprint.contains(cell) && !occupancy.is_static(cell)
-            });
-            // Even if every lost cell belongs to the new building, a unit
-            // that could walk before must still have somewhere to step.
-            let body = Footprint {
-                origin: start,
-                columns: 1,
-                rows: 1,
-            };
-            if before.nearest(interaction_cells(body)).is_some()
-                && after.nearest(interaction_cells(body)).is_none()
-            {
-                return false;
-            }
-            let preserved = self.terrain.iter().all(|terrain| {
-                let cell = terrain.coordinate();
-                footprint.contains(cell)
-                    || before.cost(cell).is_none()
-                    || after.cost(cell).is_some()
-            });
-            checked.push(after);
-            preserved
-        })
-    }
-
     /// Whether `unit` could stand beside `footprint` once other units move aside.
-    pub(super) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
+    pub(in crate::game) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
         let occupancy = self.occupancy();
         let goals = interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell));
         self.static_paths(unit, &occupancy).nearest(goals).is_some()
     }
 
-    pub(super) fn validate_move_destination(
+    pub(in crate::game) fn validate_move_destination(
         &self,
         unit: usize,
         to: CellCoordinate,
@@ -311,7 +273,7 @@ impl GameWorld {
     /// Distinct, reachable, unreserved stopping cells for a group, nearest the
     /// target first. Members may take each other's current cells because every
     /// member is about to move.
-    pub(super) fn group_move_assignments(
+    pub(in crate::game) fn group_move_assignments(
         &self,
         members: &[usize],
         target: CellCoordinate,
@@ -372,7 +334,7 @@ impl GameWorld {
 
     /// An idle unit that came to rest on someone else's reserved destination
     /// steps to the nearest cell it may reserve, so every reservation stays reachable.
-    pub(super) fn make_way(&mut self, unit: usize) {
+    pub(in crate::game) fn make_way(&mut self, unit: usize) {
         let occupancy = self.occupancy();
         let here = self.units[unit].cell;
         if self.units[unit].step.is_some() || !occupancy.reserved_by_other(here, Some(unit)) {
@@ -392,7 +354,7 @@ impl GameWorld {
         }
     }
 
-    pub(super) fn tick_move(&mut self, unit: usize, to: CellCoordinate, dt: f64) {
+    pub(in crate::game) fn tick_move(&mut self, unit: usize, to: CellCoordinate, dt: f64) {
         // An unreachable destination (walled off after the order) is abandoned
         // rather than leaving the unit permanently busy.
         if self.travel(unit, Goal::Cell(to), dt) != Travel::EnRoute {
@@ -400,14 +362,14 @@ impl GameWorld {
         }
     }
 
-    pub(super) fn is_beside(&self, unit: usize, footprint: Footprint) -> bool {
+    pub(in crate::game) fn is_beside(&self, unit: usize, footprint: Footprint) -> bool {
         self.units[unit].step.is_none() && footprint.is_interaction_cell(self.units[unit].cell)
     }
 
     /// The complete building that takes the unit's cargo (a town center takes
     /// anything, a granary food and fiber) with the cheapest available route.
     /// Prefer routes clear of other villagers; wait only when all sites are busy.
-    pub(super) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
+    pub(in crate::game) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
         let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
         let paths = self.static_paths(unit, &occupancy);
@@ -448,7 +410,7 @@ impl GameWorld {
     }
 
     /// A free cell beside the building for a newly trained unit, if any.
-    pub(super) fn spawn_cell(&self, building: usize) -> Option<CellCoordinate> {
+    pub(in crate::game) fn spawn_cell(&self, building: usize) -> Option<CellCoordinate> {
         let occupancy = self.occupancy();
         let mut cells: Vec<_> = interaction_cells(self.buildings[building].footprint())
             .filter(|cell| occupancy.is_free_for(*cell, None))
@@ -457,34 +419,12 @@ impl GameWorld {
         cells.sort_by_key(|cell| (std::cmp::Reverse(cell.row), std::cmp::Reverse(cell.column)));
         cells.first().copied()
     }
-
-    /// Whether a new footprint fits: in bounds and over cells nobody claims or reserves.
-    pub(super) fn footprint_is_free(&self, footprint: Footprint) -> bool {
-        let occupancy = self.occupancy();
-        footprint
-            .cells()
-            .all(|cell| in_bounds(cell) && occupancy.is_free_for(cell, None))
-    }
 }
 
 enum NextStep {
     Step(CellCoordinate),
     Wait,
     Unreachable,
-}
-
-/// The ring of in-bounds cells touching `footprint`, in cell order.
-pub(super) fn interaction_cells(footprint: Footprint) -> impl Iterator<Item = CellCoordinate> {
-    let origin = footprint.origin;
-    let columns = i32::from(footprint.columns);
-    let rows = i32::from(footprint.rows);
-    (-1..=rows).flat_map(move |dy| {
-        (-1..=columns).filter_map(move |dx| {
-            let ring = dx == -1 || dy == -1 || dx == columns || dy == rows;
-            ring.then(|| offset(origin, dx, dy, WORLD_COLUMNS, WORLD_ROWS))
-                .flatten()
-        })
-    })
 }
 
 /// A diagonal step must not brush past an occupied corner.

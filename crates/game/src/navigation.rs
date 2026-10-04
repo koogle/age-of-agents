@@ -4,7 +4,7 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
-use crate::game::CellCoordinate;
+use crate::spatial::CellCoordinate;
 
 /// Orthogonal and diagonal step costs, an integer approximation of 1 : sqrt(2).
 const ORTHOGONAL_COST: u32 = 2;

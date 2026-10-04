@@ -1,6 +1,6 @@
 //! Player-built food plots. Preparation reserves materials once; only labour
 //! creates a harvest. Exhausted plots retain their footprint until replenished.
-use super::*;
+use crate::game::*;
 
 pub const FIELD_COST: &[(ResourceKind, f64)] =
     &[(ResourceKind::Wood, 10.0), (ResourceKind::Stone, 5.0)];
@@ -38,7 +38,7 @@ impl GameWorld {
         }
     }
 
-    pub(super) fn plant_field(
+    pub(in crate::game) fn plant_field(
         &mut self,
         unit_id: &str,
         origin: CellCoordinate,
@@ -49,10 +49,7 @@ impl GameWorld {
             columns: 3,
             rows: 3,
         };
-        if origin.column > WORLD_COLUMNS - footprint.columns
-            || origin.row > WORLD_ROWS - footprint.rows
-            || !self.footprint_is_free(footprint)
-        {
+        if !self.footprint_is_free(footprint) {
             return Err(CommandError::InvalidBuildSite);
         }
         self.afford_field()?;
@@ -77,7 +74,7 @@ impl GameWorld {
         Ok(())
     }
 
-    pub(super) fn cultivate(
+    pub(in crate::game) fn cultivate(
         &mut self,
         unit_id: &str,
         resource_id: &str,
@@ -106,7 +103,7 @@ impl GameWorld {
         Ok(())
     }
 
-    pub(super) fn tick_cultivate(&mut self, unit: usize, resource_id: &str, dt: f64) {
+    pub(in crate::game) fn tick_cultivate(&mut self, unit: usize, resource_id: &str, dt: f64) {
         let Some(index) = self.resources.iter().position(|r| {
             r.id == resource_id && r.field.as_ref().is_some_and(|f| f.work.is_some())
         }) else {

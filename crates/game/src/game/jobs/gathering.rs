@@ -1,12 +1,11 @@
-use super::movement::{Goal, Travel};
-use super::*;
+use crate::game::*;
 
 /// How far (in cells, from the exhausted node) a gatherer looks for the next
 /// node of the same kind before going idle.
 pub const NEXT_RESOURCE_RADIUS: u32 = 10;
 
 impl GameWorld {
-    pub(super) fn tick_gather(
+    pub(in crate::game) fn tick_gather(
         &mut self,
         unit_index: usize,
         resource_id: String,
@@ -207,7 +206,7 @@ impl GameWorld {
     }
 
     /// Walks a carrier to the building it was sent to and unloads there.
-    pub(super) fn tick_deposit(&mut self, unit_index: usize, building_id: &str, dt: f64) {
+    pub(in crate::game) fn tick_deposit(&mut self, unit_index: usize, building_id: &str, dt: f64) {
         let site = self
             .buildings
             .iter()
@@ -236,7 +235,7 @@ impl GameWorld {
     /// A builder carrying goods takes them to a drop site before building.
     /// Returns whether the unit is still on that errand. With no reachable
     /// drop site the new assignment waits with its cargo intact.
-    pub(super) fn drop_off_before_building(&mut self, unit_index: usize, dt: f64) -> bool {
+    pub(in crate::game) fn drop_off_before_building(&mut self, unit_index: usize, dt: f64) -> bool {
         if self.units[unit_index].cargo.is_none() {
             return false;
         }

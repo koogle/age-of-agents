@@ -3,38 +3,40 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 mod domain;
-mod economy;
 #[cfg(test)]
 mod economy_tests;
-mod fields;
 #[cfg(test)]
 mod fields_tests;
 #[cfg(test)]
 mod fixture;
-mod gathering;
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
 mod group_move_tests;
-mod movement;
-mod occupancy;
+pub mod jobs;
 mod progression;
 #[cfg(test)]
 mod progression_tests;
 #[cfg(test)]
 mod queue_tests;
+pub mod resources;
 #[cfg(test)]
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
+pub mod spatial;
 mod terrain_codec;
+pub mod units;
+mod validation;
 mod worldgen;
 
 pub use domain::*;
-pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
-pub use gathering::NEXT_RESOURCE_RADIUS;
-use movement::{Goal, Travel};
+pub use jobs::*;
 pub use progression::*;
+pub use resources::*;
+pub use spatial::{CellCoordinate, Footprint, Position};
+use units::movement::{Goal, Travel};
+pub use units::*;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -627,27 +629,6 @@ impl GameWorld {
                 .count()
     }
 
-    /// Whether any cell beside the footprint (sharing an edge) is water.
-    fn touches_sea(&self, footprint: Footprint) -> bool {
-        let Footprint {
-            origin,
-            columns,
-            rows,
-        } = footprint;
-        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
-        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
-        let water = |column: i32, row: i32| {
-            column >= 0
-                && row >= 0
-                && column < i32::from(WORLD_COLUMNS)
-                && row < i32::from(WORLD_ROWS)
-                && self.terrain[row as usize * usize::from(WORLD_COLUMNS) + column as usize].biome
-                    == TerrainBiome::Water
-        };
-        (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
-            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r))
-    }
-
     fn next_building_name(&self) -> String {
         format!("building-{}", self.next_building_id)
     }
@@ -848,45 +829,6 @@ impl GameWorld {
             GATHERING_TECH_MULTIPLIER
         } else {
             1.0
-        }
-    }
-
-    fn tick_build(&mut self, unit: usize, building_id: &str, dt: f64) {
-        let Some(building) = self
-            .buildings
-            .iter()
-            .position(|building| building.id == building_id && !building.is_complete())
-        else {
-            // Another builder finished it.
-            self.units[unit].action = UnitAction::Idle;
-            return;
-        };
-        if self.drop_off_before_building(unit, dt) {
-            return;
-        }
-        let remaining =
-            match self.travel(unit, Goal::Beside(self.buildings[building].footprint()), dt) {
-                Travel::EnRoute => return,
-                Travel::Unreachable => {
-                    // The foundation stays; any villager can resume it with Construct.
-                    self.units[unit].action = UnitAction::Idle;
-                    return;
-                }
-                Travel::Arrived { remaining } => remaining,
-            };
-        let work = self.buildings[building].construction.unwrap_or(0.0) + remaining;
-        if work + f64::EPSILON < self.buildings[building].kind.build_seconds() {
-            self.buildings[building].construction = Some(work);
-        } else {
-            // Completion releases every builder at once, so no unit is ever
-            // left working on a building that is no longer a foundation.
-            self.buildings[building].construction = None;
-            for other in &mut self.units {
-                if matches!(&other.action, UnitAction::Build { building_id: id } if id == building_id)
-                {
-                    other.action = UnitAction::Idle;
-                }
-            }
         }
     }
 }

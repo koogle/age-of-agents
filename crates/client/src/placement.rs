@@ -1,6 +1,6 @@
 //! Building placement on the same rectangular cell grid used by the simulation.
 use crate::{App, terrain};
-use aoa_game::{CellCoordinate, UnitAction};
+use aoa_game::{CellCoordinate, Footprint};
 use glam::Vec2;
 
 impl App {
@@ -30,11 +30,12 @@ impl App {
                 .iter()
                 .filter(|r| r.field.is_some())
                 .map(|r| {
+                    let footprint = r.footprint();
                     [
-                        r.cell.column as f32 * terrain::CELL,
-                        r.cell.row as f32 * terrain::CELL,
-                        3.0 * terrain::CELL,
-                        3.0 * terrain::CELL,
+                        footprint.origin.column as f32 * terrain::CELL,
+                        footprint.origin.row as f32 * terrain::CELL,
+                        footprint.columns as f32 * terrain::CELL,
+                        footprint.rows as f32 * terrain::CELL,
                     ]
                 }),
         );
@@ -63,59 +64,24 @@ impl App {
         let (columns, rows) = kind.size();
         let column = (point.x / terrain::CELL - columns as f32 / 2.0).round();
         let row = (point.z / terrain::CELL - rows as f32 / 2.0).round();
-        if column < 0.0
-            || row < 0.0
-            || column as u16 + columns > snapshot.columns
-            || row as u16 + rows > snapshot.rows
-        {
+        if column < 0.0 || row < 0.0 {
             return None;
         }
         let origin = CellCoordinate {
             column: column as u16,
             row: row as u16,
         };
-        let covers = |c: CellCoordinate| {
-            (origin.column..origin.column + columns).contains(&c.column)
-                && (origin.row..origin.row + rows).contains(&c.row)
+        let footprint = Footprint {
+            origin,
+            columns,
+            rows,
         };
-        let blocked =
-            snapshot.resources.iter().any(|r| {
-                (r.amount > 0.0 || r.field.is_some()) && r.footprint().cells().any(covers)
-            }) || snapshot.units.iter().any(|u| {
-                covers(u.unit.cell)
-                    || u.unit.step.is_some_and(|step| covers(step.to))
-                    || matches!(u.unit.action, UnitAction::Move { to } if covers(to))
-            }) || snapshot.buildings.iter().any(|b| {
-                let o = b.building.origin;
-                o.column < origin.column + columns
-                    && origin.column < o.column + b.columns
-                    && o.row < origin.row + rows
-                    && origin.row < o.row + b.rows
-            }) || (0..rows).any(|dy| {
-                (0..columns).any(|dx| {
-                    let cell = &snapshot.terrain[(origin.row + dy) as usize
-                        * snapshot.columns as usize
-                        + (origin.column + dx) as usize];
-                    cell.visibility == aoa_game::CellVisibility::Unseen
-                        || cell.biome.is_some_and(|biome| !biome.is_walkable())
-                })
-            });
-        let water = |column: i32, row: i32| {
-            column >= 0
-                && row >= 0
-                && column < i32::from(snapshot.columns)
-                && row < i32::from(snapshot.rows)
-                && snapshot.terrain[row as usize * snapshot.columns as usize + column as usize]
-                    .biome
-                    == Some(aoa_game::TerrainBiome::Water)
-        };
-        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
-        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
-        let coast = (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
-            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r));
+        if !footprint.fits_in(snapshot.columns, snapshot.rows) {
+            return None;
+        }
         Some((
             origin,
-            !blocked
+            snapshot.footprint_is_free(footprint)
                 && snapshot
                     .stockpile
                     .affords(if self.build == crate::hud::BuildUi::PlacingField {
@@ -123,7 +89,7 @@ impl App {
                     } else {
                         kind.cost()
                     })
-                && (coast || !kind.needs_coast())
+                && (!kind.needs_coast() || snapshot.touches_sea(footprint))
                 && (self.build != crate::hud::BuildUi::PlacingField
                     || snapshot.buildings.iter().any(|b| {
                         b.building.kind == aoa_game::BuildingKind::Farm && b.building.is_complete()

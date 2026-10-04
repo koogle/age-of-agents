@@ -41,6 +41,18 @@ See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [dec
 
 Hosted games use the server's authoritative world. Native games and browser `?local` mode run the same simulation in-process. Game rules live in `crates/game`; the client handles presentation. `GameWorld::validate` checks occupancy and state invariants.
 
+Within `crates/game/src`, the core modules are:
+
+| Module | Responsibility |
+| --- | --- |
+| `game/spatial` | Coordinates, footprints, occupancy, reservations, and placement geometry; the client uses snapshot queries for previews. |
+| `game/units` | NPC/unit types, position, and movement; reusable grid search lives in `navigation.rs`. |
+| `game/jobs` | Existing activities over time: gathering, construction, field work, production, and research. |
+| `game/resources.rs` | Resource kinds, nodes, cargo, stockpiles, and resource-chain catalog. Production quantities and timing live with jobs. |
+| `game.rs` | Authoritative state, commands, tick coordination, and snapshots. |
+
+Buildings, terrain, research definitions, and scenario scaffolding remain in `game/domain.rs`; seeded generation is in `game/worldgen.rs`, and whole-world validation is in `game/validation.rs`. Public types remain available at the crate root as well as through their extracted modules. Movement keeps the existing deterministic tick order; placement previews use known terrain, while commands validate against the full world.
+
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 
 ## Run locally

@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use super::movement::interaction_cells;
+use super::spatial::interaction_cells;
 use super::*;
 
 pub(super) fn cell(column: u16, row: u16) -> CellCoordinate {
