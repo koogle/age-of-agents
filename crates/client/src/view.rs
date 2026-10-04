@@ -284,9 +284,11 @@ impl WorldView {
 
     /// Takes the next snapshot; returns whether it starts a new world.
     pub fn sync(&mut self, next: WorldSnapshot) -> bool {
-        // A new island restarts the clock but reuses unit ids: drop the old
-        // world's samples and heights, or villagers replay stale positions.
-        let restarted = self.snapshot.is_some() && (next.tick as f64) < self.latest_tick;
+        // Voyages change terrain without resetting time. Drop samples and
+        // heights on an island change or a full world reset.
+        let restarted = self.snapshot.as_ref().is_some_and(|old| {
+            old.island_id != next.island_id || (next.tick as f64) < self.latest_tick
+        });
         if restarted {
             *self = Self::new();
         }

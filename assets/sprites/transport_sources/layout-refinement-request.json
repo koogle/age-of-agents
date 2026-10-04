@@ -1,0 +1,8 @@
+{
+  "tool": "OpenAI image_gen",
+  "reference": "layout-draft.png",
+  "output": "layout-refinement.png",
+  "output_id": "exec-b44fefab-3f7b-4e16-983f-12c3fd096f4c",
+  "draft_output_id": "exec-63e67e0c-689f-4088-b395-b707206bdc77",
+  "prompt": "Make a precise consistency correction to this two-view sprite sheet, preserving BOTH hulls, exactly THREE bench seats in each boat, and exactly ONE sack in the stern bay in each boat. Preserve the two-view facing directions, style, cream sail, framing, transparency. The left boat has the sack at its far upper-right flat stern; right boat has its sack at near lower-left flat stern. KEEP THIS CORRECT SACK LOCATION. Only fix the MAST placement: both boats must have the mast on the longitudinal centerline mounted directly through the CENTER of the MIDDLE bench, not in the foreground floor bay. In the LEFT panel that bench is the large diagonal plank midway between the foremost bottom-left bench and the aft upper-right bench; its center is about 32% of the full sheet width and 68% height. In the RIGHT panel the middle bench is the large diagonal plank midway between the aft lower-left bench and fore upper-right bench; center around 80% of full sheet width and 66% height. Move each mast and its attached sail together to align its base with that middle seat center; keep mast upright and sail/yard/ropes connected. The mast base should visibly join the middle bench in each view and not emerge from the empty floor between benches. Don't add or remove any benches. Don't duplicate sacks. Keep entire boats and sails uncropped with transparent margins and equal keel baseline. Transparent PNG output."
+}

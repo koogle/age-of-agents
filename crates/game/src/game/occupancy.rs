@@ -150,6 +150,11 @@ impl GameWorld {
     /// Checks every structural invariant of the world. Persisted worlds that
     /// fail this are corrupt and must not be loaded.
     pub fn validate(&self) -> Result<(), String> {
+        self.validate_islands()?;
+        self.validate_local()
+    }
+
+    pub(super) fn validate_local(&self) -> Result<(), String> {
         let expected_terrain = (0..WORLD_ROWS)
             .flat_map(|row| (0..WORLD_COLUMNS).map(move |column| CellCoordinate::new(column, row)));
         if !self

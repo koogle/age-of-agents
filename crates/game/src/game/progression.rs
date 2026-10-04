@@ -36,6 +36,11 @@ impl GameWorld {
         self.resources
             .iter()
             .any(|r| r.kind == kind && self.explored_cells.contains(&r.cell))
+            || self.islands.iter().any(|i| {
+                i.resources
+                    .iter()
+                    .any(|r| r.kind == kind && i.explored_cells.contains(&r.cell))
+            })
     }
 
     pub fn building_available(&self, kind: BuildingKind) -> bool {
