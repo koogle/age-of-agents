@@ -1,8 +1,12 @@
 # Current handoff: persistent islands (2026-10-04)
 
+## Integration for authorized merge of PR #73
+
+User explicitly requested merging PR #73. Integrated master `3003c75`, including merged field-preparation PR #74: preparing a field now proceeds into harvesting, with twelve HD hoeing poses. Transport retains sprite slot 11; field preparation uses slot 12. Source changes merge cleanly; rebuilt generated browser assets instead of choosing either conflicting bundle. Combined verification passed: 181 workspace tests (13 server, 49 client, 119 domain), formatting, both strict lint targets, rebuilt WebGL bundle, all 282 HD frames, and field/transport asset checks. Ready for the explicitly authorized merge. See `docs/FIELD_PREPARATION_REVIEW.md` for field-specific evidence and limitations.
+
 ## Implemented on `feat/island-discovery`
 
-- Based on merged transport PR #71 (`0864057`). Fresh island PR: https://github.com/koogle/age-of-agents/pull/73 (open, unmerged); do not merge without fresh authorization.
+- Based on merged transport PR #71 (`0864057`). Fresh island PR: https://github.com/koogle/age-of-agents/pull/73 (merge explicitly authorized; integration and checks underway).
 - First completed transport generates island 2 exactly once. Existing ships in old saves can discover it on departure. Explicit previous/next voyage controls carry a stopped ship, its passengers and goods; frontier voyages generate further deterministic islands without a fixed cap.
 - Discovery-order IDs and root-seed mixing; persistent terrain, fog, resources, buildings, units, ships, orders and island-local inventories. Away islands pause; research, discovered unlocks and entity counters are global. Cross-island duplicate research is rejected.
 - Complementary, biome-appropriate reachable deposits: island 2 iron/coal, island 3 clay, island 4 fiber; repeat thereafter. Initial arrival is beside open ocean and a shore connected to resources.

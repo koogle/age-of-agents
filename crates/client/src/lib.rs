@@ -161,6 +161,7 @@ impl App {
                 "units",
             ]
             .map(|name| assets.bytes(&format!("sprites/{name}.json"))),
+            assets.bytes("sprites/villager_field_preparation.json"),
         );
         let atlas = hud::build_atlas(&assets);
         Self {
@@ -838,6 +839,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/buildings_civic.png"),
         assets.image("sprites/units.png"),
         assets.image("sprites/transport.png"),
+        assets.image("sprites/villager_field_preparation.png"),
     ]
 }
 

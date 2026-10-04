@@ -15,6 +15,7 @@ fn sheets() -> Sheets {
             include_bytes!("../../../../assets/sprites/buildings_civic.json"),
             include_bytes!("../../../../assets/sprites/units.json"),
         ],
+        include_bytes!("../../../../assets/sprites/villager_field_preparation.json"),
     )
 }
 
@@ -148,13 +149,32 @@ fn building_and_field_preparation_animate_after_unloading() {
             resource_id: snapshot.resources[0].id.clone(),
         },
     ] {
+        let preparing = matches!(action, UnitAction::Cultivate { .. });
         snapshot.units[0].unit.action = action;
         snapshot.units[0].unit.cargo = None;
         let mut view = WorldView::new();
         view.sync(snapshot.clone());
-        let (_, first) = unit_sprite(&mut view, &sheets, 0.0);
-        let (_, second) = unit_sprite(&mut view, &sheets, 1.1 / sheets.villager.fps["build"]);
-        assert_pose(&sheets, first, "build", 0);
-        assert_pose(&sheets, second, "build", 1);
+        let (sheet, first) = unit_sprite(&mut view, &sheets, 0.0);
+        let fps = if preparing {
+            4.0
+        } else {
+            sheets.villager.fps["build"]
+        };
+        let (_, second) = unit_sprite(&mut view, &sheets, 1.1 / fps);
+        if preparing {
+            assert_eq!(sheet, SHEET_FIELD_PREPARATION);
+            let variant = view.units[&snapshot.units[0].unit.id].variant;
+            let frames = &sheets.field_preparation.people[PEOPLE[variant]]["front"];
+            for (sprite, frame) in [(first, 0), (second, 1)] {
+                assert!(
+                    [false, true].into_iter().any(|mirror| sprite.uv
+                        == uv(frames[frame], sheets.field_preparation.size, mirror))
+                );
+            }
+        } else {
+            assert_pose(&sheets, first, "build", 0);
+            assert_pose(&sheets, second, "build", 1);
+        }
+        assert_ne!(first.uv, second.uv);
     }
 }
