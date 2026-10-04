@@ -1,68 +1,26 @@
-# Open Work
+# Current handoff: persistent islands (2026-10-04)
 
-## Transport ship (2026-10-03)
+## Implemented on `feat/island-discovery`
 
-Implemented local dock transport: 60 wood + 20 timber, 20-second queued production, four reserved passenger seats and a 200-good hold. Typed atomic sail/stop/board/land/transfer commands preserve passenger IDs, carried loads, housing and save compatibility. Native/WebGL controls and FAL-derived transparent front/rear sprites are integrated. Persistent destination islands (B3), local inventories/trade (B4), and cumulative globe discovery remain future work. First-completion destination generation is recorded as the future contract, not claimed as implemented.
+- Based on merged transport PR #71 (`0864057`). Fresh island PR pending creation; do not merge without fresh authorization.
+- First completed transport generates island 2 exactly once. Existing ships in old saves can discover it on departure. Explicit previous/next voyage controls carry a stopped ship, its passengers and goods; frontier voyages generate further deterministic islands without a fixed cap.
+- Discovery-order IDs and root-seed mixing; persistent terrain, fog, resources, buildings, units, ships, orders and island-local inventories. Away islands pause; research, discovered unlocks and entity counters are global. Cross-island duplicate research is rejected.
+- Complementary, biome-appropriate reachable deposits: island 2 iron/coal, island 3 clay, island 4 fiber; repeat thereafter. Initial arrival is beside open ocean and a shore connected to resources.
+- Shore unloading supports founding from transported wood (town center 20, dock 30); loading still requires a completed dock. Voyages are atomic and reject moving ships, unreachable ocean, invalid destinations and blocked arrival.
+- Shared Rust mouse/touch controls show current island/count, previous/next voyage buttons and discovery details. Camera and terrain interpolation reset on island changes. Existing sprites reused; no new asset generation needed.
 
-Verified: all 171 workspace tests (13 server, 47 client, 111 game), strict native/WASM Clippy, formatting/whitespace, rebuilt release WASM, 270-frame resolution audit, transport transparency/registration, and UI icon checks. Rebased onto master a27a564, preserving the legacy-frontend removal; repeated server tests/build and strict native lint pass. Real Chromium desktop clicks and DPR-2 phone taps cover dock production, loading, boarding, sailing, return-to-dock, safe landing and unloading; desktop X stops the ship. Both report zero page errors. Reviewed close-zoom desktop and phone screenshots. Evidence and drivers: `/workspace/scratch/transport/`. Review: [Local transport](docs/TRANSPORT_REVIEW.md).
+## Verification / release
 
-Release: direct Modal deployment was attempted and rejected with “Token missing. Could not authenticate client.” This environment has no Modal token. PR review/merge and the existing merge-triggered deployment workflow remain pending; do not describe this feature as live.
+- Seven focused domain tests cover deterministic complementary generation/biomes, repeated discoveries, persistent round trips/reload, separate inventories, four settlers founding a town center, cross-island research, old saves, corrupt archives, atomic rejection, and occupied ocean corners.
+- All 178 workspace tests passed (13 server, 47 client, 118 domain). Strict native/WASM clippy, formatting, 270-frame asset audit, transport checks and icon normalization passed.
+- Desktop 1280×800 and touch 390×844/DPR2 actual browser flow: board → discover/voyage → land → unload → return → revisit → discover island 3. No page errors. Both flows passed again after final generation/research refinements. SQLite contains all three discovered maps and both prior inventories.
+- QA uses isolated databases under `/workspace/scratch/islands`; screenshots and flow logs are there. Rebuilt tracked WASM bundle.
+- Thermonuclear review: authority stays in Rust domain, commands use existing atomic clone boundary, archives are explicit local data (no recursive worlds), all source files remain below 1,000 lines. Persistence validates archived maps and global identities/research.
+- Modal deployment attempted; rejected because this environment has no Modal token. No production deployment of this branch occurred. Transport #71's merge/deploy workflow completed successfully; this feature awaits its own PR merge/deployment.
 
-## Retire the unused frontend (2026-10-03)
+## Remaining roadmap
 
-User requested removal of unused legacy code, then PR creation and merge. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend/vendor libraries, unused GLBs/model builders, processed `assets/game/` sprites, obsolete asset pipelines/checks, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, and docs now use the Rust client only.
-
-Rebased onto master 54bf023, preserving HD sprites, custom fields, building task queues, progression, favicon and drop-off feedback. The diff against that base contains no changes to `crates/`, persistence, active art, dependencies, or the browser bootstrap/WASM. All 160 workspace tests (13 server, 46 client, 101 game), formatting, strict native/WASM Clippy, server build, browser-binding/Python syntax, UI icon checks, all 268 HD sprite checks, and whitespace pass. Isolated SQLite server: root/play and both local variants serve the exact Rust bootstrap with no-cache; retired URLs return 404. Deployment verifier passes locally. Real Chromium desktop/DPR-2 phone loads all four variants without page errors or missing/legacy requests; actual mouse/touch pause, 2×, and resume controls update authoritative state. Screenshots: `/tmp/aoa-cleanup-{desktop,phone}{,-local}.png`.
-
-Thermonuclear review: deletes the duplicate presentation stack and obsolete pipelines, adds no dependency or gameplay behavior, preserves typed commands/persistence and `/play` links, and retains provenance. PR #69: https://github.com/koogle/age-of-agents/pull/69. Integrated the documentation-only handoff refresh from master 9cfa899. Ready for the user-authorized merge; production verification remains pending until the merge-triggered workflow completes.
-
-
-Updated 2026-10-03 at 22:52 Europe/Madrid. Keep only outstanding work, blockers and verification follow-ups here. Implemented features are summarized in [README.md](README.md); completed history lives in Git and `docs/`.
-
-Use `master` as the integration branch and PR base.
-
-## Ordered agent backlog
-
-Order by prerequisites first, then estimated complexity within each stage. Small means a bounded fix/check; medium means one substantial subsystem; large means coordinated simulation, persistence and client work. These are relative sizes, not time estimates. Independent tasks may run alongside the main chain. No task below is implemented merely because it is listed here; see [README.md](README.md#implemented-roadmap) for completed features.
-
-### Stage 1 — Independent work, smallest first
-
-| ID | Task / complexity | Dependencies | Acceptance criteria |
-| --- | --- | --- | --- |
-| A1 | Remaining release and platform verification — small | Successful runtime deployment; target desktops for native checks | Independently check deployed starter economy, camera controls, gathering animations, loading title and NPC selection-ring occlusion. Check native reset-dialog appearance on macOS/Windows when those desktops are available. Follow the release checklist below; use isolated worlds and never reset the shared production save. |
-| A2 | Field placement safety — small | None | Make `plant_field` preserve existing ground routes as building placement does. Cover trapped bystanders and the last exit with regressions; preserve wood/stone charges, shared labor and manual replenishment. |
-| A3 | Touch selection and accessibility — medium | None; coordinate client edits with B5 | Add additive touch selection and accessible keyboard/screen-reader equivalents for canvas controls. Preserve desktop Shift-click/Shift-drag, mouse/touch parity and camera gestures. Explicit blocking/non-blocking task classification remains open; scope it separately if it requires new domain semantics. |
-
-### Stage 2 — Core dependency chain
-
-Local dock transport (B2) and its generated sprites (A4) are implemented in the current change. Use one integration owner for remaining island, occupancy and save-schema changes; agree on B1 before B3 → B4. Each core PR needs enough actual UI to exercise its playable slice.
-
-| ID | Task / complexity | Dependencies | Acceptance criteria |
-| --- | --- | --- | --- |
-| B1 | Remaining island/inventory contracts | Local transport | Local passenger ownership, manifests, typed commands and compatible saves are implemented. Finalize persistent island IDs and settlement inventory ownership for B3/B4. Adopted trigger: first transport completion generates a destination once; departure travels there. Generation is still future work. |
-| B3 | Persistent destination islands and founding — large | B1, B2 | Generate destinations deterministically once, preserving prior islands, settlements and fog. Support travel and initial landing without requiring an existing destination dock; allow enough transported supplies to found an outpost. Introduce complementary iron/coal, then clay and fiber on further islands. Do not replace the old world via Reset or make island two supply everything. Avoid a fixed long-term island limit. |
-| B4 | Local inventories and trading posts — large | B1–B3 | Replace global spending/deposits with explicit settlement inventories; construction and processing consume local inputs. Ship loading/unloading transfers goods atomically between inventories, with conservation and save/reload tests. Remote stock cannot fund local construction. Demonstrate a round trip that makes trade necessary; no automatic shipping in this slice. |
-| B5 | Transport UI, globe and guidance — medium/large | B1 interfaces; B2–B4 for completion | Local ship selection, manifests, passenger/goods controls and blocked-action explanations are implemented. Add destinations, local stocks and cumulative globe discoveries. Verify build → board/load → travel → land/found → return/trade through actual desktop and touch controls. Coordinate accessible controls with A3. |
-
-### Stage 3 — Progression after working transport and trade
-
-| ID | Task / complexity | Dependencies | Acceptance criteria |
-| --- | --- | --- | --- |
-| C1 | Useful advanced resources — medium | B2–B5 | Give steel/bricks/cloth meaningful uses in tools, buildings and ship improvements, using existing recipes/discovery gates. Balance complementary islands so first-island food/timber remain useful. Keep timber the sole starter processed resource; defer rations until provisioning has a playable purpose. |
-| C2 | Combat and local animal threats — large | Working B2–B5 economy; coordinate with C1 | Start with bounded combat and wolves, including clear feedback and persistence. Existing guards, archers, healers and siege carts only move/stop; their combat/healing behavior remains unfinished. Ship as a separate playable milestone after transport/trade. |
-
-Later, split pirates, mythical creatures, calamities, treasures and permanent upgrades into separate proposals/PRs after C2. Timing, balance and upgrade rules remain open; follow the [proposed gameplay loop](README.md#proposed-gameplay-loop).
-
-## Remaining release and platform checks
-
-- **Current release verification:** [run 37152725466](https://github.com/koogle/age-of-agents/actions/runs/37152725466) for `54bf023` (merged [PR #68](https://github.com/koogle/age-of-agents/pull/68)) is running its quality job. Confirm quality, Modal deployment and automated production verification for this combined release, including building task queues and one-shot unloading feedback. Follow a newer superseding release if this run is cancelled. The earlier HD merge `1f61c21` passed both quality and deployment in [run 37152283578](https://github.com/koogle/age-of-agents/actions/runs/37152283578); HD assets, custom field art and the favicon no longer need implementation or merge work.
-- **Independent live browser acceptance:** verify fresh starter-island resources/build menu in an isolated world using deployed assets; check hosted camera controls, partial-load gathering animations, loading-title cleanup, HD sprites and field stages at maximum zoom, and selected NPC rings above raised terrain but behind opaque buildings. Check building queues/cancellation refunds and the one-shot unloading announcement alongside resource-gain feedback. Record desktop/DPR-2 phone evidence and the checked bundle; the final combined phone replay of unloading feedback remains unconfirmed. Do not reset the shared production save. Existing scoped evidence: [HD sprites](docs/HD_SPRITES_REVIEW.md), [field art](docs/FIELD_ART_REVIEW.md), [building queues](docs/BUILDING_QUEUES_REVIEW.md), and `/workspace/scratch/status-check/`.
-- **Native platform appearance:** macOS and Windows reset-dialog appearance remains unverified. Check the warning, seed entry, invalid-input retry, cancellation and confirmation on those target desktops.
-
-Already-closed Linux/Zenity reset, live desktop globe and browser zigzag direction/pose checks are recorded in [presentation verification](docs/PRESENTATION_VERIFICATION.md) (merged PR #60); they are not outstanding tasks. Their platform/bundle scope does not certify the newer combined release. Local transport is implemented in this work; fresh runs cannot travel to another island until B3 is implemented.
-
-## Working constraints
-
-Use an isolated SQLite database for local verification and preserve existing saves. Old recovery work remains on `codex/native-sprite-rendering`; historical root/gukaet edits and saves should remain untouched. Keep changes tied to the [current roadmap](ROADMAP.md#current-direction).
-
-Each implementation agent uses its own branch/worktree from current `origin/master` and opens a scoped PR against `master`; do not auto-merge agent PRs. Reserve an integration owner for B1–B4 and coordinate overlapping client edits. Keep deterministic authoritative rules in `crates/game`, typed atomic commands, valid occupancy and compatible saves. Follow [AGENTS.md](AGENTS.md) and [the review gate](docs/THERMONUCLEAR_REVIEW.md): focused tests, formatting/lint, relevant asset checks, and real desktop/phone verification for runtime changes. State verification, assets and limitations in each PR; remove completed tasks from this file and keep README/ROADMAP synchronized.
+- Cumulative archipelago globe / destination selection beyond adjacent island buttons. Current globe displays the active map.
+- Away-island simulation (currently paused), separate inventories for multiple settlements on the same island, trading-post specialization and trade routes.
+- Improve accessible DOM mirror and touch controls (A3); the current canvas HUD is not a DOM mirror.
+- Combat, adversaries, calamities, upgrades and other later milestones remain in ROADMAP.md. No autonomous NPC behavior was added.

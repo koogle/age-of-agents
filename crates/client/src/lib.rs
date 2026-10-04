@@ -8,6 +8,7 @@ mod gestures;
 mod gpu;
 use gestures::Pointer;
 mod hud;
+mod islands;
 mod placement;
 mod render;
 mod reset;
@@ -301,6 +302,11 @@ impl App {
     fn act(&mut self, action: hud::Action) {
         match action {
             hud::Action::ShipCargoNext => self.selection.cargo_index += 1,
+            hud::Action::Voyage(island_id) => {
+                if let Some(ship_id) = self.selection.ship.clone() {
+                    self.send(Command::Voyage { ship_id, island_id });
+                }
+            }
             hud::Action::Disembark => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Disembark { ship_id });
@@ -613,19 +619,6 @@ impl App {
         self.rig.height = height as f32;
     }
 
-    /// Opens the game looking at the player's town center: the seeded island
-    /// can start anywhere on the map.
-    fn frame_town_center(&mut self) {
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
-            return;
-        };
-        if let Some(town_center) = snapshot.buildings.first() {
-            let center = view::footprint_center(&self.view.heights, town_center);
-            self.rig.look_at(center.x, center.z);
-            self.framed = true;
-        }
-    }
-
     fn redraw(&mut self) {
         self.fit_surface();
         let now = now_seconds();
@@ -642,6 +635,8 @@ impl App {
             // The hosted server resets after a delay, so the view may have
             // framed the old island meanwhile: look again at the new one.
             if self.view.sync(snapshot) {
+                self.selection.units.clear();
+                self.selection.building = None;
                 self.framed = false;
             }
             if !self.framed {

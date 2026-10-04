@@ -41,6 +41,7 @@ fn transport_builds_once_with_exact_cost_and_no_housing() {
         w.tick(1.0);
     }
     assert_eq!(w.ships.len(), 1);
+    assert_eq!(w.islands.len(), 1);
     assert!(w.ships[0].stopped());
     w.validate().unwrap();
 }
