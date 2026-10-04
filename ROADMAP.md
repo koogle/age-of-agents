@@ -6,7 +6,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 - Reset game opens a native seed input and progress-loss confirmation on desktop and WebGL; blank chooses a random island, and explicit seeds reproduce an island.
 
-- Camera navigation uses pan and zoom with a fixed orthographic angle, gentle mouse edge/corner panning, pointer-anchored wheel zoom, midpoint-anchored pinch zoom, stable building anchors, and an optional diamond-shaped square grid. Distant zoom transitions into the curved planet overview.
+- Camera navigation uses pan and zoom with a fixed orthographic angle, responsive, zoom-scaled mouse edge/corner panning, pointer-anchored wheel zoom, midpoint-anchored pinch zoom, stable building anchors, and an optional diamond-shaped square grid. Distant zoom transitions into the curved planet overview.
 
 ## Current direction
 
