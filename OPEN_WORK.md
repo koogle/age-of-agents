@@ -1,5 +1,10 @@
 # Open Work
 
+## Field preparation follow-up (2026-10-03)
+
+Preparation workers now continue into harvesting; depleted fields require a new paid order. Twelve new HD hoeing frames match the approved three villager identities. Sources and provenance are retained. Integrating with latest master a27a564 after detecting the local checkout was stale. The first deployment could not read the newer production save; restoring compatible a27a564 source preserves all saved state. No more local computer use per user request; prior desktop/DPR-1 phone screenshots are retained, DPR-2 remains pending. Combined checks pass: 161 tests, native/WebGL lint, formatting, both release builds, all 280 HD frames and the focused twelve-pose check. Review: `docs/FIELD_PREPARATION_REVIEW.md`. Compatible recovery succeeded, followed by the final feature deployment to `koogle-frick`. Production verification passes: current bootstrap, catalog and new preparation PNG/JSON match the checkout; `/state` returns the expected valid world. No saved-state reset or schema edits were performed. Use `MODAL_PROFILE=koogle-frick` for deployment; the machine default points elsewhere. The user requested a PR and merge into the default branch (`master`), then local synchronization. Preparing `codex/field-preparation-harvest` for that merge; the pre-integration stash remains a backup.
+
+
 ## Retire the unused frontend (2026-10-03)
 
 User requested removal of unused legacy code, then PR creation and merge. `/` and `/play` now share the Rust/WebGL2 client; `?local` still selects the in-page simulation. Removed the complete Three.js frontend/vendor libraries, unused GLBs/model builders, processed `assets/game/` sprites, obsolete asset pipelines/checks, and the standalone image-model probe. Source sheets, concept art, ledgers, and historical provenance remain. Docker/Modal packaging, production verification, CI, and docs now use the Rust client only.

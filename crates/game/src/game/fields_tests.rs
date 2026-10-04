@@ -68,8 +68,10 @@ fn preparation_pauses_persists_and_shared_work_never_charges_twice() {
     run(&mut w, 4.0);
     assert_eq!(w.resources[0].amount, 0.0);
     run(&mut w, 1.0);
-    assert_eq!(w.resources[0].amount, FIELD_FOOD);
-    assert!(w.units.iter().all(|u| u.action == UnitAction::Idle));
+    assert!(w.resources[0].field.as_ref().unwrap().work.is_none());
+    assert!(w.resources[0].amount > 0.0);
+    assert!(w.units.iter().all(|u| matches!(&u.action,
+        UnitAction::Gather { resource_id, .. } if resource_id == "field-10-10")));
     assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
     assert_eq!(cultivate(&mut w, 1), Err(CommandError::FieldNotDepleted));
     w.validate().unwrap();
@@ -80,11 +82,6 @@ fn harvesting_exhausts_fields_and_replenishment_requires_materials_and_labor() {
     let mut w = world();
     plant(&mut w).unwrap();
     run(&mut w, 13.0);
-    w.apply_command(Command::Gather {
-        unit_id: "villager-1".into(),
-        resource_id: "field-10-10".into(),
-    })
-    .unwrap();
     for _ in 0..2000 {
         w.tick(0.1);
         w.validate().unwrap();
@@ -107,9 +104,15 @@ fn harvesting_exhausts_fields_and_replenishment_requires_materials_and_labor() {
     assert_eq!((w.stockpile.wood, w.stockpile.stone), (10.0, 90.0));
     assert_eq!(w.resources[0].amount, 0.0);
     run(&mut w, 20.0);
-    assert_eq!(w.resources[0].amount, FIELD_FOOD);
+    assert!(w.resources[0].amount < FIELD_FOOD);
     assert_eq!(w.stockpile.food, FIELD_FOOD);
+    assert!(matches!(w.units[0].action, UnitAction::Gather { .. }));
+    run(&mut w, 200.0);
+    assert_eq!(w.stockpile.food, FIELD_FOOD * 2.0);
+    assert_eq!(w.resources[0].amount, 0.0);
+    assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     assert_eq!(w.units[0].action, UnitAction::Idle);
+    assert_eq!((w.stockpile.wood, w.stockpile.stone), (10.0, 90.0));
     w.validate().unwrap();
 }
 
@@ -123,10 +126,21 @@ fn preparing_a_field_delivers_existing_cargo_first() {
     plant(&mut w).unwrap();
     w.tick(0.1);
     assert_eq!(w.resources[0].field.as_ref().unwrap().work, Some(0.0));
-    run(&mut w, 30.0);
+    // The initial load must arrive before any paid preparation progresses.
+    for _ in 0..200 {
+        if w.resources[0].field.as_ref().unwrap().work != Some(0.0) {
+            break;
+        }
+        w.tick(0.1);
+        w.validate().unwrap();
+    }
+    assert!(w.resources[0].field.as_ref().unwrap().work.unwrap() > 0.0);
     assert_eq!(w.stockpile.food, 20.0);
     assert!(w.units[0].cargo.is_none());
-    assert_eq!(w.resources[0].amount, FIELD_FOOD);
+    run(&mut w, 200.0);
+    assert_eq!(w.stockpile.food, FIELD_FOOD + 20.0);
+    assert_eq!(w.resources[0].amount, 0.0);
+    assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     w.validate().unwrap();
 }
 
@@ -172,4 +186,45 @@ fn fields_reject_out_of_bounds_and_unreachable_sites_without_spending() {
     let before = serde_json::to_string(&w).unwrap();
     assert_eq!(plant(&mut w), Err(CommandError::TargetUnreachable));
     assert_eq!(before, serde_json::to_string(&w).unwrap());
+}
+
+#[test]
+fn finishing_preparation_preserves_stopped_workers_and_helpers_delivery() {
+    let mut w = world();
+    plant(&mut w).unwrap();
+    cultivate(&mut w, 2).unwrap();
+    w.apply_command(Command::Stop {
+        unit_id: "villager-2".into(),
+    })
+    .unwrap();
+    run(&mut w, FIELD_WORK_SECONDS + 0.1);
+    assert_eq!(w.units[1].action, UnitAction::Idle);
+    assert!(matches!(w.units[0].action, UnitAction::Gather { .. }));
+    w.validate().unwrap();
+
+    let mut w = world();
+    plant(&mut w).unwrap();
+    w.resources[0].field.as_mut().unwrap().work = Some(FIELD_WORK_SECONDS - 0.1);
+    w.units[1].cell = cell(40, 40);
+    w.units[1].cargo = Some(CarriedResource {
+        kind: ResourceKind::Food,
+        amount: 3.0,
+    });
+    cultivate(&mut w, 2).unwrap();
+    w.tick(0.1);
+    assert!(matches!(
+        w.units[1].action,
+        UnitAction::Gather {
+            phase: GatherPhase::Returning,
+            ..
+        }
+    ));
+    assert_eq!(w.units[1].cargo.as_ref().unwrap().amount, 3.0);
+    for _ in 0..2000 {
+        w.tick(0.1);
+        w.validate().unwrap();
+    }
+    assert_eq!(w.stockpile.food, FIELD_FOOD + 3.0);
+    assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
+    assert!(w.units.iter().all(|u| u.action == UnitAction::Idle));
 }
