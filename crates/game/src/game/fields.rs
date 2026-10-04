@@ -136,7 +136,14 @@ impl GameWorld {
         for worker in &mut self.units {
             if matches!(&worker.action, UnitAction::Cultivate { resource_id: id } if id == resource_id)
             {
-                worker.action = UnitAction::Idle;
+                worker.action = UnitAction::Gather {
+                    resource_id: resource_id.into(),
+                    phase: if worker.cargo.is_some() {
+                        GatherPhase::Returning
+                    } else {
+                        GatherPhase::ToResource
+                    },
+                };
             }
         }
     }

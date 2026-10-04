@@ -308,3 +308,11 @@ HD integration requirement: all actions/facings/stages must have at least 512×5
 ## Crop fields
 
 Dedicated 512px cleared, cultivated, seedling and ripe field frames occupy the fifth row of `buildings_economy.png`. They replace the farm building art for field resources, the Field menu coin and placement ghost. See [source art and fal provenance](field_sources/README.md); rebuild with `python3 scripts/pack_field_sprites.py`.
+
+## Field preparation (2026-10-03)
+
+`villager_field_preparation.png` / `.json` contain a four-frame hoeing cycle for all three approved villager appearances, with the same blue scarves, cream clothes, painted cel palette, fine brown pen lines and front three-quarter camera. Preparation uses these frames; carrying and walking retain their existing poses. Frames are front-facing and mirrored for the other side, like the other work animations.
+
+The 2048×1536 RGBA atlas has twelve 512×512 cells, feet at `[256,480]`, standing-scale figure height 352, and 4 fps. Original 1536×1024 two-pose generations live in `field_preparation_sources/`; each original pose occupies 768×1024 authored pixels and is downsampled, never enlarged. One scale per character cycle, transparent cutouts, and sandal anchoring preserve the ground position. Packing removes isolated cutout specks.
+
+FAL credentials were unavailable in this session, so the built-in OpenAI image tool generated the poses against the approved identity masters and a refined hoeing draft. The draft atlases were rejected for insufficient source resolution. `field_preparation_sources/provenance.json` records generation IDs, references, exact prompts and the exception; no FAL spend occurred. `villager_field_preparation_preview.gif` shows the cycle at gameplay scale. Reproduce with `python3 scripts/pack_field_preparation.py` (Pillow), then run `python3 scripts/check_field_preparation_assets.py`. The new cycle passes the HD minimum; the full sprite audit also includes this cycle.
