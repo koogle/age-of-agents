@@ -4,6 +4,7 @@ use glam::{Vec2, Vec3};
 use winit::event::{MouseButton, TouchPhase};
 
 const DRAG_THRESHOLD: f32 = 8.0;
+const EDGE_PAN_HEIGHTS_PER_SECOND: f32 = 0.75;
 
 /// Gentle speed ramp through the outer 32 logical pixels; corners pan diagonally.
 fn edge_direction(pixel: Vec2, size: Vec2, scale: f32) -> Vec2 {
@@ -44,9 +45,9 @@ impl App {
             Vec2::new(self.rig.width, self.rig.height),
             game.window.scale_factor() as f32,
         );
-        // Time-based movement stays gentle at every frame rate and zoom level.
+        // Screen-space speed follows the visible extent as the camera zooms.
         self.rig
-            .nudge(direction.x * dt * 2.0, direction.y * dt * 2.0);
+            .pan_screen(direction * self.rig.height * EDGE_PAN_HEIGHTS_PER_SECOND * dt);
     }
 
     pub(super) fn press(&mut self, pixel: Vec2, button: MouseButton, shift: bool) {

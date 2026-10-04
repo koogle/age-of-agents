@@ -204,6 +204,17 @@ impl Rig {
         }
     }
 
+    /// Move toward screen right/up by physical pixels, compensating for zoom
+    /// and the ground's isometric foreshortening.
+    pub fn pan_screen(&mut self, pixels: Vec2) {
+        let units_per_pixel =
+            2.0 * self.distance * (FOV_Y.to_radians() * 0.5).tan() / self.height.max(1.0);
+        let right = Vec3::new(YAW.cos(), 0.0, -YAW.sin());
+        let forward = Vec3::new(-YAW.sin(), 0.0, -YAW.cos());
+        self.target += (right * pixels.x + forward * (pixels.y / PITCH.sin())) * units_per_pixel;
+        self.clamp();
+    }
+
     pub fn nudge(&mut self, dx: f32, dz: f32) {
         let right = Vec3::new(YAW.cos(), 0.0, -YAW.sin());
         let forward = Vec3::new(-YAW.sin(), 0.0, -YAW.cos());
@@ -232,6 +243,57 @@ impl Rig {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn screen_pan_tracks_zoom_dpi_and_direction() {
+        for scale in [1.0, 2.0] {
+            for distance in [MIN_DISTANCE, 15.0, 60.0, MAX_DISTANCE] {
+                for direction in [Vec2::X, Vec2::Y, -Vec2::ONE.normalize()] {
+                    let mut rig = Rig::new();
+                    rig.width = 1280.0 * scale;
+                    rig.height = 800.0 * scale;
+                    rig.distance = distance;
+                    rig.look_at(COLUMNS / 2.0, ROWS / 2.0);
+                    let point = rig.target;
+                    let before = rig.screen_of(point).unwrap();
+                    let pixels = direction * 5.0 * scale;
+                    rig.pan_screen(pixels);
+                    let movement = (rig.screen_of(point).unwrap() - before) / scale;
+                    let expected = Vec2::new(-direction.x, direction.y) * 5.0;
+                    // Curved overview terrain adds a small second-order vertical shift.
+                    assert!(
+                        movement.abs_diff_eq(expected, 0.1),
+                        "{movement:?} != {expected:?}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn screen_pan_is_frame_rate_independent_and_bounded() {
+        for distance in [MIN_DISTANCE, 15.0, MAX_DISTANCE] {
+            let mut targets = Vec::new();
+            for frames in [30, 60, 144] {
+                let mut rig = Rig::new();
+                rig.height = 800.0;
+                rig.distance = distance;
+                rig.look_at(COLUMNS / 2.0, ROWS / 2.0);
+                for _ in 0..frames {
+                    rig.pan_screen(Vec2::new(60.0, 60.0) / frames as f32);
+                }
+                targets.push(rig.target);
+                rig.pan_screen(Vec2::splat(100_000.0));
+                assert!((-1.0..=COLUMNS + 1.0).contains(&rig.target.x));
+                assert!((-1.0..=ROWS + 1.0).contains(&rig.target.z));
+            }
+            assert!(
+                targets
+                    .iter()
+                    .all(|target| target.abs_diff_eq(targets[0], 0.001))
+            );
+        }
+    }
 
     #[test]
     fn pan_and_zoom_keep_ground_geometry_aligned() {

@@ -1,4 +1,12 @@
-# Current handoff: persistent islands (2026-10-04)
+# Current handoff: cursor edge panning (2026-10-04)
+
+- Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
+- Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
+- Added projection-based zoom/DPR/direction coverage plus frame-rate and pan-bound checks. All 183 workspace tests (13 server, 51 client, 119 domain), formatting, and strict native/WASM lint pass. Rebuilt the tracked browser bundle. Browser mouse checks passed for horizontal/vertical panning at three zoom levels on DPR1 and DPR2 (about 581–595 CSS pixels per game second at one pixel from the edge of an 800px-high viewport). DPR2 phone drag and stationary edge-touch checks pass with no page errors. QA scripts/logs are in `/workspace/scratch/edge-pan`; measurements account for the existing 0.25-second frame cap under software rendering.
+- Thermonuclear review: small client-only change, no dependency or simulation/persistence changes, no files over 1,000 lines, existing input guards retained.
+- User authorized merging this change into master through a PR. Branch `fix/zoom-scaled-edge-pan` is based on current master `fe75673`; local verification is complete. Direct Modal deployment is unavailable because this environment has no Modal profile; merging triggers the repository production workflow.
+
+# Previous handoff: persistent islands (2026-10-04)
 
 ## Integration for authorized merge of PR #73
 
