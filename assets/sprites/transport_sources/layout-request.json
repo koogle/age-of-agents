@@ -1,0 +1,12 @@
+{
+  "tool": "OpenAI image_gen",
+  "reference": "wharf-refinement.png",
+  "design": {
+    "benches": 3,
+    "mast": "at middle bench",
+    "sacks": 1,
+    "sack_location": "centerline stern bay between aft bench and flat stern transom",
+    "front_view": "bow near lower left; sack at far upper right",
+    "rear_view": "stern near lower left; sack at near lower left"
+  }
+}
