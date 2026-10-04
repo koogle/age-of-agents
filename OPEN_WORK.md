@@ -15,6 +15,12 @@
 - Render size reduced from 2.8 to 1.6 world units; selection ring from 0.7 to 0.4. Updating existing PR #73. Gameplay capacities and simulation unchanged.
 - All 47 client tests, sprite packing/transparency/resolution/icon checks and strict native/WASM lint passed. Desktop and DPR2 phone selection/sailing passed; inspected default and maximum zoom, including real touch pinch. Final previews are in `/workspace/scratch/ship-refinement`. Reviewed the visual-only diff against the thermonuclear gate; no simulation or capacity changes.
 
+## Ship rendering correction
+
+- Fixed sea-depth clipping of the lower hull by applying the same proportional footprint depth pull used by other billboards. Fixed reverse-view mirroring so the bow follows projected movement.
+- Two regression tests cover projected bow direction and the complete keel clearing maximum wave height. All 49 client tests and strict native/WASM lint pass; rebuilt browser bundle. Desktop/phone four-facing previews checked at normal and close zoom in `/workspace/scratch/ship-render`.
+- This correction updates open PR #73; it is not deployed. No sprite-generation or simulation changes.
+
 ## Verification / release
 
 - Seven focused domain tests cover deterministic complementary generation/biomes, repeated discoveries, persistent round trips/reload, separate inventories, four settlers founding a town center, cross-island research, old saves, corrupt archives, atomic rejection, and occupied ocean corners.
