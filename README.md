@@ -2,7 +2,7 @@
 
 A Greek strategy roguelike inspired by Age of Empires and Anno. Build an island settlement, grow its economy, and explore further islands while trying to survive an increasingly hostile world.
 
-The current prototype is a single-island RTS economy with a shared Rust simulation and native/browser clients.
+The current prototype is an island-exploration RTS economy with a shared Rust simulation and native/browser clients.
 
 ## Proposed gameplay loop
 
@@ -10,9 +10,9 @@ Start on an island, gather resources, and build a settlement. Build ships to exp
 
 Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Dock-built transports can carry villagers and goods around the current island. Multiple islands, local inventories, combat, calamities, and permanent upgrades are not implemented yet.
+Dock-built transports carry villagers and goods between persistent islands with separate inventories. Away islands pause; combat, calamities, permanent upgrades and automatic trade routes are not implemented yet.
 
-Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each holds four passengers plus 200 goods; no metal, cloth or housing is required. Persistent destination islands remain the next step.
+Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each holds four passengers plus 200 goods; no metal, cloth or housing is required. Completing the first transport discovers island 2. Select a stopped ship and choose a voyage to visit it; sailing onward discovers further islands deterministically, without a fixed island limit.
 
 ## Implemented roadmap
 
@@ -22,11 +22,11 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
 - Farms with harvestable, manually replenished fields and dedicated soil/cultivation/seedling/wheat sprites; mining camps and local gathering bonuses.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
-- Wood → timber processing on starter islands; steel, bricks and cloth await future destination resources. Existing unrestricted saves retain all five processing chains, including rations.
+- Wood → timber processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Dock transport production through the paid task queue, water-only sailing, four passenger seats, 200 goods, shore landings and dock goods transfers. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
-- Distant zoom eases into a curved world overview; explored islands will be added after ships and persistent island travel are implemented.
+- Distant zoom eases into a curved world overview; the globe currently shows the active island; a cumulative archipelago overview remains planned.
 
 See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [decisions.md](decisions.md) for design decisions.
 
@@ -75,7 +75,7 @@ Existing saves keep their terrain, resources, buildings and economy rules; choos
 
 Selected units have a broad ivory ring with a blue border around their feet, drawn above terrain and hidden by buildings. Select a unit, then tap/click ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Repeated orders join the building’s queue; tap a coin in the queued row to cancel it and refund its cost. Shift-click or Shift-drag adds units on desktop; drag to pan, hold the mouse near an edge or corner to pan gently, wheel to zoom toward the pointer, pinch to zoom around the fingers’ midpoint, X to stop, G for the grid, and Escape to cancel placement. Reset game erases the current world's progress. Gatherers keep chopping, mining, digging, or foraging while filling their load. Villagers carrying goods unload first before a new gather, build, or field-preparation assignment, then resume that task automatically; a brief floating italic message announces the resource being dropped off, and the selection status shows what comes next.
 
-Select villagers and tap a stopped transport to have them walk aboard. Select the ship and tap sea to sail, or tap a completed dock to return to its nearest reachable berth; X or Stop ship finishes its current step and stops. Land passengers unloads the whole manifest onto clear nearby land, including shores without a dock. At a completed dock, tap Cargo to cycle resource types, then Load/Unload to transfer up to 20 goods. The hold is separate from passengers’ carried loads; settlement spending cannot use goods aboard. Island inventories are still shared in this single-island slice.
+Select villagers and tap a stopped transport to have them walk aboard. Select the ship and tap sea to sail, or tap a completed dock to return to its nearest reachable berth; X or Stop ship finishes its current step and stops. Land passengers unloads the whole manifest onto clear nearby land, including shores without a dock. Tap Cargo to cycle resource types, then Load/Unload to transfer up to 20 goods. Loading requires a completed dock; unloading also works beside undeveloped shore, so transported wood can fund a town center (20 wood) and dock (30 wood). The hold is separate from passengers’ carried loads; settlement spending cannot use goods aboard. Inventories are island-local. Take founding supplies aboard before departure. Voyage buttons visit the previous/next island; the frontier button generates a new destination. Voyages arrive immediately at an open-ocean shore connected to resources. Terrain, fog, settlements, orders and local goods persist; only the active island simulates. Discovery unlocks and research remain shared across islands. Old saves retain their current island and can discover a destination with an existing ship.
 
 ## Contributing
 

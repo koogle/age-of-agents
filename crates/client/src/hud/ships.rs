@@ -14,6 +14,12 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
                 && b.building.is_complete()
                 && ship.beside(b.building.footprint())
         });
+    let shore = ship.stopped()
+        && snapshot.terrain.iter().any(|c| {
+            c.biome.is_some_and(|b| b.is_walkable())
+                && c.column.abs_diff(ship.cell.column) <= 1
+                && c.row.abs_diff(ship.cell.row) <= 1
+        });
     let load = snapshot
         .stockpile
         .amount(kind)
@@ -58,13 +64,32 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         commands.push(Command {
             icon: resource_icon(kind),
             label: format!("{label} {}", kind.name()),
-            detail: if docked {
-                format!("Transfer {amount} goods at the dock")
+            detail: if docked || (direction == CargoDirection::Unload && shore) {
+                format!("Transfer {amount} goods to/from this island")
             } else {
                 "Stop beside a completed dock to transfer goods".into()
             },
-            enabled: docked && amount > 0.0,
+            enabled: (docked || (direction == CargoDirection::Unload && shore)) && amount > 0.0,
             action: Action::ShipTransfer(direction),
+        });
+    }
+    for id in [
+        snapshot.island_id.checked_sub(1),
+        snapshot.island_id.checked_add(1),
+    ]
+    .into_iter()
+    .flatten()
+    {
+        commands.push(Command {
+            icon: "transport",
+            label: format!("Sail to island {}", id + 1),
+            detail: if id >= snapshot.island_count as u64 {
+                "Discover a new island".into()
+            } else {
+                "Voyage with passengers and goods · away settlements pause".into()
+            },
+            enabled: ship.stopped(),
+            action: Action::Voyage(id),
         });
     }
     if !ship.stopped() {
@@ -78,7 +103,11 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     }
     Some((
         "transport",
-        "Transport ship".into(),
+        format!(
+            "Transport · Island {} / {}",
+            snapshot.island_id + 1,
+            snapshot.island_count
+        ),
         format!(
             "{}/{TRANSPORT_PASSENGERS} aboard · {}/{TRANSPORT_GOODS} goods · {}",
             ship.passengers.len(),
