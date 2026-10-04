@@ -15,6 +15,12 @@
 - Render size reduced from 2.8 to 1.6 world units; selection ring from 0.7 to 0.4. Updating existing PR #73. Gameplay capacities and simulation unchanged.
 - All 47 client tests, sprite packing/transparency/resolution/icon checks and strict native/WASM lint passed. Desktop and DPR2 phone selection/sailing passed; inspected default and maximum zoom, including real touch pinch. Final previews are in `/workspace/scratch/ship-refinement`. Reviewed the visual-only diff against the thermonuclear gate; no simulation or capacity changes.
 
+## Interior layout correction
+
+- User identified inconsistent bench counts and moving sacks in the authored views. Current art has exactly three benches, a mast mounted on the middle bench, and one sack in the stern bay in both views. Bow/stern views naturally place that compartment at opposite ends of the image.
+- Retained draft/final image_gen sheets and exact prompts. Existing packer produces two registered 512px frames from native 887px panels; no renderer or simulation change.
+- Resolution/transparency/registration checks pass. Desktop/phone four-facing previews checked at normal and close zoom under `/workspace/scratch/ship-layout`, with no browser errors. Manually checked three benches and the same stern sack compartment in the authored and mirrored views. Updating PR #73.
+
 ## Ship rendering correction
 
 - Fixed sea-depth clipping of the lower hull by applying the same proportional footprint depth pull used by other billboards. Fixed reverse-view mirroring so the bow follows projected movement.
