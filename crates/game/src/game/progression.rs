@@ -20,7 +20,7 @@ pub const STARTER_BUILDINGS: [BuildingKind; 6] = [
 ];
 pub const STARTER_RESOURCES: [ResourceKind; 3] =
     [ResourceKind::Wood, ResourceKind::Food, ResourceKind::Stone];
-/// Reserved design budget for the first transport, not a playable ship recipe yet.
+/// First transport recipe; no metal or cloth prerequisite.
 pub const FIRST_TRANSPORT_COST: [(ResourceKind, f64); 2] =
     [(ResourceKind::Wood, 60.0), (ResourceKind::Timber, 20.0)];
 /// Reachable raw supplies for settlement, processing, research and departure,

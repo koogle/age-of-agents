@@ -13,6 +13,7 @@ pub fn manifest() -> Vec<String> {
     for sheet in ["villager", "villager_woman", "villager_elder", "resources"] {
         files.push(format!("sprites/{sheet}.png"));
     }
+    files.push("sprites/transport.png".into());
     files.push("sprites/towncenter.png".into());
     files.push("terrain/cobblestone.png".into());
     files.push("sprites/villager_idle_hd.png".into());

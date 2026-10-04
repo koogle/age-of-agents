@@ -18,3 +18,7 @@ The renderer reuses the existing per-person HD atlas shape, mirroring, timing, w
 ## Remaining limits
 
 DPR-2 phone inspection is pending. The earlier screenshots predate integration of the latest HD field and unit art; no further computer use was performed after the user prohibited it. Combined checks pass and the feature is deployed to the intended `koogle-frick` production account. Production bootstrap/catalog/preparation assets match and the authoritative state endpoint passes verification; details are recorded in `OPEN_WORK.md`. The stale checkout initially failed to read the newer production schema; recovery uses compatible source without editing or resetting the saved world.
+
+## PR integration — 2026-10-04
+
+Integrated transport merge 0864057 before PR creation. Ships retain atlas slot 11; preparation moves to slot 12, keeping ship art out of villager silhouettes. Combined checks: 172 tests (13 server, 47 client, 112 simulation), both strict lint targets, formatting, regenerated WebGL bindings, and all 282 HD frames plus both focused art checks. The merge changes no preparation rules or save schema. No computer use was performed; final combined visual/DPR-2 verification remains pending by user instruction.

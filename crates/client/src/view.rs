@@ -14,6 +14,7 @@ mod buildings;
 mod catalog;
 mod fields;
 mod selection;
+mod ships;
 pub(crate) use buildings::sprite as building_sprite;
 pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
@@ -31,7 +32,7 @@ const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
 const SHEET_TOWN_CENTER: usize = 4;
 const SHEET_IDLE_HD: usize = 5;
-const SHEET_FIELD_PREPARATION: usize = 11;
+const SHEET_FIELD_PREPARATION: usize = 12;
 /// Unit sheets show a team silhouette where a building hides them.
 pub const VILLAGER_SHEETS: [usize; 6] = [
     0,
@@ -195,6 +196,7 @@ impl View {
 /// Something a tap can land on by its drawn picture, not the ground under it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Pick {
+    Ship(String),
     Resource(String),
     Building(String),
 }
@@ -682,6 +684,7 @@ impl WorldView {
                 });
             }
         }
+        ships::draw(snapshot, selection, &mut sprites, &mut decals, &mut picks);
         self.pickables = picks;
         (sprites, decals)
     }
