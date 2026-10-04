@@ -15,6 +15,7 @@ mod build_menu;
 mod layout;
 pub use build_menu::BuildingGroup;
 mod selection;
+mod ships;
 use selection::{building_info, selection_model};
 
 const ATLAS: u32 = 2048;
@@ -87,6 +88,9 @@ pub enum Action {
     PlaceField,
     Cancel,
     Stop,
+    ShipCargoNext,
+    ShipTransfer(aoa_game::CargoDirection),
+    Disembark,
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
     Research(TechnologyKind),
@@ -199,6 +203,21 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
             ),
         );
     }
+    let icon = assets
+        .image("sprites/transport.png")
+        .crop(0, 0, 512, 512)
+        .resized(96, 96);
+    let at = place(96, 96);
+    blit(&mut image, &icon, at);
+    sprites.insert("transport".into(), uv(at, 96, 96));
+    let (x0, y0, x1, y1) = painted_bounds(&icon);
+    content.insert(
+        "transport".into(),
+        (
+            uv((at.0 + x0, at.1 + y0), x1 - x0, y1 - y0),
+            Vec2::new((x1 - x0) as f32, (y1 - y0) as f32),
+        ),
+    );
     // Building coins show the finished building from the generated sheet.
     let sheets: HashMap<_, _> = [
         "towncenter",
@@ -331,6 +350,8 @@ pub struct Model<'a> {
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
+    pub ship: Option<&'a str>,
+    pub cargo_index: usize,
     pub build: BuildUi,
     pub show_grid: bool,
     pub toast: Option<&'a str>,

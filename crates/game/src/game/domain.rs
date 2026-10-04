@@ -147,6 +147,9 @@ pub struct SnapshotTerrainCell {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum UnitAction {
+    Board {
+        ship_id: String,
+    },
     Idle,
     /// Walk to `to`. The destination cell is reserved for this unit until it arrives.
     Move {
@@ -479,6 +482,7 @@ impl BuildingKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProductKind {
+    TransportShip,
     Villager,
     Guard,
     Archer,

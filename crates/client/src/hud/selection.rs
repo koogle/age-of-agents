@@ -127,7 +127,9 @@ pub(super) fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'
 }
 
 fn product_label(product: ProductKind) -> String {
-    if let Some(kind) = product.unit_kind() {
+    if product == ProductKind::TransportShip {
+        "Build transport".into()
+    } else if let Some(kind) = product.unit_kind() {
         format!("Train {}", kind.name().to_lowercase())
     } else if let Some((kind, amount)) = product.output() {
         format!("Make {amount} {}", kind.name())
@@ -147,6 +149,9 @@ pub(super) struct Command {
 pub(super) type Selected = (&'static str, String, String, Option<f32>, Vec<Command>);
 
 pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> {
+    if model.ship.is_some() {
+        return super::ships::selection(snapshot, model);
+    }
     let stock = &snapshot.stockpile;
     if !model.units.is_empty() {
         let busy = snapshot
@@ -239,6 +244,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .iter()
             .find(|u| u.unit.id == model.units[0])?;
         let activity = match &unit.unit.action {
+            UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
             UnitAction::Build { .. } if unit.unit.cargo.is_some() => {
@@ -316,7 +322,9 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             product,
             elapsed_seconds,
         }) => (
-            if *elapsed_seconds >= product.seconds() && product.unit_kind().is_some() {
+            if *elapsed_seconds >= product.seconds()
+                && (product.unit_kind().is_some() || *product == ProductKind::TransportShip)
+            {
                 "Waiting for a free spawn cell".to_string()
             } else {
                 format!("Producing {}", product_label(*product))
@@ -338,12 +346,16 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         .filter(|b| b.building.is_complete())
         .map(|b| b.building.kind.housing())
         .sum();
-    let population = snapshot.units.len() + snapshot.buildings.iter().flat_map(|b| b.building.jobs()).filter(|job| matches!(job, aoa_game::BuildingJob::Produce { product, .. } if product.unit_kind().is_some())).count();
+    let population = snapshot.units.len() + snapshot.ships.iter().map(|s| s.passengers.len()).sum::<usize>() + snapshot.buildings.iter().flat_map(|b| b.building.jobs()).filter(|job| matches!(job, aoa_game::BuildingJob::Produce { product, .. } if product.unit_kind().is_some())).count();
     let mut commands = Vec::new();
     for &product in &building.building.produces {
         let crowded = product.unit_kind().is_some() && population >= housing;
         commands.push(Command {
-            icon: "command_train",
+            icon: if product == ProductKind::TransportShip {
+                "transport"
+            } else {
+                "command_train"
+            },
             label: product_label(product),
             detail: if queue_full {
                 "Queue is full".into()
@@ -498,6 +510,8 @@ mod tests {
             units: &units,
             building: None,
             build: BuildUi::Off,
+            ship: None,
+            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -518,6 +532,8 @@ mod tests {
                 units: &units,
                 building: None,
                 build: BuildUi::Group(group),
+                ship: None,
+                cargo_index: 0,
                 show_grid: false,
                 toast: None,
                 camera: Vec2::ZERO,
@@ -577,6 +593,8 @@ mod tests {
             units: &[],
             building: Some(&building_id),
             build: BuildUi::Off,
+            ship: None,
+            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -598,6 +616,8 @@ mod tests {
             units: &[],
             building: Some(&snapshot.buildings[0].building.id),
             build: BuildUi::Off,
+            ship: None,
+            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -638,6 +658,8 @@ mod tests {
             units: &units,
             building: None,
             build: BuildUi::Group(super::super::BuildingGroup::Town),
+            ship: None,
+            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
