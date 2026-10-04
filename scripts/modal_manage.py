@@ -49,7 +49,8 @@ def verify_once() -> None:
         raise RuntimeError("production does not serve the grouped building menu")
     if b"Place field" not in wasm:
         raise RuntimeError("production does not serve replenishable fields")
-    for sheet in ("buildings_economy", "buildings_crafts", "buildings_civic", "units"):
+    for sheet in ("buildings_economy", "buildings_crafts", "buildings_civic", "units",
+                  "villager_field_preparation"):
         for extension in ("json", "png"):
             path = f"assets/sprites/{sheet}.{extension}"
             if fetch(f"/{path}") != (ROOT / path).read_bytes():
