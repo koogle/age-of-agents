@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-03",
+  "note": "FAL credentials unavailable in session; generated and refined using built-in image tool against approved masters. 1536x1024 original pose pairs, downsampled without enlarging pixels. Draft atlases were rejected for source resolution.",
+  "outputs": [
+    {
+      "file": "villager_0.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-47ed85fe-ee73-4d61-83c0-20e00a162505",
+      "references": [
+        "../villager_master.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 1. Draw exactly TWO full-body frames of the same young curly dark-haired man side by side, each filling its half of a landscape 1536x1024 image. Pose 1: slight bend, hoe held forward at waist level with hoe blade low forward to left. Pose 2: bend forward at waist pressing hoe head down into ground, arms extended. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    },
+    {
+      "file": "villager_1.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-52958642-020a-477a-a49a-44568f7e4118",
+      "references": [
+        "../villager_master.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 1. Draw exactly TWO full-body frames of the same young curly dark-haired man side by side, each filling its half of a landscape 1536x1024 image. Pose 3: bent over pulling hoe backward toward planted sandals, elbows bending. Pose 4: recovering to slight bend, hoe lifted a little for next stroke. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    },
+    {
+      "file": "villager_woman_0.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-0d89dcd2-58e6-4d72-91d5-af33a147dbbe",
+      "references": [
+        "../villager_master_woman.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 2. Draw exactly TWO full-body frames of the same woman with terracotta headscarf and long cream dress side by side, each filling its half of a landscape 1536x1024 image. Pose 1: slight bend, hoe held forward at waist level with hoe blade low forward to left. Pose 2: bend forward at waist pressing hoe head down into ground, arms extended. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    },
+    {
+      "file": "villager_woman_1.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-063a1977-7993-463d-9103-1de3984e1157",
+      "references": [
+        "../villager_master_woman.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 2. Draw exactly TWO full-body frames of the same woman with terracotta headscarf and long cream dress side by side, each filling its half of a landscape 1536x1024 image. Pose 3: bent over pulling hoe backward toward planted sandals, elbows bending. Pose 4: recovering to slight bend, hoe lifted a little for next stroke. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    },
+    {
+      "file": "villager_elder_0.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-10131382-b74b-4b3e-889c-0560d5952c1a",
+      "references": [
+        "../villager_master_elder.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 3. Draw exactly TWO full-body frames of the same grey-haired grey-bearded elder side by side, each filling its half of a landscape 1536x1024 image. Pose 1: slight bend, hoe held forward at waist level with hoe blade low forward to left. Pose 2: bend forward at waist pressing hoe head down into ground, arms extended. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    },
+    {
+      "file": "villager_elder_1.png",
+      "tool": "OpenAI image_gen (built-in)",
+      "generation_id": "exec-b379c4e2-f485-45cb-8913-0a37f3fd3c77",
+      "references": [
+        "../villager_master_elder.jpg",
+        "refined_draft.png"
+      ],
+      "prompt": "Use case: identity-preserve. Production game animation sprite pair, highest resolution. Image 1 is approved identity and exact STYLE MASTER. Image 2 is approved hoeing cycle pose reference: use ONLY row 3. Draw exactly TWO full-body frames of the same grey-haired grey-bearded elder side by side, each filling its half of a landscape 1536x1024 image. Pose 3: bent over pulling hoe backward toward planted sandals, elbows bending. Pose 4: recovering to slight bend, hoe lifted a little for next stroke. Preserve exact identity, proportions, soft painted two-tone cel colours, fine brown ink lines, cream clothes, royal-blue scarf/chest band, brown leather belt/sandals and warm upper-left lighting. Three-quarter FRONT slightly from above facing viewer-left. SAME WOODEN-HANDLED IRON HOE in both frames held naturally with two hands. Need high resolution original character detail, figure approx 750px tall at standing scale, so it can be downsampled into 512px game sprite. Feet remain stable at a shared baseline near bottom; same scale across both poses, bend at waist without shortening legs. Both characters completely inside their own halves with 40px empty margins. No overlap, nothing clipped. Pure TRANSPARENT background. No soil, shadows, plants, mallet, stray objects, letters, borders, numbers. Do not redesign approved character. Clean polished hand geometry and alpha edges."
+    }
+  ],
+  "drafts": [
+    {
+      "file": "draft.png",
+      "generation_id": "exec-6226c485-40c7-4346-98a1-1bc2d85511bb",
+      "status": "rejected: 362px source cells"
+    },
+    {
+      "file": "refined_draft.png",
+      "generation_id": "exec-64c04eae-e968-433c-b2a9-0e7c4cd672ab",
+      "status": "pose reference only: refinement did not increase output resolution"
+    }
+  ]
+}

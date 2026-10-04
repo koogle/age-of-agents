@@ -20,7 +20,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
-- Farms with harvestable, manually replenished fields and dedicated soil/cultivation/seedling/wheat sprites; mining camps and local gathering bonuses.
+- Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers harvest after preparation; depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Wood → timber processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
@@ -92,6 +92,6 @@ cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnin
 
 For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks browser bindings and current UI assets.
 
-Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 270 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
+Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 282 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
-Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment: `python3 scripts/modal_manage.py deploy`.
+Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment to the production account: `MODAL_PROFILE=koogle-frick python3 scripts/modal_manage.py deploy`.
