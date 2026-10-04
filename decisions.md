@@ -22,3 +22,6 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Asset workflow:** Generate with FAL, then upscale and refine with ChatGPT’s image tool to remove diffusion artifacts while preserving the approved style. Models, provenance, and checks are documented in [AGENTS.md](AGENTS.md#asset-workflow).
 - **Sprite quality:** Require at least 512×512 authored pixels for every action, facing, and construction frame. Upscaling and DPI metadata do not recover missing source detail.
 - **Deployment:** Host on Modal with quality checks and production verification after merges to `master`.
+
+- **Local transport:** A dock trains a transport for 60 wood + 20 timber in 20 seconds; four passengers retain IDs, cargo and housing usage, while a separate 200-good hold transfers at completed docks. Ships land passengers at free connected shore cells without needing a dock; boarding orders reserve seats and departure cancels unfinished boarding.
+- **Destination contract:** Future island IDs will derive from deterministic discovery order, with destination generation once on first transport completion and travel on departure. This slice keeps the existing island/stockpile; passengers are owned by either the land-unit list or one ship manifest, never both.

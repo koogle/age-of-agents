@@ -1,0 +1,4 @@
+{"t": 1791064861.841084, "endpoint": "fal-ai/nano-banana/edit", "tag": "transport draft", "est_usd": 0.04, "request_id": "01a103c8-c726-7b51-a93c-b010aecaef66", "seconds": 9.5}
+{"t": 1791065071.0852344, "endpoint": "fal-ai/nano-banana/edit", "tag": "transport opposite facing", "est_usd": 0.04, "request_id": "01a103cb-f99d-7093-963f-3233599fc91a", "seconds": 9.2}
+{"t": 1791065076.1356473, "endpoint": "fal-ai/birefnet/v2", "tag": "transport front cutout", "est_usd": 0.01, "request_id": "01a103cc-27d4-78d1-895c-393a3f8baadb", "seconds": 2.5}
+{"t": 1791065081.9459794, "endpoint": "fal-ai/birefnet/v2", "tag": "transport rear cutout", "est_usd": 0.01, "request_id": "01a103cc-3f22-7950-a88c-27be9ad0e2d6", "seconds": 2.3}

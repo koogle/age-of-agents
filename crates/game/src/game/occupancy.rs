@@ -314,6 +314,7 @@ impl GameWorld {
                 _ => {}
             }
         }
+        self.validate_ships()?;
         self.try_occupancy().map(|_| ())
     }
 

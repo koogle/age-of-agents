@@ -24,6 +24,9 @@ mod progression_tests;
 #[cfg(test)]
 mod queue_tests;
 #[cfg(test)]
+mod ship_tests;
+mod ships;
+#[cfg(test)]
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
@@ -35,6 +38,7 @@ pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
+pub use ships::*;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -77,6 +81,8 @@ pub struct GameWorld {
     pub terrain: Vec<TerrainCell>,
     pub explored_cells: Vec<CellCoordinate>,
     pub units: Vec<Unit>,
+    #[serde(default)]
+    pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
     pub stockpile: Stockpile,
@@ -113,6 +119,8 @@ pub struct WorldSnapshot {
     #[serde(with = "terrain_codec")]
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
+    #[serde(default)]
+    pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
     pub stockpile: Stockpile,
@@ -125,6 +133,30 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    Sail {
+        ship_id: String,
+        to: CellCoordinate,
+    },
+    DockShip {
+        ship_id: String,
+        building_id: String,
+    },
+    StopShip {
+        ship_id: String,
+    },
+    Board {
+        unit_id: String,
+        ship_id: String,
+    },
+    Disembark {
+        ship_id: String,
+    },
+    TransferShipCargo {
+        ship_id: String,
+        kind: ResourceKind,
+        amount: f64,
+        direction: CargoDirection,
+    },
     Move {
         unit_id: String,
         to: CellCoordinate,
@@ -189,6 +221,12 @@ pub enum Command {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandError {
+    ShipNotFound,
+    ShipMustBeStopped,
+    ShipFull,
+    ShoreBlocked,
+    DockRequired,
+    InvalidCargoTransfer,
     UnitNotFound,
     EmptyUnitGroup,
     DuplicateUnit,
@@ -228,6 +266,12 @@ pub enum CommandError {
 impl std::fmt::Display for CommandError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
+            Self::ShipNotFound => "transport ship not found",
+            Self::ShipMustBeStopped => "stop the ship before boarding or unloading",
+            Self::ShipFull => "transport passenger capacity is full",
+            Self::ShoreBlocked => "no safe landing cells beside the ship or dock",
+            Self::DockRequired => "goods transfer requires a completed dock",
+            Self::InvalidCargoTransfer => "invalid cargo amount, insufficient goods or full hold",
             Self::UnitNotFound => "unit not found",
             Self::EmptyUnitGroup => "unit group is empty",
             Self::DuplicateUnit => "unit group contains a duplicate member",
@@ -296,6 +340,7 @@ impl GameWorld {
                 villager(1, island.villagers[0]),
                 villager(2, island.villagers[1]),
             ],
+            ships: Vec::new(),
             resources: island.resources,
             buildings: vec![town_center("base-1", island.town_center, None)],
             stockpile: Stockpile::default(),
@@ -366,6 +411,23 @@ impl GameWorld {
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
+            Command::Sail { ship_id, to } => self.sail(&ship_id, to)?,
+            Command::DockShip {
+                ship_id,
+                building_id,
+            } => self.sail_to_dock(&ship_id, &building_id)?,
+            Command::StopShip { ship_id } => {
+                let index = self.ship_index(&ship_id)?;
+                self.ships[index].destination = None;
+            }
+            Command::Board { unit_id, ship_id } => self.board(&unit_id, &ship_id)?,
+            Command::Disembark { ship_id } => self.disembark(&ship_id)?,
+            Command::TransferShipCargo {
+                ship_id,
+                kind,
+                amount,
+                direction,
+            } => self.transfer_ship_cargo(&ship_id, kind, amount, direction)?,
             Command::Move { unit_id, to } => {
                 let unit = self.ordered_unit(&unit_id)?;
                 self.validate_move_destination(unit, to)?;
@@ -619,6 +681,7 @@ impl GameWorld {
     /// Living units plus those in training; processing jobs do not consume housing.
     pub fn villagers_and_trainees(&self) -> usize {
         self.units.len()
+            + self.ships.iter().map(|s| s.passengers.len()).sum::<usize>()
             + self
                 .buildings
                 .iter()
@@ -703,6 +766,7 @@ impl GameWorld {
                         self.make_way(index);
                     }
                 }
+                UnitAction::Board { .. } => {}
                 UnitAction::Move { to } => self.tick_move(index, to, dt),
                 UnitAction::Gather { resource_id, phase } => {
                     self.tick_gather(index, resource_id, phase, dt)
@@ -712,6 +776,12 @@ impl GameWorld {
                     self.tick_cultivate(index, &resource_id, dt)
                 }
                 UnitAction::Deposit { building_id } => self.tick_deposit(index, &building_id, dt),
+            }
+        }
+        self.tick_ships(dt);
+        for index in (0..self.units.len()).rev() {
+            if let UnitAction::Board { ship_id } = self.units[index].action.clone() {
+                self.tick_board(index, &ship_id, dt);
             }
         }
         for index in 0..self.buildings.len() {
@@ -792,6 +862,7 @@ impl GameWorld {
                 .map(|building| {
                     let (columns, rows) = building.kind.size();
                     let mut visible = building.clone();
+                    visible.produces = building.kind.products().to_vec();
                     visible.researches.retain(|&t| self.technology_available(t));
                     if !self.building_available(visible.kind) {
                         visible.produces.clear();
@@ -803,6 +874,7 @@ impl GameWorld {
                     }
                 })
                 .collect(),
+            ships: self.ships.clone(),
             stockpile: self.stockpile.clone(),
             researched_technologies: self.researched_technologies.clone(),
             catalog: DomainCatalog::roadmap(),
@@ -821,6 +893,11 @@ impl GameWorld {
             .units
             .iter()
             .map(|unit| (unit.position(), UNIT_SIGHT_RADIUS))
+            .chain(
+                self.ships
+                    .iter()
+                    .map(|ship| (ship.position(), UNIT_SIGHT_RADIUS)),
+            )
             .chain(
                 self.buildings
                     .iter()
