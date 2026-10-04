@@ -24,6 +24,8 @@ impl WorldView {
 pub struct Selection {
     pub units: Vec<String>,
     pub building: Option<String>,
+    pub ship: Option<String>,
+    pub cargo_index: usize,
 }
 
 impl Selection {
@@ -37,6 +39,7 @@ impl Selection {
             self.units.push(id);
         }
         self.building = None;
+        self.ship = None;
     }
 }
 
@@ -46,6 +49,7 @@ impl Selection {
             return;
         }
         self.building = None;
+        self.ship = None;
         for id in ids {
             if !self.units.contains(&id) {
                 self.units.push(id);

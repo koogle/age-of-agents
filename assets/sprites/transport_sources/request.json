@@ -1,0 +1,10 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/reference/diorama_primary.webp",
+  "arguments": {
+    "prompt": "Create a single game sprite of a small ancient Greek wooden transport ship, broad sturdy merchant hull, one mast, cream square sail with a subtle terracotta stripe, visible open deck with a few neatly secured crates, no people, no weapons. Bow points toward bottom-right of image, stern upper-left. Fixed orthographic isometric camera looking down 35 degrees, entire ship centered with generous margin. Match the attached Greek diorama reference: painted soft two-tone cel shading, delicate ink outlines, warm sunlight from upper left, honey brown timber. Clean readable coherent geometry and rigging. Isolated on pure white, no water, no wake, no shadow, no text, no border. High detail 1024px sprite.",
+    "num_images": 1,
+    "output_format": "png",
+    "aspect_ratio": "1:1"
+  }
+}

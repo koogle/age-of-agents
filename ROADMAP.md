@@ -10,7 +10,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Next: ships and villager transport, persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Next: persistent destination islands, then local inventories and trade. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
@@ -20,12 +20,12 @@ The slices below retain earlier acceptance criteria as implementation references
 
 Implemented for fresh games: food/wood/stone nodes; wood → timber as the sole processing chain; six starter buildings plus fields; Forestry/Agriculture/Masonry research. Metal industries require discovered iron and coal, kilns require clay, and weaving requires fiber. Discovery survives resource depletion and saving. Hidden deposits and stockpile quantities do not reveal or bypass unlocks. Old saves default to unrestricted economy rules without terrain resets. Rations/infirmaries stay deferred in new games until provisioning/healing have a playable purpose.
 
-The first transport has a reserved design budget of 60 wood + 20 timber; it is not yet a playable recipe. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields still consume wood, stone and labor for ordinary food.
+The first transport is a playable dock recipe costing 60 wood + 20 timber, taking 20 seconds. It holds four passengers and 200 goods, sails on water, and lands passengers at clear shore; goods transfer at completed docks. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields still consume wood, stone and labor for ordinary food.
 
 Remaining acceptance criteria:
 
-1. Dock-built transport loads/unloads existing villagers and goods, retaining identities and cargo. Departure needs no cloth or metal.
-2. First departure reveals a persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
+1. Implemented: dock-built transport loads/unloads existing villagers and goods, retaining identities and cargo. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
+2. Planned: first transport completion generates a destination once; departure travels to that persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
 3. Each settlement owns an inventory; ships explicitly transfer goods between trading posts. The current global stockpile is temporary. Give new arrivals enough basic supplies to found an outpost without allowing the destination to replace every earlier supply chain.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
 
