@@ -1,8 +1,12 @@
 # Open Work
 
-## Field preparation follow-up (2026-10-03)
+## Field preparation follow-up — merged (2026-10-04)
 
-Preparation workers now continue into harvesting; depleted fields require a new paid order. Twelve new HD hoeing frames match the approved three villager identities. Sources and provenance are retained. Integrating with latest master a27a564 after detecting the local checkout was stale. The first deployment could not read the newer production save; restoring compatible a27a564 source preserves all saved state. No more local computer use per user request; prior desktop/DPR-1 phone screenshots are retained, DPR-2 remains pending. Combined checks pass: 161 tests, native/WebGL lint, formatting, both release builds, all 280 HD frames and the focused twelve-pose check. Review: `docs/FIELD_PREPARATION_REVIEW.md`. Compatible recovery succeeded, followed by the final feature deployment to `koogle-frick`. Production verification passes: current bootstrap, catalog and new preparation PNG/JSON match the checkout; `/state` returns the expected valid world. No saved-state reset or schema edits were performed. Use `MODAL_PROFILE=koogle-frick` for deployment; the machine default points elsewhere. The user requested a PR and merge into the default branch (`master`), then local synchronization. Integrated transport merge 0864057; ship art keeps sheet 11 and field work uses sheet 12. Merged transport source 0864057 into `codex/field-preparation-harvest`; combined checks pass (172 tests, both lint targets, WebGL release rebuild, formatting, all 282 HD frames). PR creation and the user-authorized merge are next; the pre-integration stash remains a backup.
+[PR #74](https://github.com/koogle/age-of-agents/pull/74) merged into master as 69a8737. Preparation workers continue directly into harvesting; depleted fields require a new explicit paid order. Twelve HD hoeing poses match the three approved villager identities; sources/provenance and checks are retained. Integrated transport source 0864057 with separate sprite slots (ship 11, preparation 12).
+
+Combined verification: 172 workspace tests, both strict lint targets, formatting, regenerated WebGL release/bindings, all 282 HD frames, field/transport art checks, and thermonuclear review pass. Prior feature deployment verification passed in `koogle-frick`; the merged release's automated quality/deployment run remains pending. No save reset or schema edits were performed. Use `MODAL_PROFILE=koogle-frick` for manual deployment because this machine's default is another account.
+
+The user prohibited further local computer use; earlier desktop/DPR-1 phone evidence is retained, final combined/DPR-2 visual inspection remains pending. See `docs/FIELD_PREPARATION_REVIEW.md`. Local master is being synchronized to remote master after this handoff commit; the pre-integration stash remains a backup.
 
 ## Transport ship (2026-10-03)
 
