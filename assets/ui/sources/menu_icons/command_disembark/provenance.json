@@ -1,0 +1,88 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a short wooden ship gangplank ending on a small pale sandy shore, with one large ochre boot stepping down onto land, a clear landing-passengers symbol. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3702/gkjkPIAOMeq5yOx74Tlz9_cvuc7Egt.png",
+        "content_type": "image/png",
+        "file_name": "gkjkPIAOMeq5yOx74Tlz9_cvuc7Egt.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      314,
+      314,
+      627,
+      627
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "variant": "General Use (Light)",
+    "refine_foreground": false,
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad3802/A_wuk19Ql5e5TxlncFdCN_LErQkXT3.png",
+        "content_type": "image/png",
+        "file_name": "A_wuk19Ql5e5TxlncFdCN_LErQkXT3.png",
+        "file_size": null,
+        "width": 313,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242268.462418,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "disembark-full-silhouette",
+        "est_usd": 0.005,
+        "request_id": "01a10e5b-e55d-7940-9fd8-ad6557015f2b",
+        "seconds": 2.5
+      }
+    ],
+    "note": "Heavy model erased the platform; light model retains the complete silhouette. Dark-background visual check passes."
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "command_disembark.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239709.3628464,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "command_disembark",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-bf6d-76a2-ae27-2d27cfd65927",
+      "seconds": 9.0
+    },
+    {
+      "t": 1791239850.6002204,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:command_disembark",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-00ed-74a3-9a39-473d24efabf1",
+      "seconds": 2.4
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}
