@@ -102,3 +102,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | Icon | Sources and visual review |
 | --- | --- |
 | `resource_coal` | [Review](sources/menu_icons/resource_coal/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_coal/provenance.json) |
+| `resource_steel` | [Review](sources/menu_icons/resource_steel/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_steel/provenance.json) |
