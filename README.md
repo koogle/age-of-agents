@@ -17,7 +17,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - Seeded islands with varied outlines and open bays, relief-derived mountains and downhill rivers, biomes, clustered resources and fog of war.
 - Villager and group orders for movement, gathering, carrying and construction.
 - 17 buildings, 13 resources/products, farming with granary yield bonuses, processing, research and production queues.
-- Buildings unlocked through construction-material discovery.
+- Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
 - Territorial wolves and bears, unit health and hunting orders.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.

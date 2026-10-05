@@ -65,3 +65,14 @@ strict native/WASM client lint and formatting passed. This is a text-only change
 the 269-test gameplay result above remains from the preceding implementation.
 Desktop and DPR2 phone selection were rerun successfully; refreshed screenshots
 and the bundle hash are retained here, with no page errors.
+
+## PR integration
+
+[PR #132](https://github.com/koogle/age-of-agents/pull/132) integrates master
+`8bf00b4`, preserving PR #131’s productive-building visibility and the newer menu
+artwork. Documentation conflicts were reconciled and WASM regenerated from both
+source changes. The combined suite passes 271 tests (one manual benchmark ignored),
+formatting and strict native/WASM lint. Desktop and DPR2 phone granary selection
+were rerun with no page errors; captures and `result.json` reflect this bundle.
+Six release-verifier tests, the 298-frame audit, field/transport checks and icon
+normalization also pass. Code-quality review found no further changes needed.
