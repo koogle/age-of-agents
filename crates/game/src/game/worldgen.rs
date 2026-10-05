@@ -16,8 +16,8 @@ use std::collections::VecDeque;
 
 use super::*;
 
-/// Share of the map that is land.
-const LAND_SHARE: f64 = 0.55;
+mod drainage;
+mod shape;
 /// How many mountain ranges an island has, at least and at most.
 const RANGES: (usize, usize) = (3, 4);
 const MAX_ATTEMPTS: u64 = 64;
@@ -165,7 +165,7 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
     // Several mountain ranges stand out from the middle, each a ridge broken
     // into peaks by ridged noise, so the start is ringed by high ground but
     // never sits on it. Rolling hills and winding valleys cover the rest; the
-    // coast is a warped ellipse.
+    // coastline is generated independently of these heights.
     let ranges = RANGES.0 + rng.below(RANGES.1 - RANGES.0 + 1);
     let mut ridges: Vec<((f64, f64), (f64, f64))> = Vec::new();
     for _ in 0..ranges * 40 {
@@ -196,8 +196,7 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
     if ridges.len() < RANGES.0 {
         return None;
     }
-    let (shape_seed, detail_seed, hill_seed, crag_seed, moisture_seed, clay_seed, meander_seed) = (
-        rng.next(),
+    let (shape_seed, detail_seed, hill_seed, crag_seed, moisture_seed, clay_seed) = (
         rng.next(),
         rng.next(),
         rng.next(),
@@ -206,18 +205,13 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
         rng.next(),
     );
     let valley_seed = rng.next();
+    let outline = shape::outline(seed, shape_seed);
     let raw: Vec<f64> = (0..COLUMNS * ROWS)
         .map(|index| {
             let (x, y) = (
                 (index % COLUMNS) as f64 + 0.5,
                 (index / COLUMNS) as f64 + 0.5,
             );
-            let (nx, ny) = (
-                (x - width / 2.0) / (width * 0.46),
-                (y - height / 2.0) / (height * 0.44),
-            );
-            let warp = (fbm(shape_seed, x / 16.0, y / 16.0) - 0.5) * 0.55;
-            let falloff = 1.0 - (nx * nx + ny * ny) - warp;
             let crags = 1.0 - (2.0 * noise(crag_seed, x / 5.0, y / 5.0) - 1.0).abs();
             let mountain = ridges
                 .iter()
@@ -231,18 +225,16 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
             // Valleys follow the creases of ridged noise; rivers find them.
             let crease = 1.0 - (2.0 * fbm(valley_seed, x / 22.0, y / 22.0) - 1.0).abs();
             let valley = crease * crease * crease * crease * 0.3;
-            falloff * 0.9 + mountain + hills - valley
-                + (fbm(detail_seed, x / 6.0, y / 6.0) - 0.5) * 0.2
+            0.7 + mountain + hills - valley + (fbm(detail_seed, x / 6.0, y / 6.0) - 0.5) * 0.2
         })
         .collect();
 
-    // Sea level at the quantile that leaves LAND_SHARE as land, then keep only
+    // Choose a coastline quantile for this shape family, then keep only
     // the largest landmass so there is exactly one island.
-    let mut sorted = raw.clone();
+    let mut sorted = outline.clone();
     sorted.sort_by(f64::total_cmp);
-    let sea = sorted[((1.0 - LAND_SHARE) * sorted.len() as f64) as usize];
-    let top = sorted[sorted.len() - 1];
-    let mut land: Vec<bool> = raw.iter().map(|&e| e > sea).collect();
+    let sea = sorted[((1.0 - shape::land_share(seed)) * sorted.len() as f64) as usize];
+    let mut land: Vec<bool> = outline.iter().map(|&e| e > sea).collect();
     let mut component = vec![usize::MAX; land.len()];
     let mut sizes = Vec::new();
     for start in 0..land.len() {
@@ -272,28 +264,40 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
         *cell = *cell && component[index] == main && !edge;
     }
 
-    let mut elevation: Vec<f32> = raw
-        .iter()
-        .zip(&land)
-        .map(|(&e, &is_land)| {
-            if is_land {
-                (((e - sea) / (top - sea)).clamp(0.02, 1.0)) as f32
+    // Coast first, then relief: ridges cannot accidentally fill a bay or create
+    // offshore peaks. Coastal slopes taper continuously toward sea level.
+    let shore = distance_from((0..land.len()).filter(|&i| !land[i]), |i| land[i]);
+    let offshore = distance_from((0..land.len()).filter(|&i| land[i]), |i| !land[i]);
+    let mut elevation: Vec<f32> = (0..land.len())
+        .map(|i| {
+            if land[i] {
+                (raw[i].max(0.03) * (f64::from(shore[i]) / 9.0).min(1.0)) as f32
             } else {
-                (-((sea - e) / (sea - sorted[0])).clamp(0.05, 1.0)) as f32
+                -(offshore[i] as f32 / 12.0).clamp(0.05, 1.0)
             }
         })
         .collect();
+    let drainage = drainage::drain(&land, &mut elevation);
+    let top = elevation.iter().copied().fold(0.0, f32::max);
+    for (i, height) in elevation.iter_mut().enumerate() {
+        if land[i] {
+            *height /= top;
+        }
+    }
     // Rank of every land cell by height, so biome bands hold a steady share
     // of the island however steep its relief.
     let mut by_height: Vec<usize> = (0..land.len()).filter(|&i| land[i]).collect();
-    by_height.sort_by(|&a, &b| raw[a].total_cmp(&raw[b]).then(a.cmp(&b)));
+    by_height.sort_by(|&a, &b| elevation[a].total_cmp(&elevation[b]).then(a.cmp(&b)));
     let mut rank = vec![0.0; land.len()];
     for (place, &index) in by_height.iter().enumerate() {
         rank[index] = place as f64 / by_height.len() as f64;
     }
     let mountain = |i: usize| land[i] && rank[i] >= MOUNTAIN_RANK;
 
-    let (river, ford) = carve_rivers(&raw, &land, &rank, &mut elevation, meander_seed, &mut rng);
+    let (river, ford) = drainage.rivers(&land, &rank);
+    if river.iter().filter(|&&r| r).count() < MIN_RIVER_LENGTH {
+        return None;
+    }
 
     // Distance to the open sea (water reachable from the map edge) versus
     // inland lakes and rivers, and a moisture field that is wetter near water.
@@ -380,9 +384,11 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
             rows,
         }
         .center();
-        resources
-            .iter()
-            .any(|r| r.kind == kind && r.cell.center().distance(base) <= NEAR_START)
+        resources.iter().any(|r| {
+            r.kind == kind
+                && r.cell.center().distance(base)
+                    <= NEAR_START.min(BuildingKind::TownCenter.sight_radius())
+        })
     };
     (enough && near_start(ResourceKind::Wood) && near_start(ResourceKind::Food)).then_some(Island {
         seed,
@@ -399,96 +405,6 @@ fn distance_to_segment(p: (f64, f64), (a, b): ((f64, f64), (f64, f64))) -> f64 {
         .clamp(0.0, 1.0);
     let (x, y) = (p.0 - a.0 - abx * t, p.1 - a.1 - aby * t);
     (x * x + y * y).sqrt()
-}
-
-/// Rivers rise in the highlands below the peaks and run downhill to the sea
-/// (or into an earlier river). Returns the river cells and the fords, shallow
-/// sandbars spaced along each river so no bank is ever cut off. River beds
-/// only ever descend toward the mouth.
-fn carve_rivers(
-    raw: &[f64],
-    land: &[bool],
-    rank: &[f64],
-    elevation: &mut [f32],
-    meander_seed: u64,
-    rng: &mut Rng,
-) -> (Vec<bool>, Vec<bool>) {
-    use std::cmp::Reverse;
-    use std::collections::BinaryHeap;
-
-    // Priority flood from the water inward: every land cell learns the next
-    // cell on its lowest route to the water. A little noise makes rivers meander.
-    let level = |i: usize| {
-        let (x, y) = ((i % COLUMNS) as f64, (i / COLUMNS) as f64);
-        raw[i] + (fbm(meander_seed, x / 4.0, y / 4.0) - 0.5) * 0.3
-    };
-    let key = |value: f64| (value * 1e9) as i64;
-    let mut downstream = vec![usize::MAX; land.len()];
-    let mut done: Vec<bool> = land.iter().map(|&l| !l).collect();
-    let mut heap = BinaryHeap::new();
-    for i in (0..land.len()).filter(|&i| !land[i]) {
-        if neighbours4(i).any(|n| land[n]) {
-            heap.push(Reverse((i64::MIN, i)));
-        }
-    }
-    while let Some(Reverse((current, cell))) = heap.pop() {
-        for next in neighbours4(cell) {
-            if !done[next] {
-                done[next] = true;
-                downstream[next] = cell;
-                heap.push(Reverse((current.max(key(level(next))), next)));
-            }
-        }
-    }
-
-    let mut river = vec![false; land.len()];
-    let mut ford = vec![false; land.len()];
-    let mut sources: Vec<usize> = (0..land.len())
-        .filter(|&i| (HIGHLAND_RANK..MOUNTAIN_RANK).contains(&rank[i]))
-        .collect();
-    let mut rivers = 0;
-    while rivers < RIVERS && !sources.is_empty() {
-        let source = sources.swap_remove(rng.below(sources.len()));
-        let mut path = vec![source];
-        while let Some(&last) = path.last() {
-            let next = downstream[last];
-            if next == usize::MAX || !land[next] || river[next] {
-                break;
-            }
-            path.push(next);
-        }
-        let near_other = river
-            .iter()
-            .enumerate()
-            .any(|(i, &r)| r && near(i, source, 10));
-        if path.len() < MIN_RIVER_LENGTH || near_other {
-            continue;
-        }
-        let mut bed = f32::MAX;
-        let mut since_ford = FORD_SPACING / 2;
-        for (step, &cell) in path.iter().enumerate() {
-            river[cell] = true;
-            bed = bed.min(elevation[cell]);
-            elevation[cell] = bed.max(0.02);
-            since_ford += 1;
-            // A ford every few cells on a straight reach (a ford on a bend
-            // would touch only one bank), never at the source or the mouth.
-            let straight = step >= 3
-                && step + 3 < path.len()
-                && cell + cell == path[step - 1] + path[step + 1];
-            if straight && since_ford >= FORD_SPACING {
-                ford[cell] = true;
-                since_ford = 0;
-            }
-        }
-        sources.retain(|&s| !near(s, source, 10));
-        rivers += 1;
-    }
-    (river, ford)
-}
-
-fn near(a: usize, b: usize, cells: usize) -> bool {
-    (a % COLUMNS).abs_diff(b % COLUMNS) <= cells && (a / COLUMNS).abs_diff(b / COLUMNS) <= cells
 }
 
 /// A flat, dry, central site for the town center, with two villager spots
@@ -681,7 +597,10 @@ fn place_resources(
             // other clusters; ore prefers the highest ground. The first few
             // ring the start; the rest wait out in the unexplored island.
             let (closest, furthest) = if cluster < near {
-                (STARTING_BASE_RESOURCE_CLEARANCE + 2.0, NEAR_START - 2.0)
+                (
+                    STARTING_BASE_RESOURCE_CLEARANCE + 2.0,
+                    BuildingKind::TownCenter.sight_radius(),
+                )
             } else if near > 0 {
                 (STARTING_BASE_RESOURCE_CLEARANCE + 2.0, f64::MAX)
             } else {
