@@ -10,7 +10,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Persistent destination islands, explicit voyages and a shared resource pool are implemented. Next: cumulative archipelago overview and further economy refinement. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and a shared resource pool are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
@@ -25,8 +25,8 @@ The first transport is a playable dock recipe costing 60 wood + 20 timber, takin
 Remaining acceptance criteria:
 
 1. Implemented: dock-built transport boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
-2. Implemented: first transport completion generates a destination once; an explicit voyage travels to that persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
-3. Implemented: resources are shared across all islands, so new arrivals can fund an outpost directly from the shared pool. Island-local inventories and resource shipping are deferred; away islands still pause.
+2. Implemented: sailing toward the map frontier generates an adjacent island; continuous ocean crossings reach the persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
+3. Implemented: resources are shared across all islands, so new arrivals can fund an outpost directly from the shared pool. Island-local inventories and resource shipping are deferred; all discovered settlements keep running.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
 
 ## Released baseline — Gather, build, research, and route
@@ -99,7 +99,7 @@ User-directed implementation activates construction of all 17 catalog buildings.
 
 The Rust HUD exposes grouped, labelled construction, production costs/progress and all stockpile totals. Compact phone and short-landscape layouts place actions beside the globe/speed controls, with queues and submenus wrapping upward. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
-This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying units, persistent destination islands, and shared resources. Persistent voyages are implemented; next add each discovered island to a cumulative globe overview. Away islands currently pause while the active island simulates. Animals/adversaries follow that economy/transport loop.
+This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying units, persistent destination islands, and shared resources. Continuous sailing, progressive island placement, a cumulative globe overview and simultaneous simulation of discovered settlements are implemented. Profile larger populated worlds before adding streamed terrain or snapshot deltas. Animals/adversaries follow that economy/transport loop.
 
 ## Slice C — Steel economy vertical slice
 
@@ -192,6 +192,8 @@ Gameplay acceptance:
 - [x] Dedicated lossless 512 px building/construction sprites, translucent placement ghosts, green/red rectangular footprint previews, and Grid toggle (G). Original-style building sprites render without skewing inside cobblestone plots; houses are visually smaller and the completed granary displays stored grain. Plots mark the exact claim, including construction and previews; touching plots share one level foundation height.
 
 ## Integrated native presentation fixes
+
+- [x] Globe minimap terrain, camera marker and click/touch navigation share the world view’s isometric orientation and fit the full current map.
 
 - [x] Shift-click group selection and existing shared gather/construct commands.
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.

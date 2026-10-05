@@ -28,6 +28,34 @@ impl PathTree {
         start: CellCoordinate,
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
+        Self::search_to(columns, rows, start, None, passable)
+    }
+
+    /// A* to one target; unlike a complete tree, unrelated ocean is not flooded.
+    pub fn route(
+        columns: u16,
+        rows: u16,
+        start: CellCoordinate,
+        target: CellCoordinate,
+        passable: impl Fn(CellCoordinate) -> bool,
+    ) -> Self {
+        Self::search_to(columns, rows, start, Some(target), passable)
+    }
+
+    fn search_to(
+        columns: u16,
+        rows: u16,
+        start: CellCoordinate,
+        target: Option<CellCoordinate>,
+        passable: impl Fn(CellCoordinate) -> bool,
+    ) -> Self {
+        let estimate = |cell: CellCoordinate| {
+            target.map_or(0, |goal| {
+                let x = u32::from(cell.column.abs_diff(goal.column));
+                let y = u32::from(cell.row.abs_diff(goal.row));
+                2 * x.max(y) + x.min(y)
+            })
+        };
         let count = usize::from(columns) * usize::from(rows);
         let mut tree = Self {
             columns,
@@ -41,11 +69,14 @@ impl PathTree {
         let mut open = BinaryHeap::new();
         let start_index = tree.index(start);
         tree.cost[start_index] = 0;
-        open.push(Reverse((0_u32, start)));
-        while let Some(Reverse((cost, current))) = open.pop() {
+        open.push(Reverse((estimate(start), 0_u32, start)));
+        while let Some(Reverse((_, cost, current))) = open.pop() {
             let current_index = tree.index(current);
             if cost != tree.cost[current_index] {
                 continue;
+            }
+            if target == Some(current) {
+                break;
             }
             for (next, step_cost) in steps(current, columns, rows, &passable) {
                 let candidate = cost + step_cost;
@@ -53,7 +84,7 @@ impl PathTree {
                 if candidate < tree.cost[index] {
                     tree.cost[index] = candidate;
                     tree.previous[index] = Some(current);
-                    open.push(Reverse((candidate, next)));
+                    open.push(Reverse((candidate + estimate(next), candidate, next)));
                 }
             }
         }
@@ -196,5 +227,27 @@ mod tests {
         assert_eq!(tree.cost(cell(2, 2)), None);
         assert_eq!(tree.first_step(cell(2, 2)), None);
         assert_eq!(tree.nearest([cell(2, 2), cell(0, 0)]), Some(cell(0, 0)));
+    }
+}
+
+#[cfg(test)]
+mod route_tests {
+    use super::*;
+    #[test]
+    fn targeted_routes_match_complete_search_costs_and_respect_obstacles() {
+        for seed in 0..12 {
+            let clear = |c: CellCoordinate| !(c.column == 7 && c.row != seed);
+            let start = CellCoordinate::new(2, 3);
+            let all = PathTree::search(20, 16, start, clear);
+            for goal in [
+                CellCoordinate::new(18, 14),
+                CellCoordinate::new(1, 1),
+                CellCoordinate::new(7, 15),
+            ] {
+                let route = PathTree::route(20, 16, start, goal, clear);
+                assert_eq!(route.cost(goal), all.cost(goal));
+                assert!(route.path_to(goal).iter().all(|&cell| clear(cell)));
+            }
+        }
     }
 }
