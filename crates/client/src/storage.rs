@@ -3,6 +3,32 @@ use super::*;
 use aoa_game::{CargoDirection, ResourceKind, island_at};
 
 impl App {
+    /// Selected villagers carrying goods the complete building `id` accepts.
+    pub(crate) fn carriers_for(&self, id: &str) -> Vec<String> {
+        let Some(snapshot) = self.view.snapshot.as_ref() else {
+            return Vec::new();
+        };
+        let Some(building) = snapshot
+            .buildings
+            .iter()
+            .find(|b| b.building.id == id && b.building.construction.is_none())
+        else {
+            return Vec::new();
+        };
+        snapshot
+            .units
+            .iter()
+            .filter(|u| self.selection.units.contains(&u.unit.id))
+            .filter(|u| {
+                u.unit
+                    .cargo
+                    .as_ref()
+                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
+            })
+            .map(|u| u.unit.id.clone())
+            .collect()
+    }
+
     pub(crate) fn select_storage_ship(&mut self, id: String) {
         self.selection.units.clear();
         self.selection.building = None;

@@ -480,6 +480,7 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
         .iter()
         .enumerate()
         .map(|(index, &spot)| Unit {
+            health: 100.0,
             id: format!("blocker-{index}"),
             kind: UnitKind::Villager,
             cell: spot,
@@ -644,6 +645,10 @@ fn paused_orders_are_rejected_without_changing_tasks_or_spending_resources() {
         Command::Board {
             unit_id: "villager-1".into(),
             ship_id: "ship-1".into(),
+        },
+        Command::AttackAnimal {
+            unit_ids: vec!["villager-1".into()],
+            animal_id: "wolf-1".into(),
         },
         Command::StopShip {
             ship_id: "ship-1".into(),
@@ -1197,6 +1202,7 @@ fn houses_raise_the_population_cap() {
     world.inventories[0].food = 1_000.0;
     while world.villagers_and_trainees() < world.housing() {
         world.units.push(Unit {
+            health: 100.0,
             id: format!("extra-{}", world.units.len()),
             kind: UnitKind::Villager,
             cell: cell(2 + world.units.len() as u16, 2),
