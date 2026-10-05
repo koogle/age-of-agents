@@ -40,7 +40,7 @@ Keep the simulation deterministic. The world expands as the player discovers isl
 - Villagers carry at most 20 typed units, deposit at the nearest reachable compatible completed building (including lumber mills for wood), and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: given a new gather, build, or field-preparation assignment, it delivers its cargo to a compatible completed drop site before starting, including partial loads of the same kind. It retains and resumes the new assignment automatically.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
-- Tap/click the build button to open the grouped building menu (all 17 catalog buildings plus farm fields; unaffordable ones in greyscale), pick one, then tap valid ground to issue a build order.
+- Tap/click the build button to open the grouped building menu (buildings unlocked by construction-material discovery plus farm fields; all 14 first-island buildings are initially available, and unaffordable ones stay visible in greyscale), pick one, then tap valid ground to issue a build order.
 - Tap/click a town center to train a villager or start available research through the medallion buttons that appear at the bottom center.
 - Left-drag or touch drag pans. While placing, drag the ghost and release to build. Wheel/pinch zooms. Use the Grid pill (or G) to toggle square cells shown as diamonds; placement always previews its rectangular footprint. The camera heading is fixed; right-drag, two-finger twist, and Q/E do not rotate it.
 - Mouse and touch semantics must match.
@@ -88,6 +88,7 @@ The folder holds individual system guides, procedures, research and reusable lea
 
 ## Workflow
 
+- Feature regressions require Jakob’s explicit approval before release. Preserve existing player-facing features. Before releasing a change that removes, hides, disables, or adds prerequisites to an existing feature, present Jakob with the affected features, before/after behavior, rationale, save impact, and alternatives for explicit review. General milestone simplification is not approval for individual feature losses; record the user's specific approval in the change description. Watchtower, Barracks, and the existing building catalog remain important game features.
 - Follow the **consult → work → learn/update → continue** documentation loop below; project context belongs in reviewable repository files.
 - For any visual change (sprites, textures, UI, layout, or rendering), show relevant images directly in the chat alongside status updates to the developer as soon as a preview is available, and include the final visual result when finishing. Use current asset previews or in-game screenshots, label drafts and before/after comparisons clearly, and do not wait for the developer to ask to see the changes.
 - At the start of every work session, read `OPEN_WORK.md` before acting.

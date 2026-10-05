@@ -1,6 +1,6 @@
 # Starter economy review
 
-Historical review of [PR #55](https://github.com/koogle/age-of-agents/pull/55). Its starter economy remains relevant, but the transport budget is now a playable recipe and continuous island exploration is implemented; local inventories/goods shipping were superseded by shared resources. See [current behavior](../README.md#proposed-gameplay-loop) and [decisions](../decisions.md) rather than treating the deferred-work statements below as today's backlog.
+Historical review of [PR #55](https://github.com/koogle/age-of-agents/pull/55). Its initial six-building restriction is superseded by construction-based unlocks in [PR #92](https://github.com/koogle/age-of-agents/pull/92), including first-island Kitchen/rations; see the [economy guide](knowledge/economy-and-queues.md). Its resource budget remains relevant, but the transport budget is now a playable recipe and continuous island exploration is implemented; local inventories/goods shipping were superseded by shared resources. See [current behavior](../README.md#proposed-gameplay-loop) and [decisions](../decisions.md) rather than treating the deferred-work statements below as today's backlog.
 
 Fresh worlds use food/wood/stone generation and resource-discovery unlocks. Timber is their only available processing chain. Existing saves deserialize the absent economy_rules field as Unrestricted, preserving their resources, buildings, jobs and catalog access. Reset is still an explicit destructive user choice; no schema reset or silent migration was added.
 

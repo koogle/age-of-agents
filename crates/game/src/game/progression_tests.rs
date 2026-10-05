@@ -39,12 +39,15 @@ fn locked_build_production_and_research_are_atomic_even_with_free_materials() {
     w.stockpile.wood = 1000.0;
     w.stockpile.stone = 1000.0;
     w.stockpile.food = 1000.0;
-    let origin = free_site(&mut w, BuildingKind::Kitchen);
+    w.stockpile.timber = 1000.0;
+    w.stockpile.cloth = 1000.0;
+    w.stockpile.rations = 1000.0;
+    let origin = free_site(&mut w, BuildingKind::Infirmary);
     let before = w.clone();
     assert_eq!(
         w.apply_command(Command::Build {
             unit_id: "villager-1".into(),
-            kind: BuildingKind::Kitchen,
+            kind: BuildingKind::Infirmary,
             origin
         }),
         Err(CommandError::NotBuildable)
@@ -60,12 +63,12 @@ fn locked_build_production_and_research_are_atomic_even_with_free_materials() {
     assert_eq!(w, before);
     // An existing or injected processor cannot bypass authoritative progression.
     w.buildings
-        .push(building(BuildingKind::Kitchen, "kitchen", origin, None));
+        .push(building(BuildingKind::Infirmary, "infirmary", origin, None));
     let before = w.clone();
     assert_eq!(
         w.apply_command(Command::Produce {
-            building_id: "kitchen".into(),
-            product: ProductKind::Rations
+            building_id: "infirmary".into(),
+            product: ProductKind::Healer
         }),
         Err(CommandError::ProductUnavailable)
     );
@@ -97,29 +100,48 @@ fn discovering_complementary_materials_unlocks_industries_and_persists_after_dep
         });
     }
     assert!(
-        !w.building_available(BuildingKind::Smelter),
-        "hidden nodes cannot unlock buildings"
+        !w.building_available(BuildingKind::Workshop),
+        "hidden clay cannot unlock buildings"
     );
+    assert!(!w.building_available(BuildingKind::Infirmary));
     w.explored_cells.push(cell(2, 2));
-    assert!(w.building_available(BuildingKind::MiningCamp));
     assert!(w.technology_available(TechnologyKind::Mining));
+    assert!(!w.building_available(BuildingKind::Workshop));
+    w.explored_cells.push(cell(4, 2));
+    assert!(w.building_available(BuildingKind::Workshop));
+    assert!(!w.building_available(BuildingKind::Infirmary));
+    w.explored_cells.push(cell(5, 2));
+    assert!(w.building_available(BuildingKind::Infirmary));
+    assert!(w.technology_available(TechnologyKind::Textiles));
+    assert!(!w.building_available(BuildingKind::Monument));
+    w.resources.push(ResourceNode {
+        id: "gold".into(),
+        kind: ResourceKind::Gold,
+        cell: cell(6, 2),
+        amount: 40.0,
+        capacity: 40.0,
+        field: None,
+    });
+    w.explored_cells.push(cell(6, 2));
     assert!(
-        !w.building_available(BuildingKind::Smelter),
-        "iron alone lacks fuel"
+        !w.building_available(BuildingKind::Monument),
+        "steel still needs coal"
     );
     w.explored_cells.push(cell(3, 2));
-    assert!(w.building_available(BuildingKind::Smelter));
-    assert!(!w.building_available(BuildingKind::Kiln));
-    w.explored_cells.extend([cell(4, 2), cell(5, 2)]);
-    assert!(w.building_available(BuildingKind::Kiln));
-    assert!(w.building_available(BuildingKind::Weaver));
-    assert!(w.technology_available(TechnologyKind::Textiles));
+    w.explored_cells.sort_unstable();
+    assert_eq!(w.available_buildings(), BUILDABLE);
     for r in &mut w.resources {
         r.amount = 0.0;
     }
     let restored: GameWorld = serde_json::from_value(serde_json::to_value(&w).unwrap()).unwrap();
-    assert!(restored.building_available(BuildingKind::Smelter));
-    assert!(!restored.building_available(BuildingKind::Kitchen));
+    assert_eq!(restored.available_buildings(), BUILDABLE);
+    assert!(restored.building_available(BuildingKind::Workshop));
+    assert!(restored.building_available(BuildingKind::Infirmary));
+    assert!(
+        STARTER_BUILDINGS
+            .iter()
+            .all(|&k| restored.building_available(k))
+    );
 }
 
 #[test]
@@ -182,4 +204,55 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
     }
     assert!(w.stockpile.affords(&FIRST_TRANSPORT_COST));
     w.validate().unwrap();
+}
+
+#[test]
+fn every_building_funded_by_first_island_materials_accepts_construction() {
+    let expected = [
+        BuildingKind::TownCenter,
+        BuildingKind::House,
+        BuildingKind::Granary,
+        BuildingKind::Farm,
+        BuildingKind::LumberMill,
+        BuildingKind::Dock,
+        BuildingKind::Watchtower,
+        BuildingKind::MiningCamp,
+        BuildingKind::Smelter,
+        BuildingKind::Kiln,
+        BuildingKind::Weaver,
+        BuildingKind::Kitchen,
+        BuildingKind::Barracks,
+        BuildingKind::Range,
+    ];
+    for kind in expected {
+        let mut w = fixture::fixture();
+        w.economy_rules = EconomyRules::IslandProgression;
+        w.resources.retain(|r| STARTER_RESOURCES.contains(&r.kind));
+        assert!(
+            kind.cost()
+                .iter()
+                .all(|&(r, _)| STARTER_RESOURCES.contains(&r) || r == ResourceKind::Timber)
+        );
+        for &(resource, amount) in kind.cost() {
+            w.stockpile.add(resource, amount);
+        }
+        // Dock shore placement already has dedicated coverage.
+        if kind == BuildingKind::Dock {
+            assert!(w.building_available(kind));
+            continue;
+        }
+        let origin = free_site(&mut w, kind);
+        w.apply_command(Command::Build {
+            unit_id: "villager-1".into(),
+            kind,
+            origin,
+        })
+        .unwrap();
+        assert!(
+            w.buildings
+                .iter()
+                .any(|b| b.kind == kind && b.origin == origin)
+        );
+        w.validate().unwrap();
+    }
 }
