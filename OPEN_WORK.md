@@ -1,4 +1,11 @@
-# Current handoff: harvesting through field replenishment (2026-10-05)
+# Current handoff: authorized fix release (2026-10-05)
+
+- User authorized merging the open fixes. Movement PR #91 and field replenishment PR #88 are merged. Home-dock fix #86 is already adapted and included by merged #90; original-dock and blocked-home regressions pass and #86 is closed as superseded. Refactor #72 stays open.
+- Selection PR #87 integrates latest master `d2e5d20`, preserving continuous archipelago, runtime minimap bounds, full gait cycles, arrival-gated work poses, retained field harvesting and the terrain-run deployment verifier. Control/Command adds; Shift-drag replaces and empty replacement areas clear. Documentation conflicts preserve both behaviors; rebuild JS/WASM from combined source.
+- Combined verification passes all 228 Rust tests (17 server, 73 client, 138 domain; one manual budget test remains ignored), formatting, strict native/WASM lint, JS syntax, asset audits and three deployment-verifier tests. Current Rust sources match the fully tested combined tree; rebuilt final JS/WASM. Real Control/Mac Command replacement/addition/empty-area replays pass. Authoritative field replay passes delivery → retained order → harvesting without another command. DPR2 phone navigation/selection passes after explicitly waiting for camera navigation; an earlier QA tap raced that frame update. No page errors. Logs/captures: `/workspace/scratch/merge-fixes`.
+- Thermonuclear integration review: domain/input/presentation ownership retained, no new dependencies/commands/costs/schema; all client files below 1,000 lines. Direct Modal credentials remain unavailable; authorized master merges run production quality/deployment.
+
+# Previous handoff: harvesting through field replenishment (2026-10-05)
 
 - Reproduced a returning harvester losing its Gather order when a second villager is replenishing the exhausted field. The returning villager deposited its last load, saw zero food, and became idle (or switched to nearby food), so field completion never resumed its work.
 - Fixed the shared exhausted-target continuation in `gathering.rs`: an existing gathering assignment waits while that field has paid preparation in progress. It resumes when food is ready; idle villagers are not recruited and exhausted fields do not replant themselves. Stop and replacement orders still win.
@@ -22,7 +29,7 @@
 - Thermonuclear review: removed heading filter, timed facing hold, work offsets and draw-time delta parameter; no new application dependency or gameplay subsystem. One public domain predicate reuses existing arrival semantics. Histories are bounded, input paths remain shared, commands/state ownership and SQLite behavior are unchanged. All client files remain under 1,000 lines. README, roadmap, decisions and sprite registration notes match the implementation.
 - Logs, replay scripts, numeric summaries, desktop/phone captures and native video are under `/workspace/scratch/movement-audit/`; isolated server database is `qa.db` there. Native prerequisites and Rust tooling were installed/extracted outside the repository. Source, regression tests, documentation and rebuilt browser bundle are included in the PR branch.
 
-# Current handoff: continuous archipelago (2026-10-05)
+# Previous handoff: continuous archipelago (2026-10-05)
 
 - PR #90: https://github.com/koogle/age-of-agents/pull/90. Branch `feat/continuous-archipelago` implements the requested shared map: deterministic neighboring island regions, 64-cell ocean gaps, discovery as a ship approaches the frontier, real sailing instead of map swaps, and simultaneous simulation of all discovered settlements. Resource/research sharing is preserved.
 - Legacy island saves are validated and translated once into global coordinates; fog, orders, ship steps/destinations/passengers, resource references, buildings and queues persist. Sailing shortcuts prefer a completed destination dock, including the recorded home dock. This includes the home-dock identity behavior from the separately opened PR #86, adapted to continuous sailing; #86 remains open and its teleport-specific implementation is superseded here. Do not merge automatically.

@@ -1,10 +1,29 @@
-//! Shared mouse/touch gestures; Shift-drag from ground selects instead of panning.
+//! Shared mouse/touch gestures and platform-aware unit selection.
 use crate::{App, hud};
 use glam::{Vec2, Vec3};
 use winit::event::{MouseButton, TouchPhase};
+use winit::keyboard::ModifiersState;
 
 const DRAG_THRESHOLD: f32 = 8.0;
 const EDGE_PAN_HEIGHTS_PER_SECOND: f32 = 0.75;
+
+fn additive_modifier(modifiers: ModifiersState, mac: bool) -> bool {
+    if mac {
+        modifiers.super_key()
+    } else {
+        modifiers.control_key()
+    }
+}
+
+pub(super) fn additive_selection(modifiers: ModifiersState) -> bool {
+    #[cfg(target_arch = "wasm32")]
+    let mac = web_sys::window()
+        .and_then(|window| window.navigator().platform().ok())
+        .is_some_and(|platform| platform.starts_with("Mac"));
+    #[cfg(not(target_arch = "wasm32"))]
+    let mac = cfg!(target_os = "macos");
+    additive_modifier(modifiers, mac)
+}
 
 /// Gentle speed ramp through the outer 32 logical pixels; corners pan diagonally.
 fn edge_direction(pixel: Vec2, size: Vec2, scale: f32) -> Vec2 {
@@ -24,6 +43,7 @@ pub(super) struct Pointer {
     pub(super) grabbed: Option<Vec3>,
     pub(super) dragging: bool,
     pub(super) box_select: bool,
+    additive: bool,
 }
 
 impl App {
@@ -50,9 +70,9 @@ impl App {
             .pan_screen(direction * self.rig.height * EDGE_PAN_HEIGHTS_PER_SECOND * dt);
     }
 
-    pub(super) fn press(&mut self, pixel: Vec2, button: MouseButton, shift: bool) {
+    pub(super) fn press(&mut self, pixel: Vec2, button: MouseButton, shift: bool, additive: bool) {
         let on_hud = button == MouseButton::Left && self.hud.press(pixel);
-        let box_select = shift
+        let box_select = (shift || additive)
             && !on_hud
             && button == MouseButton::Left
             && self.build == hud::BuildUi::Off
@@ -64,6 +84,7 @@ impl App {
             grabbed: self.ground_at(pixel),
             dragging: false,
             box_select,
+            additive,
         });
     }
 
@@ -105,10 +126,10 @@ impl App {
         match phase {
             TouchPhase::Started => {
                 self.cursor = pixel;
-                self.press(pixel, MouseButton::Left, false);
+                self.press(pixel, MouseButton::Left, false, false);
             }
             TouchPhase::Moved => self.moved(pixel),
-            TouchPhase::Ended => self.release(pixel, false),
+            TouchPhase::Ended => self.release(pixel),
             TouchPhase::Cancelled => self.pointer = None,
         }
     }
@@ -161,7 +182,7 @@ impl App {
         }
     }
 
-    pub(super) fn release(&mut self, pixel: Vec2, additive: bool) {
+    pub(super) fn release(&mut self, pixel: Vec2) {
         let Some(pointer) = self.pointer.take() else {
             return;
         };
@@ -171,9 +192,9 @@ impl App {
             }
         } else if pointer.box_select && pointer.dragging {
             let ids = self.view.units_in_box(&self.rig, pointer.down_at, pixel);
-            self.selection.add_units(ids);
+            self.selection.select_units(ids, pointer.additive);
         } else if !pointer.dragging && pointer.button == MouseButton::Left {
-            self.tap(pixel, additive);
+            self.tap(pixel, pointer.additive);
         }
     }
 }
@@ -181,6 +202,21 @@ impl App {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn selection_adds_only_with_the_platform_primary_modifier() {
+        for (modifiers, mac, other) in [
+            (ModifiersState::empty(), false, false),
+            (ModifiersState::SHIFT, false, false),
+            (ModifiersState::CONTROL, false, true),
+            (ModifiersState::SUPER, true, false),
+            (ModifiersState::SHIFT | ModifiersState::CONTROL, false, true),
+            (ModifiersState::SHIFT | ModifiersState::SUPER, true, false),
+        ] {
+            assert_eq!(additive_modifier(modifiers, true), mac);
+            assert_eq!(additive_modifier(modifiers, false), other);
+        }
+    }
 
     #[test]
     fn edges_and_corners_pan_toward_the_pointer_without_diagonal_speedup() {

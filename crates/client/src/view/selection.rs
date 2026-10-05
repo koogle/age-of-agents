@@ -28,22 +28,10 @@ pub struct Selection {
 }
 
 impl Selection {
-    pub fn select_unit(&mut self, id: String, additive: bool) {
+    pub fn select_units(&mut self, ids: Vec<String>, additive: bool) {
         if !additive {
-            self.units.clear();
+            *self = Self::default();
         }
-        if let Some(index) = self.units.iter().position(|unit| unit == &id) {
-            self.units.remove(index);
-        } else {
-            self.units.push(id);
-        }
-        self.building = None;
-        self.ship = None;
-    }
-}
-
-impl Selection {
-    pub fn add_units(&mut self, ids: Vec<String>) {
         if ids.is_empty() {
             return;
         }
@@ -89,16 +77,32 @@ mod tests {
     }
 
     #[test]
-    fn box_adds_without_toggling_existing_units() {
+    fn additive_selection_preserves_existing_units_and_empty_areas() {
         let mut selection = Selection {
             building: Some("base-1".into()),
             ..Selection::default()
         };
-        selection.add_units(vec![]);
+        selection.select_units(vec![], true);
         assert!(selection.building.is_some());
-        selection.add_units(vec!["villager-1".into(), "villager-2".into()]);
-        selection.add_units(vec!["villager-1".into()]);
+        selection.select_units(vec!["villager-1".into(), "villager-2".into()], true);
+        selection.select_units(vec!["villager-1".into()], true);
         assert_eq!(selection.units, ["villager-1", "villager-2"]);
+        assert!(selection.building.is_none());
+    }
+
+    #[test]
+    fn replacement_area_selects_only_enclosed_units_and_empty_area_clears() {
+        let mut selection = Selection {
+            units: vec!["outside".into()],
+            ship: Some("ship-1".into()),
+            ..Selection::default()
+        };
+        selection.select_units(vec!["inside".into(), "inside".into()], false);
+        assert_eq!(selection.units, ["inside"]);
+        assert!(selection.ship.is_none());
+        selection.building = Some("base-1".into());
+        selection.select_units(vec![], false);
+        assert!(selection.units.is_empty());
         assert!(selection.building.is_none());
     }
 }

@@ -83,20 +83,20 @@ fn villagers_on_a_new_island_follow_its_snapshots() {
 }
 
 #[test]
-fn shift_selection_toggles_members_and_plain_click_replaces() {
+fn additive_click_keeps_members_and_plain_click_replaces() {
     let mut selection = Selection {
         building: Some("base-1".into()),
         ..Selection::default()
     };
-    selection.select_unit("villager-1".into(), false);
-    selection.select_unit("villager-2".into(), true);
+    selection.select_units(vec!["villager-1".into()], false);
+    selection.select_units(vec!["villager-2".into()], true);
     assert_eq!(selection.units, ["villager-1", "villager-2"]);
     assert!(selection.building.is_none());
-    selection.select_unit("villager-1".into(), true);
-    assert_eq!(selection.units, ["villager-2"]);
-    selection.select_unit("villager-1".into(), false);
+    selection.select_units(vec!["villager-1".into()], true);
+    assert_eq!(selection.units, ["villager-1", "villager-2"]);
+    selection.select_units(vec!["villager-1".into()], false);
     assert_eq!(selection.units, ["villager-1"]);
-    selection.select_unit("villager-1".into(), false);
+    selection.select_units(vec!["villager-1".into()], false);
     assert_eq!(selection.units, ["villager-1"]);
 }
 
