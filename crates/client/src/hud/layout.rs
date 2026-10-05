@@ -11,7 +11,8 @@ impl Hud {
         };
         let s = scale;
         let narrow = width < 600.0 * s || height < 500.0 * s;
-        let stock = &snapshot.stockpile;
+        let stock =
+            &snapshot.inventories[model.resource_island.min(snapshot.inventories.len() - 1)];
 
         // Resource coins with count tabs, top-right: wood and food always, others once owned.
         let shown: Vec<(ResourceKind, f64)> = snapshot
@@ -60,7 +61,11 @@ impl Hud {
         }
 
         let header_bottom = (shown.len().div_ceil(per_row) as f32 * 82.0 + 8.0) * s;
-        let shared_label = "Resources shared across islands";
+        let label = format!(
+            "Island {} · shore + nearby ships",
+            model.resource_island + 1
+        );
+        let shared_label = label.as_str();
         self.text(
             atlas,
             shared_label,

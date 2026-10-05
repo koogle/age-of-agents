@@ -8,6 +8,7 @@ fn vessel(cell: CellCoordinate) -> TransportShip {
         destination: None,
         heading: [1, 0],
         passengers: Vec::new(),
+        cargo: Default::default(),
         home_dock_id: None,
     }
 }
@@ -157,7 +158,7 @@ fn migration_preserves_every_settlement_and_orders_and_is_idempotent() {
     assert_eq!(world.buildings.len(), 2);
     assert_eq!(world.units.len(), 4);
     assert_eq!(world.ships[0].cell, CellCoordinate::new(184, 0));
-    assert_eq!(world.stockpile, old.stockpile);
+    assert_eq!(world.inventories[0], old.inventories[0]);
     let mut expected = old.islands[0].buildings[0].origin;
     expected.column += 184;
     assert_eq!(world.buildings[1].origin, expected);
@@ -168,10 +169,11 @@ fn migration_preserves_every_settlement_and_orders_and_is_idempotent() {
 }
 
 #[test]
-fn both_settlements_keep_producing_from_shared_resources() {
+fn both_settlements_keep_producing_from_local_resources() {
     let mut world = legacy_world();
     world.unify_islands().unwrap();
-    world.stockpile.food = 1000.0;
+    world.inventories[0].food = 1000.0;
+    world.inventories[1].food = 1000.0;
     for id in ["base-1", "base-away"] {
         world
             .apply_command(Command::Produce {
@@ -294,4 +296,37 @@ fn local_visibility_matches_the_reference_full_map_scan_after_expansion() {
         })
         .collect();
     assert_eq!(world.visible_cells(), expected);
+}
+
+#[test]
+fn local_training_cannot_spend_other_islands_food_and_refunds_stay_local() {
+    let mut world = legacy_world();
+    world.unify_islands().unwrap();
+    world.inventories[0].food = 100.0;
+    let order = Command::Produce {
+        building_id: "base-away".into(),
+        product: ProductKind::Villager,
+    };
+    let before = world.clone();
+    assert!(world.apply_command(order.clone()).is_err());
+    assert_eq!(world, before);
+    world.inventories[1].food = 100.0;
+    world.apply_command(order.clone()).unwrap();
+    world.apply_command(order).unwrap();
+    assert_eq!(world.inventories[0].food, 100.0);
+    assert_eq!(world.inventories[1].food, 100.0 - 2.0 * VILLAGER_FOOD_COST);
+    let building = world
+        .buildings
+        .iter()
+        .find(|b| b.id == "base-away")
+        .unwrap();
+    let queue_id = building.queue[0].id;
+    world
+        .apply_command(Command::CancelQueuedJob {
+            building_id: "base-away".into(),
+            queue_id,
+        })
+        .unwrap();
+    assert_eq!(world.inventories[1].food, 100.0 - VILLAGER_FOOD_COST);
+    assert_eq!(world.inventories[0].food, 100.0);
 }

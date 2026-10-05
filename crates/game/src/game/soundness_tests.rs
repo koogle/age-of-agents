@@ -78,7 +78,7 @@ fn material(world: &GameWorld) -> BTreeMap<ResourceKind, f64> {
     for cargo in world.units.iter().filter_map(|unit| unit.cargo.as_ref()) {
         *totals.entry(cargo.kind).or_insert(0.0) += cargo.amount;
     }
-    for (name, amount) in world.stockpile.entries() {
+    for (name, amount) in world.inventories[0].entries() {
         let kind: ResourceKind = serde_json::from_value(name.into()).unwrap();
         *totals.entry(kind).or_insert(0.0) += amount;
     }
@@ -95,8 +95,8 @@ fn material(world: &GameWorld) -> BTreeMap<ResourceKind, f64> {
 fn play(seed: u64, steps: usize) -> (usize, usize) {
     let mut rng = Lcg(seed);
     let mut world = fixture::fixture();
-    world.stockpile.wood = 400.0;
-    world.stockpile.food = 400.0;
+    world.inventories[0].wood = 400.0;
+    world.inventories[0].food = 400.0;
     let mut accepted_builds = 0;
     let mut accepted_gathers = 0;
     for _ in 0..steps {
@@ -179,7 +179,7 @@ fn validation_rejects_overlapping_or_inconsistent_worlds() {
         ("overlapping buildings", |w| {
             w.buildings.push(town_center("overlap", cell(30, 19), None));
         }),
-        ("negative stockpile", |w| w.stockpile.food = -1.0),
+        ("negative stockpile", |w| w.inventories[0].food = -1.0),
         ("building a finished building", |w| {
             w.units[0].action = UnitAction::Build {
                 building_id: "base-1".into(),

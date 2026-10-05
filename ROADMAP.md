@@ -99,7 +99,7 @@ User-directed implementation activates construction of all 17 catalog buildings.
 
 The Rust HUD exposes grouped, labelled construction, production costs/progress and all stockpile totals. Compact phone and short-landscape layouts place actions beside the globe/speed controls, with queues and submenus wrapping upward. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
-This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying units, persistent destination islands, and shared resources. Continuous sailing, progressive island placement, a cumulative globe overview and simultaneous simulation of discovered settlements are implemented. Profile larger populated worlds before adding streamed terrain or snapshot deltas. Animals/adversaries follow that economy/transport loop.
+This completes construction and bounded production portions of C/D, not their extraction gating, upgrades, tools, combat or scenario requirements. The next progression direction is resource-based island expansion: food/wood/stone on the first island, transport ships carrying units and 50-resource movable storage holds, persistent destination islands, and island-local inventories. Continuous sailing, progressive island placement, a cumulative globe overview and simultaneous simulation of discovered settlements are implemented. Profile larger populated worlds before adding streamed terrain or snapshot deltas. Animals/adversaries follow that economy/transport loop.
 
 ## Slice C — Steel economy vertical slice
 
@@ -205,3 +205,5 @@ Gameplay acceptance:
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
+
+Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar.

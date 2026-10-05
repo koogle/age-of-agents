@@ -225,7 +225,12 @@ impl GameWorld {
                     rows,
                 }))
             }
-            UnitAction::Build { building_id } | UnitAction::Deposit { building_id } => self
+            UnitAction::Deposit { storage_id } => self
+                .storage_sites(self.units[unit].cargo.as_ref().map(|c| c.kind))
+                .into_iter()
+                .find(|site| site.id == storage_id)
+                .map(|site| Goal::Beside(site.footprint)),
+            UnitAction::Build { building_id } => self
                 .buildings
                 .iter()
                 .find(|building| &building.id == building_id)
@@ -425,17 +430,10 @@ impl GameWorld {
         let clear = PathTree::search(self.columns(), self.rows(), self.units[unit].cell, |cell| {
             !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit)
         });
-        self.buildings
-            .iter()
-            .filter(|building| {
-                building.is_complete()
-                    && match cargo {
-                        Some(kind) => building.kind.accepts(kind),
-                        None => building.kind == BuildingKind::TownCenter,
-                    }
-            })
-            .filter_map(|building| {
-                let footprint = building.footprint();
+        self.storage_sites(cargo)
+            .into_iter()
+            .filter_map(|site| {
+                let footprint = site.footprint;
                 let goals = self.goal_cells(unit, Goal::Beside(footprint), &occupancy);
                 let available = clear
                     .nearest(
@@ -452,7 +450,7 @@ impl GameWorld {
                         )
                         .and_then(|cell| paths.cost(cell))
                 })?;
-                Some(((available.is_none(), cost, &building.id), footprint))
+                Some(((available.is_none(), cost, site.id), footprint))
             })
             .min_by(|left, right| left.0.cmp(&right.0))
             .map(|(_, footprint)| footprint)

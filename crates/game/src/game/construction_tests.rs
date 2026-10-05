@@ -6,7 +6,7 @@ const SITE: CellCoordinate = CellCoordinate::new(55, 23);
 fn world() -> GameWorld {
     let mut world = fixture::fixture();
     world.resources.clear();
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     world
 }
 
@@ -23,7 +23,7 @@ fn order(world: &mut GameWorld) {
         UnitAction::ExploreBuild { .. }
     ));
     assert_eq!(world.buildings.len(), 1);
-    assert_eq!(world.stockpile.wood, 100.0);
+    assert_eq!(world.inventories[0].wood, 100.0);
 }
 
 #[test]
@@ -48,17 +48,17 @@ fn unseen_and_remembered_sites_wait_for_full_visibility_then_build_once() {
                 );
                 break;
             }
-            assert_eq!(world.stockpile.wood, 100.0);
+            assert_eq!(world.inventories[0].wood, 100.0);
         }
         assert_ne!(world.units[0].cell, start);
         assert_eq!(world.buildings.len(), 2);
-        assert_eq!(world.stockpile.wood, 85.0);
+        assert_eq!(world.inventories[0].wood, 85.0);
         for _ in 0..400 {
             world.tick(0.1);
         }
         assert!(world.buildings[1].is_complete());
         assert_eq!(world.buildings.len(), 2);
-        assert_eq!(world.stockpile.wood, 85.0);
+        assert_eq!(world.inventories[0].wood, 85.0);
         world.validate().unwrap();
     }
 }
@@ -76,14 +76,17 @@ fn discovered_obstacles_or_spent_resources_cancel_without_a_foundation() {
                 .unwrap()
                 .biome = TerrainBiome::Water;
         } else {
-            world.stockpile.wood = 0.0;
+            world.inventories[0].wood = 0.0;
         }
         for _ in 0..400 {
             world.tick(0.1);
         }
         assert_eq!(world.units[0].action, UnitAction::Idle);
         assert_eq!(world.buildings.len(), 1);
-        assert_eq!(world.stockpile.wood, if obstacle { 100.0 } else { 0.0 });
+        assert_eq!(
+            world.inventories[0].wood,
+            if obstacle { 100.0 } else { 0.0 }
+        );
         assert!(world.visible_cells().contains(&SITE));
     }
 }
@@ -117,7 +120,7 @@ fn exploration_survives_reload_and_stop_or_replacement_cancels_it() {
             world.tick(0.1);
         }
         assert_eq!(world.buildings.len(), 1);
-        assert_eq!(world.stockpile.wood, 100.0);
+        assert_eq!(world.inventories[0].wood, 100.0);
     }
 }
 
@@ -131,7 +134,7 @@ fn exploring_builder_unloads_cargo_before_walking_to_site() {
     order(&mut world);
     world.tick(0.1);
     assert!(world.units[0].cargo.is_none());
-    assert_eq!(world.stockpile.wood, 105.0);
+    assert_eq!(world.inventories[0].wood, 105.0);
     assert!(matches!(
         world.units[0].action,
         UnitAction::ExploreBuild { .. }
@@ -139,7 +142,7 @@ fn exploring_builder_unloads_cargo_before_walking_to_site() {
     for _ in 0..400 {
         world.tick(0.1);
     }
-    assert_eq!(world.stockpile.wood, 90.0);
+    assert_eq!(world.inventories[0].wood, 90.0);
     assert!(world.buildings[1].is_complete());
 }
 
@@ -162,7 +165,7 @@ fn partial_visibility_does_not_place_and_competing_orders_charge_only_once() {
         world.tick(0.1);
     }
     assert_eq!(world.buildings.len(), 2);
-    assert_eq!(world.stockpile.wood, 85.0);
+    assert_eq!(world.inventories[0].wood, 85.0);
     assert!(world.buildings[1].is_complete());
 }
 
@@ -177,7 +180,7 @@ fn unreachable_and_out_of_bounds_sites_do_not_spend_or_leave_stuck_orders() {
     order(&mut world);
     world.tick(0.1);
     assert_eq!(world.units[0].action, UnitAction::Idle);
-    assert_eq!(world.stockpile.wood, 100.0);
+    assert_eq!(world.inventories[0].wood, 100.0);
     let before = world.clone();
     assert_eq!(
         world.apply_command(Command::Build {

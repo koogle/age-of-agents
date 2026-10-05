@@ -13,8 +13,8 @@ fn harbor() -> GameWorld {
     }
     w.buildings
         .push(building(BuildingKind::Dock, "dock", c(20, 26), None));
-    w.stockpile.wood = 1000.0;
-    w.stockpile.timber = 1000.0;
+    w.inventories[0].wood = 1000.0;
+    w.inventories[0].timber = 1000.0;
     w.apply_command(Command::Produce {
         building_id: "dock".into(),
         product: ProductKind::TransportShip,
@@ -34,8 +34,8 @@ fn order_board(w: &mut GameWorld, unit: usize) {
 #[test]
 fn transport_builds_once_with_exact_cost_and_no_housing() {
     let mut w = harbor();
-    assert_eq!(w.stockpile.wood, 940.0);
-    assert_eq!(w.stockpile.timber, 980.0);
+    assert_eq!(w.inventories[0].wood, 940.0);
+    assert_eq!(w.inventories[0].timber, 980.0);
     assert_eq!(w.villagers_and_trainees(), 2);
     for _ in 0..10 {
         w.tick(1.0);
@@ -236,15 +236,15 @@ fn blocked_ship_production_waits_and_queue_cancellation_refunds() {
         })
         .unwrap();
     }
-    let paid = w.stockpile.clone();
+    let paid = w.inventories[0].clone();
     let queue_id = w.buildings.last().unwrap().queue[0].id;
     w.apply_command(Command::CancelQueuedJob {
         building_id: "dock".into(),
         queue_id,
     })
     .unwrap();
-    assert_eq!(w.stockpile.wood, paid.wood + 60.0);
-    assert_eq!(w.stockpile.timber, paid.timber + 20.0);
+    assert_eq!(w.inventories[0].wood, paid.wood + 60.0);
+    assert_eq!(w.inventories[0].timber, paid.timber + 20.0);
     w.tick(30.0);
     assert_eq!(w.ships.len(), count);
     assert!(w.buildings.last().unwrap().job.is_some());
@@ -368,4 +368,98 @@ fn blocked_home_dock_rejects_the_continuous_return_atomically() {
             .is_err()
     );
     assert_eq!(world, before);
+}
+
+#[test]
+fn cargo_transfers_are_atomic_and_share_one_fifty_resource_hold() {
+    let mut w = harbor();
+    let transfer = |kind, amount, direction| Command::TransferShipCargo {
+        ship_id: "transport-1".into(),
+        kind,
+        amount,
+        direction,
+    };
+    let id = w.ships[0].id.clone();
+    let transfer = |kind, amount, direction| {
+        let mut command = transfer(kind, amount, direction);
+        if let Command::TransferShipCargo { ship_id, .. } = &mut command {
+            *ship_id = id.clone();
+        }
+        command
+    };
+    let before = w.available_on(0);
+    w.apply_command(transfer(ResourceKind::Wood, 30.0, CargoDirection::Load))
+        .unwrap();
+    w.apply_command(transfer(ResourceKind::Timber, 20.0, CargoDirection::Load))
+        .unwrap();
+    assert_eq!(w.ships[0].cargo.total(), 50.0);
+    assert_eq!(w.available_on(0), before);
+    for amount in [1.0, -1.0, f64::NAN, f64::INFINITY] {
+        let saved = w.clone();
+        assert!(
+            w.apply_command(transfer(ResourceKind::Wood, amount, CargoDirection::Load))
+                .is_err()
+        );
+        assert_eq!(w, saved);
+    }
+    w.apply_command(transfer(ResourceKind::Wood, 10.0, CargoDirection::Unload))
+        .unwrap();
+    assert_eq!(w.ships[0].cargo.total(), 40.0);
+    assert_eq!(w.available_on(0), before);
+    let loaded: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+    assert_eq!(loaded, w);
+    w.ships[0].destination = Some(c(50, 40));
+    assert_eq!(w.available_on(0), w.inventories[0]);
+    assert!(
+        w.apply_command(transfer(ResourceKind::Wood, 1.0, CargoDirection::Load))
+            .is_err()
+    );
+}
+
+#[test]
+fn shore_ship_supplies_construction_and_accepts_partial_villager_deposits() {
+    let mut w = harbor();
+    w.buildings.retain(|b| b.kind != BuildingKind::Dock);
+    w.ships[0].cell = c(20, 30);
+    w.ships[0].home_dock_id = None;
+    w.inventories[0] = Stockpile::default();
+    w.ships[0].cargo.wood = 45.0;
+    assert_eq!(w.connected_island(0), Some(0));
+    let id = w.ships[0].id.clone();
+    w.units[0].cell = c(20, 29);
+    w.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Stone,
+        amount: 12.0,
+    });
+    w.apply_command(Command::Deposit {
+        unit_id: w.units[0].id.clone(),
+        storage_id: id.clone(),
+    })
+    .unwrap();
+    w.tick(0.1);
+    assert_eq!(w.ships[0].cargo.total(), 50.0);
+    assert_eq!(w.units[0].cargo.as_ref().unwrap().amount, 7.0);
+    assert!(
+        w.apply_command(Command::TransferShipCargo {
+            ship_id: id,
+            kind: ResourceKind::Wood,
+            amount: 1.0,
+            direction: CargoDirection::Unload
+        })
+        .is_err()
+    );
+    w.spend_at(c(10, 10), &[(ResourceKind::Wood, 20.0)])
+        .unwrap();
+    assert_eq!(w.ships[0].cargo.wood, 25.0);
+    assert_eq!(w.inventories[0].wood, 0.0);
+    w.discover_island();
+    let before = w.clone();
+    assert!(
+        w.spend_at(w.island_origins[1], &[(ResourceKind::Wood, 1.0)])
+            .is_err()
+    );
+    assert_eq!(w, before);
+    w.ships[0].destination = Some(c(50, 40));
+    assert_eq!(w.available_on(0).wood, 0.0);
+    assert_eq!(w.ships[0].cargo.wood, 25.0);
 }

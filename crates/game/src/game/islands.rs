@@ -77,6 +77,7 @@ impl GameWorld {
         self.resize_ocean(columns, rows);
         self.merge_island(island);
         self.island_origins.push(origin);
+        self.inventories.push(Stockpile::default());
     }
 
     fn resize_ocean(&mut self, columns: u16, rows: u16) {
@@ -183,6 +184,8 @@ impl GameWorld {
             self.island_origins.push(origin);
         }
         self.island_id = 0;
+        self.inventories
+            .resize(self.island_origins.len(), Stockpile::default());
         self.validate()
     }
 

@@ -42,7 +42,7 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
         }
         UnitAction::Build { building_id } => ("Building".into(), building_id.as_str()),
         UnitAction::Cultivate { resource_id } => ("Preparing field".into(), resource_id.as_str()),
-        UnitAction::Deposit { building_id } => (drop_off_status(unit)?, building_id.as_str()),
+        UnitAction::Deposit { storage_id } => (drop_off_status(unit)?, storage_id.as_str()),
         UnitAction::Gather { resource_id, .. } => {
             let text = snapshot
                 .resources
@@ -227,7 +227,7 @@ mod tests {
                 resource_id: "field-1".into(),
             },
             UnitAction::Deposit {
-                building_id: "base-1".into(),
+                storage_id: "base-1".into(),
             },
             UnitAction::Gather {
                 resource_id: "food-1".into(),
@@ -266,7 +266,7 @@ mod tests {
     fn every_unloading_task_emits_a_gain() {
         for action in [
             UnitAction::Deposit {
-                building_id: "base-1".into(),
+                storage_id: "base-1".into(),
             },
             UnitAction::Build {
                 building_id: "base-1".into(),

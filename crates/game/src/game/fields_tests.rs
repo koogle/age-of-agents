@@ -8,8 +8,8 @@ fn world() -> GameWorld {
     w.units[1].cell = cell(9, 12);
     w.buildings
         .push(building(BuildingKind::Farm, "farm", cell(14, 10), None));
-    w.stockpile.wood = 100.0;
-    w.stockpile.stone = 100.0;
+    w.inventories[0].wood = 100.0;
+    w.inventories[0].stone = 100.0;
     w
 }
 
@@ -37,7 +37,7 @@ fn fields_require_a_completed_farm_materials_and_free_land_atomically() {
                 w.buildings.pop();
             }
             1 => w.buildings.last_mut().unwrap().construction = Some(0.0),
-            2 => w.stockpile.stone = 4.0,
+            2 => w.inventories[0].stone = 4.0,
             _ => w.units[1].cell = cell(12, 12),
         }
         let before = serde_json::to_string(&w).unwrap();
@@ -50,7 +50,10 @@ fn fields_require_a_completed_farm_materials_and_free_land_atomically() {
 fn preparation_pauses_persists_and_shared_work_never_charges_twice() {
     let mut w = world();
     plant(&mut w).unwrap();
-    assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (90.0, 95.0)
+    );
     run(&mut w, 3.0);
     let progress = w.resources[0].field.as_ref().unwrap().work.unwrap();
     assert!((2.9..3.1).contains(&progress));
@@ -72,7 +75,10 @@ fn preparation_pauses_persists_and_shared_work_never_charges_twice() {
     assert!(w.resources[0].amount > 0.0);
     assert!(w.units.iter().all(|u| matches!(&u.action,
         UnitAction::Gather { resource_id, .. } if resource_id == "field-10-10")));
-    assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (90.0, 95.0)
+    );
     assert_eq!(cultivate(&mut w, 1), Err(CommandError::FieldNotDepleted));
     w.validate().unwrap();
 }
@@ -86,33 +92,39 @@ fn harvesting_exhausts_fields_and_replenishment_requires_materials_and_labor() {
         w.tick(0.1);
         w.validate().unwrap();
     }
-    assert_eq!(w.stockpile.food, FIELD_FOOD);
+    assert_eq!(w.inventories[0].food, FIELD_FOOD);
     assert_eq!(w.resources[0].amount, 0.0);
     assert_eq!(w.units[0].action, UnitAction::Idle);
     for at in w.resources[0].footprint().cells() {
         assert!(!w.occupancy().is_free_for(at, None));
     }
-    w.stockpile.wood = 0.0;
+    w.inventories[0].wood = 0.0;
     let before = serde_json::to_string(&w).unwrap();
     assert_eq!(
         cultivate(&mut w, 1),
         Err(CommandError::InsufficientResources(ResourceKind::Wood))
     );
     assert_eq!(before, serde_json::to_string(&w).unwrap());
-    w.stockpile.wood = 20.0;
+    w.inventories[0].wood = 20.0;
     cultivate(&mut w, 1).unwrap();
-    assert_eq!((w.stockpile.wood, w.stockpile.stone), (10.0, 90.0));
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (10.0, 90.0)
+    );
     assert_eq!(w.resources[0].amount, 0.0);
     run(&mut w, 20.0);
     assert!(w.resources[0].amount < FIELD_FOOD);
-    assert_eq!(w.stockpile.food, FIELD_FOOD);
+    assert_eq!(w.inventories[0].food, FIELD_FOOD);
     assert!(matches!(w.units[0].action, UnitAction::Gather { .. }));
     run(&mut w, 200.0);
-    assert_eq!(w.stockpile.food, FIELD_FOOD * 2.0);
+    assert_eq!(w.inventories[0].food, FIELD_FOOD * 2.0);
     assert_eq!(w.resources[0].amount, 0.0);
     assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     assert_eq!(w.units[0].action, UnitAction::Idle);
-    assert_eq!((w.stockpile.wood, w.stockpile.stone), (10.0, 90.0));
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (10.0, 90.0)
+    );
     w.validate().unwrap();
 }
 
@@ -135,10 +147,10 @@ fn preparing_a_field_delivers_existing_cargo_first() {
         w.validate().unwrap();
     }
     assert!(w.resources[0].field.as_ref().unwrap().work.unwrap() > 0.0);
-    assert_eq!(w.stockpile.food, 20.0);
+    assert_eq!(w.inventories[0].food, 20.0);
     assert!(w.units[0].cargo.is_none());
     run(&mut w, 200.0);
-    assert_eq!(w.stockpile.food, FIELD_FOOD + 20.0);
+    assert_eq!(w.inventories[0].food, FIELD_FOOD + 20.0);
     assert_eq!(w.resources[0].amount, 0.0);
     assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     w.validate().unwrap();
@@ -224,7 +236,7 @@ fn finishing_preparation_preserves_stopped_workers_and_helpers_delivery() {
         w.tick(0.1);
         w.validate().unwrap();
     }
-    assert_eq!(w.stockpile.food, FIELD_FOOD + 3.0);
+    assert_eq!(w.inventories[0].food, FIELD_FOOD + 3.0);
     assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     assert!(w.units.iter().all(|u| u.action == UnitAction::Idle));
 }
@@ -281,9 +293,9 @@ fn field_with_an_exit_completes_repeated_deliveries_after_reload() {
         w.validate().unwrap();
     }
     assert!(
-        (w.stockpile.food - FIELD_FOOD).abs() < 1e-8,
+        (w.inventories[0].food - FIELD_FOOD).abs() < 1e-8,
         "food={}, units={:?}, resources={:?}",
-        w.stockpile.food,
+        w.inventories[0].food,
         w.units,
         w.resources
     );
@@ -293,7 +305,10 @@ fn field_with_an_exit_completes_repeated_deliveries_after_reload() {
             .iter()
             .all(|u| u.action == UnitAction::Idle && u.cargo.is_none())
     );
-    assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (90.0, 95.0)
+    );
 }
 
 #[test]
@@ -325,10 +340,13 @@ fn gatherers_continue_between_fields_and_wild_food_in_both_directions() {
             w.tick(0.1);
             w.validate().unwrap();
         }
-        assert!((w.stockpile.food - 47.0).abs() < 1e-8);
+        assert!((w.inventories[0].food - 47.0).abs() < 1e-8);
         assert!(w.resources.iter().all(|r| r.amount == 0.0));
         assert_eq!(w.units[0].action, UnitAction::Idle);
         assert!(w.units[0].cargo.is_none());
-        assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+        assert_eq!(
+            (w.inventories[0].wood, w.inventories[0].stone),
+            (90.0, 95.0)
+        );
     }
 }

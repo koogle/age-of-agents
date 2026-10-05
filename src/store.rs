@@ -215,6 +215,7 @@ mod tests {
 
     fn legacy_inventories() -> serde_json::Value {
         let mut value = serde_json::to_value(GameWorld::default()).unwrap();
+        value.as_object_mut().unwrap().remove("inventories");
         let stock = |wood| {
             serde_json::to_value(aoa_game::Stockpile {
                 wood,
@@ -244,7 +245,7 @@ mod tests {
         let path = temporary_db("shared-resources");
         let store = store_raw(&path, &legacy_inventories());
         let world = store.load().unwrap().unwrap();
-        assert_eq!(world.stockpile.wood, 100.0);
+        assert_eq!(world.inventories[0].wood, 100.0);
         assert_eq!(world.ships.len(), 2);
         assert!(world.islands.is_empty());
         assert_eq!(world.island_origins.len(), 2);

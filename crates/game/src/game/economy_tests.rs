@@ -31,7 +31,7 @@ fn all_catalog_buildings_construct_complete_and_charge_exactly_once() {
             world.terrain[index].elevation = -0.2;
         }
         for &(resource, amount) in kind.cost() {
-            world.stockpile.add(resource, amount);
+            world.inventories[0].add(resource, amount);
         }
         // This test exercises immediate, visible placement for every catalog kind.
         world.units[0].cell = cell(12, 16);
@@ -47,7 +47,7 @@ fn all_catalog_buildings_construct_complete_and_charge_exactly_once() {
         assert!(
             kind.cost()
                 .iter()
-                .all(|&(resource, _)| world.stockpile.amount(resource) == 0.0)
+                .all(|&(resource, _)| world.inventories[0].amount(resource) == 0.0)
         );
         for _ in 0..1500 {
             world.tick(0.1);
@@ -77,14 +77,14 @@ fn processing_reserves_inputs_finishes_once_and_survives_mid_job_reload() {
         );
         assert_eq!(world, before);
         for &(resource, amount) in product.cost() {
-            world.stockpile.add(resource, amount);
+            world.inventories[0].add(resource, amount);
         }
         produce(&mut world, product).unwrap();
         assert!(
             product
                 .cost()
                 .iter()
-                .all(|&(resource, _)| world.stockpile.amount(resource) == 0.0)
+                .all(|&(resource, _)| world.inventories[0].amount(resource) == 0.0)
         );
         let reserved = world.clone();
         assert_eq!(
@@ -102,7 +102,7 @@ fn processing_reserves_inputs_finishes_once_and_survives_mid_job_reload() {
         }
         assert_eq!(loaded, world);
         let (output, amount) = product.output().unwrap();
-        assert_eq!(world.stockpile.amount(output), amount);
+        assert_eq!(world.inventories[0].amount(output), amount);
         assert!(world.buildings[1].job.is_none());
         assert_eq!(world.villagers_and_trainees(), 2);
     }
@@ -119,7 +119,7 @@ fn each_training_building_produces_its_unit_and_reserves_housing() {
         let mut world = world_with(kind);
         let product = kind.products()[0];
         for &(resource, amount) in product.cost() {
-            world.stockpile.add(resource, amount);
+            world.inventories[0].add(resource, amount);
         }
         produce(&mut world, product).unwrap();
         assert_eq!(world.villagers_and_trainees(), 3);
@@ -147,7 +147,7 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
     let mut world = world_with(BuildingKind::Barracks);
     let product = ProductKind::Guard;
     for &(resource, amount) in product.cost() {
-        world.stockpile.add(resource, amount * 2.0);
+        world.inventories[0].add(resource, amount * 2.0);
     }
     produce(&mut world, product).unwrap();
     produce(&mut world, product).unwrap();
@@ -181,7 +181,7 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
             elapsed_seconds: 0.0
         }
     );
-    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.inventories[0].food, 0.0);
     world.resources.clear();
     world.tick(0.1);
     assert_eq!(world.units.len(), 3);
@@ -189,7 +189,7 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
     assert!(world.buildings[1].queue.is_empty());
     world.tick(0.1);
     assert_eq!(world.units.len(), 3);
-    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.inventories[0].food, 0.0);
     world.tick(product.seconds());
     assert_eq!(world.units.len(), 4);
     assert!(world.buildings[1].job.is_none());
@@ -199,8 +199,8 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
 #[test]
 fn research_cannot_be_reserved_twice_at_different_buildings() {
     let mut world = world_with(BuildingKind::Farm);
-    world.stockpile.food = 100.0;
-    world.stockpile.wood = 100.0;
+    world.inventories[0].food = 100.0;
+    world.inventories[0].wood = 100.0;
     world
         .apply_command(Command::Research {
             building_id: "base-1".into(),
@@ -301,18 +301,18 @@ fn farm_bonus_changes_gathering_and_camp_accepts_actual_deposits() {
     });
     camp.apply_command(Command::Deposit {
         unit_id: "villager-1".into(),
-        building_id: "test-building".into(),
+        storage_id: "test-building".into(),
     })
     .unwrap();
     camp.tick(0.1);
-    assert_eq!(camp.stockpile.iron, 10.0);
+    assert_eq!(camp.inventories[0].iron, 10.0);
     assert!(camp.units[0].cargo.is_none());
 }
 
 #[test]
 fn processing_does_not_reserve_housing_but_parallel_training_does() {
     let mut world = world_with(BuildingKind::LumberMill);
-    world.stockpile.wood = 10.0;
+    world.inventories[0].wood = 10.0;
     produce(&mut world, ProductKind::Timber).unwrap();
     assert_eq!(world.villagers_and_trainees(), 2);
     for index in 0..4 {
@@ -322,8 +322,8 @@ fn processing_does_not_reserve_housing_but_parallel_training_does() {
             cell(2 + index * 6, 2),
             None,
         ));
-        world.stockpile.food = 40.0;
-        world.stockpile.steel = 2.0;
+        world.inventories[0].food = 40.0;
+        world.inventories[0].steel = 2.0;
         let before = world.clone();
         let result = world.apply_command(Command::Produce {
             building_id: format!("b-{index}"),
