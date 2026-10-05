@@ -13,6 +13,8 @@ mod activity_tests;
 mod buildings;
 mod catalog;
 mod fields;
+#[cfg(test)]
+mod movement_tests;
 mod selection;
 mod ships;
 pub(crate) use buildings::sprite as building_sprite;
@@ -24,9 +26,9 @@ use crate::render::{Decal, Sprite};
 use crate::terrain::{self, Heights, random};
 
 const VILLAGER_HEIGHT: f32 = 0.78;
-/// Units are drawn this many ticks behind the newest snapshot so jittery
-/// arrivals always have a sample to interpolate toward.
-const PLAYOUT_TICKS: f64 = 1.6;
+/// Remote playback starts/rebuffers with two ticks. Local playback uses its accumulator.
+const PLAYOUT_TICKS: f64 = 2.0;
+const MAX_POSITION_SAMPLES: usize = 128;
 const TICK_SECONDS: f64 = 0.1;
 const TEAM_BLUE: [f32; 4] = [0.184, 0.435, 0.878, 0.9];
 const SHEET_RESOURCES: usize = 3;
@@ -45,9 +47,6 @@ pub const VILLAGER_SHEETS: [usize; 6] = [
 const SHEET_BUILDINGS: usize = 6;
 /// Rows of the HD idle sheet, in villager sheet order (0, 1, 2).
 const PEOPLE: [&str; 3] = ["villager", "villager_woman", "villager_elder"];
-/// A drawn direction (front or back, mirrored or not) is held at least this
-/// long, so a zigzag route on the cell grid does not flicker between sprites.
-const VIEW_HOLD_SECONDS: f32 = 0.5;
 /// How far (as a sine) a heading must cross a sprite boundary before the
 /// drawn direction flips, about 17 degrees.
 const VIEW_MARGIN: f32 = 0.3;
@@ -70,6 +69,10 @@ struct VillagerSheet {
     figure_height: f32,
     fps: HashMap<String, f32>,
     animations: HashMap<String, HashMap<String, Vec<[f32; 4]>>>,
+    /// Authored poses facing the opposite way, by activity/view and character.
+    /// Correct UV orientation without resampling or moving the foot anchor.
+    #[serde(default, rename = "frameMirrors")]
+    frame_mirrors: HashMap<String, HashMap<String, [Vec<usize>; 3]>>,
 }
 
 /// Generated buildings in four construction stages (foundation, walls, roof,
@@ -153,18 +156,11 @@ struct UnitEntry {
     position: Vec3,
     velocity: Vec3,
     walked: f32,
-    /// Slowly smoothed ground velocity: the walking direction, averaged over
-    /// the straight and diagonal steps of a grid route.
-    heading: Vec2,
     moving: bool,
     still_for: f32,
     facing: f32,
     view: View,
-    view_age: f32,
     variant: usize,
-    /// Eased offset toward the thing being worked on, so a working villager
-    /// stands right against it rather than at its cell centre.
-    lean: Vec2,
 }
 
 /// Which of the four drawn directions a villager shows.
@@ -214,6 +210,8 @@ pub struct WorldView {
     units: HashMap<String, UnitEntry>,
     render_tick: Option<f64>,
     latest_tick: f64,
+    buffering: bool,
+    catching_up: bool,
     pub cells_dirty: bool,
     /// Ground heights of explored cells; rebuilt only when exploration grows.
     pub heights: Heights,
@@ -262,9 +260,10 @@ fn node_for(kind: ResourceKind) -> &'static str {
     }
 }
 
-const STRIDE_DISTANCE: f32 = 0.3;
+/// One full authored gait cycle spans two steps. Use every intermediate pose.
+const STRIDE_DISTANCE: f32 = 0.6;
 fn walking_frame(walked: f32, frame_count: usize) -> usize {
-    ((walked / STRIDE_DISTANCE) as usize % 2) * (frame_count / 2)
+    ((walked / STRIDE_DISTANCE * frame_count as f32) as usize) % frame_count
 }
 
 impl WorldView {
@@ -275,6 +274,8 @@ impl WorldView {
             units: HashMap::new(),
             render_tick: None,
             latest_tick: 0.0,
+            buffering: true,
+            catching_up: false,
             cells_dirty: true,
             heights: Heights::unknown(),
             heights_dirty: true,
@@ -293,21 +294,21 @@ impl WorldView {
             *self = Self::new();
         }
         self.latest_tick = next.tick as f64;
-        let render_tick = self
-            .render_tick
-            .get_or_insert(self.latest_tick - PLAYOUT_TICKS);
-        if (self.latest_tick - PLAYOUT_TICKS - *render_tick).abs() > 8.0 {
-            *render_tick = self.latest_tick - PLAYOUT_TICKS;
-        }
+        self.render_tick.get_or_insert(self.latest_tick);
         let known = next
             .terrain
             .iter()
             .filter(|cell| cell.elevation.is_some())
             .count();
-        if known != self.known_heights {
+        if known != self.known_heights
+            || self.heights.columns != next.columns
+            || self.heights.rows != next.rows
+        {
             self.known_heights = known;
             self.heights =
                 Heights::from_cells(next.terrain.iter().map(|cell| (cell.elevation, cell.biome)));
+            self.heights.columns = next.columns;
+            self.heights.rows = next.rows;
             self.heights_dirty = true;
         }
         let mut seen = Vec::with_capacity(next.units.len());
@@ -322,7 +323,6 @@ impl WorldView {
                     position: target,
                     velocity: Vec3::ZERO,
                     walked: 0.0,
-                    heading: Vec2::ZERO,
                     moving: false,
                     still_for: 0.0,
                     facing: 0.0,
@@ -330,8 +330,6 @@ impl WorldView {
                         toward_viewer: true,
                         screen_right: false,
                     },
-                    view_age: VIEW_HOLD_SECONDS,
-                    lean: Vec2::ZERO,
                     variant: (seed_of(&view.unit.id) % 3) as usize,
                 });
             // A command snapshot repeats the current tick: replace that sample.
@@ -339,8 +337,11 @@ impl WorldView {
                 Some(last) if last.0 >= self.latest_tick => last.1 = target,
                 _ => entry.samples.push_back((self.latest_tick, target)),
             }
-            while entry.samples.len() > 6 {
-                entry.samples.pop_front();
+            // Keep the unplayed bracket through delayed batches. For very long
+            // outages retain its anchor while thinning older future samples.
+            while entry.samples.len() > MAX_POSITION_SAMPLES {
+                entry.samples[0] = (self.render_tick.unwrap(), entry.position);
+                entry.samples.remove(1);
             }
             seen.push(view.unit.id.clone());
         }
@@ -351,24 +352,53 @@ impl WorldView {
     }
 
     /// Advances the presentation clock and unit positions.
-    pub fn frame(&mut self, dt: f32) {
+    pub fn frame(&mut self, dt: f32, local_tick: Option<f64>) {
         let Some(render_tick) = self.render_tick.as_mut() else {
             return;
         };
-        // Run slightly fast or slow to hold the playout buffer; stop at the
-        // newest tick when the simulation pauses.
-        let lag = self.latest_tick - PLAYOUT_TICKS - *render_tick;
-        let rate = (1.0 + lag * 0.35).clamp(0.6, 1.6);
-        *render_tick = (*render_tick + dt as f64 / TICK_SECONDS * rate).min(self.latest_tick);
+        let advance = dt as f64 / TICK_SECONDS;
+        if let Some(local_tick) = local_tick {
+            // Monotonic even across pause/resume: finish the last displayed step
+            // without jumping to the paused snapshot or rewinding on resume.
+            *render_tick = local_tick.max(*render_tick).min(*render_tick + advance);
+        } else {
+            let lag = self.latest_tick - *render_tick;
+            let paused = self
+                .snapshot
+                .as_ref()
+                .is_some_and(|s| s.simulation_speed == 0.0);
+            if paused || lag >= PLAYOUT_TICKS {
+                self.buffering = false;
+            }
+            // Hysteresis avoids reacting to the ordinary 100 ms arrival staircase.
+            // Recovery is bounded to 10% faster playback, never a clock jump.
+            if paused || lag <= PLAYOUT_TICKS {
+                self.catching_up = false;
+            } else if lag > PLAYOUT_TICKS + 2.0 {
+                self.catching_up = true;
+            }
+            if !self.buffering {
+                let rate = if self.catching_up { 1.1 } else { 1.0 };
+                *render_tick += advance * rate;
+            }
+            if *render_tick >= self.latest_tick {
+                self.buffering = true;
+            }
+        }
+        *render_tick = (*render_tick).min(self.latest_tick);
         let tick = *render_tick;
         for entry in self.units.values_mut() {
+            // Discard only history that has actually been played, keeping the
+            // sample on each side of the render time for interpolation.
+            while entry.samples.len() > 2 && entry.samples[1].0 <= tick {
+                entry.samples.pop_front();
+            }
             let previous = entry.position;
             entry.position = sample_at(&entry.samples, tick);
             let delta = entry.position - previous;
             entry.velocity = if dt > 0.0 { delta / dt } else { Vec3::ZERO };
             entry.walked += Vec2::new(delta.x, delta.z).length();
             let planar = Vec2::new(entry.velocity.x, entry.velocity.z);
-            entry.heading = entry.heading.lerp(planar, (dt * 4.0).min(1.0));
             if planar.length() > WALK_SPEED {
                 entry.moving = true;
                 entry.still_for = 0.0;
@@ -427,7 +457,6 @@ impl WorldView {
         sheets: &Sheets,
         rig: &Rig,
         time: f32,
-        dt: f32,
         selection: &Selection,
     ) -> (Vec<(usize, Sprite)>, Vec<Decal>) {
         let mut sprites = Vec::new();
@@ -563,10 +592,11 @@ impl WorldView {
                     ..
                 }
             );
-            let work = if moving || (unit.unit.cargo.is_some() && !gathering) {
+            let still = Vec2::new(entry.velocity.x, entry.velocity.z).length() < STOP_SPEED;
+            let work = if !still || (unit.unit.cargo.is_some() && !gathering) {
                 None
             } else {
-                work_target(heights, snapshot, &unit.unit.action)
+                work_target(snapshot, &unit.unit, entry.position)
             };
             let carrying = unit.unit.cargo.is_some();
             // Hold the carry pose when stopped with goods, unless actively gathering.
@@ -578,22 +608,15 @@ impl WorldView {
                 "idle"
             };
             let mut desired = entry.facing;
-            if moving && entry.heading.length() > STOP_SPEED {
-                desired = entry.heading.x.atan2(entry.heading.y);
+            let heading = Vec2::new(entry.velocity.x, entry.velocity.z);
+            if moving && heading.length() > STOP_SPEED {
+                desired = heading.x.atan2(heading.y);
             }
-            let mut lean = Vec2::ZERO;
             if let Some((target, activity)) = work {
                 name = activity;
                 desired = (target.x - entry.position.x).atan2(target.y - entry.position.z);
-                let toward = target - Vec2::new(entry.position.x, entry.position.z);
-                lean = toward.normalize_or_zero() * (toward.length() - 0.3).clamp(0.0, 0.2);
             }
-            entry.lean = entry.lean.lerp(lean, (dt * 6.0).min(1.0));
-            let position = ground(
-                heights,
-                entry.position.x + entry.lean.x,
-                entry.position.z + entry.lean.y,
-            );
+            let position = ground(heights, entry.position.x, entry.position.z);
             entry.facing = desired;
             let direction = Vec3::new(entry.facing.sin(), 0.0, entry.facing.cos());
             let animation = villager
@@ -604,11 +627,7 @@ impl WorldView {
                 direction.dot(Vec3::new(right.x, 0.0, right.z).normalize_or_zero()),
                 -direction.dot(forward),
             );
-            entry.view_age += dt;
-            if next != entry.view && entry.view_age >= VIEW_HOLD_SECONDS {
-                entry.view = next;
-                entry.view_age = 0.0;
-            }
+            entry.view = next;
             let View {
                 toward_viewer,
                 screen_right,
@@ -658,6 +677,13 @@ impl WorldView {
             } else {
                 (time * fps) as usize % frames.len()
             };
+            let corrected_mirror = mirror
+                ^ (!military
+                    && villager
+                        .frame_mirrors
+                        .get(name)
+                        .and_then(|views| views.get(view))
+                        .is_some_and(|variants| variants[entry.variant].contains(&frame)));
             let rect = frames[frame];
             sprites.push((
                 sheet,
@@ -665,7 +691,7 @@ impl WorldView {
                     anchor: position.to_array(),
                     size: [cell_size, cell_size],
                     pivot,
-                    uv: uv(rect, sheet_size, mirror),
+                    uv: uv(rect, sheet_size, corrected_mirror),
                     pull: 0.3 * cell_size,
                     tint: [1.0; 4],
                     footprint: [0.0; 2],
@@ -742,34 +768,39 @@ impl WorldView {
 }
 
 fn work_target(
-    heights: &Heights,
     snapshot: &WorldSnapshot,
-    action: &UnitAction,
+    unit: &aoa_game::Unit,
+    position: Vec3,
 ) -> Option<(Vec2, &'static str)> {
-    match action {
+    let (footprint, activity) = match &unit.action {
         UnitAction::Gather {
             resource_id,
             phase: GatherPhase::Gathering,
         } => {
             let resource = snapshot.resources.iter().find(|r| &r.id == resource_id)?;
-            Some((fields::center(resource), activity_for(resource.kind)))
+            (resource.footprint(), activity_for(resource.kind))
         }
-        UnitAction::Cultivate { resource_id } => snapshot
-            .resources
-            .iter()
-            .find(|r| &r.id == resource_id)
-            .map(|r| (fields::center(r), "cultivate")),
+        UnitAction::Cultivate { resource_id } => {
+            let resource = snapshot.resources.iter().find(|r| &r.id == resource_id)?;
+            (resource.footprint(), "cultivate")
+        }
         UnitAction::Build { building_id } => {
             let building = snapshot
                 .buildings
                 .iter()
                 .find(|b| &b.building.id == building_id)?;
-            let center = footprint_center(heights, building);
-            let center = Vec2::new(center.x, center.z);
-            Some((center, "build"))
+            (building.building.footprint(), "build")
         }
-        _ => None,
+        _ => return None,
+    };
+    // A blocked approach is not work. Use the domain's arrival rule and wait
+    // for the rendered body to reach that authoritative cell before animating.
+    let at = terrain::cell_center(unit.cell);
+    if !unit.is_at_work_site(footprint) || Vec2::new(position.x, position.z).distance(at) > 0.001 {
+        return None;
     }
+    let center = footprint.center();
+    Some((terrain::world_of(center.x, center.y), activity))
 }
 
 /// World point at the middle of a building's footprint.

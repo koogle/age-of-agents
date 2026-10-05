@@ -1,261 +1,297 @@
 use super::*;
 
-fn expedition() -> GameWorld {
-    let mut w = GameWorld::default();
-    w.ships.push(TransportShip {
+fn vessel(cell: CellCoordinate) -> TransportShip {
+    TransportShip {
         id: "transport-test".into(),
-        cell: CellCoordinate::new(0, 0),
+        cell,
         step: None,
         destination: None,
         heading: [1, 0],
-        passengers: vec![w.units.remove(0)],
+        passengers: Vec::new(),
+        home_dock_id: None,
+    }
+}
+
+#[test]
+fn discovery_keeps_home_and_places_deterministic_separated_islands() {
+    let mut a = GameWorld::generate(17);
+    let home = a.clone();
+    for _ in 0..3 {
+        a.discover_island();
+    }
+    let mut b = GameWorld::generate(17);
+    for _ in 0..3 {
+        b.discover_island();
+    }
+    assert_eq!(a, b);
+    assert_eq!(
+        a.island_origins,
+        vec![
+            CellCoordinate::new(0, 0),
+            CellCoordinate::new(184, 0),
+            CellCoordinate::new(184, 144),
+            CellCoordinate::new(0, 144)
+        ]
+    );
+    assert_eq!(a.units, home.units);
+    assert_eq!(a.buildings, home.buildings);
+    for cell in home.terrain {
+        assert_eq!(
+            a.terrain[usize::from(cell.row) * usize::from(a.columns()) + usize::from(cell.column)],
+            cell
+        );
+    }
+    for cell in &a.terrain {
+        if (120..184).contains(&cell.column) || (80..144).contains(&cell.row) {
+            assert_eq!(cell.biome, TerrainBiome::Water);
+        }
+    }
+    for (i, kinds) in [
+        vec![ResourceKind::Iron, ResourceKind::Coal],
+        vec![ResourceKind::Clay],
+        vec![ResourceKind::Fiber],
+    ]
+    .iter()
+    .enumerate()
+    {
+        let origin = a.island_origins[i + 1];
+        for kind in kinds {
+            assert!(a.resources.iter().any(|r| r.kind == *kind
+                && r.cell.column >= origin.column
+                && r.cell.column < origin.column + WORLD_COLUMNS
+                && r.cell.row >= origin.row
+                && r.cell.row < origin.row + WORLD_ROWS));
+        }
+    }
+    a.validate().unwrap();
+    let saved: GameWorld = serde_json::from_str(&serde_json::to_string(&a).unwrap()).unwrap();
+    assert_eq!(saved, a);
+}
+
+#[test]
+fn frontier_discovery_preserves_ship_position_and_sailing_order() {
+    let mut world = GameWorld::default();
+    world.ships.push(vessel(CellCoordinate::new(106, 0)));
+    world
+        .sail("transport-test", CellCoordinate::new(119, 0))
+        .unwrap();
+    world.tick(0.1);
+    assert_eq!(world.island_origins.len(), 1);
+    for _ in 0..8 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.island_origins.len(), 2);
+    assert_eq!(
+        world.ships[0].destination,
+        Some(CellCoordinate::new(119, 0))
+    );
+    assert!(world.ships[0].cell.column < 112);
+    assert_eq!(world.ships[0].cell.row, 0);
+    for _ in 0..50 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.island_origins.len(), 2);
+    assert_eq!(world.ships[0].cell, CellCoordinate::new(119, 0));
+    world
+        .sail("transport-test", CellCoordinate::new(184, 0))
+        .unwrap();
+    for _ in 0..200 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.ships[0].cell, CellCoordinate::new(184, 0));
+    world.validate().unwrap();
+}
+
+#[test]
+fn destination_shortcut_sails_without_swapping_or_teleporting() {
+    let mut world = GameWorld::default();
+    world.discover_island();
+    world.ships.push(vessel(CellCoordinate::new(0, 0)));
+    let home = world.buildings.clone();
+    world
+        .apply_command(Command::Voyage {
+            ship_id: "transport-test".into(),
+            island_id: 1,
+        })
+        .unwrap();
+    assert_eq!(world.ships[0].cell, CellCoordinate::new(0, 0));
+    assert!(world.ships[0].destination.unwrap().column >= 184);
+    assert_eq!(world.buildings, home);
+    assert_eq!(world.island_id, 0);
+    let before = world.clone();
+    assert!(
+        world
+            .apply_command(Command::Voyage {
+                ship_id: "transport-test".into(),
+                island_id: 50
+            })
+            .is_err()
+    );
+    assert_eq!(world, before);
+}
+
+fn legacy_world() -> GameWorld {
+    let mut world = GameWorld::default();
+    let mut away = GameWorld::generate(42);
+    away.units[0].id = "villager-away-1".into();
+    away.units[1].id = "villager-away-2".into();
+    away.buildings[0].id = "base-away".into();
+    world.islands.push(IslandState {
+        id: 1,
+        terrain: away.terrain,
+        explored_cells: away.explored_cells,
+        units: away.units,
+        ships: vec![vessel(CellCoordinate::new(0, 0))],
+        resources: away.resources,
+        buildings: away.buildings,
     });
-    w.discover_island();
-    w.validate().unwrap();
-    w
-}
-fn voyage(w: &mut GameWorld, id: u64) -> Result<(), CommandError> {
-    w.apply_command(Command::Voyage {
-        ship_id: "transport-test".into(),
-        island_id: id,
-    })
+    world
 }
 
 #[test]
-fn discovery_is_deterministic_complementary_and_saved_without_replacing_home() {
-    for seed in 0..8 {
-        let mut a = GameWorld::generate(seed);
-        let home = a.terrain.clone();
-        a.discover_island();
-        a.discover_island();
-        a.discover_island();
-        let mut b = GameWorld::generate(seed);
-        for _ in 0..3 {
-            b.discover_island();
+fn migration_preserves_every_settlement_and_orders_and_is_idempotent() {
+    let mut world = legacy_world();
+    let old = world.clone();
+    world.unify_islands().unwrap();
+    assert!(world.islands.is_empty());
+    assert_eq!(world.buildings.len(), 2);
+    assert_eq!(world.units.len(), 4);
+    assert_eq!(world.ships[0].cell, CellCoordinate::new(184, 0));
+    assert_eq!(world.stockpile, old.stockpile);
+    let mut expected = old.islands[0].buildings[0].origin;
+    expected.column += 184;
+    assert_eq!(world.buildings[1].origin, expected);
+    let migrated = world.clone();
+    world.unify_islands().unwrap();
+    assert_eq!(world, migrated);
+    world.validate().unwrap();
+}
+
+#[test]
+fn both_settlements_keep_producing_from_shared_resources() {
+    let mut world = legacy_world();
+    world.unify_islands().unwrap();
+    world.stockpile.food = 1000.0;
+    for id in ["base-1", "base-away"] {
+        world
+            .apply_command(Command::Produce {
+                building_id: id.into(),
+                product: ProductKind::Villager,
+            })
+            .unwrap();
+    }
+    for _ in 0..100 {
+        world.tick(1.0);
+    }
+    assert_eq!(world.units.len(), 6);
+    assert!(world.units.iter().filter(|u| u.cell.column >= 184).count() >= 3);
+    world.validate().unwrap();
+}
+
+#[test]
+fn migration_rejects_corrupt_archives_without_replacing_them() {
+    let mut world = legacy_world();
+    world.islands[0].terrain.pop();
+    let before = world.clone();
+    assert!(world.unify_islands().is_err());
+    assert_eq!(world, before);
+}
+
+#[test]
+fn expanded_snapshot_terrain_round_trips_runtime_dimensions() {
+    let mut world = GameWorld::default();
+    world.discover_island();
+    world.discover_island();
+    let snapshot = world.snapshot();
+    let loaded: WorldSnapshot =
+        serde_json::from_str(&serde_json::to_string(&snapshot).unwrap()).unwrap();
+    assert_eq!(loaded, snapshot);
+    assert_eq!((loaded.columns, loaded.rows), (304, 224));
+}
+
+#[test]
+#[ignore = "manual release-mode memory and snapshot budget measurement"]
+fn archipelago_budget() {
+    let mut world = GameWorld::default();
+    for count in [1, 4, 16, 64] {
+        while world.island_origins.len() < count {
+            world.discover_island();
         }
-        assert_eq!(a, b);
-        assert_eq!(a.terrain, home);
-        for (island, expected) in a.islands.iter().zip([
-            vec![ResourceKind::Iron, ResourceKind::Coal],
-            vec![ResourceKind::Clay],
-            vec![ResourceKind::Fiber],
-        ]) {
-            assert_ne!(island.terrain, home);
-            assert!(island.explored_cells.is_empty());
-            for node in &island.resources {
-                assert!(
-                    worldgen::grows_in(node.kind).contains(
-                        &island.terrain
-                            [usize::from(node.cell.row * WORLD_COLUMNS + node.cell.column)]
-                        .biome
-                    )
-                );
-            }
-            for kind in &expected {
-                assert!(island.resources.iter().any(|r| r.kind == *kind));
-            }
-            assert!(
-                island
-                    .resources
-                    .iter()
-                    .all(|r| STARTER_RESOURCES.contains(&r.kind) || expected.contains(&r.kind))
-            );
+        let terrain_bytes = world.terrain.capacity() * std::mem::size_of::<TerrainCell>();
+        let start = std::time::Instant::now();
+        for _ in 0..10 {
+            world.tick(0.1);
         }
-        let saved: GameWorld = serde_json::from_str(&serde_json::to_string(&a).unwrap()).unwrap();
-        assert_eq!(saved, a);
-        saved.validate().unwrap();
+        let tick_ms = start.elapsed().as_secs_f64() * 100.0;
+        let start = std::time::Instant::now();
+        let bytes = serde_json::to_vec(&world.snapshot()).unwrap().len();
+        eprintln!(
+            "islands={count} cells={} terrain_bytes={terrain_bytes} snapshot_bytes={bytes} tick_ms={tick_ms:.3} snapshot_ms={:.3}",
+            world.terrain.len(),
+            start.elapsed().as_secs_f64() * 1000.0
+        );
     }
 }
 
 #[test]
-fn voyage_lands_founders_with_shared_resources_and_preserves_settlements() {
-    let mut w = expedition();
-    w.stockpile.wood = 100.0;
-    let home = w.clone();
-    voyage(&mut w, 1).unwrap();
-    assert_eq!(w.island_id, 1);
-    assert_eq!(w.stockpile.wood, 100.0);
-    assert!(w.buildings.is_empty());
-    assert_eq!(w.ships[0].passengers[0], home.ships[0].passengers[0]);
-    w.apply_command(Command::Disembark {
-        ship_id: "transport-test".into(),
-    })
-    .unwrap();
-    w.stockpile.wood -= 40.0; // Shared spending remains visible after a return voyage.
-    assert_eq!(w.units.len(), 1);
-    let destination_terrain = w.terrain.clone();
-    let destination_fog = w.explored_cells.clone();
-    voyage(&mut w, 0).unwrap();
-    assert_eq!(w.terrain, home.terrain);
-    assert_eq!(w.buildings, home.buildings);
-    assert_eq!(w.units, home.units);
-    assert_eq!(w.stockpile.wood, 60.0);
-    assert!(
-        home.explored_cells
-            .iter()
-            .all(|c| w.explored_cells.contains(c))
+fn migration_translates_mid_voyage_steps_passengers_and_destinations() {
+    let mut world = legacy_world();
+    let island = &mut world.islands[0];
+    let passenger = island.units.remove(0);
+    let old_cell = passenger.cell;
+    island.ships[0].passengers.push(passenger);
+    island.ships[0].step = Some(Step {
+        to: CellCoordinate::new(1, 0),
+        progress: 0.3,
+    });
+    island.ships[0].destination = Some(CellCoordinate::new(5, 0));
+    world.unify_islands().unwrap();
+    let ship = &world.ships[0];
+    assert_eq!(
+        ship.step,
+        Some(Step {
+            to: CellCoordinate::new(185, 0),
+            progress: 0.3
+        })
     );
-    let mut restored: GameWorld =
-        serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
-    voyage(&mut restored, 1).unwrap();
-    assert_eq!(restored.terrain, destination_terrain);
-    assert_eq!(restored.stockpile.wood, 60.0);
-    assert_eq!(restored.units.len(), 1);
-    assert!(
-        destination_fog
-            .iter()
-            .all(|c| restored.explored_cells.contains(c))
+    assert_eq!(ship.destination, Some(CellCoordinate::new(189, 0)));
+    assert_eq!(
+        ship.passengers[0].cell,
+        CellCoordinate::new(old_cell.column + 184, old_cell.row)
     );
-    restored.validate().unwrap();
+    world.validate().unwrap();
 }
 
 #[test]
-fn invalid_or_blocked_voyages_are_atomic_and_do_not_generate_maps() {
-    let mut w = expedition();
-    for id in [0, 12, u64::MAX] {
-        let before = w.clone();
-        assert!(voyage(&mut w, id).is_err());
-        assert_eq!(w, before);
-    }
-    w.ships[0].destination = Some(CellCoordinate::new(1, 0));
-    let before = w.clone();
-    assert_eq!(voyage(&mut w, 2), Err(CommandError::ShipMustBeStopped));
-    assert_eq!(w, before);
-    w.ships[0].destination = None;
-    for cell in &mut w.islands[0].terrain {
-        cell.biome = TerrainBiome::Water;
-    }
-    w.islands[0].resources.clear();
-    let before = w.clone();
-    assert_eq!(voyage(&mut w, 1), Err(CommandError::ShoreBlocked));
-    assert_eq!(w, before);
-}
-
-#[test]
-fn old_saves_can_discover_and_corrupt_archives_are_rejected() {
-    let w = expedition();
-    let mut json = serde_json::to_value(&w).unwrap();
-    json.as_object_mut().unwrap().remove("island_id");
-    json.as_object_mut().unwrap().remove("islands");
-    let mut old: GameWorld = serde_json::from_value(json).unwrap();
-    voyage(&mut old, 1).unwrap();
-    old.validate().unwrap();
-    old.islands[0].terrain.pop();
-    assert!(old.validate().is_err());
-    let mut duplicate = w;
-    duplicate.islands[0].id = 0;
-    assert!(duplicate.validate().is_err());
-}
-
-#[test]
-fn frontier_keeps_expanding_and_revisits_do_not_regenerate() {
-    let mut w = expedition();
-    for id in 1..=5 {
-        voyage(&mut w, id).unwrap();
-        assert_eq!(w.island_id, id);
-        assert_eq!(w.islands.len() as u64, id);
-        w.validate().unwrap();
-    }
-    let terrain = w.terrain.clone();
-    voyage(&mut w, 0).unwrap();
-    voyage(&mut w, 5).unwrap();
-    assert_eq!(w.terrain, terrain);
-    assert_eq!(w.islands.len(), 5);
-}
-
-#[test]
-fn four_founders_can_land_and_build_from_shared_wood() {
-    let mut w = expedition();
-    w.stockpile.wood = 100.0;
-    w.stockpile.food = 100.0;
-    w.apply_command(Command::Research {
-        building_id: "base-1".into(),
-        technology: TechnologyKind::Forestry,
-    })
-    .unwrap();
-    let template = w.ships[0].passengers[0].clone();
-    for n in 3..=5 {
-        let mut passenger = template.clone();
-        passenger.id = format!("villager-{n}");
-        w.ships[0].passengers.push(passenger);
-    }
-    w.next_unit_id = 6;
-    voyage(&mut w, 1).unwrap();
-    w.apply_command(Command::Disembark {
-        ship_id: "transport-test".into(),
-    })
-    .unwrap();
-    assert_eq!(w.units.len(), 4);
-    let unit_id = w.units[0].id.clone();
-    let mut sites = w
+fn local_visibility_matches_the_reference_full_map_scan_after_expansion() {
+    let mut world = GameWorld::default();
+    world.discover_island();
+    world.ships.push(vessel(CellCoordinate::new(184, 0)));
+    let eyes: Vec<_> = world
+        .units
+        .iter()
+        .map(|u| (u.position(), UNIT_SIGHT_RADIUS))
+        .chain(
+            world
+                .ships
+                .iter()
+                .map(|s| (s.position(), UNIT_SIGHT_RADIUS)),
+        )
+        .chain(
+            world
+                .buildings
+                .iter()
+                .map(|b| (b.footprint().center(), b.kind.sight_radius())),
+        )
+        .collect();
+    let expected: BTreeSet<_> = world
         .terrain
         .iter()
-        .filter(|c| c.biome.is_walkable())
         .map(|c| c.coordinate())
-        .collect::<Vec<_>>();
-    sites.sort_by_key(|c| {
-        c.column.abs_diff(w.units[0].cell.column) + c.row.abs_diff(w.units[0].cell.row)
-    });
-    assert!(sites.into_iter().any(|origin| {
-        w.apply_command(Command::Build {
-            unit_id: unit_id.clone(),
-            origin,
-            kind: BuildingKind::TownCenter,
+        .filter(|c| {
+            eyes.iter()
+                .any(|(eye, radius)| eye.distance(c.center()) <= *radius)
         })
-        .is_ok()
-    }));
-    for _ in 0..600 {
-        w.tick(0.1);
-    }
-    assert!(w.buildings[0].is_complete());
-    assert_eq!(w.stockpile.wood, 60.0);
-    w.stockpile.food = 100.0;
-    let before = w.clone();
-    assert_eq!(
-        w.apply_command(Command::Research {
-            building_id: w.buildings[0].id.clone(),
-            technology: TechnologyKind::Forestry
-        }),
-        Err(CommandError::TechnologyInProgress)
-    );
-    assert_eq!(w, before);
-    // A deposit on the new island joins the same pool used back home.
-    w.units[0].cargo = Some(CarriedResource {
-        kind: ResourceKind::Iron,
-        amount: 7.0,
-    });
-    w.apply_command(Command::Deposit {
-        unit_id: w.units[0].id.clone(),
-        building_id: w.buildings[0].id.clone(),
-    })
-    .unwrap();
-    for _ in 0..600 {
-        w.tick(0.1);
-    }
-    assert_eq!(w.stockpile.iron, 7.0);
-    voyage(&mut w, 0).unwrap();
-    assert_eq!(w.stockpile.wood, 60.0);
-    assert_eq!(w.stockpile.iron, 7.0);
-    w.apply_command(Command::Produce {
-        product: ProductKind::Villager,
-        building_id: "base-1".into(),
-    })
-    .unwrap();
-    assert_eq!(w.stockpile.food, 50.0);
-    voyage(&mut w, 1).unwrap();
-    assert_eq!(w.stockpile.food, 50.0);
-    w.validate().unwrap();
-}
-
-#[test]
-fn ocean_departure_does_not_require_a_specific_corner_to_be_unoccupied() {
-    let mut w = expedition();
-    let mut other = w.ships[0].clone();
-    other.id = "another-ship".into();
-    other.passengers.clear();
-    w.ships[0].cell = CellCoordinate::new(1, 0);
-    w.ships.push(other);
-    voyage(&mut w, 1).unwrap();
-    assert_eq!(w.islands[0].ships.len(), 1);
-    w.validate().unwrap();
+        .collect();
+    assert_eq!(world.visible_cells(), expected);
 }
