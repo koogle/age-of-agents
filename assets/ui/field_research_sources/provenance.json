@@ -1,0 +1,59 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "subject": "a small diamond-shaped patch of freshly tilled terracotta earth with three neat parallel furrows and three prominent green two-leaf seedlings, with one simple wooden-handled bronze hoe laid diagonally beside the furrows; a clear symbol of improved field cultivation, no wheat, no grain sheaf, no corn, no sickle",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a small diamond-shaped patch of freshly tilled terracotta earth with three neat parallel furrows and three prominent green two-leaf seedlings, with one simple wooden-handled bronze hoe laid diagonally beside the furrows; a clear symbol of improved field cultivation, no wheat, no grain sheaf, no corn, no sickle. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre and terracotta with olive-green leaves, Moebius and Studio Ghibli style, three-quarter viewpoint from above. Simple refined silhouette readable at 24 pixels, large clear shapes, no tiny scattered details. One isolated object centered on pure white, no cast shadow, no surrounding landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad2356/ap5LivO0O4Ug9oYpffNI5_DNfdqcPm.png",
+        "content_type": "image/png",
+        "file_name": "ap5LivO0O4Ug9oYpffNI5_DNfdqcPm.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "generation": {
+    "t": 1791189356.8951693,
+    "endpoint": "fal-ai/nano-banana/edit",
+    "tag": "icon:tech_agriculture_fields",
+    "est_usd": 0.0398,
+    "request_id": "01a10b34-75bc-7903-b58f-0c3c5a8df88e",
+    "seconds": 7.0
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad2359/5ecUKJNx8sXS6-CGP-V2r_zanWSWPe.png",
+        "content_type": "image/png",
+        "file_name": "5ecUKJNx8sXS6-CGP-V2r_zanWSWPe.png",
+        "file_size": null,
+        "width": 1024,
+        "height": 1024
+      },
+      "mask_image": null
+    },
+    "request": {
+      "t": 1791189372.9664748,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:tech_agriculture_fields.png",
+      "est_usd": 0.005,
+      "request_id": "01a10b34-c707-77b2-b090-4b9b2c36dbf6",
+      "seconds": 2.3
+    }
+  },
+  "processing": {
+    "script": "scripts/normalize_icons.py",
+    "input": "assets/ui/field_research_sources/cutout.png",
+    "output": "assets/ui/icons/tech_agriculture.png",
+    "size": [
+      128,
+      128
+    ],
+    "notes": "Normalized directly from the original FAL cutout. FAL-only generation, consistent with requested pipeline."
+  }
+}
