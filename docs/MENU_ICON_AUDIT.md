@@ -43,3 +43,11 @@ phone WebGL, and perform the thermonuclear review. Record PR/release evidence as
 work completes; an open PR or local screenshot does not establish deployment.
 
 Stop evidence: [desktop](verification/menu-icons/stop/desktop.jpg), [phone](verification/menu-icons/stop/phone.jpg), [checks](verification/menu-icons/stop/checks.txt).
+
+## Individual art PRs
+
+Art lands separately from runtime wiring in [#107](https://github.com/koogle/age-of-agents/pull/107). Each entry has a visual style review and retained provenance. The initial draft set was rejected under [#110](https://github.com/koogle/age-of-agents/pull/110).
+
+| Icon | Review/source | PR |
+| --- | --- | --- |
+| `resource_coal` | [Style review](../assets/ui/sources/menu_icons/resource_coal/STYLE_REVIEW.md) | PR_PENDING |

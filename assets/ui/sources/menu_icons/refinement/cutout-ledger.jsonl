@@ -1,0 +1,14 @@
+{"t": 1791242156.6868854, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:resource_steel", "est_usd": 0.005, "request_id": "01a10e5a-3027-7162-a0e3-4c4137cb089f", "seconds": 2.6}
+{"t": 1791242156.7972095, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:resource_cloth", "est_usd": 0.005, "request_id": "01a10e5a-3003-70b0-a7af-53f3725be3cb", "seconds": 2.8}
+{"t": 1791242156.8459523, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:resource_coal", "est_usd": 0.005, "request_id": "01a10e5a-3009-7a11-8592-2ea4ca693f1c", "seconds": 2.8}
+{"t": 1791242156.8960657, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:resource_bricks", "est_usd": 0.005, "request_id": "01a10e5a-3043-79c2-bab7-fddbfa0961ba", "seconds": 2.8}
+{"t": 1791242160.0158694, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:resource_rations", "est_usd": 0.005, "request_id": "01a10e5a-3dfb-7371-aa15-5aceb2533247", "seconds": 2.4}
+{"t": 1791242160.0750756, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:command_sail", "est_usd": 0.005, "request_id": "01a10e5a-3e90-7fc1-a859-a44336748a48", "seconds": 2.3}
+{"t": 1791242160.1288023, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:command_disembark", "est_usd": 0.005, "request_id": "01a10e5a-3e43-7e02-a15b-e4c22c075559", "seconds": 2.4}
+{"t": 1791242160.1315854, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:command_explore", "est_usd": 0.005, "request_id": "01a10e5a-3ea5-7370-896e-869f13d50738", "seconds": 2.3}
+{"t": 1791242163.295052, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:command_back", "est_usd": 0.005, "request_id": "01a10e5a-4b47-7773-b8b3-21200eb548d6", "seconds": 2.3}
+{"t": 1791242163.3544674, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:command_cargo", "est_usd": 0.005, "request_id": "01a10e5a-4b24-7ab0-bab2-351ff1c77f9b", "seconds": 2.4}
+{"t": 1791242163.4112835, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:category_town", "est_usd": 0.005, "request_id": "01a10e5a-4b5a-70b3-9ab0-5b6cd6e8e5f3", "seconds": 2.4}
+{"t": 1791242163.5537007, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:category_gathering", "est_usd": 0.005, "request_id": "01a10e5a-4c03-7db1-b416-95f660413ef5", "seconds": 2.3}
+{"t": 1791242166.5005968, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:category_production", "est_usd": 0.005, "request_id": "01a10e5a-57d4-79b1-a5a0-9a18700da3a8", "seconds": 2.3}
+{"t": 1791242166.6755087, "endpoint": "fal-ai/birefnet/v2", "tag": "restyle:category_military", "est_usd": 0.005, "request_id": "01a10e5a-586f-7b91-9e63-6e843c631c7c", "seconds": 2.3}
