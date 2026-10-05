@@ -1,5 +1,7 @@
 # Current work: environmental dangers (2026-10-05)
 
+- Review: [PR #98](https://github.com/koogle/age-of-agents/pull/98), branch `feat/environmental-drought`; implementation `b6a33be`. Not merged or deployed.
+
 - Implemented the requested first calamity slice: deterministic escalating drought, food-gathering penalty, saved simulation clock, and shared client forecast. See [environmental dangers](docs/knowledge/environmental-dangers.md) for rules and verification entry points.
 - Store version 12 resets incompatible saves, including version 11, under the accepted compatibility policy. No new assets or dependencies.
 - All 232 Rust tests pass (one existing manual benchmark ignored); asset checks and rebuilt JS syntax pass. Desktop mouse, DPR2 phone touch and landscape browser checks pass without page errors; native and WASM strict lint pass; evidence is in [drought review](docs/verification/2026-10-05-drought/REVIEW.md). Not deployed. Rust and wasm-bindgen were absent from this fresh environment and are now installed. Modal SDK installation succeeded, but `python3 scripts/modal_manage.py status` failed with "Could not connect to the Modal server" despite ready runtime credential bindings; direct release is blocked on connectivity.
