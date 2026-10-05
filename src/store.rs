@@ -4,6 +4,8 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 use aoa_game::GameWorld;
 
+mod migration;
+
 const DEFAULT_DB_PATH: &str = "age_of_agents.db";
 
 type StoreResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -78,7 +80,7 @@ impl Store {
         let Some(json) = json else {
             return Ok(None);
         };
-        let world: GameWorld = serde_json::from_str(&json)?;
+        let world = migration::load_world(&json)?;
         world
             .validate()
             .map_err(|error| format!("persisted world is corrupt: {error}"))?;
@@ -209,6 +211,92 @@ mod tests {
             )
             .unwrap();
         store
+    }
+
+    fn legacy_inventories() -> serde_json::Value {
+        let mut value = serde_json::to_value(GameWorld::default()).unwrap();
+        let stock = |wood| {
+            serde_json::to_value(aoa_game::Stockpile {
+                wood,
+                ..Default::default()
+            })
+            .unwrap()
+        };
+        let ship = |id, wood| {
+            serde_json::json!({
+                "id": id, "cell": {"column": 0, "row": 0},
+                "step": null, "destination": null, "heading": [1, 0],
+                "passengers": [], "goods": stock(wood)
+            })
+        };
+        value["stockpile"] = stock(10.0);
+        value["ships"] = serde_json::json!([ship("transport-home", 20.0)]);
+        value["islands"] = serde_json::json!([{
+            "id": 1, "terrain": value["terrain"], "explored_cells": [],
+            "units": [], "ships": [ship("transport-away", 40.0)],
+            "resources": [], "buildings": [], "stockpile": stock(30.0)
+        }]);
+        value
+    }
+
+    #[test]
+    fn legacy_island_and_ship_resources_are_pooled_once_and_saved() {
+        let path = temporary_db("shared-resources");
+        let store = store_raw(&path, &legacy_inventories());
+        let world = store.load().unwrap().unwrap();
+        assert_eq!(world.stockpile.wood, 100.0);
+        assert_eq!(world.ships.len(), 1);
+        assert_eq!(world.islands[0].ships.len(), 1);
+        // Repeated reads and a save/reload must never credit resources twice.
+        assert_eq!(store.load().unwrap().unwrap(), world);
+        store.save(&world).unwrap();
+        assert_eq!(store.load().unwrap().unwrap(), world);
+        let json = serde_json::to_value(&world).unwrap();
+        assert!(json["islands"][0].get("stockpile").is_none());
+        assert!(json["ships"][0].get("goods").is_none());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn corrupt_legacy_resources_are_rejected_before_pooling() {
+        for (index, pointer, amount) in [
+            (0, "/islands/0/stockpile/wood", -1.0),
+            (1, "/ships/0/goods/wood", -1.0),
+            (2, "/islands/0/ships/0/goods/wood", 201.0),
+            (3, "/stockpile/wood", -1.0),
+        ] {
+            let path = temporary_db(&format!("bad-inventory-{index}"));
+            let mut value = legacy_inventories();
+            *value.pointer_mut(pointer).unwrap() = serde_json::json!(amount);
+            let store = store_raw(&path, &value);
+            assert!(store.load().unwrap_err().to_string().contains("corrupt"));
+            std::fs::remove_file(path).unwrap();
+        }
+    }
+
+    #[test]
+    fn legacy_pooling_rejects_overflow_and_malformed_stockpiles() {
+        for mode in 0..3 {
+            let path = temporary_db(&format!("malformed-inventory-{mode}"));
+            let mut value = legacy_inventories();
+            match mode {
+                0 => {
+                    value["stockpile"]["wood"] = serde_json::json!(1e308);
+                    value["islands"][0]["stockpile"]["wood"] = serde_json::json!(1e308);
+                }
+                1 => {
+                    value["ships"][0]["goods"]
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("food");
+                }
+                _ => {
+                    value["islands"][0]["stockpile"]["wood"] = serde_json::Value::Null;
+                }
+            }
+            assert!(store_raw(&path, &value).load().is_err());
+            std::fs::remove_file(path).unwrap();
+        }
     }
 
     #[test]

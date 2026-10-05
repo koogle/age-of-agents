@@ -60,6 +60,19 @@ impl Hud {
         }
 
         let header_bottom = (shown.len().div_ceil(per_row) as f32 * 82.0 + 8.0) * s;
+        let shared_label = "Resources shared across islands";
+        self.text(
+            atlas,
+            shared_label,
+            (
+                width - 16.0 * s - Self::text_width(atlas, shared_label, 11.0 * s),
+                header_bottom + 8.0 * s,
+            ),
+            11.0 * s,
+            INK,
+            false,
+        );
+        let header_bottom = header_bottom + 18.0 * s;
         let toast_top = header_bottom
             + if snapshot.simulation_speed == 0.0 {
                 46.0 * s

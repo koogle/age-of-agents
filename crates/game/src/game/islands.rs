@@ -13,7 +13,6 @@ pub struct IslandState {
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
-    pub stockpile: Stockpile,
 }
 
 impl IslandState {
@@ -26,7 +25,6 @@ impl IslandState {
         swap(&mut self.ships, &mut world.ships);
         swap(&mut self.resources, &mut world.resources);
         swap(&mut self.buildings, &mut world.buildings);
-        swap(&mut self.stockpile, &mut world.stockpile);
     }
 }
 
@@ -48,7 +46,6 @@ impl GameWorld {
             units: Vec::new(),
             ships: Vec::new(),
             buildings: Vec::new(),
-            stockpile: Stockpile::default(),
         });
     }
 
