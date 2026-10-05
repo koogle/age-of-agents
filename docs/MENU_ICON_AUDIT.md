@@ -51,4 +51,4 @@ Each row links its verified change; consult GitHub for live merge/release state.
 | Icon | PR | Evidence |
 | --- | --- | --- |
 | Stop | [#104](https://github.com/koogle/age-of-agents/pull/104) | [Checks](verification/menu-icons/stop/checks.txt) |
-| Transport queue | PR_PENDING_transport_queue | [Checks](verification/menu-icons/transport_queue/checks.txt) |
+| Transport queue | [#107](https://github.com/koogle/age-of-agents/pull/107) | [Checks](verification/menu-icons/transport_queue/checks.txt) |
