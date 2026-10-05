@@ -13,6 +13,7 @@ use super::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum Claim {
+    Animal(usize),
     Building(usize),
     Resource(usize),
     Unit(usize),
@@ -43,7 +44,7 @@ impl Occupancy {
         (cell.column >= self.columns || cell.row >= self.rows || self.impassable[self.index(cell)])
             || matches!(
                 self.claim(cell),
-                Some(Claim::Building(_) | Claim::Resource(_))
+                Some(Claim::Building(_) | Claim::Resource(_) | Claim::Animal(_))
             )
     }
 
@@ -135,6 +136,12 @@ impl GameWorld {
                 }
             }
         }
+        for (index, animal) in self.animals.iter().enumerate() {
+            claim(animal.cell, Claim::Animal(index))?;
+            if let Some(step) = animal.step {
+                claim(step.to, Claim::Animal(index))?;
+            }
+        }
         for (index, unit) in self.units.iter().enumerate() {
             claim(unit.cell, Claim::Unit(index))?;
             if let Some(step) = unit.step {
@@ -165,6 +172,7 @@ impl GameWorld {
     /// Checks every structural invariant of the world. Persisted worlds that
     /// fail this are corrupt and must not be loaded.
     pub fn validate(&self) -> Result<(), String> {
+        self.validate_wildlife()?;
         self.validate_islands()?;
         self.validate_local()
     }
