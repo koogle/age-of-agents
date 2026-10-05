@@ -12,6 +12,7 @@ mod islands;
 mod placement;
 mod render;
 mod reset;
+mod snapshots;
 mod source;
 mod storage;
 mod terrain;
@@ -596,29 +597,7 @@ impl App {
             .unwrap_or(0.0);
         self.last_frame = Some(now);
         self.clock += dt;
-        self.source.poll(dt, &mut self.incoming);
-        while let Some(snapshot) = self.incoming.pop_front() {
-            self.feedback
-                .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
-            // The hosted server resets after a delay, so the view may have
-            // framed the old island meanwhile: look again at the new one.
-            if self.view.sync(snapshot) {
-                self.selection.units.clear();
-                self.selection.building = None;
-                self.framed = false;
-            }
-            if !self.framed {
-                self.frame_town_center();
-            }
-        }
-        for result in self.source.take_results() {
-            if let Err(error) = result {
-                self.toast = Some((friendly(&error), now + 3.0));
-            }
-        }
-        if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {
-            self.toast = None;
-        }
+        self.poll_world(dt, now);
         self.rig.map_size = Vec2::new(
             self.view.heights.columns as f32,
             self.view.heights.rows as f32,
@@ -713,7 +692,7 @@ impl App {
         });
         let (mut sprites, mut decals) =
             self.view
-                .draw_list(&self.sheets, &self.rig, self.clock as f32, &self.selection);
+                .draw_list(&self.sheets, &self.rig, &self.selection);
         decals.extend(hover);
         if let Some((kind, origin, ok)) = ghost {
             let (columns, rows) = kind.size();
