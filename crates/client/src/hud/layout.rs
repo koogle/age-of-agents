@@ -60,6 +60,19 @@ impl Hud {
         }
 
         let header_bottom = (shown.len().div_ceil(per_row) as f32 * 82.0 + 8.0) * s;
+        let shared_label = "Resources shared across islands";
+        self.text(
+            atlas,
+            shared_label,
+            (
+                width - 16.0 * s - Self::text_width(atlas, shared_label, 11.0 * s),
+                header_bottom + 8.0 * s,
+            ),
+            11.0 * s,
+            INK,
+            false,
+        );
+        let header_bottom = header_bottom + 18.0 * s;
         let toast_top = header_bottom
             + if snapshot.simulation_speed == 0.0 {
                 46.0 * s
@@ -314,6 +327,20 @@ impl Hud {
                     command.enabled,
                     hot && command.enabled,
                 );
+                if matches!(command.action, Action::Research(tech) if snapshot.researched_technologies.contains(&tech))
+                {
+                    self.sprite(
+                        atlas,
+                        "coin_researched",
+                        [
+                            rect[0] + m - 30.0 * s,
+                            rect[1] + m - 30.0 * s,
+                            30.0 * s,
+                            30.0 * s,
+                        ],
+                        [1.0; 4],
+                    );
+                }
                 // An unavailable coin still answers a tap, with the reason:
                 // phones have no hover to show it.
                 self.regions.push(Region {
