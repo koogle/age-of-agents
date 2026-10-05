@@ -1,7 +1,7 @@
 use super::movement::{Goal, Travel};
 use super::*;
 
-/// How far (in cells, from the exhausted node) a gatherer looks for the next
+/// How far (in cells, from the exhausted patch) a gatherer looks for the next
 /// node of the same kind before going idle.
 pub const NEXT_RESOURCE_RADIUS: u32 = 10;
 
@@ -182,18 +182,42 @@ impl GameWorld {
         }
     }
 
-    /// The nearest live node of the same kind within `NEXT_RESOURCE_RADIUS`
-    /// cells of the given node that the unit can reach; ties go to the lower id.
+    /// The nearest reachable node within `NEXT_RESOURCE_RADIUS` of the spent
+    /// patch; ties go to the lower id. Fields remain individual work sites.
     fn next_resource(&self, unit_index: usize, resource_id: &str) -> Option<String> {
         let finished = self.resources.iter().find(|r| r.id == resource_id)?;
+        // The last bush/tree to run out must not shrink the search area to one
+        // edge of its patch, especially when several workers finish together.
+        let mut origins = vec![finished.cell];
+        if finished.field.is_none() {
+            let mut cursor = 0;
+            while cursor < origins.len() {
+                for node in &self.resources {
+                    if node.kind == finished.kind
+                        && node.field.is_none()
+                        && node.amount <= f64::EPSILON
+                        && node.cell.touches(origins[cursor])
+                        && !origins.contains(&node.cell)
+                    {
+                        origins.push(node.cell);
+                    }
+                }
+                cursor += 1;
+            }
+        }
         let mut candidates: Vec<(u32, &ResourceNode)> = self
             .resources
             .iter()
             .filter(|r| r.kind == finished.kind && r.id != resource_id && r.amount > f64::EPSILON)
             .filter_map(|r| {
-                let dc = u32::from(r.cell.column.abs_diff(finished.cell.column));
-                let dr = u32::from(r.cell.row.abs_diff(finished.cell.row));
-                let distance = dc * dc + dr * dr;
+                let distance = origins
+                    .iter()
+                    .map(|origin| {
+                        let dc = u32::from(r.cell.column.abs_diff(origin.column));
+                        let dr = u32::from(r.cell.row.abs_diff(origin.row));
+                        dc * dc + dr * dr
+                    })
+                    .min()?;
                 (distance <= NEXT_RESOURCE_RADIUS * NEXT_RESOURCE_RADIUS).then_some((distance, r))
             })
             .collect();
