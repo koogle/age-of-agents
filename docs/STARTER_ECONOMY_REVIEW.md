@@ -1,5 +1,7 @@
 # Starter economy review
 
+Historical review of [PR #55](https://github.com/koogle/age-of-agents/pull/55). Its starter economy remains relevant, but the transport budget is now a playable recipe and continuous island exploration is implemented; local inventories/goods shipping were superseded by shared resources. See [current behavior](../README.md#proposed-gameplay-loop) and [decisions](../decisions.md) rather than treating the deferred-work statements below as today's backlog.
+
 Fresh worlds use food/wood/stone generation and resource-discovery unlocks. Timber is their only available processing chain. Existing saves deserialize the absent economy_rules field as Unrestricted, preserving their resources, buildings, jobs and catalog access. Reset is still an explicit destructive user choice; no schema reset or silent migration was added.
 
 The domain computes available buildings and filters snapshot production/research offers. Build, Produce and Research enforce those same rules inside the existing atomic command transaction. Clients only filter existing menu groups; they neither discover resources nor decide unlocks. Discovery uses explored node coordinates and persists after depletion; hidden nodes and stockpile amounts cannot bypass it. No extra discovery cache, tech ages, simulation framework, dependencies, autonomy or art changes.
