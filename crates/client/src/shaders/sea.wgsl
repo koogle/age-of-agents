@@ -7,6 +7,8 @@ struct VOut {
 @vertex
 fn vs(@location(0) position: vec3<f32>) -> VOut {
     var p = position;
+    p.x += g.curve_center.x;
+    p.z += g.curve_center.y;
     p.y += sin(p.x * 0.9 + g.time * 1.1) * 0.025 + cos(p.z * 0.7 + g.time * 0.8) * 0.025;
     var out: VOut;
     out.world = p;

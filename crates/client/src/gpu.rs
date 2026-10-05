@@ -187,12 +187,14 @@ pub fn data_texture(
     device: &wgpu::Device,
     format: wgpu::TextureFormat,
     label: &str,
+    width: u32,
+    height: u32,
 ) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some(label),
         size: wgpu::Extent3d {
-            width: aoa_game::WORLD_COLUMNS as u32,
-            height: aoa_game::WORLD_ROWS as u32,
+            width,
+            height,
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,

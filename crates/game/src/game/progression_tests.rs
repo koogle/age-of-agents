@@ -128,6 +128,7 @@ fn discovering_complementary_materials_unlocks_industries_and_persists_after_dep
         "steel still needs coal"
     );
     w.explored_cells.push(cell(3, 2));
+    w.explored_cells.sort_unstable();
     assert_eq!(w.available_buildings(), BUILDABLE);
     for r in &mut w.resources {
         r.amount = 0.0;

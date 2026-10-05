@@ -372,6 +372,7 @@ pub struct Hud {
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
     pressed: Option<Action>,
+    map_size: Vec2,
 }
 
 fn resource_icon(kind: ResourceKind) -> &'static str {
@@ -398,6 +399,7 @@ impl Hud {
             regions: Vec::new(),
             hover: None,
             pressed: None,
+            map_size: Vec2::new(crate::terrain::COLUMNS, crate::terrain::ROWS),
         }
     }
 
@@ -697,7 +699,7 @@ impl Hud {
                 if region.enabled {
                     self.pressed = Some(match &region.action {
                         Action::LookAt(_) => Action::LookAt(
-                            minimap::Minimap::new()
+                            minimap::Minimap::new(self.map_size)
                                 .world_at(Vec2::new((at.x - r[0]) / r[2], (at.y - r[1]) / r[3])),
                         ),
                         action => action.clone(),
