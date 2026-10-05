@@ -95,6 +95,7 @@ async def main(out, only):
                         await page.screenshot(path=str(out/(label+'-wildlife.png')))
                         await click(*(await screen(cell(x,y),.3)))
                         await page.wait_for_timeout(250)
+                        await command({'type':'set_simulation_speed','multiplier':1.0})
                         await click(*(await screen(cell(x+4,y+1),.35)))
                         await page.wait_for_timeout(400)
                         ordered=await state()
