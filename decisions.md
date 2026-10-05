@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. Subsequent direction sets one animal on the first island and more on the second: one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island ([wildlife](docs/knowledge/wildlife.md)).
+
 - **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.
 - **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind.

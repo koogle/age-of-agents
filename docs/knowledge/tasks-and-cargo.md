@@ -63,7 +63,7 @@ cycle rather than treating one successful command as proof of the loop.
 The developer reported regular-bush gatherers going Idle after automatic delivery,
 with nearby food remaining and no further clicks, especially at 2× (2026-10-05).
 The developer also suspects any resource with a distant drop-off is affected.
-Coverage is being expanded to food, wood and stone with both nearby and distant
+Coverage includes food, wood and stone with both nearby and distant
 storage, including deliveries while the original node still has stock.
 A visible-production-layout replay reproduced this when `berries-34` was the last
 node harvested: its 10-cell circle excluded a neighboring patch, although other
@@ -77,10 +77,13 @@ limit, nearest-distance/ID ordering and reachable-target check. Disconnected
 exhausted patches cannot extend the range, fields retain their individual search
 origin, and Stop/manual replenishment remain unchanged. No persisted fields change.
 
-`finishing_the_far_side_of_a_bush_patch_keeps_nearby_food_in_range_after_delivery`
+`exhausted_patch_continuation_survives_distant_deliveries`
 fails before this change and passes at 1×/2× afterward. It fills one load across
 two bushes, resumes at the neighboring patch after delivery, credits all 60 food,
-and leaves distant food alone. Generated-world coverage uses two workers across
+and leaves distant resources alone. It covers food, wood and stone with nearby
+and distant storage. `live_resource_assignment_survives_repeated_distant_deliveries`
+checks three full deliveries while the original node remains live at 1×/2×;
+drop-off distance alone did not reproduce abandonment. Generated-world coverage uses two workers across
 seven seeds at 2×. The production-layout replay reconstructs only known terrain
 (unseen becomes water), so it is supporting evidence rather than an exact save.
 The [isolated browser comparison](../verification/2026-10-05/bush-delivery-2x.json)
