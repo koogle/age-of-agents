@@ -54,12 +54,14 @@ impl Hud {
                 true,
             );
             let hit = [x, y, d, d + 16.0 * s];
+            let mut name = kind.name().to_owned();
+            name[..1].make_ascii_uppercase();
             if self.hovered(hit) {
-                resource_hint = Some(kind.name());
+                resource_hint = Some(name.clone());
             }
             self.regions.push(Region {
                 rect: hit,
-                action: Action::Explain(kind.name().into()),
+                action: Action::Explain(name),
                 enabled: true,
             });
         }
@@ -242,7 +244,13 @@ impl Hud {
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
         else {
-            self.toast(atlas, model.toast.or(resource_hint), width, s, toast_top);
+            self.toast(
+                atlas,
+                model.toast.or(resource_hint.as_deref()),
+                width,
+                s,
+                toast_top,
+            );
             return;
         };
         let gap = if narrow { 8.0 } else { 10.0 } * s;
@@ -513,6 +521,12 @@ impl Hud {
                 1.5 * s,
             );
         }
-        self.toast(atlas, model.toast.or(resource_hint), width, s, toast_top);
+        self.toast(
+            atlas,
+            model.toast.or(resource_hint.as_deref()),
+            width,
+            s,
+            toast_top,
+        );
     }
 }

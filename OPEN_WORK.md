@@ -15,7 +15,7 @@
 
 # Open work
 
-- Separate PR requested: `fix/resource-icon-tooltips` removes persistent top-resource names, retains quantities, shows names on hover/tap, and compacts rows to 66px. Integrated master `e50ad7b`; 253 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass, rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors. Thermonuclear review complete; [screenshots and details](docs/verification/resource-names/README.md). Ready for the separately requested PR; leave it open for review.
+- Separate PR requested: `fix/resource-icon-tooltips` removes persistent top-resource names, retains quantities, shows names on hover/tap, and compacts rows to 66px. Integrated master `e50ad7b`; 253 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass, rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors. Thermonuclear review complete; [screenshots and details](docs/verification/resource-names/README.md). [PR #108](https://github.com/koogle/age-of-agents/pull/108) is open. Capitalization follow-up verified with all five HUD layout tests, strict native/WASM lint, rebuilt WebGL and refreshed desktop/phone browser captures. Ready for review.
 
 - README cleanup: restored the concise scope of `9ce5f17`, retaining current features and setup, including merged wildlife combat. Detailed implementation notes stay in existing guides. Documentation-only; links and whitespace checked. User authorized PR creation and merge.
 
