@@ -24,7 +24,7 @@ SUBJ = {
  "command_cancel": (PREFIX, "a simple hand-drawn ink saltire cross mark made of two crossed brush strokes in muted terracotta red"),
  "command_train": (PREFIX, "a single small full-body villager figure in a cream linen tunic and sandals, walking forward with a wooden staff"),
  "tech_forestry": (PREFIX, "a felling axe embedded in a tree stump with a fresh sapling sprouting beside it"),
- "tech_agriculture": (PREFIX, "a bronze sickle laid across a golden sheaf of wheat"),
+ "tech_agriculture": (PREFIX, "a small diamond-shaped patch of freshly tilled terracotta earth with three neat parallel furrows and three prominent green two-leaf seedlings, with one simple wooden-handled bronze hoe laid diagonally beside the furrows; a clear symbol of improved field cultivation, no wheat, no grain sheaf, no corn, no sickle"),
  "tech_masonry": (PREFIX, "a mason's iron chisel and wooden mallet resting on a carved limestone block"),
  "tech_mining": (PREFIX, "a pickaxe resting against a chunk of rock with a glint of ore"),
  "tech_textiles": (PREFIX, "a wooden drop spindle wound with cream wool thread and a small folded piece of woven cloth"),

@@ -368,6 +368,8 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         commands.push(Command {
             icon: if product == ProductKind::TransportShip {
                 "transport"
+            } else if product == ProductKind::Timber {
+                "resource_timber"
             } else {
                 "command_train"
             },
@@ -441,7 +443,11 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
         .map(|(index, entry)| {
             let (icon, name, cost) = match entry.job {
                 aoa_game::BuildingJob::Produce { product, .. } => (
-                    "command_train",
+                    if product == ProductKind::Timber {
+                        "resource_timber"
+                    } else {
+                        "command_train"
+                    },
                     product_label(product, false),
                     cost_text(product.cost()),
                 ),
