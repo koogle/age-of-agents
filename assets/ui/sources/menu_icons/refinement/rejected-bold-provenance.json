@@ -1,0 +1,18 @@
+{
+  "tool": "OpenAI image_gen",
+  "date": "2026-10-05",
+  "prompt": "Refine this game UI icon atlas. Preserve EXACTLY its 4-column by 4-row equal-square cell layout, 14 icons, and two empty white cells at bottom right. Output a square high resolution image ideally 2048x2048 or larger. Keep every icon centered in its original cell with generous white margins, do not move or combine icons. Retain the approved fine brown ink outlines, flat watercolor Mediterranean palette and each original object's identity. Carefully clean inconsistent geometry, stray marks, distorted edges, and diffusion artifacts; simplify tiny details for 24-pixel readability. Coal must stay black lumps, steel silver ingots, bricks red stack, cloth cream roll; row2 provisions, disembark boot/gangplank/shore, sail/waves, compass; row3 cargo crate, left arrow, classical civic columns, harvest basket; row4 anvil and hammer, shield and spear, empty, empty. Fix the compass to ONE unambiguous red needle with a small opposite tail, simple cardinal ticks but NO LETTERS. Make the disembark boot sit convincingly on the end of the gangplank at shore. Keep transparent-looking objects on solid pure white here; no shadows, no labels, no numbers, no grid lines. Do not change style or add decorative objects. This is a cleanup pass of the existing authored designs, not a redesign.",
+  "input": "draft-sheet.png",
+  "output": "refined-sheet.png",
+  "transparent_background": false,
+  "layout": "4x4 equal cells, row-major order in subjects.json; final two cells empty",
+  "requested_size": [
+    2048,
+    2048
+  ],
+  "actual_size": [
+    1254,
+    1254
+  ],
+  "note": "Retain 1024px original FAL renders independently. The refinement has approximately 314px per cell and supplies 128px UI icons, not 512px world sprite frames. No claim of recovered 512px detail."
+}
