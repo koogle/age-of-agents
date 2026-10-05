@@ -139,11 +139,27 @@ fn play(seed: u64, steps: usize) -> (usize, usize) {
 #[test]
 fn random_play_preserves_every_invariant() {
     let (mut builds, mut gathers) = (0, 0);
-    for seed in 1..=8 {
-        let (b, g) = play(seed, 1_200);
-        builds += b;
-        gathers += g;
-    }
+    let workers = std::thread::available_parallelism().map_or(1, |n| n.get().min(4));
+    std::thread::scope(|scope| {
+        let handles: Vec<_> = (0..workers)
+            .map(|worker| {
+                scope.spawn(move || {
+                    let mut totals = (0, 0);
+                    for seed in (worker + 1..=8).step_by(workers) {
+                        let (builds, gathers) = play(seed as u64, 1_200);
+                        totals.0 += builds;
+                        totals.1 += gathers;
+                    }
+                    totals
+                })
+            })
+            .collect();
+        for handle in handles {
+            let (b, g) = handle.join().unwrap();
+            builds += b;
+            gathers += g;
+        }
+    });
     assert!(
         builds >= 8 && gathers >= 8,
         "builds={builds} gathers={gathers}"

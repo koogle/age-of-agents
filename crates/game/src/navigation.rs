@@ -28,7 +28,7 @@ impl PathTree {
         start: CellCoordinate,
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
-        Self::search_to(columns, rows, start, None, passable)
+        Self::search_to(columns, rows, start, None, &[], passable)
     }
 
     /// A* to one target; unlike a complete tree, unrelated ocean is not flooded.
@@ -39,7 +39,26 @@ impl PathTree {
         target: CellCoordinate,
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
-        Self::search_to(columns, rows, start, Some(target), passable)
+        Self::search_to(columns, rows, start, Some(target), &[], passable)
+    }
+
+    /// Stop Dijkstra when the cheapest goal is settled. Uses the same cell-order
+    /// tie breaks and exact path as a complete search, without flooding the rest
+    /// of the map. Returns the cost and path; an empty path means the start
+    /// is already a goal.
+    pub fn route_to_nearest(
+        columns: u16,
+        rows: u16,
+        start: CellCoordinate,
+        goals: &[CellCoordinate],
+        passable: impl Fn(CellCoordinate) -> bool,
+    ) -> Option<(u32, Vec<CellCoordinate>)> {
+        if goals.is_empty() {
+            return None;
+        }
+        let tree = Self::search_to(columns, rows, start, None, goals, passable);
+        tree.nearest(goals.iter().copied())
+            .map(|goal| (tree.cost(goal).unwrap(), tree.path_to(goal)))
     }
 
     fn search_to(
@@ -47,6 +66,7 @@ impl PathTree {
         rows: u16,
         start: CellCoordinate,
         target: Option<CellCoordinate>,
+        goals: &[CellCoordinate],
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
         let estimate = |cell: CellCoordinate| {
@@ -75,7 +95,7 @@ impl PathTree {
             if cost != tree.cost[current_index] {
                 continue;
             }
-            if target == Some(current) {
+            if target == Some(current) || goals.contains(&current) {
                 break;
             }
             for (next, step_cost) in steps(current, columns, rows, &passable) {
@@ -233,6 +253,54 @@ mod tests {
 #[cfg(test)]
 mod route_tests {
     use super::*;
+    #[test]
+    fn nearest_routes_preserve_complete_search_paths_and_goal_ties() {
+        let cell = CellCoordinate::new;
+        // All obstacle layouts on a small grid, including blocked corners,
+        // unreachable goals, equal-cost goals, and a start that is itself a goal.
+        for walls in 0_u16..512 {
+            let clear = |c: CellCoordinate| walls & (1 << (c.row * 3 + c.column)) == 0;
+            for start in [cell(0, 0), cell(1, 1), cell(2, 2)] {
+                let all = PathTree::search(3, 3, start, clear);
+                for goals in [
+                    vec![],
+                    vec![cell(2, 0), cell(0, 2)],
+                    vec![cell(0, 2), cell(2, 0)],
+                    vec![start, cell(2, 1)],
+                    vec![cell(1, 1)],
+                    vec![cell(3, 0), cell(0, 3)],
+                ] {
+                    let expected = all
+                        .nearest(goals.iter().copied())
+                        .map(|goal| (all.cost(goal).unwrap(), all.path_to(goal)));
+                    assert_eq!(
+                        PathTree::route_to_nearest(3, 3, start, &goals, clear),
+                        expected,
+                        "walls={walls}, start={start:?}, goals={goals:?}",
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn nearby_goal_does_not_search_the_whole_map() {
+        let calls = std::cell::Cell::new(0);
+        let clear = |_| {
+            calls.set(calls.get() + 1);
+            true
+        };
+        let start = CellCoordinate::new(10, 10);
+        let goal = CellCoordinate::new(11, 10);
+        let all = PathTree::search(120, 80, start, clear);
+        let full_calls = calls.replace(0);
+        assert_eq!(
+            PathTree::route_to_nearest(120, 80, start, &[goal], clear),
+            Some((all.cost(goal).unwrap(), all.path_to(goal))),
+        );
+        assert!(calls.get() < full_calls / 100);
+    }
+
     #[test]
     fn targeted_routes_match_complete_search_costs_and_respect_obstacles() {
         for seed in 0..12 {

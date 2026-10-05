@@ -32,6 +32,22 @@ See [the field audit limits](../FIELD_GATHERING_REVIEW.md#limits) before diagnos
 an old save. Prevention does not relocate already-blocking plots, and an idle
 unit in a narrow passage is a separate traffic problem.
 
+## Destination searches and deterministic routes
+
+`PathTree::route_to_nearest` stops Dijkstra when the cheapest requested goal is
+settled. It preserves complete-search path and cell-order ties; use it for a
+known movement/interaction destination. Drop-site selection still prefers a
+clear route, then route cost, then building ID, and only computes a blocked-route
+fallback when the clear route is unavailable. Per-site searches can cost more
+with many far-away compatible buildings; profile populated settlements before
+assuming the small-world gains generalize.
+
+Keep complete trees for connectivity/placement checks and callers comparing
+arbitrary terrain cells. A partial tree cannot replace those contracts. The
+navigation tests compare exact paths across every 3×3 obstacle layout and check
+that an adjacent destination does not flood the whole 120×80 grid. Gathering
+regressions cover busy-only, incompatible, unfinished and blocked-nearby drop sites.
+
 ## Learned constraints and evidence
 
 **Evidence:** [#46](https://github.com/koogle/age-of-agents/pull/46) prevented
