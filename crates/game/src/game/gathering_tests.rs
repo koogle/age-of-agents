@@ -61,41 +61,45 @@ fn automatic_drop_off_uses_the_nearest_compatible_complete_building() {
 
 #[test]
 fn a_blocked_nearby_drop_off_does_not_hide_an_accessible_one() {
-    let mut world = world();
-    world.buildings.push(building(
-        BuildingKind::Granary,
-        "granary",
-        cell(12, 10),
-        None,
-    ));
-    let near = world.buildings[1].footprint();
-    // Only one approach cell remains, and an idle villager occupies it.
-    let entrance = cell(11, 11);
-    for at in interaction_cells(near).filter(|at| *at != entrance) {
-        let index = usize::from(at.row) * usize::from(WORLD_COLUMNS) + usize::from(at.column);
-        world.terrain[index].biome = TerrainBiome::Water;
+    for (building_kind, resource_kind) in [
+        (BuildingKind::Granary, ResourceKind::Food),
+        (BuildingKind::LumberMill, ResourceKind::Wood),
+    ] {
+        let mut world = world();
+        world
+            .buildings
+            .push(building(building_kind, "drop-site", cell(12, 10), None));
+        let near = world.buildings[1].footprint();
+        // Only one approach cell remains, and an idle villager occupies it.
+        let entrance = cell(11, 11);
+        for at in interaction_cells(near).filter(|at| *at != entrance) {
+            let index = usize::from(at.row) * usize::from(WORLD_COLUMNS) + usize::from(at.column);
+            world.terrain[index].biome = TerrainBiome::Water;
+        }
+        world.units[1].cell = entrance;
+        world.units[0].cargo = Some(CarriedResource {
+            kind: resource_kind,
+            amount: 20.0,
+        });
+        let mut resource = node("berries", cell(8, 10), 40.0);
+        resource.kind = resource_kind;
+        world.resources.push(resource);
+        world.units[0].action = UnitAction::Gather {
+            resource_id: "berries".into(),
+            phase: GatherPhase::Returning,
+        };
+        world.validate().unwrap();
+        assert_eq!(
+            world.nearest_drop_site(0),
+            Some(world.buildings[0].footprint())
+        );
+        run(&mut world, 30.0);
+        assert!(world.stockpile.amount(resource_kind) >= 20.0);
+        assert!(
+            world.resources[0].amount < 40.0,
+            "gathering resumes after unloading"
+        );
     }
-    world.units[1].cell = entrance;
-    world.units[0].cargo = Some(CarriedResource {
-        kind: ResourceKind::Food,
-        amount: 20.0,
-    });
-    world.resources.push(node("berries", cell(8, 10), 40.0));
-    world.units[0].action = UnitAction::Gather {
-        resource_id: "berries".into(),
-        phase: GatherPhase::Returning,
-    };
-    world.validate().unwrap();
-    assert_eq!(
-        world.nearest_drop_site(0),
-        Some(world.buildings[0].footprint())
-    );
-    run(&mut world, 30.0);
-    assert!(world.stockpile.food >= 20.0);
-    assert!(
-        world.resources[0].amount < 40.0,
-        "gathering resumes after unloading"
-    );
 }
 
 #[test]
@@ -127,6 +131,102 @@ fn repeated_granary_deliveries_resume_until_the_resource_is_exhausted() {
     }
     assert_eq!(deliveries, 3);
     assert_eq!(world.resources[0].amount, 0.0);
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+}
+
+#[test]
+fn lumber_mill_deliveries_resume_and_credit_full_and_partial_wood_loads_once() {
+    let mut world = world();
+    world.buildings.push(building(
+        BuildingKind::LumberMill,
+        "mill",
+        cell(12, 10),
+        None,
+    ));
+    let mut tree = node("tree", cell(8, 10), 47.0);
+    tree.kind = ResourceKind::Wood;
+    world.resources.push(tree);
+    world
+        .apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "tree".into(),
+        })
+        .unwrap();
+    let mut delivered = Vec::new();
+    for _ in 0..1000 {
+        let before = world.stockpile.wood;
+        world.tick(0.1);
+        if world.stockpile.wood > before {
+            assert!(world.is_beside(0, world.buildings[1].footprint()));
+            assert!(world.units[0].cargo.is_none());
+            delivered.push(world.stockpile.wood - before);
+        }
+    }
+    assert_eq!(delivered.len(), 3);
+    for (actual, expected) in delivered.into_iter().zip([20.0, 20.0, 7.0]) {
+        assert!((actual - expected).abs() < 1e-9);
+    }
+    assert!((world.stockpile.wood - 47.0).abs() < 1e-9);
+    assert_eq!(world.stockpile.timber, 0.0);
+    assert_eq!(world.resources[0].amount, 0.0);
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    world.validate().unwrap();
+}
+
+#[test]
+fn lumber_mill_requires_completion_and_wood_for_automatic_and_explicit_unloading() {
+    let mut world = world();
+    world.buildings.push(building(
+        BuildingKind::LumberMill,
+        "mill",
+        cell(12, 10),
+        Some(0.0),
+    ));
+    world.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Wood,
+        amount: 7.0,
+    });
+    let deposit = Command::Deposit {
+        unit_id: "villager-1".into(),
+        building_id: "mill".into(),
+    };
+    let before = world.clone();
+    assert_eq!(
+        world.apply_command(deposit.clone()),
+        Err(CommandError::BuildingUnderConstruction)
+    );
+    assert_eq!(world, before);
+    assert_eq!(
+        world.nearest_drop_site(0),
+        Some(world.buildings[0].footprint())
+    );
+    world.buildings[1].construction = None;
+    for kind in ROADMAP_RESOURCES
+        .into_iter()
+        .filter(|kind| *kind != ResourceKind::Wood)
+    {
+        world.units[0].cargo.as_mut().unwrap().kind = kind;
+        let before = world.clone();
+        assert_eq!(
+            world.apply_command(deposit.clone()),
+            Err(CommandError::BuildingRefusesCargo)
+        );
+        assert_eq!(world, before);
+        assert_eq!(
+            world.nearest_drop_site(0),
+            Some(world.buildings[0].footprint())
+        );
+    }
+    world.units[0].cargo.as_mut().unwrap().kind = ResourceKind::Wood;
+    assert_eq!(
+        world.nearest_drop_site(0),
+        Some(world.buildings[1].footprint())
+    );
+    world.apply_command(deposit).unwrap();
+    run(&mut world, 10.0);
+    assert_eq!(world.stockpile.wood, 7.0);
+    assert!(world.units[0].cargo.is_none());
+    assert!(world.is_beside(0, world.buildings[1].footprint()));
     assert_eq!(world.units[0].action, UnitAction::Idle);
 }
 
