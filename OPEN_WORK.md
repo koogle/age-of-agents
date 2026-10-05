@@ -1,4 +1,11 @@
-# Current handoff: villager action flashes (2026-10-05)
+# Current handoff: field gathering audit (2026-10-05)
+
+- Dedicated branch `fix/field-gathering-routes`; user has now authorized merging PR #80. Integrated master `4b6fe9e` (action flashes); source merges cleanly, handoffs preserved, combined bundle rebuilt; all 190 workspace tests, formatting and strict native/WASM lint pass. Fresh-browser smoke of the combined bundle also passes; ready for the authorized merge.
+- Confirmed fields already share ordinary gathering, deposits, resumption and same-kind continuation. Found and reproduced a field-placement gap: a permanent plot could cut off delivery routes while remaining reachable for preparation. Reuses building placement's route-preservation guard before mutation/spending.
+- Added regressions for atomic rejection from either side of a bottleneck, complete harvesting around a legal bypass across reload, and field/wild-food continuation in both directions. All ten focused field tests pass; the rejection test failed before the fix. All 186 workspace tests, formatting and strict native/WASM lint pass; rebuilt the tracked browser bundle. Desktop mouse and DPR2 phone touch each completed the prepare → harvest → six deliveries → idle flow with no page errors, using an isolated SQLite fixture under `/workspace/scratch/field-audit`. Rebuilt-client smoke also passes. Dedicated PR: https://github.com/koogle/age-of-agents/pull/80 (open, unmerged). No production deployment performed.
+- Audit and thermonuclear review: `docs/FIELD_GATHERING_REVIEW.md`. Existing blocked layouts are not migrated. Separately observed the existing idle-villager blockage in one-cell traffic; no general movement behavior change in this PR. User's precise saved layout is unavailable.
+
+# Previous handoff: villager action flashes (2026-10-05)
 
 - Extended the existing 1.4-second floating italic drop-off feedback to gathering (with resource name), building, field preparation, boarding, and idle transitions. Plain movement does not flash. Labels follow the villager and rapid assignment changes replace the previous status; resource gains retain separate labels with vertical separation on simultaneous status changes.
 - Feedback compares authoritative snapshots and assignment targets; repeated snapshots and movement-to-work gathering phases do not replay it. Initial snapshots/new units stay quiet, and reset/island changes clear labels. No simulation, persistence, command, asset, or dependency changes.
