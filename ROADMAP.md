@@ -8,6 +8,8 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 - Camera navigation uses pan and zoom with a fixed orthographic angle, responsive, zoom-scaled mouse edge/corner panning, pointer-anchored wheel zoom, midpoint-anchored pinch zoom, stable building anchors, and an optional diamond-shaped square grid. Distant zoom transitions into the curved planet overview.
 
+- Villager presentation uses accumulator interpolation locally and buffered playback remotely, with full gait cycles, prompt facing changes, and work poses only after reaching the authoritative work cell.
+
 ## Current direction
 
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and a shared resource pool are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
