@@ -4,7 +4,7 @@
 - Removed inventory pooling, archived island translation/models, legacy home-dock inference and historical deserialization defaults. Discovery writes terrain/resources directly to the shared world. No new dependencies or gameplay changes.
 - Rebased onto master `2bddab9`, preserving construction-material unlocks, movement, field-replenishment and maintained knowledge. Final integration passes **224 Rust tests** (13 server, 75 client, 136 domain; one manual benchmark ignored), formatting, strict native/WASM lint, release WASM rebuild and generated JS syntax. Desktop mouse and emulated DPR2-phone touch decode current snapshots, pause and reload without page errors. Thermonuclear review passed: atomic version reset, explicit current corruption errors, deterministic discovery and global validation retained, no dependencies or gameplay additions.
 - Isolated server checks verified that a current-version restart preserves the complete paused snapshot and a version-10 old-layout database resets to a playable world. Artifacts/databases: `/workspace/scratch/store-reset`; integration logs: `/tmp/aoa-pr-{tests,lint,wasm-lint,web}.log`.
-- PR preparation complete on `refactor/drop-save-backward-compatibility`; no merge or production deployment performed. Earlier Modal connection attempt failed; runtime now reports credentials ready, but deployment was not retried for this PR-only request.
+- PR [#96](https://github.com/koogle/age-of-agents/pull/96) is open against master on `refactor/drop-save-backward-compatibility`; no merge or production deployment performed. Earlier Modal connection attempt failed; runtime now reports credentials ready, but deployment was not retried for this PR-only request.
 
 ## Remaining work and open PRs
 
