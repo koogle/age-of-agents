@@ -1,0 +1,10 @@
+{
+  "name": "transport_queue",
+  "wasm_sha256": "b711748cbff36edadf26899a569f4ec4418b5d60363cb65de7b182d3d8b564c9",
+  "errors": [],
+  "viewports": [
+    "1280x800 DPR1 mouse",
+    "390x844 DPR2 touch"
+  ],
+  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
+}

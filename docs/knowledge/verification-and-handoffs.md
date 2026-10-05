@@ -79,3 +79,11 @@ In this cloud executor, source `/workspace/.cloud-setup/activate.sh` when Rust i
 not on PATH; check/install the matching WASM target and wasm-bindgen version.
 Software WebGL can take roughly a minute for initial shaders; a real-time snapshot
 feed avoids clock instrumentation blocking first-frame initialization.
+
+For sequential icon verification, `menu_icon_batch.py --queue DIR` keeps Chromium
+alive and accepts a single `request.json` with `name` and `output`. It writes
+`done.json`, screenshots and a bundle hash; the source lists supported menu
+fixtures. It uses loopback :8012 and a fresh page for each rebuilt bundle, with
+verified desktop/phone metrics and actual mouse/touch events. Reusing the browser
+keeps shader initialization costs manageable; this remains presentation/wire
+verification rather than a persisted-world gameplay test.

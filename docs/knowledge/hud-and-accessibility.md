@@ -81,3 +81,5 @@ and queued-job mappings: a manifest entry alone does not make an icon available
 in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
 Stop already had authored artwork but was omitted from that list and used Cancel;
 restore the hand for land units and ships, retaining the X for cancellation.
+
+Production offers and queued jobs now share `selection.rs::product_icon`; add future product artwork there so the two surfaces cannot silently diverge. The transport queue regression also preserves the existing timber artwork.
