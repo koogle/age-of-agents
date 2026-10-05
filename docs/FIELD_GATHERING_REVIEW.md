@@ -67,3 +67,13 @@ fields that already sever routes are not relocated or removed. A separate,
 existing traffic limitation also remains: an idle villager standing in a
 one-cell passage can block another worker's delivery. Neither limitation is
 specific to the harvesting phase machine.
+
+## Merge integration — 2026-10-05
+
+The user authorized merging PR #80. Integrated master `4b6fe9e`, including
+villager action flashes (#81). Source merges cleanly; preserved both handoffs
+and regenerated the combined browser bundle. All 190 workspace tests (13 server,
+55 client, 122 simulation), formatting and both strict lint targets pass.
+Thermonuclear integration review: no new behavior or source conflict resolution;
+the domain route guard and presentation feedback remain independent. A fresh
+browser loaded the exact rebuilt bundle successfully with no page errors.
