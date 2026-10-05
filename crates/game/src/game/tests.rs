@@ -328,9 +328,9 @@ fn partial_last_load_is_carried_then_deposited_before_becoming_idle() {
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
     world.tick(100.0);
     assert_gather_phase(&world.units[0], GatherPhase::Depositing);
-    assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.inventories[0].wood, 0.0);
     world.tick(0.1);
-    assert_eq!(world.stockpile.wood, 15.0);
+    assert_eq!(world.inventories[0].wood, 15.0);
     assert_eq!(world.units[0].cargo, None);
     assert_eq!(world.units[0].action, UnitAction::Idle);
 }
@@ -345,12 +345,12 @@ fn full_loads_deposit_once_resume_and_finish_after_depletion() {
         world.tick(100.0);
         assert_gather_phase(&world.units[0], GatherPhase::Depositing);
         world.tick(0.1);
-        assert_eq!(world.stockpile.wood, expected);
+        assert_eq!(world.inventories[0].wood, expected);
     }
     assert_eq!(world.resources[0].amount, 0.0);
     assert_eq!(world.units[0].action, UnitAction::Idle);
     world.tick(100.0);
-    assert_eq!(world.stockpile.wood, 45.0);
+    assert_eq!(world.inventories[0].wood, 45.0);
 }
 
 #[test]
@@ -388,7 +388,7 @@ fn deleted_resource_returns_existing_cargo_and_then_finishes() {
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
     world.tick(100.0);
     world.tick(0.1);
-    assert_eq!(world.stockpile.wood, GATHER_RATE * 0.5);
+    assert_eq!(world.inventories[0].wood, GATHER_RATE * 0.5);
     assert_eq!(world.units[0].action, UnitAction::Idle);
 }
 
@@ -406,7 +406,7 @@ fn missing_town_center_retains_cargo_until_a_deposit_is_possible() {
     world.buildings.push(town_center);
     world.tick(100.0);
     world.tick(0.1);
-    assert_eq!(world.stockpile.wood, 10.0);
+    assert_eq!(world.inventories[0].wood, 10.0);
     assert_eq!(world.units[0].action, UnitAction::Idle);
 }
 
@@ -431,7 +431,7 @@ fn deposits_route_each_resource_to_its_typed_stockpile() {
         world.tick(10.0 / GATHER_RATE);
         world.tick(100.0);
         world.tick(0.1);
-        let totals: BTreeMap<_, _> = world.stockpile.entries().into_iter().collect();
+        let totals: BTreeMap<_, _> = world.inventories[0].entries().into_iter().collect();
         let name = serde_json::to_value(kind).unwrap();
         for (resource, amount) in totals {
             let expected = if name == resource { 10.0 } else { 0.0 };
@@ -443,15 +443,15 @@ fn deposits_route_each_resource_to_its_typed_stockpile() {
 #[test]
 fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
     let mut world = fixture::fixture();
-    world.stockpile.food = 100.0;
+    world.inventories[0].food = 100.0;
     let produce = Command::Produce {
         building_id: "base-1".into(),
         product: ProductKind::Villager,
     };
     world.apply_command(produce.clone()).unwrap();
-    assert_eq!(world.stockpile.food, 50.0);
+    assert_eq!(world.inventories[0].food, 50.0);
     world.apply_command(produce).unwrap();
-    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.inventories[0].food, 0.0);
     assert_eq!(world.buildings[0].queue.len(), 1);
     world.tick(VILLAGER_PRODUCTION_SECONDS - 0.1);
     assert_eq!(world.units.len(), 2);
@@ -465,7 +465,7 @@ fn town_center_trains_one_villager_at_a_time_and_reserves_food_once() {
     );
     assert!(world.buildings[0].job.is_some());
     assert!(world.buildings[0].queue.is_empty());
-    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.inventories[0].food, 0.0);
     world.tick(VILLAGER_PRODUCTION_SECONDS);
     assert_eq!(world.units.len(), 4);
     assert_eq!(world.buildings[0].job, None);
@@ -490,7 +490,7 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
         })
         .collect();
     house(&mut world, ring.len() + 1);
-    world.stockpile.food = VILLAGER_FOOD_COST;
+    world.inventories[0].food = VILLAGER_FOOD_COST;
     world
         .apply_command(Command::Produce {
             building_id: "base-1".into(),
@@ -510,8 +510,8 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
 #[test]
 fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
     let mut world = fixture::fixture();
-    world.stockpile.food = 100.0;
-    world.stockpile.wood = 100.0;
+    world.inventories[0].food = 100.0;
+    world.inventories[0].wood = 100.0;
     let research = |technology| Command::Research {
         building_id: "base-1".into(),
         technology,
@@ -525,14 +525,17 @@ fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
     world
         .apply_command(research(TechnologyKind::Masonry))
         .unwrap();
-    assert_eq!((world.stockpile.food, world.stockpile.wood), (60.0, 80.0));
+    assert_eq!(
+        (world.inventories[0].food, world.inventories[0].wood),
+        (60.0, 80.0)
+    );
     world
         .apply_command(Command::Produce {
             building_id: "base-1".into(),
             product: ProductKind::Villager,
         })
         .unwrap();
-    assert_eq!(world.stockpile.food, 10.0);
+    assert_eq!(world.inventories[0].food, 10.0);
     assert_eq!(world.buildings[0].queue.len(), 1);
     world.tick(RESEARCH_SECONDS - 0.1);
     assert!(world.researched_technologies.is_empty());
@@ -635,7 +638,7 @@ fn a_rejected_order_keeps_the_busy_units_task() {
 #[test]
 fn build_places_one_foundation_immediately_and_charges_once() {
     let mut world = fixture::fixture();
-    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    world.inventories[0].wood = TOWN_CENTER_WOOD_COST;
     let site = free_site(&mut world.clone(), BuildingKind::TownCenter);
     world
         .apply_command(Command::Build {
@@ -644,7 +647,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
             origin: site,
         })
         .unwrap();
-    assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.inventories[0].wood, 0.0);
     assert_eq!(world.buildings.len(), 2);
     let foundation = world.buildings[1].clone();
     assert_eq!(foundation.id, "building-2");
@@ -653,7 +656,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
     assert!(foundation.footprint().cells().all(|c| claimed.contains(&c)));
 
     // A foundation is not a working town center.
-    world.stockpile.food = 100.0;
+    world.inventories[0].food = 100.0;
     assert_eq!(
         world.apply_command(Command::Produce {
             building_id: "building-2".into(),
@@ -681,7 +684,7 @@ fn build_places_one_foundation_immediately_and_charges_once() {
     );
     run(&mut world, 10.0);
     assert_eq!(world.buildings.len(), 2);
-    assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.inventories[0].wood, 0.0);
 }
 
 #[test]
@@ -698,7 +701,7 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
         Err(CommandError::InsufficientWood)
     );
     assert_eq!(world, before);
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     world
         .apply_command(Command::Move {
             unit_id: "villager-2".into(),
@@ -741,7 +744,7 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
 fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
     let mut world = fixture::fixture();
     world.resources.clear();
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     world.units[0].cell = cell(0, 0);
     // Seal villager-1 into the north-west pocket.
     let edge = BuildingKind::TownCenter.size().0;
@@ -768,7 +771,7 @@ fn unreachable_build_site_is_rejected_and_leaves_no_foundation() {
 #[test]
 fn a_second_villager_can_help_and_construction_completes_exactly_once() {
     let mut solo = fixture::fixture();
-    solo.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    solo.inventories[0].wood = TOWN_CENTER_WOOD_COST;
     solo.apply_command(Command::Build {
         kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
@@ -933,7 +936,7 @@ fn snapshots_round_trip_through_json_for_remote_clients() {
 #[test]
 fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
     let mut world = fixture::fixture();
-    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    world.inventories[0].wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Gather {
             unit_id: "villager-1".into(),
@@ -981,7 +984,7 @@ fn stop_ends_any_task_keeping_cargo_and_foundation_progress() {
     );
     assert_eq!(world.units[0].cargo, cargo);
     assert_eq!(world.buildings[1].construction, progress);
-    assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.inventories[0].wood, 0.0);
     // Stopping an idle unit is harmless; an unknown one is rejected untouched.
     let before = world.clone();
     world
@@ -1085,7 +1088,7 @@ fn build(
 #[test]
 fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     let mut world = fixture::fixture();
-    world.stockpile.wood = 15.0;
+    world.inventories[0].wood = 15.0;
     world.units[0].cell = cell(20, 23);
     let before = world.clone();
     assert_eq!(
@@ -1094,7 +1097,7 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     );
     assert_eq!(world, before);
     build(&mut world, BuildingKind::House, cell(20, 24)).unwrap();
-    assert_eq!(world.stockpile.wood, 0.0);
+    assert_eq!(world.inventories[0].wood, 0.0);
     let house = world.buildings.last().unwrap();
     assert_eq!(house.kind, BuildingKind::House);
     assert_eq!(house.footprint().columns, 3);
@@ -1111,7 +1114,7 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
 #[test]
 fn houses_raise_the_population_cap() {
     let mut world = fixture::fixture();
-    world.stockpile.food = 1_000.0;
+    world.inventories[0].food = 1_000.0;
     while world.villagers_and_trainees() < world.housing() {
         world.units.push(Unit {
             health: 100.0,
@@ -1149,14 +1152,14 @@ fn a_dock_must_touch_the_sea() {
     // The fixture map is all land; put the site in current sight.
     let mut world = fixture::fixture();
     world.units[0].cell = cell(20, 23);
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     assert_eq!(
         build(&mut world, BuildingKind::Dock, cell(20, 24)),
         Err(CommandError::NeedsCoast)
     );
     // On a generated island some coastal site accepts one.
     let mut island = GameWorld::generate(DEFAULT_SEED);
-    island.stockpile.wood = 100.0;
+    island.inventories[0].wood = 100.0;
     let (columns, rows) = BuildingKind::Dock.size();
     let sites = (0..WORLD_ROWS - rows)
         .flat_map(|row| (0..WORLD_COLUMNS - columns).map(move |column| cell(column, row)));
@@ -1207,14 +1210,14 @@ fn goods_of_another_kind_are_dropped_off_before_gathering() {
         .unwrap();
     assert_gather_phase(&world.units[0], GatherPhase::Returning);
     run(&mut world, 60.0);
-    assert_eq!(world.stockpile.wood, 12.0);
-    assert!(world.stockpile.food > 0.0 || world.units[0].cargo.is_some());
+    assert_eq!(world.inventories[0].wood, 12.0);
+    assert!(world.inventories[0].food > 0.0 || world.units[0].cargo.is_some());
 }
 
 #[test]
 fn a_builder_drops_off_carried_goods_before_building() {
     let mut world = fixture::fixture();
-    world.stockpile.wood = TOWN_CENTER_WOOD_COST;
+    world.inventories[0].wood = TOWN_CENTER_WOOD_COST;
     world
         .apply_command(Command::Build {
             unit_id: "villager-2".into(),
@@ -1234,7 +1237,7 @@ fn a_builder_drops_off_carried_goods_before_building() {
         })
         .unwrap();
     run(&mut world, 60.0);
-    assert_eq!(world.stockpile.stone, 7.0);
+    assert_eq!(world.inventories[0].stone, 7.0);
     assert!(world.units[0].cargo.is_none());
     assert!(world.buildings.last().unwrap().is_complete());
 }
@@ -1249,11 +1252,11 @@ fn a_carrier_sent_to_the_town_center_unloads_and_idles() {
     world
         .apply_command(Command::Deposit {
             unit_id: "villager-1".into(),
-            building_id: "base-1".into(),
+            storage_id: "base-1".into(),
         })
         .unwrap();
     run(&mut world, 30.0);
-    assert_eq!(world.stockpile.wood, 9.0);
+    assert_eq!(world.inventories[0].wood, 9.0);
     assert!(world.units[0].cargo.is_none());
     assert_eq!(world.units[0].action, UnitAction::Idle);
 }
@@ -1263,7 +1266,7 @@ fn deposit_orders_are_rejected_untouched_when_they_cannot_work() {
     let mut world = fixture::fixture();
     let deposit = |building: &str| Command::Deposit {
         unit_id: "villager-1".into(),
-        building_id: building.into(),
+        storage_id: building.into(),
     };
     let before = world.clone();
     assert_eq!(

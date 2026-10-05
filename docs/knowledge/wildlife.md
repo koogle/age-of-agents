@@ -60,8 +60,8 @@ rings identify wildlife. Authored sprites are documented in
 are authored and mirrored; reverse-facing and animal attack poses are future art
 work. Friendly hunting reuses existing villager chopping / military action art.
 
-Store version 13 adds required health and wildlife state. Incompatible stores
-(including 11 and the withdrawn drought's 12) reset under the existing
+Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
+(including 12 and the earlier branch-only wildlife schema 13) reset under the existing
 [save policy](server-and-saves.md). Current corrupt health, steps, cooldowns,
 claims or orders fail validation. Population tuning does not change the save schema:
 existing animals remain intact on reload; the roster applies when an island is generated. Passengers retain health and remain safe at sea.

@@ -211,10 +211,26 @@ impl GameWorld {
         {
             return Err("an id counter would reissue an existing id".into());
         }
-        for (name, amount) in self.stockpile.entries() {
-            if !amount.is_finite() || amount < 0.0 {
-                return Err(format!("stockpile {name} is {amount}"));
+        if self.inventories.len() != self.island_origins.len() {
+            return Err("island inventory count does not match map".into());
+        }
+        for stock in self
+            .inventories
+            .iter()
+            .chain(self.ships.iter().map(|s| &s.cargo))
+        {
+            for (name, amount) in stock.entries() {
+                if !amount.is_finite() || amount < 0.0 {
+                    return Err(format!("inventory {name} is {amount}"));
+                }
             }
+        }
+        if self
+            .ships
+            .iter()
+            .any(|s| s.cargo.total() > SHIP_RESOURCE_CAPACITY + 1e-9)
+        {
+            return Err("transport resource hold exceeds 50".into());
         }
         for resource in &self.resources {
             if let Some(field) = &resource.field
@@ -338,12 +354,13 @@ impl GameWorld {
                 {
                     return Err(format!("{} builds a missing foundation", unit.id));
                 }
-                UnitAction::Deposit { building_id }
+                UnitAction::Deposit { storage_id }
                     if unit.cargo.is_none()
                         || !self
                             .buildings
                             .iter()
-                            .any(|b| &b.id == building_id && b.is_complete()) =>
+                            .any(|b| &b.id == storage_id && b.is_complete())
+                            && !self.ships.iter().any(|ship| &ship.id == storage_id) =>
                 {
                     return Err(format!("{} deposits nothing or nowhere", unit.id));
                 }

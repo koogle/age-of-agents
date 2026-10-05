@@ -176,10 +176,10 @@ pub enum UnitAction {
     Cultivate {
         resource_id: String,
     },
-    /// Carry the load to the complete building `building_id`, unload it
-    /// there, and stand idle.
+    /// Carry the load to a compatible building or stopped shore ship,
+    /// unload it there, and stand idle.
     Deposit {
-        building_id: String,
+        storage_id: String,
     },
 }
 
@@ -465,7 +465,7 @@ impl BuildingKind {
     /// Whether gatherers may drop this resource here once it is complete.
     pub const fn accepts(self, resource: ResourceKind) -> bool {
         match self {
-            Self::TownCenter => true,
+            Self::TownCenter | Self::Dock => true,
             Self::LumberMill => matches!(resource, ResourceKind::Wood),
             Self::Granary | Self::Farm => {
                 matches!(resource, ResourceKind::Food | ResourceKind::Fiber)

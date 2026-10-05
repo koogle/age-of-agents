@@ -17,6 +17,7 @@ mod layout;
 mod layout_tests;
 mod minimap;
 pub use build_menu::BuildingGroup;
+mod cargo;
 mod selection;
 mod ships;
 use selection::{building_info, selection_model};
@@ -48,11 +49,13 @@ const ICONS: [&str; 19] = [
     "portrait_group",
     "portrait_towncenter",
 ];
-const COINS: [&str; 4] = [
+const BUTTONS: [&str; 6] = [
     "coin_normal",
     "coin_hover",
     "coin_disabled",
     "coin_researched",
+    "shield_up",
+    "shield_down",
 ];
 
 pub fn files() -> Vec<String> {
@@ -60,7 +63,7 @@ pub fn files() -> Vec<String> {
         .iter()
         .map(|name| format!("ui/icons/{name}.png"))
         .collect();
-    files.extend(COINS.iter().map(|name| format!("ui/buttons/{name}.png")));
+    files.extend(BUTTONS.iter().map(|name| format!("ui/buttons/{name}.png")));
     files.push("fonts/Nunito-ExtraBold.ttf".into());
     files.push("fonts/Alegreya-MediumItalic.ttf".into());
     files
@@ -100,6 +103,9 @@ pub enum Action {
     Cancel,
     Stop,
     Disembark,
+    SelectShip(String),
+    CargoPage(usize),
+    TransferCargo(ResourceKind, aoa_game::CargoDirection, f64),
     Voyage(u64),
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
@@ -191,7 +197,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
     };
     let mut sprites = HashMap::new();
     let mut content = HashMap::new();
-    for name in COINS {
+    for name in BUTTONS {
         let coin = assets
             .image(&format!("ui/buttons/{name}.png"))
             .resized(192, 192);
@@ -357,6 +363,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
 
 /// What the HUD needs from the app each frame.
 pub struct Model<'a> {
+    pub resource_island: usize,
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
@@ -368,6 +375,7 @@ pub struct Model<'a> {
 }
 
 pub struct Hud {
+    pub cargo_page: usize,
     pub quads: Vec<Quad>,
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
@@ -395,6 +403,7 @@ fn resource_icon(kind: ResourceKind) -> &'static str {
 impl Hud {
     pub fn new() -> Self {
         Self {
+            cargo_page: 0,
             quads: Vec::new(),
             regions: Vec::new(),
             hover: None,
@@ -687,6 +696,21 @@ impl Hud {
         self.regions.iter().any(|region| {
             let r = region.rect;
             at.x >= r[0] && at.x <= r[0] + r[2] && at.y >= r[1] && at.y <= r[1] + r[3]
+        })
+    }
+
+    pub fn map_point(&self, at: Vec2) -> Option<Vec2> {
+        self.regions.iter().find_map(|region| {
+            let r = region.rect;
+            (matches!(region.action, Action::LookAt(_))
+                && at.x >= r[0]
+                && at.x <= r[0] + r[2]
+                && at.y >= r[1]
+                && at.y <= r[1] + r[3])
+                .then(|| {
+                    minimap::Minimap::new(self.map_size)
+                        .world_at(Vec2::new((at.x - r[0]) / r[2], (at.y - r[1]) / r[3]))
+                })
         })
     }
 

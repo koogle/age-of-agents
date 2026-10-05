@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import subprocess
 import sys
 import time
@@ -54,6 +55,37 @@ def unpack_terrain(encoded: str, limit: int) -> str:
     if size != limit:
         raise RuntimeError("terrain length disagrees with map dimensions")
     return "".join(parts)
+
+
+def verify_inventories(state: dict) -> None:
+    expected_resources = {
+        "wood",
+        "food",
+        "stone",
+        "gold",
+        "iron",
+        "coal",
+        "clay",
+        "fiber",
+        "timber",
+        "steel",
+        "bricks",
+        "cloth",
+        "rations",
+    }
+    island_count = len(state.get("island_origins", []))
+    if not island_count:
+        raise RuntimeError("production state has no island inventories")
+    for field in ("inventories", "stored_inventories"):
+        inventories = state.get(field)
+        if not isinstance(inventories, list) or len(inventories) != island_count:
+            raise RuntimeError(f"production {field} does not match discovered islands")
+        for inventory in inventories:
+            if not isinstance(inventory, dict) or set(inventory) != expected_resources:
+                raise RuntimeError(f"production {field} does not expose the explicit 13-resource catalog")
+            if any(type(value) not in (int, float) or not math.isfinite(value) or value < 0
+                   for value in inventory.values()):
+                raise RuntimeError(f"production {field} contains an invalid resource balance")
 
 
 def verify_once() -> None:
@@ -107,23 +139,7 @@ def verify_once() -> None:
         raise RuntimeError("production leaks elevation for unseen terrain")
     if state.get("simulation_speed") not in (0.0, 1.0, 2.0):
         raise RuntimeError(f"invalid production simulation speed: {state.get('simulation_speed')}")
-    expected_resources = {
-        "wood",
-        "food",
-        "stone",
-        "gold",
-        "iron",
-        "coal",
-        "clay",
-        "fiber",
-        "timber",
-        "steel",
-        "bricks",
-        "cloth",
-        "rations",
-    }
-    if set(state.get("stockpile", {})) != expected_resources:
-        raise RuntimeError("production stockpile does not expose the explicit 13-resource catalog")
+    verify_inventories(state)
 
     print(
         "PASS production matches checkout; "

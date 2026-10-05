@@ -573,6 +573,9 @@ impl WorldView {
                 center,
                 building.building.construction,
                 building.building.job.is_some(),
+                snapshot
+                    .dock_facing(building.building.origin)
+                    .unwrap_or_default(),
             );
             picks.push(Pickable {
                 pick: Pick::Building(building.building.id.clone()),

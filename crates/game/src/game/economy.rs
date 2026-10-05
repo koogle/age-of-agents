@@ -3,6 +3,21 @@
 use super::*;
 
 impl ResourceKind {
+    pub const ALL: [Self; 13] = [
+        Self::Wood,
+        Self::Food,
+        Self::Stone,
+        Self::Gold,
+        Self::Iron,
+        Self::Coal,
+        Self::Clay,
+        Self::Fiber,
+        Self::Timber,
+        Self::Steel,
+        Self::Bricks,
+        Self::Cloth,
+        Self::Rations,
+    ];
     pub const fn name(self) -> &'static str {
         match self {
             Self::Wood => "wood",
@@ -124,15 +139,16 @@ impl GameWorld {
             .position(|entry| entry.id == queue_id)
             .ok_or(CommandError::QueuedJobNotFound)?;
         let entry = building.queue.remove(index);
+        let origin = building.origin;
         match entry.job {
             BuildingJob::Produce { product, .. } => {
                 for &(kind, amount) in product.cost() {
-                    self.stockpile.add(kind, amount);
+                    self.credit_at(origin, kind, amount);
                 }
             }
             BuildingJob::Research { .. } => {
-                self.stockpile.food += RESEARCH_FOOD_COST;
-                self.stockpile.wood += RESEARCH_WOOD_COST;
+                self.credit_at(origin, ResourceKind::Food, RESEARCH_FOOD_COST);
+                self.credit_at(origin, ResourceKind::Wood, RESEARCH_WOOD_COST);
             }
         }
         Ok(())
@@ -199,7 +215,7 @@ impl GameWorld {
                     });
                     self.next_unit_id += 1;
                 } else if let Some((kind, amount)) = product.output() {
-                    self.stockpile.add(kind, amount);
+                    self.credit_at(self.buildings[index].origin, kind, amount);
                 }
             }
             BuildingJob::Research {
