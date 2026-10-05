@@ -6,7 +6,15 @@
 - All 189 workspace tests pass (13 server, 51 client, 125 domain), including six new regression tests and randomized material/occupancy checks. Formatting, strict native/WASM lint and generated JS syntax check pass.
 - Thermonuclear review: construction code is consolidated in a 140-line domain module; atomic placement is reused, pending sites own no cells or costs, bounds and worker type validate on reload, and no idle behavior or new navigation machinery was added.
 - Real browser menu → fog placement → exploration → completed house passes on desktop 1280×800/DPR1 and phone 390×844/DPR2 with touch input. Authoritative snapshots confirm no early foundation/cost, exactly one house and exactly 15 wood spent; no page errors. QA scripts, fixture and screenshots are under `/workspace/scratch/fog-build`.
-- This is a review PR, not a production deployment; master merges use the existing Modal deployment workflow.
+- User authorized merging PR #79. Integrated master `4b6fe9e` (villager action flashes); rebuilding the combined client and validating before merge. The existing Modal workflow deploys master merges.
+
+# Previous handoff: villager action flashes (2026-10-05)
+
+- Extended the existing 1.4-second floating italic drop-off feedback to gathering (with resource name), building, field preparation, boarding, and idle transitions. Plain movement does not flash. Labels follow the villager and rapid assignment changes replace the previous status; resource gains retain separate labels with vertical separation on simultaneous status changes.
+- Feedback compares authoritative snapshots and assignment targets; repeated snapshots and movement-to-work gathering phases do not replay it. Initial snapshots/new units stay quiet, and reset/island changes clear labels. No simulation, persistence, command, asset, or dependency changes.
+- Added four focused client tests and adapted drop-off/gain coverage. All 187 workspace tests (55 client, 13 server, 119 domain), formatting, strict native and WASM lint pass. After the final viewport correction, reran all 55 client tests and both lint targets; rebuilt the tracked browser bundle. Desktop 1280×800 and phone 390×844/DPR2 gather/stop captures show the new labels, accepted commands and no page errors; walking captures stay quiet. QA uses an isolated database and a controlled presentation clock for stable captures, under `/workspace/scratch/status-flashes`.
+- Thermonuclear review: retained the existing feedback module and animation, with one assignment-label helper; typed snapshot comparison stays presentation-only. Source remains below 1,000 lines, common mouse/touch command paths unchanged, no autonomous behavior. Floating text now shifts inside viewport edges and fits narrow screens to prevent clipped messages; reviewed desktop and phone previews after the correction.
+- User approved the visual result and authorized creating a PR and merging into the default branch (`master`). Branch `feat/villager-action-flashes` contains the verified change; merging triggers the repository quality/deploy workflow. Direct Modal deployment remains unavailable in this environment.
 
 # Previous handoff: cursor edge panning (2026-10-04)
 
