@@ -1,7 +1,7 @@
 # Active menu icon audit
 
 - User authorized the [dedicated menu icon audit](docs/MENU_ICON_AUDIT.md) and sequential PR merges. Stop is merged in [#104](https://github.com/koogle/age-of-agents/pull/104).
-- Current fix: **Transport queue**, ready for its authorized PR/merge. 257 Rust tests, native/WASM lint, rebuilt bindings, asset checks and desktop/DPR-2 phone browser checks pass. [Evidence](docs/verification/menu-icons/transport_queue/checks.txt).
+- Current fix: **Transport queue**, [PR #107](https://github.com/koogle/age-of-agents/pull/107) is verified and ready for the authorized merge. 257 Rust tests, native/WASM lint, rebuilt bindings, asset checks and desktop/DPR-2 phone browser checks pass. [Evidence](docs/verification/menu-icons/transport_queue/checks.txt).
 - Remaining prepared artwork and requests are retained under `/workspace/scratch/menu-icons/generated/`; the audit and integration table track individual coverage. Confirm production from the latest release workflow, separately from PR merge state. Preserve unrelated work below.
 
 # Wildlife integration (2026-10-05)
