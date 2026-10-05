@@ -5,7 +5,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 use aoa_game::GameWorld;
 
 // No save migrations during development. Bump this when the persisted model changes.
-const STORE_VERSION: u32 = 12;
+const STORE_VERSION: u32 = 14;
 
 const DEFAULT_DB_PATH: &str = "age_of_agents.db";
 
@@ -279,7 +279,7 @@ mod tests {
 
     #[test]
     fn incompatible_store_versions_reset_before_deserialization() {
-        for version in [0, 2, 10, STORE_VERSION + 1] {
+        for version in [0, 2, 10, 11, 12, 13, STORE_VERSION + 1] {
             let path = temporary_db(&format!("version-{version}"));
             let connection = Connection::open(&path).unwrap();
             connection
