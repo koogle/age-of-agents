@@ -45,6 +45,8 @@ See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [dec
 
 Hosted games use the server's authoritative world. Native games and browser `?local` mode run the same simulation in-process. Game rules live in `crates/game`; the client handles presentation. `GameWorld::validate` checks occupancy and state invariants.
 
+SQLite persistence applies to hosted games. Native and browser-local worlds currently live in memory and are not saved across application/page restarts.
+
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 
 ## Run locally
@@ -87,6 +89,8 @@ See [continuous map budgets](docs/CONTINUOUS_MAP.md) for memory measurements and
 ## Contributing
 
 Read [AGENTS.md](AGENTS.md) and [OPEN_WORK.md](OPEN_WORK.md) before starting. Keep changes small, game rules deterministic, and commands typed and atomic. Update the roadmap and handoff when behavior changes; keep design history in `decisions.md`.
+
+Consult [the knowledge folder](docs/knowledge/INDEX.md) before changing a system. Its individual guides cover system behavior, tool/API procedures, troubleshooting and reusable learnings; update the relevant file during work, especially after developer steering. The [project-documentation skill](.agents/skills/project-documentation/SKILL.md) guides this continuing loop and can be selected automatically or invoked with `$project-documentation`. [docs/INDEX.md](docs/INDEX.md) routes the wider documentation.
 
 Run the Rust checks:
 

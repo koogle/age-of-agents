@@ -34,9 +34,11 @@ Review candidates at gameplay size before replacing an atlas. Preserve the
 existing frame rectangles, footprint anchor, scale, camera and construction
 states in `assets/sprites/towncenter.json`.
 
-## Current cloud setup
+## Historical cloud setup
 
-Both binaries are installed in `/workspace/bin` and the `midjourney` MCP entry
+The following records an earlier environment and is not a current readiness check. Consult [the asset guide](knowledge/asset-pipeline.md) and inspect the active environment before using these paths or treating a provider as blocked.
+
+Both binaries were installed in `/workspace/bin` and the `midjourney` MCP entry
 points to `/workspace/bin/mj-mcp`. Installation and registration are verified;
 the MCP file root is restricted to `/workspace/age-of-agents/assets` so reference
 images can be uploaded without exposing unrelated local files.

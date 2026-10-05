@@ -1,0 +1,65 @@
+# Villager tasks and cargo
+
+Read before: Before changing gathering, reassignment, drop-offs, field work, or activity animation.
+
+Status: maintained guide. Source-reviewed 2026-10-05 against `b054655`; historical
+PR results below are evidence, not newly run verification. Repository code paths
+in backticks are relative to the root.
+
+## Working with this system
+
+Read [gathering.rs](../../crates/game/src/game/gathering.rs),
+[fields.rs](../../crates/game/src/game/fields.rs), command application in
+[game.rs](../../crates/game/src/game.rs), and cargo acceptance in
+[domain.rs](../../crates/game/src/game/domain.rs). The client does not choose work.
+
+1. Identify the existing order, phase, carried kind/amount and intended next task.
+2. Implement transitions through the existing domain command/tick paths; retain
+   atomic rejection and distinguish a new order from continued gathering.
+3. Follow the full cycle across travel, work, delivery and resumption. Treat a
+   temporary reservation as a different condition from permanently blocked land.
+4. Check [activity presentation](../../crates/client/src/view/activity_tests.rs)
+   and selection text if the visible meaning of a phase changes.
+
+```bash
+cargo test -p aoa-game --locked gathering_tests
+cargo test -p aoa-game --locked fields_tests
+cargo test -p aoa-client --locked activity_tests
+```
+
+The field-replenishment proposal in PR #88 was unmerged at the recorded review;
+check [open work](../../OPEN_WORK.md) and current source before assuming harvesters
+wait for a depleted field to be replanted. No idle-worker recruitment or automatic
+replanting follows from the existing preparation-to-harvesting transition.
+
+## Learned constraints and evidence
+
+**Evidence:** [#31](https://github.com/koogle/age-of-agents/pull/31) allowed
+same-kind partial loads to continue and builders to carry goods without a drop
+site. [#47](https://github.com/koogle/age-of-agents/pull/47) tightened that behavior
+to unload before a new assignment, including partial same-kind loads.
+[#44](https://github.com/koogle/age-of-agents/pull/44) fixed a blocked nearby
+drop-off hiding a reachable alternative;
+[#85](https://github.com/koogle/age-of-agents/pull/85) added wood delivery to mills.
+[The activity regression](../ACTIVITY_SPRITES_REVIEW.md) shows why “has cargo” cannot
+alone decide whether a villager is working or carrying.
+
+**Lesson:** Distinguish continuing an existing gather order from issuing a new
+one. New gather/build/cultivate work unloads first, retains its intended task,
+and waits if no compatible completed drop-off is available. Temporary traffic
+must not be confused with a permanently unreachable target. Animation and HUD
+copy describe the authoritative phase: active gathering with partial cargo
+still works; stopped or unloading cargo still uses the carry pose.
+
+**Check:** Exercise empty/partial/full cargo, same/different resource kinds,
+busy/incompatible/unfinished drop sites, Stop, replacement, depletion and reload.
+Start with `gathering_tests.rs` and
+`crates/client/src/view/activity_tests.rs`; use a complete delivery/resumption
+cycle rather than treating one successful command as proof of the loop.
+
+## Keep this guide current
+
+Update this file when developer steering, implementation changes or investigation
+changes the procedure, contract, failure modes or verification limits. Record the
+source and distinguish intended changes from implemented behavior; link any new
+focused topic from the [knowledge index](INDEX.md).
