@@ -47,7 +47,12 @@ const ICONS: [&str; 19] = [
     "portrait_group",
     "portrait_towncenter",
 ];
-const COINS: [&str; 3] = ["coin_normal", "coin_hover", "coin_disabled"];
+const COINS: [&str; 4] = [
+    "coin_normal",
+    "coin_hover",
+    "coin_disabled",
+    "coin_researched",
+];
 
 pub fn files() -> Vec<String> {
     let mut files: Vec<String> = ICONS

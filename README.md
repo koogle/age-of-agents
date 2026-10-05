@@ -23,6 +23,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
 - Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers use the normal harvest, deposit and resume loop after preparation; field placement preserves walking and delivery routes. Depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
+- Completed technologies stay visible as disabled coins with a bronze laurel seal with a green check; hover or tap explains the researched upgrade. Research cannot be ordered twice.
 - Wood → timber processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Dock transport production through the paid task queue, water-only sailing, four passenger seats and shore landings. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.

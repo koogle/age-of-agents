@@ -1,0 +1,26 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "prompt": "The attached image is a style reference for painted game-interface symbols. Create a single bold green CHECK MARK (tick), two joined strokes with a short descending left arm and a long ascending right arm. It means research completed. Use a rich, saturated emerald green fill, clearly bright green rather than grey or brown, with a very thin dark forest-green ink outline and a restrained painted highlight. Thick solid strokes and a clean, simple silhouette must remain unmistakable at 18 pixels. Match the reference's hand-painted Mediterranean strategy-game treatment while making the shape considerably bolder. Flat straight-on 2D symbol, centered, filling 80 percent of a square frame. One check mark only. Pure white background for cutout, no circle, no coin, no frame, no cast shadow, no text, no letters, no extra ornaments.",
+  "reference": "assets/ui/icons/command_cancel.png",
+  "purpose": "Completed technology research badge",
+  "requests": [
+    {
+      "t": 1791189789.9673693,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "icon:research_check_bold_green",
+      "est_usd": 0.0398,
+      "request_id": "01a10b3b-112e-7c82-a0d8-fd30d187a38e",
+      "seconds": 7.1
+    },
+    {
+      "t": 1791189794.8307455,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:research_check_bold_green",
+      "est_usd": 0.005,
+      "request_id": "01a10b3b-3651-7963-a200-0a1b7a801560",
+      "seconds": 2.4
+    }
+  ],
+  "processing": "FAL BiRefNet transparent cutout; remove alpha below 12; crop and center native 1024px source with 8% padding; Lanczos reduction to 128px runtime icon. Source retains original resolution. Final optical centering, visual weight and safe-circle normalization with scripts/normalize_icons.py.",
+  "status": "Superseded draft retained for provenance. Runtime completion medallion uses classical/provenance.json."
+}
