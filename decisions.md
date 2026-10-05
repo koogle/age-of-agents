@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).
+
 - **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.
 - **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind.

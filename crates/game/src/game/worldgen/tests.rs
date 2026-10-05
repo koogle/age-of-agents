@@ -101,6 +101,12 @@ fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
                 )
             );
         }
+        for kind in [ResourceKind::Wood, ResourceKind::Food] {
+            assert!(
+                world.snapshot().resources.iter().any(|r| r.kind == kind),
+                "seed {seed}: starter {kind:?} hidden by fog"
+            );
+        }
         // Everything else has to be found by exploring.
         for resource in &world.resources {
             if !matches!(resource.kind, ResourceKind::Wood | ResourceKind::Food) {
@@ -237,4 +243,108 @@ fn nobody_walks_or_builds_on_water() {
     let mut drowned = before.clone();
     drowned.units[0].cell = water;
     assert!(drowned.validate().is_err());
+}
+
+#[test]
+fn relief_drains_without_uphill_steps_and_conserves_runoff() {
+    let mut land = vec![false; COLUMNS * ROWS];
+    let mut height = vec![-0.5; land.len()];
+    // A closed bowl and flat plateau exercise spill filling, not just slopes.
+    for y in 12..68 {
+        for x in 12..108 {
+            let i = at(x, y);
+            land[i] = true;
+            height[i] = if (35..85).contains(&x) && (25..55).contains(&y) {
+                0.1
+            } else {
+                0.8
+            };
+        }
+    }
+    let flow = drainage::drain(&land, &mut height);
+    let total: u32 = flow
+        .accumulation
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| !land[*i])
+        .map(|(_, &a)| a)
+        .sum();
+    assert_eq!(total as usize, land.iter().filter(|&&l| l).count());
+    for i in (0..land.len()).filter(|&i| land[i]) {
+        let n = flow.downstream[i];
+        assert!(neighbours4(i).any(|adjacent| adjacent == n));
+        assert!(height[n] < height[i]);
+        assert!(flow.accumulation[n] >= flow.accumulation[i]);
+    }
+}
+
+#[test]
+fn generated_rivers_have_a_downhill_route_to_the_sea_including_fords() {
+    for seed in 0..48 {
+        let world = GameWorld::generate(seed);
+        let mut reached = vec![false; world.terrain.len()];
+        let mut queue = VecDeque::new();
+        for (i, cell) in world.terrain.iter().enumerate() {
+            if cell.biome == TerrainBiome::Water {
+                reached[i] = true;
+                queue.push_back(i);
+            }
+        }
+        while let Some(i) = queue.pop_front() {
+            for n in neighbours4(i) {
+                if !reached[n]
+                    && matches!(
+                        world.terrain[n].biome,
+                        TerrainBiome::River | TerrainBiome::Beach
+                    )
+                    && world.terrain[n].elevation > world.terrain[i].elevation
+                {
+                    reached[n] = true;
+                    queue.push_back(n);
+                }
+            }
+        }
+        for (i, cell) in world.terrain.iter().enumerate() {
+            assert!(
+                cell.biome != TerrainBiome::River || reached[i],
+                "seed {seed}: river cannot drain at {i}"
+            );
+        }
+    }
+}
+
+#[test]
+fn shape_families_survive_generation_and_bays_stay_open() {
+    let mut families = std::collections::BTreeSet::new();
+    for seed in 0..48 {
+        let world = GameWorld::generate(seed);
+        let kind = shape::kind(seed);
+        families.insert(format!("{kind:?}"));
+        let land: Vec<_> = world
+            .terrain
+            .iter()
+            .filter(|c| c.biome != TerrainBiome::Water)
+            .collect();
+        let width = land.iter().map(|c| c.column).max().unwrap()
+            - land.iter().map(|c| c.column).min().unwrap();
+        let height =
+            land.iter().map(|c| c.row).max().unwrap() - land.iter().map(|c| c.row).min().unwrap();
+        if kind == shape::Shape::Long {
+            assert!(f64::from(width) / f64::from(height) > 1.8);
+        }
+        if kind == shape::Shape::Square {
+            assert!((0.8..1.3).contains(&(f64::from(width) / f64::from(height))));
+        }
+        if kind == shape::Shape::Bay {
+            let sea = distance_from(0..COLUMNS, |i| {
+                world.terrain[i].biome == TerrainBiome::Water
+            });
+            assert_ne!(
+                sea[at(COLUMNS / 2, ROWS / 2)],
+                u32::MAX,
+                "seed {seed}: closed bay"
+            );
+        }
+    }
+    assert_eq!(families.len(), 5);
 }
