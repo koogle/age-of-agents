@@ -1,4 +1,12 @@
-# Current handoff: shared resources and unit-only transport (2026-10-05)
+# Current handoff: completed research — authorized merge (2026-10-05)
+
+- User authorized merging PR #77 into the default `master` branch. Integrated current master `efd9b21`, preserving compact mobile HUD, timber and field icons, exploration/construction fixes, and shared-resource transport changes. Rebuilt the combined browser bundle.
+- Completed technologies show the FAL-generated bronze laurel seal and green check, stay disabled, and explain their upgrade on hover/tap. Final native sources and generation provenance remain in `assets/ui/sources/research_check/classical/`.
+- Combined verification: all 204 workspace tests pass (17 server, 60 client, 127 domain), formatting and strict native/WASM lint pass. Added actual HUD press/release coverage for completed research on desktop and compact DPR1/DPR2 screens. All asset audits pass, including 282 HD frames, field/transport checks and icon normalization.
+- Final integrated desktop 1280×800/DPR1 and phone 390×844/DPR2 browser checks pass: selection, completed seal, disabled click/tap without a repeat research command, and no page errors. Verified using the isolated WebSocket fixture in `/workspace/scratch/research-status`; no production or saved-game state touched.
+- Thermonuclear review: existing snapshot and atlas/sprite path, no extra dependencies/state/domain rules; incoming features retained, authored seal inside the existing hit region, all client files below 1,000 lines. Production deployment runs through the master push workflow; earlier production releases currently occupy the workflow queue.
+
+# Previous handoff: shared resources and unit-only transport (2026-10-05)
 
 - User requested simplifying transport and opening a PR. Branch `fix/shared-island-resources` removes ship holds/transfer commands and keeps one global stockpile when exchanging islands.
 - Ship HUD now contains passenger/voyage controls only; resource HUD explicitly labels resources as shared across islands. Units retain personal gathering loads; away-island simulation remains paused.

@@ -327,6 +327,20 @@ impl Hud {
                     command.enabled,
                     hot && command.enabled,
                 );
+                if matches!(command.action, Action::Research(tech) if snapshot.researched_technologies.contains(&tech))
+                {
+                    self.sprite(
+                        atlas,
+                        "coin_researched",
+                        [
+                            rect[0] + m - 30.0 * s,
+                            rect[1] + m - 30.0 * s,
+                            30.0 * s,
+                            30.0 * s,
+                        ],
+                        [1.0; 4],
+                    );
+                }
                 // An unavailable coin still answers a tap, with the reason:
                 // phones have no hover to show it.
                 self.regions.push(Region {
