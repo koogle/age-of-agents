@@ -18,7 +18,6 @@ mod gathering;
 mod islands;
 #[cfg(test)]
 mod islands_tests;
-pub use islands::IslandState;
 use islands::starting_origins;
 #[cfg(test)]
 mod gathering_tests;
@@ -80,22 +79,16 @@ pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GameWorld {
-    #[serde(default)]
     pub island_id: u64,
-    #[serde(default)]
-    pub islands: Vec<IslandState>,
-    #[serde(default = "starting_origins")]
     pub island_origins: Vec<CellCoordinate>,
     /// The island this world was generated from.
     pub seed: u64,
-    #[serde(default)]
     pub economy_rules: EconomyRules,
     pub tick: u64,
     pub simulation_speed: f64,
     pub terrain: Vec<TerrainCell>,
     pub explored_cells: Vec<CellCoordinate>,
     pub units: Vec<Unit>,
-    #[serde(default)]
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
@@ -125,11 +118,8 @@ pub struct BuildingView {
 // Clients decode snapshots too; the catalog is static data they already have.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldSnapshot {
-    #[serde(default)]
     pub island_id: u64,
-    #[serde(default)]
     pub island_count: usize,
-    #[serde(default = "starting_origins")]
     pub island_origins: Vec<CellCoordinate>,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
@@ -139,7 +129,6 @@ pub struct WorldSnapshot {
     #[serde(with = "terrain_codec")]
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
-    #[serde(default)]
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
@@ -347,7 +336,6 @@ impl GameWorld {
         };
         let mut world = Self {
             island_id: 0,
-            islands: Vec::new(),
             island_origins: starting_origins(),
             seed: island.seed,
             economy_rules: EconomyRules::IslandProgression,
@@ -569,7 +557,7 @@ impl GameWorld {
                 if self.researched_technologies.contains(&technology) {
                     return Err(CommandError::TechnologyAlreadyResearched);
                 }
-                if self.all_buildings().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
+                if self.buildings.iter().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
                     return Err(CommandError::TechnologyInProgress);
                 }
                 if technology
