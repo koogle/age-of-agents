@@ -120,13 +120,3 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
-
-## Fresh cloud environment check (2026-10-05 drought work)
-
-This environment had cached target artifacts but no Rust executable on PATH. Installing
-a minimal rustup toolchain with rustfmt/clippy, the wasm32 target, and the lockfile
-matching wasm-bindgen CLI restored local builds. Do not infer installed tooling
-from target files. Modal 1.5.3 installed successfully and runtime credential
-bindings reported ready, but `scripts/modal_manage.py status` failed with
-"Could not connect to the Modal server". This is a connectivity blocker, not
-evidence of missing credentials; no deployment was attempted on that failed path.
