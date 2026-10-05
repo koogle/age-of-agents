@@ -17,6 +17,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 ## Implemented roadmap
 
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
+- Docks automatically face adjacent water, with four sprite orientations throughout construction and placement.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
 - Building orders in fog send the villager to explore first. A foundation is created and paid for only when the whole footprint is currently visible and placement is valid; blocked or unaffordable sites cancel without spending.
@@ -107,7 +108,7 @@ For simulation-only iteration, use `cargo test -p aoa-game --locked`; run the fu
 
 For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks browser bindings and current UI assets.
 
-Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 282 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
+Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 294 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
 Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment to the production account: `MODAL_PROFILE=koogle-frick python3 scripts/modal_manage.py deploy`.
 
