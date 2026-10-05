@@ -1,3 +1,9 @@
+# Terrain-first island generation — PR #111
+
+- [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.
+- Combined verification: 267 tests pass (one manual benchmark ignored), strict native/WASM lint and formatting, rebuilt browser bundle, six release-verifier tests and all 298 sprite/field/transport/icon checks. Browser verification and reproducible evidence: [terrain verification](docs/verification/island-generation/README.md).
+- Preserves wildlife, shore pickup, pause/reconnect, gathering continuation and current UI. No save-model change beyond current master’s version 14; saved terrain remains intact. New games and discoveries use the generator. Release uses the merge-triggered [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml); verify its result separately from PR merge status.
+
 ## Mobile time controls — 2026-10-05
 
 - User authorized PR creation and merge after grid verification. Integrated master `28a09a2`, preserving current gameplay, Stop/cargo controls and pause/reconnect fixes. Mobile time buttons use 36px center spacing and separate 36×44px targets; glyphs use the original alpha mask to remove rectangular tint. All 264 Rust tests pass (one manual benchmark ignored), formatting, native/WASM lint, rebuilt web/server, 298-frame asset/icon audits and six verifier tests pass. Browser grid/speed checks and screenshots are in `docs/verification/2026-10-05/time-merged-*`. Production release uses the merge-triggered GitHub Actions workflow.
