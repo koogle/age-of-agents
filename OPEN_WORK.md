@@ -9,6 +9,12 @@
 - Reproducible browser driver: `docs/verification/replay_reconnect.py`; its fixture parses in Rust tests and now uses the current island-inventory snapshot schema. Native-window appearance and physical phones remain unverified. Follow [reconnect recovery](docs/knowledge/runtime-debugging.md#reconnect-recovery) and [pause contract](docs/knowledge/runtime-debugging.md#pause-contract).
 - Release uses the production GitHub Actions workflow after the authorized merge; do not use the local Modal workspace for production. Review and merge: [PR #105](https://github.com/koogle/age-of-agents/pull/105); release status: [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
 
+# Active menu icon audit
+
+- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md): 20 fixes; 18 packed new/extracted icons are prepared in `/workspace/scratch/menu-icons/generated/` and pass normalization.
+- [PR #104](https://github.com/koogle/age-of-agents/pull/104) restores the Stop hand for units and ships. Integrated master `10ee124` including docks, shore pickup, wildlife/health and mobile cargo gestures. All 253 Rust tests pass (one manual benchmark ignored), native/WASM lint, formatting, 298-frame/icon checks and rebuilt bindings pass. Final desktop mouse and DPR-2 phone Stop dispatch pass without page errors; [evidence](docs/verification/menu-icons/stop/checks.txt). Ready for the authorized merge; deployment remains a separate workflow check.
+- Next: transport queue consistency, then dedicated resource, unit, ship/navigation and category icons, one PR per fix. Preserve unrelated open work below.
+
 # Wildlife integration (2026-10-05)
 
 - PR #98 merged into master as `0b5ce8b`, including `ba51a51` (island inventories, ship holds, shore-facing docks and automatic shore pickup). Final desktop mouse and DPR2-phone touch combat pass without page errors. Final integration suite: 251 tests pass (13 server, 79 client, 159 domain; one manual benchmark ignored); native/WASM strict lint and 298-frame asset audit pass. Combined save schema is version 14; release through GitHub Actions with production credentials.
@@ -19,6 +25,8 @@
 - Historical direct release check (superseded by the Modal proxy/account findings below): Modal 1.5.3 status again reports "Could not connect to the Modal server" despite ready runtime bindings. No production state was changed.
 
 # Open work
+
+- README cleanup: restored the concise scope of `9ce5f17`, retaining current features and setup, including merged wildlife combat. Detailed implementation notes stay in existing guides. Documentation-only; links and whitespace checked. User authorized PR creation and merge.
 
 - Branch `fix/mobile-cargo-chevron-swipe`: mobile boat cargo now uses inline chevrons in a single 78px row, including 320px portrait and short landscape. Shared mouse/touch swipe paging cancels underlying transfers. Verified 252 combined workspace tests (one manual benchmark ignored), final cargo regressions, formatting, strict native/WASM lint, rebuilt browser bundle, DPR-2 touch paging and DPR-1 mouse paging/dragging. [Replay and visual evidence](docs/knowledge/hud-and-accessibility.md#ship-cargo-controls). Thermonuclear review completed: shared input path, unchanged authoritative cargo commands/save model, no added runtime dependency, all changed client files below 1,000 lines. User authorized merging [PR #101](https://github.com/koogle/age-of-agents/pull/101). Integrated master `0b5ce8b` (water-facing docks, shore pickup and wildlife), rebuilt the combined browser bundle, and passed the full suite, strict native/WASM lint and combined DPR-2 cargo replay. Production delivery follows the GitHub Actions release workflow after the authorized merge; see the Modal workspace guidance below.
 
