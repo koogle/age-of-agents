@@ -4,7 +4,7 @@
 - Preserved the previous icon, generated source, cutout, prompt, references, request IDs and small-size comparison in `assets/ui/field_research_sources`. Updated the generation subject and contact sheet; estimated FAL cost $0.0448.
 - Icon normalization, PNG/RGBA/transparency and 282-frame resolution checks pass. All 183 workspace tests, formatting and strict native/WASM lint pass. Desktop and DPR2-phone available/queued research inspected using staged snapshots; both browser checks pass with no page errors. QA artifacts are in `/workspace/scratch/field-research`.
 - Thermonuclear review: asset replacement only, no new dependencies or game behavior; no source file growth beyond the existing prompt.
-- Branch `feat/field-research-icon` starts from master, separate from timber PR #78. Modal remains unavailable in this environment; not deployed.
+- PR https://github.com/koogle/age-of-agents/pull/82 (`feat/field-research-icon`) starts from master, separate from timber PR #78. Modal remains unavailable in this environment; not deployed.
 
 # Previous handoff: cursor edge panning (2026-10-04)
 
