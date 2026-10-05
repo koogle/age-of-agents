@@ -31,3 +31,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Simplified transport and economy:** Transports carry up to four units only; all islands use one shared stockpile for deposits and spending, while away islands remain paused. Existing saved island inventories and ship holds are pooled on load; villagers retain personal carried loads until deposited.
 
 - **Compact HUD:** Preserve painted medallions and parchment while aligning phone actions and globe/speed controls in one bottom band. Expand queues and submenus upward only when needed, and collapse construction choices during placement.
+
+- **Selection modifiers:** Shift-drag replaces the unit selection with the enclosed units. Control-click/drag adds units on Windows/Linux, Command does so on Mac, and adding already selected units keeps them selected.
