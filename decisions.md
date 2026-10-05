@@ -34,3 +34,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 
 - 2026-10-05: Islands occupy one persistent coordinate space, with 64-cell ocean gaps and deterministic adjacent discovery along a growing square spiral; ships sail continuously and all discovered settlements simulate against the shared stockpile. Retain layouts in memory for now, bound ground geometry to the camera, compress repeated snapshot terrain and profile populated worlds before introducing streaming.
 - **Minimap orientation:** Project the full map using the fixed world camera’s ground axes; terrain sampling, camera marker and click/touch navigation use the same invertible mapping.
+
+- Island inventories replace the shared resource pool; stopped shore ships contribute their 50-resource holds to local spending and accept villager deposits, with explicit dock-only transfers. Cargo stays aboard on arrival, training/research stay in buildings, and old shared balances migrate to the starter island without duplication.

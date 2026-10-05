@@ -100,6 +100,9 @@ pub enum Action {
     Cancel,
     Stop,
     Disembark,
+    CargoKind,
+    SelectShip(String),
+    TransferCargo(aoa_game::CargoDirection, f64),
     Voyage(u64),
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
@@ -357,6 +360,8 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
 
 /// What the HUD needs from the app each frame.
 pub struct Model<'a> {
+    pub resource_island: usize,
+    pub cargo_kind: ResourceKind,
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
@@ -687,6 +692,21 @@ impl Hud {
         self.regions.iter().any(|region| {
             let r = region.rect;
             at.x >= r[0] && at.x <= r[0] + r[2] && at.y >= r[1] && at.y <= r[1] + r[3]
+        })
+    }
+
+    pub fn map_point(&self, at: Vec2) -> Option<Vec2> {
+        self.regions.iter().find_map(|region| {
+            let r = region.rect;
+            (matches!(region.action, Action::LookAt(_))
+                && at.x >= r[0]
+                && at.x <= r[0] + r[2]
+                && at.y >= r[1]
+                && at.y <= r[1] + r[3])
+                .then(|| {
+                    minimap::Minimap::new(self.map_size)
+                        .world_at(Vec2::new((at.x - r[0]) / r[2], (at.y - r[1]) / r[3]))
+                })
         })
     }
 

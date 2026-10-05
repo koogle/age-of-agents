@@ -137,21 +137,9 @@ impl GameWorld {
     }
 
     fn tick_depositing(&mut self, unit_index: usize, resource_id: String) {
-        let cargo = self.units[unit_index]
-            .cargo
-            .as_ref()
-            .map(|cargo| cargo.kind);
-        let beside_drop_site = self.buildings.iter().any(|building| {
-            building.is_complete()
-                && cargo.is_none_or(|kind| building.kind.accepts(kind))
-                && self.is_beside(unit_index, building.footprint())
-        });
-        if !beside_drop_site {
+        if !self.deposit_here(unit_index, None) {
             self.set_gather_phase(unit_index, resource_id, GatherPhase::Returning);
             return;
-        }
-        if let Some(cargo) = self.units[unit_index].cargo.take() {
-            self.stockpile.add(cargo.kind, cargo.amount);
         }
         self.resume_or_finish_gather(unit_index, resource_id);
     }
@@ -207,27 +195,22 @@ impl GameWorld {
     }
 
     /// Walks a carrier to the building it was sent to and unloads there.
-    pub(super) fn tick_deposit(&mut self, unit_index: usize, building_id: &str, dt: f64) {
+    pub(super) fn tick_deposit(&mut self, unit_index: usize, storage_id: &str, dt: f64) {
+        let kind = self.units[unit_index].cargo.as_ref().map(|c| c.kind);
         let site = self
-            .buildings
-            .iter()
-            .find(|building| building.id == building_id && building.is_complete())
-            .map(|building| (building.footprint(), building.kind));
-        let (Some((footprint, kind)), Some(cargo)) = (site, self.units[unit_index].cargo.clone())
-        else {
+            .storage_sites(kind)
+            .into_iter()
+            .find(|site| site.id == storage_id)
+            .map(|site| site.footprint);
+        let Some(footprint) = site.filter(|_| kind.is_some()) else {
             self.units[unit_index].action = UnitAction::Idle;
             return;
         };
-        if !kind.accepts(cargo.kind) {
-            self.units[unit_index].action = UnitAction::Idle;
-            return;
-        }
         match self.travel(unit_index, Goal::Beside(footprint), dt) {
             Travel::EnRoute => {}
             Travel::Unreachable => self.units[unit_index].action = UnitAction::Idle,
             Travel::Arrived { .. } => {
-                self.units[unit_index].cargo = None;
-                self.stockpile.add(cargo.kind, cargo.amount);
+                self.deposit_here(unit_index, Some(storage_id));
                 self.units[unit_index].action = UnitAction::Idle;
             }
         }
@@ -247,9 +230,7 @@ impl GameWorld {
             Travel::EnRoute => true,
             Travel::Unreachable => true,
             Travel::Arrived { .. } => {
-                if let Some(cargo) = self.units[unit_index].cargo.take() {
-                    self.stockpile.add(cargo.kind, cargo.amount);
-                }
+                self.deposit_here(unit_index, None);
                 true
             }
         }

@@ -2,8 +2,8 @@ use super::*;
 
 fn funded_world() -> GameWorld {
     let mut world = fixture::fixture();
-    world.stockpile.food = 1000.0;
-    world.stockpile.wood = 1000.0;
+    world.inventories[0].food = 1000.0;
+    world.inventories[0].wood = 1000.0;
     world
 }
 fn train(world: &mut GameWorld) -> Result<(), CommandError> {
@@ -32,10 +32,16 @@ fn mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload(
     research(&mut world, TechnologyKind::Forestry).unwrap();
     train(&mut world).unwrap();
     research(&mut world, TechnologyKind::Masonry).unwrap();
-    assert_eq!((world.stockpile.food, world.stockpile.wood), (820.0, 960.0));
+    assert_eq!(
+        (world.inventories[0].food, world.inventories[0].wood),
+        (820.0, 960.0)
+    );
     let cancelled = world.buildings[0].queue[1].id;
     cancel(&mut world, cancelled).unwrap();
-    assert_eq!((world.stockpile.food, world.stockpile.wood), (870.0, 960.0));
+    assert_eq!(
+        (world.inventories[0].food, world.inventories[0].wood),
+        (870.0, 960.0)
+    );
     assert_eq!(world.villagers_and_trainees(), 3);
     let before = world.clone();
     assert_eq!(
@@ -59,7 +65,10 @@ fn mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload(
         vec![TechnologyKind::Forestry, TechnologyKind::Masonry]
     );
     assert!(world.buildings[0].jobs().next().is_none());
-    assert_eq!((world.stockpile.food, world.stockpile.wood), (870.0, 960.0));
+    assert_eq!(
+        (world.inventories[0].food, world.inventories[0].wood),
+        (870.0, 960.0)
+    );
 }
 
 #[test]
@@ -79,7 +88,10 @@ fn cancellation_cannot_target_promoted_job_or_reuse_its_id() {
     assert_eq!(world, before);
     let waiting = world.buildings[0].queue[0].id;
     cancel(&mut world, waiting).unwrap();
-    assert_eq!((world.stockpile.food, world.stockpile.wood), (910.0, 980.0));
+    assert_eq!(
+        (world.inventories[0].food, world.inventories[0].wood),
+        (910.0, 980.0)
+    );
     research(&mut world, TechnologyKind::Masonry).unwrap();
     assert!(world.buildings[0].queue[0].id > waiting);
 }
@@ -97,7 +109,7 @@ fn waiting_trainees_reserve_housing_and_cancellation_releases_it() {
     let id = world.buildings[0].queue[0].id;
     cancel(&mut world, id).unwrap();
     train(&mut world).unwrap();
-    assert_eq!(world.stockpile.food, 850.0);
+    assert_eq!(world.inventories[0].food, 850.0);
 }
 
 #[test]
@@ -143,8 +155,8 @@ fn processing_queue_limit_and_insufficient_inputs_reject_atomically() {
         CellCoordinate::new(10, 10),
         None,
     ));
-    world.stockpile.iron = 100.0;
-    world.stockpile.coal = 100.0;
+    world.inventories[0].iron = 100.0;
+    world.inventories[0].coal = 100.0;
     let produce = Command::Produce {
         building_id: "smelter".into(),
         product: ProductKind::Steel,
@@ -165,8 +177,11 @@ fn processing_queue_limit_and_insufficient_inputs_reject_atomically() {
             queue_id: id,
         })
         .unwrap();
-    assert_eq!((world.stockpile.iron, world.stockpile.coal), (75.0, 75.0));
-    world.stockpile.coal = 0.0;
+    assert_eq!(
+        (world.inventories[0].iron, world.inventories[0].coal),
+        (75.0, 75.0)
+    );
+    world.inventories[0].coal = 0.0;
     let before = world.clone();
     assert_eq!(
         world.apply_command(produce),
@@ -176,7 +191,7 @@ fn processing_queue_limit_and_insufficient_inputs_reject_atomically() {
     for _ in 0..5 {
         world.tick(10.0);
     }
-    assert_eq!(world.stockpile.steel, 25.0);
+    assert_eq!(world.inventories[0].steel, 25.0);
     assert!(world.buildings[1].jobs().next().is_none());
 }
 

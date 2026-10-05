@@ -86,7 +86,11 @@ impl App {
                     && cell.visibility != aoa_game::CellVisibility::Visible
             })
         {
-            return Some((origin, snapshot.stockpile.affords(kind.cost())));
+            return Some((
+                origin,
+                snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
+                    .affords(kind.cost()),
+            ));
         }
         let blocked =
             snapshot.resources.iter().any(|r| {
@@ -126,8 +130,7 @@ impl App {
         Some((
             origin,
             !blocked
-                && snapshot
-                    .stockpile
+                && snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
                     .affords(if self.build == crate::hud::BuildUi::PlacingField {
                         aoa_game::FIELD_COST
                     } else {

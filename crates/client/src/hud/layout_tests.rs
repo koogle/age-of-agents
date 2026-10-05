@@ -15,6 +15,8 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
     let snapshot = GameWorld::default().snapshot();
     let camera = Vec2::new(36.0, 18.0);
     let model = Model {
+        resource_island: 0,
+        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: None,
@@ -59,8 +61,8 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
     let atlas = build_atlas(&assets);
     let mut world = GameWorld::default();
     world.economy_rules = EconomyRules::Unrestricted;
-    world.stockpile.wood = 1000.0;
-    world.stockpile.food = 1000.0;
+    world.inventories[0].wood = 1000.0;
+    world.inventories[0].food = 1000.0;
     world.ships.push(aoa_game::TransportShip {
         id: "layout-ship".into(),
         cell: aoa_game::CellCoordinate::new(0, 0),
@@ -68,6 +70,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         destination: None,
         heading: [1, 0],
         passengers: vec![],
+        cargo: Default::default(),
         home_dock_id: None,
     });
     let snapshot = world.snapshot();
@@ -93,6 +96,8 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         for scale in [1.0, 2.0] {
             for &(build, town, ship) in &states {
                 let model = Model {
+                    resource_island: 0,
+                    cargo_kind: ResourceKind::Wood,
                     snapshot: Some(&snapshot),
                     units: if town || ship { &[] } else { &units },
                     building: town.then_some(building.as_str()),
@@ -172,7 +177,7 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
     let atlas = build_atlas(&assets);
     let mut world = GameWorld::default();
     world.economy_rules = EconomyRules::Unrestricted;
-    world.stockpile.wood = 1000.0;
+    world.inventories[0].wood = 1000.0;
     world.buildings[0].kind = BuildingKind::LumberMill;
     world.buildings[0].produces = BuildingKind::LumberMill.products().to_vec();
     let id = world.buildings[0].id.clone();
@@ -186,6 +191,8 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
     }
     let snapshot = world.snapshot();
     let model = Model {
+        resource_island: 0,
+        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: Some(&id),
@@ -225,11 +232,13 @@ fn completed_research_coin_explains_instead_of_dispatching_research() {
     let assets = pollster::block_on(crate::assets::Assets::load());
     let atlas = build_atlas(&assets);
     let mut world = GameWorld::default();
-    world.stockpile.food = 1000.0;
-    world.stockpile.wood = 1000.0;
+    world.inventories[0].food = 1000.0;
+    world.inventories[0].wood = 1000.0;
     world.researched_technologies.push(TechnologyKind::Masonry);
     let snapshot = world.snapshot();
     let model = Model {
+        resource_island: 0,
+        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: Some(&snapshot.buildings[0].building.id),

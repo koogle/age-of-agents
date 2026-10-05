@@ -185,11 +185,11 @@ fn nobody_walks_or_builds_on_peaks_or_rivers() {
                 .is_err()
         );
         let mut built = world.clone();
-        built.stockpile.wood = 1000.0;
-        built.stockpile.stone = 1000.0;
+        built.inventories[0].wood = 1000.0;
+        built.inventories[0].stone = 1000.0;
         let origin = CellCoordinate::new(cell.column.saturating_sub(1), cell.row.saturating_sub(1));
         let before_buildings = built.buildings.clone();
-        let before_stockpile = built.stockpile.clone();
+        let before_stockpile = built.inventories[0].clone();
         let _ = built.apply_command(Command::Build {
             kind: BuildingKind::House,
             unit_id: "villager-1".into(),
@@ -200,7 +200,7 @@ fn nobody_walks_or_builds_on_peaks_or_rivers() {
             built.tick(0.1);
         }
         assert_eq!(built.buildings, before_buildings);
-        assert_eq!(built.stockpile, before_stockpile);
+        assert_eq!(built.inventories[0], before_stockpile);
         let mut stranded = world.clone();
         stranded.units[0].cell = cell;
         assert!(stranded.validate().is_err());
@@ -222,7 +222,7 @@ fn nobody_walks_or_builds_on_water() {
         to: water,
     });
     assert!(moved.is_err());
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     let _ = world.apply_command(Command::Build {
         kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
@@ -232,7 +232,7 @@ fn nobody_walks_or_builds_on_water() {
         world.tick(0.1);
     }
     assert_eq!(world.buildings, before.buildings);
-    assert_eq!(world.stockpile.wood, 100.0);
+    assert_eq!(world.inventories[0].wood, 100.0);
     assert_eq!(world.units[0].action, UnitAction::Idle);
     let mut drowned = before.clone();
     drowned.units[0].cell = water;

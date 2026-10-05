@@ -1,4 +1,4 @@
-//! Fold the former island inventories and transport holds into the shared pool.
+//! Preserve old shared balances on the starter island, including legacy holds.
 //! Removed fields are consumed once; saving writes only the current schema.
 use super::StoreResult;
 use aoa_game::{GameWorld, Stockpile};
@@ -6,6 +6,9 @@ use serde_json::Value;
 
 pub(super) fn load_world(json: &str) -> StoreResult<GameWorld> {
     let mut value: Value = serde_json::from_str(json)?;
+    if value.get("inventories").is_some() {
+        return Ok(serde_json::from_value(value)?);
+    }
     let mut stock = value["stockpile"].clone();
     validate_stock(&stock)?;
     pool_ship_holds(&mut value, &mut stock)?;
@@ -17,7 +20,14 @@ pub(super) fn load_world(json: &str) -> StoreResult<GameWorld> {
             pool_ship_holds(island, &mut stock)?;
         }
     }
-    value["stockpile"] = stock;
+    value
+        .as_object_mut()
+        .ok_or("invalid world")?
+        .remove("stockpile");
+    let count = value["island_origins"].as_array().map_or(1, Vec::len);
+    let mut inventories = vec![serde_json::to_value(Stockpile::default())?; count.max(1)];
+    inventories[0] = stock;
+    value["inventories"] = Value::Array(inventories);
     let mut world: GameWorld = serde_json::from_value(value)?;
     world.unify_islands()?;
     Ok(world)
