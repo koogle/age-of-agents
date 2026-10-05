@@ -245,8 +245,9 @@ mod tests {
         let store = store_raw(&path, &legacy_inventories());
         let world = store.load().unwrap().unwrap();
         assert_eq!(world.stockpile.wood, 100.0);
-        assert_eq!(world.ships.len(), 1);
-        assert_eq!(world.islands[0].ships.len(), 1);
+        assert_eq!(world.ships.len(), 2);
+        assert!(world.islands.is_empty());
+        assert_eq!(world.island_origins.len(), 2);
         // Repeated reads and a save/reload must never credit resources twice.
         assert_eq!(store.load().unwrap().unwrap(), world);
         store.save(&world).unwrap();

@@ -24,7 +24,9 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
         toast: None,
         camera,
     };
-    let map = minimap::Minimap::new();
+    let map = minimap::Minimap::new(
+        Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL,
+    );
     for (width, height, scale) in [(1280.0, 800.0, 1.0), (390.0, 844.0, 2.0)] {
         let mut hud = Hud::new();
         hud.layout(&atlas, &model, width * scale, height * scale, scale);
@@ -66,6 +68,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         destination: None,
         heading: [1, 0],
         passengers: vec![],
+        home_dock_id: None,
     });
     let snapshot = world.snapshot();
     let units = [snapshot.units[0].unit.id.clone()];
@@ -134,7 +137,9 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                         assert_eq!(
                             hud.release(),
                             Some(Action::LookAt(
-                                Vec2::new(crate::terrain::COLUMNS, crate::terrain::ROWS) * 0.5
+                                Vec2::new(snapshot.columns as f32, snapshot.rows as f32)
+                                    * crate::terrain::CELL
+                                    / 2.0
                             ))
                         );
                     } else {

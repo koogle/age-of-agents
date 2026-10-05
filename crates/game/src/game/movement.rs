@@ -4,7 +4,7 @@
 
 use std::collections::BTreeSet;
 
-use super::occupancy::{Occupancy, in_bounds};
+use super::occupancy::Occupancy;
 use super::*;
 use crate::navigation::{PathTree, offset};
 
@@ -88,7 +88,7 @@ impl GameWorld {
         let start = self.units[unit].cell;
         let goals = self.goal_cells(unit, goal, occupancy);
         let clear = |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit);
-        let around = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, clear);
+        let around = PathTree::search(self.columns(), self.rows(), start, clear);
         if let Some(to) = around
             .nearest(goals.iter().copied().filter(|cell| clear(*cell)))
             .and_then(|target| around.first_step(target))
@@ -159,7 +159,7 @@ impl GameWorld {
             (1, 1),
         ]
         .into_iter()
-        .filter_map(|(dx, dy)| offset(here, dx, dy, WORLD_COLUMNS, WORLD_ROWS))
+        .filter_map(|(dx, dy)| offset(here, dx, dy, self.columns(), self.rows()))
         .filter(|cell| {
             *cell != blocked
                 && !occupancy.reserved_by_other(*cell, Some(unit))
@@ -248,7 +248,7 @@ impl GameWorld {
 
     /// Path tree over cells that are not statically blocked.
     pub(super) fn static_paths(&self, unit: usize, occupancy: &Occupancy) -> PathTree {
-        PathTree::search(WORLD_COLUMNS, WORLD_ROWS, self.units[unit].cell, |cell| {
+        PathTree::search(self.columns(), self.rows(), self.units[unit].cell, |cell| {
             !occupancy.is_static(cell)
         })
     }
@@ -265,10 +265,10 @@ impl GameWorld {
             if checked.iter().any(|paths| paths.cost(start).is_some()) {
                 return true;
             }
-            let before = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+            let before = PathTree::search(self.columns(), self.rows(), start, |cell| {
                 !occupancy.is_static(cell)
             });
-            let after = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, start, |cell| {
+            let after = PathTree::search(self.columns(), self.rows(), start, |cell| {
                 !footprint.contains(cell) && !occupancy.is_static(cell)
             });
             // Even if every lost cell belongs to the new building, a unit
@@ -306,7 +306,7 @@ impl GameWorld {
         unit: usize,
         to: CellCoordinate,
     ) -> Result<(), CommandError> {
-        if !in_bounds(to) {
+        if !self.in_bounds(to) {
             return Err(CommandError::InvalidDestination);
         }
         let occupancy = self.occupancy();
@@ -327,7 +327,7 @@ impl GameWorld {
         members: &[usize],
         target: CellCoordinate,
     ) -> Result<Vec<(usize, CellCoordinate)>, CommandError> {
-        if !in_bounds(target) {
+        if !self.in_bounds(target) {
             return Err(CommandError::InvalidDestination);
         }
         let occupancy = self.occupancy();
@@ -363,7 +363,7 @@ impl GameWorld {
     /// stop on a cell reserved by someone else, so the cell is guaranteed to clear.
     /// Units at rest, or idle units finishing a step, would never leave.
     fn can_reserve(&self, cell: CellCoordinate, movers: &[usize], occupancy: &Occupancy) -> bool {
-        if !in_bounds(cell) || occupancy.is_static(cell) {
+        if !self.in_bounds(cell) || occupancy.is_static(cell) {
             return false;
         }
         if occupancy
@@ -422,7 +422,7 @@ impl GameWorld {
         let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
         let paths = self.static_paths(unit, &occupancy);
-        let clear = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, self.units[unit].cell, |cell| {
+        let clear = PathTree::search(self.columns(), self.rows(), self.units[unit].cell, |cell| {
             !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit)
         });
         self.buildings
@@ -474,7 +474,7 @@ impl GameWorld {
         let occupancy = self.occupancy();
         footprint
             .cells()
-            .all(|cell| in_bounds(cell) && occupancy.is_free_for(cell, None))
+            .all(|cell| self.in_bounds(cell) && occupancy.is_free_for(cell, None))
     }
 }
 
@@ -492,7 +492,7 @@ pub(super) fn interaction_cells(footprint: Footprint) -> impl Iterator<Item = Ce
     (-1..=rows).flat_map(move |dy| {
         (-1..=columns).filter_map(move |dx| {
             let ring = dx == -1 || dy == -1 || dx == columns || dy == rows;
-            ring.then(|| offset(origin, dx, dy, WORLD_COLUMNS, WORLD_ROWS))
+            ring.then(|| offset(origin, dx, dy, u16::MAX, u16::MAX))
                 .flatten()
         })
     })
