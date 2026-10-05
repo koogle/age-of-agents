@@ -194,7 +194,7 @@ fn completed_research_coin_explains_instead_of_dispatching_research() {
         let mut hud = Hud::new();
         hud.layout(&atlas, &model, width, height, scale);
         let rect = hud.regions.iter().find_map(|r| {
-            matches!(&r.action, Action::Explain(reason) if reason.starts_with("Masonry: Already researched")).then_some(r.rect)
+            matches!(&r.action, Action::Explain(reason) if reason.starts_with("Masonry: Research complete")).then_some(r.rect)
         }).expect("completed research remains visible and explains its status");
         assert!(hud.press(Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0)));
         assert!(matches!(hud.release(), Some(Action::Explain(_))));
