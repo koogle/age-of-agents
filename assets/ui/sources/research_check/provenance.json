@@ -21,5 +21,6 @@
       "seconds": 2.4
     }
   ],
-  "processing": "FAL BiRefNet transparent cutout; remove alpha below 12; crop and center native 1024px source with 8% padding; Lanczos reduction to 128px runtime icon. Source retains original resolution. Final optical centering, visual weight and safe-circle normalization with scripts/normalize_icons.py."
+  "processing": "FAL BiRefNet transparent cutout; remove alpha below 12; crop and center native 1024px source with 8% padding; Lanczos reduction to 128px runtime icon. Source retains original resolution. Final optical centering, visual weight and safe-circle normalization with scripts/normalize_icons.py.",
+  "status": "Superseded draft retained for provenance. Runtime completion medallion uses classical/provenance.json."
 }

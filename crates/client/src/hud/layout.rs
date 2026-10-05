@@ -307,25 +307,14 @@ impl Hud {
                 );
                 if matches!(command.action, Action::Research(tech) if snapshot.researched_technologies.contains(&tech))
                 {
-                    self.shape(
-                        [
-                            rect[0] + m - 26.0 * s,
-                            rect[1] + m - 26.0 * s,
-                            26.0 * s,
-                            26.0 * s,
-                        ],
-                        [0.98, 0.96, 0.92, 1.0],
-                        1.0,
-                        13.0 * s,
-                    );
                     self.sprite(
                         atlas,
-                        "status_check",
+                        "coin_researched",
                         [
-                            rect[0] + m - 24.0 * s,
-                            rect[1] + m - 24.0 * s,
-                            22.0 * s,
-                            22.0 * s,
+                            rect[0] + m - 30.0 * s,
+                            rect[1] + m - 30.0 * s,
+                            30.0 * s,
+                            30.0 * s,
                         ],
                         [1.0; 4],
                     );

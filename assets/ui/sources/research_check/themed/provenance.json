@@ -1,0 +1,29 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "prompt": "Create one CHECK MARK game UI symbol that belongs to the exact same illustrated Mediterranean art kit as these references. Reference 1 is the existing terracotta cancel symbol: match its fine dark-brown ink contour, sparse hatching, restrained watercolor wash and small hand-painted irregularities. Reference 2 is the existing warm bronze-and-ivory coin: match its warm earthy palette and delicate ink quality. Draw a simple bold tick: two joined strokes, a short left arm and a long rising right arm. The strokes are clearly GREEN, in warm leaf/olive green with a lighter yellow-green watercolor wash inside and a fine brown ink outline. It must read as green at 20 pixels on an ivory coin face. Keep strokes thick enough to read, but use a flat painted illustration, with subtle pigment texture rather than a polished bevel or metallic shine. No emerald jewel, no glossy plastic, no neon color, no modern app-logo treatment. Front-on view. Only the check mark, no coin or round background, no text, no letters, no ornaments, no cast shadow. Center the check mark in a square, filling 80 percent of the frame, on pure white for transparent cutout.",
+  "references": [
+    "assets/ui/icons/command_cancel.png",
+    "assets/ui/buttons/coin_normal.png"
+  ],
+  "purpose": "Final themed completed-research check; earlier emerald generation retained as draft",
+  "requests": [
+    {
+      "t": 1791190077.938625,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "icon:research_check_themed_olive",
+      "est_usd": 0.0398,
+      "request_id": "01a10b3f-6d32-7f91-84ee-c17dbbfffa46",
+      "seconds": 9.3
+    },
+    {
+      "t": 1791190083.2735817,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:research_check_themed_olive",
+      "est_usd": 0.005,
+      "request_id": "01a10b3f-9da1-79c2-a21b-37340fc84712",
+      "seconds": 2.3
+    }
+  ],
+  "processing": "FAL BiRefNet cutout; native 1024px source retained; clean faint alpha, crop with 8% padding, reduce to 128px with Lanczos, then normalize optical center and safe-circle reach with scripts/normalize_icons.py.",
+  "status": "Superseded draft retained for provenance. Runtime completion medallion uses classical/provenance.json."
+}

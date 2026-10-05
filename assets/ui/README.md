@@ -74,4 +74,4 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 - Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
 - It reads distinctly from the X down to 24 px.
 
-`icons/status_check.png` is a bold emerald-green check generated with FAL `fal-ai/nano-banana/edit`, using the authored cancel icon as a style reference, then cut out with `fal-ai/birefnet/v2`. Original 1024px renders, exact prompt, request IDs and processing provenance are retained in `sources/research_check/`. The normalized 128px runtime icon appears on an opaque ivory badge at 22 logical pixels for clear completed-research feedback.
+`buttons/coin_researched.png` is a Greco-Roman completion seal: an antique bronze medallion, classical laurel wreath and dark olive-green check. Generated with FAL `fal-ai/nano-banana/edit` against the approved coin and town-center portrait, then cut out with `fal-ai/birefnet/v2`. Final 1024px sources, exact prompt, request IDs and processing provenance are in `sources/research_check/classical/`; earlier versions are retained as drafts. The 256px runtime seal renders at 30 logical pixels.
