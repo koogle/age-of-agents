@@ -49,3 +49,14 @@ Existing saved terrain is unchanged, and new discoveries use the new generator.
 - Modal's read-only status request returned no response before a 30-second timeout
   (after an earlier longer attempt was interrupted). No deployment was attempted;
   production is unverified. No production save was reset.
+
+## Integration for PR #111
+
+Integrated master `079d348` before the user-authorized merge, preserving wildlife,
+shore pickup, pause/reconnect, automatic resource continuation and the current UI.
+The combined suite passes 267 tests with one manual benchmark ignored. Strict
+native/WASM Clippy, formatting, the rebuilt WASM bundle, all six release-verifier
+tests and the 298-frame/field/transport/icon audits pass. Combined desktop and DPR-2 phone snapshot and fresh-WASM browser checks pass
+without JavaScript errors; screenshots and the browser log are refreshed. The terrain change does not alter master’s store version
+14 or its current save model. Release uses the master GitHub Actions workflow;
+the earlier local Modal timeout is not evidence of a production failure.
