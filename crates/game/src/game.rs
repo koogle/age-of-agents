@@ -463,7 +463,10 @@ impl GameWorld {
             } => self.sail_to_dock(&ship_id, &building_id)?,
             Command::StopShip { ship_id } => {
                 let index = self.ship_index(&ship_id)?;
-                self.ships[index].destination = None;
+                let to = self.ships[index]
+                    .step
+                    .map_or(self.ships[index].cell, |step| step.to);
+                self.sail(&ship_id, to)?;
             }
             Command::Board { unit_id, ship_id } => self.board(&unit_id, &ship_id)?,
             Command::Disembark { ship_id } => self.disembark(&ship_id)?,

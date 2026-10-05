@@ -58,7 +58,7 @@ history, and the remote inbox queues snapshots without a bound. Reconnect and
 excessive queued backlog now establish the newest snapshot as a fresh playback
 baseline, including paused worlds, without replaying missed movement or feedback.
 Ordinary short network delays retain interpolation; camera and selection survive
-a reconnect to the same world. `source/inbox.rs` keeps at most eight pending
+a reconnect to the same world. `crates/client/src/source/inbox.rs` keeps at most eight pending
 distinct-tick snapshots, coalesces same-tick broadcasts, and switches to only the
 newest snapshot until the renderer consumes a fresh baseline. Reconnect accepts
 a restarted sequence (including zero), clears old deliveries and signals

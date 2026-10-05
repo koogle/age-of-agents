@@ -461,3 +461,123 @@ fn shore_ship_supplies_construction_and_accepts_partial_villager_deposits() {
     assert_eq!(w.available_on(0).wood, 0.0);
     assert_eq!(w.ships[0].cargo.wood, 25.0);
 }
+
+#[test]
+fn offshore_pickup_meets_at_shore_and_reloads_mid_approach() {
+    let mut w = harbor();
+    w.ships[0].cell = c(40, 45);
+    let start = w.ships[0].cell;
+    w.units[0].cell = c(40, 29);
+    w.units[1].cell = c(41, 28);
+    order_board(&mut w, 0);
+    let berth = w.ships[0].destination.unwrap();
+    assert_eq!(berth.row, 30);
+    assert_eq!(w.ships[0].cell, start);
+    w.tick(0.1);
+    assert!(w.ships[0].passengers.is_empty());
+    order_board(&mut w, 1);
+    assert_eq!(w.ships[0].destination, Some(berth));
+    order_board(&mut w, 0);
+    let mut loaded: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+    for _ in 0..200 {
+        w.tick(0.1);
+        loaded.tick(0.1);
+        w.validate().unwrap();
+        assert_eq!(w, loaded);
+    }
+    assert_eq!(w.ships[0].cell, berth);
+    assert_eq!(w.ships[0].passengers.len(), 2);
+    assert!(w.units.is_empty());
+}
+
+#[test]
+fn unreachable_pickup_rejects_without_changing_unit_or_ship() {
+    let mut w = harbor();
+    w.ships[0].cell = c(40, 45);
+    // An unbroken water strip separates the units from every shore.
+    for tile in &mut w.terrain {
+        if tile.row == 25 {
+            tile.biome = TerrainBiome::Water;
+        }
+    }
+    let before = w.clone();
+    assert_eq!(
+        w.apply_command(Command::Board {
+            unit_id: w.units[0].id.clone(),
+            ship_id: w.ships[0].id.clone(),
+        }),
+        Err(CommandError::ShoreBlocked)
+    );
+    assert_eq!(w, before);
+}
+
+#[test]
+fn explicit_ship_orders_cancel_pickup_and_keep_steps() {
+    for stop in [false, true] {
+        let mut w = harbor();
+        w.ships[0].cell = c(40, 45);
+        order_board(&mut w, 0);
+        w.tick(0.1);
+        let step = w.ships[0].step;
+        let ship_id = w.ships[0].id.clone();
+        w.apply_command(if stop {
+            Command::StopShip { ship_id }
+        } else {
+            Command::Sail {
+                ship_id,
+                to: c(60, 50),
+            }
+        })
+        .unwrap();
+        assert_eq!(w.units[0].action, UnitAction::Idle);
+        assert_eq!(w.ships[0].step, step);
+        w.tick(1.0);
+        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn pickup_redirects_a_sailing_ship_without_interrupting_its_step() {
+    let mut w = harbor();
+    w.ships[0].cell = c(40, 40);
+    w.apply_command(Command::Sail {
+        ship_id: w.ships[0].id.clone(),
+        to: c(60, 50),
+    })
+    .unwrap();
+    w.tick(0.1);
+    let step = w.ships[0].step;
+    order_board(&mut w, 0);
+    assert_eq!(w.ships[0].step, step);
+    assert_eq!(w.ships[0].destination.unwrap().row, 30);
+    for _ in 0..400 {
+        w.tick(0.1);
+    }
+    assert_eq!(w.ships[0].passengers.len(), 1);
+    w.validate().unwrap();
+}
+
+#[test]
+fn four_passengers_wait_for_pickup_on_a_crowded_shore() {
+    let mut w = harbor();
+    w.ships[0].cell = c(40, 60);
+    w.units[0].cell = c(40, 29);
+    w.units[1].cell = c(39, 29);
+    for n in 0..2 {
+        let mut unit = w.units[0].clone();
+        unit.id = format!("pickup-{n}");
+        unit.cell = c(40 + n, 28);
+        w.units.push(unit);
+    }
+    for i in 0..4 {
+        order_board(&mut w, i);
+    }
+    let before = w.clone();
+    order_board(&mut w, 0);
+    assert_eq!(w, before, "repeated boarding must not consume another seat");
+    for _ in 0..400 {
+        w.tick(0.1);
+    }
+    assert_eq!(w.ships[0].passengers.len(), 4, "remaining: {:?}", w.units);
+    w.validate().unwrap();
+}

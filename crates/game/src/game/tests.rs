@@ -641,6 +641,13 @@ fn paused_orders_are_rejected_without_changing_tasks_or_spending_resources() {
             amount: 1.0,
             direction: CargoDirection::Load,
         },
+        Command::Board {
+            unit_id: "villager-1".into(),
+            ship_id: "ship-1".into(),
+        },
+        Command::StopShip {
+            ship_id: "ship-1".into(),
+        },
         Command::Disembark {
             ship_id: "ship-1".into(),
         },
