@@ -59,3 +59,4 @@ Art lands separately from runtime wiring in [#107](https://github.com/koogle/age
 | `unit_archer` | [Style review](../assets/ui/sources/menu_icons/unit_archer/STYLE_REVIEW.md) | [#118](https://github.com/koogle/age-of-agents/pull/118) |
 | `unit_healer` | [Style review](../assets/ui/sources/menu_icons/unit_healer/STYLE_REVIEW.md) | [#119](https://github.com/koogle/age-of-agents/pull/119) |
 | `unit_siege_cart` | [Style review](../assets/ui/sources/menu_icons/unit_siege_cart/STYLE_REVIEW.md) | [#120](https://github.com/koogle/age-of-agents/pull/120) |
+| `command_disembark` | [Style review](../assets/ui/sources/menu_icons/command_disembark/STYLE_REVIEW.md) | [#121](https://github.com/koogle/age-of-agents/pull/121) |
