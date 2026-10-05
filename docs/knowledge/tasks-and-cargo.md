@@ -27,10 +27,11 @@ cargo test -p aoa-game --locked fields_tests
 cargo test -p aoa-client --locked activity_tests
 ```
 
-The field-replenishment proposal in PR #88 was unmerged at the recorded review;
-check [open work](../../OPEN_WORK.md) and current source before assuming harvesters
-wait for a depleted field to be replanted. No idle-worker recruitment or automatic
-replanting follows from the existing preparation-to-harvesting transition.
+PR #88 is now merged (integration checked at `0a863a4`). Existing harvesters retain
+their assigned field while paid replenishment is underway; Stop and reassignment
+still take priority. Idle workers are not recruited and exhausted fields are not
+automatically replanted. The regression cases include reload, partial cargo and
+both worker update orders.
 
 ## Learned constraints and evidence
 

@@ -31,8 +31,17 @@ cargo test -p aoa-client --locked gestures::tests
 cargo test -p aoa-client --locked minimap
 ```
 
-Selection-modifier PR #87 was open at review time. Recheck current source rather
-than assuming its Control/Command behavior is part of the baseline.
+PR #87 is now merged (integration checked at `0a863a4`): Shift-drag replaces,
+Control-click/drag adds on Windows/Linux and Command does so on Mac. Modifier
+state is captured at press time; touch keeps its existing tap/pan path.
+
+PR #91 also changed movement presentation: local interpolation follows the
+simulation accumulator; remote playback buffers two ticks, retains unplayed
+history and catches up at at most 1.1× without clock jumps. Full authored gait
+cycles replace the earlier two-pose gait, and work animation is gated by arrival
+at the authoritative interaction cell. Read `view/movement_tests.rs` and
+`view/activity_tests.rs` before modifying timing or work poses. These are merged
+contracts; the later recovery proposal in PR #93 is separate work.
 
 ## Learned constraints and evidence
 

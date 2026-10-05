@@ -54,7 +54,7 @@ status from metadata and deployment from workflow/production evidence. Record
 target platform, revision, bundle and limits. A fixture, phone emulation and a
 physical device answer different questions.
 
-**Recovered gaps:** Four open PRs are recorded in the handoff. The current code
+**Recovered gaps:** Live open PRs are recorded in the handoff; the four from the original history review are a dated snapshot. The current code
 still lacks accessible DOM controls and additive touch selection. Native
 macOS/Windows reset appearance and physical-phone safe areas remain unverified
 in reviewed evidence. These are not reopened completed fixes. Store useful

@@ -332,3 +332,154 @@ fn gatherers_continue_between_fields_and_wild_food_in_both_directions() {
         assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
     }
 }
+
+#[test]
+fn returning_harvester_waits_for_replenishment_and_resumes_without_another_order() {
+    let mut w = world();
+    plant(&mut w).unwrap();
+    run(&mut w, FIELD_WORK_SECONDS + 0.1);
+    // The last harvester is delivering the exhausted field's final load while
+    // another villager starts replenishing it.
+    w.resources[0].amount = 0.0;
+    w.units[1].action = UnitAction::Gather {
+        resource_id: "field-10-10".into(),
+        phase: GatherPhase::Returning,
+    };
+    w.units[1].cargo = Some(CarriedResource {
+        kind: ResourceKind::Food,
+        amount: 20.0,
+    });
+    let town = w.buildings[0].footprint();
+    super::tests::stand_beside(&mut w, 1, town);
+    cultivate(&mut w, 1).unwrap();
+    run(&mut w, 1.0);
+    assert_eq!(w.stockpile.food, 20.0);
+    assert!(matches!(&w.units[1].action,
+        UnitAction::Gather { resource_id, .. } if resource_id == "field-10-10"));
+    // Waiting orders must survive persistence as well as normal ticks.
+    w = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+    run(&mut w, FIELD_WORK_SECONDS + 5.0);
+    assert!(
+        w.units[1]
+            .cargo
+            .as_ref()
+            .is_some_and(|c| c.kind == ResourceKind::Food)
+    );
+    w.validate().unwrap();
+}
+
+#[test]
+fn harvesters_keep_preparing_fields_in_every_gather_phase_but_stop_still_cancels() {
+    for phase in [
+        GatherPhase::ToResource,
+        GatherPhase::Gathering,
+        GatherPhase::Returning,
+        GatherPhase::Depositing,
+    ] {
+        let mut w = world();
+        plant(&mut w).unwrap();
+        w.units[1].action = UnitAction::Gather {
+            resource_id: "field-10-10".into(),
+            phase,
+        };
+        // A nearby food node must not steal the assignment during preparation.
+        w.resources.push(ResourceNode {
+            id: "berries".into(),
+            kind: ResourceKind::Food,
+            cell: cell(8, 12),
+            amount: 120.0,
+            capacity: 120.0,
+            field: None,
+        });
+        run(&mut w, 1.0);
+        assert!(
+            matches!(&w.units[1].action,
+            UnitAction::Gather { resource_id, .. } if resource_id == "field-10-10"),
+            "lost assignment from {phase:?}"
+        );
+        w.apply_command(Command::Stop {
+            unit_id: "villager-2".into(),
+        })
+        .unwrap();
+        run(&mut w, FIELD_WORK_SECONDS + 1.0);
+        assert_eq!(w.units[1].action, UnitAction::Idle);
+        assert!(w.units[1].cargo.is_none());
+        assert_eq!(w.resources[1].amount, 120.0);
+        w.validate().unwrap();
+
+        // A new gather order also replaces the waiting assignment.
+        w.resources[0].amount = 0.0;
+        cultivate(&mut w, 1).unwrap();
+        w.units[1].action = UnitAction::Gather {
+            resource_id: "field-10-10".into(),
+            phase: GatherPhase::ToResource,
+        };
+        w.apply_command(Command::Gather {
+            unit_id: "villager-2".into(),
+            resource_id: "berries".into(),
+        })
+        .unwrap();
+        run(&mut w, FIELD_WORK_SECONDS + 0.1);
+        assert!(w.resources[1].amount < 120.0);
+        assert!(matches!(&w.units[1].action,
+            UnitAction::Gather { resource_id, .. } if resource_id == "berries"));
+        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn replenishment_handoff_handles_worker_order_partial_cargo_and_reload() {
+    for reverse in [false, true] {
+        for cargo_kind in [ResourceKind::Food, ResourceKind::Wood] {
+            let mut w = world();
+            plant(&mut w).unwrap();
+            // Use an exhausted, previously prepared field.
+            w.resources[0].field.as_mut().unwrap().work = None;
+            w.units[0].action = UnitAction::Idle;
+            cultivate(&mut w, 1).unwrap();
+            w.resources[0].field.as_mut().unwrap().work = Some(FIELD_WORK_SECONDS - 0.05);
+            w.units[1].cell = cell(20, 20);
+            w.units[1].cargo = Some(CarriedResource {
+                kind: cargo_kind,
+                amount: 3.0,
+            });
+            cultivate(&mut w, 2).unwrap();
+            if reverse {
+                w.units.reverse();
+            }
+            w = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+            w.tick(0.1);
+            assert!(w.resources[0].field.as_ref().unwrap().work.is_none());
+            assert!(
+                w.units
+                    .iter()
+                    .all(|u| matches!(u.action, UnitAction::Gather { .. }))
+            );
+            let food_before = w.stockpile.food;
+            let wood_before = w.stockpile.wood;
+            run(&mut w, 200.0);
+            assert!(
+                (w.stockpile.food
+                    - food_before
+                    - FIELD_FOOD
+                    - if cargo_kind == ResourceKind::Food {
+                        3.0
+                    } else {
+                        0.0
+                    })
+                .abs()
+                    < 1e-8
+            );
+            assert_eq!(
+                w.stockpile.wood - wood_before,
+                if cargo_kind == ResourceKind::Wood {
+                    3.0
+                } else {
+                    0.0
+                }
+            );
+            assert!(w.units.iter().all(|u| u.action == UnitAction::Idle));
+            w.validate().unwrap();
+        }
+    }
+}

@@ -8,6 +8,8 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 - Camera navigation uses pan and zoom with a fixed orthographic angle, responsive, zoom-scaled mouse edge/corner panning, pointer-anchored wheel zoom, midpoint-anchored pinch zoom, stable building anchors, and an optional diamond-shaped square grid. Distant zoom transitions into the curved planet overview.
 
+- Villager presentation uses accumulator interpolation locally and buffered playback remotely, with full gait cycles, prompt facing changes, and work poses only after reaching the authoritative work cell.
+
 ## Current direction
 
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and a shared resource pool are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
@@ -81,7 +83,7 @@ Status: selected units use a broad ivory ground ring with a blue border in the s
 
 Gameplay acceptance:
 
-1. Intentional mouse Shift-drag from empty ground draws a readable selection rectangle and selects all visible friendly units whose projected feet are enclosed; ordinary drag still pans and click selection still works.
+1. Intentional mouse Shift-drag from empty ground draws a readable selection rectangle and replaces the selection with visible friendly units whose projected feet are enclosed; Control-drag (Command on Mac) adds enclosed units; ordinary drag still pans and click selection still works.
 2. Touch keeps pan/tap semantics and offers additive unit selection without accidental box selection.
 3. A group ground order is one typed authoritative command. Validation is atomic: one invalid/busy/member mismatch rejects the whole order without moving any unit.
 4. Accepted group movement assigns deterministic distinct reachable destinations, respects reservations/occupancy, and visibly moves every selected unit without stacking.
@@ -95,7 +97,7 @@ Completed research remains visible with a bronze laurel seal with a green check 
 
 ## Building expansion — deployed
 
-User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. Existing harvesters keep their gathering order while another worker replenishes their field, including when returning with the previous harvest. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
 The Rust HUD exposes grouped, labelled construction, production costs/progress and all stockpile totals. Compact phone and short-landscape layouts place actions beside the globe/speed controls, with queues and submenus wrapping upward. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
@@ -193,14 +195,14 @@ Gameplay acceptance:
 
 ## Integrated native presentation fixes
 
+- [x] Control/Command-click additive group selection and existing shared gather/construct commands.
 - [x] Globe minimap terrain, camera marker and click/touch navigation share the world view’s isometric orientation and fit the full current map.
 
-- [x] Shift-click group selection and existing shared gather/construct commands.
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.
-- [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
+- [x] Full authored walking/carrying cycles paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
 - [x] Keep partially visible buildings on screen when their ground anchors pass the near clipping plane at close zoom.
-- [x] Shift-drag from empty ground draws a selection box and adds enclosed visible units in native and WebGL2 clients.
+- [x] Shift-drag from empty ground draws a selection box and replaces the selection with enclosed visible units; Control-drag (Command on Mac) adds units in native and WebGL2 clients.
 - [ ] Additive touch selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 
@@ -213,6 +215,7 @@ Gameplay acceptance:
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
 
-## Deployment verification follow-up — source-reviewed 2026-10-05
+## Deployment verification follow-up — reconciled 2026-10-05
 
-- [ ] Align `scripts/modal_manage.py::verify_once` with the current compressed terrain codec and runtime map dimensions. It still assumes 9,600 uncompressed cells, a 120×80 map, a land unit and unseen terrain; test the verifier against starter and expanded snapshots without resetting production or weakening checks to force a pass ([release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch)). This was found by source inspection; no deployment failure was reproduced in this documentation task.
+- [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
+- The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
