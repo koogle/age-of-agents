@@ -8,8 +8,9 @@ cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnin
 scripts/build_web.sh: pass
 node --check web/pkg/aoa_client.js: pass
 git diff --check: pass
-WebGL WASM SHA-256: 29355bf43073928848bde9e2b8dd6f22f37cdcc3d6a623ee9384f3b17feefda7
+WebGL WASM SHA-256: 6122729b4f5406ea479e55448391e5871d9c18013cb3dc80683d6825e4c05cec
 Direct Modal deployment: blocked, Token missing
 Browser: Chromium /usr/bin/chromium, DPR2, touch emulation, software WebGL
 See docs/COMPACT_HUD_REVIEW.md for browser scope and limitations.
 Authoritative browser replay: 0×/1×/2× pass; six orders fill queue; reload paused world; cancellation/refund pass; menus/House placement pass; 320px phone/landscape/desktop captures; no page errors.
+Pause-row follow-up: relocated pause shares 1×/2× baseline; DPR-2 actual touch pauses local game; no browser page errors. Current image: compact-time-row.png.

@@ -71,8 +71,7 @@ impl Hud {
         let r = if narrow { 40.0 } else { 68.0 } * s;
         let edge = if narrow { 12.0 } else { 18.0 } * s;
         let (gx, gy) = (width - edge - r * 2.0, height - edge - r * 2.0);
-        // The leftmost mobile speed target ends four pixels before the globe.
-        // Reserve this whole group, not just the visible map, for hit testing.
+        // Reserve the full time-control row above the globe on compact screens.
         let navigation_left = if narrow { gx - 48.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
         let span = 38.0;
@@ -109,8 +108,7 @@ impl Hud {
             let angle = std::f32::consts::PI * (1.0 + 0.16 + index as f32 * 0.17);
             let c = 30.0 * s;
             let center = if narrow {
-                let (x, y) = [(-26.0, 22.0), (18.0, -26.0), (62.0, -26.0)][index];
-                Vec2::new(gx + x * s, gy + y * s)
+                Vec2::new(gx + (-26.0 + index as f32 * 44.0) * s, gy - 26.0 * s)
             } else {
                 Vec2::new(
                     gx + r + angle.cos() * (r + 22.0 * s),
