@@ -21,13 +21,8 @@ pub(super) fn draw(
         let stride = moving && (time * 5.0) as u32 % 2 == 1;
         let size = if bear { 1.3 } else { 0.95 };
         let mirror = animal.heading[0] < animal.heading[1];
-        // Measured opaque paw baselines in the original 627px frames.
-        let foot = match (bear, stride) {
-            (false, false) => 611.0,
-            (false, true) => 589.0,
-            (true, false) => 541.0,
-            (true, true) => 545.0,
-        };
+        // All poses share the baseline registered by scripts/pack_wildlife.py.
+        let foot = 590.0;
         let sprite = Sprite {
             anchor: center.to_array(),
             size: [size, size],
