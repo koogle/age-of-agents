@@ -1,0 +1,10 @@
+{
+  "scene": "granary",
+  "wasm_sha256": "31bba99f03b03f153c40b4a367bab061fe7ac7dfc0fa7ba58a25751f16b57359",
+  "viewports": [
+    "1280x800 DPR1 mouse",
+    "390x844 DPR2 touch"
+  ],
+  "errors": [],
+  "limitation": "Controlled snapshot presentation and wire dispatch; not an authoritative gameplay fixture."
+}

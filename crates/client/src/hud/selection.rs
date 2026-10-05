@@ -90,7 +90,7 @@ pub(super) fn building_info(
             "building_granary",
             "granary",
             "Granary",
-            "Drop-off for food and fiber",
+            "Food/fiber drop-off · +50% nearby field yield",
         ),
         BuildingKind::Watchtower => (
             "building_watchtower",
@@ -195,7 +195,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 icon: "command_cancel",
                 label: "Place field".into(),
                 detail: format!(
-                    "{} · {} s work · {} food",
+                    "{} · {} s work · {} food (+50% near a granary)",
                     cost_text(aoa_game::FIELD_COST),
                     aoa_game::FIELD_WORK_SECONDS,
                     aoa_game::FIELD_FOOD
