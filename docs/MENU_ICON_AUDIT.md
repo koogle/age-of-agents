@@ -65,4 +65,4 @@ Art lands separately from runtime wiring in [#107](https://github.com/koogle/age
 | `command_cargo` | [Style review](../assets/ui/sources/menu_icons/command_cargo/STYLE_REVIEW.md) | [#124](https://github.com/koogle/age-of-agents/pull/124) |
 | `command_back` | [Style review](../assets/ui/sources/menu_icons/command_back/STYLE_REVIEW.md) | [#125](https://github.com/koogle/age-of-agents/pull/125) |
 | `category_town` | [Style review](../assets/ui/sources/menu_icons/category_town/STYLE_REVIEW.md) | [#126](https://github.com/koogle/age-of-agents/pull/126) |
-| `category_gathering` | [Style review](../assets/ui/sources/menu_icons/category_gathering/STYLE_REVIEW.md) | PR_PENDING |
+| `category_gathering` | [Style review](../assets/ui/sources/menu_icons/category_gathering/STYLE_REVIEW.md) | [#127](https://github.com/koogle/age-of-agents/pull/127) |
