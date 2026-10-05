@@ -64,3 +64,5 @@ to connect. No attempt was made to deploy to the differently selected account.
 ![Phone maximum-zoom wolf](phone-wolf-maxzoom.png)
 
 ![Phone maximum-zoom bear](phone-bear-maxzoom.png)
+
+The subsequent [attack-frame extension](../2026-10-05-animal-attacks/REVIEW.md) adds authored windup/strike poses and supersedes this initial review's attack-art limitation.

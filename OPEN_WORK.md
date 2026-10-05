@@ -1,3 +1,8 @@
+## Animal attack frames — 2026-10-05
+
+- Extending PR #130 at the user's request with two authored attack poses per species, preserving the NPC-matched style. Eight-frame atlas; idle/walk cells preserved, attacks registered by planted rear paws. `attack_seconds` selects windup/strike, pause freezes poses, and animals face their contacted target. No balance/save changes.
+- 266 Rust tests, native/WASM lint, rebuilt web/server and 302-frame resolution audit pass. Browser pose replay passes on desktop/DPR-2 phone, including rendered UVs, pause, mirroring and reviewed normal/maximum-zoom captures. Real-server desktop mouse and DPR-2 phone touch hunting, mutual damage, defeat/cleanup and zero page errors pass. Sources/provenance and review: `docs/verification/2026-10-05-animal-attacks/`. Not merged/deployed.
+
 ## Animal style refinement — 2026-10-05
 
 - PR #130: https://github.com/koogle/age-of-agents/pull/130 (`fix/animal-art-style`, from master `079d348`), tested and pushed; not merged or deployed. User requested less generic animals and explicit comparison to existing NPCs. New wolf/bear idle/walk art uses the shipped villager and guard references; a textured first pass was rejected and retained. NPC contact sheet and review: `docs/verification/2026-10-05-animal-style/`.
