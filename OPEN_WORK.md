@@ -1,4 +1,12 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: villager action flashes (2026-10-05)
+
+- Extended the existing 1.4-second floating italic drop-off feedback to gathering (with resource name), building, field preparation, boarding, and idle transitions. Plain movement does not flash. Labels follow the villager and rapid assignment changes replace the previous status; resource gains retain separate labels with vertical separation on simultaneous status changes.
+- Feedback compares authoritative snapshots and assignment targets; repeated snapshots and movement-to-work gathering phases do not replay it. Initial snapshots/new units stay quiet, and reset/island changes clear labels. No simulation, persistence, command, asset, or dependency changes.
+- Added four focused client tests and adapted drop-off/gain coverage. All 187 workspace tests (55 client, 13 server, 119 domain), formatting, strict native and WASM lint pass. After the final viewport correction, reran all 55 client tests and both lint targets; rebuilt the tracked browser bundle. Desktop 1280×800 and phone 390×844/DPR2 gather/stop captures show the new labels, accepted commands and no page errors; walking captures stay quiet. QA uses an isolated database and a controlled presentation clock for stable captures, under `/workspace/scratch/status-flashes`.
+- Thermonuclear review: retained the existing feedback module and animation, with one assignment-label helper; typed snapshot comparison stays presentation-only. Source remains below 1,000 lines, common mouse/touch command paths unchanged, no autonomous behavior. Floating text now shifts inside viewport edges and fits narrow screens to prevent clipped messages; reviewed desktop and phone previews after the correction.
+- User approved the visual result and authorized creating a PR and merging into the default branch (`master`). Branch `feat/villager-action-flashes` contains the verified change; merging triggers the repository quality/deploy workflow. Direct Modal deployment remains unavailable in this environment.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
