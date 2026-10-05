@@ -215,7 +215,7 @@ Gameplay acceptance:
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
 
-Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar.
+Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar. Mobile cargo paging uses inline chevrons and supports horizontal swipe paging.
 
 ## Deployment verification follow-up — reconciled 2026-10-05
 

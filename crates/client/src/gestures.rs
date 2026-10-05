@@ -130,7 +130,10 @@ impl App {
             }
             TouchPhase::Moved => self.moved(pixel),
             TouchPhase::Ended => self.release(pixel),
-            TouchPhase::Cancelled => self.pointer = None,
+            TouchPhase::Cancelled => {
+                self.pointer = None;
+                self.hud.release();
+            }
         }
     }
 
@@ -160,6 +163,7 @@ impl App {
             return;
         };
         if pointer.on_hud {
+            self.hud.drag_cargo(pointer.down_at, pixel, false);
             return;
         }
         if matches!(
@@ -187,6 +191,7 @@ impl App {
             return;
         };
         if pointer.on_hud {
+            self.hud.drag_cargo(pointer.down_at, pixel, true);
             if let Some(action) = self.hud.release() {
                 self.act(action);
             }

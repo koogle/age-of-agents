@@ -51,6 +51,8 @@ Local unit rendering follows the fixed-step simulation accumulator. Hosted unit 
 
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 
+On phones, the ship cargo strip keeps paging chevrons beside the resources in one row. Swipe horizontally (or drag with a mouse) to page through cargo; tap the shields to load or unload.
+
 ## Run locally
 
 Requires Rust 1.85+ and a modern browser for the web client.
