@@ -10,6 +10,7 @@ const STARTING_TOWN_CENTER: CellCoordinate = CellCoordinate::new(28, 17);
 pub(super) fn fixture() -> GameWorld {
     let terrain = generate_terrain();
     let villager = |number: u64, column, row| Unit {
+        health: 100.0,
         id: format!("villager-{number}"),
         kind: UnitKind::Villager,
         cell: CellCoordinate::new(column, row),
@@ -18,6 +19,7 @@ pub(super) fn fixture() -> GameWorld {
         cargo: None,
     };
     let mut world = GameWorld::generate(DEFAULT_SEED);
+    world.animals.clear();
     world.economy_rules = EconomyRules::Unrestricted;
     world.terrain = terrain.clone();
     let south = STARTING_TOWN_CENTER.row + BuildingKind::TownCenter.size().1;

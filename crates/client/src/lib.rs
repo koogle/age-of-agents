@@ -16,6 +16,7 @@ mod source;
 mod storage;
 mod terrain;
 mod view;
+mod wildlife;
 mod window;
 use window::{loaded, physical_size};
 
@@ -43,6 +44,7 @@ const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
 
 /// What lies under a pointer.
 enum Target {
+    Animal(String),
     Ship(String),
     Unit(String),
     Resource(String),
@@ -217,6 +219,7 @@ impl App {
         // A tree, rock or building is hit where it is drawn, not where the
         // ground behind it happens to be.
         match self.view.sprite_at(&self.rig, pixel) {
+            Some(view::Pick::Animal(id)) => return Some(Target::Animal(id)),
             Some(view::Pick::Ship(id)) => return Some(Target::Ship(id)),
             Some(view::Pick::Resource(id)) => return Some(Target::Resource(id)),
             Some(view::Pick::Building(id)) => {
@@ -270,6 +273,10 @@ impl App {
         }
         let snapshot = self.view.snapshot.as_ref()?;
         let (center, radius, color) = match self.target_at(self.cursor)? {
+            Target::Animal(id) => {
+                let a = snapshot.animals.iter().find(|a| a.id == id)?;
+                (terrain::cell_center(a.cell), 0.5, [0.85, 0.18, 0.1, 0.9])
+            }
             Target::Resource(id) => {
                 let r = snapshot.resources.iter().find(|r| r.id == id)?;
                 let c = r.footprint().center();
@@ -440,6 +447,10 @@ impl App {
             self.selection.ship = None;
         }
         let units = self.selection.units.clone();
+        if let Target::Animal(ref id) = target {
+            self.interact_with_animal(id, units);
+            return;
+        }
         if units.is_empty() {
             self.selection.building = match target {
                 Target::Foundation(id) | Target::Building(id) => Some(id),
@@ -448,7 +459,7 @@ impl App {
             return;
         }
         match target {
-            Target::Unit(_) | Target::Ship(_) => {}
+            Target::Unit(_) | Target::Ship(_) | Target::Animal(_) => {}
             Target::Resource(resource_id) => {
                 for unit_id in units {
                     let depleted_field = self.view.snapshot.as_ref().is_some_and(|s| {
@@ -505,32 +516,6 @@ impl App {
                 to: cell,
             }),
         }
-    }
-
-    /// Selected villagers carrying goods the complete building `id` accepts.
-    fn carriers_for(&self, id: &str) -> Vec<String> {
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
-            return Vec::new();
-        };
-        let Some(building) = snapshot
-            .buildings
-            .iter()
-            .find(|b| b.building.id == id && b.building.construction.is_none())
-        else {
-            return Vec::new();
-        };
-        snapshot
-            .units
-            .iter()
-            .filter(|u| self.selection.units.contains(&u.unit.id))
-            .filter(|u| {
-                u.unit
-                    .cargo
-                    .as_ref()
-                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
-            })
-            .map(|u| u.unit.id.clone())
-            .collect()
     }
 
     /// Stops every selected villager that is busy.
@@ -840,6 +825,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/units.png"),
         assets.image("sprites/transport.png"),
         assets.image("sprites/villager_field_preparation.png"),
+        assets.image("sprites/wildlife.png"),
     ]
 }
 

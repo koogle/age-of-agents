@@ -10,12 +10,13 @@ Start on an island, gather resources, and build a settlement. Build ships to exp
 
 Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Dock-built transports carry units between persistent islands. Each island has its own inventory, supplemented by cargo aboard stopped ships at its shore. All discovered settlements keep gathering, building, producing and researching. Combat, calamities, permanent upgrades and automatic trade routes are not implemented yet.
+Dock-built transports carry units between persistent islands. Each island has its own inventory, supplemented by cargo aboard stopped ships at its shore. All discovered settlements keep gathering, building, producing and researching. Wolves and bears threaten units exploring their territory; select units and tap an animal to attack, or retreat. Broader combat, calamities, permanent upgrades and automatic trade routes are not implemented yet.
 
 Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each holds four passengers; no metal, cloth or housing is required. Select a transport and tap sea, or choose **Explore beyond the coast**. Sailing toward the frontier generates the next island before the ship reaches the map edge. Islands share one expanding map, with 64 cells of open water between their 120×80 generation regions; crossing takes real sailing time. Sites follow an expanding square spiral, so successive discoveries stay adjacent without a fixed island-count cap.
 
 ## Implemented roadmap
 
+- Territorial wolves and bears with health, pursuit, contact attacks and explicit hunting orders. Wildlife is hidden outside current sight and starts away from the settlement. Tap an animal with no units selected to inspect it; select units and tap to attack. Bears are tougher and slower than wolves. New games start with one wolf on the first island; the second and later islands have 2–4 animals (one bear and 1–3 wolves).
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
 - Docks automatically face adjacent water, with four sprite orientations throughout construction and placement.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
@@ -27,7 +28,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Completed technologies stay visible as disabled coins with a bronze laurel seal with a green check; hover or tap explains the researched upgrade. Research cannot be ordered twice.
 - Wood → timber and food → rations processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries.
-- Guard, archer, healer, and siege-cart production; these units currently only move and stop.
+- Guard, archer, healer, and siege-cart production; guards, archers and siege carts can also attack wildlife in contact; ranged combat and healing remain future work.
 - Dock transport production through the paid task queue, water-only sailing, four passenger seats and shore landings. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
 - Distant zoom eases into a curved world overview; the globe shows the discovered archipelago in the same isometric orientation as the world view, with matching camera-marker and click/touch navigation.
