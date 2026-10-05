@@ -224,3 +224,5 @@ Island storage: stopped shore ships supplement local construction/production cos
 
 - [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
 - The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
+
+Island generation uses rounded, square, elongated, lobed and open-bay outlines, with shared relief and downhill drainage; starter resources remain visible and reachable.
