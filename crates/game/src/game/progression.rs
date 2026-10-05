@@ -1,5 +1,4 @@
-//! Resource discovery gates new games. Missing rules in old saves retain the
-//! unrestricted economy; loading a save never deletes resources or buildings.
+//! Resource discovery gates the starter economy.
 use super::*;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -44,11 +43,6 @@ impl GameWorld {
         self.resources
             .iter()
             .any(|r| r.kind == kind && self.explored_cells.binary_search(&r.cell).is_ok())
-            || self.islands.iter().any(|i| {
-                i.resources
-                    .iter()
-                    .any(|r| r.kind == kind && i.explored_cells.binary_search(&r.cell).is_ok())
-            })
     }
 
     /// Unlock construction from discoverable cost inputs, independently of current

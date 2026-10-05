@@ -17,8 +17,7 @@ pub struct TransportShip {
     /// Last travel vector, retained when stopped for sprite facing.
     pub heading: [i8; 2],
     pub passengers: Vec<Unit>,
-    /// The dock that built the vessel; legacy ships learn it on departure.
-    #[serde(default)]
+    /// The dock that built the vessel.
     pub home_dock_id: Option<String>,
 }
 

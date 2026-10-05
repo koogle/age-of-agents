@@ -15,7 +15,7 @@ commands. Start in [islands.rs](../../crates/game/src/game/islands.rs),
 [continuous map](../CONTINUOUS_MAP.md) for the coordinate model and measured limits.
 
 1. Identify whether the change affects generation, movement, passenger ownership,
-   snapshot dimensions, save conversion, or several together.
+   snapshot dimensions, save versioning, or several together.
 2. Preserve deterministic seed/discovery ordering, existing settlements and ship
    position. Discovery adds land; destination shortcuts are sailing orders.
 3. For save changes, use the [server and saves guide](server-and-saves.md).
@@ -52,9 +52,9 @@ from historical reviews. First departure must remain affordable from starter
 resources, including timber's raw wood cost.
 
 **Check:** `crates/game/src/game/islands_tests.rs` covers non-teleporting shortcuts,
-both settlements producing, runtime map dimensions and idempotent migration;
+both settlements producing, runtime map dimensions and current-format round trips;
 `ship_tests.rs` covers original-dock return, passengers and blocked commands.
-Use the existing save conversion in `src/store/migration.rs`; malformed old
+Use the existing save versioning in `src/store/migration.rs`; malformed old
 values remain errors, and reload must not credit legacy cargo twice.
 
 ## Keep this guide current

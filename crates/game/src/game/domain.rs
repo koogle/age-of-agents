@@ -243,7 +243,7 @@ pub struct ResourceNode {
     pub cell: CellCoordinate,
     pub amount: f64,
     pub capacity: f64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub field: Option<FieldState>,
 }
 
@@ -304,9 +304,7 @@ pub struct Building {
     pub researches: Vec<TechnologyKind>,
     pub job: Option<BuildingJob>,
     /// Paid tasks waiting behind the active job, in submission order.
-    #[serde(default)]
     pub queue: Vec<QueuedBuildingJob>,
-    #[serde(default)]
     pub next_queue_id: u64,
 }
 
