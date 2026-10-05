@@ -586,9 +586,16 @@ impl Hud {
         at: Vec2,
         pixels_per_world: f32,
         alpha: f32,
+        screen_width: f32,
     ) {
         let size = 34.0 / 110.0 * pixels_per_world;
         let radius = 2.5 / 110.0 * pixels_per_world;
+        let available = (screen_width - 4.0 * radius).max(1.0);
+        let width = Self::glyph_width(&atlas.gain_glyphs, text, size).max(1.0);
+        let size = size * (available / width).min(1.0);
+        let half = (Self::glyph_width(&atlas.gain_glyphs, text, size) * 0.5 + 2.0 * radius)
+            .min(screen_width * 0.5);
+        let at = Vec2::new(at.x.clamp(half, screen_width - half), at.y);
         for step in 0..8 {
             let angle = step as f32 * std::f32::consts::TAU / 8.0;
             let edge = at + Vec2::new(angle.cos(), angle.sin()) * radius;

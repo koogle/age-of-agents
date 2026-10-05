@@ -22,3 +22,5 @@ Direct Modal deployment fails with “Token missing”; this review does not cer
 Earlier visual research and rejected/superseded proposals remain in `docs/grid-proposal/`; its mobile study is not the implemented layout.
 
 Follow-up: pause now shares the horizontal 1×/2× row instead of sitting beside the globe. The compact band height and 44px touch targets are unchanged. Current screenshot: `verification/2026-10-05/compact-time-row.png`; earlier screenshots show the previous pause position.
+
+Merge integration: retained master `9393efe` field-route protection and action feedback, resolving documentation conflicts and regenerating the combined browser bundle. All 192 tests (13 server, 57 client, 122 game), formatting and both strict lint targets pass. Fresh DPR2 browser touch at the relocated pause target pauses the game with no page errors. Reviewed integration: no changes to the incoming domain or feedback behavior.
