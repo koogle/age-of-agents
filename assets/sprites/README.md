@@ -19,6 +19,17 @@ All three share the same layout, anchor, frame order and royal-blue team scarf, 
 - **`fps`:** suggested playback rates per animation.
 - **Team colour:** a saturated royal-blue scarf and chest band, which reads on grass and sand at about 56 px (see `villager_contact.jpg`). No shadow is baked in.
 
+## Gait registration (2026-10-05)
+
+The shared `villager.json` `frameMirrors` table identifies opposite-facing poses
+by animation, view and character (base villager, woman, elder). The renderer XORs
+this registration with the camera-facing mirror. Zero-based walk-front frames 2/3/3,
+base/woman carry-front cycles, and base carry-back frames 2–3 and woman carry-back frame 3 are registered
+this way after inspection against each strip's canonical facing. PNG pixels,
+512px cells and foot anchors are unchanged; walking now plays all four poses in
+distance order. This corrects opposite facings, not the remaining small authored
+head/torso differences between poses.
+
 ## HD recovery and refinement (2026-10-03)
 
 The original FAL/BiRefNet strips are retained in `hd_sources/`, with request IDs,

@@ -2,7 +2,7 @@
 use super::*;
 use aoa_game::{CarriedResource, GameWorld};
 
-fn sheets() -> Sheets {
+pub(super) fn sheets() -> Sheets {
     Sheets::parse(
         include_bytes!("../../../../assets/sprites/villager.json"),
         include_bytes!("../../../../assets/sprites/villager_idle_hd.json"),
@@ -19,8 +19,8 @@ fn sheets() -> Sheets {
     )
 }
 
-fn unit_sprite(view: &mut WorldView, sheets: &Sheets, time: f32) -> (usize, Sprite) {
-    let (sprites, _) = view.draw_list(sheets, &Rig::new(), time, 0.016, &Selection::default());
+pub(super) fn unit_sprite(view: &mut WorldView, sheets: &Sheets, time: f32) -> (usize, Sprite) {
+    let (sprites, _) = view.draw_list(sheets, &Rig::new(), time, &Selection::default());
     let mut units = sprites
         .into_iter()
         .filter(|(sheet, _)| VILLAGER_SHEETS.contains(sheet));
@@ -67,6 +67,7 @@ fn all_gathering_activities_keep_animating_with_partial_cargo() {
                     (amount > 0.0).then_some(CarriedResource { kind, amount });
                 let id = snapshot.units[0].unit.id.clone();
                 let mut view = WorldView::new();
+                park_beside_work(&mut snapshot);
                 view.sync(snapshot);
                 view.units.get_mut(&id).unwrap().variant = variant;
                 let (sheet, first) = unit_sprite(&mut view, &sheets, 0.0);
@@ -125,14 +126,9 @@ fn cargo_keeps_the_carry_pose_outside_active_gathering() {
         assert_eq!(stopped.uv, later.uv);
         let entry = view.units.get_mut(&id).unwrap();
         entry.moving = true;
-        entry.walked = STRIDE_DISTANCE * 1.1;
+        entry.walked = STRIDE_DISTANCE * 0.3;
         let (_, walking) = unit_sprite(&mut view, &sheets, 0.5);
-        assert_pose(
-            &sheets,
-            walking,
-            "carry",
-            sheets.villager.animations["carry"]["front"].len() / 2,
-        );
+        assert_pose(&sheets, walking, "carry", 1);
     }
 }
 
@@ -153,6 +149,7 @@ fn building_and_field_preparation_animate_after_unloading() {
         snapshot.units[0].unit.action = action;
         snapshot.units[0].unit.cargo = None;
         let mut view = WorldView::new();
+        park_beside_work(&mut snapshot);
         view.sync(snapshot.clone());
         let (sheet, first) = unit_sprite(&mut view, &sheets, 0.0);
         let fps = if preparing {
@@ -177,4 +174,27 @@ fn building_and_field_preparation_animate_after_unloading() {
         }
         assert_ne!(first.uv, second.uv);
     }
+}
+
+fn park_beside_work(snapshot: &mut WorldSnapshot) {
+    let footprint = match &snapshot.units[0].unit.action {
+        UnitAction::Build { building_id } => snapshot
+            .buildings
+            .iter()
+            .find(|b| &b.building.id == building_id)
+            .unwrap()
+            .building
+            .footprint(),
+        UnitAction::Gather { resource_id, .. } | UnitAction::Cultivate { resource_id } => snapshot
+            .resources
+            .iter()
+            .find(|r| &r.id == resource_id)
+            .unwrap()
+            .footprint(),
+        _ => unreachable!(),
+    };
+    let cell = aoa_game::CellCoordinate::new(footprint.origin.column - 1, footprint.origin.row);
+    snapshot.units[0].unit.cell = cell;
+    snapshot.units[0].unit.step = None;
+    snapshot.units[0].position = snapshot.units[0].unit.position();
 }

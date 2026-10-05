@@ -56,6 +56,21 @@ impl Source {
         }
     }
 
+    /// Local rendering uses the exact fixed-step accumulator, not a network clock.
+    pub fn presentation_tick(&self) -> Option<f64> {
+        match self {
+            Self::Local {
+                world, accumulator, ..
+            } => Some(if world.simulation_speed == 0.0 {
+                world.tick as f64
+            } else {
+                (world.tick as f64 - 1.0 + accumulator / TICK_SECONDS).max(0.0)
+            }),
+            #[cfg(target_arch = "wasm32")]
+            Self::Remote(_) => None,
+        }
+    }
+
     /// Outcomes of commands sent since the last call.
     pub fn take_results(&mut self) -> Vec<CommandResult> {
         match self {
