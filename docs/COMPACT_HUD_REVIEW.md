@@ -1,6 +1,6 @@
 # Compact mobile HUD review — 2026-10-05
 
-The phone layout preserves the game's painted medallions and parchment. Actions align bottom-left beside an 80-logical-pixel globe and its speed controls, instead of stacking navigation above the action area. Compact layout applies below 600 logical pixels wide or 500 high. Building menus and queues expand upward in the left column; choosing a building restores the compact placement controls. Queue backgrounds fit their contents in landscape.
+The phone layout preserves the game's painted medallions and parchment. Actions align bottom-left beside an 80-logical-pixel globe with pause, 1× and 2× grouped in one row above it, instead of stacking navigation above the action area. Compact layout applies below 600 logical pixels wide or 500 high. Building menus and queues expand upward in the left column; choosing a building restores the compact placement controls. Queue backgrounds fit their contents in landscape.
 
 ## Implementation review
 
@@ -20,3 +20,5 @@ The thermonuclear review found no need for another layout abstraction: the exist
 Direct Modal deployment fails with “Token missing”; this review does not certify a production rollout. Native platform appearance and physical-device safe-area behavior have not been checked. Existing canvas accessibility work remains a separate backlog item; this change does not claim to implement accessible DOM buttons. Desktop globe/speed rectangular hit bounds already overlap at an empty corner; the new compact targets do not.
 
 Earlier visual research and rejected/superseded proposals remain in `docs/grid-proposal/`; its mobile study is not the implemented layout.
+
+Follow-up: pause now shares the horizontal 1×/2× row instead of sitting beside the globe. The compact band height and 44px touch targets are unchanged. Current screenshot: `verification/2026-10-05/compact-time-row.png`; earlier screenshots show the previous pause position.
