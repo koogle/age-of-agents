@@ -118,3 +118,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
 | `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
 | `category_production` | [Review](sources/menu_icons/category_production/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_production/provenance.json) |
+| `category_military` | [Review](sources/menu_icons/category_military/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_military/provenance.json) |
