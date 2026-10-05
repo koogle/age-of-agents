@@ -1,4 +1,12 @@
-# Current handoff: completed research — authorized merge (2026-10-05)
+# Current handoff: lumber mill wood drop-off (2026-10-05)
+
+- User authorized merging [PR #85](https://github.com/koogle/age-of-agents/pull/85). Branch `fix/lumber-mill-wood-dropoff` is integrating latest master `606898c`, including shared island resources, researched-tech status, compact HUD, fogged build-site exploration, field routes and both resource/research icon updates.
+- Completed mills accept wood through the existing shared drop-site rule. Automatic nearest-reachable delivery, explicit unloading and pre-assignment unloading use it without new state or routing logic. Deliveries credit master’s shared stockpile; timber production is unchanged.
+- Regression coverage checks full/partial deliveries (20 + 20 + 7), resumed gathering, completed/compatible sites, atomic rejection, manual partial unloading, and blocked-mill fallback to HQ. Updated selection help, README, roadmap and interaction contract.
+- Thermonuclear review: one domain match arm, no new abstraction/dependency/save schema or autonomous assignment; typed/atomic commands and shared mouse/touch behavior retained. Integration preserves current master features. All edited source files remain below 1,000 lines.
+- Final verification against `606898c` passed all 206 workspace tests (129 game, 60 client, 17 server), formatting, strict native/WASM lint and the rebuilt combined browser bundle. Asset checks pass (282 HD frames, field/transport assets and icon normalization). Final desktop flow passed manual partial unloading and repeated 20/20/7 deliveries, zero timber conversion and no page errors; the same DPR2-touch flow also passed during integration. QA logs/scripts/screenshots and isolated SQLite `qa.db` are under `/workspace/scratch/wood-dropoff`. User-authorized merge/release status is tracked by PR #85 and the repository production workflow.
+
+# Previous handoff: completed research — authorized merge (2026-10-05)
 
 - User authorized merging PR #77 into the default `master` branch. Integrated current master `efd9b21`, preserving compact mobile HUD, timber and field icons, exploration/construction fixes, and shared-resource transport changes. Rebuilt the combined browser bundle.
 - Completed technologies show the FAL-generated bronze laurel seal and green check, stay disabled, and explain their upgrade on hover/tap. Final native sources and generation provenance remain in `assets/ui/sources/research_check/classical/`.
