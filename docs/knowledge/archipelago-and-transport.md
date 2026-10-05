@@ -98,3 +98,27 @@ unit and click/tap the offshore ship, check the Board acknowledgement and destin
 and verify the passenger manifest only changes at the stopped berth. At 0×, Board
 and Stop ship are rejected without mutating either actor; see the
 [pause contract](runtime-debugging.md#pause-contract).
+
+## Terrain-first generation (2026-10-05)
+
+Jakob requested varied outlines followed by relief and terrain-derived rivers.
+`worldgen/shape.rs` selects a seed-stable rounded, square, long, bay or lobed mask;
+rerolls preserve the family. The bay's central basin remains connected to the sea.
+`worldgen.rs` retains the main land component, applies coastal slopes and noisy
+ridge relief, and derives mountain/highland bands from the resulting elevation.
+
+`worldgen/drainage.rs` priority-floods depressions to spill height with a small
+positive gradient. Steepest cardinal descent defines a single acyclic drainage
+network; accumulated upstream cells select headwaters. Rivers follow that network
+through confluences to water; they no longer use a separate meander height field
+or independently flatten beds. Sandbar fords and reachable resource checks remain.
+This is a procedural relief approximation, not a physical erosion simulation.
+Snapshot height quantization can display tiny slopes as flat, but preserves order.
+
+Generation changes affect new games and newly discovered islands. Existing saved
+terrain remains authoritative; no persisted fields changed or save reset is needed.
+Run `cargo test -p aoa-game --locked worldgen` for shape, runoff, downhill-route,
+resource and settlement checks. Near-start wood and food must be within town-center
+sight, not merely within the wider resource-placement radius: the latter can leave
+a fresh settlement with no visible gather targets. The `island_preview` example exports fully explored
+snapshots; `docs/verification/island-generation/preview.py` renders relief comparisons.

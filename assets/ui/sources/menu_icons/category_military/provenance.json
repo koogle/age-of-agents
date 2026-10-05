@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of an upright round bronze Greek hoplite shield with muted red center and one diagonal spear behind it, compact bold defense symbol. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3703/YiC83YnUZvzwOQSH3__tj_4bioG85A.png",
+        "content_type": "image/png",
+        "file_name": "YiC83YnUZvzwOQSH3__tj_4bioG85A.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      314,
+      940,
+      627,
+      1254
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f8/K5x5VgIS3tEI8mdgycOv5_7TjgBun3.png",
+        "content_type": "image/png",
+        "file_name": "K5x5VgIS3tEI8mdgycOv5_7TjgBun3.png",
+        "file_size": null,
+        "width": 313,
+        "height": 314
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242166.6755087,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:category_military",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-586f-7b91-9e63-6e843c631c7c",
+        "seconds": 2.3
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "category_military.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239727.2632692,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "category_military",
+      "est_usd": 0.0398,
+      "request_id": "01a10e35-067e-75a1-9df6-c21e87100562",
+      "seconds": 8.7
+    },
+    {
+      "t": 1791239855.1830237,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:category_military",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-1335-7de2-90fb-c1806d0d7e41",
+      "seconds": 2.3
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}

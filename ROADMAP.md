@@ -218,9 +218,11 @@ Gameplay acceptance:
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
 
-Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar. Mobile cargo paging uses inline chevrons and supports horizontal swipe paging.
+Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar; resource names appear on hover or tap instead of permanent labels. Mobile cargo paging uses inline chevrons and supports horizontal swipe paging.
 
 ## Deployment verification follow-up — reconciled 2026-10-05
 
 - [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
 - The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
+
+Island generation uses rounded, square, elongated, lobed and open-bay outlines, with shared relief and downhill drainage; starter resources remain visible and reachable.

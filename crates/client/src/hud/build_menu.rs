@@ -28,6 +28,14 @@ impl BuildingGroup {
             Self::Military => "Military",
         }
     }
+    pub(super) fn icon(self) -> &'static str {
+        match self {
+            Self::Town => "category_town",
+            Self::Gathering => "category_gathering",
+            Self::Production => "category_production",
+            Self::Military => "category_military",
+        }
+    }
     fn buildings(self) -> &'static [BuildingKind] {
         use BuildingKind::*;
         match self {
@@ -82,7 +90,7 @@ pub(super) fn commands(
                     .any(|kind| available.contains(kind))
             })
             .map(|group| Command {
-                icon: building_info(group.buildings()[0]).0,
+                icon: group.icon(),
                 label: group.name().into(),
                 detail: group
                     .buildings()
@@ -115,7 +123,11 @@ pub(super) fn commands(
         });
     }
     commands.push(Command {
-        icon: "command_cancel",
+        icon: if build == BuildUi::Categories {
+            "command_cancel"
+        } else {
+            "command_back"
+        },
         label: if build == BuildUi::Categories {
             "Close"
         } else {
