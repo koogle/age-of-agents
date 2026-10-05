@@ -47,6 +47,7 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
+        self.populate_wildlife(id as usize);
     }
 
     fn resize_ocean(&mut self, columns: u16, rows: u16) {

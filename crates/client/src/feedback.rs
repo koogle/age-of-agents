@@ -31,6 +31,9 @@ fn drop_off_status(unit: &Unit) -> Option<String> {
 // while walking to a node and starting work remain one gathering assignment.
 fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, String)> {
     let (text, target) = match &unit.action {
+        UnitAction::AttackAnimal { animal_id, .. } => {
+            ("Attacking wildlife".into(), animal_id.as_str())
+        }
         UnitAction::Idle => ("Idle".into(), ""),
         UnitAction::Move { .. } => return None,
         UnitAction::Board { ship_id } => ("Boarding transport".into(), ship_id.as_str()),
@@ -82,6 +85,20 @@ impl Feedback {
             self.labels.clear();
             return;
         }
+        for animal in &next.animals {
+            if let Some(before) = previous.animals.iter().find(|a| a.id == animal.id)
+                && animal.health < before.health
+            {
+                let p = animal.position();
+                let at = terrain::world_of(p.x, p.y);
+                self.labels.push(Label {
+                    unit_id: None,
+                    text: format!("{}: {:.0} HP", animal.kind.name(), animal.health),
+                    at: Vec3::new(at.x, 0.8, at.y),
+                    born: now,
+                });
+            }
+        }
         for unit in &next.units {
             let Some(before) = previous
                 .units
@@ -109,6 +126,14 @@ impl Feedback {
                     unit_id: Some(unit.unit.id.clone()),
                     text,
                     at: Vec3::new(at.x, 0.8, at.y),
+                    born: now,
+                });
+            }
+            if unit.unit.health < before.unit.health {
+                self.labels.push(Label {
+                    unit_id: None,
+                    text: format!("-{:.0} HP", before.unit.health - unit.unit.health),
+                    at: Vec3::new(at.x, 1.1, at.y),
                     born: now,
                 });
             }

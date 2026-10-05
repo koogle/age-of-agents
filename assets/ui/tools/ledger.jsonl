@@ -271,3 +271,5 @@
 {"t": 1791188429.267797, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:resource_timber.png", "est_usd": 0.005, "request_id": "01a10b26-5ff9-75c0-9019-6c2a1f3a90dd", "seconds": 2.5}
 {"t": 1791189356.8951693, "endpoint": "fal-ai/nano-banana/edit", "tag": "icon:tech_agriculture_fields", "est_usd": 0.0398, "request_id": "01a10b34-75bc-7903-b58f-0c3c5a8df88e", "seconds": 7.0}
 {"t": 1791189372.9664748, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tech_agriculture_fields.png", "est_usd": 0.005, "request_id": "01a10b34-c707-77b2-b090-4b9b2c36dbf6", "seconds": 2.3}
+{"t": 1791238124.6968975, "endpoint": "fal-ai/nano-banana/edit", "tag": "wildlife-wolf-boar-draft", "est_usd": 0.04, "request_id": "01a10e1c-91ab-7893-b65c-aaee9d38b5a3", "seconds": 8.9}
+{"t": 1791238139.462653, "endpoint": "fal-ai/nano-banana/edit", "tag": "wildlife-wolf-bear-draft", "est_usd": 0.04, "request_id": "01a10e1c-cd51-7621-ae42-8b79d471f148", "seconds": 8.4}

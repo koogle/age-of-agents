@@ -1,3 +1,9 @@
+# Current work: dangerous wildlife (2026-10-05)
+
+- User correction: wolves and other dangerous animals, instead of timed events. Drought changes in PR #98 have been reverted on its branch; replacing them with wolves and bears. See [wildlife](docs/knowledge/wildlife.md).
+- Wildlife implemented with generated/refined wolf and bear art. All 236 Rust tests pass (one manual benchmark ignored), native/WASM strict lint and all 286 sprite-frame audits pass. Real desktop mouse and DPR2-phone pinch/touch hunting verify attack orders, two-way damage and bear defeat without page errors; final frame-anchor screenshots pass too. See [review/evidence](docs/verification/2026-10-05-wildlife/REVIEW.md). Store version 13 resets incompatible saves under existing policy. Not merged or deployed.
+- Direct release remains blocked: Modal 1.5.3 status again reports "Could not connect to the Modal server" despite ready runtime bindings. No production state was changed.
+
 # Current handoff: test runtime optimization (2026-10-05)
 
 - [PR #97](https://github.com/koogle/age-of-agents/pull/97), branch `perf/test-runtime`, integrates master `3ccc5e8`. Implements the requested parallel soundness seeds, bounded destination searches, and simulation-only test optimization. All eight seeds, 9,600 ticks, debug assertions, route tie breaks and drop-site preferences are retained.
