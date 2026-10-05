@@ -734,11 +734,18 @@ impl App {
             let (columns, rows) = kind.size();
             let x = (origin.column as f32 + columns as f32 / 2.0) * terrain::CELL;
             let z = (origin.row as f32 + rows as f32 / 2.0) * terrain::CELL;
-            let center = Vec3::new(x, self.view.heights.at(x, z), z);
+            let heights = &self.view.heights;
+            let center = Vec3::new(x, heights.at(x, z), z);
+            let facing = self
+                .view
+                .snapshot
+                .as_ref()
+                .and_then(|s| s.dock_facing(origin))
+                .unwrap_or_default();
             let (sheet, mut preview) = if self.build == hud::BuildUi::PlacingField {
-                view::field_preview(&self.sheets, &self.view.heights, center)
+                view::field_preview(&self.sheets, heights, center)
             } else {
-                view::building_sprite(&self.sheets, &self.view.heights, kind, center, None, false)
+                view::building_sprite(&self.sheets, heights, kind, center, None, false, facing)
             };
             preview.tint = if ok {
                 [0.75, 1.0, 0.8, 0.48]
