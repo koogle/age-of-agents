@@ -1,9 +1,9 @@
 # Current handoff: authorized fix merges (2026-10-05)
 
-- User authorized merging the open fixes. Integrating movement PR #91, selection PR #87 and field replenishment PR #88 with current continuous-archipelago master; refactor #72 stays open.
-- Home-dock fix #86 is already adapted and included by merged #90: saved home identity, original-dock preference, continuous return and atomic blocked-berth rejection. Verify its current regressions and close the superseded teleport-based PR.
+- User authorized merging the open fixes. Movement PR #91 merged; selection PR #87 integrated and ready for the authorized merge; field replenishment PR #88 integration is under verification; refactor #72 stays open.
+- Home-dock fix #86 is already adapted and included by merged #90: saved home identity, original-dock preference, continuous return and atomic blocked-berth rejection. Current original-dock and blocked-home regressions pass; superseded teleport-based PR #86 is closed.
 - Selection integration preserves runtime minimap/world dimensions, full gait cycles and arrival-gated work poses. Control/Command adds; Shift-drag replaces and empty replacement areas clear. Documentation conflicts retain the current behavior of both changes. Rebuild JS/WASM from combined source.
-- Integration verification/browser replay in progress; logs and artifacts under `/workspace/scratch/merge-fixes`. Direct Modal credentials are unavailable; authorized master merges trigger production checks and deployment.
+- Selection integration verification passes all 73 client tests, formatting, strict native/WASM lint and rebuilt JS/WASM. Control and Mac Command browser replacement/addition/empty-area replay passes without page errors. Combined simulation and field-browser verification are in progress; logs and artifacts under `/workspace/scratch/merge-fixes`. Direct Modal credentials are unavailable; authorized master merges trigger production checks and deployment.
 
 # Previous handoff: movement presentation fixes (2026-10-05)
 
