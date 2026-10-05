@@ -12,6 +12,8 @@ use crate::gpu::{
 use crate::hud::Quad;
 use crate::terrain::{self, GroundVertex};
 
+mod map;
+
 const GROUND_SIZE: u32 = 512;
 
 #[repr(C)]
@@ -97,6 +99,15 @@ pub struct Renderer {
     globals: wgpu::Buffer,
     globals_group: wgpu::BindGroup,
     cells: wgpu::Texture,
+    globals_layout: wgpu::BindGroupLayout,
+    terrain_layout: wgpu::BindGroupLayout,
+    hud_layout: wgpu::BindGroupLayout,
+    linear: wgpu::Sampler,
+    repeat: wgpu::Sampler,
+    sprite_sampler: wgpu::Sampler,
+    ground_layers: wgpu::Texture,
+    atlas: wgpu::Texture,
+    pub ground_bounds: [f32; 5],
     ground_index: wgpu::Texture,
     terrain_pipeline: wgpu::RenderPipeline,
     terrain_group: wgpu::BindGroup,
@@ -137,11 +148,13 @@ impl Renderer {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        let cells = data_texture(device, wgpu::TextureFormat::Rgba8Unorm, "cells");
+        let cells = data_texture(device, wgpu::TextureFormat::Rgba8Unorm, "cells", 120, 80);
         let ground_index = data_texture(
             device,
             wgpu::TextureFormat::Rg8Unorm,
             "ground index and building plots",
+            120,
+            80,
         );
         let linear = device.create_sampler(&wgpu::SamplerDescriptor {
             mag_filter: wgpu::FilterMode::Linear,
@@ -614,6 +627,15 @@ impl Renderer {
             gpu.config.height,
         );
         Self {
+            globals_layout,
+            terrain_layout,
+            hud_layout,
+            linear,
+            repeat,
+            sprite_sampler,
+            ground_layers,
+            atlas,
+            ground_bounds: [0.0; 5],
             globals,
             globals_group,
             cells,
@@ -705,36 +727,6 @@ impl Renderer {
             width.max(1),
             height.max(1),
         );
-    }
-
-    /// Per-cell fog-of-war colour/visibility (RGBA) and painted ground layer (255 = unknown).
-    /// Re-shapes the ground once exploration reveals more of the island.
-    pub fn update_ground(&self, queue: &wgpu::Queue, heights: &terrain::Heights) {
-        let mesh = terrain::ground_mesh(heights);
-        queue.write_buffer(&self.ground.0, 0, bytemuck::cast_slice(&mesh.vertices));
-    }
-
-    pub fn update_cells(&self, queue: &wgpu::Queue, rgba: &[u8], layers: &[u8]) {
-        let (width, height) = (aoa_game::WORLD_COLUMNS as u32, aoa_game::WORLD_ROWS as u32);
-        let size = wgpu::Extent3d {
-            width,
-            height,
-            depth_or_array_layers: 1,
-        };
-        let write = |texture: &wgpu::Texture, data: &[u8], bytes: u32| {
-            queue.write_texture(
-                texture.as_image_copy(),
-                data,
-                wgpu::TexelCopyBufferLayout {
-                    offset: 0,
-                    bytes_per_row: Some(width * bytes),
-                    rows_per_image: Some(height),
-                },
-                size,
-            );
-        };
-        write(&self.cells, rgba, 4);
-        write(&self.ground_index, layers, 2);
     }
 
     /// Draws one frame. `sprites` holds (sheet index, sprite) pairs.
