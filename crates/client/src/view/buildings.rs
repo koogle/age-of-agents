@@ -1,5 +1,5 @@
 //! Structural base corners, rather than image bounds, determine building geometry.
-use aoa_game::BuildingKind;
+use aoa_game::{BuildingKind, DockFacing};
 use glam::{Mat2, Vec2, Vec3};
 
 use super::{SHEET_BUILDINGS, SHEET_TOWN_CENTER, Sheets, ground, town_center_frame, uv};
@@ -24,6 +24,7 @@ fn frame(
     kind: BuildingKind,
     construction: Option<f64>,
     working: bool,
+    facing: DockFacing,
 ) -> (usize, [f32; 4], [f32; 2], [f32; 2], Corners) {
     if kind == BuildingKind::TownCenter {
         let tc = &sheets.town_center;
@@ -40,7 +41,16 @@ fn frame(
         BuildingKind::House => (SHEET_BUILDINGS, &sheets.buildings, "house"),
         BuildingKind::Granary => (SHEET_BUILDINGS, &sheets.buildings, "granary"),
         BuildingKind::Watchtower => (SHEET_BUILDINGS, &sheets.buildings, "watchtower"),
-        BuildingKind::Dock => (SHEET_BUILDINGS, &sheets.buildings, "dock"),
+        BuildingKind::Dock => (
+            SHEET_BUILDINGS,
+            &sheets.buildings,
+            match facing {
+                DockFacing::South => "dock",
+                DockFacing::East => "dock_east",
+                DockFacing::North => "dock_north",
+                DockFacing::West => "dock_west",
+            },
+        ),
         _ => sheets.catalog.building(kind),
     };
     let stage = construction.map_or(3, |work| {
@@ -62,8 +72,9 @@ pub(crate) fn sprite(
     center: Vec3,
     construction: Option<f64>,
     working: bool,
+    facing: DockFacing,
 ) -> (usize, Sprite) {
-    let (sheet, rect, atlas, cell, corners) = frame(sheets, kind, construction, working);
+    let (sheet, rect, atlas, cell, corners) = frame(sheets, kind, construction, working, facing);
     let (columns, rows) = kind.size();
     let (width, depth) = (columns as f32 * CELL, rows as f32 * CELL);
     // Initial construction plots fill the claim, independently of the smaller
@@ -176,7 +187,15 @@ mod tests {
         let (right, up) = rig.basis();
         let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
         let ground_inverse = Mat2::from_cols(project(Vec3::X), project(Vec3::Z)).inverse();
-        for kind in aoa_game::BUILDABLE {
+        let views = aoa_game::BUILDABLE
+            .into_iter()
+            .map(|kind| (kind, DockFacing::South))
+            .chain(
+                [DockFacing::East, DockFacing::North, DockFacing::West]
+                    .into_iter()
+                    .map(|facing| (BuildingKind::Dock, facing)),
+            );
+        for (kind, facing) in views {
             let (columns, rows) = kind.size();
             let extent = Vec2::new(columns as f32, rows as f32) * CELL;
             heights.set_plots(vec![[10.0, 12.0, extent.x, extent.y]], false);
@@ -188,8 +207,8 @@ mod tests {
                 (None, false),
                 (None, true),
             ] {
-                let art = sprite(&sheets, &heights, kind, center, work, working).1;
-                let (_, _, _, cell, corners) = frame(&sheets, kind, work, working);
+                let art = sprite(&sheets, &heights, kind, center, work, working, facing).1;
+                let (_, _, _, cell, corners) = frame(&sheets, kind, work, working, facing);
                 assert!(
                     (art.size[0] / cell[0] - art.size[1] / cell[1]).abs() < 1e-6,
                     "{kind:?} must use the same scale on both image axes"
@@ -207,6 +226,40 @@ mod tests {
                         "{kind:?} {work:?}: base corner {ground_offset:?} outside plot {extent:?}"
                     );
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn dock_facings_have_distinct_registered_art_at_every_stage() {
+        let sheets = sheets();
+        let heights = Heights::unknown();
+        let center = ground(&heights, 12.0, 12.0);
+        for work in [Some(0.0), Some(3.0), Some(6.0), None] {
+            let mut rects = Vec::new();
+            for facing in [
+                DockFacing::South,
+                DockFacing::East,
+                DockFacing::North,
+                DockFacing::West,
+            ] {
+                let (sheet, art) = sprite(
+                    &sheets,
+                    &heights,
+                    BuildingKind::Dock,
+                    center,
+                    work,
+                    false,
+                    facing,
+                );
+                assert_eq!(sheet, SHEET_BUILDINGS);
+                assert!(art.size.into_iter().all(|v| v.is_finite() && v > 0.0));
+                assert_eq!(art.footprint, [2.0, 2.0]);
+                assert!(
+                    !rects.contains(&art.uv),
+                    "each facing needs its own authored view"
+                );
+                rects.push(art.uv);
             }
         }
     }
@@ -284,8 +337,18 @@ mod tests {
         let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
         let inverse = Mat2::from_cols(project(Vec3::X), project(Vec3::Z)).inverse();
         for (work, expected_fill) in [(Some(0.0), 1.0), (None, 0.72)] {
-            let art = sprite(&sheets, &heights, BuildingKind::House, center, work, false).1;
-            let (_, _, _, cell, corners) = frame(&sheets, BuildingKind::House, work, false);
+            let art = sprite(
+                &sheets,
+                &heights,
+                BuildingKind::House,
+                center,
+                work,
+                false,
+                DockFacing::South,
+            )
+            .1;
+            let (_, _, _, cell, corners) =
+                frame(&sheets, BuildingKind::House, work, false, DockFacing::South);
             let max_extent = corners
                 .into_iter()
                 .map(|[x, y]| {
@@ -310,7 +373,18 @@ mod tests {
         let before = rig.basis();
         let sprites: Vec<_> = aoa_game::BUILDABLE
             .iter()
-            .map(|kind| sprite(&sheets, &heights, *kind, center, None, false).1)
+            .map(|kind| {
+                sprite(
+                    &sheets,
+                    &heights,
+                    *kind,
+                    center,
+                    None,
+                    false,
+                    DockFacing::South,
+                )
+                .1
+            })
             .collect();
         for factor in [0.5, 2.0, 4.0] {
             rig.zoom(factor);
@@ -319,7 +393,16 @@ mod tests {
             assert!(before.0.abs_diff_eq(after.0, 1e-6));
             assert!(before.1.abs_diff_eq(after.1, 1e-6));
             for (kind, initial) in aoa_game::BUILDABLE.iter().zip(&sprites) {
-                let actual = sprite(&sheets, &heights, *kind, center, None, false).1;
+                let actual = sprite(
+                    &sheets,
+                    &heights,
+                    *kind,
+                    center,
+                    None,
+                    false,
+                    DockFacing::South,
+                )
+                .1;
                 assert_eq!(actual.anchor, initial.anchor);
                 assert_eq!(actual.size, initial.size);
                 assert_eq!(actual.uv, initial.uv);
