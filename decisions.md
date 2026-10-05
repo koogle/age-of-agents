@@ -39,7 +39,7 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 - **Project documentation (2026-10-05):** Maintain individual system guides, procedures, research and reusable learnings in `docs/knowledge/`, routed by its index and consulted before changes. Update the relevant guide throughout work, especially after developer steering, while keeping decisions concise and task status in the handoff ([knowledge index](docs/knowledge/INDEX.md)).
 
 - **Selection modifiers:** Shift-drag replaces the unit selection with the enclosed units. Control-click/drag adds units on Windows/Linux, Command does so on Mac, and adding already selected units keeps them selected.
-- **Movement presentation:** Local interpolation follows the simulation accumulator; remote playback retains unplayed samples, buffers two ticks after starvation, and catches up at at most 1.1× without jumping the clock. Villagers use every gait pose and animate work at their authoritative interaction cell, with no visual movement toward the target.
+- **Movement presentation:** Local interpolation follows the simulation accumulator; remote playback retains unplayed samples, buffers two ticks after starvation, and catches up at at most 1.1× for short delays. Remote lag above eight ticks triggers an explicit resynchronization to the newest snapshot without animating the correction; a long outage cannot preserve both every historical frame and current responsiveness. Villagers use every gait pose and animate work at their authoritative interaction cell, with no visual movement toward the target.
 
 ## Superseded designs
 
