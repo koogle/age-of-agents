@@ -45,7 +45,7 @@ See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [dec
 
 Hosted games use the server's authoritative world. Native games and browser `?local` mode run the same simulation in-process. Game rules live in `crates/game`; the client handles presentation. `GameWorld::validate` checks occupancy and state invariants.
 
-Local unit rendering follows the fixed-step simulation accumulator. Hosted unit rendering buffers two ticks and preserves unplayed movement through delayed updates; prolonged gaps hold position, then recover at a bounded playback rate. Walking and carrying use all authored gait poses, and facing follows movement with angular hysteresis. Work animations begin only after the displayed villager reaches its authoritative neighboring work cell, without a cosmetic positional offset.
+Local unit rendering follows the fixed-step simulation accumulator. Hosted unit rendering buffers two ticks and preserves unplayed movement through delayed updates; short gaps hold position, then recover at a bounded playback rate. When remote playback falls more than 800 ms behind, it resynchronizes to the newest snapshot once and rebuilds the two-tick buffer instead of replaying stale movement. This explicit outage correction does not advance the walking animation. Walking and carrying use all authored gait poses, and facing follows movement with angular hysteresis. Work animations begin only after the displayed villager reaches its authoritative neighboring work cell, without a cosmetic positional offset.
 
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 
@@ -104,3 +104,5 @@ For client changes, rebuild the web client and test the affected flow on desktop
 Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 282 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
 
 Open a PR against `master`. Merges run quality checks, deploy to Modal, and verify production. Manual deployment to the production account: `MODAL_PROFILE=koogle-frick python3 scripts/modal_manage.py deploy`.
+
+Movement regression scenario: `cargo test -p aoa-client seeded_npc_routes -- --nocapture`. See [the frame-validation scenarios](docs/MOVEMENT_VERIFICATION.md) for coverage and recovery expectations.
