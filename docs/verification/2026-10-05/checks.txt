@@ -1,0 +1,17 @@
+Compact HUD verification — 2026-10-05
+Base: master 61fc87c
+cargo test --workspace --locked: 185 passed (13 server, 53 client, 119 game)
+cargo test -p aoa-client hud::layout_tests --locked: 2 passed after final queue sizing
+cargo fmt --all -- --check: pass
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings: pass
+cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnings: pass
+scripts/build_web.sh: pass
+node --check web/pkg/aoa_client.js: pass
+git diff --check: pass
+WebGL WASM SHA-256: 3bc607842b737221f005afc79f40add52c5d8932239678c707ce85a113b37260
+Direct Modal deployment: blocked, Token missing
+Browser: Chromium /usr/bin/chromium, DPR2, touch emulation, software WebGL
+See docs/COMPACT_HUD_REVIEW.md for browser scope and limitations.
+Authoritative browser replay: 0×/1×/2× pass; six orders fill queue; reload paused world; cancellation/refund pass; menus/House placement pass; 320px phone/landscape/desktop captures; no page errors.
+Pause-row follow-up: relocated pause shares 1×/2× baseline; DPR-2 actual touch pauses local game; no browser page errors. Current image: compact-time-row.png.
+Merge integration with 9393efe: 192 workspace tests pass; formatting/native lint/WASM lint/build pass; fresh DPR2 pause smoke has no page errors.
