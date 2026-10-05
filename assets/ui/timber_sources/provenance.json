@@ -1,0 +1,58 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a compact stack of three freshly sawn rectangular timber beams with flat square-cut ends and long straight edges, slightly staggered so all three beams are visible. Clearly processed construction lumber, no round logs, no bark, no twine, no tools. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre wood, Moebius and Studio Ghibli style, three-quarter viewpoint from above. Simple refined silhouette readable at 24 pixels. One isolated object centered on pure white, no cast shadow, no ground, no frame, no text.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad22f8/rFP63zVC7ELlpHpmmiJUP_WvQ3ohBA.png",
+        "content_type": "image/png",
+        "file_name": "rFP63zVC7ELlpHpmmiJUP_WvQ3ohBA.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "generation": {
+    "t": 1791188416.1542451,
+    "endpoint": "fal-ai/nano-banana/edit",
+    "tag": "icon:resource_timber",
+    "est_usd": 0.0398,
+    "request_id": "01a10b26-1859-7960-8d2b-1f86ea4a46c4",
+    "seconds": 7.7
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad22fa/cmyzTC0s4nNI5Ww8fDCXZ_ASTCjHz4.png",
+        "content_type": "image/png",
+        "file_name": "cmyzTC0s4nNI5Ww8fDCXZ_ASTCjHz4.png",
+        "file_size": null,
+        "width": 1024,
+        "height": 1024
+      },
+      "mask_image": null
+    },
+    "request": {
+      "t": 1791188429.267797,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:resource_timber.png",
+      "est_usd": 0.005,
+      "request_id": "01a10b26-5ff9-75c0-9019-6c2a1f3a90dd",
+      "seconds": 2.5
+    }
+  },
+  "processing": {
+    "script": "scripts/normalize_icons.py",
+    "input": "assets/ui/timber_sources/cutout.png",
+    "output": "assets/ui/icons/resource_timber.png",
+    "size": [
+      128,
+      128
+    ],
+    "notes": "Normalized directly from the original 1024px FAL cutout; no intermediate upscaling. FAL-only generation requested."
+  }
+}

@@ -13,6 +13,8 @@ use crate::assets::{Assets, Rgba};
 
 mod build_menu;
 mod layout;
+#[cfg(test)]
+mod layout_tests;
 pub use build_menu::BuildingGroup;
 mod selection;
 mod ships;
@@ -24,8 +26,9 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 18] = [
+const ICONS: [&str; 19] = [
     "resource_wood",
+    "resource_timber",
     "resource_food",
     "resource_stone",
     "resource_gold",
@@ -381,7 +384,7 @@ fn resource_icon(kind: ResourceKind) -> &'static str {
         ResourceKind::Clay => "resource_clay",
         ResourceKind::Fiber => "resource_fiber",
         ResourceKind::Coal | ResourceKind::Steel => "resource_iron",
-        ResourceKind::Timber => "resource_wood",
+        ResourceKind::Timber => "resource_timber",
         ResourceKind::Bricks => "resource_clay",
         ResourceKind::Cloth => "resource_fiber",
         ResourceKind::Rations => "resource_food",
@@ -589,9 +592,16 @@ impl Hud {
         at: Vec2,
         pixels_per_world: f32,
         alpha: f32,
+        screen_width: f32,
     ) {
         let size = 34.0 / 110.0 * pixels_per_world;
         let radius = 2.5 / 110.0 * pixels_per_world;
+        let available = (screen_width - 4.0 * radius).max(1.0);
+        let width = Self::glyph_width(&atlas.gain_glyphs, text, size).max(1.0);
+        let size = size * (available / width).min(1.0);
+        let half = (Self::glyph_width(&atlas.gain_glyphs, text, size) * 0.5 + 2.0 * radius)
+            .min(screen_width * 0.5);
+        let at = Vec2::new(at.x.clamp(half, screen_width - half), at.y);
         for step in 0..8 {
             let angle = step as f32 * std::f32::consts::TAU / 8.0;
             let edge = at + Vec2::new(angle.cos(), angle.sin()) * radius;
