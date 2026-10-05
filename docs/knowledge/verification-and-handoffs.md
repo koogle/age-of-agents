@@ -67,3 +67,15 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Menu icon verification
+
+`python docs/verification/menu_icons.py --name stop --output /tmp/menu-stop`
+serves a controlled current-schema snapshot on loopback :8011, loads the current
+WASM and assets, captures desktop/DPR-2 phone views and checks Stop wire dispatch.
+It never touches hosted saves. This verifies presentation and pointer/touch
+dispatch, not domain acceptance. Use native domain tests for authoritative behavior.
+In this cloud executor, source `/workspace/.cloud-setup/activate.sh` when Rust is
+not on PATH; check/install the matching WASM target and wasm-bindgen version.
+Software WebGL can take roughly a minute for initial shaders; a real-time snapshot
+feed avoids clock instrumentation blocking first-frame initialization.
