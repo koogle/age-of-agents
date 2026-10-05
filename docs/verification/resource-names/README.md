@@ -1,7 +1,7 @@
 # Resource names on demand
 
 2026-10-05, `fix/resource-icon-tooltips`. The top resource bar displays icons and
-quantities. Hovering or tapping an icon/count reveals its name in the existing
+quantities. Resource hints start with a capital letter (for example, “Wood”). Hovering or tapping an icon/count reveals its name in the existing
 explanation pill; the removed label space reduces each resource row from 82 to
 66 logical pixels. Existing action/error messages retain priority.
 

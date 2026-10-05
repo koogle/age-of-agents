@@ -75,7 +75,7 @@ Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonov
 
 ## Resource names on demand
 
-Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
+Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
 
 Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
 
