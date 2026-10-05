@@ -201,36 +201,67 @@ impl GameWorld {
     }
     /// A dock bridges its footprint; elsewhere a ship can land directly at shore.
     pub(super) fn landing_cells(&self, ship: usize) -> Vec<CellCoordinate> {
-        let mut cells: BTreeSet<_> = interaction_cells(self.ships[ship].footprint()).collect();
-        if let Some(dock) = self.dock_for_ship(ship) {
+        self.landing_cells_at(self.ships[ship].cell)
+    }
+    fn landing_cells_at(&self, cell: CellCoordinate) -> Vec<CellCoordinate> {
+        let mut cells: BTreeSet<_> = interaction_cells(Footprint {
+            origin: cell,
+            columns: 1,
+            rows: 1,
+        })
+        .collect();
+        if let Some(dock) = self.buildings.iter().find(|b| {
+            b.kind == BuildingKind::Dock
+                && b.is_complete()
+                && b.footprint().cells().any(|land| {
+                    land.column.abs_diff(cell.column) + land.row.abs_diff(cell.row) == 1
+                })
+        }) {
             cells.extend(interaction_cells(dock.footprint()));
         }
         cells.into_iter().collect()
     }
     pub(super) fn boarding_goal(&self, unit: usize, id: &str) -> Option<CellCoordinate> {
         let ship = self.ship_index(id).ok()?;
-        if !self.ships[ship].stopped() {
-            return None;
-        }
+        let berth = self.ships[ship]
+            .destination
+            .or(self.ships[ship].step.map(|step| step.to))
+            .unwrap_or(self.ships[ship].cell);
+        self.boarding_goal_at(unit, berth)
+    }
+    fn boarding_goal_at(&self, unit: usize, berth: CellCoordinate) -> Option<CellCoordinate> {
         let occupancy = self.occupancy();
         let from = self.units[unit]
             .step
             .map_or(self.units[unit].cell, |step| step.to);
-        let paths = PathTree::search(self.columns(), self.rows(), from, |c| {
-            !occupancy.is_static(c)
-        });
-        paths.nearest(
-            self.landing_cells(ship)
+        let goals = self.landing_cells_at(berth);
+        let free: Vec<_> = goals
+            .iter()
+            .copied()
+            .filter(|&c| occupancy.is_free_for(c, Some(unit)))
+            .collect();
+        let route = |goals: &[CellCoordinate]| {
+            PathTree::route_to_nearest(self.columns(), self.rows(), from, goals, |c| {
+                !occupancy.is_static(c)
+            })
+        };
+        // A full shoreline is temporary: let queued passengers wait behind
+        // one another instead of losing their seat while the ship approaches.
+        let (_, path) = route(&free).or_else(|| {
+            let walkable: Vec<_> = goals
                 .into_iter()
-                .filter(|&c| occupancy.is_free_for(c, Some(unit))),
-        )
+                .filter(|&c| !occupancy.is_static(c))
+                .collect();
+            route(&walkable)
+        })?;
+        Some(path.last().copied().unwrap_or(from))
     }
     pub(super) fn board(&mut self, unit_id: &str, ship_id: &str) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
-        if !self.ships[ship].stopped() {
-            return Err(CommandError::ShipMustBeStopped);
-        }
         let unit = self.ordered_unit(unit_id)?;
+        if matches!(&self.units[unit].action, UnitAction::Board { ship_id: id } if id == ship_id) {
+            return Ok(());
+        }
         let waiting = self
             .units
             .iter()
@@ -239,13 +270,61 @@ impl GameWorld {
         if self.ships[ship].passengers.len() + waiting >= TRANSPORT_PASSENGERS {
             return Err(CommandError::ShipFull);
         }
-        if self.boarding_goal(unit, ship_id).is_none() {
-            return Err(CommandError::ShoreBlocked);
-        }
+        // Additional passengers join the existing meeting point; never move it
+        // out from under units already walking to this ship.
+        let berth = if waiting > 0 {
+            self.boarding_goal(unit, ship_id)
+                .ok_or(CommandError::ShoreBlocked)?;
+            self.ships[ship]
+                .destination
+                .or(self.ships[ship].step.map(|step| step.to))
+                .unwrap_or(self.ships[ship].cell)
+        } else if self.ships[ship].stopped() && self.boarding_goal(unit, ship_id).is_some() {
+            self.ships[ship].cell
+        } else {
+            self.pickup_berth(unit, ship)
+                .ok_or(CommandError::ShoreBlocked)?
+        };
+        let from = self.ships[ship]
+            .step
+            .map_or(self.ships[ship].cell, |step| step.to);
+        self.ships[ship].destination = (from != berth).then_some(berth);
         self.units[unit].action = UnitAction::Board {
             ship_id: ship_id.into(),
         };
         Ok(())
+    }
+    /// Compare reachable land and water routes once when pickup is ordered.
+    /// Cell order breaks equal-cost ties, keeping command replay deterministic.
+    fn pickup_berth(&self, unit: usize, ship: usize) -> Option<CellCoordinate> {
+        let occupancy = self.occupancy();
+        let from = self.units[unit]
+            .step
+            .map_or(self.units[unit].cell, |step| step.to);
+        let land = PathTree::search(self.columns(), self.rows(), from, |c| {
+            !occupancy.is_static(c)
+        });
+        let from = self.ships[ship]
+            .step
+            .map_or(self.ships[ship].cell, |step| step.to);
+        let sea = self.sea_paths(ship, from);
+        self.terrain
+            .iter()
+            .filter_map(|tile| {
+                let berth = CellCoordinate::new(tile.column, tile.row);
+                if !self.water_free(berth, Some(ship)) {
+                    return None;
+                }
+                let sea_cost = sea.cost(berth)?;
+                let goal = land.nearest(
+                    self.landing_cells_at(berth)
+                        .into_iter()
+                        .filter(|&c| occupancy.is_free_for(c, Some(unit))),
+                )?;
+                Some((sea_cost + land.cost(goal)?, berth))
+            })
+            .min()
+            .map(|(_, berth)| berth)
     }
     pub(super) fn tick_board(&mut self, unit: usize, id: &str, dt: f64) {
         let Some(goal) = self.boarding_goal(unit, id) else {
@@ -255,6 +334,9 @@ impl GameWorld {
         match self.travel(unit, Goal::Cell(goal), dt) {
             Travel::Arrived { .. } => {
                 let ship = self.ship_index(id).unwrap();
+                if !self.ships[ship].stopped() {
+                    return;
+                }
                 let mut passenger = self.units.remove(unit);
                 passenger.action = UnitAction::Idle;
                 passenger.step = None;
@@ -362,9 +444,9 @@ impl GameWorld {
         }
         for unit in &self.units {
             if let UnitAction::Board { ship_id } = &unit.action
-                && !self.ships.iter().any(|s| &s.id == ship_id && s.stopped())
+                && !self.ships.iter().any(|s| &s.id == ship_id)
             {
-                return Err("boarding a missing or moving ship".into());
+                return Err("boarding a missing ship".into());
             }
         }
         Ok(())
