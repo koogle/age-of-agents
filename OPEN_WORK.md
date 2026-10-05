@@ -1,6 +1,7 @@
 # Current work: dangerous wildlife (2026-10-05)
 
 - Review: [PR #98](https://github.com/koogle/age-of-agents/pull/98), **Add territorial wolves and bears**. Wildlife implementation `2d275e5`, followed by damage-feedback cleanup; not merged or deployed.
+- Latest population tuning: one wolf on newly generated first islands; two wolves and one bear on the second and later islands. Existing saved animals are preserved. Verified across three seeds through three islands; all 237 tests, native/WASM lint, regenerated WASM and fresh desktop browser combat pass.
 - User correction: wolves and other dangerous animals, instead of timed events. Drought changes in PR #98 have been reverted on its branch; replacing them with wolves and bears. See [wildlife](docs/knowledge/wildlife.md).
 - Wildlife implemented with generated/refined wolf and bear art. All 237 Rust tests pass (one manual benchmark ignored), native/WASM strict lint and all 286 sprite-frame audits pass. Real desktop mouse and DPR2-phone pinch/touch hunting verify attack orders, two-way damage and bear defeat without page errors; final frame-anchor screenshots pass too. See [review/evidence](docs/verification/2026-10-05-wildlife/REVIEW.md). Store version 13 resets incompatible saves under existing policy. Not merged or deployed.
 - Direct release remains blocked: Modal 1.5.3 status again reports "Could not connect to the Modal server" despite ready runtime bindings. No production state was changed.

@@ -57,3 +57,24 @@ are retained in [wildlife sources](../../../assets/sprites/wildlife_sources/READ
 Direct release remains blocked: Modal 1.5.3 status again returned "Could not
 connect to the Modal server" with configured credential bindings ready. No
 production state was changed.
+
+## Population tuning (2026-10-05)
+
+User direction: one wild animal on the first island and more on the second.
+Generation now chooses one wolf for island zero and two wolves plus one bear
+for later islands. Existing placement, fog, combat and persistence rules remain
+unchanged. No schema bump or rewrite of saved animals.
+
+Thermonuclear review: one local roster branch in the authoritative domain; no
+new abstractions, dependencies, commands, client behavior or save fields. Focused
+checks exercise three seeds through the first three islands and preserve earlier
+animals during discovery. The browser driver also checks the natural starter
+roster in the saved world before constructing its combat fixture.
+
+Population follow-up verification passed: all 237 Rust tests (one manual benchmark
+ignored), formatting, strict native/WASM lint, rebuilt server/WASM, JS syntax and
+whitespace checks. Fresh desktop Chromium confirms the saved natural starter
+roster is one wolf, then exercises hunting, two-way damage and defeat without
+page errors. Logs and screenshots: `/tmp/aoa-population-browser`; phone interaction
+was previously verified above and is unchanged by this generation-only adjustment.
+The earlier Modal connectivity blocker remains; this follow-up is not deployed.

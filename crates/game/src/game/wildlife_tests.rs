@@ -30,12 +30,12 @@ fn attack(world: &mut GameWorld) {
 }
 
 #[test]
-fn wolves_and_bears_spawn_deterministically_away_from_starter_units() {
+fn one_wolf_spawns_deterministically_away_from_starter_units() {
     for seed in [1, 123, DEFAULT_SEED] {
         let world = GameWorld::generate(seed);
         assert_eq!(world.animals, GameWorld::generate(seed).animals);
-        assert_eq!(world.animals.len(), 3);
-        assert!(world.animals.iter().any(|a| a.kind == AnimalKind::Bear));
+        assert_eq!(world.animals.len(), 1);
+        assert_eq!(world.animals[0].kind, AnimalKind::Wolf);
         for a in &world.animals {
             assert!(
                 world
@@ -152,12 +152,20 @@ fn animals_pursue_locally_and_retreat_to_their_territory() {
 
 #[test]
 fn discovery_adds_wildlife_without_replacing_existing_animals() {
-    let mut world = GameWorld::generate(123);
-    let old = world.animals.clone();
-    world.discover_island();
-    assert_eq!(&world.animals[..old.len()], old.as_slice());
-    assert_eq!(world.animals.len(), 6);
-    world.validate().unwrap();
+    for seed in [1, 123, DEFAULT_SEED] {
+        let mut world = GameWorld::generate(seed);
+        for _ in 0..2 {
+            let old = world.animals.clone();
+            world.discover_island();
+            assert_eq!(&world.animals[..old.len()], old.as_slice());
+            let added: Vec<_> = world.animals[old.len()..].iter().map(|a| a.kind).collect();
+            assert_eq!(
+                added,
+                [AnimalKind::Wolf, AnimalKind::Wolf, AnimalKind::Bear]
+            );
+            world.validate().unwrap();
+        }
+    }
 }
 
 #[test]
