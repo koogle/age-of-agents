@@ -6,6 +6,7 @@ impl Hud {
     pub fn layout(&mut self, atlas: &Atlas, model: &Model, width: f32, height: f32, scale: f32) {
         self.quads.clear();
         self.regions.clear();
+        self.cargo_strip = None;
         let Some(snapshot) = model.snapshot else {
             return;
         };
@@ -452,7 +453,7 @@ impl Hud {
             info_width,
             info_height,
         ];
-        self.cargo_panel(atlas, model, width, info[1] - 8.0 * s, s);
+        self.cargo_panel(atlas, model, width, info[1] - 8.0 * s, s, narrow);
         self.shape(info, GLASS, 1.0, 26.0 * s);
         let portrait_size = if narrow { 32.0 } else { 40.0 } * s;
         self.sprite(
