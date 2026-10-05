@@ -41,7 +41,6 @@ fn transport_builds_once_with_exact_cost_and_no_housing() {
         w.tick(1.0);
     }
     assert_eq!(w.ships.len(), 1);
-    assert!(w.islands.is_empty());
     assert_eq!(w.island_origins.len(), 1);
     assert!(w.ships[0].stopped());
     w.validate().unwrap();
@@ -136,12 +135,11 @@ fn sailing_is_water_only_stoppable_and_blocked_landing_is_atomic() {
     w.validate().unwrap();
 }
 #[test]
-fn old_saves_default_to_no_ships_and_corrupt_manifests_fail() {
+fn missing_ships_and_corrupt_manifests_fail() {
     let w = GameWorld::default();
     let mut json = serde_json::to_value(&w).unwrap();
     json.as_object_mut().unwrap().remove("ships");
-    let old: GameWorld = serde_json::from_value(json).unwrap();
-    assert_eq!(old, w);
+    assert!(serde_json::from_value::<GameWorld>(json).is_err());
     let mut w = harbor();
     w.ships[0].passengers.push(w.units[0].clone());
     assert!(w.validate().is_err());

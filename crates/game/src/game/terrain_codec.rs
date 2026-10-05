@@ -37,7 +37,6 @@ pub(super) fn quantize(elevation: f32) -> f32 {
 #[derive(Serialize, Deserialize)]
 struct Compact {
     columns: u16,
-    #[serde(default)]
     rows: u16,
     cells: String,
     heights: String,
@@ -88,11 +87,7 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Vec<SnapshotTerrainCell>, D::Error> {
     let compact = Compact::deserialize(deserializer)?;
-    let limit = if compact.rows == 0 {
-        compact.cells.len()
-    } else {
-        usize::from(compact.columns) * usize::from(compact.rows)
-    };
+    let limit = usize::from(compact.columns) * usize::from(compact.rows);
     let cells = unpack(&compact.cells, limit).map_err(D::Error::custom)?;
     let heights = unpack(&compact.heights, limit).map_err(D::Error::custom)?;
     if compact.columns == 0 || cells.len() != limit || heights.len() != limit {
@@ -137,7 +132,7 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
 }
 
 // Long unseen/ocean runs are common between islands. The marker does not occur
-// in either alphabet, so older uncompressed snapshots remain readable.
+// in either alphabet, so literal characters and encoded runs are unambiguous.
 fn pack(input: &str) -> String {
     use std::fmt::Write;
     let mut result = String::new();
