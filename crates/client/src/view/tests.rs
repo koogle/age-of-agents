@@ -15,18 +15,15 @@ fn drawn_direction_flips_only_past_the_margin() {
 }
 
 #[test]
-fn walking_uses_only_two_stride_pictures_in_every_direction() {
+fn walking_uses_every_authored_pose_in_distance_order() {
     let sheet: VillagerSheet =
         serde_json::from_str(include_str!("../../../../assets/sprites/villager.json")).unwrap();
     for activity in ["walk", "carry"] {
         for frames in sheet.animations[activity].values() {
             assert_ne!(frames[0], frames[frames.len() / 2]);
             for step in 0..20 {
-                let distance = (step as f32 + 0.1) * STRIDE_DISTANCE;
-                assert_eq!(
-                    walking_frame(distance, frames.len()),
-                    (step % 2) * (frames.len() / 2)
-                );
+                let distance = (step as f32 + 0.1) * STRIDE_DISTANCE / frames.len() as f32;
+                assert_eq!(walking_frame(distance, frames.len()), step % frames.len());
             }
         }
     }
@@ -42,19 +39,19 @@ fn displayed_movement_starts_walking_immediately_and_stops_without_a_tail() {
         moved.tick = 1;
         moved.units[0].position.y += direction;
         view.sync(moved);
-        view.frame(0.3);
+        view.frame(0.3, Some(1.0));
         let entry = &view.units["villager-1"];
         assert_eq!(entry.velocity.z.signum(), direction as f32);
         assert!(entry.walked > 0.0);
         let walked = entry.walked;
-        view.frame(0.016);
+        view.frame(0.016, None);
         let entry = &view.units["villager-1"];
         assert_eq!(entry.velocity, Vec3::ZERO);
         assert_eq!(entry.walked, walked);
         // Camera motion never advances a unit's gait.
         let mut rig = Rig::new();
         rig.nudge(1.0, 1.0);
-        view.frame(0.1);
+        view.frame(0.1, None);
         assert_eq!(view.units["villager-1"].walked, walked);
     }
 }
@@ -67,17 +64,17 @@ fn villagers_on_a_new_island_follow_its_snapshots() {
         old.tick = tick;
         view.sync(old.clone());
     }
-    view.frame(1.0);
+    view.frame(1.0, None);
     let mut fresh = GameWorld::generate(9).snapshot();
     assert!(view.sync(fresh.clone()));
     for _ in 0..4 {
         fresh.tick += 1;
         fresh.units[0].position.y += 1.0;
         view.sync(fresh.clone());
-        view.frame(0.1);
+        view.frame(0.1, None);
     }
     for _ in 0..20 {
-        view.frame(0.1);
+        view.frame(0.1, None);
     }
     let at = &fresh.units[0].position;
     let at = terrain::world_of(at.x, at.y);
@@ -182,14 +179,14 @@ fn the_presentation_clock_trails_the_newest_tick_and_never_passes_it() {
     for _ in 0..20 {
         world.tick(0.1);
         view.sync(world.snapshot());
-        view.frame(0.1);
+        view.frame(0.1, None);
     }
     let render = view.render_tick.unwrap();
     assert!(render <= view.latest_tick);
     assert!(view.latest_tick - render < PLAYOUT_TICKS + 1.0);
     // A paused simulation stops the clock at the newest tick.
     for _ in 0..50 {
-        view.frame(0.1);
+        view.frame(0.1, None);
     }
     assert_eq!(view.render_tick.unwrap(), view.latest_tick);
 }

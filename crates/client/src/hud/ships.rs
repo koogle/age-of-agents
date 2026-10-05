@@ -25,20 +25,36 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         enabled: ship.stopped() && !ship.passengers.is_empty(),
         action: Action::Disembark,
     }];
-    for id in [
-        snapshot.island_id.checked_sub(1),
-        snapshot.island_id.checked_add(1),
-    ]
-    .into_iter()
-    .flatten()
+    let current = snapshot
+        .island_origins
+        .iter()
+        .enumerate()
+        .min_by_key(|(_, origin)| {
+            let x = i64::from(ship.cell.column)
+                - i64::from(origin.column)
+                - i64::from(aoa_game::WORLD_COLUMNS / 2);
+            let y = i64::from(ship.cell.row)
+                - i64::from(origin.row)
+                - i64::from(aoa_game::WORLD_ROWS / 2);
+            x * x + y * y
+        })
+        .map_or(0, |(id, _)| id as u64);
+    for id in [current.checked_sub(1), Some(current + 1)]
+        .into_iter()
+        .flatten()
     {
+        let frontier = id >= snapshot.island_count as u64;
         commands.push(Command {
             icon: "transport",
-            label: format!("Sail to island {}", id + 1),
-            detail: if id >= snapshot.island_count as u64 {
-                "Discover a new island".into()
+            label: if frontier {
+                "Explore beyond the coast".into()
             } else {
-                "Voyage with passengers · away settlements pause".into()
+                format!("Sail to island {}", id + 1)
+            },
+            detail: if frontier {
+                "Sail to open water to discover the next island".into()
+            } else {
+                "Cross the ocean · all settlements keep working".into()
             },
             enabled: ship.stopped(),
             action: Action::Voyage(id),
@@ -55,16 +71,12 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     }
     Some((
         "transport",
-        format!(
-            "Transport · Island {} / {}",
-            snapshot.island_id + 1,
-            snapshot.island_count
-        ),
+        format!("Transport · {} islands", snapshot.island_count),
         format!(
             "{}/{TRANSPORT_PASSENGERS} passengers · {}",
             ship.passengers.len(),
             if ship.stopped() {
-                "Tap sea or dock"
+                "Tap sea or dock · sail beyond the coast to explore"
             } else {
                 "Sailing"
             }
@@ -92,6 +104,7 @@ mod tests {
             destination: None,
             heading: [1, 0],
             passengers: vec![],
+            home_dock_id: None,
         });
         let commands = |snapshot: &WorldSnapshot| {
             selection(
@@ -112,17 +125,15 @@ mod tests {
         };
         let actions = commands(&snapshot);
         assert_eq!(actions.len(), 2);
+        assert_eq!(actions[1].action, Action::Voyage(1));
         assert_eq!(actions[0].action, Action::Disembark);
         assert!(!actions[0].enabled);
-        assert_eq!(actions[1].action, Action::Voyage(1));
-        assert!(actions[1].enabled);
         snapshot.ships[0]
             .passengers
             .push(snapshot.units[0].unit.clone());
         assert!(commands(&snapshot)[0].enabled);
         snapshot.ships[0].destination = Some(CellCoordinate::new(0, 0));
         assert!(!commands(&snapshot)[0].enabled);
-        assert!(!commands(&snapshot)[1].enabled);
         assert_eq!(commands(&snapshot).last().unwrap().action, Action::Stop);
     }
 }

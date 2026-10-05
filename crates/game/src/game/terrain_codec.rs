@@ -37,6 +37,8 @@ pub(super) fn quantize(elevation: f32) -> f32 {
 #[derive(Serialize, Deserialize)]
 struct Compact {
     columns: u16,
+    #[serde(default)]
+    rows: u16,
     cells: String,
     heights: String,
 }
@@ -45,7 +47,7 @@ pub(super) fn serialize<S: Serializer>(
     terrain: &[SnapshotTerrainCell],
     serializer: S,
 ) -> Result<S::Ok, S::Error> {
-    let cells = terrain
+    let cells: String = terrain
         .iter()
         .map(|cell| match (cell.visibility, cell.biome) {
             (CellVisibility::Unseen, _) | (_, None) => '.',
@@ -64,7 +66,7 @@ pub(super) fn serialize<S: Serializer>(
             }
         })
         .collect();
-    let heights = terrain
+    let heights: String = terrain
         .iter()
         .map(|cell| match cell.elevation {
             None => '.',
@@ -74,9 +76,10 @@ pub(super) fn serialize<S: Serializer>(
         })
         .collect();
     Compact {
-        columns: WORLD_COLUMNS,
-        cells,
-        heights,
+        columns: terrain.iter().take_while(|c| c.row == 0).count() as u16,
+        rows: terrain.last().map_or(0, |c| c.row + 1),
+        cells: pack(&cells),
+        heights: pack(&heights),
     }
     .serialize(serializer)
 }
@@ -85,13 +88,19 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Vec<SnapshotTerrainCell>, D::Error> {
     let compact = Compact::deserialize(deserializer)?;
-    if compact.columns == 0 || compact.cells.len() != compact.heights.len() {
+    let limit = if compact.rows == 0 {
+        compact.cells.len()
+    } else {
+        usize::from(compact.columns) * usize::from(compact.rows)
+    };
+    let cells = unpack(&compact.cells, limit).map_err(D::Error::custom)?;
+    let heights = unpack(&compact.heights, limit).map_err(D::Error::custom)?;
+    if compact.columns == 0 || cells.len() != limit || heights.len() != limit {
         return Err(D::Error::custom("terrain cells and heights disagree"));
     }
-    compact
-        .cells
+    cells
         .bytes()
-        .zip(compact.heights.bytes())
+        .zip(heights.bytes())
         .enumerate()
         .map(|(index, (cell, height))| {
             let (visibility, biome) = match cell {
@@ -125,4 +134,72 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
             })
         })
         .collect()
+}
+
+// Long unseen/ocean runs are common between islands. The marker does not occur
+// in either alphabet, so older uncompressed snapshots remain readable.
+fn pack(input: &str) -> String {
+    use std::fmt::Write;
+    let mut result = String::new();
+    let bytes = input.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        let count = bytes[i..].iter().take_while(|&&b| b == bytes[i]).count();
+        if count >= 8 {
+            write!(result, "~{count}:{}", char::from(bytes[i])).unwrap();
+        } else {
+            result.push_str(&input[i..i + count]);
+        }
+        i += count;
+    }
+    result
+}
+
+fn unpack(input: &str, limit: usize) -> Result<String, &'static str> {
+    if !input.is_ascii() {
+        return Err("non-ASCII terrain");
+    }
+    let mut result = String::new();
+    let mut rest = input;
+    while !rest.is_empty() {
+        let (count, value, used) = if let Some(run) = rest.strip_prefix('~') {
+            let (count, tail) = run.split_once(':').ok_or("invalid terrain run")?;
+            let length = count
+                .parse::<usize>()
+                .map_err(|_| "invalid terrain run length")?;
+            if length == 0 || tail.is_empty() {
+                return Err("empty terrain run");
+            }
+            (length, tail.as_bytes()[0], count.len() + 3)
+        } else {
+            (1, rest.as_bytes()[0], 1)
+        };
+        if count > limit.saturating_sub(result.len()) {
+            return Err("terrain run exceeds map bounds");
+        }
+        result.extend(std::iter::repeat_n(char::from(value), count));
+        rest = &rest[used..];
+    }
+    Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn runs_preserve_both_alphabets_and_reject_invalid_lengths() {
+        for input in ["..AAaaJL", "................aBc", "1111111111--AZ_...."] {
+            assert_eq!(unpack(&pack(input), input.len()).unwrap(), input);
+        }
+        for input in [
+            "~0:.",
+            "~999999999999999999999:.",
+            "~10:",
+            "~9:.",
+            "~x:a",
+            "é",
+        ] {
+            assert!(unpack(input, 8).is_err(), "{input}");
+        }
+    }
 }
