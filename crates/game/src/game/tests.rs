@@ -203,10 +203,12 @@ fn default_world_is_valid_and_has_a_productive_base() {
 }
 
 #[test]
-fn idle_world_is_invariant_except_tick() {
+fn idle_world_is_invariant_except_clocks() {
     let mut world = fixture::fixture();
     let initial = world.clone();
     world.tick(10.0);
+    assert_eq!(world.environment_seconds, 10.0);
+    world.environment_seconds = 0.0;
     world.tick = 0;
     world.scenario.elapsed_ticks = 0;
     assert_eq!(world, initial);

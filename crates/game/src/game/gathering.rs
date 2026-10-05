@@ -91,6 +91,7 @@ impl GameWorld {
             .map_or(0.0, |cargo| cargo.amount);
         let capacity_left = (VILLAGER_CARRY_CAPACITY - carried).max(0.0);
         let gathered = (GATHER_RATE
+            * self.environment_gather_multiplier(kind)
             * self.gather_multiplier(kind)
             * self.extraction_multiplier(kind, self.resources[resource_index].cell)
             * dt)

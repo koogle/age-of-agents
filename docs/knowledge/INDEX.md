@@ -11,6 +11,7 @@ of current behavior.
 | Discovery, sailing, passengers, expanding maps | [Archipelago and transport](archipelago-and-transport.md) | Server/saves; rendering/input |
 | Gathering, cargo, reassignment, field work | [Tasks and cargo](tasks-and-cargo.md) | Placement/routes; HUD |
 | Foundations, fields, occupancy, reachability | [Placement and routes](placement-and-routes.md) | Tasks/cargo; rendering/input |
+| Drought, calamity timing, environmental forecasts | [Environmental dangers](environmental-dangers.md) | Tasks/cargo; HUD; server/saves |
 | Production, research, refunds, housing, unlocks | [Economy and queues](economy-and-queues.md) | Server/saves; HUD |
 | Camera, terrain, picking, selection, minimap | [Rendering and input](rendering-and-input.md) | HUD; archipelago |
 | Frozen worlds, stuck workers, delayed input | [Runtime debugging](runtime-debugging.md) | Server/saves; affected domain guide |
