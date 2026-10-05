@@ -166,6 +166,16 @@ impl GameWorld {
 
     /// Moves on to the next node of the same kind near an exhausted one, or idles.
     fn continue_or_idle(&mut self, unit_index: usize, resource_id: &str) {
+        // A paid replenishment is still the same gathering assignment. Keep
+        // it while another worker prepares the field, including after delivery.
+        if self
+            .resources
+            .iter()
+            .any(|r| r.id == resource_id && r.field.as_ref().is_some_and(|f| f.work.is_some()))
+        {
+            self.set_gather_phase(unit_index, resource_id.into(), GatherPhase::ToResource);
+            return;
+        }
         match self.next_resource(unit_index, resource_id) {
             Some(next) => self.set_gather_phase(unit_index, next, GatherPhase::ToResource),
             None => self.units[unit_index].action = UnitAction::Idle,

@@ -22,7 +22,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Building orders in fog send the villager to explore first. A foundation is created and paid for only when the whole footprint is currently visible and placement is valid; blocked or unaffordable sites cancel without spending.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
-- Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers use the normal harvest, deposit and resume loop after preparation; field placement preserves walking and delivery routes. Depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
+- Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers use the normal harvest, deposit and resume loop after preparation; field placement preserves walking and delivery routes. Existing harvesters retain their assignment while another worker replenishes the field. Depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Completed technologies stay visible as disabled coins with a bronze laurel seal with a green check; hover or tap explains the researched upgrade. Research cannot be ordered twice.
 - Wood → timber processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries. Existing unrestricted saves retain all five processing chains, including rations.
@@ -44,6 +44,8 @@ See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [dec
 | `web` | Browser bootstrap and generated WebAssembly bindings; served at `/` and `/play`. |
 
 Hosted games use the server's authoritative world. Native games and browser `?local` mode run the same simulation in-process. Game rules live in `crates/game`; the client handles presentation. `GameWorld::validate` checks occupancy and state invariants.
+
+Local unit rendering follows the fixed-step simulation accumulator. Hosted unit rendering buffers two ticks and preserves unplayed movement through delayed updates; prolonged gaps hold position, then recover at a bounded playback rate. Walking and carrying use all authored gait poses, and facing follows movement with angular hysteresis. Work animations begin only after the displayed villager reaches its authoritative neighboring work cell, without a cosmetic positional offset.
 
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 

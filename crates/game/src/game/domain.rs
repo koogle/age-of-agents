@@ -210,6 +210,11 @@ pub struct Unit {
 }
 
 impl Unit {
+    /// Work starts only after the claimed step ends beside the target footprint.
+    pub fn is_at_work_site(&self, footprint: Footprint) -> bool {
+        self.step.is_none() && footprint.is_interaction_cell(self.cell)
+    }
+
     pub fn position(&self) -> Position {
         let from = self.cell.center();
         match self.step {

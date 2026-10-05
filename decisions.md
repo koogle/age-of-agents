@@ -36,3 +36,4 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Minimap orientation:** Project the full map using the fixed world camera’s ground axes; terrain sampling, camera marker and click/touch navigation use the same invertible mapping.
 
 - Island inventories replace the shared resource pool; stopped shore ships contribute their 50-resource holds to local spending and accept villager deposits, with explicit dock-only transfers. Cargo stays aboard on arrival, training/research stay in buildings, and old shared balances migrate to the starter island without duplication.
+- **Movement presentation:** Local interpolation follows the simulation accumulator; remote playback retains unplayed samples, buffers two ticks after starvation, and catches up at at most 1.1× without jumping the clock. Villagers use every gait pose and animate work at their authoritative interaction cell, with no visual movement toward the target.

@@ -145,7 +145,9 @@ pub struct WorldSnapshot {
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
+    /// Usable balances per island, including connected ship holds.
     pub inventories: Vec<Stockpile>,
+    /// Onshore balances only, used by explicit dock transfers.
     pub stored_inventories: Vec<Stockpile>,
     pub ship_connections: Vec<ShipConnection>,
     pub researched_technologies: Vec<TechnologyKind>,
