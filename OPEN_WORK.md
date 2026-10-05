@@ -1,39 +1,51 @@
-# Current handoff: web reconnect recovery (2026-10-05)
+# Current handoff: pause and reconnect integration (2026-10-05)
 
-- Implemented on `work` alongside the pause fix below: first snapshots after reconnect establish current playback position without replaying old movement or activity feedback. Remote delivery is bounded to eight distinct ticks; excess backlog collapses to the newest snapshot. Repeated paused ticks coalesce. Sequence zero is accepted after restart; commands are never replayed.
-- Same-world reconnect preserves selection/camera. Paused long-gap recovery corrects stale position before holding it. All 233 workspace tests pass (one existing manual benchmark ignored), with native/WASM strict lint and rebuilt release WASM passing. Chromium desktop (960×640, DPR1) and emulated phone (390×844, DPR2) pass real socket reconnect to sequence zero, paused-position recovery and a 40-snapshot suspended-render backlog check, with no page errors. No dependency, protocol or save-model changes.
-- Thermonuclear review passed: shared inbox logic is directly tested, ordinary short-delay interpolation is retained, corrections do not advance gait, and no authority or persistence moved into the client. Screenshots/logs are under `/tmp/aoa-reconnect-browser*`.
-- Browser driver: `docs/verification/replay_reconnect.py`; existing presentation fixture updated with current snapshot metadata. See [reconnect recovery](docs/knowledge/runtime-debugging.md#reconnect-recovery). Release remains blocked by the previously observed Modal connection failure; not deployed.
+- Branch `fix/pause-reconnect` integrates master `e7c8cb6`, preserving island-local inventories, ship cargo and water-facing docks. Jakob explicitly requested a PR, validation and merge to master on 2026-10-05.
+- At 0×, the shared domain rejects gameplay orders (including cargo transfers) without changing tasks/resources. Speed, camera and selection controls remain available. NPC movement/work frames freeze and resume with existing tasks intact.
+- Reconnect establishes the newest snapshot without replaying old movement or activity feedback, even while paused. The remote inbox coalesces same-tick updates and bounds pending history to eight distinct ticks. Commands are never replayed; same-world camera and selection survive. Snapshot application lives in `client/src/snapshots.rs` to keep the main client below the 1,000-line limit.
+- Integrated validation: 242 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint, formatting, rebuilt release WASM/server, six verifier tests, all 294 sprite frames, field/transport checks and icon normalization. Client tests/lint were rerun after extracting snapshot application. Final integrated browser checks are in progress.
+- Thermonuclear review passed: one authoritative pause guard, bounded remote delivery, position corrections never advance gait, ordinary short-delay interpolation retained, no new dependencies/protocol/save-model changes. Current store version 12 and cargo/dock behavior are preserved.
+- Reproducible browser driver: `docs/verification/replay_reconnect.py`; its fixture parses in Rust tests and now uses the current island-inventory snapshot schema. Native-window appearance and physical phones remain unverified. Follow [reconnect recovery](docs/knowledge/runtime-debugging.md#reconnect-recovery) and [pause contract](docs/knowledge/runtime-debugging.md#pause-contract).
+- Release uses the production GitHub Actions workflow after the authorized merge; do not use the local Modal workspace for production. PR/merge/deployment evidence will be tracked here before handoff.
 
-# Previous handoff: pause enforcement (2026-10-05)
+# Open work
 
-- Implemented on `work`: reject gameplay commands atomically at 0× while retaining speed controls; hold buffered unit motion and work animations until resume. Existing tasks, stock and saves are preserved; camera and selection stay available.
-- Regression coverage includes paused order rejection, moving-task preservation, remote/local presentation clocks and gathering sprite frames. All 228 Rust tests pass (one existing manual benchmark ignored), and native strict lint passes. WASM strict lint, formatting, generated JS syntax and rebuilt release WASM pass. Chromium desktop (1280×800, DPR1 mouse) and emulated phone (390×844, DPR2 touch) pause/resume checks pass on an isolated seed-123 SQLite world: rejected move/stop/production orders leave snapshots unchanged, resumed ticks advance, and no page errors occur. Modal status fails with “Could not connect to the Modal server”; not deployed.
-- Thermonuclear review passed: the domain owns rejection, presentation holds existing motion without discarding it, and no gameplay systems or dependencies were added. Browser artifacts and driver are under `/tmp/aoa-pause-browser*`; native appearance and physical phones were not tested.
-- See [pause contract](docs/knowledge/runtime-debugging.md#pause-contract). No save-model or dependency changes.
+## Shore-facing docks (current workspace, 2026-10-05)
 
-# Previous handoff: test runtime optimization (2026-10-05)
+- Implemented automatic water-edge facing shared by domain coast validation,
+  placement ghosts and placed docks. Added east/north/west sprites, all four
+  construction stages, retained source/provenance and a reproducible packer.
+  Original building atlas rows are pixel-identical; no save-model change.
+- Verification: full workspace 235 tests passed (one manual benchmark ignored),
+  including snapshot edge/fog regression; all five
+  building geometry tests pass across every facing/stage. Native/WASM lint,
+  294-frame sprite audit and rebuilt WebGL passed. Desktop four-shore captures
+  and selection pass; DPR-2 phone replay also passes all four directions and
+  construction stages (32 captures, no browser errors). Evidence and review:
+  [dock-facing verification](docs/verification/dock-facing/README.md).
+- User authorized merging the dock changes on 2026-10-05: [PR #99](https://github.com/koogle/age-of-agents/pull/99),
+  branch `feat/water-facing-docks`. Production checks use the GitHub Actions
+  release workflow after merge; inspect its result before claiming deployment.
+  Modal 1.6.1 needed its API proxy extra;
+  installing `modal[api-proxy-support]` fixed connectivity. The configured
+  workspace is `radiantai`, not the repository's production `koogle-frick`, and
+  no local profiles exist. Direct deployment was not attempted; the existing
+  GitHub release workflow uses the production credentials.
 
-- [PR #97](https://github.com/koogle/age-of-agents/pull/97), branch `perf/test-runtime`, integrates master `3ccc5e8`. Implements the requested parallel soundness seeds, bounded destination searches, and simulation-only test optimization. All eight seeds, 9,600 ticks, debug assertions, route tie breaks and drop-site preferences are retained.
-- Final integrated warm suite: 233 passed, one existing manual benchmark ignored, 52.74s wall (0.29s build check, 1.20s server, 15.72s client, 34.79s domain). Investigation baseline: 215 tests in 115.80s at `b054655`; upstream adds tests, so this is not an identical-suite benchmark. Formatting, native/WASM strict lint, three Python verifier tests, generated JS syntax and rebuilt WASM pass. Desktop gathering/deposit and DPR2-phone pinch/tap gathering pass without page errors on isolated seed-123 saves. User authorized merging PR #97. Subsequent integration with master `3ccc5e8` passes 226 tests (13 server, 75 client, 138 domain; one manual benchmark ignored), formatting, strict native/WASM lint and a rebuilt WASM bundle. Fresh isolated desktop mouse and DPR2-phone pinch/tap gathering pass without page errors. Merge/deployment state is tracked by the linked PR and production workflow.
-- Thermonuclear review: no dependencies, new gameplay rules, persistence changes or removed assertions. Nearest-goal routes match complete-search paths across all 3×3 obstacle layouts; full connectivity queries stay complete. Many distant compatible drop sites remain a profiling caveat.
-- Baseline instrumentation: 45,911 path searches consumed 90.19s of 103.36s in the serial soundness test. Full-map searches remain where complete connectivity is needed. Investigation artifacts: `/workspace/scratch/test-performance/`.
+## Earlier release follow-up
 
-# Previous handoff: remove save backward compatibility (2026-10-05)
-
-- Jakob requested removal of compatibility code and a PR. `STORE_VERSION` 11 transactionally resets different-version SQLite stores; current saves persist and corrupt current data remains an error. Policy and maintained save/archipelago guides are updated.
-- Removed inventory pooling, archived island translation/models, legacy home-dock inference and historical deserialization defaults. Discovery writes terrain/resources directly to the shared world. No new dependencies or gameplay changes.
-- Rebased onto master `2bddab9`, preserving construction-material unlocks, movement, field-replenishment and maintained knowledge. Final integration passes **224 Rust tests** (13 server, 75 client, 136 domain; one manual benchmark ignored), formatting, strict native/WASM lint, release WASM rebuild and generated JS syntax. Desktop mouse and emulated DPR2-phone touch decode current snapshots, pause and reload without page errors. Thermonuclear review passed: atomic version reset, explicit current corruption errors, deterministic discovery and global validation retained, no dependencies or gameplay additions.
-- Isolated server checks verified that a current-version restart preserves the complete paused snapshot and a version-10 old-layout database resets to a playable world. Artifacts/databases: `/workspace/scratch/store-reset`; integration logs: `/tmp/aoa-pr-{tests,lint,wasm-lint,web}.log`.
-- PR [#96](https://github.com/koogle/age-of-agents/pull/96) merged as `3ccc5e8`; its production workflow was queued when this integration began. Earlier Modal connection attempt failed; runtime now reports credentials ready, but deployment was not retried for this PR-only request.
+- Branch `feat/island-storage-ships`, PR #94: https://github.com/koogle/age-of-agents/pull/94. Integrating master through `58813c1`. Implements island-local inventories and 50-resource ship holds in addition to four passengers. Cargo stays aboard on arrival; stopped shore ships supply local construction/production/research and accept partial villager deposits. Training/research still require buildings.
+- Storage sites unify completed compatible buildings and available ship holds. Costs reserve once from shore stores then connected ships; outputs/refunds go to the job’s island. Explicit load/unload transfers require a completed dock, reject atomically, and do not require NPC labor. Storage targets use `storage_id`; incompatible stores reset rather than migrate.
+- Top resources follow pointer/touch island inspection, including minimap hover. Selected building costs use its own island. Ship cargo is now a single horizontal strip with one column per resource, resource icons without name labels, onboard counts and Load/Unload shields at each icon’s lower corners (24px art, generous tap targets); cargo-only types remain visible and additional columns paginate on compact screens. Dock selection also exposes moored ship cargo when artwork obscures the vessel.
+- User authorized merging PR #94. Integrating master `58813c1` before release: preserve construction unlocks, movement recovery, bounded route searches and removal of save backward compatibility. Store version 12 resets incompatible saves; no inventory migrations or legacy aliases. Integrated verification: 231 Rust tests pass (13 server, 77 client, 141 domain; one manual benchmark ignored), strict native/WASM lint, rebuilt web/server, verifier/asset checks and documentation links. Combined desktop mouse and DPR-2 phone touch load/unload acceptance passed without browser errors. Task-owned QA server stopped. Captures/logs: `/workspace/scratch/island-storage/merge-browser.log`, `desktop-cargo-merged.png`, `phone-cargo-merged.png`. PR #94 merged as `330803f`. Its first release run was cancelled before deployment because the verifier still read the removed shared-stockpile field. Verifier repair `75e7540` is now deployed and verified: [production run 37379045726](https://github.com/koogle/age-of-agents/actions/runs/37379045726) succeeded.
 
 ## Remaining work and open PRs
 
-- Other module-extraction/island-inventory proposals remain independent work; consult live PR metadata before integration. Construction-material unlocks and the knowledge folder are already in this PR’s master base.
+- Other module-extraction proposals remain independent work; consult live PR metadata before integration. Island inventories are delivered by PR #94. Construction-material unlocks and the knowledge folder are already in this PR’s master base.
 - Profile populated archipelagos and refine the economy per [ROADMAP.md](ROADMAP.md); starter-only budget measurements do not establish busy-world capacity. Combat, calamities and permanent progression remain proposals.
 - Preserve [acceptance gaps](ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05): accessible DOM controls, additive touch selection, native macOS/Windows appearance and physical-phone safe-area verification, and documented narrow-passage/existing-blocked-field limits. Native/browser-local games remain in-memory.
 - The production verifier still requires land units and unseen terrain; distinguish those fixture assumptions from actual deployment failures. Its old fixed-map/terrain-run bug is resolved.
 
 ## Verification and release
 
-Local integration verification is recorded above. All 74 relative links in the eight changed Markdown files resolve; final formatting and whitespace checks pass. The PR does not merge or deploy. Confirm any later master release through workflow/production evidence rather than inferring it from PR state.
+Local integration verification is recorded above. All 74 relative links in the eight changed Markdown files resolve; final formatting and whitespace checks pass. PR #94 is merged; the subsequent verifier repair released successfully in the workflow linked above. Dock merge/release status is tracked at the top.

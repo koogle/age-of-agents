@@ -68,6 +68,10 @@
       "disabled": "buttons/coin_disabled.png",
       "researched": "buttons/coin_researched.png"
     },
-    "note": "256x256 RGBA; coin diameter 224 px centred (16 px margin for the hover glow); ivory face radius 92 px for icons"
+    "note": "256x256 RGBA; coin diameter 224 px centred (16 px margin for the hover glow); ivory face radius 92 px for icons",
+    "cargo": {
+      "load": "buttons/shield_up.png",
+      "unload": "buttons/shield_down.png"
+    }
   }
 }

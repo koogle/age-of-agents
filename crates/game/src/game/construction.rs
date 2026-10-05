@@ -24,8 +24,9 @@ impl GameWorld {
         if origin.column > self.columns() - columns || origin.row > self.rows() - rows {
             return Err(CommandError::InvalidBuildSite);
         }
+        let available = self.available_at(origin);
         for &(resource, amount) in kind.cost() {
-            if self.stockpile.amount(resource) < amount {
+            if available.amount(resource) < amount {
                 return Err(match resource {
                     ResourceKind::Stone => CommandError::InsufficientStone,
                     ResourceKind::Wood => CommandError::InsufficientWood,
@@ -55,9 +56,7 @@ impl GameWorld {
             return Err(CommandError::TargetUnreachable);
         }
         self.next_building_id += 1;
-        for &(resource, amount) in kind.cost() {
-            self.stockpile.add(resource, -amount);
-        }
+        self.spend_at(origin, kind.cost())?;
         self.units[unit].action = UnitAction::Build { building_id: id };
         Ok(())
     }

@@ -1,6 +1,6 @@
 # Archipelago and transport
 
-Read before: Before changing discovery, voyages, passengers, shared resources, or map scaling.
+Read before: Before changing discovery, voyages, passengers, island resources, or map scaling.
 
 Status: maintained guide. Source-reviewed 2026-10-05 against `b054655`; historical
 PR results below are evidence, not newly run verification. Repository code paths
@@ -47,8 +47,7 @@ voyages with continuous sailing and simultaneous simulation.
 **Lesson:** Before changing exploration, state the resource scope, discovery
 trigger, travel behavior, background simulation, passenger ownership and save
 conversion together. Current choices are in [continuous map](../CONTINUOUS_MAP.md)
-and the README. Do not reuse the local-inventory or first-ship-generation design
-from historical reviews. First departure must remain affordable from starter
+and the README. PR #94 restores local inventories and a 50-resource ship hold by explicit user request; do not restore the historical 200-good holds, paused settlements, or first-ship-generation design. First departure must remain affordable from starter
 resources, including timber's raw wood cost.
 
 **Check:** `crates/game/src/game/islands_tests.rs` covers non-teleporting shortcuts,
@@ -65,3 +64,9 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Island storage and movable ship holds (PR #94)
+
+Each discovered island owns a stockpile. A stopped shore ship contributes its cargo to that island’s available resources and accepts villager deposits up to its remaining 50-resource capacity. Cargo stays aboard on arrival and leaves with the ship; passengers have four independent seats. Research and training still require buildings. Explicit load/unload commands transfer up to 10 per button tap at a completed dock, without NPC labor.
+
+`storage.rs` owns compatible building/ship sites and local resource reservation. Costs consume shore stores first, then connected holds; production output and queue refunds remain on the job’s island. Partial deposits preserve the villager’s remainder when a ship fills or departs. Future automated trading ports are intended but not implemented. The shared map and all-settlement simulation remain intact.

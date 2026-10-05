@@ -2,7 +2,9 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
+mod coast;
 mod construction;
+pub use coast::{DockFacing, dock_facing};
 #[cfg(test)]
 mod construction_tests;
 mod domain;
@@ -16,6 +18,8 @@ mod fields_tests;
 mod fixture;
 mod gathering;
 mod islands;
+mod storage;
+pub use storage::{CargoDirection, SHIP_RESOURCE_CAPACITY, ShipConnection, island_at};
 #[cfg(test)]
 mod islands_tests;
 use islands::starting_origins;
@@ -92,7 +96,7 @@ pub struct GameWorld {
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
-    pub stockpile: Stockpile,
+    pub inventories: Vec<Stockpile>,
     pub researched_technologies: Vec<TechnologyKind>,
     pub scenario: ScenarioState,
     next_building_id: u64,
@@ -132,7 +136,11 @@ pub struct WorldSnapshot {
     pub ships: Vec<TransportShip>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
-    pub stockpile: Stockpile,
+    /// Usable balances per island, including connected ship holds.
+    pub inventories: Vec<Stockpile>,
+    /// Onshore balances only, used by explicit dock transfers.
+    pub stored_inventories: Vec<Stockpile>,
+    pub ship_connections: Vec<ShipConnection>,
     pub researched_technologies: Vec<TechnologyKind>,
     #[serde(skip_deserializing, default = "DomainCatalog::roadmap")]
     pub catalog: DomainCatalog,
@@ -142,6 +150,12 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    TransferShipCargo {
+        ship_id: String,
+        kind: ResourceKind,
+        amount: f64,
+        direction: CargoDirection,
+    },
     Voyage {
         ship_id: String,
         island_id: u64,
@@ -217,7 +231,7 @@ pub enum Command {
     /// food and fiber) and unload it.
     Deposit {
         unit_id: String,
-        building_id: String,
+        storage_id: String,
     },
     /// Abandon the current task. The unit finishes the step it is taking,
     /// keeps any cargo, and leaves foundation progress in place.
@@ -228,6 +242,10 @@ pub enum Command {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandError {
+    ShipStorageUnavailable,
+    StorageUnavailable,
+    InvalidCargoAmount,
+    ShipHoldFull,
     ShipNotFound,
     ShipMustBeStopped,
     ShipFull,
@@ -273,6 +291,12 @@ pub enum CommandError {
 impl std::fmt::Display for CommandError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
+            Self::StorageUnavailable => "storage is unavailable, unreachable from shore, or full",
+            Self::ShipStorageUnavailable => {
+                "ship must be stopped beside a completed dock to transfer island storage"
+            }
+            Self::InvalidCargoAmount => "cargo amount must be finite and positive",
+            Self::ShipHoldFull => "ship can carry 50 resources in total",
             Self::ShipNotFound => "transport ship not found",
             Self::ShipMustBeStopped => "stop the ship before boarding or unloading",
             Self::ShipFull => "transport passenger capacity is full",
@@ -352,7 +376,7 @@ impl GameWorld {
             ships: Vec::new(),
             resources: island.resources,
             buildings: vec![town_center("base-1", island.town_center, None)],
-            stockpile: Stockpile::default(),
+            inventories: vec![Stockpile::default()],
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
             next_building_id: 2,
@@ -423,6 +447,14 @@ impl GameWorld {
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
+            Command::TransferShipCargo {
+                ship_id,
+                kind,
+                amount,
+                direction,
+            } => {
+                self.transfer_ship_cargo(&ship_id, kind, amount, direction)?;
+            }
             Command::Voyage { ship_id, island_id } => self.voyage(&ship_id, island_id)?,
             Command::Sail { ship_id, to } => self.sail(&ship_id, to)?,
             Command::DockShip {
@@ -534,16 +566,17 @@ impl GameWorld {
                 {
                     return Err(CommandError::PopulationCapReached);
                 }
-                if !self.stockpile.affords(product.cost()) {
+                if !self
+                    .available_at(self.buildings[building].origin)
+                    .affords(product.cost())
+                {
                     return Err(if product == ProductKind::Villager {
                         CommandError::InsufficientFood
                     } else {
                         CommandError::InsufficientProductionResources
                     });
                 }
-                for &(kind, amount) in product.cost() {
-                    self.stockpile.add(kind, -amount);
-                }
+                self.spend_at(self.buildings[building].origin, product.cost())?;
                 self.buildings[building].enqueue(BuildingJob::Produce {
                     product,
                     elapsed_seconds: 0.0,
@@ -571,13 +604,17 @@ impl GameWorld {
                 {
                     return Err(CommandError::MissingTechnologyPrerequisite);
                 }
-                if self.stockpile.food < RESEARCH_FOOD_COST
-                    || self.stockpile.wood < RESEARCH_WOOD_COST
-                {
+                let stock = self.available_at(self.buildings[building].origin);
+                if stock.food < RESEARCH_FOOD_COST || stock.wood < RESEARCH_WOOD_COST {
                     return Err(CommandError::InsufficientResearchResources);
                 }
-                self.stockpile.food -= RESEARCH_FOOD_COST;
-                self.stockpile.wood -= RESEARCH_WOOD_COST;
+                self.spend_at(
+                    self.buildings[building].origin,
+                    &[
+                        (ResourceKind::Food, RESEARCH_FOOD_COST),
+                        (ResourceKind::Wood, RESEARCH_WOOD_COST),
+                    ],
+                )?;
                 self.buildings[building].enqueue(BuildingJob::Research {
                     technology,
                     elapsed_seconds: 0.0,
@@ -591,7 +628,7 @@ impl GameWorld {
             }
             Command::Deposit {
                 unit_id,
-                building_id,
+                storage_id,
             } => {
                 let unit = self.ordered_unit(&unit_id)?;
                 let cargo = self.units[unit]
@@ -599,21 +636,29 @@ impl GameWorld {
                     .as_ref()
                     .ok_or(CommandError::NothingToDeposit)?
                     .kind;
-                let building = self
-                    .buildings
-                    .iter()
-                    .find(|building| building.id == building_id)
-                    .ok_or(CommandError::BuildingNotFound)?;
-                if !building.is_complete() {
-                    return Err(CommandError::BuildingUnderConstruction);
+                if let Some(building) = self.buildings.iter().find(|b| b.id == storage_id) {
+                    if !building.is_complete() {
+                        return Err(CommandError::BuildingUnderConstruction);
+                    }
+                    if !building.kind.accepts(cargo) {
+                        return Err(CommandError::BuildingRefusesCargo);
+                    }
                 }
-                if !building.kind.accepts(cargo) {
-                    return Err(CommandError::BuildingRefusesCargo);
+                if !self.buildings.iter().any(|b| b.id == storage_id)
+                    && !self.ships.iter().any(|s| s.id == storage_id)
+                {
+                    return Err(CommandError::BuildingNotFound);
                 }
-                if !self.can_reach_beside(unit, building.footprint()) {
+                let footprint = self
+                    .storage_sites(Some(cargo))
+                    .into_iter()
+                    .find(|site| site.id == storage_id)
+                    .map(|site| site.footprint)
+                    .ok_or(CommandError::StorageUnavailable)?;
+                if !self.can_reach_beside(unit, footprint) {
                     return Err(CommandError::TargetUnreachable);
                 }
-                self.units[unit].action = UnitAction::Deposit { building_id };
+                self.units[unit].action = UnitAction::Deposit { storage_id };
             }
             Command::Stop { unit_id } => {
                 let unit = self
@@ -656,13 +701,6 @@ impl GameWorld {
 
     /// Whether any cell beside the footprint (sharing an edge) is water.
     fn touches_sea(&self, footprint: Footprint) -> bool {
-        let Footprint {
-            origin,
-            columns,
-            rows,
-        } = footprint;
-        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
-        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
         let water = |column: i32, row: i32| {
             column >= 0
                 && row >= 0
@@ -671,8 +709,7 @@ impl GameWorld {
                 && self.terrain[row as usize * usize::from(self.columns()) + column as usize].biome
                     == TerrainBiome::Water
         };
-        (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
-            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r))
+        dock_facing(footprint, water).is_some()
     }
 
     fn next_building_name(&self) -> String {
@@ -742,7 +779,7 @@ impl GameWorld {
                 UnitAction::Cultivate { resource_id } => {
                     self.tick_cultivate(index, &resource_id, dt)
                 }
-                UnitAction::Deposit { building_id } => self.tick_deposit(index, &building_id, dt),
+                UnitAction::Deposit { storage_id } => self.tick_deposit(index, &storage_id, dt),
             }
         }
         self.tick_ships(dt);
@@ -847,7 +884,11 @@ impl GameWorld {
                 })
                 .collect(),
             ships: self.ships.clone(),
-            stockpile: self.stockpile.clone(),
+            inventories: (0..self.island_origins.len())
+                .map(|id| self.available_on(id))
+                .collect(),
+            stored_inventories: self.inventories.clone(),
+            ship_connections: self.ship_connections(),
             researched_technologies: self.researched_technologies.clone(),
             catalog: DomainCatalog::roadmap(),
             scenario: self.scenario.clone(),

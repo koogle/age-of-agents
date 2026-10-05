@@ -80,6 +80,8 @@ repairs those assumptions: `unpack_terrain` bounds run decoding by advertised
 runtime dimensions, and `scripts/test_modal_manage.py` covers the decoder in CI.
 Do not reopen that completed fix or restore the old character-count check.
 
+PR #94 replaced the shared `stockpile` snapshot with per-island `inventories` (available including connected holds) and `stored_inventories` (onshore). The release verifier now checks both arrays against discovered island count, the 13-resource catalog and finite nonnegative balances; regressions accept ship-supplemented availability and reject the obsolete shared-pool format.
+
 The verifier still requires a land unit and some unseen terrain; those are fixture
 assumptions, not universal world invariants. If such a check fails, inspect the
 actual world and distinguish verifier assumptions from deployment failures. Never
@@ -120,3 +122,18 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Modal proxy support (2026-10-05)
+
+In a managed environment with HTTP(S) proxy variables, Modal 1.6.1 requires the
+optional `python-socks` support installed by `python3 -m pip install
+'modal[api-proxy-support]'`. Without it, `modal app list` may end with the generic
+“Could not connect to the Modal server”; inspect the installed SDK's proxy
+support before treating that as missing credentials. Keep the inherited proxy
+and CA settings. Installing the extra fixed the read-only CLI check here.
+
+Check `python3 -m modal profile current` and `python3 -m modal profile list`
+before releasing. Environment-selected workspace identity can differ from the
+repository's `koogle-frick` production target; a successful empty app list does
+not establish the correct account. Do not deploy to a different workspace merely
+because its injected credentials work.

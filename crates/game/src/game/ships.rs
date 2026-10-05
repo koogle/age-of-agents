@@ -17,6 +17,7 @@ pub struct TransportShip {
     /// Last travel vector, retained when stopped for sprite facing.
     pub heading: [i8; 2],
     pub passengers: Vec<Unit>,
+    pub cargo: Stockpile,
     /// The dock that built the vessel.
     pub home_dock_id: Option<String>,
 }
@@ -91,6 +92,7 @@ impl GameWorld {
             destination: None,
             heading: [1, 0],
             passengers: Vec::new(),
+            cargo: Stockpile::default(),
             home_dock_id: Some(self.buildings[building].id.clone()),
         });
         self.next_unit_id += 1;
@@ -198,7 +200,7 @@ impl GameWorld {
         })
     }
     /// A dock bridges its footprint; elsewhere a ship can land directly at shore.
-    fn landing_cells(&self, ship: usize) -> Vec<CellCoordinate> {
+    pub(super) fn landing_cells(&self, ship: usize) -> Vec<CellCoordinate> {
         let mut cells: BTreeSet<_> = interaction_cells(self.ships[ship].footprint()).collect();
         if let Some(dock) = self.dock_for_ship(ship) {
             cells.extend(interaction_cells(dock.footprint()));
