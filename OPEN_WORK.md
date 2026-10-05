@@ -1,4 +1,10 @@
-# Current handoff: field gathering audit (2026-10-05)
+# Current handoff: compact mobile HUD (2026-10-05)
+
+The requested shared Rust layout places actions bottom-left beside an 80px globe and a single row of 44px pause/1×/2× targets above it. Selection text, full queues and building submenus wrap upward within the left column; picking a building collapses the menu. Painted artwork is preserved. Earlier stacked mobile studies are superseded.
+
+Rebased onto current master `61fc87c`, retaining transport, islands, field harvesting and zoom-scaled edge panning. All 185 workspace tests, formatting, strict native/WASM Clippy and rebuilt browser bundle pass. Layout tests include ship controls and pass after the landscape queue-width refinement. Browser-local phone/menu/landscape replay has no page errors; authoritative combined touch checks pass for speed changes, full queues and cancellation/refunds. Final phone, submenu, placement, narrow-phone, landscape and desktop captures are saved in `docs/verification/2026-10-05/`; the browser replay has no page errors. Review: `docs/COMPACT_HUD_REVIEW.md`. Direct Modal deployment fails with “Token missing”; no production changes have been made. PR #76: https://github.com/koogle/age-of-agents/pull/76. User authorized merging with pause aligned beside 1× and 2×. Integrated master `9393efe` (field route safety and action flashes); all 192 combined tests, formatting, strict native/WASM lint and rebuilt-browser DPR2 pause smoke pass. Ready for the user-authorized merge; release verification follows the merge-triggered workflow.
+
+# Previous handoff: field gathering audit (2026-10-05)
 
 - Dedicated branch `fix/field-gathering-routes`; user has now authorized merging PR #80. Integrated master `4b6fe9e` (action flashes); source merges cleanly, handoffs preserved, combined bundle rebuilt; all 190 workspace tests, formatting and strict native/WASM lint pass. Fresh-browser smoke of the combined bundle also passes; ready for the authorized merge.
 - Confirmed fields already share ordinary gathering, deposits, resumption and same-kind continuation. Found and reproduced a field-placement gap: a permanent plot could cut off delivery routes while remaining reachable for preparation. Reuses building placement's route-preservation guard before mutation/spending.
