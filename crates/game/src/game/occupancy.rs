@@ -165,6 +165,9 @@ impl GameWorld {
     /// Checks every structural invariant of the world. Persisted worlds that
     /// fail this are corrupt and must not be loaded.
     pub fn validate(&self) -> Result<(), String> {
+        if !self.environment_seconds.is_finite() || self.environment_seconds < 0.0 {
+            return Err("environment time must be finite and nonnegative".into());
+        }
         self.validate_islands()?;
         self.validate_local()
     }

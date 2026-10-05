@@ -14,7 +14,7 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and a shared resource pool are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
-Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
+Recurring drought is the first implemented environmental pressure: five calm minutes, a one-minute warning, and 50% food gathering for 60/90/120 seconds, capped at 120. The shared HUD shows phase and remaining simulation time. Combat, destructive calamities, treasures, and permanent progression remain proposals. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
 The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
 

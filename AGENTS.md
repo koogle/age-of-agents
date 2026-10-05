@@ -17,7 +17,7 @@ The current playable demo proves these loops:
 3. A player can construct a town center and train villagers through its authoritative task queue.
 4. A player can research five bounded gathering improvements through that same task queue.
 
-Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; resources are shared. Treat combat, calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
+Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; resources are shared. Recurring drought is the first environmental danger; consult [environmental dangers](docs/knowledge/environmental-dangers.md). Treat combat, destructive calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
 ## Architecture
 

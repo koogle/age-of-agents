@@ -12,6 +12,7 @@ use glam::Vec2;
 use crate::assets::{Assets, Rgba};
 
 mod build_menu;
+mod environment;
 mod layout;
 #[cfg(test)]
 mod layout_tests;
