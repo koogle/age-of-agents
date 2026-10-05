@@ -1,4 +1,11 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: lumber mill wood drop-off (2026-10-05)
+
+- User requested a small PR. Branch `fix/lumber-mill-wood-dropoff` adds wood acceptance to the existing shared drop-site rule; automatic nearest-reachable routing, explicit unloading and pre-assignment unloading use it without new state or routing logic. Completed mills accept wood only; shared settlement stockpiles and timber production are unchanged.
+- Updated mill selection help, README, roadmap and interaction contract. Regression coverage checks three deliveries (20 + 20 + 7), resumed gathering, atomic rejection of unfinished mills/non-wood cargo, explicit partial unloading, and fallback to HQ when mill approaches are blocked.
+- Thermonuclear review: one domain match arm, no added abstraction/dependency/save schema, no autonomous task assignment, existing typed/atomic commands and shared mouse/touch behavior retained. All edited source files remain below 1,000 lines.
+- Verification complete: formatting/diff checks, all 185 tests (121 game in a separate target directory, 51 client and 13 server in the workspace run; stopped the redundant second game run), and strict native/WASM lint pass. Rebuilt tracked WASM bundle. Isolated desktop mouse and 390×844/DPR2 touch flows passed explicit 7-wood unloading and automatic 20/20/7 deliveries at the mill, resumed gathering, zero timber conversion and no page errors. QA scripts, logs and screenshots: `/workspace/scratch/wood-dropoff`; isolated SQLite save: `qa.db`. PR will remain unmerged; production deployment follows the repository master merge workflow.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
