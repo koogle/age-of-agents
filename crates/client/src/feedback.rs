@@ -11,6 +11,7 @@ fn drop_off_status(unit: &Unit) -> Option<String> {
     let unloading = matches!(
         unit.action,
         UnitAction::Build { .. }
+            | UnitAction::ExploreBuild { .. }
             | UnitAction::Cultivate { .. }
             | UnitAction::Deposit { .. }
             | UnitAction::Gather {

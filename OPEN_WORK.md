@@ -1,4 +1,14 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: explore fogged building sites (2026-10-05)
+
+- User requested a PR for building placement outside current sight. Branch `fix/explore-before-building` is based on master `61fc87c`.
+- Fogged orders retain a typed, persisted exploration assignment. Villagers unload cargo first, explore, and create/pay for a foundation only after the whole footprint is currently visible and all existing placement checks pass. Stop/replacement, blocked/unreachable sites and lost affordability leave no foundation or charge. Visible placement remains immediate.
+- Mouse/touch placement accepts fogged building sites; selection shows “Exploring build site.” Field preparation retains its existing behavior. README/roadmap and tracked browser bundle updated; no new assets or dependencies.
+- All 189 workspace tests pass (13 server, 51 client, 125 domain), including six new regression tests and randomized material/occupancy checks. Formatting, strict native/WASM lint and generated JS syntax check pass.
+- Thermonuclear review: construction code is consolidated in a 140-line domain module; atomic placement is reused, pending sites own no cells or costs, bounds and worker type validate on reload, and no idle behavior or new navigation machinery was added.
+- Real browser menu → fog placement → exploration → completed house passes on desktop 1280×800/DPR1 and phone 390×844/DPR2 with touch input. Authoritative snapshots confirm no early foundation/cost, exactly one house and exactly 15 wood spent; no page errors. QA scripts, fixture and screenshots are under `/workspace/scratch/fog-build`.
+- This is a review PR, not a production deployment; master merges use the existing Modal deployment workflow.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.

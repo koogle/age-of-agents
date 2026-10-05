@@ -211,9 +211,19 @@ impl GameWorld {
                     field_goal()
                 }
             }
-            UnitAction::Build { .. } if self.units[unit].cargo.is_some() => {
+            UnitAction::Build { .. } | UnitAction::ExploreBuild { .. }
+                if self.units[unit].cargo.is_some() =>
+            {
                 // Dropping goods off first; see `drop_off_before_building`.
                 self.nearest_drop_site(unit).map(Goal::Beside)
+            }
+            UnitAction::ExploreBuild { origin, kind } => {
+                let (columns, rows) = kind.size();
+                Some(Goal::Beside(Footprint {
+                    origin: *origin,
+                    columns,
+                    rows,
+                }))
             }
             UnitAction::Build { building_id } | UnitAction::Deposit { building_id } => self
                 .buildings

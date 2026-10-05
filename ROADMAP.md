@@ -45,6 +45,7 @@ Status: integrated into the current prototype; the shared Rust renderer has repl
 - [x] One derived occupancy map: buildings (rectangular footprints, foundations included), live resources, unit cells, and step targets are exclusive claims; move destinations are reservations.
 - [x] Units claim the next cell before stepping; deterministic eight-neighbor Dijkstra never cuts an occupied corner.
 - [x] Building placement preserves every unit’s existing ground routes, preventing builders or bystanders from being enclosed by a foundation.
+- [x] Fogged building orders explore first, then recheck the fully visible footprint before placing and paying for a foundation. Stop/replacement cancels exploration without cost.
 - [x] Build orders place a foundation immediately; `Construct` lets any villager resume or help; completion releases every builder at once.
 - [x] Typed cell coordinates on every command; `GameWorld::validate` runs on load, after accepted commands and ticks (debug), and across deterministic randomized play.
 - [x] Shared native/WebGL2 Rust client: painted sprites, island terrain with fog-of-war shader, minimap, and mouse/touch controls. The original Three.js implementation is retired.

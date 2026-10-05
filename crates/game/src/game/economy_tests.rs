@@ -33,6 +33,8 @@ fn all_catalog_buildings_construct_complete_and_charge_exactly_once() {
         for &(resource, amount) in kind.cost() {
             world.stockpile.add(resource, amount);
         }
+        // This test exercises immediate, visible placement for every catalog kind.
+        world.units[0].cell = cell(12, 16);
         assert!(!kind.cost().is_empty());
         assert!(kind.size().0 >= 2 && kind.size().1 >= 2);
         world
