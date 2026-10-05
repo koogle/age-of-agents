@@ -4,7 +4,6 @@ use aoa_game::{CargoDirection, SHIP_RESOURCE_CAPACITY};
 
 struct CargoRow {
     kind: ResourceKind,
-    ashore: f64,
     aboard: f64,
     load: f64,
     unload: f64,
@@ -28,7 +27,6 @@ fn rows(snapshot: &WorldSnapshot, ship_id: &str) -> Vec<CargoRow> {
             let aboard = ship.cargo.amount(kind);
             (ashore > 0.0 || aboard > 0.0).then_some(CargoRow {
                 kind,
-                ashore,
                 aboard,
                 load: ashore
                     .min(10.0)
@@ -73,7 +71,7 @@ impl Hud {
             .skip(self.cargo_page * room)
             .take(room)
             .collect();
-        let h = (116.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
+        let h = (90.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
         let w = if shown.is_empty() {
             300.0 * s
         } else {
@@ -103,30 +101,22 @@ impl Hud {
             self.coin(
                 atlas,
                 resource_icon(resource.kind),
-                [center - 12.0 * s, y + 6.0 * s, 24.0 * s, 24.0 * s],
+                [center - 16.0 * s, y + 8.0 * s, 32.0 * s, 32.0 * s],
                 true,
                 false,
             );
             self.text(
                 atlas,
                 resource.kind.name(),
-                (center, y + 43.0 * s),
+                (center, y + 66.0 * s),
                 11.0 * s,
                 INK,
                 true,
             );
             self.text(
                 atlas,
-                &format!("{} shore", quantity(resource.ashore)),
-                (center, y + 57.0 * s),
-                10.0 * s,
-                MUTED,
-                true,
-            );
-            self.text(
-                atlas,
                 &format!("{} aboard", quantity(resource.aboard)),
-                (center, y + 70.0 * s),
+                (center, y + 80.0 * s),
                 10.0 * s,
                 INK,
                 true,
@@ -139,7 +129,7 @@ impl Hud {
                 // Keep generous hit areas while the painted shields are small.
                 let rect = [
                     left + (10.0 + index as f32 * 44.0) * s,
-                    y + 74.0 * s,
+                    y + 20.0 * s,
                     44.0 * s,
                     40.0 * s,
                 ];
@@ -149,15 +139,15 @@ impl Hud {
                     "shield_down"
                 };
                 let size = if self.hovered(rect) && enabled {
-                    24.0
+                    18.0
                 } else {
-                    22.0
+                    16.0
                 } * s;
                 self.sprite(
                     atlas,
                     icon,
                     [
-                        rect[0] + (rect[2] - size) / 2.0,
+                        center + (index as f32 * 32.0 - 16.0) * s - size / 2.0,
                         rect[1] + (rect[3] - size) / 2.0,
                         size,
                         size,
@@ -180,7 +170,7 @@ impl Hud {
             }
         }
         if pages > 1 {
-            let ry = y + 116.0 * s;
+            let ry = y + 90.0 * s;
             self.text(
                 atlas,
                 &format!("{} / {pages}", self.cargo_page + 1),
@@ -292,7 +282,7 @@ mod tests {
             .iter()
             .find(|r| r.kind == ResourceKind::Stone)
             .unwrap();
-        assert_eq!((stone.ashore, stone.unload), (0.0, 10.0));
+        assert_eq!(stone.unload, 10.0);
         s.ship_connections.clear();
         let at_sea = rows(&s, "ship");
         assert_eq!(at_sea.len(), 1);
