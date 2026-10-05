@@ -13,9 +13,10 @@
   and selection pass; DPR-2 phone replay also passes all four directions and
   construction stages (32 captures, no browser errors). Evidence and review:
   [dock-facing verification](docs/verification/dock-facing/README.md).
-- User authorized merging the dock changes on 2026-10-05. Preparing PR and
-  merge on `feat/water-facing-docks`; production checks will run through GitHub
-  Actions after merge. Modal 1.6.1 needed its API proxy extra;
+- User authorized merging the dock changes on 2026-10-05: [PR #99](https://github.com/koogle/age-of-agents/pull/99),
+  branch `feat/water-facing-docks`. Production checks use the GitHub Actions
+  release workflow after merge; inspect its result before claiming deployment.
+  Modal 1.6.1 needed its API proxy extra;
   installing `modal[api-proxy-support]` fixed connectivity. The configured
   workspace is `radiantai`, not the repository's production `koogle-frick`, and
   no local profiles exist. Direct deployment was not attempted; the existing

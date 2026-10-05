@@ -46,8 +46,10 @@ undersized construction draft, exact prompts and provenance remain under
 
 ## Release limit
 
-Not deployed. Modal 1.6.1 required `modal[api-proxy-support]` to connect through
+Direct deployment was unavailable during local verification. Modal 1.6.1 required `modal[api-proxy-support]` to connect through
 this environment's proxy. After installing the extra, the CLI connected, but its
 only environment-selected workspace was `radiantai`, with no configured profiles;
 the repository's production target is `koogle-frick`. Production credentials for
-that target are unavailable here. No deployment or production reset was attempted.
+that target are unavailable here. No direct deployment or production reset was attempted. The user subsequently
+authorized merging [PR #99](https://github.com/koogle/age-of-agents/pull/99);
+production release uses the existing GitHub Actions workflow after merge.
