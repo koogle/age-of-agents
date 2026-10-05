@@ -510,7 +510,7 @@ impl Hud {
                     rect,
                     uv: glyph.uv,
                     color,
-                    params: [0.0; 4],
+                    params: [4.0, 0.0, 0.0, 0.0],
                 });
             }
             pen += glyph.advance * scale;

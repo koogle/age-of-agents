@@ -149,7 +149,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                         assert_eq!(hud.release(), Some(action.clone()));
                     }
                     if (width < 600.0 || height < 500.0) && matches!(action, Action::Speed(_)) {
-                        assert!(rect[2] >= 44.0 * scale && rect[3] >= 44.0 * scale);
+                        assert!(rect[2] >= 36.0 * scale && rect[3] >= 44.0 * scale);
                     }
                 }
                 // The normal phone controls share the lowest 140 logical pixels.

@@ -91,7 +91,7 @@ impl Hud {
         let edge = if narrow { 12.0 } else { 18.0 } * s;
         let (gx, gy) = (width - edge - r * 2.0, height - edge - r * 2.0);
         // Reserve the full time-control row above the globe on compact screens.
-        let navigation_left = if narrow { gx - 48.0 * s } else { gx };
+        let navigation_left = if narrow { gx - 28.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
         self.map_size =
             Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL;
@@ -115,7 +115,7 @@ impl Hud {
             let angle = std::f32::consts::PI * (1.0 + 0.16 + index as f32 * 0.17);
             let c = 30.0 * s;
             let center = if narrow {
-                Vec2::new(gx + (-26.0 + index as f32 * 44.0) * s, gy - 26.0 * s)
+                Vec2::new(gx + (-10.0 + index as f32 * 36.0) * s, gy - 26.0 * s)
             } else {
                 Vec2::new(
                     gx + r + angle.cos() * (r + 22.0 * s),
@@ -124,7 +124,7 @@ impl Hud {
             };
             let rect = [center.x - c / 2.0, center.y - c / 2.0, c, c];
             let hit = if narrow {
-                [center.x - 22.0 * s, center.y - 22.0 * s, 44.0 * s, 44.0 * s]
+                [center.x - 18.0 * s, center.y - 22.0 * s, 36.0 * s, 44.0 * s]
             } else {
                 rect
             };
