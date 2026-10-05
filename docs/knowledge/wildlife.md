@@ -86,3 +86,9 @@ Browser-verifier timing: software-rendered screenshot capture can take enough
 wall time for combat and subsequent attacks to finish. Pause authoritative
 simulation while capturing combat frames, and track unit injury/death across
 polls rather than requiring an injured survivor at the final sample.
+
+## NPC-matched art (2026-10-05)
+
+The animal style correction uses the shipped villager family and guard originals as direct references, in addition to the island diorama. Broad cel color areas and fine brown contours replace the original detailed fur. `scripts/pack_wildlife.py` registers all four poses at y=590 in 627px cells; the renderer shares that baseline. Sources, the rejected first pass and exact final prompt remain in `assets/sprites/wildlife_sources/`. No animal rules or save schema change. The browser verifier accepts `--closeups` to capture each animal at the camera minimum distance in both desktop and DPR-2 phone viewports, then reloads the paused fixture before interaction acceptance.
+
+Maximum-zoom capture detail: wheel input clamps each event to a 0.5 scale factor in `lib.rs`; use multiple events (eight cover the full 140-to-5 distance range), not one extreme delta. A large delta alone is not proof of maximum zoom.

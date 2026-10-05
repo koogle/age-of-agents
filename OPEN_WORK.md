@@ -1,3 +1,8 @@
+## Animal style refinement — 2026-10-05
+
+- `fix/animal-art-style` starts from master `079d348`. User requested less generic animals and explicit comparison to existing NPCs. New wolf/bear idle/walk art uses the shipped villager and guard references; a textured first pass was rejected and retained. NPC contact sheet and review: `docs/verification/2026-10-05-animal-style/`.
+- Registered all four paw baselines with `scripts/pack_wildlife.py`; no animal behavior or save changes. 264 Rust tests (one existing ignored benchmark), strict native/WASM lint, 298-frame resolution audit, four common paw baseline/bounds checks and six release-verifier tests pass. Rebuilt desktop/DPR-2 phone hunting checks pass with no page errors; gameplay and true maximum-zoom screenshots reviewed against guards/buildings and the NPC contact sheet. Corrected capture driver sends repeated wheel events because individual zoom factors clamp. Direct Modal profile is `radiantai`, not the documented production target; profile listing also failed to connect. Do not deploy to a different account.
+
 ## Mobile time controls — 2026-10-05
 
 - User authorized PR creation and merge after grid verification. Integrated master `28a09a2`, preserving current gameplay, Stop/cargo controls and pause/reconnect fixes. Mobile time buttons use 36px center spacing and separate 36×44px targets; glyphs use the original alpha mask to remove rectangular tint. All 264 Rust tests pass (one manual benchmark ignored), formatting, native/WASM lint, rebuilt web/server, 298-frame asset/icon audits and six verifier tests pass. Browser grid/speed checks and screenshots are in `docs/verification/2026-10-05/time-merged-*`. Production release uses the merge-triggered GitHub Actions workflow.
