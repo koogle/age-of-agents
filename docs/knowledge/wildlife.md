@@ -80,3 +80,8 @@ phone touch to select a guard and attack a bear. It verifies damage both ways,
 defeat and cleanup, captures screenshots and checks page errors. The controlled
 fixture is not evidence of natural spawn placement (domain tests cover that).
 See [review/evidence](../verification/2026-10-05-wildlife/REVIEW.md).
+
+Browser-verifier timing: software-rendered screenshot capture can take enough
+wall time for combat and subsequent attacks to finish. Pause authoritative
+simulation while capturing combat frames, and track unit injury/death across
+polls rather than requiring an injured survivor at the final sample.

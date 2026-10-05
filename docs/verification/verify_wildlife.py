@@ -101,23 +101,27 @@ async def main(out, only):
                         assert ordered['units'][0]['action']['type']=='attack_animal', ordered['units'][0]['action']
                         await command({'type':'set_simulation_speed','multiplier':2.0})
                         injured=None
+                        injured_units=False
                         for _ in range(120):
                             await asyncio.sleep(.15)
                             live=await state()
+                            injured_units |= any(u['health']<100 for u in live['units']) or len(live['units']) < len(ordered['units'])
                             bear=next((a for a in live['animals'] if a['id']=='bear'),None)
                             if bear and bear['health']<100 and injured is None:
                                 injured=copy.deepcopy(live)
+                                await command({'type':'set_simulation_speed','multiplier':0.0})
                                 await page.screenshot(path=str(out/(label+'-combat.png')))
+                                await command({'type':'set_simulation_speed','multiplier':2.0})
                             if not bear:break
                         else:raise AssertionError('Bear was not defeated')
                         assert injured is not None
-                        assert any(u['health']<100 for u in live['units']), 'Animal must fight back'
+                        assert injured_units, 'Animal must fight back'
                         await command({'type':'set_simulation_speed','multiplier':0.0})
                         await page.wait_for_timeout(300)
                         await page.screenshot(path=str(out/(label+'-after.png')))
                         assert not errors,errors
                         results.append({'viewport':label,'ordered':ordered['units'][0]['action'],
-                                        'injured_animals':injured['animals'],'survivors':live['units'],'errors':errors})
+                                        'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
                         await context.close();stop()
                     await browser.close()
             finally:stop()

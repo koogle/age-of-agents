@@ -112,3 +112,20 @@ Thermonuclear review: no features removed. The existing carriers_for method move
 unchanged to storage.rs to keep the shared client entrypoint under 1,000 lines.
 Wildlife remains sheet 13; extended building atlas rows remain intact. Both asset
 provenance ledger additions are retained.
+
+Master advanced during verification to `ba51a51` (automatic shore pickup, PR #102).
+Integrated that change as well; only the generated WASM conflicted and is rebuilt.
+No source behavior from the pickup change was discarded.
+
+Final source passes 251 Rust tests (13 server, 79 client, 159 domain; one ignored
+manual benchmark), strict native/WASM lint, formatting and rebuilt WASM/JS checks.
+The initial phone browser run exposed a verifier timing assumption: slow screenshot
+capture allowed the surviving wolf to kill the guards before the final survivor
+health assertion. The verifier now pauses for combat screenshots and records
+injury/death throughout the sampled fight. Rerunning both input modes on the final
+combined build before merge.
+
+Final combined desktop mouse and DPR2-phone touch runs both pass: explicit attack,
+two-way damage, bear defeat and no page errors. Evidence:
+`/tmp/aoa-wildlife-final-browser/results.json` and sibling screenshots.
+All local merge gates pass; deployment is checked separately after merging PR #98.
