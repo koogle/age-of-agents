@@ -302,7 +302,6 @@ impl App {
 
     fn act(&mut self, action: hud::Action) {
         match action {
-            hud::Action::ShipCargoNext => self.selection.cargo_index += 1,
             hud::Action::Voyage(island_id) => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Voyage { ship_id, island_id });
@@ -311,29 +310,6 @@ impl App {
             hud::Action::Disembark => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Disembark { ship_id });
-                }
-            }
-            hud::Action::ShipTransfer(direction) => {
-                if let (Some(ship_id), Some(snapshot)) =
-                    (self.selection.ship.clone(), self.view.snapshot.as_ref())
-                    && let Some(ship) = snapshot.ships.iter().find(|s| s.id == ship_id)
-                {
-                    let kind = snapshot.catalog.resources
-                        [self.selection.cargo_index % snapshot.catalog.resources.len()];
-                    let amount = match direction {
-                        aoa_game::CargoDirection::Load => snapshot
-                            .stockpile
-                            .amount(kind)
-                            .min(20.0)
-                            .min(aoa_game::TRANSPORT_GOODS - ship.goods_total()),
-                        aoa_game::CargoDirection::Unload => ship.goods.amount(kind).min(20.0),
-                    };
-                    self.send(Command::TransferShipCargo {
-                        ship_id,
-                        kind,
-                        amount,
-                        direction,
-                    });
                 }
             }
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
@@ -759,7 +735,6 @@ impl App {
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
             ship: self.selection.ship.as_deref(),
-            cargo_index: self.selection.cargo_index,
             build: self.build,
             show_grid: self.show_grid,
             toast: self.toast.as_ref().map(|(text, _)| text.as_str()),

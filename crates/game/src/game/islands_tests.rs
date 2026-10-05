@@ -9,10 +9,6 @@ fn expedition() -> GameWorld {
         destination: None,
         heading: [1, 0],
         passengers: vec![w.units.remove(0)],
-        goods: Stockpile {
-            wood: 80.0,
-            ..Stockpile::default()
-        },
     });
     w.discover_island();
     w.validate().unwrap();
@@ -72,28 +68,20 @@ fn discovery_is_deterministic_complementary_and_saved_without_replacing_home() {
 }
 
 #[test]
-fn voyage_lands_founders_with_local_supplies_and_preserves_settlements() {
+fn voyage_lands_founders_with_shared_resources_and_preserves_settlements() {
     let mut w = expedition();
     w.stockpile.wood = 100.0;
     let home = w.clone();
     voyage(&mut w, 1).unwrap();
     assert_eq!(w.island_id, 1);
-    assert_eq!(w.stockpile.wood, 0.0);
+    assert_eq!(w.stockpile.wood, 100.0);
     assert!(w.buildings.is_empty());
-    assert_eq!(w.ships[0].goods.wood, 80.0);
     assert_eq!(w.ships[0].passengers[0], home.ships[0].passengers[0]);
     w.apply_command(Command::Disembark {
         ship_id: "transport-test".into(),
     })
     .unwrap();
-    w.apply_command(Command::TransferShipCargo {
-        ship_id: "transport-test".into(),
-        kind: ResourceKind::Wood,
-        amount: 60.0,
-        direction: CargoDirection::Unload,
-    })
-    .unwrap();
-    assert_eq!(w.stockpile.wood, 60.0);
+    w.stockpile.wood -= 40.0; // Shared spending remains visible after a return voyage.
     assert_eq!(w.units.len(), 1);
     let destination_terrain = w.terrain.clone();
     let destination_fog = w.explored_cells.clone();
@@ -101,7 +89,7 @@ fn voyage_lands_founders_with_local_supplies_and_preserves_settlements() {
     assert_eq!(w.terrain, home.terrain);
     assert_eq!(w.buildings, home.buildings);
     assert_eq!(w.units, home.units);
-    assert_eq!(w.stockpile.wood, 100.0);
+    assert_eq!(w.stockpile.wood, 60.0);
     assert!(
         home.explored_cells
             .iter()
@@ -176,7 +164,7 @@ fn frontier_keeps_expanding_and_revisits_do_not_regenerate() {
 }
 
 #[test]
-fn four_founders_can_land_and_build_from_transported_wood() {
+fn four_founders_can_land_and_build_from_shared_wood() {
     let mut w = expedition();
     w.stockpile.wood = 100.0;
     w.stockpile.food = 100.0;
@@ -198,13 +186,6 @@ fn four_founders_can_land_and_build_from_transported_wood() {
     })
     .unwrap();
     assert_eq!(w.units.len(), 4);
-    w.apply_command(Command::TransferShipCargo {
-        ship_id: "transport-test".into(),
-        kind: ResourceKind::Wood,
-        amount: 60.0,
-        direction: CargoDirection::Unload,
-    })
-    .unwrap();
     let unit_id = w.units[0].id.clone();
     let mut sites = w
         .terrain
@@ -227,7 +208,7 @@ fn four_founders_can_land_and_build_from_transported_wood() {
         w.tick(0.1);
     }
     assert!(w.buildings[0].is_complete());
-    assert_eq!(w.stockpile.wood, 40.0);
+    assert_eq!(w.stockpile.wood, 60.0);
     w.stockpile.food = 100.0;
     let before = w.clone();
     assert_eq!(
@@ -238,6 +219,31 @@ fn four_founders_can_land_and_build_from_transported_wood() {
         Err(CommandError::TechnologyInProgress)
     );
     assert_eq!(w, before);
+    // A deposit on the new island joins the same pool used back home.
+    w.units[0].cargo = Some(CarriedResource {
+        kind: ResourceKind::Iron,
+        amount: 7.0,
+    });
+    w.apply_command(Command::Deposit {
+        unit_id: w.units[0].id.clone(),
+        building_id: w.buildings[0].id.clone(),
+    })
+    .unwrap();
+    for _ in 0..600 {
+        w.tick(0.1);
+    }
+    assert_eq!(w.stockpile.iron, 7.0);
+    voyage(&mut w, 0).unwrap();
+    assert_eq!(w.stockpile.wood, 60.0);
+    assert_eq!(w.stockpile.iron, 7.0);
+    w.apply_command(Command::Produce {
+        product: ProductKind::Villager,
+        building_id: "base-1".into(),
+    })
+    .unwrap();
+    assert_eq!(w.stockpile.food, 50.0);
+    voyage(&mut w, 1).unwrap();
+    assert_eq!(w.stockpile.food, 50.0);
     w.validate().unwrap();
 }
 
