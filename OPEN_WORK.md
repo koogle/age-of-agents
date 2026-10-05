@@ -7,6 +7,8 @@
 
 # Integrated upstream handoff
 
+- Automatic transport shore pickup: [PR #102](https://github.com/koogle/age-of-agents/pull/102), `feat/transport-shore-pickup`; user authorized PR creation and merge to master. Board orders choose a mutually reachable berth, preserve group reservations, and wait for the ship to stop. Explicit ship orders cancel pickup; no save schema changes. Integrated master `e7c8cb6` (shore-facing docks). Combined verification: 240 Rust tests passed (one manual benchmark ignored), strict native/WASM lint, formatting, 294-frame asset audit, transport/verifier checks and web/server rebuild. Isolated Chromium desktop mouse (1100×750) and DPR-2 phone touch (430×932) both issued Board, moved the ship to shore and boarded only once stopped, with no browser errors. Thermonuclear review passed for atomicity, deterministic routes, seat ownership, cancellation and crowded-shore waiting. QA server stopped. The PR tracks merge status; production release uses the merge-triggered GitHub Actions workflow, whose result must be checked separately.
+
 ## Shore-facing docks (current workspace, 2026-10-05)
 
 - Implemented automatic water-edge facing shared by domain coast validation,
