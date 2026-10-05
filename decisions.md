@@ -2,6 +2,7 @@
 
 Each entry records a design choice in one or two sentences. The current gameplay direction lives in [README.md](README.md#proposed-gameplay-loop).
 
+- **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.
 - **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind.
 - **Shared simulation:** Keep deterministic game rules in `crates/game`, shared by hosted, native, and browser-local games. Rendering never decides gameplay outcomes.
@@ -13,7 +14,7 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Persistence:** Save authoritative snapshots in SQLite and respect `AGE_OF_AGENTS_DB`. Corrupt state is an error; incompatible historical schemas are intentionally discarded rather than translated unsafely.
 - **Current economy:** Direct gathering remains available alongside farm/mining-camp drop-offs and non-stacking local bonuses. Processing costs and quantities are initial balance values.
 - **Fields:** Planting and replenishing fields require paid, explicit villager orders. Preparation workers continue into harvesting; exhausted fields never replenish automatically and idle villagers never replant.
-- **Starter economy:** New islands supply food, wood and stone, with timber as the sole processed resource. Reserve metal, brick and cloth chains for complementary later islands; defer rations until provisioning is playable.
+- **Starter economy:** New islands supply food, wood and stone, with timber and rations processing available. Building unlocks follow construction costs: expose every wood/stone/timber building initially, then expand the menu as exploration reveals the inputs for remaining construction materials.
 - **First departure:** The planned first transport consumes wood and timber only, so departure cannot depend on resources found elsewhere. Later trading posts need separate inventories and explicit shipping.
 - **Island progression:** Plan transport and persistent destination islands before local inventories and inter-island trade. The long-term world keeps expanding through discovered islands without a fixed island limit; the prototype currently uses one island and shared stockpiles.
 - **Globe overview:** Retain distant planet zoom during exploration. Add newly discovered islands cumulatively after ships and persistent island travel are implemented.

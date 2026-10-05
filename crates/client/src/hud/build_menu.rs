@@ -147,19 +147,38 @@ mod tests {
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(categories.len(), 4); // Town, Gathering, Production, Close.
+        assert_eq!(categories.len(), 5); // All four groups and Close.
         assert!(
-            !categories
+            categories
                 .iter()
                 .any(|c| c.action == Action::BuildGroup(BuildingGroup::Military))
         );
+        let military = commands(
+            BuildUi::Group(BuildingGroup::Military),
+            &stock,
+            false,
+            &aoa_game::STARTER_BUILDINGS,
+        );
+        assert_eq!(
+            military
+                .iter()
+                .map(|c| c.action.clone())
+                .collect::<Vec<_>>(),
+            vec![
+                Action::Place(BuildingKind::Watchtower),
+                Action::Place(BuildingKind::Barracks),
+                Action::Place(BuildingKind::Range),
+                Action::Build
+            ]
+        );
+        assert!(!military[1].enabled, "unaffordable barracks stays visible");
         let production = commands(
             BuildUi::Group(BuildingGroup::Production),
             &stock,
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(production.len(), 2);
+        assert_eq!(production.len(), 6);
         assert_eq!(
             production[0].action,
             Action::Place(BuildingKind::LumberMill)
@@ -170,9 +189,9 @@ mod tests {
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(gathering.len(), 3); // Farm, Field, All types.
-        assert_eq!(gathering[1].action, Action::PlaceField);
-        assert!(!gathering[1].enabled);
+        assert_eq!(gathering.len(), 4); // Farm, Mining Camp, Field, All types.
+        assert_eq!(gathering[2].action, Action::PlaceField);
+        assert!(!gathering[2].enabled);
     }
 
     #[test]

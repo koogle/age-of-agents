@@ -10,13 +10,21 @@ pub enum EconomyRules {
     IslandProgression,
 }
 
-pub const STARTER_BUILDINGS: [BuildingKind; 6] = [
+pub const STARTER_BUILDINGS: [BuildingKind; 14] = [
     BuildingKind::TownCenter,
     BuildingKind::House,
     BuildingKind::Granary,
     BuildingKind::Farm,
     BuildingKind::LumberMill,
     BuildingKind::Dock,
+    BuildingKind::Watchtower,
+    BuildingKind::MiningCamp,
+    BuildingKind::Smelter,
+    BuildingKind::Kiln,
+    BuildingKind::Weaver,
+    BuildingKind::Kitchen,
+    BuildingKind::Barracks,
+    BuildingKind::Range,
 ];
 pub const STARTER_RESOURCES: [ResourceKind; 3] =
     [ResourceKind::Wood, ResourceKind::Food, ResourceKind::Stone];
@@ -43,29 +51,20 @@ impl GameWorld {
             })
     }
 
+    /// Unlock construction from discoverable cost inputs, independently of current
+    /// stock and the recipes a completed building can run.
     pub fn building_available(&self, kind: BuildingKind) -> bool {
-        if self.economy_rules == EconomyRules::Unrestricted || STARTER_BUILDINGS.contains(&kind) {
-            return true;
-        }
-        use BuildingKind::*;
-        use ResourceKind as R;
-        match kind {
-            MiningCamp => [R::Iron, R::Coal, R::Gold]
-                .iter()
-                .any(|&r| self.discovered(r)),
-            Smelter | Barracks | Watchtower => self.discovered(R::Iron) && self.discovered(R::Coal),
-            Kiln => self.discovered(R::Clay),
-            Weaver | Range => self.discovered(R::Fiber),
-            Workshop => [R::Iron, R::Coal, R::Clay]
-                .iter()
-                .all(|&r| self.discovered(r)),
-            Monument => [R::Iron, R::Coal, R::Clay, R::Fiber, R::Gold]
-                .iter()
-                .all(|&r| self.discovered(r)),
-            // Provisioning and healing need a playable purpose before introducing rations.
-            Kitchen | Infirmary => false,
-            _ => false,
-        }
+        self.economy_rules == EconomyRules::Unrestricted
+            || kind.cost().iter().all(|&(resource, _)| {
+                use ResourceKind::*;
+                match resource {
+                    Wood | Food | Stone | Timber | Rations => true,
+                    Steel => self.discovered(Iron) && self.discovered(Coal),
+                    Bricks => self.discovered(Clay),
+                    Cloth => self.discovered(Fiber),
+                    raw => self.discovered(raw),
+                }
+            })
     }
 
     pub fn technology_available(&self, technology: TechnologyKind) -> bool {
