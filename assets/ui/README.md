@@ -90,3 +90,7 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 Final 1024px renders, BiRefNet cutouts, exact prompts, reference paths, responses, request IDs and the reproducible `pack.py` are in `sources/cargo_shields/classical/`. The existing research seal was the primary style reference; the earlier shield provided only its silhouette. `style-comparison.png` compares the check seal and both arrows on dark green, parchment and blue at large and actual UI sizes. The earlier ivory draft and its provenance remain in the parent directory.
 
 Packing restores original pixels inside any enclosed segmentation holes, removes a two-pixel matte fringe and resizes both from a common bound to matched 256px RGBA buttons. Estimated FAL generation/cutout cost for the final revision: $0.0896 ($0.1792 including the initial draft). No code-drawn arrow geometry or generated lettering.
+
+## Style review requirement
+
+Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) for every new or changed icon. Compare against the original wood/food/research kit, including 24px and 32px views. Attach approved references again during refinement; a batch of new drafts must not become its own style source. Normalization validates geometry, not appearance.
