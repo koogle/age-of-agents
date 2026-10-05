@@ -116,3 +116,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `command_cargo` | [Review](sources/menu_icons/command_cargo/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_cargo/provenance.json) |
 | `command_back` | [Review](sources/menu_icons/command_back/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_back/provenance.json) |
 | `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
+| `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
