@@ -27,9 +27,9 @@
 
 # Active menu icon audit
 
-- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md): 20 fixes. Stop hand restoration [#104](https://github.com/koogle/age-of-agents/pull/104) is merged; deployment is tracked separately. No newly generated menu art has merged.
-- Jakob flagged style drift on 2026-10-05. The 14 new illustrations in the 18-icon draft set need rework; the four extracted unit portraits need comparison in their UI context. Normalization passed but did not establish a visual match. [Rejected comparison](docs/verification/art-style/rejected-menu-drafts.png) and [blocking style gate](docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) retain the finding and required checks.
-- Integration [#107](https://github.com/koogle/age-of-agents/pull/107) is draft. Preserve its transport queue fix and active-speed browser fixtures. New-art merges are paused pending style correction. Next: validate a representative refinement against approved references, then create/review/merge individual art PRs sequentially and wire the accepted set in the integration PR with complete game validation. Preserve unrelated handoff sections.
+- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md); Stop restoration #104 and blocking style review #110 are merged. No new menu icons are wired into gameplay yet.
+- The initial 14 generated illustrations were rejected for style drift. A reference-anchored refinement now has fine brown contours, restrained washes and comparisons at 24/32px on three backgrounds. Each icon lands in a separate art PR with its own provenance and style review; unit portraits retain approved atlas art.
+- Current art PR: `resource_coal`. Accepted art is retained under `assets/ui/sources/menu_icons/`; the audit ledger lists each sequential PR. Integration [#107](https://github.com/koogle/age-of-agents/pull/107) remains draft until all art, mappings and final desktop/DPR-2 phone validation pass. Preserve unrelated handoff sections. Merged is not deployed.
 
 # Wildlife integration (2026-10-05)
 

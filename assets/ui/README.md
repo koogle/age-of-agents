@@ -94,3 +94,11 @@ Packing restores original pixels inside any enclosed segmentation holes, removes
 ## Style review requirement
 
 Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) for every new or changed icon. Compare against the original wood/food/research kit, including 24px and 32px views. Attach approved references again during refinement; a batch of new drafts must not become its own style source. Normalization validates geometry, not appearance.
+
+## Dedicated menu icon additions
+
+These files remain unused until integration PR #107 wires them into the HUD. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
+
+| Icon | Sources and visual review |
+| --- | --- |
+| `resource_coal` | [Review](sources/menu_icons/resource_coal/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_coal/provenance.json) |
