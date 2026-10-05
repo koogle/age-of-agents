@@ -417,7 +417,7 @@ impl GameWorld {
     }
 
     pub(super) fn is_beside(&self, unit: usize, footprint: Footprint) -> bool {
-        self.units[unit].step.is_none() && footprint.is_interaction_cell(self.units[unit].cell)
+        self.units[unit].is_at_work_site(footprint)
     }
 
     /// The complete building that takes the unit's cargo (a town center takes
