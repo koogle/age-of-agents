@@ -32,20 +32,16 @@ impl App {
         self.resource_island = self.resource_island.min(snapshot.inventories.len() - 1);
     }
 
-    pub(crate) fn cycle_cargo(&mut self) {
-        let kinds = &ResourceKind::ALL;
-        let current = kinds
-            .iter()
-            .position(|&k| k == self.cargo_kind)
-            .unwrap_or(0);
-        self.cargo_kind = kinds[(current + 1) % kinds.len()];
-    }
-
-    pub(crate) fn transfer_cargo(&mut self, direction: CargoDirection, amount: f64) {
+    pub(crate) fn transfer_cargo(
+        &mut self,
+        kind: ResourceKind,
+        direction: CargoDirection,
+        amount: f64,
+    ) {
         if let Some(ship_id) = self.selection.ship.clone() {
             self.send(Command::TransferShipCargo {
                 ship_id,
-                kind: self.cargo_kind,
+                kind,
                 amount,
                 direction,
             });

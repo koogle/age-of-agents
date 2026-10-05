@@ -108,7 +108,6 @@ pub struct App {
     pointer: Option<Pointer>,
     cursor: Vec2,
     resource_island: usize,
-    cargo_kind: aoa_game::ResourceKind,
     mouse_inside: bool,
     focused: bool,
     modifiers: ModifiersState,
@@ -183,7 +182,6 @@ impl App {
             pointer: None,
             cursor: Vec2::ZERO,
             resource_island: 0,
-            cargo_kind: aoa_game::ResourceKind::Wood,
             mouse_inside: false,
             focused: true,
             modifiers: ModifiersState::empty(),
@@ -313,8 +311,10 @@ impl App {
     fn act(&mut self, action: hud::Action) {
         match action {
             hud::Action::SelectShip(id) => self.select_storage_ship(id),
-            hud::Action::CargoKind => self.cycle_cargo(),
-            hud::Action::TransferCargo(direction, amount) => self.transfer_cargo(direction, amount),
+            hud::Action::TransferCargo(kind, direction, amount) => {
+                self.transfer_cargo(kind, direction, amount)
+            }
+            hud::Action::CargoPage(page) => self.hud.cargo_page = page,
             hud::Action::Voyage(island_id) => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Voyage { ship_id, island_id });
@@ -749,7 +749,6 @@ impl App {
         }
         let model = hud::Model {
             resource_island: self.resource_island,
-            cargo_kind: self.cargo_kind,
             snapshot: self.view.snapshot.as_ref(),
             units: &self.selection.units,
             building: self.selection.building.as_deref(),

@@ -1,5 +1,5 @@
 use super::*;
-use aoa_game::{SHIP_RESOURCE_CAPACITY, TRANSPORT_PASSENGERS};
+use aoa_game::TRANSPORT_PASSENGERS;
 use selection::{Command, Selected};
 
 pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selected> {
@@ -29,49 +29,6 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         .ship_connections
         .iter()
         .find(|c| c.ship_id == ship.id);
-    let kind = model.cargo_kind;
-    let aboard = ship.cargo.amount(kind);
-    let ashore = connection.map_or(0.0, |c| {
-        snapshot.stored_inventories[c.island_id].amount(kind)
-    });
-    let docked = connection.is_some_and(|c| c.docked);
-    commands.push(Command {
-        icon: resource_icon(kind),
-        label: format!("{} {:.0}", kind.name(), aboard),
-        detail: format!(
-            "{:.0} {} aboard · tap to choose another resource",
-            aboard,
-            kind.name()
-        ),
-        enabled: true,
-        action: Action::CargoKind,
-    });
-    for (direction, amount, label) in [
-        (
-            aoa_game::CargoDirection::Load,
-            ashore
-                .min(10.0)
-                .min((SHIP_RESOURCE_CAPACITY - ship.cargo.total()).max(0.0)),
-            "Load",
-        ),
-        (aoa_game::CargoDirection::Unload, aboard.min(10.0), "Unload"),
-    ] {
-        commands.push(Command {
-            icon: resource_icon(kind),
-            label: format!("{label} {:.0}", amount),
-            detail: if docked {
-                format!(
-                    "{:.0} on shore · {:.0}/50 aboard",
-                    ashore,
-                    ship.cargo.total()
-                )
-            } else {
-                "Stop beside a completed dock to transfer".into()
-            },
-            enabled: docked && amount > 0.0,
-            action: Action::TransferCargo(direction, amount),
-        });
-    }
     let current = snapshot
         .island_origins
         .iter()
@@ -163,7 +120,6 @@ mod tests {
                 snapshot,
                 &Model {
                     resource_island: 0,
-                    cargo_kind: ResourceKind::Wood,
                     snapshot: Some(snapshot),
                     units: &[],
                     building: None,
@@ -178,8 +134,8 @@ mod tests {
             .4
         };
         let actions = commands(&snapshot);
-        assert_eq!(actions.len(), 5);
-        assert_eq!(actions[4].action, Action::Voyage(1));
+        assert_eq!(actions.len(), 2);
+        assert_eq!(actions[1].action, Action::Voyage(1));
         assert_eq!(actions[0].action, Action::Disembark);
         assert!(!actions[0].enabled);
         snapshot.ships[0]

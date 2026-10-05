@@ -562,7 +562,6 @@ mod tests {
         let units = [snapshot.units[0].unit.id.clone()];
         let model = Model {
             resource_island: 0,
-            cargo_kind: ResourceKind::Wood,
             snapshot: Some(&snapshot),
             units: &units,
             building: None,
@@ -585,7 +584,6 @@ mod tests {
         for group in super::super::BuildingGroup::ALL {
             let model = Model {
                 resource_island: 0,
-                cargo_kind: ResourceKind::Wood,
                 snapshot: Some(&snapshot),
                 units: &units,
                 building: None,
@@ -647,7 +645,6 @@ mod tests {
         let snapshot = world.snapshot();
         let model = Model {
             resource_island: 0,
-            cargo_kind: ResourceKind::Wood,
             snapshot: Some(&snapshot),
             units: &[],
             building: Some(&building_id),
@@ -675,7 +672,6 @@ mod tests {
         let snapshot = world.snapshot();
         let model = Model {
             resource_island: 0,
-            cargo_kind: ResourceKind::Wood,
             snapshot: Some(&snapshot),
             units: &[],
             building: Some(&snapshot.buildings[0].building.id),
@@ -812,7 +808,6 @@ mod tests {
         let units = [snapshot.units[0].unit.id.clone()];
         let model = Model {
             resource_island: 0,
-            cargo_kind: ResourceKind::Wood,
             snapshot: Some(&snapshot),
             units: &units,
             building: None,

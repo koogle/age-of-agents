@@ -452,6 +452,14 @@ impl Hud {
             info_width,
             info_height,
         ];
+        self.cargo_panel(
+            atlas,
+            model,
+            width,
+            header_bottom + 48.0 * s,
+            info[1] - 8.0 * s,
+            s,
+        );
         self.shape(info, GLASS, 1.0, 26.0 * s);
         let portrait_size = if narrow { 32.0 } else { 40.0 } * s;
         self.sprite(
