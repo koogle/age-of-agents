@@ -1,0 +1,76 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of three stacked rectangular fired terracotta bricks, rich red clay with crisp straight edges, clearly manufactured masonry not lumps of raw clay. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3701/WFThDk_pESy683xPfGopg_EVSJkwjm.png",
+        "content_type": "image/png",
+        "file_name": "WFThDk_pESy683xPfGopg_EVSJkwjm.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "source": "../refinement/draft-sheet.png",
+    "result": "../refinement/refined-sheet.png",
+    "sheet_size": [
+      1254,
+      1254
+    ],
+    "crop": [
+      627,
+      0,
+      940,
+      314
+    ],
+    "purpose": "Preserve the 4x4 cell layout and original identities; clean geometry, edges and diffusion artifacts; simplify small details; correct compass needle and disembark boot contact.",
+    "full_prompt": "../refinement/provenance.json"
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad3710/r1GNLYz8g54XZBniCo5xP_tdOkhwCR.png",
+        "content_type": "image/png",
+        "file_name": "r1GNLYz8g54XZBniCo5xP_tdOkhwCR.png",
+        "file_size": null,
+        "width": 313,
+        "height": 314
+      },
+      "mask_image": null
+    }
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "resource_bricks.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239699.695127,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "resource_bricks",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-9916-7aa2-bf9d-5cefc06b7a57",
+      "seconds": 9.1
+    },
+    {
+      "t": 1791239847.1591828,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:resource_bricks",
+      "est_usd": 0.005,
+      "request_id": "01a10e36-f361-7360-a063-3fda8b515fa2",
+      "seconds": 2.4
+    }
+  ]
+}
