@@ -80,6 +80,8 @@ repairs those assumptions: `unpack_terrain` bounds run decoding by advertised
 runtime dimensions, and `scripts/test_modal_manage.py` covers the decoder in CI.
 Do not reopen that completed fix or restore the old character-count check.
 
+PR #94 replaced the shared `stockpile` snapshot with per-island `inventories` (available including connected holds) and `stored_inventories` (onshore). The release verifier now checks both arrays against discovered island count, the 13-resource catalog and finite nonnegative balances; regressions accept ship-supplemented availability and reject the obsolete shared-pool format.
+
 The verifier still requires a land unit and some unseen terrain; those are fixture
 assumptions, not universal world invariants. If such a check fails, inspect the
 actual world and distinguish verifier assumptions from deployment failures. Never
