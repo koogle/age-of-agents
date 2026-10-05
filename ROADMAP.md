@@ -193,6 +193,8 @@ Gameplay acceptance:
 
 ## Integrated native presentation fixes
 
+- [x] Globe minimap terrain, camera marker and click/touch navigation share the world view’s isometric orientation and fit the full current map.
+
 - [x] Shift-click group selection and existing shared gather/construct commands.
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.
 - [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
