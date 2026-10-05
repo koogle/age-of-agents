@@ -11,6 +11,7 @@ fn drop_off_status(unit: &Unit) -> Option<String> {
     let unloading = matches!(
         unit.action,
         UnitAction::Build { .. }
+            | UnitAction::ExploreBuild { .. }
             | UnitAction::Cultivate { .. }
             | UnitAction::Deposit { .. }
             | UnitAction::Gather {
@@ -28,11 +29,17 @@ fn drop_off_status(unit: &Unit) -> Option<String> {
 
 // Include the assignment target so replacing an order of the same kind flashes,
 // while walking to a node and starting work remain one gathering assignment.
-fn action_status<'a>(unit: &'a Unit, snapshot: &WorldSnapshot) -> Option<(String, &'a str)> {
+fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, String)> {
     let (text, target) = match &unit.action {
         UnitAction::Idle => ("Idle".into(), ""),
         UnitAction::Move { .. } => return None,
         UnitAction::Board { ship_id } => ("Boarding transport".into(), ship_id.as_str()),
+        UnitAction::ExploreBuild { origin, kind } => {
+            return Some((
+                drop_off_status(unit).unwrap_or_else(|| "Exploring build site".into()),
+                format!("{kind:?}:{},{}", origin.column, origin.row),
+            ));
+        }
         UnitAction::Build { building_id } => ("Building".into(), building_id.as_str()),
         UnitAction::Cultivate { resource_id } => ("Preparing field".into(), resource_id.as_str()),
         UnitAction::Deposit { building_id } => (drop_off_status(unit)?, building_id.as_str()),
@@ -51,7 +58,7 @@ fn action_status<'a>(unit: &'a Unit, snapshot: &WorldSnapshot) -> Option<(String
             (text, resource_id.as_str())
         }
     };
-    Some((drop_off_status(unit).unwrap_or(text), target))
+    Some((drop_off_status(unit).unwrap_or(text), target.into()))
 }
 
 struct Label {
@@ -372,6 +379,37 @@ mod tests {
         assert!(feedback.labels.is_empty());
         feedback.observe(Some(&walking), &before, 2.0);
         assert_eq!(feedback.labels[0].text, "Idle");
+    }
+
+    #[test]
+    fn exploring_flashes_once_per_site_then_announces_construction() {
+        let before = GameWorld::default().snapshot();
+        let mut exploring = before.clone();
+        exploring.units[0].unit.action = UnitAction::ExploreBuild {
+            origin: aoa_game::CellCoordinate::new(40, 31),
+            kind: aoa_game::BuildingKind::House,
+        };
+        let mut feedback = Feedback::default();
+        feedback.observe(Some(&before), &exploring, 1.0);
+        feedback.observe(Some(&exploring), &exploring, 1.1);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Exploring build site");
+        assert_eq!(feedback.labels[0].born, 1.0);
+        let mut redirected = exploring.clone();
+        redirected.units[0].unit.action = UnitAction::ExploreBuild {
+            origin: aoa_game::CellCoordinate::new(50, 31),
+            kind: aoa_game::BuildingKind::House,
+        };
+        feedback.observe(Some(&exploring), &redirected, 1.2);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].born, 1.2);
+        let mut building = redirected.clone();
+        building.units[0].unit.action = UnitAction::Build {
+            building_id: "building-2".into(),
+        };
+        feedback.observe(Some(&redirected), &building, 1.3);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Building");
     }
 
     #[test]
