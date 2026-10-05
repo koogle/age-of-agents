@@ -19,6 +19,7 @@ mod movement_tests;
 mod scenario_tests;
 mod selection;
 mod ships;
+mod wildlife;
 pub(crate) use buildings::sprite as building_sprite;
 pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
@@ -194,6 +195,7 @@ impl View {
 /// Something a tap can land on by its drawn picture, not the ground under it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Pick {
+    Animal(String),
     Ship(String),
     Resource(String),
     Building(String),
@@ -743,6 +745,14 @@ impl WorldView {
             }
         }
         ships::draw(snapshot, selection, &mut sprites, &mut decals, &mut picks);
+        wildlife::draw(
+            snapshot,
+            heights,
+            self.animation_time,
+            &mut sprites,
+            &mut decals,
+            &mut picks,
+        );
         self.pickables = picks;
         (sprites, decals)
     }
@@ -803,6 +813,24 @@ fn work_target(
     position: Vec3,
 ) -> Option<(Vec2, &'static str)> {
     let (footprint, activity) = match &unit.action {
+        UnitAction::AttackAnimal { animal_id, .. } => {
+            let animal = snapshot
+                .animals
+                .iter()
+                .find(|a| &a.id == animal_id && a.step.is_none())?;
+            (
+                aoa_game::Footprint {
+                    origin: animal.cell,
+                    columns: 1,
+                    rows: 1,
+                },
+                if unit.kind == aoa_game::UnitKind::Villager {
+                    "chop"
+                } else {
+                    "action"
+                },
+            )
+        }
         UnitAction::Gather {
             resource_id,
             phase: GatherPhase::Gathering,

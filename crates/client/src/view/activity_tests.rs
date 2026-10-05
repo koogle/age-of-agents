@@ -236,3 +236,47 @@ fn park_beside_work(snapshot: &mut WorldSnapshot) {
     snapshot.units[0].unit.step = None;
     snapshot.units[0].position = snapshot.units[0].unit.position();
 }
+
+#[test]
+fn paused_wildlife_holds_its_rendered_stride_until_resumed() {
+    let sheets = sheets();
+    let mut snapshot = GameWorld::default().snapshot();
+    let cell = snapshot.units[0].unit.cell;
+    snapshot.animals = vec![aoa_game::Animal {
+        id: "pause-wolf".into(),
+        kind: aoa_game::AnimalKind::Wolf,
+        home: cell,
+        cell,
+        step: Some(aoa_game::Step {
+            to: aoa_game::CellCoordinate::new(cell.column + 1, cell.row),
+            progress: 0.5,
+        }),
+        health: 40.0,
+        attack_seconds: 0.0,
+        heading: [1, 0],
+    }];
+    snapshot.simulation_speed = 0.0;
+    let mut view = WorldView::new();
+    view.sync(snapshot.clone());
+    let sprite = |view: &mut WorldView| {
+        view.draw_list(&sheets, &Rig::new(), &Selection::default())
+            .0
+            .into_iter()
+            .find(|(sheet, _)| *sheet == 13)
+            .unwrap()
+            .1
+    };
+    let before = sprite(&mut view);
+    for _ in 0..90 {
+        view.frame(1.0 / 60.0, None);
+        let held = sprite(&mut view);
+        assert_eq!(held.uv, before.uv);
+        assert_eq!(held.anchor, before.anchor);
+    }
+    snapshot.simulation_speed = 1.0;
+    view.sync(snapshot);
+    for _ in 0..15 {
+        view.frame(1.0 / 60.0, None);
+    }
+    assert_ne!(sprite(&mut view).uv, before.uv);
+}

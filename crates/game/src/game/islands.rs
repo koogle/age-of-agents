@@ -47,6 +47,7 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
+        self.populate_wildlife(id as usize);
         self.inventories.push(Stockpile::default());
     }
 
