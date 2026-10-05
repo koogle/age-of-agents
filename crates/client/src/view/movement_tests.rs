@@ -75,7 +75,7 @@ fn late_batches_keep_the_unplayed_path_without_position_or_clock_jumps() {
 }
 
 #[test]
-fn starvation_rebuffers_and_pause_drains_without_rewinding() {
+fn starvation_rebuffers_and_pause_freezes_until_resume() {
     let mut view = WorldView::new();
     warm(&mut view);
     for _ in 0..120 {
@@ -90,11 +90,23 @@ fn starvation_rebuffers_and_pause_drains_without_rewinding() {
     assert!(view.render_tick.unwrap() > held);
     let mut paused = view.snapshot.clone().unwrap();
     paused.simulation_speed = 0.0;
-    view.sync(paused);
+    view.sync(paused.clone());
+    let clock = view.render_tick;
+    let animation = view.animation_time;
+    let entry = view.units.values().next().unwrap();
+    let (position, walked) = (entry.position, entry.walked);
     for _ in 0..120 {
         view.frame(1.0 / 60.0, None);
     }
-    assert_eq!(view.render_tick.unwrap(), view.latest_tick);
+    assert_eq!(view.render_tick, clock);
+    assert_eq!(view.animation_time, animation);
+    let entry = view.units.values().next().unwrap();
+    assert_eq!((entry.position, entry.walked), (position, walked));
+    paused.simulation_speed = 1.0;
+    view.sync(paused);
+    view.frame(1.0 / 60.0, None);
+    assert!(view.render_tick > clock);
+    assert!(view.animation_time > animation);
 }
 
 #[test]
@@ -128,6 +140,9 @@ fn native_accumulator_and_view_agree_at_every_frame_and_across_speed_changes() {
         assert!(clock <= view.latest_tick);
         if (12..60).contains(&frame) || frame > 132 {
             assert!((clock - target).abs() < 1e-5);
+        }
+        if (60..120).contains(&frame) {
+            assert_eq!(clock, previous, "local pause must hold presentation");
         }
         previous = clock;
     }
@@ -316,5 +331,72 @@ fn reconnect_restores_recency_in_one_frame_without_animating_the_correction() {
                 assert!(view.latest_tick - view.render_tick.unwrap() <= 2.01);
             }
         }
+    }
+}
+
+#[test]
+fn reconnect_rebases_even_short_gaps_and_paused_worlds_without_animating_history() {
+    for speed in [0.0, 1.0] {
+        for gap in [2, 50] {
+            let mut view = WorldView::new();
+            warm(&mut view);
+            let walked = view.units.values().next().unwrap().walked;
+            let mut next = view.snapshot.clone().unwrap();
+            next.tick += gap;
+            next.simulation_speed = speed;
+            next.units[0].position.x += 4.0;
+            assert!(!view.sync(next), "reconnect does not reset the world");
+            let newest = view
+                .units
+                .values()
+                .next()
+                .unwrap()
+                .samples
+                .back()
+                .unwrap()
+                .1;
+            view.reset_playback();
+            assert_eq!(view.render_tick, Some(view.latest_tick));
+            let entry = view.units.values().next().unwrap();
+            assert_eq!(entry.position, newest);
+            assert_eq!(entry.velocity, Vec3::ZERO);
+            assert_eq!(entry.walked, walked);
+            assert!(!entry.moving);
+            assert_eq!(entry.samples.len(), 1);
+            for _ in 0..60 {
+                view.frame(1.0 / 60.0, None);
+                let entry = view.units.values().next().unwrap();
+                assert_eq!(entry.position, newest);
+                assert_eq!(entry.walked, walked);
+            }
+        }
+    }
+}
+
+#[test]
+fn a_paused_snapshot_after_a_long_stream_gap_establishes_current_position() {
+    let mut view = WorldView::new();
+    warm(&mut view);
+    let animation = view.animation_time;
+    let walked = view.units.values().next().unwrap().walked;
+    sample(&mut view, 150);
+    let mut paused = view.snapshot.clone().unwrap();
+    paused.simulation_speed = 0.0;
+    view.sync(paused);
+    let expected = view
+        .units
+        .values()
+        .next()
+        .unwrap()
+        .samples
+        .back()
+        .unwrap()
+        .1;
+    for _ in 0..60 {
+        view.frame(1.0 / 60.0, None);
+        let entry = view.units.values().next().unwrap();
+        assert_eq!(entry.position, expected);
+        assert_eq!(entry.walked, walked);
+        assert_eq!(view.animation_time, animation);
     }
 }
