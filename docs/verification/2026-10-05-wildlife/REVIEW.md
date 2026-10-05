@@ -78,3 +78,22 @@ roster is one wolf, then exercises hunting, two-way damage and defeat without
 page errors. Logs and screenshots: `/tmp/aoa-population-browser`; phone interaction
 was previously verified above and is unchanged by this generation-only adjustment.
 The earlier Modal connectivity blocker remains; this follow-up is not deployed.
+
+## Seeded population variation (2026-10-05)
+
+The subsequent user request supersedes the fixed three-animal later-island roster:
+later islands now choose 2–4 animals using the world seed and island index, with
+one bear and the remaining animals wolves. The first island retains one wolf.
+Existing saved animals and placement safeguards are unchanged. Focused tests
+cover five seeds and three discoveries each, verify deterministic replay and
+preservation of earlier animals, and observe all three possible counts.
+
+Thermonuclear review: bounded local generation logic, existing hash mixer, no RNG
+dependency or persisted random state, no client or command changes.
+
+Random-count follow-up: all 237 Rust tests pass (one manual benchmark ignored),
+strict native/WASM lint, formatting, rebuilt server/WASM, generated JS syntax,
+document links and whitespace checks pass. Fresh desktop browser verifies natural
+starter count and the combat fixture without page errors; evidence is in
+`/tmp/aoa-random-wildlife-browser`. No deployment was performed; the previously
+recorded Modal connectivity blocker remains.

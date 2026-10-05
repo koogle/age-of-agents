@@ -152,20 +152,31 @@ fn animals_pursue_locally_and_retreat_to_their_territory() {
 
 #[test]
 fn discovery_adds_wildlife_without_replacing_existing_animals() {
-    for seed in [1, 123, DEFAULT_SEED] {
+    let mut counts = std::collections::BTreeSet::new();
+    for seed in [1, 2, 3, 123, DEFAULT_SEED] {
         let mut world = GameWorld::generate(seed);
-        for _ in 0..2 {
+        for _ in 0..3 {
             let old = world.animals.clone();
+            let mut replay = world.clone();
             world.discover_island();
+            replay.discover_island();
+            assert_eq!(world.animals, replay.animals);
             assert_eq!(&world.animals[..old.len()], old.as_slice());
-            let added: Vec<_> = world.animals[old.len()..].iter().map(|a| a.kind).collect();
+            let added = &world.animals[old.len()..];
+            assert!((2..=4).contains(&added.len()));
             assert_eq!(
-                added,
-                [AnimalKind::Wolf, AnimalKind::Wolf, AnimalKind::Bear]
+                added.iter().filter(|a| a.kind == AnimalKind::Bear).count(),
+                1
             );
+            assert_eq!(
+                added.iter().filter(|a| a.kind == AnimalKind::Wolf).count(),
+                added.len() - 1
+            );
+            counts.insert(added.len());
             world.validate().unwrap();
         }
     }
+    assert_eq!(counts, [2, 3, 4].into_iter().collect());
 }
 
 #[test]
