@@ -1,6 +1,6 @@
 # Current handoff: minimap orientation (2026-10-05)
 
-- User requested a dedicated PR and merge into the default branch (`master`). Branch `fix/minimap-orientation` starts from `eb6757c`; the separate selection-modifier PR #87 remains open.
+- PR #89: https://github.com/koogle/age-of-agents/pull/89. User authorized its merge into the default branch (`master`); release status is tracked by the repository production workflow. Branch `fix/minimap-orientation` starts from `eb6757c`; the separate selection-modifier PR #87 remains open.
 - Minimap terrain, camera marker and mouse/touch navigation share a projection derived from the fixed world camera. Replaces unrotated axes and stale 30×20 dimensions with full current world bounds; projected corners fit inside the globe.
 - Focused tests cover orientation against the actual world camera, world/local/shader round trips, full map bounds and real HUD press/marker alignment at desktop and DPR2 phone sizes. README/roadmap/design decision updated; no simulation, persistence or artwork changes.
 - Thermonuclear review: one small projection module replaces three independent coordinate formulas; uses existing camera axes and terrain bounds, no new dependencies/authority/interaction mode, client files remain below 1,000 lines.
