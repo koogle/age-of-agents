@@ -54,8 +54,10 @@ resources, including timber's raw wood cost.
 **Check:** `crates/game/src/game/islands_tests.rs` covers non-teleporting shortcuts,
 both settlements producing, runtime map dimensions and current-format round trips;
 `ship_tests.rs` covers original-dock return, passengers and blocked commands.
-Use the existing save versioning in `src/store/migration.rs`; malformed old
-values remain errors, and reload must not credit legacy cargo twice.
+Historical island translation and inventory pooling are removed per Jakob’s
+2026-10-05 instruction. Discovery adds generated terrain/resources directly to
+the continuous world; incompatible hosted saves reset by store version. Consult
+[the save policy](server-and-saves.md#snapshot-and-save-version-policy) before changing persisted fields.
 
 ## Keep this guide current
 
