@@ -547,47 +547,93 @@ fn generated_bush_gatherers_resume_after_delivery_at_double_speed() {
 }
 
 #[test]
-fn finishing_the_far_side_of_a_bush_patch_keeps_nearby_food_in_range_after_delivery() {
-    for speed in [1.0, 2.0] {
-        let mut w = world();
-        w.simulation_speed = speed;
-        w.units.truncate(1);
-        w.units[0].cell = cell(9, 10);
-        w.resources = vec![
-            node("patch-left", cell(10, 10), 10.0),
-            node("patch-right", cell(11, 10), 10.0),
-            node("next-patch", cell(21, 10), 40.0),
-            node("distant-patch", cell(45, 10), 30.0),
-            node("unrelated-old-patch", cell(40, 10), 0.0),
-        ];
-        w.apply_command(Command::Gather {
-            unit_id: "villager-1".into(),
-            resource_id: "patch-right".into(),
-        })
-        .unwrap();
-        // Right then left fills the first load. The last bush is eleven cells
-        // from the next patch, but its connected neighbor is within ten.
-        for _ in 0..2000 {
-            w.tick(0.1);
-            if w.inventories[0].food >= 20.0 - 1e-8 && w.resources[2].amount > 0.0 {
-                assert!(
-                    matches!(w.units[0].action, UnitAction::Gather { .. }),
-                    "{speed}x lost the patch after delivery: {:?}",
-                    w.units[0]
+fn exhausted_patch_continuation_survives_distant_deliveries() {
+    for kind in [ResourceKind::Food, ResourceKind::Wood, ResourceKind::Stone] {
+        for drop_site in [cell(25, 10), cell(80, 40)] {
+            for speed in [1.0, 2.0] {
+                let mut w = world();
+                w.simulation_speed = speed;
+                w.units.truncate(1);
+                w.buildings[0].origin = drop_site;
+                w.units[0].cell = cell(9, 10);
+                w.resources = vec![
+                    node("patch-left", cell(10, 10), 10.0),
+                    node("patch-right", cell(11, 10), 10.0),
+                    node("next-patch", cell(21, 10), 40.0),
+                    node("distant-patch", cell(45, 10), 30.0),
+                    node("unrelated-old-patch", cell(40, 10), 0.0),
+                ];
+                for resource in &mut w.resources {
+                    resource.kind = kind;
+                }
+                w.apply_command(Command::Gather {
+                    unit_id: "villager-1".into(),
+                    resource_id: "patch-right".into(),
+                })
+                .unwrap();
+                // Right then left fills the first load. The last bush is eleven cells
+                // from the next patch, but its connected neighbor is within ten.
+                for _ in 0..6000 {
+                    w.tick(0.1);
+                    if w.inventories[0].amount(kind) >= 20.0 - 1e-8 && w.resources[2].amount > 0.0 {
+                        assert!(
+                            matches!(w.units[0].action, UnitAction::Gather { .. }),
+                            "{kind:?} {drop_site:?} {speed}x lost the patch after delivery: {:?}",
+                            w.units[0]
+                        );
+                    }
+                    if w.units[0].action == UnitAction::Idle {
+                        break;
+                    }
+                }
+                assert!((w.inventories[0].amount(kind) - 60.0).abs() < 1e-8);
+                assert_eq!(w.resources[2].amount, 0.0);
+                assert_eq!(
+                    w.resources[3].amount, 30.0,
+                    "do not search the whole island"
                 );
-            }
-            if w.units[0].action == UnitAction::Idle {
-                break;
+                assert_eq!(w.units[0].action, UnitAction::Idle);
+                assert!(w.units[0].cargo.is_none());
+                w.validate().unwrap();
             }
         }
-        assert!((w.inventories[0].food - 60.0).abs() < 1e-8);
-        assert_eq!(w.resources[2].amount, 0.0);
-        assert_eq!(
-            w.resources[3].amount, 30.0,
-            "do not search the whole island"
-        );
-        assert_eq!(w.units[0].action, UnitAction::Idle);
-        assert!(w.units[0].cargo.is_none());
-        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn live_resource_assignment_survives_repeated_distant_deliveries() {
+    for kind in [ResourceKind::Food, ResourceKind::Wood, ResourceKind::Stone] {
+        for speed in [1.0, 2.0] {
+            let mut w = world();
+            w.simulation_speed = speed;
+            w.units.truncate(1);
+            w.buildings[0].origin = cell(80, 40);
+            let mut resource = node("source", cell(11, 10), 100.0);
+            resource.kind = kind;
+            w.resources = vec![resource];
+            w.apply_command(Command::Gather {
+                unit_id: "villager-1".into(),
+                resource_id: "source".into(),
+            })
+            .unwrap();
+            for _ in 0..6000 {
+                w.tick(0.1);
+                if w.resources[0].amount > 0.0 {
+                    assert!(
+                        matches!(&w.units[0].action, UnitAction::Gather { resource_id, .. } if resource_id == "source"),
+                        "{kind:?} {speed}x abandoned a live distant resource"
+                    );
+                }
+                if w.inventories[0].amount(kind) >= 60.0 - 1e-8 {
+                    break;
+                }
+            }
+            assert!((w.inventories[0].amount(kind) - 60.0).abs() < 1e-8);
+            assert!((w.resources[0].amount - 40.0).abs() < 1e-8);
+            assert!(
+                matches!(&w.units[0].action, UnitAction::Gather { resource_id, .. } if resource_id == "source")
+            );
+            w.validate().unwrap();
+        }
     }
 }

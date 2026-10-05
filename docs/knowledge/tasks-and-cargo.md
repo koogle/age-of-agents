@@ -62,6 +62,9 @@ cycle rather than treating one successful command as proof of the loop.
 
 The developer reported regular-bush gatherers going Idle after automatic delivery,
 with nearby food remaining and no further clicks, especially at 2× (2026-10-05).
+The developer also suspects any resource with a distant drop-off is affected.
+Coverage is being expanded to food, wood and stone with both nearby and distant
+storage, including deliveries while the original node still has stock.
 A visible-production-layout replay reproduced this when `berries-34` was the last
 node harvested: its 10-cell circle excluded a neighboring patch, although other
 bushes in the connected exhausted patch were close enough. Starting on another
