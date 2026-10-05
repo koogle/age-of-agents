@@ -3,9 +3,9 @@
 use aoa_game::*;
 fn main() {
     let mut world = GameWorld::default();
-    world.stockpile.wood = 300.0;
-    world.stockpile.timber = 100.0;
-    world.stockpile.food = 100.0;
+    world.inventories[0].wood = 300.0;
+    world.inventories[0].timber = 100.0;
+    world.inventories[0].food = 100.0;
     for row in 2..WORLD_ROWS - 5 {
         for col in 2..WORLD_COLUMNS - 5 {
             let origin = CellCoordinate::new(col, row);

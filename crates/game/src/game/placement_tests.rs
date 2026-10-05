@@ -4,7 +4,7 @@ use super::*;
 #[test]
 fn houses_can_share_edges_on_both_axes_but_never_overlap() {
     let mut world = fixture::fixture();
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     let first = cell(20, 24);
     let (columns, rows) = BuildingKind::House.size();
     for origin in [
@@ -31,7 +31,7 @@ fn houses_can_share_edges_on_both_axes_but_never_overlap() {
         assert!(world.buildings.last().unwrap().is_complete());
         world.validate().unwrap();
     }
-    assert_eq!(world.stockpile.wood, 55.0);
+    assert_eq!(world.inventories[0].wood, 55.0);
     let before = world.clone();
     assert_eq!(
         world.apply_command(Command::Build {
@@ -60,7 +60,7 @@ fn bottleneck_world() -> GameWorld {
     }
     world.units[0].cell = cell(11, 10);
     world.units[1].cell = cell(20, 10);
-    world.stockpile.wood = 100.0;
+    world.inventories[0].wood = 100.0;
     world.validate().unwrap();
     world
 }

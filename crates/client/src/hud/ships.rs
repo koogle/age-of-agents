@@ -25,6 +25,10 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         enabled: ship.stopped() && !ship.passengers.is_empty(),
         action: Action::Disembark,
     }];
+    let connection = snapshot
+        .ship_connections
+        .iter()
+        .find(|c| c.ship_id == ship.id);
     let current = snapshot
         .island_origins
         .iter()
@@ -71,12 +75,16 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     }
     Some((
         "transport",
-        format!("Transport · {} islands", snapshot.island_count),
+        format!("Transport · {:.0}/50 resources", ship.cargo.total()),
         format!(
             "{}/{TRANSPORT_PASSENGERS} passengers · {}",
             ship.passengers.len(),
             if ship.stopped() {
-                "Tap sea or dock · sail beyond the coast to explore"
+                if connection.is_some() {
+                    "Storage available to nearby island"
+                } else {
+                    "Stop near shore to share cargo"
+                }
             } else {
                 "Sailing"
             }
@@ -96,7 +104,7 @@ mod tests {
         let dock = &mut snapshot.buildings[0].building;
         dock.kind = BuildingKind::Dock;
         let cell = CellCoordinate::new(dock.origin.column, dock.origin.row + 4);
-        snapshot.stockpile.wood = 100.0;
+        snapshot.inventories[0].wood = 100.0;
         snapshot.ships.push(TransportShip {
             id: "transport-3".into(),
             cell,
@@ -104,12 +112,14 @@ mod tests {
             destination: None,
             heading: [1, 0],
             passengers: vec![],
+            cargo: Default::default(),
             home_dock_id: None,
         });
         let commands = |snapshot: &WorldSnapshot| {
             selection(
                 snapshot,
                 &Model {
+                    resource_island: 0,
                     snapshot: Some(snapshot),
                     units: &[],
                     building: None,

@@ -82,3 +82,11 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 ## Timber icon (2026-10-05)
 
 `icons/resource_timber.png` distinguishes processed timber from raw wood in the resource display, lumber-mill production button, and queued timber jobs. Generated with FAL `fal-ai/nano-banana/edit` using the existing wood icon as the style reference, then cut out with `fal-ai/birefnet/v2` and normalized directly from the 1024px cutout with `scripts/normalize_icons.py`. Original render, cutout, exact prompt, reference, responses and request IDs are retained in `timber_sources/provenance.json`; estimated generation plus cutout cost is $0.0448. The existing wood art remains the kit’s style reference.
+
+## Cargo transfer shields (2026-10-05)
+
+`buttons/shield_up.png` loads ship cargo; `buttons/shield_down.png` unloads it. The active FAL-generated shields match `buttons/coin_researched.png`: warm bronze faces and rims, engraved laurel branches, and green enamel arrows with bronze outlines. The shape stays an upright shield in both directions. They replace text buttons in each ship resource row, with Load/Unload column labels and reduced opacity when unavailable.
+
+Final 1024px renders, BiRefNet cutouts, exact prompts, reference paths, responses, request IDs and the reproducible `pack.py` are in `sources/cargo_shields/classical/`. The existing research seal was the primary style reference; the earlier shield provided only its silhouette. `style-comparison.png` compares the check seal and both arrows on dark green, parchment and blue at large and actual UI sizes. The earlier ivory draft and its provenance remain in the parent directory.
+
+Packing restores original pixels inside any enclosed segmentation holes, removes a two-pixel matte fringe and resizes both from a common bound to matched 256px RGBA buttons. Estimated FAL generation/cutout cost for the final revision: $0.0896 ($0.1792 including the initial draft). No code-drawn arrow geometry or generated lettering.

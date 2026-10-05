@@ -103,7 +103,7 @@ fn cargo_keeps_the_carry_pose_outside_active_gathering() {
             phase: GatherPhase::Depositing,
         },
         UnitAction::Deposit {
-            building_id: building_id.clone(),
+            storage_id: building_id.clone(),
         },
         UnitAction::Build {
             building_id: building_id.clone(),

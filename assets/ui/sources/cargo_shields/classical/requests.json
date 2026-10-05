@@ -1,0 +1,34 @@
+[
+  {
+    "t": 1791212188.970213,
+    "endpoint": "fal-ai/nano-banana/edit",
+    "tag": "cargo-shield-classical:up",
+    "est_usd": 0.0398,
+    "request_id": "01a10c90-ca0d-7432-af7d-d7e3f203a2da",
+    "seconds": 10.8
+  },
+  {
+    "t": 1791212211.330497,
+    "endpoint": "fal-ai/nano-banana/edit",
+    "tag": "cargo-shield-classical:down",
+    "est_usd": 0.0398,
+    "request_id": "01a10c91-2522-7cd0-be0c-a658a6b7d81c",
+    "seconds": 9.9
+  },
+  {
+    "t": 1791212227.299364,
+    "endpoint": "fal-ai/birefnet/v2",
+    "tag": "cargo-shield-classical:cut:up",
+    "est_usd": 0.005,
+    "request_id": "01a10c91-7e75-78d0-8522-a0451fdab643",
+    "seconds": 3.0
+  },
+  {
+    "t": 1791212244.6243057,
+    "endpoint": "fal-ai/birefnet/v2",
+    "tag": "cargo-shield-classical:cut:down",
+    "est_usd": 0.005,
+    "request_id": "01a10c91-b93d-77a1-a2ba-de1e38f77a6c",
+    "seconds": 5.3
+  }
+]
