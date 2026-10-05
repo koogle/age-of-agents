@@ -1,3 +1,7 @@
+## Mobile time controls — 2026-10-05
+
+- User authorized PR creation and merge after grid verification. Tightened mobile time-control centers to 36px and corrected glyph transparency using the original alpha mask. Integrating current master before fresh full checks and browser grid/alignment acceptance; preserves all incoming features. Earlier evidence is in `docs/verification/2026-10-05/tighter-time-*` and `time-label-*`. Release will use the GitHub Actions production workflow.
+
 # Current fix: automatic resource gathering continuation (2026-10-05)
 
 - Branch `fix/food-gathering-continuation`, PR [#100](https://github.com/koogle/age-of-agents/pull/100), integrated master `e50ad7b` including docks, shore pickup, wildlife, mobile cargo paging and the Stop hand; preserved the concise README cleanup. The 10-cell continuation search used only the last exhausted node, so harvesting order could strand nearby resources after delivery. It now measures from the connected exhausted wild-resource patch, preserving same-kind/reachable candidates, deterministic ordering, field behavior and Stop.
