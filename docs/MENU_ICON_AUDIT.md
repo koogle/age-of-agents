@@ -6,7 +6,7 @@ Each fix goes through a PR and the repository verification/release process.
 
 | Meaning | Before | Required correction | Status |
 | --- | --- | --- | --- |
-| Stop unit/ship | Cancel X; unused authored hand exists | Load and use `command_stop` | Verified locally; first PR |
+| Stop unit/ship | Cancel X; unused authored hand exists | Load and use `command_stop` | [PR #104](https://github.com/koogle/age-of-agents/pull/104), verified |
 | Coal | Iron ore | Dedicated coal icon | Pending |
 | Steel | Iron ore; villager on production/queue | Dedicated steel across surfaces | Pending |
 | Bricks | Clay; villager on production/queue | Dedicated brick stack | Pending |

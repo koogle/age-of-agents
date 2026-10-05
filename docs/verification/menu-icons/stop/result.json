@@ -1,6 +1,6 @@
 {
   "scene": "stop",
-  "wasm_sha256": "1d906b4f0664462bf379834ac5cf236b1a37cfccce31e8c97b62d88415cc7347",
+  "wasm_sha256": "f7d3d26cd43a8608e1d6ac0fae9970b4e39e078042c9db228e3a363032cf0f1c",
   "viewports": [
     "1280x800 DPR1 mouse",
     "390x844 DPR2 touch"

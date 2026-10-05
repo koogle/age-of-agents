@@ -308,7 +308,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         };
         let scaled = font.as_scaled(PxScale::from(pixels));
         let mut glyphs = HashMap::new();
-        for ch in (32u8..127).map(char::from).chain(['×', '·']) {
+        for ch in (32u8..127).map(char::from).chain(['×', '·', '‹', '›']) {
             let id = scaled.glyph_id(ch);
             let advance = scaled.h_advance(id);
             let glyph = id.with_scale_and_position(pixels, ab_glyph::point(0.0, 0.0));
@@ -377,6 +377,7 @@ pub struct Model<'a> {
 
 pub struct Hud {
     pub cargo_page: usize,
+    cargo_strip: Option<([f32; 4], usize, f32)>,
     pub quads: Vec<Quad>,
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
@@ -405,6 +406,7 @@ impl Hud {
     pub fn new() -> Self {
         Self {
             cargo_page: 0,
+            cargo_strip: None,
             quads: Vec::new(),
             regions: Vec::new(),
             hover: None,
