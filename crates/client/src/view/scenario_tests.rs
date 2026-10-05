@@ -162,10 +162,10 @@ fn seeded_npc_routes_are_correct_on_every_rendered_frame() {
                             "{context} npc={id}: sprite offset"
                         );
                         let traveled = distance.entry(id.clone()).or_default();
-                        if let Some(old) = previous.insert(id.clone(), at) {
-                            if !resync {
-                                *traveled += at.distance(old);
-                            }
+                        if let Some(old) = previous.insert(id.clone(), at)
+                            && !resync
+                        {
+                            *traveled += at.distance(old);
                         }
                         if entry.moving {
                             moving += 1;
