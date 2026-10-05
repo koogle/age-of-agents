@@ -247,12 +247,15 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
-            UnitAction::Build { .. } if unit.unit.cargo.is_some() => {
+            UnitAction::Build { .. } | UnitAction::ExploreBuild { .. }
+                if unit.unit.cargo.is_some() =>
+            {
                 format!(
                     "Unloading {} before building",
                     resource_name(unit.unit.cargo.as_ref().unwrap().kind)
                 )
             }
+            UnitAction::ExploreBuild { .. } => "Exploring build site".into(),
             UnitAction::Build { .. } => "Building".into(),
             UnitAction::Cultivate { .. } if unit.unit.cargo.is_some() => {
                 format!(

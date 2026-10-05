@@ -2,6 +2,9 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
+mod construction;
+#[cfg(test)]
+mod construction_tests;
 mod domain;
 mod economy;
 #[cfg(test)]
@@ -187,8 +190,8 @@ pub enum Command {
         unit_id: String,
         resource_id: String,
     },
-    /// Place a foundation of `kind` (a town center when omitted) with its
-    /// north-west corner at `origin`.
+    /// Build `kind` (a town center when omitted) at `origin`, exploring first
+    /// if any footprint cell is outside current sight.
     Build {
         unit_id: String,
         origin: CellCoordinate,
@@ -495,50 +498,7 @@ impl GameWorld {
                 origin,
                 kind,
             } => {
-                let unit = self.ordered_unit(&unit_id)?;
-                if self.units[unit].kind != UnitKind::Villager {
-                    return Err(CommandError::VillagerRequired);
-                }
-                if !self.building_available(kind) {
-                    return Err(CommandError::NotBuildable);
-                }
-                let (columns, rows) = kind.size();
-                let footprint = Footprint {
-                    origin,
-                    columns,
-                    rows,
-                };
-                if !self.footprint_is_free(footprint) {
-                    return Err(CommandError::InvalidBuildSite);
-                }
-                if kind.needs_coast() && !self.touches_sea(footprint) {
-                    return Err(CommandError::NeedsCoast);
-                }
-                for &(resource, amount) in kind.cost() {
-                    if self.stockpile.amount(resource) < amount {
-                        return Err(match resource {
-                            ResourceKind::Stone => CommandError::InsufficientStone,
-                            ResourceKind::Wood => CommandError::InsufficientWood,
-                            kind => CommandError::InsufficientResources(kind),
-                        });
-                    }
-                }
-                if !self.placement_preserves_routes(footprint) {
-                    return Err(CommandError::TargetUnreachable);
-                }
-                // Validate reachability against the world as it will be, with
-                // the foundation in place; roll back if the builder is cut off.
-                let id = self.next_building_name();
-                self.buildings.push(building(kind, &id, origin, Some(0.0)));
-                if !self.can_reach_beside(unit, footprint) {
-                    self.buildings.pop();
-                    return Err(CommandError::TargetUnreachable);
-                }
-                self.next_building_id += 1;
-                for &(resource, amount) in kind.cost() {
-                    self.stockpile.add(resource, -amount);
-                }
-                self.units[unit].action = UnitAction::Build { building_id: id };
+                self.order_build(&unit_id, origin, kind)?;
             }
             Command::Construct {
                 unit_id,
@@ -776,6 +736,9 @@ impl GameWorld {
                 UnitAction::Gather { resource_id, phase } => {
                     self.tick_gather(index, resource_id, phase, dt)
                 }
+                UnitAction::ExploreBuild { origin, kind } => {
+                    self.tick_explore_build(index, origin, kind, dt)
+                }
                 UnitAction::Build { building_id } => self.tick_build(index, &building_id, dt),
                 UnitAction::Cultivate { resource_id } => {
                     self.tick_cultivate(index, &resource_id, dt)
@@ -932,45 +895,6 @@ impl GameWorld {
             GATHERING_TECH_MULTIPLIER
         } else {
             1.0
-        }
-    }
-
-    fn tick_build(&mut self, unit: usize, building_id: &str, dt: f64) {
-        let Some(building) = self
-            .buildings
-            .iter()
-            .position(|building| building.id == building_id && !building.is_complete())
-        else {
-            // Another builder finished it.
-            self.units[unit].action = UnitAction::Idle;
-            return;
-        };
-        if self.drop_off_before_building(unit, dt) {
-            return;
-        }
-        let remaining =
-            match self.travel(unit, Goal::Beside(self.buildings[building].footprint()), dt) {
-                Travel::EnRoute => return,
-                Travel::Unreachable => {
-                    // The foundation stays; any villager can resume it with Construct.
-                    self.units[unit].action = UnitAction::Idle;
-                    return;
-                }
-                Travel::Arrived { remaining } => remaining,
-            };
-        let work = self.buildings[building].construction.unwrap_or(0.0) + remaining;
-        if work + f64::EPSILON < self.buildings[building].kind.build_seconds() {
-            self.buildings[building].construction = Some(work);
-        } else {
-            // Completion releases every builder at once, so no unit is ever
-            // left working on a building that is no longer a foundation.
-            self.buildings[building].construction = None;
-            for other in &mut self.units {
-                if matches!(&other.action, UnitAction::Build { building_id: id } if id == building_id)
-                {
-                    other.action = UnitAction::Idle;
-                }
-            }
         }
     }
 }
