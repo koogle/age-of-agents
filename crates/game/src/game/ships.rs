@@ -1,19 +1,11 @@
 //! Explicit transport. Passengers live in exactly one collection: land units
-//! or a ship manifest. Loading needs a dock; unloading also works at shore.
+//! or a ship manifest. Passengers can land at clear shore without a dock.
 use super::*;
 use crate::navigation::PathTree;
 use movement::interaction_cells;
 
 pub const TRANSPORT_PASSENGERS: usize = 4;
-pub const TRANSPORT_GOODS: f64 = 200.0;
 const SAIL_SPEED: f64 = 4.0;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum CargoDirection {
-    Load,
-    Unload,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -25,7 +17,6 @@ pub struct TransportShip {
     /// Last travel vector, retained when stopped for sprite facing.
     pub heading: [i8; 2],
     pub passengers: Vec<Unit>,
-    pub goods: Stockpile,
 }
 
 impl TransportShip {
@@ -38,9 +29,6 @@ impl TransportShip {
     }
     pub fn stopped(&self) -> bool {
         self.step.is_none() && self.destination.is_none()
-    }
-    pub fn goods_total(&self) -> f64 {
-        self.goods.entries().iter().map(|(_, n)| n).sum()
     }
     pub fn beside(&self, footprint: Footprint) -> bool {
         footprint
@@ -101,7 +89,6 @@ impl GameWorld {
             destination: None,
             heading: [1, 0],
             passengers: Vec::new(),
-            goods: Stockpile::default(),
         });
         self.next_unit_id += 1;
         if self.islands.is_empty() {
@@ -300,51 +287,6 @@ impl GameWorld {
         }
         Ok(())
     }
-    pub(super) fn transfer_ship_cargo(
-        &mut self,
-        id: &str,
-        kind: ResourceKind,
-        amount: f64,
-        direction: CargoDirection,
-    ) -> Result<(), CommandError> {
-        let ship = self.ship_index(id)?;
-        if !self.ships[ship].stopped() {
-            return Err(CommandError::ShipMustBeStopped);
-        }
-        if self.dock_for_ship(ship).is_none()
-            && !(direction == CargoDirection::Unload
-                && self.landing_cells(ship).iter().any(|&c| {
-                    self.terrain
-                        [usize::from(c.row) * usize::from(WORLD_COLUMNS) + usize::from(c.column)]
-                    .biome
-                    .is_walkable()
-                }))
-        {
-            return Err(CommandError::DockRequired);
-        }
-        if !amount.is_finite() || amount <= 0.0 {
-            return Err(CommandError::InvalidCargoTransfer);
-        }
-        match direction {
-            CargoDirection::Load => {
-                if self.stockpile.amount(kind) < amount
-                    || self.ships[ship].goods_total() + amount > TRANSPORT_GOODS
-                {
-                    return Err(CommandError::InvalidCargoTransfer);
-                }
-                self.stockpile.add(kind, -amount);
-                self.ships[ship].goods.add(kind, amount);
-            }
-            CargoDirection::Unload => {
-                if self.ships[ship].goods.amount(kind) < amount {
-                    return Err(CommandError::InvalidCargoTransfer);
-                }
-                self.ships[ship].goods.add(kind, -amount);
-                self.stockpile.add(kind, amount);
-            }
-        }
-        Ok(())
-    }
     pub(super) fn validate_ships(&self) -> Result<(), String> {
         let mut ids: BTreeSet<_> = self.units.iter().map(|u| u.id.as_str()).collect();
         let mut claims = BTreeSet::new();
@@ -386,14 +328,7 @@ impl GameWorld {
                     |u| matches!(&u.action, UnitAction::Board { ship_id } if ship_id == &ship.id),
                 )
                 .count();
-            if ship.passengers.len() + waiting > TRANSPORT_PASSENGERS
-                || ship.goods_total() > TRANSPORT_GOODS
-                || ship
-                    .goods
-                    .entries()
-                    .iter()
-                    .any(|(_, n)| !n.is_finite() || *n < 0.0)
-            {
+            if ship.passengers.len() + waiting > TRANSPORT_PASSENGERS {
                 return Err("invalid transport manifest".into());
             }
             for unit in &ship.passengers {

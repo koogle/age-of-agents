@@ -384,7 +384,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         let queued = snapshot.buildings.iter().flat_map(|b| b.building.jobs()).any(|job| matches!(job, aoa_game::BuildingJob::Research { technology, .. } if *technology == tech));
         let blocked = tech.prerequisite().filter(|p| !known.contains(p));
         let detail = if done {
-            "researched".to_string()
+            format!("Already researched · {effect}")
         } else if queued {
             "research queued or in progress".to_string()
         } else if queue_full {
@@ -520,7 +520,6 @@ mod tests {
             building: None,
             build: BuildUi::Off,
             ship: None,
-            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -542,7 +541,6 @@ mod tests {
                 building: None,
                 build: BuildUi::Group(group),
                 ship: None,
-                cargo_index: 0,
                 show_grid: false,
                 toast: None,
                 camera: Vec2::ZERO,
@@ -603,7 +601,6 @@ mod tests {
             building: Some(&building_id),
             build: BuildUi::Off,
             ship: None,
-            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -626,7 +623,6 @@ mod tests {
             building: Some(&snapshot.buildings[0].building.id),
             build: BuildUi::Off,
             ship: None,
-            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,
@@ -655,6 +651,39 @@ mod tests {
     }
 
     #[test]
+    fn completed_research_stays_visible_and_disabled_after_reload() {
+        let mut world = GameWorld::default();
+        world.stockpile.food = 100.0;
+        world.stockpile.wood = 100.0;
+        world
+            .apply_command(aoa_game::Command::Research {
+                building_id: world.buildings[0].id.clone(),
+                technology: TechnologyKind::Masonry,
+            })
+            .unwrap();
+        let command = |world: &GameWorld| {
+            commands_for_town_center(world)
+                .into_iter()
+                .find(|c| c.action == Action::Research(TechnologyKind::Masonry))
+                .unwrap()
+        };
+        assert!(!command(&world).enabled);
+        assert_eq!(command(&world).detail, "research queued or in progress");
+        world.tick(aoa_game::RESEARCH_SECONDS + 0.1);
+        assert!(
+            world
+                .researched_technologies
+                .contains(&TechnologyKind::Masonry)
+        );
+        let saved = serde_json::to_string(&world).unwrap();
+        let restored: GameWorld = serde_json::from_str(&saved).unwrap();
+        let completed = command(&restored);
+        assert!(!completed.enabled);
+        assert_eq!(completed.label, "Masonry");
+        assert!(completed.detail.starts_with("Already researched ·"));
+    }
+
+    #[test]
     fn build_menu_greys_out_what_the_stockpile_cannot_cover() {
         let mut world = GameWorld::default();
         world.economy_rules = aoa_game::EconomyRules::Unrestricted;
@@ -668,7 +697,6 @@ mod tests {
             building: None,
             build: BuildUi::Group(super::super::BuildingGroup::Town),
             ship: None,
-            cargo_index: 0,
             show_grid: false,
             toast: None,
             camera: Vec2::ZERO,

@@ -47,7 +47,12 @@ const ICONS: [&str; 19] = [
     "portrait_group",
     "portrait_towncenter",
 ];
-const COINS: [&str; 3] = ["coin_normal", "coin_hover", "coin_disabled"];
+const COINS: [&str; 4] = [
+    "coin_normal",
+    "coin_hover",
+    "coin_disabled",
+    "coin_researched",
+];
 
 pub fn files() -> Vec<String> {
     let mut files: Vec<String> = ICONS
@@ -91,8 +96,6 @@ pub enum Action {
     PlaceField,
     Cancel,
     Stop,
-    ShipCargoNext,
-    ShipTransfer(aoa_game::CargoDirection),
     Disembark,
     Voyage(u64),
     Produce(aoa_game::ProductKind),
@@ -355,7 +358,6 @@ pub struct Model<'a> {
     pub units: &'a [String],
     pub building: Option<&'a str>,
     pub ship: Option<&'a str>,
-    pub cargo_index: usize,
     pub build: BuildUi,
     pub show_grid: bool,
     pub toast: Option<&'a str>,

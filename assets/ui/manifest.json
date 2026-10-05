@@ -65,7 +65,8 @@
       "normal": "buttons/coin_normal.png",
       "hover": "buttons/coin_hover.png",
       "pressed": "buttons/coin_pressed.png",
-      "disabled": "buttons/coin_disabled.png"
+      "disabled": "buttons/coin_disabled.png",
+      "researched": "buttons/coin_researched.png"
     },
     "note": "256x256 RGBA; coin diameter 224 px centred (16 px margin for the hover glow); ivory face radius 92 px for icons"
   }
