@@ -71,7 +71,7 @@ impl Hud {
             .skip(self.cargo_page * room)
             .take(room)
             .collect();
-        let h = (90.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
+        let h = (78.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
         let w = if shown.is_empty() {
             300.0 * s
         } else {
@@ -107,16 +107,8 @@ impl Hud {
             );
             self.text(
                 atlas,
-                resource.kind.name(),
-                (center, y + 66.0 * s),
-                11.0 * s,
-                INK,
-                true,
-            );
-            self.text(
-                atlas,
                 &format!("{} aboard", quantity(resource.aboard)),
-                (center, y + 80.0 * s),
+                (center, y + 68.0 * s),
                 10.0 * s,
                 INK,
                 true,
@@ -139,9 +131,9 @@ impl Hud {
                     "shield_down"
                 };
                 let size = if self.hovered(rect) && enabled {
-                    18.0
+                    26.0
                 } else {
-                    16.0
+                    24.0
                 } * s;
                 self.sprite(
                     atlas,
@@ -170,7 +162,7 @@ impl Hud {
             }
         }
         if pages > 1 {
-            let ry = y + 90.0 * s;
+            let ry = y + 78.0 * s;
             self.text(
                 atlas,
                 &format!("{} / {pages}", self.cargo_page + 1),
