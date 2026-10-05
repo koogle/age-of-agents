@@ -1,3 +1,8 @@
+# Productive building availability — 2026-10-05
+
+- User explicitly requested hiding advanced buildings such as Barracks until resources support construction and productive use, superseding construction-only visibility. Implemented shared domain gate; Barracks/Smelter require iron + coal, Kiln clay, Weaver fiber, Workshop clay + steel inputs. Ten starter buildings remain; Range is productive with food/timber. Temporary shortages still grey out choices.
+- No persistence/schema change or deletion of existing buildings/jobs. Discovery remains global and survives depletion. All 269 workspace tests pass (one existing manual benchmark ignored), including seven progression checks and the filtered HUD menu. Formatting, native/WASM strict lint and the rebuilt release browser bundle pass. Final desktop mouse and DPR2-phone touch Military/Production menu captures pass without page errors; [evidence and review](docs/verification/building-progression/README.md). User explicitly authorized PR creation and merge on 2026-10-05 after reviewing the result. [PR #131](https://github.com/koogle/age-of-agents/pull/131) is ready for the authorized merge, based on master `92aaf7e`; upstream additions are unwired menu art, and the rebuilt bundle is byte-identical. Production uses the master release workflow; release status is tracked separately.
+
 # Terrain-first island generation — PR #111
 
 - [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.
