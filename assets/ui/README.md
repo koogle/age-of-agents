@@ -74,4 +74,4 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 - Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
 - It reads distinctly from the X down to 24 px.
 
-`icons/status_check.png` is a plain U+2713 check mark rendered from DejaVu Sans at 384 px and reduced to 96 px with Lanczos filtering. It marks completed research, using green ink on the existing ivory HUD badge; it is a typographic status symbol.
+`icons/status_check.png` is a bold emerald-green check generated with FAL `fal-ai/nano-banana/edit`, using the authored cancel icon as a style reference, then cut out with `fal-ai/birefnet/v2`. Original 1024px renders, exact prompt, request IDs and processing provenance are retained in `sources/research_check/`. The normalized 128px runtime icon appears on an opaque ivory badge at 22 logical pixels for clear completed-research feedback.

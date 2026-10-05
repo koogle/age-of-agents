@@ -309,23 +309,23 @@ impl Hud {
                 {
                     self.shape(
                         [
-                            rect[0] + m - 20.0 * s,
-                            rect[1] + m - 20.0 * s,
-                            20.0 * s,
-                            20.0 * s,
+                            rect[0] + m - 26.0 * s,
+                            rect[1] + m - 26.0 * s,
+                            26.0 * s,
+                            26.0 * s,
                         ],
-                        GLASS,
+                        [0.98, 0.96, 0.92, 1.0],
                         1.0,
-                        10.0 * s,
+                        13.0 * s,
                     );
                     self.sprite(
                         atlas,
                         "status_check",
                         [
-                            rect[0] + m - 18.0 * s,
-                            rect[1] + m - 18.0 * s,
-                            16.0 * s,
-                            16.0 * s,
+                            rect[0] + m - 24.0 * s,
+                            rect[1] + m - 24.0 * s,
+                            22.0 * s,
+                            22.0 * s,
                         ],
                         [1.0; 4],
                     );

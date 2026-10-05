@@ -27,6 +27,9 @@
       "masonry": "icons/tech_masonry.png",
       "mining": "icons/tech_mining.png",
       "textiles": "icons/tech_textiles.png"
+    },
+    "status": {
+      "researched": "icons/status_check.png"
     }
   },
   "textures": {
