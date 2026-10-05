@@ -1,6 +1,13 @@
+# Current handoff: field-research icon (2026-10-05)
+
+- Replaced Agriculture’s sickle-and-grain icon with a tilled field, seedlings and hoe through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline. The existing `tech_agriculture` key supplies available/disabled research buttons and queued research; no Rust, gameplay or WASM changes.
+- Preserved the previous icon, generated source, cutout, prompt, references, request IDs and small-size comparison in `assets/ui/field_research_sources`. Updated the generation subject and contact sheet; estimated FAL cost $0.0448.
+- Icon normalization, PNG/RGBA/transparency and 282-frame resolution checks pass. All 183 workspace tests, formatting and strict native/WASM lint pass. Desktop and DPR2-phone available/queued research inspected using staged snapshots; both browser checks pass with no page errors. QA artifacts are in `/workspace/scratch/field-research`.
+- Thermonuclear review: asset replacement only, no new dependencies or game behavior; no source file growth beyond the existing prompt.
+- PR https://github.com/koogle/age-of-agents/pull/82 (`feat/field-research-icon`) starts from master, separate from timber PR #78. Modal remains unavailable in this environment; not deployed.
 ## Authorized icon PR merge
 
-User authorized merging PRs #78 and #82. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Compact HUD integration passed all 57 client tests, both lint targets and a fresh-browser smoke. Integrated fog-placement PR #79 on master ddf2123; rebuilt bundle, client tests, formatting, strict native/WASM lint and fresh-browser lumber-mill smoke all pass. Ready for the authorized timber merge.
+User authorized merging PRs #78 and #82. Timber PR #78 merged as dda155f; field-research PR #82 is now integrated with that master, retaining both generated icons and rebuilding the combined contact sheet. Combined icon checks and a fresh DPR2-phone town-center/queued-research preview pass without page errors; no Rust or browser-bundle diff from the verified timber merge. Ready for the authorized field-research merge. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Compact HUD integration passed all 57 client tests, both lint targets and a fresh-browser smoke. Integrated fog-placement PR #79 on master ddf2123; rebuilt bundle, client tests, formatting, strict native/WASM lint and fresh-browser lumber-mill smoke all pass. Ready for the authorized timber merge.
 
 # Current handoff: timber icon (2026-10-05)
 
