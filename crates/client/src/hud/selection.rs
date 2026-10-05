@@ -247,12 +247,15 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
-            UnitAction::Build { .. } if unit.unit.cargo.is_some() => {
+            UnitAction::Build { .. } | UnitAction::ExploreBuild { .. }
+                if unit.unit.cargo.is_some() =>
+            {
                 format!(
                     "Unloading {} before building",
                     resource_name(unit.unit.cargo.as_ref().unwrap().kind)
                 )
             }
+            UnitAction::ExploreBuild { .. } => "Exploring build site".into(),
             UnitAction::Build { .. } => "Building".into(),
             UnitAction::Cultivate { .. } if unit.unit.cargo.is_some() => {
                 format!(
@@ -353,6 +356,8 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         commands.push(Command {
             icon: if product == ProductKind::TransportShip {
                 "transport"
+            } else if product == ProductKind::Timber {
+                "resource_timber"
             } else {
                 "command_train"
             },
@@ -426,7 +431,11 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
         .map(|(index, entry)| {
             let (icon, name, cost) = match entry.job {
                 aoa_game::BuildingJob::Produce { product, .. } => (
-                    "command_train",
+                    if product == ProductKind::Timber {
+                        "resource_timber"
+                    } else {
+                        "command_train"
+                    },
                     product_label(product),
                     cost_text(product.cost()),
                 ),

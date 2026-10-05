@@ -159,6 +159,11 @@ pub enum UnitAction {
         resource_id: String,
         phase: GatherPhase,
     },
+    /// Explore the footprint before validating and paying for a foundation.
+    ExploreBuild {
+        origin: CellCoordinate,
+        kind: BuildingKind,
+    },
     /// Walk beside the foundation `building_id` and raise it.
     Build {
         building_id: String,
