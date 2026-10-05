@@ -1,5 +1,7 @@
 # Local transport review
 
+Historical review of [PR #71](https://github.com/koogle/age-of-agents/pull/71), not the current transport contract. [#83](https://github.com/koogle/age-of-agents/pull/83) removed goods holds/transfers and island-local stocks; [#90](https://github.com/koogle/age-of-agents/pull/90) introduced continuous sailing and simultaneous settlement simulation. Read [current map behavior](CONTINUOUS_MAP.md) and the [README](../README.md) before transport work; checks and release blockers below describe the original slice.
+
 A completed dock can queue a 60-wood/20-timber transport, produced after 20
 seconds when a water berth is free. Ships carry four existing units plus 200
 goods, sail only on water, return to a clicked dock, and land at clear shores.

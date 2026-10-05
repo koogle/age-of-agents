@@ -206,4 +206,16 @@ Gameplay acceptance:
 - [ ] Additive touch selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 
+## Recovered acceptance gaps — reviewed 2026-10-05
+
+- The canvas HUD still lacks accessible DOM button equivalents, and touch still lacks additive selection; these existing items above must survive handoff cleanup. Canvas labels/hit regions do not complete accessibility.
+- Native reset-dialog appearance has checked-in Linux/Zenity evidence, but no macOS/Windows appearance evidence was found in the reviewed PRs; physical-phone safe-area behavior remains unverified. Desktop/phone emulation and hosted/local presentation fixtures certify only their recorded platforms and revisions ([presentation verification](docs/PRESENTATION_VERIFICATION.md), [compact HUD limits](docs/COMPACT_HUD_REVIEW.md#boundaries)).
+- An idle villager in a one-cell passage and previously placed route-blocking fields remain documented limits; the placement fix does not repair existing worlds ([field audit](docs/FIELD_GATHERING_REVIEW.md#limits)). Reproduce before changing routing behavior.
+- Open PR proposals and any remaining release checks belong in [OPEN_WORK.md](OPEN_WORK.md); an open PR's described behavior is not part of the implemented baseline. Native/browser-local persistence is also not implemented; selecting it as new scope requires a task, not an assumption that hosted SQLite already covers it.
+
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
+
+## Deployment verification follow-up — reconciled 2026-10-05
+
+- [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
+- The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
