@@ -2,7 +2,9 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
+mod coast;
 mod construction;
+pub use coast::{DockFacing, dock_facing};
 #[cfg(test)]
 mod construction_tests;
 mod domain;
@@ -456,7 +458,10 @@ impl GameWorld {
             } => self.sail_to_dock(&ship_id, &building_id)?,
             Command::StopShip { ship_id } => {
                 let index = self.ship_index(&ship_id)?;
-                self.ships[index].destination = None;
+                let to = self.ships[index]
+                    .step
+                    .map_or(self.ships[index].cell, |step| step.to);
+                self.sail(&ship_id, to)?;
             }
             Command::Board { unit_id, ship_id } => self.board(&unit_id, &ship_id)?,
             Command::Disembark { ship_id } => self.disembark(&ship_id)?,
@@ -694,13 +699,6 @@ impl GameWorld {
 
     /// Whether any cell beside the footprint (sharing an edge) is water.
     fn touches_sea(&self, footprint: Footprint) -> bool {
-        let Footprint {
-            origin,
-            columns,
-            rows,
-        } = footprint;
-        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
-        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
         let water = |column: i32, row: i32| {
             column >= 0
                 && row >= 0
@@ -709,8 +707,7 @@ impl GameWorld {
                 && self.terrain[row as usize * usize::from(self.columns()) + column as usize].biome
                     == TerrainBiome::Water
         };
-        (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
-            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r))
+        dock_facing(footprint, water).is_some()
     }
 
     fn next_building_name(&self) -> String {
