@@ -458,6 +458,7 @@ impl BuildingKind {
     pub const fn accepts(self, resource: ResourceKind) -> bool {
         match self {
             Self::TownCenter => true,
+            Self::LumberMill => matches!(resource, ResourceKind::Wood),
             Self::Granary | Self::Farm => {
                 matches!(resource, ResourceKind::Food | ResourceKind::Fiber)
             }
