@@ -173,6 +173,7 @@
   },
   "after": {
     "stored_food": 60.00000000000006,
+    "page_errors": [],
     "remaining": {
       "patch-left": 0,
       "patch-right": 0,
@@ -180,7 +181,6 @@
       "distant-patch": 30,
       "old-distant": 0
     },
-    "page_errors": [],
     "transitions": [
       {
         "tick": 0,
@@ -434,5 +434,7 @@
         "stored_food": 60.00000000000006
       }
     ]
-  }
+  },
+  "integrated_base_revision": "10ee124f081bb7de7f0e00a6f8fb05111051d533",
+  "integration_note": "Repeated against combined docks, shore pickup, wildlife and mobile cargo paging. Isolated version-14 fixture adds health=100 and no animals; resource geometry and commands match baseline."
 }
