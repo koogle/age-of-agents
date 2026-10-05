@@ -66,7 +66,7 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     }
     if !ship.stopped() {
         commands.push(Command {
-            icon: "command_cancel",
+            icon: "command_stop",
             label: "Stop ship".into(),
             detail: "Finish current step · X".into(),
             enabled: true,
@@ -145,5 +145,6 @@ mod tests {
         snapshot.ships[0].destination = Some(CellCoordinate::new(0, 0));
         assert!(!commands(&snapshot)[0].enabled);
         assert_eq!(commands(&snapshot).last().unwrap().action, Action::Stop);
+        assert_eq!(commands(&snapshot).last().unwrap().icon, "command_stop");
     }
 }
