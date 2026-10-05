@@ -29,6 +29,33 @@ def fetch(path: str, timeout: int = 120) -> bytes:
         return response.read()
 
 
+
+def unpack_terrain(encoded: str, limit: int) -> str:
+    """Decode the snapshot's bounded ~count:character runs (or legacy text)."""
+    if not encoded.isascii():
+        raise RuntimeError("non-ASCII terrain")
+    parts = []
+    size = 0
+    index = 0
+    while index < len(encoded):
+        count = 1
+        if encoded[index] == "~":
+            end = encoded.find(":", index + 1)
+            digits = encoded[index + 1:end]
+            if end < 0 or not digits.isdigit() or end + 1 >= len(encoded):
+                raise RuntimeError("invalid terrain run")
+            count = int(digits)
+            index = end + 1
+        if count <= 0 or count > limit - size:
+            raise RuntimeError("terrain run exceeds map bounds")
+        parts.append(encoded[index] * count)
+        size += count
+        index += 1
+    if size != limit:
+        raise RuntimeError("terrain length disagrees with map dimensions")
+    return "".join(parts)
+
+
 def verify_once() -> None:
     comparisons = {
         "/": ROOT / "web/index.html",
@@ -57,12 +84,19 @@ def verify_once() -> None:
                 raise RuntimeError(f"production {path} does not match the catalog")
 
     state = json.loads(fetch("/state"))
-    # Terrain is compact: one character per cell ('.' unseen) plus one per height.
+    # The continuous map grows; both terrain channels may contain encoded runs.
     encoded = state.get("terrain", {})
-    terrain = list(zip(encoded.get("cells", ""), encoded.get("heights", "")))
+    columns, rows = state.get("columns"), state.get("rows")
+    if (type(columns) is not int or type(rows) is not int
+            or not 0 < columns <= 65535 or not 0 < rows <= 65535
+            or encoded.get("columns") != columns or encoded.get("rows", rows) != rows):
+        raise RuntimeError("unexpected world dimensions")
+    size = columns * rows
+    terrain = list(zip(unpack_terrain(encoded.get("cells", ""), size),
+                       unpack_terrain(encoded.get("heights", ""), size)))
     units = state.get("units", [])
-    if len(terrain) != 9600 or not units or (state.get("columns"), state.get("rows")) != (120, 80):
-        raise RuntimeError(f"unexpected world shape: terrain={len(terrain)}, units={len(units)}")
+    if not units:
+        raise RuntimeError("production state has no units")
     cells = [(unit["cell"]["column"], unit["cell"]["row"]) for unit in units]
     if len(set(cells)) != len(cells):
         raise RuntimeError("production units share a cell")
