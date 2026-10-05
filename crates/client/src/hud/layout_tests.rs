@@ -159,7 +159,10 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     && !ship
                 {
                     for (rect, action) in &regions {
-                        if !matches!(action, Action::Reset | Action::Grid) {
+                        // Resource-name explanations now live in the top bar.
+                        let resource_name = matches!(action, Action::Explain(name)
+                            if ResourceKind::ALL.iter().any(|kind| name.eq_ignore_ascii_case(kind.name())));
+                        if !matches!(action, Action::Reset | Action::Grid) && !resource_name {
                             assert!(rect[1] >= (height - 140.0) * scale - 0.1, "{action:?}");
                         }
                     }
