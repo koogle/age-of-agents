@@ -282,6 +282,7 @@ impl GameWorld {
             match &unit.action {
                 UnitAction::Gather { .. }
                 | UnitAction::Build { .. }
+                | UnitAction::ExploreBuild { .. }
                 | UnitAction::Cultivate { .. }
                     if unit.kind != UnitKind::Villager =>
                 {
@@ -298,6 +299,12 @@ impl GameWorld {
                     }) =>
                 {
                     return Err(format!("{} cultivates no unfinished field", unit.id));
+                }
+                UnitAction::ExploreBuild { origin, kind }
+                    if origin.column > WORLD_COLUMNS - kind.size().0
+                        || origin.row > WORLD_ROWS - kind.size().1 =>
+                {
+                    return Err(format!("{} explores an invalid build site", unit.id));
                 }
                 UnitAction::Build { building_id }
                     if !self
