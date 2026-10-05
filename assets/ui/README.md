@@ -111,3 +111,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `unit_healer` | [Review](sources/menu_icons/unit_healer/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_healer/provenance.json) |
 | `unit_siege_cart` | [Review](sources/menu_icons/unit_siege_cart/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_siege_cart/provenance.json) |
 | `command_disembark` | [Review](sources/menu_icons/command_disembark/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_disembark/provenance.json) |
+| `command_sail` | [Review](sources/menu_icons/command_sail/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_sail/provenance.json) |
