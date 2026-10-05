@@ -167,12 +167,6 @@ pub enum Command {
     Disembark {
         ship_id: String,
     },
-    TransferShipCargo {
-        ship_id: String,
-        kind: ResourceKind,
-        amount: f64,
-        direction: CargoDirection,
-    },
     Move {
         unit_id: String,
         to: CellCoordinate,
@@ -242,7 +236,6 @@ pub enum CommandError {
     ShipFull,
     ShoreBlocked,
     DockRequired,
-    InvalidCargoTransfer,
     UnitNotFound,
     EmptyUnitGroup,
     DuplicateUnit,
@@ -286,8 +279,7 @@ impl std::fmt::Display for CommandError {
             Self::ShipMustBeStopped => "stop the ship before boarding or unloading",
             Self::ShipFull => "transport passenger capacity is full",
             Self::ShoreBlocked => "no safe landing cells beside the ship or dock",
-            Self::DockRequired => "goods transfer requires a completed dock",
-            Self::InvalidCargoTransfer => "invalid cargo amount, insufficient goods or full hold",
+            Self::DockRequired => "select a completed dock",
             Self::UnitNotFound => "unit not found",
             Self::EmptyUnitGroup => "unit group is empty",
             Self::DuplicateUnit => "unit group contains a duplicate member",
@@ -441,12 +433,6 @@ impl GameWorld {
             }
             Command::Board { unit_id, ship_id } => self.board(&unit_id, &ship_id)?,
             Command::Disembark { ship_id } => self.disembark(&ship_id)?,
-            Command::TransferShipCargo {
-                ship_id,
-                kind,
-                amount,
-                direction,
-            } => self.transfer_ship_cargo(&ship_id, kind, amount, direction)?,
             Command::Move { unit_id, to } => {
                 let unit = self.ordered_unit(&unit_id)?;
                 self.validate_move_destination(unit, to)?;

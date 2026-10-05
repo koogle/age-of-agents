@@ -1,4 +1,13 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: shared resources and unit-only transport (2026-10-05)
+
+- User requested simplifying transport and opening a PR. Branch `fix/shared-island-resources` removes ship holds/transfer commands and keeps one global stockpile when exchanging islands.
+- Ship HUD now contains passenger/voyage controls only; resource HUD explicitly labels resources as shared across islands. Units retain personal gathering loads; away-island simulation remains paused.
+- Existing SQLite snapshots pool archived inventories and active/archived ship holds on load, with invalid amounts rejected and no double credit after save/reload.
+- All 186 workspace tests pass (17 server, 51 client, 118 domain), along with formatting and strict native/WASM lint. Rebuilt the tracked WebGL bundle; 282-frame sprite audit, transport assets and icon checks pass. Desktop 1280×800 mouse and phone 390×844/DPR2 touch checks passed: previous/next voyages retain shared totals, and touch passenger landing succeeds, with no page errors. Screenshots, browser logs and isolated QA database are under `/workspace/scratch/shared-resources`.
+- Thermonuclear review: removed the cargo-transfer concept end to end and removed island inventories rather than synchronizing copies. Simulation remains authoritative; atomic command handling and passenger ownership are unchanged. Migration is isolated in persistence, checks old values before pooling, and preserves corrupt-save errors. No dependencies or assets added; client files remain below 1,000 lines.
+- No deployment or merge requested; the PR is the reviewable deliverable. Production deployment follows an approved merge through existing CI.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.

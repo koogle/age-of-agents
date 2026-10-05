@@ -25,7 +25,6 @@ pub struct Selection {
     pub units: Vec<String>,
     pub building: Option<String>,
     pub ship: Option<String>,
-    pub cargo_index: usize,
 }
 
 impl Selection {

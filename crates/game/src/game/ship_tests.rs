@@ -75,29 +75,6 @@ fn passengers_keep_identity_cargo_housing_and_reload_then_land() {
     assert!(loaded.ships[0].passengers.is_empty());
 }
 #[test]
-fn goods_are_conserved_and_bad_transfers_are_atomic() {
-    let mut w = harbor();
-    let id = w.ships[0].id.clone();
-    let initial = w.stockpile.wood;
-    let transfer = |amount, direction| Command::TransferShipCargo {
-        ship_id: id.clone(),
-        kind: ResourceKind::Wood,
-        amount,
-        direction,
-    };
-    w.apply_command(transfer(200.0, CargoDirection::Load))
-        .unwrap();
-    assert_eq!(w.stockpile.wood + w.ships[0].goods.wood, initial);
-    for n in [1.0, f64::NAN, -1.0, f64::INFINITY] {
-        let before = w.clone();
-        assert!(w.apply_command(transfer(n, CargoDirection::Load)).is_err());
-        assert_eq!(w, before);
-    }
-    w.apply_command(transfer(200.0, CargoDirection::Unload))
-        .unwrap();
-    assert_eq!(w.stockpile.wood, initial);
-}
-#[test]
 fn sailing_is_water_only_stoppable_and_blocked_landing_is_atomic() {
     let mut w = harbor();
     order_board(&mut w, 0);
@@ -168,7 +145,7 @@ fn old_saves_default_to_no_ships_and_corrupt_manifests_fail() {
     w.ships[0].passengers.push(w.units[0].clone());
     assert!(w.validate().is_err());
     w.ships[0].passengers.clear();
-    w.ships[0].goods.wood = f64::NAN;
+    w.ships[0].heading = [2, 0];
     assert!(w.validate().is_err());
 }
 #[test]
