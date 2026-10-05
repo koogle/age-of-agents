@@ -1,4 +1,13 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: HQ copy audit (2026-10-05)
+
+- Branch `fix/hq-language`, based on merged master `61fc87c`. Audited the town-center description, production and research status, button labels, housing/prerequisite warnings, and queued-task cancellation/refund text.
+- Active tasks now read "Training a villager", "Building a transport/siege cart", or "Making 5 timber" rather than combining "Producing" with a button instruction. Research descriptions identify gathering bonuses; completion, housing, queue and blocked-spawn wording use clear English. Shared building labels receive the same correction; gameplay and persistence are unchanged.
+- Verification: all 184 workspace tests (13 server, 52 client, 119 domain), formatting, strict native/WASM lint, all 282 HD frames and field/transport/icon checks pass. Rebuilt the tracked browser bundle. The regression test exercises action/status wording for every product and completed-but-blocked unit production.
+- Desktop selection, training, research effects, queue hover/costs, active/completed research, and DPR2 phone touch training/housing/queued-research/prerequisite flows were exercised against an isolated saved game. No page errors were recorded. Software WebGL exceeded the initial dual-context phone loading/capture timeouts; separate previews completed the checks. Screenshots, scripts and logs are under `/workspace/scratch/hq-copy`; `final-training.png` is the focused final result.
+- Thermonuclear review: pure presentation changes with one shared label helper, no new dependencies or interaction paths, no authority/cost/queue/persistence changes, and the changed client file stays below 1,000 lines. README and roadmap behavior claims remain accurate.
+- Direct Modal deployment was attempted after verification and rejected with "Token missing. Could not authenticate client." No Modal profiles are configured. The verified branch is ready for PR review; merging triggers the repository production workflow. This copy fix is not deployed.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.

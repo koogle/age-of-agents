@@ -103,7 +103,7 @@ pub(super) fn building_info(
             "building_towncenter",
             "towncenter",
             "Town center",
-            "Trains villagers, houses 5",
+            "Trains villagers; provides 5 housing spaces",
         ),
     }
 }
@@ -118,21 +118,33 @@ pub(super) fn cost_text(cost: &[(ResourceKind, f64)]) -> String {
 
 pub(super) fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'static str) {
     match tech {
-        TechnologyKind::Forestry => ("tech_forestry", "Forestry", "Wood +20%"),
-        TechnologyKind::Agriculture => ("tech_agriculture", "Agriculture", "Food +20%"),
-        TechnologyKind::Masonry => ("tech_masonry", "Masonry", "Stone and clay +20%"),
-        TechnologyKind::Mining => ("tech_mining", "Mining", "Gold and iron +20%"),
-        TechnologyKind::Textiles => ("tech_textiles", "Textiles", "Fiber +20%"),
+        TechnologyKind::Forestry => ("tech_forestry", "Forestry", "Wood gathering +20%"),
+        TechnologyKind::Agriculture => ("tech_agriculture", "Agriculture", "Food gathering +20%"),
+        TechnologyKind::Masonry => ("tech_masonry", "Masonry", "Stone and clay gathering +20%"),
+        TechnologyKind::Mining => ("tech_mining", "Mining", "Gold and iron gathering +20%"),
+        TechnologyKind::Textiles => ("tech_textiles", "Textiles", "Fiber gathering +20%"),
     }
 }
 
-fn product_label(product: ProductKind) -> String {
+fn product_label(product: ProductKind, in_progress: bool) -> String {
+    let (build, train, make) = if in_progress {
+        ("Building", "Training", "Making")
+    } else {
+        ("Build", "Train", "Make")
+    };
     if product == ProductKind::TransportShip {
-        "Build transport".into()
+        format!("{build} a transport")
+    } else if product == ProductKind::SiegeCart {
+        format!("{build} a siege cart")
     } else if let Some(kind) = product.unit_kind() {
-        format!("Train {}", kind.name().to_lowercase())
+        let article = if product == ProductKind::Archer {
+            "an"
+        } else {
+            "a"
+        };
+        format!("{train} {article} {}", kind.name().to_lowercase())
     } else if let Some((kind, amount)) = product.output() {
-        format!("Make {amount} {}", kind.name())
+        format!("{make} {amount} {}", kind.name())
     } else {
         unreachable!("every product has an output")
     }
@@ -325,9 +337,9 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             if *elapsed_seconds >= product.seconds()
                 && (product.unit_kind().is_some() || *product == ProductKind::TransportShip)
             {
-                "Waiting for a free spawn cell".to_string()
+                "Waiting for space outside the building".to_string()
             } else {
-                format!("Producing {}", product_label(*product))
+                product_label(*product, true)
             },
             Some((elapsed_seconds / product.seconds()).min(1.0) as f32),
         ),
@@ -356,11 +368,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             } else {
                 "command_train"
             },
-            label: product_label(product),
+            label: product_label(product, false),
             detail: if queue_full {
                 "Queue is full".into()
             } else if crowded {
-                "Needs a house first".into()
+                "Build a house for more housing".into()
             } else {
                 format!(
                     "{} · {} seconds",
@@ -379,13 +391,13 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         let queued = snapshot.buildings.iter().flat_map(|b| b.building.jobs()).any(|job| matches!(job, aoa_game::BuildingJob::Research { technology, .. } if *technology == tech));
         let blocked = tech.prerequisite().filter(|p| !known.contains(p));
         let detail = if done {
-            "researched".to_string()
+            "Research complete".to_string()
         } else if queued {
-            "research queued or in progress".to_string()
+            "Research queued or in progress".to_string()
         } else if queue_full {
             "Queue is full".to_string()
         } else if let Some(p) = blocked {
-            format!("needs {}", tech_info(p).1)
+            format!("Requires {} research", tech_info(p).1)
         } else {
             format!(
                 "{effect} · {} food, {} wood",
@@ -427,22 +439,22 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
             let (icon, name, cost) = match entry.job {
                 aoa_game::BuildingJob::Produce { product, .. } => (
                     "command_train",
-                    product_label(product),
+                    product_label(product, false),
                     cost_text(product.cost()),
                 ),
                 aoa_game::BuildingJob::Research { technology, .. } => {
                     let (icon, name, _) = tech_info(technology);
                     (
                         icon,
-                        name.to_string(),
+                        format!("Research {name}"),
                         format!("{RESEARCH_FOOD_COST} food, {RESEARCH_WOOD_COST} wood"),
                     )
                 }
             };
             Command {
                 icon,
-                label: format!("Cancel queued {}: {name}", index + 1),
-                detail: format!("Refund {cost}"),
+                label: format!("Cancel task {}: {name}", index + 1),
+                detail: format!("Refunds {cost}"),
                 enabled: true,
                 action: Action::CancelQueuedJob(entry.id),
             }
@@ -610,6 +622,10 @@ mod tests {
     }
 
     fn commands_for_town_center(world: &GameWorld) -> Vec<Command> {
+        selected_town_center(world).4
+    }
+
+    fn selected_town_center(world: &GameWorld) -> Selected {
         let snapshot = world.snapshot();
         let model = Model {
             snapshot: Some(&snapshot),
@@ -622,7 +638,68 @@ mod tests {
             toast: None,
             camera: Vec2::ZERO,
         };
-        selection_model(&snapshot, &model).unwrap().4
+        selection_model(&snapshot, &model).unwrap()
+    }
+
+    #[test]
+    fn building_status_describes_work_instead_of_reusing_button_instructions() {
+        let mut world = GameWorld::default();
+        world.economy_rules = aoa_game::EconomyRules::Unrestricted;
+        for (product, command, activity) in [
+            (
+                ProductKind::Villager,
+                "Train a villager",
+                "Training a villager",
+            ),
+            (ProductKind::Guard, "Train a guard", "Training a guard"),
+            (ProductKind::Archer, "Train an archer", "Training an archer"),
+            (ProductKind::Healer, "Train a healer", "Training a healer"),
+            (
+                ProductKind::SiegeCart,
+                "Build a siege cart",
+                "Building a siege cart",
+            ),
+            (
+                ProductKind::TransportShip,
+                "Build a transport",
+                "Building a transport",
+            ),
+            (ProductKind::Timber, "Make 5 timber", "Making 5 timber"),
+            (ProductKind::Steel, "Make 5 steel", "Making 5 steel"),
+            (ProductKind::Bricks, "Make 5 bricks", "Making 5 bricks"),
+            (ProductKind::Cloth, "Make 5 cloth", "Making 5 cloth"),
+            (ProductKind::Rations, "Make 5 rations", "Making 5 rations"),
+        ] {
+            world.buildings[0].kind = *BUILDABLE
+                .iter()
+                .find(|kind| kind.products().contains(&product))
+                .unwrap();
+            world.buildings[0].job = Some(aoa_game::BuildingJob::Produce {
+                product,
+                elapsed_seconds: 1.0,
+            });
+            let selected = selected_town_center(&world);
+            assert_eq!(selected.2, activity);
+            assert_eq!(selected.4[0].label, command);
+            world.buildings[0].job = Some(aoa_game::BuildingJob::Produce {
+                product,
+                elapsed_seconds: product.seconds(),
+            });
+            assert_eq!(
+                selected_town_center(&world).2,
+                if product.unit_kind().is_some() || product == ProductKind::TransportShip {
+                    "Waiting for space outside the building"
+                } else {
+                    activity
+                }
+            );
+        }
+        world.buildings[0].kind = BuildingKind::TownCenter;
+        world.buildings[0].job = Some(aoa_game::BuildingJob::Research {
+            technology: TechnologyKind::Forestry,
+            elapsed_seconds: 1.0,
+        });
+        assert_eq!(selected_town_center(&world).2, "Researching Forestry");
     }
 
     #[test]
