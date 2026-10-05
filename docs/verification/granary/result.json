@@ -1,6 +1,6 @@
 {
   "scene": "granary",
-  "wasm_sha256": "31bba99f03b03f153c40b4a367bab061fe7ac7dfc0fa7ba58a25751f16b57359",
+  "wasm_sha256": "792e7a32b3d020b3f16873f155c699f15436a1b02654430998d4739bd725ec5d",
   "viewports": [
     "1280x800 DPR1 mouse",
     "390x844 DPR2 touch"
