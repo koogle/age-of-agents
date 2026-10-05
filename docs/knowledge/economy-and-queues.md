@@ -24,11 +24,15 @@ cancellation or queue UI. Maintained guide; source-reviewed 2026-10-05 against
 
 ## Starter progression and resources
 
-Fresh games begin with starter inputs; old saves can remain unrestricted. Unlocks
-derive from discovered deposits, persist after depletion, and cannot be bypassed
-by hidden nodes or a large stockpile. Transport must be affordable before the
-player can obtain later-island materials. Verify the whole budget including
-processed material inputs rather than checking only the final recipe price.
+Implemented in [PR #92](https://github.com/koogle/age-of-agents/pull/92), with merge authorized on 2026-10-05: construction availability follows each building's costs, independently of current stock or the production recipes it can run. The user clarified that every building constructible from first-island materials must be available initially; discovery then expands the menu. This replaces the earlier six-building starter restriction.
+
+Fourteen wood/stone/timber buildings are initially available: Town Center, House, Granary, Farm, Lumber Mill, Dock, Watchtower, Mining Camp, Smelter, Kiln, Weaver, Kitchen, Barracks and Range. Unaffordable buildings remain visible in grey. Kitchen can make rations from food; other production still requires actual recipe inputs.
+
+Workshop unlocks with discovered clay for bricks; Infirmary with fiber for cloth; Monument with iron, coal, clay, fiber and gold for all its construction materials. Discovery persists after depletion and cannot be bypassed by hidden nodes or stock quantities. Legacy unrestricted saves retain access; no reset or migration is required for these revised gates.
+
+Existing player-facing features remain important. Removing, hiding, disabling or adding prerequisites to them requires Jakob's explicit approval after a before/after impact review and before release; see [AGENTS.md](../../AGENTS.md#workflow). Starter simplification is not blanket approval for feature losses.
+
+Transport must remain affordable before later-island materials are available. Verify the whole budget, including raw wood consumed to make timber, rather than only the final recipe price.
 
 Read [current decisions](../../decisions.md) and the
 [starter economy review](../STARTER_ECONOMY_REVIEW.md) for rationale; the review's
