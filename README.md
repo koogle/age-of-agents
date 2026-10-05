@@ -28,7 +28,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Wood → timber and food → rations processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Dock transport production through the paid task queue, water-only sailing, four passenger seats and shore landings. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.
-- Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
+- Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves. Pause freezes simulation and NPC animations and rejects gameplay orders until resumed; camera and selection remain available.
 - Distant zoom eases into a curved world overview; the globe shows the discovered archipelago in the same isometric orientation as the world view, with matching camera-marker and click/touch navigation.
 
 See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [decisions.md](decisions.md) for design decisions.
@@ -47,7 +47,7 @@ Hosted games use the server's authoritative world. Native games and browser `?lo
 
 SQLite persistence applies to hosted games. Native and browser-local worlds currently live in memory and are not saved across application/page restarts.
 
-Local unit rendering follows the fixed-step simulation accumulator. Hosted unit rendering buffers two ticks and preserves unplayed movement through delayed updates; short gaps hold position, then recover at a bounded playback rate. When remote playback falls more than 800 ms behind, it resynchronizes to the newest snapshot once and rebuilds the two-tick buffer instead of replaying stale movement. This explicit outage correction does not advance the walking animation. Walking and carrying use all authored gait poses, and facing follows movement with angular hysteresis. Work animations begin only after the displayed villager reaches its authoritative neighboring work cell, without a cosmetic positional offset.
+Local unit rendering follows the fixed-step simulation accumulator. Hosted unit rendering buffers two ticks and preserves unplayed movement through delayed updates; short gaps hold position, then recover at a bounded playback rate. When remote playback falls more than 800 ms behind, it resynchronizes to the newest snapshot once and rebuilds the two-tick buffer instead of replaying stale movement. Reconnecting starts at the current snapshot, and excessive queued updates collapse to the newest state instead of replaying missed movement or activity messages. These corrections work while paused and do not advance the walking animation. Walking and carrying use all authored gait poses, and facing follows movement with angular hysteresis. Work animations begin only after the displayed villager reaches its authoritative neighboring work cell, without a cosmetic positional offset.
 
 The visual target is a sunlit Greek island diorama with painted sprites, cel shading, and tilt-shift depth of field. Building sprites remain visible when their roofs overlap the viewport, even if their ground anchors pass the near clipping plane at close zoom. See [the primary reference](assets/reference/diorama_primary.webp).
 

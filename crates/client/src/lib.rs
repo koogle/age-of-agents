@@ -610,10 +610,15 @@ impl App {
             .unwrap_or(0.0);
         self.last_frame = Some(now);
         self.clock += dt;
-        self.source.poll(dt, &mut self.incoming);
+        let reset_playback = self.source.poll(dt, &mut self.incoming);
+        if reset_playback {
+            self.feedback = feedback::Feedback::default();
+        }
         while let Some(snapshot) = self.incoming.pop_front() {
-            self.feedback
-                .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
+            if !reset_playback {
+                self.feedback
+                    .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
+            }
             // The hosted server resets after a delay, so the view may have
             // framed the old island meanwhile: look again at the new one.
             if self.view.sync(snapshot) {
@@ -624,6 +629,9 @@ impl App {
             if !self.framed {
                 self.frame_town_center();
             }
+        }
+        if reset_playback {
+            self.view.reset_playback();
         }
         for result in self.source.take_results() {
             if let Err(error) = result {
@@ -726,7 +734,7 @@ impl App {
         });
         let (mut sprites, mut decals) =
             self.view
-                .draw_list(&self.sheets, &self.rig, self.clock as f32, &self.selection);
+                .draw_list(&self.sheets, &self.rig, &self.selection);
         decals.extend(hover);
         if let Some((kind, origin, ok)) = ghost {
             let (columns, rows) = kind.size();

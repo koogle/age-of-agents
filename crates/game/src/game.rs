@@ -267,6 +267,7 @@ pub enum CommandError {
     MissingTechnologyPrerequisite,
     InsufficientResearchResources,
     InvalidSimulationSpeed,
+    GamePaused,
 }
 
 impl std::fmt::Display for CommandError {
@@ -310,6 +311,7 @@ impl std::fmt::Display for CommandError {
             Self::TechnologyInProgress => "technology is already being researched",
             Self::MissingTechnologyPrerequisite => "technology prerequisite is not researched",
             Self::InsufficientResearchResources => "research requires 40 food and 20 wood",
+            Self::GamePaused => "game is paused; resume to give orders",
             Self::InvalidSimulationSpeed => "simulation speed must be 0, 1, or 2",
         };
         f.write_str(message)
@@ -403,6 +405,9 @@ fn building(
 impl GameWorld {
     /// Applies a command atomically: on error the world is unchanged.
     pub fn apply_command(&mut self, command: Command) -> Result<(), CommandError> {
+        if self.simulation_speed == 0.0 && !matches!(command, Command::SetSimulationSpeed { .. }) {
+            return Err(CommandError::GamePaused);
+        }
         // A new order replaces a unit's current task, so validate it against a
         // copy in which that unit has stopped; a rejected order leaves the
         // world, and the unit's old task, untouched.
