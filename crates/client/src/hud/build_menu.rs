@@ -196,19 +196,18 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![
                 Action::Place(BuildingKind::Watchtower),
-                Action::Place(BuildingKind::Barracks),
                 Action::Place(BuildingKind::Range),
                 Action::Build
             ]
         );
-        assert!(!military[1].enabled, "unaffordable barracks stays visible");
+        assert!(!military[1].enabled, "unaffordable range stays visible");
         let production = commands(
             BuildUi::Group(BuildingGroup::Production),
             &stock,
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(production.len(), 6);
+        assert_eq!(production.len(), 3);
         assert_eq!(
             production[0].action,
             Action::Place(BuildingKind::LumberMill)
