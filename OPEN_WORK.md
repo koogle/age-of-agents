@@ -1,4 +1,12 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: completed research indication (2026-10-05)
+
+- Completed research coins now show a persistent Done badge and explain “Already researched” plus the upgrade effect on hover/tap. Existing client disabling and authoritative duplicate rejection remain in force.
+- Added a queue → completion → JSON save/reload regression test. All 184 workspace tests pass (13 server, 52 client, 119 domain), formatting and strict native/WASM lint pass; rebuilt the tracked WebGL bundle.
+- Live WebGL desktop 1280×800/DPR1 and phone 390×844/DPR2 checks passed against an isolated WebSocket presentation fixture: selection, incoming completion, visible badge, and disabled click/tap with no repeat research command or browser errors. Screenshots/script are under `/workspace/scratch/research-status`; no saved game or production state was touched.
+- Thermonuclear review: direct snapshot-driven text overlay, shared mouse/touch disabled handling, no added state/dependency/domain rules, changed client files below 1,000 lines.
+- Branch `fix/researched-tech-status` starts at merged master `61fc87c`. Modal deployment is unavailable in this environment (no Modal module/profile); the PR merge workflow deploys production.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
