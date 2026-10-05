@@ -1,4 +1,12 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: field-research icon (2026-10-05)
+
+- Replaced Agriculture’s sickle-and-grain icon with a tilled field, seedlings and hoe through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline. The existing `tech_agriculture` key supplies available/disabled research buttons and queued research; no Rust, gameplay or WASM changes.
+- Preserved the previous icon, generated source, cutout, prompt, references, request IDs and small-size comparison in `assets/ui/field_research_sources`. Updated the generation subject and contact sheet; estimated FAL cost $0.0448.
+- Icon normalization, PNG/RGBA/transparency and 282-frame resolution checks pass. All 183 workspace tests, formatting and strict native/WASM lint pass. Desktop and DPR2-phone available/queued research inspected using staged snapshots; both browser checks pass with no page errors. QA artifacts are in `/workspace/scratch/field-research`.
+- Thermonuclear review: asset replacement only, no new dependencies or game behavior; no source file growth beyond the existing prompt.
+- Branch `feat/field-research-icon` starts from master, separate from timber PR #78. Modal remains unavailable in this environment; not deployed.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
