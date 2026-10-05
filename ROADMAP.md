@@ -12,6 +12,9 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
+Dock presentation now includes all four shoreline-facing orientations and matching
+construction stages; placement previews use the same deterministic water-edge choice.
+
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and island inventories supplemented by movable ship storage are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
@@ -26,7 +29,7 @@ The first transport is a playable dock recipe costing 60 wood + 20 timber, takin
 
 Remaining acceptance criteria:
 
-1. Implemented: dock-built transport boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
+1. Implemented: dock-built transport approaches reachable shore for boarding orders and boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
 2. Implemented: sailing toward the map frontier generates an adjacent island; continuous ocean crossings reach the persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
 3. Implemented: island-local inventories and 50-resource ship holds fund outposts. Cargo stays aboard and is available while stopped at shore; dock controls transfer it directly. All discovered settlements keep running.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
