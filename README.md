@@ -10,13 +10,12 @@ Start on an island, gather resources, and build a settlement. Build ships to exp
 
 Time keeps moving forward and bring with it dangers and challenges. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs. The balance still needs work: losses should make the next run interesting without making rebuilding tedious.
 
-Dock-built transports carry units between persistent islands. Resources are shared across all islands. All discovered settlements keep gathering, building, producing and researching. The first environmental danger is a recurring drought that temporarily halves food gathering. Combat, destructive calamities, permanent upgrades and automatic trade routes are not implemented yet.
+Dock-built transports carry units between persistent islands. Resources are shared across all islands. All discovered settlements keep gathering, building, producing and researching. Combat, calamities, permanent upgrades and automatic trade routes are not implemented yet.
 
 Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each holds four passengers; no metal, cloth or housing is required. Select a transport and tap sea, or choose **Explore beyond the coast**. Sailing toward the frontier generates the next island before the ship reaches the map edge. Islands share one expanding map, with 64 cells of open water between their 120×80 generation regions; crossing takes real sailing time. Sites follow an expanding square spiral, so successive discoveries stay adjacent without a fixed island-count cap.
 
 ## Implemented roadmap
 
-- Drought forecasts and recovery: five calm minutes, a one-minute warning, then food gathering at half speed for 60 seconds; later droughts last 90 then 120 seconds. Stockpile food or shift workers to other tasks. Pause and speed controls also govern weather.
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.

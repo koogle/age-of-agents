@@ -72,13 +72,7 @@ impl Hud {
             INK,
             false,
         );
-        let header_bottom = self.environment_banner(
-            atlas,
-            snapshot.environment,
-            width,
-            s,
-            header_bottom + 18.0 * s,
-        );
+        let header_bottom = header_bottom + 18.0 * s;
         let toast_top = header_bottom
             + if snapshot.simulation_speed == 0.0 {
                 46.0 * s

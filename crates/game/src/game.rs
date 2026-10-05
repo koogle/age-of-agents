@@ -9,9 +9,6 @@ mod domain;
 mod economy;
 #[cfg(test)]
 mod economy_tests;
-mod environment;
-#[cfg(test)]
-mod environment_tests;
 mod fields;
 #[cfg(test)]
 mod fields_tests;
@@ -44,7 +41,6 @@ mod terrain_codec;
 mod worldgen;
 
 pub use domain::*;
-pub use environment::*;
 pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
@@ -89,7 +85,6 @@ pub struct GameWorld {
     pub seed: u64,
     pub economy_rules: EconomyRules,
     pub tick: u64,
-    pub environment_seconds: f64,
     pub simulation_speed: f64,
     pub terrain: Vec<TerrainCell>,
     pub explored_cells: Vec<CellCoordinate>,
@@ -131,7 +126,6 @@ pub struct WorldSnapshot {
     pub rows: u16,
     pub tick: u64,
     pub simulation_speed: f64,
-    pub environment: EnvironmentView,
     #[serde(with = "terrain_codec")]
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
@@ -346,7 +340,6 @@ impl GameWorld {
             seed: island.seed,
             economy_rules: EconomyRules::IslandProgression,
             tick: 0,
-            environment_seconds: 0.0,
             simulation_speed: 1.0,
             terrain: island.terrain,
             explored_cells: Vec::new(),
@@ -719,7 +712,7 @@ impl GameWorld {
             return;
         }
         let dt = dt * self.simulation_speed;
-        if !dt.is_finite() || dt <= 0.0 || !(self.environment_seconds + dt).is_finite() {
+        if dt <= 0.0 {
             return;
         }
         self.tick += 1;
@@ -757,7 +750,6 @@ impl GameWorld {
         for index in 0..self.buildings.len() {
             self.tick_building_job(index, dt);
         }
-        self.environment_seconds += dt;
         self.refresh_exploration();
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
@@ -797,7 +789,6 @@ impl GameWorld {
             rows: self.rows(),
             tick: self.tick,
             simulation_speed: self.simulation_speed,
-            environment: EnvironmentView::at(self.environment_seconds),
             terrain: self
                 .terrain
                 .iter()
