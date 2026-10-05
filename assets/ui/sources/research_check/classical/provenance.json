@@ -1,0 +1,28 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "prompt": "Create a small GRECO-ROMAN completed-research SEAL for this ancient Greek strategy game. The attached coin is the approved art style: match its warm aged bronze-gold, limestone ivory, fine dark-brown ink contour and restrained hand-painted shading. Draw one perfectly circular antique bronze medallion seen straight on. A LARGE, unmistakable GREEN CHECK MARK occupies the ivory center, made of two joined broad strokes in deep olive/leaf-green enamel with a subtle antique bronze outline. Around it, use a simple symmetrical classical LAUREL WREATH with only three broad bronze-gold leaves on each side, the stems meet below; this should evoke a Roman triumph or Greek victory wreath. One thin bronze outer rim. Make the central green check the dominant shape, about 55 percent of the medallion diameter; leaves sit close to the rim and never cover the check. It must read at 30 pixels. Ancient crafted/engraved metal with gentle watercolor treatment, not a glossy modern app badge, not a cartoon sticker. No letters, no inscriptions, no numbers, no stars, no additional symbols, no excessive small decorations. The medallion is centered, occupies 90 percent of the square frame, on a pure white background for cutout. No cast shadow or ground.",
+  "references": [
+    "assets/ui/buttons/coin_normal.png",
+    "assets/ui/icons/portrait_towncenter.png"
+  ],
+  "purpose": "Greco-Roman completion medallion with bronze laurel and green check",
+  "requests": [
+    {
+      "t": 1791190238.2442539,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "icon:research_completed_classical_seal",
+      "est_usd": 0.0398,
+      "request_id": "01a10b41-e1b6-7511-9274-847fe26c5282",
+      "seconds": 8.8
+    },
+    {
+      "t": 1791190244.17858,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:research_completed_classical_seal",
+      "est_usd": 0.005,
+      "request_id": "01a10b42-11f4-7850-a4bc-94ee5fdddcb0",
+      "seconds": 2.3
+    }
+  ],
+  "processing": "Native 1024px FAL render retained; BiRefNet cutout, remove alpha below 12, center/crop with 6% padding, Lanczos reduction to 256px runtime medallion. Rendered at 30 logical pixels."
+}

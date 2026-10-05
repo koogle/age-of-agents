@@ -166,3 +166,37 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
         }
     }
 }
+
+#[test]
+fn completed_research_coin_explains_instead_of_dispatching_research() {
+    let assets = pollster::block_on(crate::assets::Assets::load());
+    let atlas = build_atlas(&assets);
+    let mut world = GameWorld::default();
+    world.stockpile.food = 1000.0;
+    world.stockpile.wood = 1000.0;
+    world.researched_technologies.push(TechnologyKind::Masonry);
+    let snapshot = world.snapshot();
+    let model = Model {
+        snapshot: Some(&snapshot),
+        units: &[],
+        building: Some(&snapshot.buildings[0].building.id),
+        build: BuildUi::Off,
+        ship: None,
+        show_grid: false,
+        toast: None,
+        camera: Vec2::ZERO,
+    };
+    for (width, height, scale) in [
+        (390.0, 844.0, 1.0),
+        (780.0, 1688.0, 2.0),
+        (1280.0, 800.0, 1.0),
+    ] {
+        let mut hud = Hud::new();
+        hud.layout(&atlas, &model, width, height, scale);
+        let rect = hud.regions.iter().find_map(|r| {
+            matches!(&r.action, Action::Explain(reason) if reason.starts_with("Masonry: Research complete")).then_some(r.rect)
+        }).expect("completed research remains visible and explains its status");
+        assert!(hud.press(Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0)));
+        assert!(matches!(hud.release(), Some(Action::Explain(_))));
+    }
+}

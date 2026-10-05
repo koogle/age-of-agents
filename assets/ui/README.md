@@ -74,6 +74,8 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 - Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
 - It reads distinctly from the X down to 24 px.
 
+`buttons/coin_researched.png` is a Greco-Roman completion seal: an antique bronze medallion, classical laurel wreath and dark olive-green check. Generated with FAL `fal-ai/nano-banana/edit` against the approved coin and town-center portrait, then cut out with `fal-ai/birefnet/v2`. Final 1024px sources, exact prompt, request IDs and processing provenance are in `sources/research_check/classical/`; earlier versions are retained as drafts. The 256px runtime seal renders at 30 logical pixels.
+
 ## Field research icon (2026-10-05)
 
 `icons/tech_agriculture.png` now depicts tilled rows, green seedlings and a hoe for Agriculture research, replacing the sickle-and-grain illustration. Its existing key supplies both the research button and queued research. Generated with FAL `fal-ai/nano-banana/edit` using the original wood icon as the style reference; background removed with `fal-ai/birefnet/v2`, then normalized directly from the original cutout with `scripts/normalize_icons.py`. The previous icon, original render, cutout, exact prompt, reference, request IDs and comparison preview are retained in `field_research_sources/`. Estimated FAL cost: $0.0448.
