@@ -18,6 +18,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
+- Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
 - Building orders in fog send the villager to explore first. A foundation is created and paid for only when the whole footprint is currently visible and placement is valid; blocked or unaffordable sites cancel without spending.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
