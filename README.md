@@ -29,7 +29,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
 - Dock transport production through the paid task queue, water-only sailing, four passenger seats and shore landings. Passengers retain IDs, carried goods and housing usage; saves retain manifests and in-progress movement.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls, seeded reset, and SQLite saves.
-- Distant zoom eases into a curved world overview; the globe currently shows the active island; a cumulative archipelago overview remains planned.
+- Distant zoom eases into a curved world overview; the globe shows the active island in the same isometric orientation as the world view, with matching camera-marker and click navigation; a cumulative archipelago overview remains planned.
 
 See [ROADMAP.md](ROADMAP.md) for upcoming work and acceptance criteria, and [decisions.md](decisions.md) for design decisions.
 
