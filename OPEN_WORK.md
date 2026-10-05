@@ -1,3 +1,9 @@
+# Active menu icon audit
+
+- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md): 20 fixes; 18 packed new/extracted icons are prepared in `/workspace/scratch/menu-icons/generated/` and pass normalization.
+- [PR #104](https://github.com/koogle/age-of-agents/pull/104) restores the Stop hand for units and ships. Integrated master `10ee124` including docks, shore pickup, wildlife/health and mobile cargo gestures. All 253 Rust tests pass (one manual benchmark ignored), native/WASM lint, formatting, 298-frame/icon checks and rebuilt bindings pass. Final desktop mouse and DPR-2 phone Stop dispatch pass without page errors; [evidence](docs/verification/menu-icons/stop/checks.txt). Ready for the authorized merge; deployment remains a separate workflow check.
+- Next: transport queue consistency, then dedicated resource, unit, ship/navigation and category icons, one PR per fix. Preserve unrelated open work below.
+
 # Wildlife integration (2026-10-05)
 
 - PR #98 merged into master as `0b5ce8b`, including `ba51a51` (island inventories, ship holds, shore-facing docks and automatic shore pickup). Final desktop mouse and DPR2-phone touch combat pass without page errors. Final integration suite: 251 tests pass (13 server, 79 client, 159 domain; one manual benchmark ignored); native/WASM strict lint and 298-frame asset audit pass. Combined save schema is version 14; release through GitHub Actions with production credentials.
