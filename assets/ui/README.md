@@ -113,3 +113,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `command_disembark` | [Review](sources/menu_icons/command_disembark/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_disembark/provenance.json) |
 | `command_sail` | [Review](sources/menu_icons/command_sail/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_sail/provenance.json) |
 | `command_explore` | [Review](sources/menu_icons/command_explore/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_explore/provenance.json) |
+| `command_cargo` | [Review](sources/menu_icons/command_cargo/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_cargo/provenance.json) |
