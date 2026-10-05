@@ -13,6 +13,8 @@ use crate::assets::{Assets, Rgba};
 
 mod build_menu;
 mod layout;
+#[cfg(test)]
+mod layout_tests;
 pub use build_menu::BuildingGroup;
 mod selection;
 mod ships;
