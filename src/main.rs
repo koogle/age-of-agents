@@ -358,6 +358,12 @@ mod tests {
     }
 
     #[test]
+    fn obsolete_ship_cargo_commands_are_rejected() {
+        let json = r#"{"type":"command","request_id":"old-client","command":{"type":"transfer_ship_cargo","ship_id":"transport-1","kind":"wood","amount":20,"direction":"load"}}"#;
+        assert!(serde_json::from_str::<ClientMessage>(json).is_err());
+    }
+
+    #[test]
     fn typed_command_and_result_use_request_id() {
         let message: ClientMessage = serde_json::from_str(
             r#"{"type":"command","request_id":"request-7","command":{"type":"gather","unit_id":"villager-1","resource_id":"tree-1"}}"#,
