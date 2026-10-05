@@ -20,7 +20,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - New games start with food, wood and stone; timber is their only processed resource. Town center, house, granary, farm/fields, lumber mill and dock are initially available, with Forestry, Agriculture and Masonry research.
 - The 17-building/13-resource catalog remains implemented. Advanced industries and research unlock through discovery of their raw inputs; existing saves retain unrestricted access. New-game rations and healing production are deferred.
-- Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers harvest after preparation; depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
+- Farms with custom field-preparation animations and soil/cultivation/seedling/wheat sprites. Workers use the normal harvest, deposit and resume loop after preparation; field placement preserves walking and delivery routes. Depleted fields require a new paid order. Mining camps and local gathering bonuses are also implemented.
 - Building task queues: one active task plus five waiting tasks, paid upfront; cancelling a waiting task refunds its full cost and releases housing.
 - Wood → timber processing on starter islands; island 2 adds iron/coal, island 3 clay, and island 4 fiber; that resource pattern repeats on later discoveries. Existing unrestricted saves retain all five processing chains, including rations.
 - Guard, archer, healer, and siege-cart production; these units currently only move and stop.
