@@ -27,3 +27,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Destination contract:** Future island IDs will derive from deterministic discovery order, with destination generation once on first transport completion and travel on departure. This slice keeps the existing island/stockpile; passengers are owned by either the land-unit list or one ship manifest, never both.
 
 - Persistent islands: discovery-order IDs and mixed root seeds identify generated destinations; explicit voyages exchange local terrain, fog, entities and inventory while research and counters stay global. Away islands pause, and unload-at-shore permits founding an outpost from transported goods; loading still requires a dock.
+
+- **Compact HUD:** Preserve painted medallions and parchment while aligning phone actions and globe/speed controls in one bottom band. Expand queues and submenus upward only when needed, and collapse construction choices during placement.
