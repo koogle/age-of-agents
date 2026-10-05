@@ -85,12 +85,17 @@ impl Animal {
 impl GameWorld {
     pub(super) fn populate_wildlife(&mut self, island: usize) {
         let origin = self.island_origins[island];
-        let kinds: &[AnimalKind] = if island == 0 {
-            &[AnimalKind::Wolf]
+        let count = if island == 0 {
+            1
         } else {
-            &[AnimalKind::Wolf, AnimalKind::Wolf, AnimalKind::Bear]
+            2 + (worldgen::mix(self.seed ^ 0x7769_6c64_6c69_6665, island as u64) % 3) as usize
         };
-        for (number, &kind) in kinds.iter().enumerate() {
+        for number in 0..count {
+            let kind = if island > 0 && number == count - 1 {
+                AnimalKind::Bear
+            } else {
+                AnimalKind::Wolf
+            };
             let occupancy = self.occupancy();
             let cell = self
                 .terrain

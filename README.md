@@ -16,7 +16,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 
 ## Implemented roadmap
 
-- Territorial wolves and bears with health, pursuit, contact attacks and explicit hunting orders. Wildlife is hidden outside current sight and starts away from the settlement. Tap an animal with no units selected to inspect it; select units and tap to attack. Bears are tougher and slower than wolves. New games start with one wolf on the first island; the second and later islands have two wolves and a bear.
+- Territorial wolves and bears with health, pursuit, contact attacks and explicit hunting orders. Wildlife is hidden outside current sight and starts away from the settlement. Tap an animal with no units selected to inspect it; select units and tap to attack. Bears are tougher and slower than wolves. New games start with one wolf on the first island; the second and later islands have 2–4 animals (one bear and 1–3 wolves).
 - Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
