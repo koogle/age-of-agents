@@ -68,3 +68,12 @@ focused topic from the [knowledge index](INDEX.md).
 Jakob’s PR #94 refinements specify a single row of resource columns, filtered to resources on the connected island or aboard. Show resource icons and onboard quantities only, without resource-name or shore-count labels. Place up/load and down/unload shields at each icon’s lower left/right corners; the final artwork is 24px (26px hovered) with 44×40px hit areas. Extra resources paginate on narrow screens. The FAL bronze/laurel/green-enamel art matches research check seals; provenance is in `assets/ui/sources/cargo_shields/classical/`.
 
 Top resources follow the pointer/touch island, including minimap inspection. Building affordability uses the building’s own island. Dock selection exposes Ship cargo when dock artwork obscures its vessel. Validate mouse/touch transfers against authoritative cargo and island inventories, not only screenshots.
+
+## Dedicated menu icons (2026-10-05 audit)
+
+Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
+Track coverage in [the menu icon audit](../MENU_ICON_AUDIT.md). Inspect both command
+and queued-job mappings: a manifest entry alone does not make an icon available
+in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
+Stop already had authored artwork but was omitted from that list and used Cancel;
+restore the hand for land units and ships, retaining the X for cancellation.

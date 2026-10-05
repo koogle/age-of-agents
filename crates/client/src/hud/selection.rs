@@ -245,7 +245,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         }
         if busy && model.build == BuildUi::Off {
             commands.push(Command {
-                icon: "command_cancel",
+                icon: "command_stop",
                 label: "Stop".into(),
                 detail: "Drop the current task · X".into(),
                 enabled: true,
