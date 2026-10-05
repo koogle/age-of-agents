@@ -23,7 +23,6 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         destination: None,
         heading: [1, 0],
         passengers: vec![],
-        goods: Default::default(),
     });
     let snapshot = world.snapshot();
     let units = [snapshot.units[0].unit.id.clone()];
@@ -52,7 +51,6 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     units: if town || ship { &[] } else { &units },
                     building: town.then_some(building.as_str()),
                     ship: ship.then_some("layout-ship"),
-                    cargo_index: 0,
                     build,
                     show_grid: false,
                     toast: None,
@@ -139,7 +137,6 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
         units: &[],
         building: Some(&id),
         ship: None,
-        cargo_index: 0,
         build: BuildUi::Off,
         show_grid: false,
         toast: None,
@@ -185,7 +182,6 @@ fn completed_research_coin_explains_instead_of_dispatching_research() {
         building: Some(&snapshot.buildings[0].building.id),
         build: BuildUi::Off,
         ship: None,
-        cargo_index: 0,
         show_grid: false,
         toast: None,
         camera: Vec2::ZERO,
