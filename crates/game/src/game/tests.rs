@@ -8,9 +8,10 @@ pub(super) fn cell(column: u16, row: u16) -> CellCoordinate {
 }
 
 /// The first free site for `kind`, scanning from the south-west of the map,
-/// that villager-1 can reach.
+/// that is fully visible and villager-1 can reach.
 pub(super) fn free_site(world: &mut GameWorld, kind: BuildingKind) -> CellCoordinate {
     let (columns, rows) = kind.size();
+    let visible = world.visible_cells();
     for row in (0..WORLD_ROWS - rows).rev() {
         for column in 0..WORLD_COLUMNS - columns {
             let footprint = Footprint {
@@ -18,7 +19,10 @@ pub(super) fn free_site(world: &mut GameWorld, kind: BuildingKind) -> CellCoordi
                 columns,
                 rows,
             };
-            if world.footprint_is_free(footprint) && world.can_reach_beside(0, footprint) {
+            if footprint.cells().all(|cell| visible.contains(&cell))
+                && world.footprint_is_free(footprint)
+                && world.can_reach_beside(0, footprint)
+            {
                 return footprint.origin;
             }
         }
@@ -701,7 +705,6 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
         })
         .unwrap();
     let resource = world.resources[0].cell;
-    let before = world.clone();
     for origin in [
         cell(WORLD_COLUMNS - 2, 5), // straddles the east edge
         cell(5, WORLD_ROWS - 2),    // straddles the south edge
@@ -711,6 +714,19 @@ fn build_rejects_blocked_or_unaffordable_sites_without_mutation() {
         cell(30, 18),               // overlaps villager-2 and the base
         cell(38, 28),               // covers villager-2's reservation
     ] {
+        let (columns, rows) = BuildingKind::TownCenter.size();
+        if origin.column <= WORLD_COLUMNS - columns && origin.row <= WORLD_ROWS - rows {
+            stand_beside(
+                &mut world,
+                0,
+                Footprint {
+                    origin,
+                    columns,
+                    rows,
+                },
+            );
+        }
+        let before = world.clone();
         assert_eq!(
             world.apply_command(build(origin)),
             Err(CommandError::InvalidBuildSite),
@@ -1069,6 +1085,7 @@ fn build(
 fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     let mut world = fixture::fixture();
     world.stockpile.wood = 15.0;
+    world.units[0].cell = cell(20, 23);
     let before = world.clone();
     assert_eq!(
         build(&mut world, BuildingKind::Watchtower, cell(20, 24)),
@@ -1127,8 +1144,9 @@ fn a_granary_takes_food_but_not_wood() {
 
 #[test]
 fn a_dock_must_touch_the_sea() {
-    // The fixture map is all land.
+    // The fixture map is all land; put the site in current sight.
     let mut world = fixture::fixture();
+    world.units[0].cell = cell(20, 23);
     world.stockpile.wood = 100.0;
     assert_eq!(
         build(&mut world, BuildingKind::Dock, cell(20, 24)),
@@ -1137,21 +1155,31 @@ fn a_dock_must_touch_the_sea() {
     // On a generated island some coastal site accepts one.
     let mut island = GameWorld::generate(DEFAULT_SEED);
     island.stockpile.wood = 100.0;
-    let sites = (0..WORLD_ROWS - 3)
-        .flat_map(|row| (0..WORLD_COLUMNS - 3).map(move |column| cell(column, row)));
+    let (columns, rows) = BuildingKind::Dock.size();
+    let sites = (0..WORLD_ROWS - rows)
+        .flat_map(|row| (0..WORLD_COLUMNS - columns).map(move |column| cell(column, row)));
     let coastal: Vec<_> = sites
         .filter(|origin| {
             let footprint = Footprint {
                 origin: *origin,
-                columns: 3,
-                rows: 3,
+                columns,
+                rows,
             };
             island.footprint_is_free(footprint) && island.touches_sea(footprint)
         })
         .collect();
-    let built = coastal
-        .into_iter()
-        .any(|origin| build(&mut island, BuildingKind::Dock, origin).is_ok());
+    let built = coastal.into_iter().any(|origin| {
+        stand_beside(
+            &mut island,
+            0,
+            Footprint {
+                origin,
+                columns,
+                rows,
+            },
+        );
+        build(&mut island, BuildingKind::Dock, origin).is_ok()
+    });
     assert!(built, "some coastal site takes a dock");
 }
 
