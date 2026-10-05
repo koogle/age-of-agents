@@ -188,15 +188,19 @@ fn nobody_walks_or_builds_on_peaks_or_rivers() {
         built.stockpile.wood = 1000.0;
         built.stockpile.stone = 1000.0;
         let origin = CellCoordinate::new(cell.column.saturating_sub(1), cell.row.saturating_sub(1));
-        assert!(
-            built
-                .apply_command(Command::Build {
-                    kind: BuildingKind::House,
-                    unit_id: "villager-1".into(),
-                    origin
-                })
-                .is_err()
-        );
+        let before_buildings = built.buildings.clone();
+        let before_stockpile = built.stockpile.clone();
+        let _ = built.apply_command(Command::Build {
+            kind: BuildingKind::House,
+            unit_id: "villager-1".into(),
+            origin,
+        });
+        // Fogged sites may accept exploration, but never create an invalid foundation.
+        for _ in 0..400 {
+            built.tick(0.1);
+        }
+        assert_eq!(built.buildings, before_buildings);
+        assert_eq!(built.stockpile, before_stockpile);
         let mut stranded = world.clone();
         stranded.units[0].cell = cell;
         assert!(stranded.validate().is_err());
@@ -219,14 +223,17 @@ fn nobody_walks_or_builds_on_water() {
     });
     assert!(moved.is_err());
     world.stockpile.wood = 100.0;
-    let built = world.apply_command(Command::Build {
+    let _ = world.apply_command(Command::Build {
         kind: BuildingKind::TownCenter,
         unit_id: "villager-1".into(),
         origin: water,
     });
-    assert!(built.is_err());
-    world.stockpile.wood = before.stockpile.wood;
-    assert_eq!(world, before);
+    for _ in 0..400 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.buildings, before.buildings);
+    assert_eq!(world.stockpile.wood, 100.0);
+    assert_eq!(world.units[0].action, UnitAction::Idle);
     let mut drowned = before.clone();
     drowned.units[0].cell = water;
     assert!(drowned.validate().is_err());
