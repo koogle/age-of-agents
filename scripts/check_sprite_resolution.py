@@ -20,7 +20,7 @@ MANIFESTS = (
     "villager.json", "villager_woman.json", "villager_elder.json",
     "villager_field_preparation.json", "villager_idle_hd.json", "resources.json", "towncenter.json",
     "buildings_hd.json", "buildings_economy.json", "buildings_crafts.json",
-    "buildings_civic.json", "units.json", "transport.json",
+    "buildings_civic.json", "units.json", "transport.json", "wildlife.json",
 )
 
 
