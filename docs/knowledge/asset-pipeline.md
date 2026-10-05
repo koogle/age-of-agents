@@ -77,3 +77,14 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Directional dock integration (2026-10-05)
+
+The building packer appends three directional rows to the existing atlas, keeping
+all original pixels and UV rectangles. Use the retained 2172×724 strips in
+`assets/sprites/building_sources/directions`; the earlier 1254×1254 construction
+sheet was rejected because its cells were only 418px. Each integrated source
+cell is 724×724 before packing down to 512×512. Manual structural deck corners
+register each construction stage, and the atlas manifest drives texture dimensions.
+The new geometry remains upright in the fixed camera. Domain facing and preview
+behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
