@@ -77,6 +77,12 @@ Mobile refinement (Jakob, 2026-10-05): in the compact HUD (width below 600 or he
 
 Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonoverlapping transfer/chevron targets, compact row height, DPI-scaled swipe thresholds and cancelled transfers. [Cargo browser replay](../verification/replay_cargo.py) exercises DPR-2 touch swipes/chevrons and DPR-1 desktop clicks/drags; it inspects outgoing commands against a presentation fixture rather than applying transfers to a save. Run with `--output DIR`, then separately with `--output DIR --desktop`. [Mobile row capture](../verification/2026-10-05/mobile-cargo-row.png). The all-13-resource stress fixture still crowds top-resource labels in short landscape; this change only adjusts cargo layout.
 
+## Resource names on demand
+
+Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
+
+Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
+
 ## Dedicated menu icons (2026-10-05 audit)
 
 Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
