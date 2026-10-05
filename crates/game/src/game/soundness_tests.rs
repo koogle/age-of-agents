@@ -69,7 +69,7 @@ fn random_command(world: &GameWorld, rng: &mut Lcg) -> Command {
     }
 }
 
-/// Raw material in nodes, in villagers' arms, and in the stockpile.
+/// Raw material in nodes, cargo, stockpiles and paid building footprints.
 fn material(world: &GameWorld) -> BTreeMap<ResourceKind, f64> {
     let mut totals = BTreeMap::new();
     for resource in &world.resources {
@@ -81,6 +81,11 @@ fn material(world: &GameWorld) -> BTreeMap<ResourceKind, f64> {
     for (name, amount) in world.stockpile.entries() {
         let kind: ResourceKind = serde_json::from_value(name.into()).unwrap();
         *totals.entry(kind).or_insert(0.0) += amount;
+    }
+    for building in &world.buildings {
+        for &(kind, amount) in building.kind.cost() {
+            *totals.entry(kind).or_insert(0.0) += amount;
+        }
     }
     totals
 }
@@ -119,7 +124,13 @@ fn play(seed: u64, steps: usize) -> (usize, usize) {
                 before[&kind]
             );
         }
-        assert_eq!(world.buildings.len(), 1 + accepted_builds, "seed {seed}");
+        // Accepted fogged orders may still be exploring or later cancelled.
+        assert!(world.buildings.len() <= 1 + accepted_builds, "seed {seed}");
+        assert_eq!(
+            world.next_building_id as usize,
+            world.buildings.len() + 1,
+            "seed {seed}"
+        );
     }
     assert_eq!(world.tick as usize, steps);
     (accepted_builds, accepted_gathers)
