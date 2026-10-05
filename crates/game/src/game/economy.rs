@@ -189,6 +189,7 @@ impl GameWorld {
                         return;
                     };
                     self.units.push(Unit {
+                        health: 100.0,
                         id: self.next_unit_name(),
                         kind,
                         cell,

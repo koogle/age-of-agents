@@ -147,6 +147,10 @@ pub struct SnapshotTerrainCell {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum UnitAction {
+    AttackAnimal {
+        animal_id: String,
+        elapsed_seconds: f64,
+    },
     Board {
         ship_id: String,
     },
@@ -197,6 +201,7 @@ pub struct CarriedResource {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Unit {
+    pub health: f64,
     pub id: String,
     pub kind: UnitKind,
     /// The cell this unit stands in. It is exclusively claimed by this unit.

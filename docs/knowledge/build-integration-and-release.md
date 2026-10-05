@@ -120,3 +120,10 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Wildlife release check (2026-10-05)
+
+During the wolves/bears implementation, Modal 1.5.3 installed successfully and
+current runtime credential bindings reported ready, but `python3 scripts/modal_manage.py status`
+returned "Could not connect to the Modal server" again. Treat this as connectivity
+failure, not proof of missing credentials; no direct deployment was attempted.
