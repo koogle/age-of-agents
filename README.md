@@ -103,6 +103,8 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnings
 ```
 
+For simulation-only iteration, use `cargo test -p aoa-game --locked`; run the full workspace suite before shipping. The test profile optimizes only `aoa-game`, retaining debug invariant checks without optimizing the renderer dependency graph. Deterministic soundness seeds run on up to four workers, preserving all eight seeds and 9,600 ticks.
+
 For client changes, rebuild the web client and test the affected flow on desktop and phone. Apply [the code-quality review](docs/THERMONUCLEAR_REVIEW.md) before shipping; [CI](.github/workflows/deploy.yml) also checks browser bindings and current UI assets.
 
 Asset changes must pass the relevant checks in `scripts/`. Audited villager, military, base-resource and building frames use 512×512 cells repacked from recovered sources and reviewed refinements. Run `python3 scripts/check_sprite_resolution.py` to validate all 282 audited frames. See [the asset workflow](AGENTS.md#asset-workflow) for generation and refinement, and [Midjourney tooling](docs/MIDJOURNEY.md) for setup.
