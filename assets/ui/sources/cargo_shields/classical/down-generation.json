@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/sources/cargo_shields/classical/up-original.png",
+  "prompt": "Keep this exact same upright classical shield game UI button, with identical shield shape, pointed bottom, warm bronze-gold metal face and border, laurel branches, ink linework, shading, lighting, scale and white background. Change ONLY the central green enamel arrow with bronze outline so it points straight DOWN instead of UP. The arrowhead must be at the BOTTOM and its short thick vertical shaft above it. Do not rotate or flip the shield itself. No other changes. No text.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad2c44/ByPmcB8bNr3L32iVjn1ST_f21wJ1nD.png",
+        "content_type": "image/png",
+        "file_name": "ByPmcB8bNr3L32iVjn1ST_f21wJ1nD.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  }
+}

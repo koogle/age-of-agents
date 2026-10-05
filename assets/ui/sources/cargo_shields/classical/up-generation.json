@@ -1,0 +1,21 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "references": [
+    "assets/ui/sources/research_check/classical/generated.png",
+    "assets/ui/sources/cargo_shields/up-original.png"
+  ],
+  "prompt": "Create a matching UP ARROW SHIELD button for the game. The FIRST reference is the existing approved research-complete check-mark seal: COPY its art style faithfully. Use the same warm honey-bronze metal face and raised bronze rim, the same hand-painted gold highlights and darker ochre shading, fine dark brown engraved outlines, and deep leaf-green enamel symbol edged by a thin bronze line. Include the same restrained symmetrical classical laurel branches on either side of the center. The SECOND reference gives ONLY the upright shield silhouette (rounded shoulders, softly pointed bottom), not its pale colors or flat arrow. Replace the check symbol with one large bold UP arrow: broad triangular head at TOP, short thick vertical shaft below, crisp and unmistakable at 40 pixels. The shield face must be BRONZE GOLD like the check seal, NOT cream or white; the arrow must be GREEN ENAMEL with the bronze outline, NOT flat olive-grey. Keep the shield upright and perfectly front facing. Symmetrical and centered, fills 88 percent of the square. Match the handcrafted ink-and-watercolor Greco-Roman game art, not a glossy modern app icon. One isolated shield on a pure white background, no shadows outside it, no lettering, no numbers, no extra symbols.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad2c41/xwLMx1nNc4PJYQ108LNSO_y6UHZk45.png",
+        "content_type": "image/png",
+        "file_name": "xwLMx1nNc4PJYQ108LNSO_y6UHZk45.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  }
+}
