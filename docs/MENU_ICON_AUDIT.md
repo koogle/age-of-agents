@@ -13,7 +13,7 @@ Each fix goes through a PR and the repository verification/release process.
 | Cloth | Fiber; villager on production/queue | Dedicated folded cloth | Pending |
 | Rations | Food; villager on production/queue | Dedicated packed provisions | Pending |
 | Guard, Archer, Healer, Siege cart | Villager training and selection art | Distinct authored unit portraits on selection, production and queue | Pending |
-| Transport queue | Villager training icon | Use existing transport portrait consistently | Pending |
+| Transport queue | Villager training icon | Use existing transport portrait consistently | See integration PRs |
 | Land passengers | Group portrait | Dedicated disembark icon | Pending |
 | Sail to island | Transport portrait | Dedicated sailing command | Pending |
 | Explore beyond coast | Transport portrait | Dedicated exploration command | Pending |
@@ -43,3 +43,12 @@ phone WebGL, and perform the thermonuclear review. Record PR/release evidence as
 work completes; an open PR or local screenshot does not establish deployment.
 
 Stop evidence: [desktop](verification/menu-icons/stop/desktop.jpg), [phone](verification/menu-icons/stop/phone.jpg), [checks](verification/menu-icons/stop/checks.txt).
+
+## Integration PRs
+
+Each row links its verified change; consult GitHub for live merge/release state.
+
+| Icon | PR | Evidence |
+| --- | --- | --- |
+| Stop | [#104](https://github.com/koogle/age-of-agents/pull/104) | [Checks](verification/menu-icons/stop/checks.txt) |
+| Transport queue | PR_PENDING_transport_queue | [Checks](verification/menu-icons/transport_queue/checks.txt) |

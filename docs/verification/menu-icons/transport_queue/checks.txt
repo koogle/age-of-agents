@@ -1,0 +1,6 @@
+transport_queue: 254 Rust tests pass; one manual benchmark ignored.
+Formatting, strict native and WASM Clippy, rebuilt WebAssembly/JS: PASS.
+Sprite resolution and all icon normalization checks: PASS.
+Desktop 1280x800 DPR1 mouse and 390x844 DPR2 touch: PASS; no page errors.
+Bundle SHA256 and fixture limitations are recorded in result.json.
+Thermonuclear review: direct typed icon mappings, shared offer/queue mapping; no domain, cost, save, unlock or input behavior changes. All frontend files remain below 1000 lines. Existing art remains unchanged.

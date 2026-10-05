@@ -126,6 +126,22 @@ pub(super) fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'
     }
 }
 
+pub(super) fn product_icon(product: ProductKind) -> &'static str {
+    match product {
+        ProductKind::TransportShip => "transport",
+        ProductKind::Timber => "resource_timber",
+        ProductKind::Villager
+        | ProductKind::Guard
+        | ProductKind::Archer
+        | ProductKind::Healer
+        | ProductKind::SiegeCart
+        | ProductKind::Steel
+        | ProductKind::Bricks
+        | ProductKind::Cloth
+        | ProductKind::Rations => "command_train",
+    }
+}
+
 fn product_label(product: ProductKind, in_progress: bool) -> String {
     let (build, train, make) = if in_progress {
         ("Building", "Training", "Making")
@@ -382,13 +398,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
     for &product in &building.building.produces {
         let crowded = product.unit_kind().is_some() && population >= housing;
         commands.push(Command {
-            icon: if product == ProductKind::TransportShip {
-                "transport"
-            } else if product == ProductKind::Timber {
-                "resource_timber"
-            } else {
-                "command_train"
-            },
+            icon: product_icon(product),
             label: product_label(product, false),
             detail: if queue_full {
                 "Queue is full".into()
@@ -478,11 +488,7 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
         .map(|(index, entry)| {
             let (icon, name, cost) = match entry.job {
                 aoa_game::BuildingJob::Produce { product, .. } => (
-                    if product == ProductKind::Timber {
-                        "resource_timber"
-                    } else {
-                        "command_train"
-                    },
+                    product_icon(product),
                     product_label(product, false),
                     cost_text(product.cost()),
                 ),
@@ -558,6 +564,46 @@ mod tests {
         assert_eq!(unit_detail(&world), "Heading out to gather · HP 100/100");
         world.units[0].health = 76.0;
         assert!(unit_detail(&world).ends_with("HP 76/100"));
+    }
+
+    #[test]
+    fn queued_products_use_their_production_art() {
+        for (product, expected) in [
+            (ProductKind::TransportShip, "transport"),
+            (ProductKind::Timber, "resource_timber"),
+        ] {
+            let mut snapshot = aoa_game::GameWorld::default().snapshot();
+            let building = &mut snapshot.buildings[0].building;
+            building.produces = vec![product];
+            building.queue = vec![aoa_game::QueuedBuildingJob {
+                id: 1,
+                job: aoa_game::BuildingJob::Produce {
+                    product,
+                    elapsed_seconds: 0.0,
+                },
+            }];
+            let model = Model {
+                resource_island: 0,
+                snapshot: Some(&snapshot),
+                units: &[],
+                building: Some(&snapshot.buildings[0].building.id),
+                ship: None,
+                build: BuildUi::Off,
+                show_grid: false,
+                toast: None,
+                camera: glam::Vec2::ZERO,
+            };
+            let offered = selection_model(&snapshot, &model).unwrap().4;
+            assert_eq!(
+                offered
+                    .iter()
+                    .find(|c| c.action == Action::Produce(product))
+                    .unwrap()
+                    .icon,
+                expected
+            );
+            assert_eq!(queued_commands(&snapshot, &model)[0].icon, expected);
+        }
     }
 
     fn unit_detail(world: &GameWorld) -> String {
