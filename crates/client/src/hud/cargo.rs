@@ -1,4 +1,4 @@
-//! Resource rows keep both transfer directions beside the relevant inventory.
+//! A single strip of resource columns, each with compact transfer shields.
 use super::*;
 use aoa_game::{CargoDirection, SHIP_RESOURCE_CAPACITY};
 
@@ -56,7 +56,6 @@ impl Hud {
         atlas: &Atlas,
         model: &Model,
         width: f32,
-        top: f32,
         bottom: f32,
         s: f32,
     ) {
@@ -64,95 +63,84 @@ impl Hud {
             self.cargo_page = 0;
             return;
         };
-        let rows = rows(snapshot, ship_id);
-        let room = ((bottom - top - 44.0 * s) / (44.0 * s)).floor().max(1.0) as usize;
-        let pages = rows.len().div_ceil(room).max(1);
+        let resources = rows(snapshot, ship_id);
+        let column_width = 108.0 * s;
+        let room = (((width - 24.0 * s).min(864.0 * s) / column_width).floor() as usize).max(1);
+        let pages = resources.len().div_ceil(room).max(1);
         self.cargo_page = self.cargo_page.min(pages - 1);
-        let shown: Vec<_> = rows
+        let shown: Vec<_> = resources
             .iter()
             .skip(self.cargo_page * room)
             .take(room)
             .collect();
-        let h = (44.0 + shown.len().max(1) as f32 * 44.0) * s;
-        let w = (width - 24.0 * s).min(380.0 * s);
+        let h = (116.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
+        let w = if shown.is_empty() {
+            300.0 * s
+        } else {
+            (if pages > 1 { room } else { shown.len() }) as f32 * column_width
+        };
         let x = (width - w) / 2.0;
         let y = bottom - h;
         self.shape([x, y, w, h], GLASS, 1.0, 16.0 * s);
         self.regions.push(Region {
             rect: [x, y, w, h],
-            action: Action::Explain(
-                "Load and unload at a completed dock · up to 10 per tap".into(),
-            ),
+            action: Action::Explain("Up: load · Down: unload · up to 10 per tap at a dock".into()),
             enabled: true,
         });
-        self.text(
-            atlas,
-            if pages > 1 { "Cargo" } else { "Ship resources" },
-            (x + 12.0 * s, y + 26.0 * s),
-            13.0 * s,
-            INK,
-            false,
-        );
-        if pages == 1 {
-            for (offset, label) in [(126.0, "Load"), (46.0, "Unload")] {
-                self.text(
-                    atlas,
-                    label,
-                    (x + w - offset * s, y + 26.0 * s),
-                    11.0 * s,
-                    MUTED,
-                    true,
-                );
-            }
-        }
         if shown.is_empty() {
             self.text(
                 atlas,
-                "No resources aboard or on this island",
-                (x + 12.0 * s, y + 67.0 * s),
+                "No resources available here",
+                (x + w / 2.0, y + 62.0 * s),
                 12.0 * s,
                 MUTED,
-                false,
+                true,
             );
         }
-        for (i, row) in shown.iter().enumerate() {
-            let ry = y + (44.0 + i as f32 * 44.0) * s;
+        for (i, resource) in shown.iter().enumerate() {
+            let left = x + i as f32 * column_width;
+            let center = left + column_width / 2.0;
             self.coin(
                 atlas,
-                resource_icon(row.kind),
-                [x + 8.0 * s, ry + 4.0 * s, 30.0 * s, 30.0 * s],
+                resource_icon(resource.kind),
+                [center - 12.0 * s, y + 6.0 * s, 24.0 * s, 24.0 * s],
                 true,
                 false,
             );
             self.text(
                 atlas,
-                row.kind.name(),
-                (x + 44.0 * s, ry + 15.0 * s),
-                12.0 * s,
+                resource.kind.name(),
+                (center, y + 43.0 * s),
+                11.0 * s,
                 INK,
-                false,
+                true,
             );
             self.text(
                 atlas,
-                &format!(
-                    "{} shore · {} aboard",
-                    quantity(row.ashore),
-                    quantity(row.aboard)
-                ),
-                (x + 44.0 * s, ry + 31.0 * s),
+                &format!("{} shore", quantity(resource.ashore)),
+                (center, y + 57.0 * s),
                 10.0 * s,
                 MUTED,
-                false,
+                true,
+            );
+            self.text(
+                atlas,
+                &format!("{} aboard", quantity(resource.aboard)),
+                (center, y + 70.0 * s),
+                10.0 * s,
+                INK,
+                true,
             );
             for (index, direction, amount, label) in [
-                (0, CargoDirection::Load, row.load, "Load"),
-                (1, CargoDirection::Unload, row.unload, "Unload"),
+                (0, CargoDirection::Load, resource.load, "Load"),
+                (1, CargoDirection::Unload, resource.unload, "Unload"),
             ] {
-                let enabled = row.docked && amount > 0.0;
+                let enabled = resource.docked && amount > 0.0;
+                // Keep generous hit areas while the painted shields are small.
                 let rect = [
-                    x + w - (164.0 - index as f32 * 80.0) * s,
-                    ry,
-                    76.0 * s,
+                    left + (10.0 + index as f32 * 44.0) * s,
+                    y + 74.0 * s,
+                    44.0 * s,
                     40.0 * s,
                 ];
                 let icon = if direction == CargoDirection::Load {
@@ -160,8 +148,11 @@ impl Hud {
                 } else {
                     "shield_down"
                 };
-                let hot = self.hovered(rect) && enabled;
-                let size = if hot { 44.0 } else { 40.0 } * s;
+                let size = if self.hovered(rect) && enabled {
+                    24.0
+                } else {
+                    22.0
+                } * s;
                 self.sprite(
                     atlas,
                     icon,
@@ -176,9 +167,9 @@ impl Hud {
                 self.regions.push(Region {
                     rect,
                     action: if enabled {
-                        Action::TransferCargo(row.kind, direction, amount)
+                        Action::TransferCargo(resource.kind, direction, amount)
                     } else {
-                        Action::Explain(if !row.docked {
+                        Action::Explain(if !resource.docked {
                             "Stop beside a completed dock to transfer".into()
                         } else {
                             format!("{label}: no resources or space available")
@@ -189,18 +180,18 @@ impl Hud {
             }
         }
         if pages > 1 {
-            let ry = y;
+            let ry = y + 116.0 * s;
             self.text(
                 atlas,
                 &format!("{} / {pages}", self.cargo_page + 1),
-                (x + w - 128.0 * s, ry + 26.0 * s),
-                12.0 * s,
-                INK,
+                (x + w / 2.0, ry + 25.0 * s),
+                11.0 * s,
+                MUTED,
                 true,
             );
             for (left, label, page, enabled) in [
                 (
-                    x + w - 252.0 * s,
+                    x + 8.0 * s,
                     "Previous",
                     self.cargo_page.saturating_sub(1),
                     self.cargo_page > 0,
@@ -214,7 +205,7 @@ impl Hud {
             ] {
                 self.cargo_button(
                     atlas,
-                    [left, ry, 80.0 * s, 40.0 * s],
+                    [left, ry, 80.0 * s, 36.0 * s],
                     label,
                     Action::CargoPage(page.min(pages - 1)),
                     enabled,
@@ -368,14 +359,7 @@ mod tests {
             for page in 0..13 {
                 hud.regions.clear();
                 hud.cargo_page = page;
-                hud.cargo_panel(
-                    &atlas,
-                    &model,
-                    width * scale,
-                    top * scale,
-                    bottom * scale,
-                    scale,
-                );
+                hud.cargo_panel(&atlas, &model, width * scale, bottom * scale, scale);
                 if hud.cargo_page != page {
                     break;
                 }
@@ -385,6 +369,10 @@ mod tests {
                     .filter(|r| matches!(r.action, Action::TransferCargo(..)))
                     .collect();
                 for (i, button) in buttons.iter().enumerate() {
+                    assert_eq!(button.rect[1], buttons[0].rect[1]);
+                    assert!(
+                        button.rect[0] >= 0.0 && button.rect[0] + button.rect[2] <= width * scale
+                    );
                     assert!(
                         button.rect[1] >= top * scale
                             && button.rect[1] + button.rect[3] <= bottom * scale
