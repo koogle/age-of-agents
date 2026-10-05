@@ -34,3 +34,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 
 - 2026-10-05: Islands occupy one persistent coordinate space, with 64-cell ocean gaps and deterministic adjacent discovery along a growing square spiral; ships sail continuously and all discovered settlements simulate against the shared stockpile. Retain layouts in memory for now, bound ground geometry to the camera, compress repeated snapshot terrain and profile populated worlds before introducing streaming.
 - **Minimap orientation:** Project the full map using the fixed world camera’s ground axes; terrain sampling, camera marker and click/touch navigation use the same invertible mapping.
+
+- **Movement presentation:** Local interpolation follows the simulation accumulator; remote playback retains unplayed samples, buffers two ticks after starvation, and catches up at at most 1.1× without jumping the clock. Villagers use every gait pose and animate work at their authoritative interaction cell, with no visual movement toward the target.
