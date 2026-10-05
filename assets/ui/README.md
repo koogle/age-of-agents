@@ -104,3 +104,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `resource_coal` | [Review](sources/menu_icons/resource_coal/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_coal/provenance.json) |
 | `resource_steel` | [Review](sources/menu_icons/resource_steel/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_steel/provenance.json) |
 | `resource_bricks` | [Review](sources/menu_icons/resource_bricks/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_bricks/provenance.json) |
+| `resource_cloth` | [Review](sources/menu_icons/resource_cloth/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_cloth/provenance.json) |
