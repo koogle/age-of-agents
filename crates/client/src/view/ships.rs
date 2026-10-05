@@ -66,6 +66,7 @@ mod tests {
             destination: None,
             heading,
             passengers: vec![],
+            cargo: Default::default(),
             home_dock_id: None,
         }];
         let mut sprites = Vec::new();

@@ -337,7 +337,7 @@ mod tests {
         let store = Store::from_path(&path);
         store.initialize().unwrap();
         let mut modified = GameWorld::default();
-        modified.stockpile.wood = 99.0;
+        modified.inventories[0].wood = 99.0;
         store.save(&modified).unwrap();
         let (snapshots, _) = broadcast::channel(4);
         let state = Arc::new(AppState {
@@ -352,15 +352,15 @@ mod tests {
             .unwrap();
 
         assert_eq!(snapshot.tick, 0);
-        assert_eq!(snapshot.stockpile.wood, 0.0);
+        assert_eq!(snapshot.inventories[0].wood, 0.0);
         assert_eq!(store.load().unwrap(), Some(GameWorld::generate(9)));
         std::fs::remove_file(path).unwrap();
     }
 
     #[test]
-    fn obsolete_ship_cargo_commands_are_rejected() {
+    fn ship_cargo_commands_are_typed() {
         let json = r#"{"type":"command","request_id":"old-client","command":{"type":"transfer_ship_cargo","ship_id":"transport-1","kind":"wood","amount":20,"direction":"load"}}"#;
-        assert!(serde_json::from_str::<ClientMessage>(json).is_err());
+        assert!(serde_json::from_str::<ClientMessage>(json).is_ok());
     }
 
     #[test]

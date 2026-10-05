@@ -32,12 +32,12 @@ fn locked_build_production_and_research_are_atomic_even_with_free_materials() {
     let mut w = fixture::fixture();
     w.economy_rules = EconomyRules::IslandProgression;
     w.resources.retain(|r| STARTER_RESOURCES.contains(&r.kind));
-    w.stockpile.wood = 1000.0;
-    w.stockpile.stone = 1000.0;
-    w.stockpile.food = 1000.0;
-    w.stockpile.timber = 1000.0;
-    w.stockpile.cloth = 1000.0;
-    w.stockpile.rations = 1000.0;
+    w.inventories[0].wood = 1000.0;
+    w.inventories[0].stone = 1000.0;
+    w.inventories[0].food = 1000.0;
+    w.inventories[0].timber = 1000.0;
+    w.inventories[0].cloth = 1000.0;
+    w.inventories[0].rations = 1000.0;
     let origin = free_site(&mut w, BuildingKind::Infirmary);
     let before = w.clone();
     assert_eq!(
@@ -145,7 +145,7 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
     let mut w = fixture::fixture();
     w.economy_rules = EconomyRules::IslandProgression;
     for (kind, amount) in STARTER_RESOURCE_BUDGET {
-        w.stockpile.add(kind, amount);
+        w.inventories[0].add(kind, amount);
     }
     let origin = free_site(&mut w, BuildingKind::LumberMill);
     w.apply_command(Command::Build {
@@ -172,9 +172,9 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
         BuildingKind::Granary,
         BuildingKind::Dock,
     ] {
-        assert!(w.stockpile.affords(kind.cost()));
+        assert!(w.inventories[0].affords(kind.cost()));
         for &(r, amount) in kind.cost() {
-            w.stockpile.add(r, -amount);
+            w.inventories[0].add(r, -amount);
         }
     }
     for technology in [
@@ -196,9 +196,9 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
     .unwrap();
     run(&mut w, VILLAGER_PRODUCTION_SECONDS + 0.1);
     for &(r, amount) in FIELD_COST {
-        w.stockpile.add(r, -amount);
+        w.inventories[0].add(r, -amount);
     }
-    assert!(w.stockpile.affords(&FIRST_TRANSPORT_COST));
+    assert!(w.inventories[0].affords(&FIRST_TRANSPORT_COST));
     w.validate().unwrap();
 }
 
@@ -230,7 +230,7 @@ fn every_building_funded_by_first_island_materials_accepts_construction() {
                 .all(|&(r, _)| STARTER_RESOURCES.contains(&r) || r == ResourceKind::Timber)
         );
         for &(resource, amount) in kind.cost() {
-            w.stockpile.add(resource, amount);
+            w.inventories[0].add(resource, amount);
         }
         // Dock shore placement already has dedicated coverage.
         if kind == BuildingKind::Dock {

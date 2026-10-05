@@ -23,19 +23,14 @@ impl GameWorld {
         Ok(unit)
     }
 
-    fn afford_field(&self) -> Result<(), CommandError> {
+    fn afford_field(&self, origin: CellCoordinate) -> Result<(), CommandError> {
+        let available = self.available_at(origin);
         for &(kind, amount) in FIELD_COST {
-            if self.stockpile.amount(kind) < amount {
+            if available.amount(kind) < amount {
                 return Err(CommandError::InsufficientResources(kind));
             }
         }
         Ok(())
-    }
-
-    fn pay_for_field(&mut self) {
-        for &(kind, amount) in FIELD_COST {
-            self.stockpile.add(kind, -amount);
-        }
     }
 
     pub(super) fn plant_field(
@@ -55,7 +50,7 @@ impl GameWorld {
         {
             return Err(CommandError::InvalidBuildSite);
         }
-        self.afford_field()?;
+        self.afford_field(origin)?;
         // A plot blocks its cells even after harvest. Preserve delivery and
         // escape routes just as we do when placing a building foundation.
         if !self.placement_preserves_routes(footprint) {
@@ -77,7 +72,7 @@ impl GameWorld {
             self.resources.pop();
             return Err(CommandError::TargetUnreachable);
         }
-        self.pay_for_field();
+        self.spend_at(origin, FIELD_COST)?;
         self.units[unit].action = UnitAction::Cultivate { resource_id: id };
         Ok(())
     }
@@ -101,8 +96,9 @@ impl GameWorld {
             return Err(CommandError::TargetUnreachable);
         }
         if resource.field.as_ref().unwrap().work.is_none() {
-            self.afford_field()?;
-            self.pay_for_field();
+            let origin = resource.cell;
+            self.afford_field(origin)?;
+            self.spend_at(origin, FIELD_COST)?;
             self.resources[index].field.as_mut().unwrap().work = Some(0.0);
         }
         self.units[unit].action = UnitAction::Cultivate {

@@ -13,6 +13,7 @@ mod placement;
 mod render;
 mod reset;
 mod source;
+mod storage;
 mod terrain;
 mod view;
 mod window;
@@ -106,6 +107,7 @@ pub struct App {
     selection: Selection,
     pointer: Option<Pointer>,
     cursor: Vec2,
+    resource_island: usize,
     mouse_inside: bool,
     focused: bool,
     modifiers: ModifiersState,
@@ -179,6 +181,7 @@ impl App {
             selection: Selection::default(),
             pointer: None,
             cursor: Vec2::ZERO,
+            resource_island: 0,
             mouse_inside: false,
             focused: true,
             modifiers: ModifiersState::empty(),
@@ -307,6 +310,11 @@ impl App {
 
     fn act(&mut self, action: hud::Action) {
         match action {
+            hud::Action::SelectShip(id) => self.select_storage_ship(id),
+            hud::Action::TransferCargo(kind, direction, amount) => {
+                self.transfer_cargo(kind, direction, amount)
+            }
+            hud::Action::CargoPage(page) => self.hud.cargo_page = page,
             hud::Action::Voyage(island_id) => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Voyage { ship_id, island_id });
@@ -400,14 +408,7 @@ impl App {
             return;
         };
         if let Target::Ship(id) = target {
-            if !self.selection.units.is_empty() {
-                for unit_id in self.selection.units.clone() {
-                    self.send(Command::Board {
-                        unit_id,
-                        ship_id: id.clone(),
-                    });
-                }
-            }
+            self.order_ship_storage(&id);
             self.selection.units.clear();
             self.selection.building = None;
             self.selection.ship = Some(id);
@@ -488,7 +489,7 @@ impl App {
                 for unit_id in carriers {
                     self.send(Command::Deposit {
                         unit_id,
-                        building_id: building_id.clone(),
+                        storage_id: building_id.clone(),
                     });
                 }
                 // The building's own menu stays one tap away: it is selected.
@@ -648,6 +649,7 @@ impl App {
                 .map(|(origin, ok)| (kind, origin, ok)),
             _ => None,
         };
+        self.update_resource_island();
         let plots_changed = self.level_building_plots(ghost);
         let hover = self.hover_decal();
         let Some(game) = self.game.as_mut() else {
@@ -746,6 +748,7 @@ impl App {
             sprites.push((sheet, preview));
         }
         let model = hud::Model {
+            resource_island: self.resource_island,
             snapshot: self.view.snapshot.as_ref(),
             units: &self.selection.units,
             building: self.selection.building.as_deref(),

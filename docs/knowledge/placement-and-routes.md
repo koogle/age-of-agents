@@ -37,9 +37,9 @@ unit in a narrow passage is a separate traffic problem.
 `PathTree::route_to_nearest` stops Dijkstra when the cheapest requested goal is
 settled. It preserves complete-search path and cell-order ties; use it for a
 known movement/interaction destination. Drop-site selection still prefers a
-clear route, then route cost, then building ID, and only computes a blocked-route
+clear route, then route cost, then storage-site ID (building or stopped shore ship), and only computes a blocked-route
 fallback when the clear route is unavailable. Per-site searches can cost more
-with many far-away compatible buildings; profile populated settlements before
+with many far-away compatible storage sites; profile populated settlements before
 assuming the small-world gains generalize.
 
 Keep complete trees for connectivity/placement checks and callers comparing
