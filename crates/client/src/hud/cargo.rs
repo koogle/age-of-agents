@@ -93,6 +93,18 @@ impl Hud {
             INK,
             false,
         );
+        if pages == 1 {
+            for (offset, label) in [(126.0, "Load"), (46.0, "Unload")] {
+                self.text(
+                    atlas,
+                    label,
+                    (x + w - offset * s, y + 26.0 * s),
+                    11.0 * s,
+                    MUTED,
+                    true,
+                );
+            }
+        }
         if shown.is_empty() {
             self.text(
                 atlas,
@@ -143,22 +155,37 @@ impl Hud {
                     76.0 * s,
                     40.0 * s,
                 ];
-                self.cargo_button(
+                let icon = if direction == CargoDirection::Load {
+                    "shield_up"
+                } else {
+                    "shield_down"
+                };
+                let hot = self.hovered(rect) && enabled;
+                let size = if hot { 44.0 } else { 40.0 } * s;
+                self.sprite(
                     atlas,
+                    icon,
+                    [
+                        rect[0] + (rect[2] - size) / 2.0,
+                        rect[1] + (rect[3] - size) / 2.0,
+                        size,
+                        size,
+                    ],
+                    [1.0, 1.0, 1.0, if enabled { 1.0 } else { 0.3 }],
+                );
+                self.regions.push(Region {
                     rect,
-                    &format!("{label} {}", quantity(amount)),
-                    if enabled {
+                    action: if enabled {
                         Action::TransferCargo(row.kind, direction, amount)
                     } else {
                         Action::Explain(if !row.docked {
                             "Stop beside a completed dock to transfer".into()
                         } else {
-                            "No resources or space available for this transfer".into()
+                            format!("{label}: no resources or space available")
                         })
                     },
-                    enabled,
-                    s,
-                );
+                    enabled: true,
+                });
             }
         }
         if pages > 1 {

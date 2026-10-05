@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/sources/cargo_shields/up-original.png",
+  "prompt": "Keep this exact same upright shield game UI button, with identical shield shape, pointed bottom, bronze-gold border, cream face, ink linework, shading, lighting, scale and white background. Change ONLY the central dark olive arrow so it points straight DOWN instead of UP. The arrowhead must be at the BOTTOM and its short thick vertical shaft above it. Do not rotate or flip the shield itself. No other changes. No text.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad2bfa/KZTI9YuHsx9Mgil9Psh1u_EIg3XKT2.png",
+        "content_type": "image/png",
+        "file_name": "KZTI9YuHsx9Mgil9Psh1u_EIg3XKT2.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  }
+}
