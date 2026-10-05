@@ -55,7 +55,7 @@ pub(super) fn draw(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aoa_game::{CellCoordinate, GameWorld, Stockpile, TransportShip};
+    use aoa_game::{CellCoordinate, GameWorld, TransportShip};
 
     fn sprite(heading: [i8; 2]) -> Sprite {
         let mut snapshot = GameWorld::default().snapshot();
@@ -66,7 +66,6 @@ mod tests {
             destination: None,
             heading,
             passengers: vec![],
-            goods: Stockpile::default(),
         }];
         let mut sprites = Vec::new();
         draw(
