@@ -245,7 +245,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         }
         if busy && model.build == BuildUi::Off {
             commands.push(Command {
-                icon: "command_cancel",
+                icon: "command_stop",
                 label: "Stop".into(),
                 detail: "Drop the current task · X".into(),
                 enabled: true,
@@ -271,6 +271,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .iter()
             .find(|u| u.unit.id == model.units[0])?;
         let activity = match &unit.unit.action {
+            UnitAction::AttackAnimal { .. } => "Attacking wildlife".into(),
             UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
@@ -325,7 +326,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         return Some((
             "portrait_villager",
             title,
-            format!("{activity}{cargo}"),
+            format!("{activity}{cargo} · HP {:.0}/100", unit.unit.health),
             None,
             commands,
         ));
@@ -554,7 +555,9 @@ mod tests {
             resource_id: "outside-fog".into(),
             phase: aoa_game::GatherPhase::ToResource,
         };
-        assert_eq!(unit_detail(&world), "Heading out to gather");
+        assert_eq!(unit_detail(&world), "Heading out to gather · HP 100/100");
+        world.units[0].health = 76.0;
+        assert!(unit_detail(&world).ends_with("HP 76/100"));
     }
 
     fn unit_detail(world: &GameWorld) -> String {

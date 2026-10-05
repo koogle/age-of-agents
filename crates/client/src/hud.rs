@@ -28,7 +28,7 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 19] = [
+const ICONS: [&str; 20] = [
     "resource_wood",
     "resource_timber",
     "resource_food",
@@ -39,6 +39,7 @@ const ICONS: [&str; 19] = [
     "resource_fiber",
     "command_build",
     "command_cancel",
+    "command_stop",
     "command_train",
     "tech_forestry",
     "tech_agriculture",
@@ -307,7 +308,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         };
         let scaled = font.as_scaled(PxScale::from(pixels));
         let mut glyphs = HashMap::new();
-        for ch in (32u8..127).map(char::from).chain(['×', '·']) {
+        for ch in (32u8..127).map(char::from).chain(['×', '·', '‹', '›']) {
             let id = scaled.glyph_id(ch);
             let advance = scaled.h_advance(id);
             let glyph = id.with_scale_and_position(pixels, ab_glyph::point(0.0, 0.0));
@@ -376,6 +377,7 @@ pub struct Model<'a> {
 
 pub struct Hud {
     pub cargo_page: usize,
+    cargo_strip: Option<([f32; 4], usize, f32)>,
     pub quads: Vec<Quad>,
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
@@ -404,6 +406,7 @@ impl Hud {
     pub fn new() -> Self {
         Self {
             cargo_page: 0,
+            cargo_strip: None,
             quads: Vec::new(),
             regions: Vec::new(),
             hover: None,
@@ -507,7 +510,7 @@ impl Hud {
                     rect,
                     uv: glyph.uv,
                     color,
-                    params: [0.0; 4],
+                    params: [4.0, 0.0, 0.0, 0.0],
                 });
             }
             pen += glyph.advance * scale;

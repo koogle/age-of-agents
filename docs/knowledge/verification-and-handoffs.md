@@ -26,6 +26,19 @@ The driver uses loopback port 8001, a retained fixture and controlled time. See
 and interpretation limits. Its assertions are not an end-to-end gameplay proof;
 UI commands against an isolated hosted save answer a different question.
 
+`python3 docs/verification/replay_reconnect.py --output /tmp/aoa-reconnect-check`
+uses loopback :8002 to close/reopen an actual browser WebSocket and deliver a
+40-snapshot burst while rendering is suspended. It checks the rendered villager
+anchor on desktop and emulated DPR2 phone, including a paused sequence restart.
+Both replay drivers share `presentation-fixture.json`; the inbox Rust tests
+parse it so missing required snapshot metadata fails before a browser load timeout.
+The reconnect driver keeps real WebSocket/retry timing and holds only animation
+frames for the background-tab scenario. It throttles rendering to 10 FPS for
+software WebGL; high-frame-rate motion remains covered by the Rust movement
+suite. Advancing a synthetic clock through every expensive WebGL frame made this
+reconnect test impractically slow, so it does not use the presentation driver's
+blanket clock control.
+
 Store reusable fixtures/drivers and selected evidence under `docs/verification/`
 when they support a lasting claim. A result should identify revision/bundle,
 mode, fixture/seed, viewport/DPI/platform, procedure, observed state and remaining
@@ -67,3 +80,15 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Menu icon verification
+
+`python docs/verification/menu_icons.py --name stop --output /tmp/menu-stop`
+serves a controlled current-schema snapshot on loopback :8011, loads the current
+WASM and assets, captures desktop/DPR-2 phone views and checks Stop wire dispatch.
+It never touches hosted saves. This verifies presentation and pointer/touch
+dispatch, not domain acceptance. Use native domain tests for authoritative behavior.
+In this cloud executor, source `/workspace/.cloud-setup/activate.sh` when Rust is
+not on PATH; check/install the matching WASM target and wasm-bindgen version.
+Software WebGL can take roughly a minute for initial shaders; a real-time snapshot
+feed avoids clock instrumentation blocking first-frame initialization.

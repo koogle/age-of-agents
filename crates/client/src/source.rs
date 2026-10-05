@@ -7,6 +7,9 @@ use aoa_game::{Command, GameWorld, WorldSnapshot};
 
 const TICK_SECONDS: f64 = 0.1;
 
+#[cfg(any(target_arch = "wasm32", test))]
+mod inbox;
+
 pub enum Source {
     Local {
         world: Box<GameWorld>,
@@ -32,8 +35,8 @@ impl Source {
         }
     }
 
-    /// Advances the clock and returns every new snapshot.
-    pub fn poll(&mut self, dt: f64, out: &mut VecDeque<WorldSnapshot>) {
+    /// Advances the clock and drains snapshots. True starts a fresh remote playback baseline.
+    pub fn poll(&mut self, dt: f64, out: &mut VecDeque<WorldSnapshot>) -> bool {
         match self {
             Source::Local {
                 world,
@@ -50,6 +53,7 @@ impl Source {
                     world.tick(TICK_SECONDS);
                     out.push_back(world.snapshot());
                 }
+                false
             }
             #[cfg(target_arch = "wasm32")]
             Source::Remote(remote) => remote.drain(out),
@@ -134,7 +138,7 @@ pub mod remote {
     use wasm_bindgen::JsCast;
     use wasm_bindgen::closure::Closure;
 
-    use super::CommandResult;
+    use super::inbox::Inbox;
 
     #[derive(Deserialize)]
     #[serde(tag = "type", rename_all = "snake_case")]
@@ -148,13 +152,6 @@ pub mod remote {
             #[serde(default)]
             error: Option<String>,
         },
-    }
-
-    #[derive(Default)]
-    pub(super) struct Inbox {
-        snapshots: VecDeque<WorldSnapshot>,
-        pub(super) results: Vec<CommandResult>,
-        last_sequence: u64,
     }
 
     pub struct Remote {
@@ -187,13 +184,9 @@ pub mod remote {
                     };
                     let mut inbox = sink.borrow_mut();
                     match serde_json::from_str::<ServerMessage>(&text) {
-                        Ok(ServerMessage::Snapshot { sequence, world })
-                            if sequence > inbox.last_sequence =>
-                        {
-                            inbox.last_sequence = sequence;
-                            inbox.snapshots.push_back(*world);
+                        Ok(ServerMessage::Snapshot { sequence, world }) => {
+                            inbox.snapshot(sequence, *world);
                         }
-                        Ok(ServerMessage::Snapshot { .. }) => {}
                         Ok(ServerMessage::CommandResult { ok, error }) => {
                             inbox.results.push(if ok {
                                 Ok(())
@@ -216,9 +209,9 @@ pub mod remote {
             }
         }
 
-        pub fn drain(&mut self, out: &mut VecDeque<WorldSnapshot>) {
+        pub fn drain(&mut self, out: &mut VecDeque<WorldSnapshot>) -> bool {
             self.keep_connected();
-            out.extend(self.inbox.borrow_mut().snapshots.drain(..));
+            self.inbox.borrow_mut().drain(out)
         }
 
         /// Reopens the socket after it closes. A restarted server numbers its
@@ -240,8 +233,9 @@ pub mod remote {
                 Some(at) if now >= at => {
                     if let Ok(socket) = web_sys::WebSocket::new(&self.url) {
                         socket.set_onmessage(Some(self.on_message.as_ref().unchecked_ref()));
+                        self.socket.set_onmessage(None);
                         self.socket = socket;
-                        self.inbox.borrow_mut().last_sequence = 0;
+                        self.inbox.borrow_mut().reconnect();
                     }
                     self.retry_at = Some(now + 3.0);
                 }

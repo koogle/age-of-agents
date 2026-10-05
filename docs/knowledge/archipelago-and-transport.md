@@ -71,6 +71,34 @@ Each discovered island owns a stockpile. A stopped shore ship contributes its ca
 
 `storage.rs` owns compatible building/ship sites and local resource reservation. Costs consume shore stores first, then connected holds; production output and queue refunds remain on the job’s island. Partial deposits preserve the villager’s remainder when a ship fills or departs. Future automated trading ports are intended but not implemented. The shared map and all-settlement simulation remain intact.
 
+## Shore pickup (2026-10-05)
+
+User-requested behavior: clicking a transport with boarding units selected should
+bring the ship to a reachable shore so both can meet. Implemented in `ships.rs`: the first boarding order chooses a berth using the
+combined reachable land/water route cost with deterministic cell ties. A stopped,
+reachable ship keeps its berth; additional passengers join the same pickup. Units
+walk to the destination shore and wait until the vessel stops before boarding.
+Dock bridging and seat reservations remain supported. No shared reachable shore
+rejects the order without changing either actor. Explicit sailing or Stop ship
+cancels pickup orders; a redirected ship finishes its current step.
+
+The existing ship destination and Board action encode pickup, so no persisted
+fields or store-version change are needed. Validation permits boarding a moving
+ship; `tick_board` enforces arrival before passenger ownership changes. Searches
+compare complete land/sea trees only when selecting a berth; walking uses the
+bounded nearest-goal route. `ship_tests` covers offshore group pickup, replay after
+a mid-approach save, unreachable shores, cancellation, and mid-sail redirection. A crowded shoreline keeps queued passengers waiting for
+space instead of dropping their orders while the vessel approaches.
+Clicking with carriers still orders a cargo deposit, as before.
+
+For browser pickup fixtures, the initial view centers on the first ship via
+`crates/client/src/islands.rs::frame_town_center`; `Rig::new`'s default target is
+not the rendered camera target. Use an isolated save, resume before issuing orders, select the empty-handed
+unit and click/tap the offshore ship, check the Board acknowledgement and destination,
+and verify the passenger manifest only changes at the stopped berth. At 0×, Board
+and Stop ship are rejected without mutating either actor; see the
+[pause contract](runtime-debugging.md#pause-contract).
+
 ## Terrain-first generation (2026-10-05)
 
 Jakob requested varied outlines followed by relief and terrain-derived rivers.

@@ -12,9 +12,12 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
-The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Island generation uses varied outlines (including elongated islands and central bays), shared relief and downhill drainage. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and island inventories supplemented by movable ship storage are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+Dock presentation now includes all four shoreline-facing orientations and matching
+construction stages; placement previews use the same deterministic water-edge choice.
 
-Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
+The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and island inventories supplemented by movable ship storage are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
+
+Territorial wolves and bears are the first implemented danger, with explicit contact attack orders, health, pursuit and death cleanup. New games have one wolf on the first island and 2–4 animals (one bear and 1–3 wolves) on later islands. Broad combat, calamities, treasures, and permanent progression remain proposals. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
 The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
 
@@ -26,7 +29,7 @@ The first transport is a playable dock recipe costing 60 wood + 20 timber, takin
 
 Remaining acceptance criteria:
 
-1. Implemented: dock-built transport boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
+1. Implemented: dock-built transport approaches reachable shore for boarding orders and boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
 2. Implemented: sailing toward the map frontier generates an adjacent island; continuous ocean crossings reach the persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
 3. Implemented: island-local inventories and 50-resource ship holds fund outposts. Cargo stays aboard and is available while stopped at shore; dock controls transfer it directly. All discovered settlements keep running.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
@@ -37,7 +40,7 @@ Remaining acceptance criteria:
 - [x] Seven biome-compatible raw resources: wood, food, stone, gold, iron, clay, and fiber.
 - [x] Bounded villager carrying, deposits at the closest accessible compatible building, resumption through temporary approach congestion, explicit unload-first gather/build reassignment, depletion, construction, training, and five gathering technologies.
 - [x] Deterministic four-neighbor routing, occupancy, reserved destinations/build sites, and blocked-spawn rejection.
-- [x] Typed sequenced WebSocket commands/snapshots, SQLite round-trip, authoritative 0×/1×/2× speed.
+- [x] Typed sequenced WebSocket commands/snapshots, SQLite round-trip, authoritative 0×/1×/2× speed. At 0×, simulation and NPC presentation freeze and gameplay orders are rejected until resumed; camera and selection remain available.
 - [x] Terrain/entity presentation, directional movement/gathering animation, fog memory, capability popover, and desktop/mobile controls (Canvas 2D; superseded by the 3D client).
 
 ## Direction change — 3D client and spatial soundness
@@ -55,7 +58,7 @@ Status: integrated into the current prototype; the shared Rust renderer has repl
 - [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
 - [x] Villager build menu: town center, house (+5 housing), granary (food and fiber drop-off), watchtower (sight 20), dock (must touch the sea; the fishing boat comes later). Training respects housing.
 - [x] Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
-- [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells when theirs runs out.
+- [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells of the connected exhausted wild-resource patch (or individual field) when theirs runs out.
 - [x] Seeded island worldgen: deterministic integer-hash noise, sea, beaches, elevation with hills and impassable peaks, rivers with fords, biome-placed resource clusters, and a guaranteed fishing-boat budget (wood 300, food 150, stone 80, iron 60, fiber 60, clay 40, with 50% headroom) reachable from the start; compact terrain snapshots.
 - [x] Liveness: head-on standoffs resolve by deterministic yielding (lower index side-steps, highest index wins a contested cell); idle units never rest on another unit's reservation; a destination may be reserved while someone only walks through it.
 
@@ -97,7 +100,7 @@ Completed research remains visible with a bronze laurel seal with a green check 
 
 ## Building expansion — deployed
 
-User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. Existing harvesters keep their gathering order while another worker replenishes their field, including when returning with the previous harvest. New worlds now generate only food, wood and stone; the full resource catalog remains available to domain test fixtures. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. Existing harvesters keep their gathering order while another worker replenishes their field, including when returning with the previous harvest. New worlds now generate only food, wood and stone; the full resource catalog remains available to domain test fixtures. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; wildlife contact attacks are implemented, while general combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
 The Rust HUD exposes grouped, labelled construction, production costs/progress and all stockpile totals. Compact phone and short-landscape layouts place actions beside the globe/speed controls, with queues and submenus wrapping upward. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
@@ -144,7 +147,7 @@ A combined default prototype scenario requires steel production, exploration, an
 
 ## Slice F — Combat foundation
 
-Status: planned.
+Status: wildlife contact combat is implemented; ranged attacks, building health, factions and general combat remain planned.
 
 Gameplay acceptance:
 
@@ -215,9 +218,11 @@ Gameplay acceptance:
 
 - [x] Full-plot initial foundations, cleaned curved roof repeats for non-HQ buildings, and loading animation sharing the lossless 512 px gameplay sheets.
 
-Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar.
+Island storage: stopped shore ships supplement local construction/production costs and accept villager deposits; dock controls transfer cargo directly. Cargo stays aboard between islands, while training/research remain building jobs. Pointer/touch island inspection drives the top resource bar; resource names appear on hover or tap instead of permanent labels. Mobile cargo paging uses inline chevrons and supports horizontal swipe paging.
 
 ## Deployment verification follow-up — reconciled 2026-10-05
 
 - [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
 - The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
+
+Island generation uses rounded, square, elongated, lobed and open-bay outlines, with shared relief and downhill drainage; starter resources remain visible and reachable.

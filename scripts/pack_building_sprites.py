@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets/sprites/building_sources"
 DEST = ROOT / "assets/sprites"
 CELL, BASE, FIT_H, FIT_W = 512, 496, 472, 488
-KINDS = ("house", "granary", "watchtower", "dock")
+KINDS = ("house", "granary", "watchtower", "dock", "dock_east", "dock_north", "dock_west")
 STAGES = ("foundation", "walls", "roof", "complete")
 
 
@@ -32,7 +32,8 @@ def main():
     footprints = {}
     source_corners = json.loads((SOURCE / "footprints.json").read_text())["footprints"]
     for row, kind in enumerate(KINDS):
-        cutouts = [cutout(SOURCE / ("clean_roofs" if stage in ("roof", "complete") else "")
+        cutouts = [cutout(SOURCE / ("directions" if kind.startswith("dock_") else
+                                   "clean_roofs" if stage in ("roof", "complete") else "")
                          / f"{kind}_{stage}.png") for stage in STAGES]
         images = [im for im, _ in cutouts]
         scale = min(FIT_H / max(im.height for im in images), FIT_W / max(im.width for im in images))

@@ -12,10 +12,12 @@ mod islands;
 mod placement;
 mod render;
 mod reset;
+mod snapshots;
 mod source;
 mod storage;
 mod terrain;
 mod view;
+mod wildlife;
 mod window;
 use window::{loaded, physical_size};
 
@@ -43,6 +45,7 @@ const HOVER_GROUND: [f32; 4] = [1.0, 0.98, 0.9, 0.85];
 
 /// What lies under a pointer.
 enum Target {
+    Animal(String),
     Ship(String),
     Unit(String),
     Resource(String),
@@ -217,6 +220,7 @@ impl App {
         // A tree, rock or building is hit where it is drawn, not where the
         // ground behind it happens to be.
         match self.view.sprite_at(&self.rig, pixel) {
+            Some(view::Pick::Animal(id)) => return Some(Target::Animal(id)),
             Some(view::Pick::Ship(id)) => return Some(Target::Ship(id)),
             Some(view::Pick::Resource(id)) => return Some(Target::Resource(id)),
             Some(view::Pick::Building(id)) => {
@@ -270,6 +274,10 @@ impl App {
         }
         let snapshot = self.view.snapshot.as_ref()?;
         let (center, radius, color) = match self.target_at(self.cursor)? {
+            Target::Animal(id) => {
+                let a = snapshot.animals.iter().find(|a| a.id == id)?;
+                (terrain::cell_center(a.cell), 0.5, [0.85, 0.18, 0.1, 0.9])
+            }
             Target::Resource(id) => {
                 let r = snapshot.resources.iter().find(|r| r.id == id)?;
                 let c = r.footprint().center();
@@ -440,6 +448,10 @@ impl App {
             self.selection.ship = None;
         }
         let units = self.selection.units.clone();
+        if let Target::Animal(ref id) = target {
+            self.interact_with_animal(id, units);
+            return;
+        }
         if units.is_empty() {
             self.selection.building = match target {
                 Target::Foundation(id) | Target::Building(id) => Some(id),
@@ -448,7 +460,7 @@ impl App {
             return;
         }
         match target {
-            Target::Unit(_) | Target::Ship(_) => {}
+            Target::Unit(_) | Target::Ship(_) | Target::Animal(_) => {}
             Target::Resource(resource_id) => {
                 for unit_id in units {
                     let depleted_field = self.view.snapshot.as_ref().is_some_and(|s| {
@@ -505,32 +517,6 @@ impl App {
                 to: cell,
             }),
         }
-    }
-
-    /// Selected villagers carrying goods the complete building `id` accepts.
-    fn carriers_for(&self, id: &str) -> Vec<String> {
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
-            return Vec::new();
-        };
-        let Some(building) = snapshot
-            .buildings
-            .iter()
-            .find(|b| b.building.id == id && b.building.construction.is_none())
-        else {
-            return Vec::new();
-        };
-        snapshot
-            .units
-            .iter()
-            .filter(|u| self.selection.units.contains(&u.unit.id))
-            .filter(|u| {
-                u.unit
-                    .cargo
-                    .as_ref()
-                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
-            })
-            .map(|u| u.unit.id.clone())
-            .collect()
     }
 
     /// Stops every selected villager that is busy.
@@ -611,29 +597,7 @@ impl App {
             .unwrap_or(0.0);
         self.last_frame = Some(now);
         self.clock += dt;
-        self.source.poll(dt, &mut self.incoming);
-        while let Some(snapshot) = self.incoming.pop_front() {
-            self.feedback
-                .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
-            // The hosted server resets after a delay, so the view may have
-            // framed the old island meanwhile: look again at the new one.
-            if self.view.sync(snapshot) {
-                self.selection.units.clear();
-                self.selection.building = None;
-                self.framed = false;
-            }
-            if !self.framed {
-                self.frame_town_center();
-            }
-        }
-        for result in self.source.take_results() {
-            if let Err(error) = result {
-                self.toast = Some((friendly(&error), now + 3.0));
-            }
-        }
-        if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {
-            self.toast = None;
-        }
+        self.poll_world(dt, now);
         self.rig.map_size = Vec2::new(
             self.view.heights.columns as f32,
             self.view.heights.rows as f32,
@@ -728,17 +692,24 @@ impl App {
         });
         let (mut sprites, mut decals) =
             self.view
-                .draw_list(&self.sheets, &self.rig, self.clock as f32, &self.selection);
+                .draw_list(&self.sheets, &self.rig, &self.selection);
         decals.extend(hover);
         if let Some((kind, origin, ok)) = ghost {
             let (columns, rows) = kind.size();
             let x = (origin.column as f32 + columns as f32 / 2.0) * terrain::CELL;
             let z = (origin.row as f32 + rows as f32 / 2.0) * terrain::CELL;
-            let center = Vec3::new(x, self.view.heights.at(x, z), z);
+            let heights = &self.view.heights;
+            let center = Vec3::new(x, heights.at(x, z), z);
+            let facing = self
+                .view
+                .snapshot
+                .as_ref()
+                .and_then(|s| s.dock_facing(origin))
+                .unwrap_or_default();
             let (sheet, mut preview) = if self.build == hud::BuildUi::PlacingField {
-                view::field_preview(&self.sheets, &self.view.heights, center)
+                view::field_preview(&self.sheets, heights, center)
             } else {
-                view::building_sprite(&self.sheets, &self.view.heights, kind, center, None, false)
+                view::building_sprite(&self.sheets, heights, kind, center, None, false, facing)
             };
             preview.tint = if ok {
                 [0.75, 1.0, 0.8, 0.48]
@@ -833,6 +804,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/units.png"),
         assets.image("sprites/transport.png"),
         assets.image("sprites/villager_field_preparation.png"),
+        assets.image("sprites/wildlife.png"),
     ]
 }
 

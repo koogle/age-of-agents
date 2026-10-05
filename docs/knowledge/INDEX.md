@@ -8,6 +8,7 @@ of current behavior.
 
 | When working on | Read first | Also consult when affected |
 | --- | --- | --- |
+| Wildlife, hunting, unit health | [Dangerous wildlife](wildlife.md) | Placement/routes; rendering/input; assets; server/saves |
 | Island generation, discovery, sailing, passengers, expanding maps | [Archipelago and transport](archipelago-and-transport.md) | Server/saves; rendering/input |
 | Gathering, cargo, reassignment, field work | [Tasks and cargo](tasks-and-cargo.md) | Placement/routes; HUD |
 | Foundations, fields, occupancy, reachability | [Placement and routes](placement-and-routes.md) | Tasks/cargo; rendering/input |

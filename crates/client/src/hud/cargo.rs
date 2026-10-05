@@ -56,6 +56,7 @@ impl Hud {
         width: f32,
         bottom: f32,
         s: f32,
+        compact: bool,
     ) {
         let (Some(snapshot), Some(ship_id)) = (model.snapshot, model.ship) else {
             self.cargo_page = 0;
@@ -63,7 +64,11 @@ impl Hud {
         };
         let resources = rows(snapshot, ship_id);
         let column_width = 108.0 * s;
-        let room = (((width - 24.0 * s).min(864.0 * s) / column_width).floor() as usize).max(1);
+        let margin = if compact { 16.0 } else { 24.0 } * s;
+        let available = (width - margin).min(864.0 * s);
+        let paged = resources.len() as f32 * column_width > available;
+        let side = if compact && paged { 44.0 * s } else { 0.0 };
+        let room = (((available - 2.0 * side) / column_width).floor() as usize).max(1);
         let pages = resources.len().div_ceil(room).max(1);
         self.cargo_page = self.cargo_page.min(pages - 1);
         let shown: Vec<_> = resources
@@ -71,14 +76,15 @@ impl Hud {
             .skip(self.cargo_page * room)
             .take(room)
             .collect();
-        let h = (78.0 + if pages > 1 { 40.0 } else { 0.0 }) * s;
+        let h = (78.0 + if pages > 1 && !compact { 40.0 } else { 0.0 }) * s;
         let w = if shown.is_empty() {
             300.0 * s
         } else {
-            (if pages > 1 { room } else { shown.len() }) as f32 * column_width
+            (if pages > 1 { room } else { shown.len() }) as f32 * column_width + 2.0 * side
         };
         let x = (width - w) / 2.0;
         let y = bottom - h;
+        self.cargo_strip = Some(([x, y, w, h], pages, s));
         self.shape([x, y, w, h], GLASS, 1.0, 16.0 * s);
         self.regions.push(Region {
             rect: [x, y, w, h],
@@ -96,7 +102,7 @@ impl Hud {
             );
         }
         for (i, resource) in shown.iter().enumerate() {
-            let left = x + i as f32 * column_width;
+            let left = x + side + i as f32 * column_width;
             let center = left + column_width / 2.0;
             self.coin(
                 atlas,
@@ -161,7 +167,36 @@ impl Hud {
                 });
             }
         }
-        if pages > 1 {
+        if pages > 1 && compact {
+            for (left, label, page, enabled) in [
+                (
+                    x,
+                    "‹",
+                    self.cargo_page.saturating_sub(1),
+                    self.cargo_page > 0,
+                ),
+                (
+                    x + w - side,
+                    "›",
+                    self.cargo_page + 1,
+                    self.cargo_page + 1 < pages,
+                ),
+            ] {
+                let rect = [left, y, side, h];
+                self.centered_label(
+                    atlas,
+                    label,
+                    Vec2::new(left + side / 2.0, y + h / 2.0),
+                    32.0 * s,
+                    if enabled { INK } else { MUTED },
+                );
+                self.regions.push(Region {
+                    rect,
+                    action: Action::CargoPage(page.min(pages - 1)),
+                    enabled,
+                });
+            }
+        } else if pages > 1 {
             let ry = y + 78.0 * s;
             self.text(
                 atlas,
@@ -197,6 +232,30 @@ impl Hud {
         }
     }
 
+    /// Consume drags that start in cargo, cancelling any underlying transfer tap.
+    /// Both mouse and touch use this path; horizontal swipes snap one page on release.
+    pub fn drag_cargo(&mut self, from: Vec2, to: Vec2, finished: bool) -> bool {
+        let Some(([x, y, w, h], pages, scale)) = self.cargo_strip else {
+            return false;
+        };
+        if from.x < x || from.x > x + w || from.y < y || from.y > y + h {
+            return false;
+        }
+        let delta = (to - from) / scale;
+        if delta.length() <= 8.0 {
+            return false;
+        }
+        self.pressed = None;
+        if finished && delta.x.abs() >= 32.0 && delta.x.abs() > delta.y.abs() {
+            self.cargo_page = if delta.x < 0.0 {
+                (self.cargo_page + 1).min(pages - 1)
+            } else {
+                self.cargo_page.saturating_sub(1)
+            };
+        }
+        true
+    }
+
     fn cargo_button(
         &mut self,
         atlas: &Atlas,
@@ -227,7 +286,7 @@ impl Hud {
         self.regions.push(Region {
             rect,
             action,
-            enabled: true,
+            enabled,
         });
     }
 }
@@ -236,6 +295,46 @@ impl Hud {
 mod tests {
     use super::*;
     use aoa_game::{CellCoordinate, GameWorld, ShipConnection, TransportShip};
+
+    #[test]
+    fn cargo_swipes_cancel_transfers_and_clamp_pages_at_both_dpis() {
+        for scale in [1.0, 2.0] {
+            let mut hud = Hud::new();
+            hud.cargo_strip = Some((
+                [10.0 * scale, 20.0 * scale, 300.0 * scale, 78.0 * scale],
+                3,
+                scale,
+            ));
+            let start = Vec2::new(150.0, 50.0) * scale;
+            hud.pressed = Some(Action::TransferCargo(
+                ResourceKind::Wood,
+                CargoDirection::Load,
+                10.0,
+            ));
+            assert!(!hud.drag_cargo(start, start + Vec2::X * 4.0 * scale, true));
+            assert!(matches!(hud.release(), Some(Action::TransferCargo(..))));
+            for expected in [1, 2, 2] {
+                hud.pressed = Some(Action::CargoPage(0));
+                assert!(hud.drag_cargo(start, start - Vec2::X * 50.0 * scale, true));
+                assert_eq!(hud.cargo_page, expected);
+                assert!(hud.release().is_none());
+            }
+            for expected in [1, 0, 0] {
+                hud.drag_cargo(start, start + Vec2::X * 50.0 * scale, true);
+                assert_eq!(hud.cargo_page, expected);
+            }
+            hud.pressed = Some(Action::CargoPage(1));
+            hud.drag_cargo(start, start + Vec2::Y * 50.0 * scale, true);
+            assert_eq!(hud.cargo_page, 0);
+            assert!(hud.release().is_none());
+            assert!(!hud.drag_cargo(Vec2::ZERO, start, true));
+            hud.pressed = Some(Action::CargoPage(1));
+            hud.drag_cargo(start, start - Vec2::X * 50.0 * scale, false);
+            hud.drag_cargo(start, start, true);
+            assert!(hud.release().is_none());
+            assert_eq!(hud.cargo_page, 0);
+        }
+    }
 
     #[test]
     fn available_rows_keep_aboard_goods_and_bound_each_transfer() {
@@ -334,16 +433,39 @@ mod tests {
             toast: None,
             camera: Vec2::ZERO,
         };
-        for (width, top, bottom, scale) in [(390.0, 370.0, 650.0, 2.0), (1280.0, 110.0, 620.0, 1.0)]
-        {
+        for (width, top, bottom, scale, compact) in [
+            (320.0, 370.0, 650.0, 2.0, true),
+            (390.0, 370.0, 650.0, 2.0, true),
+            (844.0, 0.0, 230.0, 2.0, true),
+            (1280.0, 110.0, 620.0, 1.0, false),
+        ] {
             let mut hud = Hud::new();
             let mut seen = Vec::new();
             for page in 0..13 {
                 hud.regions.clear();
                 hud.cargo_page = page;
-                hud.cargo_panel(&atlas, &model, width * scale, bottom * scale, scale);
+                hud.cargo_panel(
+                    &atlas,
+                    &model,
+                    width * scale,
+                    bottom * scale,
+                    scale,
+                    compact,
+                );
                 if hud.cargo_page != page {
                     break;
+                }
+                let (strip, _, _) = hud.cargo_strip.unwrap();
+                if compact {
+                    assert_eq!(strip[3], 78.0 * scale);
+                    for arrow in hud
+                        .regions
+                        .iter()
+                        .filter(|r| matches!(r.action, Action::CargoPage(_)))
+                    {
+                        assert_eq!(arrow.rect[1], strip[1]);
+                        assert_eq!(arrow.rect[3], strip[3]);
+                    }
                 }
                 let buttons: Vec<_> = hud
                     .regions
@@ -359,7 +481,11 @@ mod tests {
                         button.rect[1] >= top * scale
                             && button.rect[1] + button.rect[3] <= bottom * scale
                     );
-                    for other in buttons.iter().skip(i + 1) {
+                    for other in buttons.iter().skip(i + 1).copied().chain(
+                        hud.regions
+                            .iter()
+                            .filter(|r| matches!(r.action, Action::CargoPage(_))),
+                    ) {
                         let a = button.rect;
                         let b = other.rect;
                         assert!(

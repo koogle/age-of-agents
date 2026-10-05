@@ -54,7 +54,9 @@ assume they provide deduplication for replayed commands.
 
 The server ticks at 100 ms and publishes snapshots. The client reconnects after
 deploys and resets its sequence tracking because a restarted server starts a new
-sequence. Preserve the no-cache response policy and test reconnect plus rejection
+sequence. Its first fresh snapshot also resets presentation history; the bounded
+remote inbox coalesces repeated ticks and discards excessive pending history
+([recovery contract](runtime-debugging.md#reconnect-recovery)). Preserve the no-cache response policy and test reconnect plus rejection
 when changing this boundary. Do not replay uncertain state-changing commands
 blindly after reconnecting.
 
@@ -66,7 +68,7 @@ blindly after reconnecting.
 - Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
   waived backward compatibility on 2026-10-05 until he requests it again. There
   are no old inventory/island migrations or historical required-field defaults.
-- `STORE_VERSION` in `src/store.rs` is 12 (island inventories and ship cargo). Bump it for incompatible persisted-model
+- `STORE_VERSION` in `src/store.rs` is 14 (island inventories, ship cargo, unit health and wildlife state). Bump it for incompatible persisted-model
   changes; initialization atomically drops/recreates `world_state` when SQLite
   `user_version` differs, then normal startup generates a fresh world. The reset
   also applies to higher versions. Matching-version saves survive initialization.

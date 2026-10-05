@@ -59,3 +59,10 @@ payloads or inaccessible transcript contents into the knowledge folder.
 ## CLI compatibility when updating an authorized PR
 
 In this environment on 2026-10-05, `gh pr edit --body-file` failed because its GraphQL query references deprecated classic-project cards. Updating PR #92 succeeded through `gh api --method PATCH repos/koogle/age-of-agents/pulls/92 --input /tmp/pr-update.json`, where the file is JSON containing the exact `body` string. Use a JSON serializer to preserve Markdown newlines; inspect the returned PR state. This fallback requires the same explicit task authorization as any remote PR write.
+
+## CLI credential failure during wildlife merge (2026-10-05)
+
+`gh pr view` returned HTTP 401 in the merge session, while Git fetch and the
+connected GitHub app remained available. Use the app for PR metadata and an
+expected-head-SHA merge; do not replace or expose credentials. Public repository
+Actions run metadata can also be read through GitHub REST without authentication.
