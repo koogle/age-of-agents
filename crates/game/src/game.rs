@@ -42,6 +42,9 @@ mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
 mod terrain_codec;
+mod wildlife;
+#[cfg(test)]
+mod wildlife_tests;
 mod worldgen;
 
 pub use domain::*;
@@ -50,6 +53,7 @@ pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
 pub use ships::*;
+pub use wildlife::*;
 
 /// The grid is finer than a villager is tall (a villager stands about one and
 /// a half cells high), so bodies stand right against what they work on and
@@ -94,6 +98,7 @@ pub struct GameWorld {
     pub explored_cells: Vec<CellCoordinate>,
     pub units: Vec<Unit>,
     pub ships: Vec<TransportShip>,
+    pub animals: Vec<Animal>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
     pub inventories: Vec<Stockpile>,
@@ -134,6 +139,7 @@ pub struct WorldSnapshot {
     pub terrain: Vec<SnapshotTerrainCell>,
     pub units: Vec<UnitView>,
     pub ships: Vec<TransportShip>,
+    pub animals: Vec<Animal>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
     /// Usable balances per island, including connected ship holds.
@@ -150,6 +156,10 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    AttackAnimal {
+        unit_ids: Vec<String>,
+        animal_id: String,
+    },
     TransferShipCargo {
         ship_id: String,
         kind: ResourceKind,
@@ -242,6 +252,8 @@ pub enum Command {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandError {
+    AnimalNotVisible,
+    CannotAttack,
     ShipStorageUnavailable,
     StorageUnavailable,
     InvalidCargoAmount,
@@ -301,6 +313,8 @@ impl std::fmt::Display for CommandError {
             Self::ShipFull => "transport passenger capacity is full",
             Self::ShoreBlocked => "no safe landing cells beside the ship or dock",
             Self::DockRequired => "select a completed dock",
+            Self::AnimalNotVisible => "animal is not currently visible",
+            Self::CannotAttack => "healers cannot attack",
             Self::UnitNotFound => "unit not found",
             Self::EmptyUnitGroup => "unit group is empty",
             Self::DuplicateUnit => "unit group contains a duplicate member",
@@ -351,6 +365,7 @@ impl GameWorld {
     pub fn generate(seed: u64) -> Self {
         let island = worldgen::generate(seed);
         let villager = |number: u64, cell: CellCoordinate| Unit {
+            health: 100.0,
             id: format!("villager-{number}"),
             kind: UnitKind::Villager,
             cell,
@@ -372,6 +387,7 @@ impl GameWorld {
                 villager(2, island.villagers[1]),
             ],
             ships: Vec::new(),
+            animals: Vec::new(),
             resources: island.resources,
             buildings: vec![town_center("base-1", island.town_center, None)],
             inventories: vec![Stockpile::default()],
@@ -380,6 +396,7 @@ impl GameWorld {
             next_building_id: 2,
             next_unit_id: 3,
         };
+        world.populate_wildlife(0);
         world.refresh_exploration();
         world
     }
@@ -442,6 +459,10 @@ impl GameWorld {
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
+            Command::AttackAnimal {
+                unit_ids,
+                animal_id,
+            } => self.attack_animal(&unit_ids, &animal_id)?,
             Command::TransferShipCargo {
                 ship_id,
                 kind,
@@ -765,6 +786,10 @@ impl GameWorld {
                         self.make_way(index);
                     }
                 }
+                UnitAction::AttackAnimal {
+                    animal_id,
+                    elapsed_seconds,
+                } => self.tick_attack_animal(index, &animal_id, elapsed_seconds, dt),
                 UnitAction::Board { .. } => {}
                 UnitAction::Move { to } => self.tick_move(index, to, dt),
                 UnitAction::Gather { resource_id, phase } => {
@@ -780,6 +805,7 @@ impl GameWorld {
                 UnitAction::Deposit { storage_id } => self.tick_deposit(index, &storage_id, dt),
             }
         }
+        self.tick_wildlife(dt);
         self.tick_ships(dt);
         self.expand_archipelago();
         for index in (0..self.units.len()).rev() {
@@ -821,6 +847,14 @@ impl GameWorld {
         }
 
         WorldSnapshot {
+            animals: self
+                .animals
+                .iter()
+                .filter(|a| {
+                    visible.contains(&a.cell) && a.step.is_none_or(|s| visible.contains(&s.to))
+                })
+                .cloned()
+                .collect(),
             island_id: self.island_id,
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
