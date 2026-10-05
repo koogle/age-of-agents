@@ -1,6 +1,6 @@
 ## Authorized icon PR merge
 
-User authorized merging PRs #78 and #82. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Master advanced with compact HUD PR #76 during verification; integrating that next.
+User authorized merging PRs #78 and #82. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Compact HUD integration passed all 57 client tests, both lint targets and a fresh-browser smoke. Integrated fog-placement PR #79 on master ddf2123; rebuilt bundle, client tests, formatting, strict native/WASM lint and fresh-browser lumber-mill smoke all pass. Ready for the authorized timber merge.
 
 # Current handoff: timber icon (2026-10-05)
 
@@ -9,6 +9,16 @@ User authorized merging PRs #78 and #82. Integrating current master (field-route
 - All icon normalization checks and the 282-frame sprite resolution audit pass; PNG/RGBA/transparent corners and light/dark/blue preview reviewed. All 183 workspace tests, formatting, native and WASM strict lint pass. Rebuilt the tracked browser bundle. Desktop and DPR2 phone lumber-mill selection with active/queued timber passes with no page errors; inspected desktop HUD at normal/close zoom and phone HUD at normal zoom using a paused fixture. The additional phone close-zoom screenshot timed out under software rendering; normal phone selection and screenshot passed. QA captures and fixture are in `/workspace/scratch/timber`.
 - Thermonuclear review: small presentation-only mapping change, no dependencies or domain/persistence changes. No source files cross 1,000 lines.
 - Deployment unavailable: this environment has no Modal tooling/profile. Review PR: https://github.com/koogle/age-of-agents/pull/78 (`feat/timber-icon`); not deployed.
+
+# Current handoff: explore fogged building sites (2026-10-05)
+
+- User requested a PR for building placement outside current sight. Branch `fix/explore-before-building` is based on master `61fc87c`.
+- Fogged orders retain a typed, persisted exploration assignment. Villagers unload cargo first, explore, and create/pay for a foundation only after the whole footprint is currently visible and all existing placement checks pass. Stop/replacement, blocked/unreachable sites and lost affordability leave no foundation or charge. Visible placement remains immediate.
+- Mouse/touch placement accepts fogged building sites; selection shows “Exploring build site.” Field preparation retains its existing behavior. README/roadmap and tracked browser bundle updated; no new assets or dependencies.
+- Validation covers 199 tests: the full integration suite passed (13 server, 56 client, 128 domain), followed by all 58 client tests after the client-only compact-HUD merge. Strict native/WASM lint, formatting and generated JS syntax checks pass; browser bundle rebuilt. Seven new regressions cover exploration and its action feedback.
+- Thermonuclear review: construction code is consolidated in a 140-line domain module; atomic placement is reused, pending sites own no cells or costs, bounds and worker type validate on reload, and no idle behavior or new navigation machinery was added.
+- Real browser menu → fog placement → exploration → completed house passes on desktop 1280×800/DPR1 and phone 390×844/DPR2 with touch input. Authoritative snapshots confirm no early foundation/cost, exactly one house and exactly 15 wood spent; no page errors. QA scripts, fixture and screenshots are under `/workspace/scratch/fog-build`.
+- User authorized merging PR #79. Integrated master `7aaafdb` (action flashes, field-route safety and compact HUD); added exploration status/reassignment coverage. Final checks pass, including the compact-HUD touch menu → exploration → completed house flow with exactly 15 wood spent and no browser errors. Ready for the authorized merge. The existing Modal workflow deploys master merges.
 
 # Previous handoff: compact mobile HUD (2026-10-05)
 
