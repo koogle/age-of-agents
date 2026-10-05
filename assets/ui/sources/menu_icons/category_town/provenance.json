@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a compact civic emblem of two short ivory Greek columns supporting a terracotta triangular pediment, a simple clear town-civic symbol rather than a whole building. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3703/dncpyXBOlMZ19cMPKckML_r6hgLb1K.png",
+        "content_type": "image/png",
+        "file_name": "dncpyXBOlMZ19cMPKckML_r6hgLb1K.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      627,
+      627,
+      940,
+      940
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f8/0tbCLosKF81d_g-FGzaMO_lcBfexu6.png",
+        "content_type": "image/png",
+        "file_name": "0tbCLosKF81d_g-FGzaMO_lcBfexu6.png",
+        "file_size": null,
+        "width": 313,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242163.4112835,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:category_town",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-4b5a-70b3-9ab0-5b6cd6e8e5f3",
+        "seconds": 2.4
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "category_town.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239718.6738715,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "category_town",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-e53d-75d0-8098-13abaa7c097a",
+      "seconds": 8.6
+    },
+    {
+      "t": 1791239853.9696589,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:category_town",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-0e5a-7523-ac31-7a1aab17db7a",
+      "seconds": 2.3
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}
