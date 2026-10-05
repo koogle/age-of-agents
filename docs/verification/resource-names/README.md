@@ -20,3 +20,9 @@ The HUD layout matrix continues checking all region bounds, overlap and hit
 results. Resource-name regions belong to the top bar, so the bottom-action-band
 assertion excludes those explanations. This is a presentation/input check;
 physical-phone behavior and accessible DOM controls remain separate gaps.
+
+Review: resource inspection reuses the shared `Action::Explain` handler and
+existing hover state. It adds no game command, dependency, input mode or saved
+state; active action/error explanations take priority. Both modified client
+files remain below 1,000 lines. The requested removal of permanent names is
+explicit user steering.

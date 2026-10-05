@@ -1,0 +1,11 @@
+Stop icon verification on integrated master base 10ee124, 2026-10-05.
+253 Rust tests passed; 1 manual benchmark ignored.
+cargo fmt --all --check: PASS
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings: PASS
+cargo clippy -p aoa-client --target wasm32-unknown-unknown --locked -- -D warnings: PASS
+scripts/build_web.sh: PASS
+scripts/check_sprite_resolution.py: PASS (298 frames)
+scripts/normalize_icons.py --check: PASS
+Desktop 1280x800 DPR1 mouse and phone 390x844 DPR2 touch: loaded WebGL, selected busy villager, inspected hand icon and dispatched Stop; no page errors.
+Ship Stop icon asserted in existing ship-state test. Unit Stop hit dispatch covered at both scales; Cancel remains separately loaded.
+Thermonuclear review: direct existing-asset mapping restores intended meaning; no domain/save/interaction change, no new dependency, no file above 1000 lines. Verification driver is a controlled snapshot and wire-dispatch check, not authoritative gameplay or physical-phone acceptance.

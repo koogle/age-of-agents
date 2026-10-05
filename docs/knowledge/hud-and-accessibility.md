@@ -78,3 +78,12 @@ Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonov
 Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
 
 Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
+
+## Dedicated menu icons (2026-10-05 audit)
+
+Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
+Track coverage in [the menu icon audit](../MENU_ICON_AUDIT.md). Inspect both command
+and queued-job mappings: a manifest entry alone does not make an icon available
+in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
+Stop already had authored artwork but was omitted from that list and used Cancel;
+restore the hand for land units and ships, retaining the X for cancellation.
