@@ -309,22 +309,25 @@ impl Hud {
                 {
                     self.shape(
                         [
-                            rect[0] + m / 2.0 - 18.0 * s,
-                            rect[1] + m - 16.0 * s,
-                            36.0 * s,
-                            16.0 * s,
+                            rect[0] + m - 20.0 * s,
+                            rect[1] + m - 20.0 * s,
+                            20.0 * s,
+                            20.0 * s,
                         ],
                         GLASS,
                         1.0,
-                        8.0 * s,
-                    );
-                    self.text(
-                        atlas,
-                        "Done",
-                        (rect[0] + m / 2.0, rect[1] + m - 4.0 * s),
                         10.0 * s,
-                        INK,
-                        true,
+                    );
+                    self.sprite(
+                        atlas,
+                        "status_check",
+                        [
+                            rect[0] + m - 18.0 * s,
+                            rect[1] + m - 18.0 * s,
+                            16.0 * s,
+                            16.0 * s,
+                        ],
+                        [1.0; 4],
                     );
                 }
                 // An unavailable coin still answers a tap, with the reason:

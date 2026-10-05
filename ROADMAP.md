@@ -89,7 +89,7 @@ Gameplay acceptance:
 
 Each building runs one task and holds up to five waiting production/research tasks in submission order. Inputs and trainee housing are reserved when ordered; tapping a queued coin cancels that waiting task and refunds the full cost. Active work continues, including waiting for a free spawn cell.
 
-Completed research remains visible with a Done badge and disabled ordering; hover or tap explains the upgrade. Completion survives saving and is shared across islands.
+Completed research remains visible with a check mark badge and disabled ordering; hover or tap explains the upgrade. Completion survives saving and is shared across islands.
 
 ## Building expansion — deployed
 

@@ -73,3 +73,5 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 - Made with `fal-ai/nano-banana/edit` using `resource_wood` and `command_train` as style references, then a BiRefNet cutout, `tools/norm.py` and `scripts/normalize_icons.py --write`.
 - Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
 - It reads distinctly from the X down to 24 px.
+
+`icons/status_check.png` is a plain U+2713 check mark rendered from DejaVu Sans at 384 px and reduced to 96 px with Lanczos filtering. It marks completed research, using green ink on the existing ivory HUD badge; it is a typographic status symbol.
