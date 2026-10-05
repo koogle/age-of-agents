@@ -19,6 +19,7 @@
       "gold": "icons/resource_gold.png",
       "iron": "icons/resource_iron.png",
       "stone": "icons/resource_stone.png",
+      "timber": "icons/resource_timber.png",
       "wood": "icons/resource_wood.png"
     },
     "tech": {

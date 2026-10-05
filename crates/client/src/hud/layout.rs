@@ -10,6 +10,7 @@ impl Hud {
             return;
         };
         let s = scale;
+        let narrow = width < 600.0 * s || height < 500.0 * s;
         let stock = &snapshot.stockpile;
 
         // Resource coins with count tabs, top-right: wood and food always, others once owned.
@@ -67,8 +68,11 @@ impl Hud {
             };
 
         // Globe minimap bottom-right, gold rim, speed coins on its shoulder.
-        let r = 68.0 * s;
-        let (gx, gy) = (width - 18.0 * s - r * 2.0, height - 18.0 * s - r * 2.0);
+        let r = if narrow { 40.0 } else { 68.0 } * s;
+        let edge = if narrow { 12.0 } else { 18.0 } * s;
+        let (gx, gy) = (width - edge - r * 2.0, height - edge - r * 2.0);
+        // Reserve the full time-control row above the globe on compact screens.
+        let navigation_left = if narrow { gx - 48.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
         let span = 38.0;
         let (cx, cz) = (15.0, 10.0);
@@ -103,15 +107,24 @@ impl Hud {
         for (index, (speed, label)) in speeds.into_iter().enumerate() {
             let angle = std::f32::consts::PI * (1.0 + 0.16 + index as f32 * 0.17);
             let c = 30.0 * s;
-            let center = Vec2::new(
-                gx + r + angle.cos() * (r + 22.0 * s),
-                gy + r + angle.sin() * (r + 22.0 * s),
-            );
+            let center = if narrow {
+                Vec2::new(gx + (-26.0 + index as f32 * 44.0) * s, gy - 26.0 * s)
+            } else {
+                Vec2::new(
+                    gx + r + angle.cos() * (r + 22.0 * s),
+                    gy + r + angle.sin() * (r + 22.0 * s),
+                )
+            };
             let rect = [center.x - c / 2.0, center.y - c / 2.0, c, c];
+            let hit = if narrow {
+                [center.x - 22.0 * s, center.y - 22.0 * s, 44.0 * s, 44.0 * s]
+            } else {
+                rect
+            };
             let active = (snapshot.simulation_speed - speed).abs() < 1e-6;
             self.sprite(
                 atlas,
-                if self.hovered(rect) {
+                if self.hovered(hit) {
                     "coin_hover"
                 } else {
                     "coin_normal"
@@ -140,7 +153,7 @@ impl Hud {
                 if active { [1.0; 4] } else { INK },
             );
             self.regions.push(Region {
-                rect,
+                rect: hit,
                 action: Action::Speed(speed),
                 enabled: true,
             });
@@ -222,15 +235,16 @@ impl Hud {
             self.toast(atlas, model.toast, width, s, toast_top);
             return;
         };
-        let gap = 10.0 * s;
+        let gap = if narrow { 8.0 } else { 10.0 } * s;
         let margin = 12.0 * s;
-        // Phones: the selection sits bottom-left beside the globe, its coins
-        // wrapping into rows; wide screens keep one centred row.
-        let narrow = width < 600.0 * s;
+        let padding = if narrow { 8.0 } else { 14.0 } * s;
+        let selection_width = navigation_left - margin - 12.0 * s;
+        // Actions and navigation share the bottom band. Longer menus grow up
+        // within the left column, then collapse when placement is selected.
         let count = commands.len().max(1);
         let (m, per_row) = if narrow {
-            let m = 48.0 * s;
-            let room = gx - 10.0 * s - margin - 28.0 * s + gap;
+            let m = 44.0 * s;
+            let room = selection_width - 2.0 * padding + gap;
             (m, ((room / (m + gap)).floor() as usize).max(1))
         } else {
             let m = ((width - 24.0 * s - 28.0 * s + gap) / count as f32 - gap)
@@ -242,15 +256,10 @@ impl Hud {
         let row_step = m + gap + if labels { 26.0 * s } else { 0.0 };
         let rows = count.div_ceil(per_row);
         let columns = count.min(per_row);
-        let bar_width = columns as f32 * (m + gap) - gap + 28.0 * s;
+        let bar_width = columns as f32 * (m + gap) - gap + 2.0 * padding;
         let bar_height = rows as f32 * row_step - gap + 12.0 * s;
         let bar = if narrow {
-            [
-                margin,
-                height - 18.0 * s - bar_height,
-                bar_width,
-                bar_height,
-            ]
+            [margin, height - edge - bar_height, bar_width, bar_height]
         } else {
             let left = (width - bar_width) / 2.0;
             // A centred bar that would run under the globe sits above it.
@@ -267,7 +276,7 @@ impl Hud {
             for (index, command) in commands.iter().enumerate() {
                 let (column, row) = (index % per_row, index / per_row);
                 let rect = [
-                    bar[0] + 14.0 * s + column as f32 * (m + gap),
+                    bar[0] + padding + column as f32 * (m + gap),
                     bar[1] + 6.0 * s + row as f32 * row_step,
                     m,
                     m,
@@ -293,7 +302,7 @@ impl Hud {
                 }
                 // The hit area spans half the gap on each side, so sweeping
                 // across the bar never falls back to the selection text.
-                let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, m + gap];
+                let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, row_step];
                 let hot = self.hovered(hit);
                 if hot {
                     hover_text = Some((command.label.clone(), command.detail.clone()));
@@ -335,32 +344,50 @@ impl Hud {
         // A separate, ordered row of waiting tasks. Tapping any coin cancels
         // that task and refunds its paid inputs; the active task stays above.
         let queued = selection::queued_commands(snapshot, model);
-        let mut queue_height = if queued.is_empty() { 0.0 } else { 72.0 * s };
+        let queue_columns = if narrow {
+            ((selection_width - 16.0 * s) / (44.0 * s)).floor().max(1.0) as usize
+        } else {
+            queued.len().max(1)
+        };
+        let queue_height = if queued.is_empty() {
+            0.0
+        } else {
+            (28.0 + queued.len().div_ceil(queue_columns) as f32 * 44.0) * s
+        };
         if !queued.is_empty() {
-            let queue_width = (queued.len() as f32 * 44.0 + 24.0).max(168.0) * s;
+            let queue_width = if narrow {
+                selection_width.min(
+                    ((queued.len().min(queue_columns) as f32 * 44.0 + 16.0) * s).max(168.0 * s),
+                )
+            } else {
+                (queued.len() as f32 * 44.0 + 24.0).max(168.0) * s
+            };
             let left = if narrow {
                 margin
             } else {
                 (width - queue_width) / 2.0
             };
-            let mut top = bar[1] - queue_height;
-            if narrow && left + queue_width > gx - 8.0 * s {
-                top = top.min(gy - 128.0 * s);
-                queue_height = bar[1] - top;
-            }
-            self.shape([left, top, queue_width, 64.0 * s], GLASS, 1.0, 20.0 * s);
+            let top = bar[1] - queue_height;
+            self.shape(
+                [left, top, queue_width, queue_height - 8.0 * s],
+                GLASS,
+                1.0,
+                20.0 * s,
+            );
             self.text(
                 atlas,
                 "Queued · tap to cancel",
-                (left + 12.0 * s, top + 15.0 * s),
+                (left + if narrow { 8.0 } else { 12.0 } * s, top + 15.0 * s),
                 10.0 * s,
                 MUTED,
                 false,
             );
             for (index, command) in queued.iter().enumerate() {
                 let rect = [
-                    left + (12.0 + index as f32 * 44.0) * s,
-                    top + 22.0 * s,
+                    left + (if narrow { 8.0 } else { 12.0 }
+                        + (index % queue_columns) as f32 * 44.0)
+                        * s,
+                    top + (22.0 + (index / queue_columns) as f32 * 44.0) * s,
                     36.0 * s,
                     36.0 * s,
                 ];
@@ -390,48 +417,70 @@ impl Hud {
                 Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
             })
             .fold(0.0, f32::max);
-        let info_width = (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin);
-        let (title, detail) = hover_text.unwrap_or((title, detail));
-        let detail_lines = Self::wrapped_lines(atlas, &detail, 12.0 * s, info_width - 80.0 * s);
-        let extra = (detail_lines.len().saturating_sub(1)) as f32 * 14.0 * s;
-        let info = if narrow {
-            // Above the coins; lifted clear of the speed coins when it is
-            // wide enough to reach over the globe.
-            let mut top = bar[1] - queue_height - 64.0 * s - extra;
-            if margin + info_width > gx - 10.0 * s {
-                top = top.min(gy - 56.0 * s - 60.0 * s - extra);
-            }
-            [margin, top, info_width, 52.0 * s + extra]
+        let info_width = if narrow {
+            selection_width.min((widest + 64.0 * s).max(156.0 * s))
         } else {
-            [
-                (width - info_width) / 2.0,
-                bar[1] - queue_height - 64.0 * s - extra,
-                info_width,
-                52.0 * s + extra,
-            ]
+            (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin)
         };
+        let (title, detail) = hover_text.unwrap_or((title, detail));
+        let text_offset = if narrow { 52.0 } else { 64.0 } * s;
+        let text_room = info_width - text_offset - if narrow { 12.0 } else { 16.0 } * s;
+        let title_size = if narrow { 14.0 } else { 15.0 } * s;
+        let title_lines = if narrow {
+            Self::wrapped_lines(atlas, &title, title_size, text_room)
+        } else {
+            vec![title]
+        };
+        let detail_lines = Self::wrapped_lines(atlas, &detail, 12.0 * s, text_room);
+        let title_extra = title_lines.len().saturating_sub(1) as f32 * 16.0 * s;
+        let extra = title_extra + detail_lines.len().saturating_sub(1) as f32 * 14.0 * s;
+        let info_height = if narrow { 48.0 } else { 52.0 } * s + extra;
+        let info_gap = if narrow { 8.0 } else { 12.0 } * s;
+        let info = [
+            if narrow {
+                margin
+            } else {
+                (width - info_width) / 2.0
+            },
+            bar[1] - queue_height - info_gap - info_height,
+            info_width,
+            info_height,
+        ];
         self.shape(info, GLASS, 1.0, 26.0 * s);
+        let portrait_size = if narrow { 32.0 } else { 40.0 } * s;
         self.sprite(
             atlas,
             portrait,
-            [info[0] + 10.0 * s, info[1] + 6.0 * s, 40.0 * s, 40.0 * s],
+            [
+                info[0] + 10.0 * s,
+                info[1] + if narrow { 8.0 } else { 6.0 } * s,
+                portrait_size,
+                portrait_size,
+            ],
             [1.0; 4],
         );
-        self.text(
-            atlas,
-            &title,
-            (info[0] + 64.0 * s, info[1] + 23.0 * s),
-            15.0 * s,
-            INK,
-            false,
-        );
+        for (line, text) in title_lines.iter().enumerate() {
+            self.text(
+                atlas,
+                text,
+                (
+                    info[0] + text_offset,
+                    info[1] + (if narrow { 20.0 } else { 23.0 } + line as f32 * 16.0) * s,
+                ),
+                title_size,
+                INK,
+                false,
+            );
+        }
         for (line, text) in detail_lines.iter().enumerate() {
             self.text(
                 atlas,
                 text,
                 (
-                    info[0] + 64.0 * s,
-                    info[1] + (40.0 + line as f32 * 14.0) * s,
+                    info[0] + text_offset,
+                    info[1]
+                        + title_extra
+                        + (if narrow { 36.0 } else { 40.0 } + line as f32 * 14.0) * s,
                 ),
                 12.0 * s,
                 MUTED,
@@ -440,9 +489,9 @@ impl Hud {
         }
         if let Some(progress) = progress {
             let track = [
-                info[0] + 64.0 * s,
+                info[0] + text_offset,
                 info[1] + info[3] - 7.0 * s,
-                info_width - 84.0 * s,
+                text_room,
                 3.0 * s,
             ];
             self.shape(track, [0.24, 0.2, 0.16, 0.15], 1.0, 1.5 * s);
