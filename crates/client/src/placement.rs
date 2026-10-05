@@ -78,6 +78,16 @@ impl App {
             (origin.column..origin.column + columns).contains(&c.column)
                 && (origin.row..origin.row + rows).contains(&c.row)
         };
+        // Unknown sites accept an exploration order. Occupancy and coast are
+        // checked by the simulation after the entire footprint becomes visible.
+        if self.build != crate::hud::BuildUi::PlacingField
+            && snapshot.terrain.iter().any(|cell| {
+                covers(CellCoordinate::new(cell.column, cell.row))
+                    && cell.visibility != aoa_game::CellVisibility::Visible
+            })
+        {
+            return Some((origin, snapshot.stockpile.affords(kind.cost())));
+        }
         let blocked =
             snapshot.resources.iter().any(|r| {
                 (r.amount > 0.0 || r.field.is_some()) && r.footprint().cells().any(covers)
