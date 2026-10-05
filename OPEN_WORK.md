@@ -1,3 +1,10 @@
+# Granary field yield — 2026-10-05
+
+- User requested shorter copy: “Food/fiber drop-off · +50% nearby field yield.” Browser bundle rebuilt; strict native/WASM lint and refreshed desktop/phone selection checks pass with no browser errors.
+
+- Implemented +50% field yield within six cells of a completed granary, edge to edge, non-stacking. Evaluated at planting/replenishment completion; each boosted harvest has 180 food. Existing crops and food/fiber drop-offs are preserved; no save schema change.
+- 269 workspace tests pass (one existing benchmark ignored), strict native/WASM lint and rebuilt browser selection pass on desktop and DPR2 phone with no page errors. [Evidence and reproduction](docs/verification/granary/README.md). User authorized creating/merging the granary PR. Integrating current master on `feat/granary-field-yield`; release will use the merge-triggered GitHub Actions workflow. Direct Modal access remains unavailable.
+
 # Terrain-first island generation — PR #111
 
 - [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.
