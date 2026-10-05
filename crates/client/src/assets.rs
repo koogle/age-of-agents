@@ -14,6 +14,7 @@ pub fn manifest() -> Vec<String> {
         files.push(format!("sprites/{sheet}.png"));
     }
     files.push("sprites/transport.png".into());
+    files.push("sprites/wildlife.png".into());
     files.push("sprites/towncenter.png".into());
     files.push("terrain/cobblestone.png".into());
     files.push("sprites/villager_idle_hd.png".into());
