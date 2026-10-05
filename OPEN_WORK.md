@@ -1,3 +1,7 @@
+## Authorized icon PR merge
+
+User authorized merging PRs #78 and #82. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Master advanced with compact HUD PR #76 during verification; integrating that next.
+
 # Current handoff: timber icon (2026-10-05)
 
 - Generated a distinct sawn-timber resource icon through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline, using the existing wood art as reference. Source render, cutout, prompt, request IDs and preview are retained in `assets/ui/timber_sources`; estimated FAL cost $0.0448.
@@ -5,6 +9,21 @@
 - All icon normalization checks and the 282-frame sprite resolution audit pass; PNG/RGBA/transparent corners and light/dark/blue preview reviewed. All 183 workspace tests, formatting, native and WASM strict lint pass. Rebuilt the tracked browser bundle. Desktop and DPR2 phone lumber-mill selection with active/queued timber passes with no page errors; inspected desktop HUD at normal/close zoom and phone HUD at normal zoom using a paused fixture. The additional phone close-zoom screenshot timed out under software rendering; normal phone selection and screenshot passed. QA captures and fixture are in `/workspace/scratch/timber`.
 - Thermonuclear review: small presentation-only mapping change, no dependencies or domain/persistence changes. No source files cross 1,000 lines.
 - Deployment unavailable: this environment has no Modal tooling/profile. Review PR: https://github.com/koogle/age-of-agents/pull/78 (`feat/timber-icon`); not deployed.
+
+# Previous handoff: field gathering audit (2026-10-05)
+
+- Dedicated branch `fix/field-gathering-routes`; user has now authorized merging PR #80. Integrated master `4b6fe9e` (action flashes); source merges cleanly, handoffs preserved, combined bundle rebuilt; all 190 workspace tests, formatting and strict native/WASM lint pass. Fresh-browser smoke of the combined bundle also passes; ready for the authorized merge.
+- Confirmed fields already share ordinary gathering, deposits, resumption and same-kind continuation. Found and reproduced a field-placement gap: a permanent plot could cut off delivery routes while remaining reachable for preparation. Reuses building placement's route-preservation guard before mutation/spending.
+- Added regressions for atomic rejection from either side of a bottleneck, complete harvesting around a legal bypass across reload, and field/wild-food continuation in both directions. All ten focused field tests pass; the rejection test failed before the fix. All 186 workspace tests, formatting and strict native/WASM lint pass; rebuilt the tracked browser bundle. Desktop mouse and DPR2 phone touch each completed the prepare → harvest → six deliveries → idle flow with no page errors, using an isolated SQLite fixture under `/workspace/scratch/field-audit`. Rebuilt-client smoke also passes. Dedicated PR: https://github.com/koogle/age-of-agents/pull/80 (open, unmerged). No production deployment performed.
+- Audit and thermonuclear review: `docs/FIELD_GATHERING_REVIEW.md`. Existing blocked layouts are not migrated. Separately observed the existing idle-villager blockage in one-cell traffic; no general movement behavior change in this PR. User's precise saved layout is unavailable.
+
+# Previous handoff: villager action flashes (2026-10-05)
+
+- Extended the existing 1.4-second floating italic drop-off feedback to gathering (with resource name), building, field preparation, boarding, and idle transitions. Plain movement does not flash. Labels follow the villager and rapid assignment changes replace the previous status; resource gains retain separate labels with vertical separation on simultaneous status changes.
+- Feedback compares authoritative snapshots and assignment targets; repeated snapshots and movement-to-work gathering phases do not replay it. Initial snapshots/new units stay quiet, and reset/island changes clear labels. No simulation, persistence, command, asset, or dependency changes.
+- Added four focused client tests and adapted drop-off/gain coverage. All 187 workspace tests (55 client, 13 server, 119 domain), formatting, strict native and WASM lint pass. After the final viewport correction, reran all 55 client tests and both lint targets; rebuilt the tracked browser bundle. Desktop 1280×800 and phone 390×844/DPR2 gather/stop captures show the new labels, accepted commands and no page errors; walking captures stay quiet. QA uses an isolated database and a controlled presentation clock for stable captures, under `/workspace/scratch/status-flashes`.
+- Thermonuclear review: retained the existing feedback module and animation, with one assignment-label helper; typed snapshot comparison stays presentation-only. Source remains below 1,000 lines, common mouse/touch command paths unchanged, no autonomous behavior. Floating text now shifts inside viewport edges and fits narrow screens to prevent clipped messages; reviewed desktop and phone previews after the correction.
+- User approved the visual result and authorized creating a PR and merging into the default branch (`master`). Branch `feat/villager-action-flashes` contains the verified change; merging triggers the repository quality/deploy workflow. Direct Modal deployment remains unavailable in this environment.
 
 # Previous handoff: cursor edge panning (2026-10-04)
 
