@@ -228,3 +228,107 @@ fn finishing_preparation_preserves_stopped_workers_and_helpers_delivery() {
     assert_eq!(w.resources[0].field.as_ref().unwrap().work, None);
     assert!(w.units.iter().all(|u| u.action == UnitAction::Idle));
 }
+
+// A field can be reached from either side of this strip, but must not cut
+// its western workers off from the farm where they deposit their harvest.
+fn bottleneck_world(exit: bool) -> GameWorld {
+    let mut w = world();
+    w.buildings.remove(0);
+    for tile in &mut w.terrain {
+        tile.biome = if (8..25).contains(&tile.column)
+            && (10..if exit { 14 } else { 13 }).contains(&tile.row)
+        {
+            TerrainBiome::Meadow
+        } else {
+            TerrainBiome::Water
+        };
+    }
+    w.validate().unwrap();
+    w
+}
+
+#[test]
+fn field_placement_cannot_cut_off_delivery_routes_for_any_worker() {
+    for planter in ["villager-1", "villager-2"] {
+        let mut w = bottleneck_world(false);
+        w.units[1].cell = cell(13, 12);
+        w.units[0].cargo = Some(CarriedResource {
+            kind: ResourceKind::Food,
+            amount: 3.0,
+        });
+        let before = w.clone();
+        assert_eq!(
+            w.apply_command(Command::PlantField {
+                unit_id: planter.into(),
+                origin: cell(10, 10),
+            }),
+            Err(CommandError::TargetUnreachable)
+        );
+        assert_eq!(w, before);
+        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn field_with_an_exit_completes_repeated_deliveries_after_reload() {
+    let mut w = bottleneck_world(true);
+    w.units.truncate(1);
+    plant(&mut w).unwrap();
+    run(&mut w, 20.0);
+    w = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+    for _ in 0..3000 {
+        w.tick(0.1);
+        w.validate().unwrap();
+    }
+    assert!(
+        (w.stockpile.food - FIELD_FOOD).abs() < 1e-8,
+        "food={}, units={:?}, resources={:?}",
+        w.stockpile.food,
+        w.units,
+        w.resources
+    );
+    assert_eq!(w.resources[0].amount, 0.0);
+    assert!(
+        w.units
+            .iter()
+            .all(|u| u.action == UnitAction::Idle && u.cargo.is_none())
+    );
+    assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+}
+
+#[test]
+fn gatherers_continue_between_fields_and_wild_food_in_both_directions() {
+    for start_at_field in [false, true] {
+        let mut w = world();
+        plant(&mut w).unwrap();
+        w.resources[0].field.as_mut().unwrap().work = None;
+        w.resources[0].amount = 23.0;
+        w.resources.push(ResourceNode {
+            id: "berries".into(),
+            kind: ResourceKind::Food,
+            cell: cell(8, 8),
+            amount: 24.0,
+            capacity: 24.0,
+            field: None,
+        });
+        w.apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: if start_at_field {
+                "field-10-10"
+            } else {
+                "berries"
+            }
+            .into(),
+        })
+        .unwrap();
+        for _ in 0..2000 {
+            w.tick(0.1);
+            w.validate().unwrap();
+        }
+        assert!((w.stockpile.food - 47.0).abs() < 1e-8);
+        assert!(w.resources.iter().all(|r| r.amount == 0.0));
+        assert_eq!(w.units[0].action, UnitAction::Idle);
+        assert!(w.units[0].cargo.is_none());
+        assert_eq!((w.stockpile.wood, w.stockpile.stone), (90.0, 95.0));
+    }
+}
