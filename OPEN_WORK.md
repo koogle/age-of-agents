@@ -1,3 +1,7 @@
+## Mobile time controls — 2026-10-05
+
+- User authorized PR creation and merge after grid verification. Integrated master `28a09a2`, preserving current gameplay, Stop/cargo controls and pause/reconnect fixes. Mobile time buttons use 36px center spacing and separate 36×44px targets; glyphs use the original alpha mask to remove rectangular tint. All 264 Rust tests pass (one manual benchmark ignored), formatting, native/WASM lint, rebuilt web/server, 298-frame asset/icon audits and six verifier tests pass. Browser grid/speed checks and screenshots are in `docs/verification/2026-10-05/time-merged-*`. Production release uses the merge-triggered GitHub Actions workflow.
+
 # Current handoff: pause and reconnect integration (2026-10-05)
 
 - Branch `fix/pause-reconnect` integrates master `8f91557`, preserving island-local inventories, ship cargo and water-facing docks and transport shore pickup and territorial wildlife and mobile cargo swipe controls, Stop icons, concise README and resource-patch continuation. Jakob explicitly requested a PR, validation and merge to master on 2026-10-05.

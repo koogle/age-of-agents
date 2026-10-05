@@ -1,0 +1,8 @@
+2026-10-05 glyph transparency follow-up
+231 Rust tests pass, one manual benchmark ignored. Formatting, native/WASM strict Clippy, web rebuild and whitespace checks pass.
+PASS phone DPR2 touch: pause/1x/2x; desktop resize; no page errors
+Chromium software WebGL, isolated saved seed-123 world; phone 390x844 DPR2, desktop 1440x900 DPR2.
+Before phone states captured successfully; before desktop screenshot timed out under concurrent software-GPU load. After desktop capture completed.
+Images: time-label-{before,after}-{0,1,2}.png and time-label-after-{phone,desktop}.png.
+Review: existing glyph emitter + shader; original alpha mask prevents packed mip bleed; no simulation/save changes.
+Not deployed: Modal connectivity unavailable in this session. Physical devices untested.
