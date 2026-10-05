@@ -1,3 +1,7 @@
+# Active menu icon audit
+
+User requested missing dedicated menu icons and sequential PR merges. Audit: [coverage](docs/MENU_ICON_AUDIT.md). First change restores the existing Stop hand in land/ship commands. The complete audit covers 20 sequential fixes. Fourteen FAL originals and OpenAI refinements, plus four portraits from approved unit sprites, are prepared under `/workspace/scratch/menu-icons/generated/`; all 18 packed icons pass normalization. The Stop patch passes 232 Rust tests (one manual benchmark ignored); native/WASM lint, rebuilt browser bundle, asset checks and desktop/phone Stop dispatch all pass. Evidence is retained in `docs/verification/menu-icons/stop/`. First PR is ready to merge; remaining icons are pending. Existing unrelated handoff follows; #94 is merged and release `37379045726` for `75e7540` succeeded.
+
 # Open work
 
 - Branch `feat/island-storage-ships`, PR #94: https://github.com/koogle/age-of-agents/pull/94. Integrating master through `58813c1`. Implements island-local inventories and 50-resource ship holds in addition to four passengers. Cargo stays aboard on arrival; stopped shore ships supply local construction/production/research and accept partial villager deposits. Training/research still require buildings.

@@ -1,0 +1,10 @@
+{
+  "scene": "stop",
+  "wasm_sha256": "1d906b4f0664462bf379834ac5cf236b1a37cfccce31e8c97b62d88415cc7347",
+  "viewports": [
+    "1280x800 DPR1 mouse",
+    "390x844 DPR2 touch"
+  ],
+  "errors": [],
+  "limitation": "Controlled snapshot presentation and wire dispatch; not an authoritative gameplay fixture."
+}
