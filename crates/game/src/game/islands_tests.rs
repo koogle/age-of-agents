@@ -9,6 +9,7 @@ fn expedition() -> GameWorld {
         destination: None,
         heading: [1, 0],
         passengers: vec![w.units.remove(0)],
+        home_dock_id: None,
     });
     w.discover_island();
     w.validate().unwrap();

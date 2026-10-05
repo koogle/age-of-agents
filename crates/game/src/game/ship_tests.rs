@@ -317,3 +317,126 @@ fn docking_selects_a_reachable_water_berth_and_rejects_other_buildings() {
     assert!(w.ships[0].beside(w.buildings.last().unwrap().footprint()));
     w.validate().unwrap();
 }
+
+fn ocean_harbor() -> GameWorld {
+    let mut world = harbor();
+    // Connect the fixture's southern sea to the ocean arrival corner.
+    for cell in &mut world.terrain {
+        if cell.column == 0 || cell.row == 0 {
+            cell.biome = TerrainBiome::Water;
+            cell.elevation = 0.0;
+        }
+    }
+    world.validate().unwrap();
+    world
+}
+
+fn visit(world: &mut GameWorld, island_id: u64) -> Result<(), CommandError> {
+    world.apply_command(Command::Voyage {
+        ship_id: world.ships[0].id.clone(),
+        island_id,
+    })
+}
+
+#[test]
+fn return_voyage_remembers_birth_dock_across_reload_and_ignores_other_docks() {
+    let mut world = ocean_harbor();
+    assert_eq!(world.ships[0].home_dock_id.as_deref(), Some("dock"));
+    let dock = world
+        .buildings
+        .iter()
+        .find(|b| b.id == "dock")
+        .unwrap()
+        .footprint();
+    // This dock is closer to the ocean entry, but it is not this ship's home.
+    world
+        .buildings
+        .push(building(BuildingKind::Dock, "other-dock", c(5, 26), None));
+    let stock = world.stockpile.clone();
+    visit(&mut world, 1).unwrap();
+    let mut restored: GameWorld =
+        serde_json::from_str(&serde_json::to_string(&world).unwrap()).unwrap();
+    visit(&mut restored, 0).unwrap();
+    assert!(restored.ships[0].beside(dock));
+    assert!(restored.ships[0].stopped());
+    assert_eq!(restored.stockpile, stock);
+    // Home has no resource nodes: returning to a dock must not require trees.
+    assert!(restored.resources.is_empty());
+    restored.validate().unwrap();
+}
+
+#[test]
+fn legacy_ships_learn_the_departure_dock_and_away_ships_can_find_a_dock() {
+    let world = ocean_harbor();
+    let mut json = serde_json::to_value(&world).unwrap();
+    json["ships"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("home_dock_id");
+    let mut old: GameWorld = serde_json::from_value(json).unwrap();
+    assert!(old.ships[0].home_dock_id.is_none());
+    visit(&mut old, 1).unwrap();
+    assert_eq!(old.ships[0].home_dock_id.as_deref(), Some("dock"));
+    // Also support saves made while already away, without origin metadata.
+    old.ships[0].home_dock_id = None;
+    visit(&mut old, 0).unwrap();
+    assert!(
+        old.ships[0].beside(
+            world
+                .buildings
+                .iter()
+                .find(|b| b.id == "dock")
+                .unwrap()
+                .footprint()
+        )
+    );
+    old.validate().unwrap();
+}
+
+#[test]
+fn return_voyage_uses_another_home_berth_and_rejects_a_fully_blocked_dock_atomically() {
+    let mut world = ocean_harbor();
+    let template = world.ships[0].clone();
+    visit(&mut world, 1).unwrap();
+    let home = world.islands.iter_mut().find(|i| i.id == 0).unwrap();
+    let dock = home
+        .buildings
+        .iter()
+        .find(|b| b.id == "dock")
+        .unwrap()
+        .footprint();
+    let mut blocker = template.clone();
+    blocker.id = "blocker-first".into();
+    home.ships.push(blocker);
+    let blocked_cell = template.cell;
+    let mut partly_blocked = world.clone();
+    visit(&mut partly_blocked, 0).unwrap();
+    let ship = partly_blocked
+        .ships
+        .iter()
+        .find(|s| s.id == template.id)
+        .unwrap();
+    assert!(ship.beside(dock));
+    assert_ne!(ship.cell, blocked_cell);
+    partly_blocked.validate().unwrap();
+
+    let home = world.islands.iter_mut().find(|i| i.id == 0).unwrap();
+    home.ships.clear();
+    for (index, cell) in movement::interaction_cells(dock).enumerate() {
+        if home.terrain[usize::from(cell.row * WORLD_COLUMNS + cell.column)].biome
+            == TerrainBiome::Water
+            && dock
+                .cells()
+                .any(|land| land.column.abs_diff(cell.column) + land.row.abs_diff(cell.row) == 1)
+        {
+            let mut blocker = template.clone();
+            blocker.id = format!("blocker-{index}");
+            blocker.cell = cell;
+            home.ships.push(blocker);
+        }
+    }
+    world.validate().unwrap();
+    let before = world.clone();
+    assert_eq!(visit(&mut world, 0), Err(CommandError::ShoreBlocked));
+    assert_eq!(world, before);
+}

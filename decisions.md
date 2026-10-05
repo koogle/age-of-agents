@@ -31,3 +31,5 @@ Each entry records a design choice in one or two sentences. The current gameplay
 - **Simplified transport and economy:** Transports carry up to four units only; all islands use one shared stockpile for deposits and spending, while away islands remain paused. Existing saved island inventories and ship holds are pooled on load; villagers retain personal carried loads until deposited.
 
 - **Compact HUD:** Preserve painted medallions and parchment while aligning phone actions and globe/speed controls in one bottom band. Expand queues and submenus upward only when needed, and collapse construction choices during placement.
+
+- **Home-dock returns:** Transports remember their construction dock and use its free ocean-connected berths on return voyages, rejecting atomically when that home dock is blocked. Older ships learn a departure dock; destinations without a known home dock prefer another completed dock before shore landings.

@@ -17,6 +17,9 @@ pub struct TransportShip {
     /// Last travel vector, retained when stopped for sprite facing.
     pub heading: [i8; 2],
     pub passengers: Vec<Unit>,
+    /// The dock that built this ship; older saves learn it when departing a dock.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub home_dock_id: Option<String>,
 }
 
 impl TransportShip {
@@ -89,6 +92,7 @@ impl GameWorld {
             destination: None,
             heading: [1, 0],
             passengers: Vec::new(),
+            home_dock_id: Some(self.buildings[building].id.clone()),
         });
         self.next_unit_id += 1;
         if self.islands.is_empty() {
@@ -180,7 +184,7 @@ impl GameWorld {
             }
         }
     }
-    fn dock_for_ship(&self, ship: usize) -> Option<&Building> {
+    pub(super) fn dock_for_ship(&self, ship: usize) -> Option<&Building> {
         self.buildings.iter().find(|b| {
             b.kind == BuildingKind::Dock
                 && b.is_complete()

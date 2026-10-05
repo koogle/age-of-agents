@@ -92,6 +92,7 @@ mod tests {
             destination: None,
             heading: [1, 0],
             passengers: vec![],
+            home_dock_id: None,
         });
         let commands = |snapshot: &WorldSnapshot| {
             selection(

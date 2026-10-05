@@ -1,4 +1,10 @@
-# Current handoff: shared resources and unit-only transport (2026-10-05)
+# Current handoff: home-dock return voyages (2026-10-05)
+
+- User requested a separate PR after merging shared resources (#83); do not merge this new fix without a separate request.
+- Transports record their construction dock, preserve it in snapshots/saves, and prefer an ocean-connected free berth there when returning. A fully blocked known home dock rejects the voyage atomically. Other destinations prefer completed docks before the existing shore fallback; old saves learn the departure dock or use a destination dock if already away.
+- All 12 focused transport tests pass, including original-dock selection over another dock, save/reload, exhausted home resources, legacy saves and blocked/alternate berths. Full verification and browser return-button checks will run after rebasing onto merged #83.
+
+# Previous handoff: shared resources and unit-only transport (2026-10-05)
 
 - User requested simplifying transport and opening a PR. Branch `fix/shared-island-resources` removes ship holds/transfer commands and keeps one global stockpile when exchanging islands.
 - Ship HUD now contains passenger/voyage controls only; resource HUD explicitly labels resources as shared across islands. Units retain personal gathering loads; away-island simulation remains paused.

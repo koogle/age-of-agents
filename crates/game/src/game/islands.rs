@@ -92,6 +92,9 @@ impl GameWorld {
                 unit.action = UnitAction::Idle;
             }
         }
+        if self.ships[ship].home_dock_id.is_none() {
+            self.ships[ship].home_dock_id = self.dock_for_ship(ship).map(|dock| dock.id.clone());
+        }
         let mut vessel = self.ships.remove(ship);
         let mut island = self.islands.remove(destination);
         island.exchange(self);
@@ -102,41 +105,76 @@ impl GameWorld {
             self.water_free(c, None)
         });
         let arrival = self
-            .terrain
-            .iter()
-            .map(|c| c.coordinate())
-            .find(|&c| {
-                self.water_free(c, None)
-                    && sea.cost(c).is_some()
-                    && [(0, -1), (-1, 0), (1, 0), (0, 1)]
-                        .into_iter()
-                        .any(|(dx, dy)| {
-                            offset(c, dx, dy, WORLD_COLUMNS, WORLD_ROWS).is_some_and(|land| {
-                                occupancy.is_free_for(land, None)
-                                    && PathTree::search(WORLD_COLUMNS, WORLD_ROWS, land, |c| {
-                                        occupancy.is_free_for(c, None)
-                                    })
-                                    .nearest(
-                                        self.resources
-                                            .iter()
-                                            .filter(|r| r.kind == ResourceKind::Wood)
-                                            .flat_map(|r| {
-                                                movement::interaction_cells(Footprint {
-                                                    origin: r.cell,
-                                                    columns: 1,
-                                                    rows: 1,
-                                                })
-                                            }),
-                                    )
-                                    .is_some()
+            .voyage_dock_arrival(&vessel, &sea)?
+            .or_else(|| {
+                self.terrain.iter().map(|c| c.coordinate()).find(|&c| {
+                    self.water_free(c, None)
+                        && sea.cost(c).is_some()
+                        && [(0, -1), (-1, 0), (1, 0), (0, 1)]
+                            .into_iter()
+                            .any(|(dx, dy)| {
+                                offset(c, dx, dy, WORLD_COLUMNS, WORLD_ROWS).is_some_and(|land| {
+                                    occupancy.is_free_for(land, None)
+                                        && PathTree::search(WORLD_COLUMNS, WORLD_ROWS, land, |c| {
+                                            occupancy.is_free_for(c, None)
+                                        })
+                                        .nearest(
+                                            self.resources
+                                                .iter()
+                                                .filter(|r| r.kind == ResourceKind::Wood)
+                                                .flat_map(|r| {
+                                                    movement::interaction_cells(Footprint {
+                                                        origin: r.cell,
+                                                        columns: 1,
+                                                        rows: 1,
+                                                    })
+                                                }),
+                                        )
+                                        .is_some()
+                                })
                             })
-                        })
+                })
             })
             .ok_or(CommandError::ShoreBlocked)?;
         vessel.cell = arrival;
         self.ships.push(vessel);
         self.refresh_exploration();
         Ok(())
+    }
+
+    /// Prefer the original dock on return. Legacy ships and other destinations
+    /// use an available completed dock; unexplored shores retain their landing.
+    fn voyage_dock_arrival(
+        &self,
+        ship: &TransportShip,
+        sea: &PathTree,
+    ) -> Result<Option<CellCoordinate>, CommandError> {
+        let home = self.buildings.iter().find(|b| {
+            Some(&b.id) == ship.home_dock_id.as_ref()
+                && b.kind == BuildingKind::Dock
+                && b.is_complete()
+        });
+        let berths = self
+            .buildings
+            .iter()
+            .filter(|b| {
+                b.kind == BuildingKind::Dock
+                    && b.is_complete()
+                    && home.is_none_or(|home| home.id == b.id)
+            })
+            .flat_map(|dock| {
+                movement::interaction_cells(dock.footprint()).filter(move |&c| {
+                    self.water_free(c, None)
+                        && dock.footprint().cells().any(|land| {
+                            land.column.abs_diff(c.column) + land.row.abs_diff(c.row) == 1
+                        })
+                })
+            });
+        let arrival = sea.nearest(berths);
+        if home.is_some() && arrival.is_none() {
+            return Err(CommandError::ShoreBlocked);
+        }
+        Ok(arrival)
     }
 
     pub(super) fn validate_islands(&self) -> Result<(), String> {

@@ -23,6 +23,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         destination: None,
         heading: [1, 0],
         passengers: vec![],
+        home_dock_id: None,
     });
     let snapshot = world.snapshot();
     let units = [snapshot.units[0].unit.id.clone()];

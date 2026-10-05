@@ -24,7 +24,7 @@ The first transport is a playable dock recipe costing 60 wood + 20 timber, takin
 
 Remaining acceptance criteria:
 
-1. Implemented: dock-built transport boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
+1. Implemented: dock-built transport boards/lands existing units, retaining identities and personal carried loads. Return voyages prefer the original home dock and a free berth; older saves remain compatible. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
 2. Implemented: first transport completion generates a destination once; an explicit voyage travels to that persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
 3. Implemented: resources are shared across all islands, so new arrivals can fund an outpost directly from the shared pool. Island-local inventories and resource shipping are deferred; away islands still pause.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
