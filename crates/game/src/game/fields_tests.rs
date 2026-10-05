@@ -157,10 +157,12 @@ fn preparing_a_field_delivers_existing_cargo_first() {
 }
 
 #[test]
-fn old_resource_saves_load_and_invalid_field_states_are_rejected() {
-    let old = r#"{"id":"berries","kind":"food","cell":{"column":1,"row":1},"amount":30.0,"capacity":30.0}"#;
-    let node: ResourceNode = serde_json::from_str(old).unwrap();
-    assert!(node.field.is_none());
+fn non_field_nodes_round_trip_and_invalid_field_states_are_rejected() {
+    let node = GameWorld::default().resources[0].clone();
+    let loaded: ResourceNode =
+        serde_json::from_str(&serde_json::to_string(&node).unwrap()).unwrap();
+    assert_eq!(loaded, node);
+    assert!(loaded.field.is_none());
     let mut w = world();
     plant(&mut w).unwrap();
     w.resources[0].amount = 1.0;

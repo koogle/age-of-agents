@@ -4,7 +4,8 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 use aoa_game::GameWorld;
 
-mod migration;
+// No save migrations during development. Bump this when the persisted model changes.
+const STORE_VERSION: u32 = 12;
 
 const DEFAULT_DB_PATH: &str = "age_of_agents.db";
 
@@ -36,34 +37,17 @@ impl Store {
         let mut connection = Connection::open(&self.path)?;
         let schema_version: u32 =
             connection.query_row("PRAGMA user_version", [], |row| row.get(0))?;
-        let legacy_schema = {
-            let mut statement = connection.prepare("PRAGMA table_info(world_state)")?;
-            let columns = statement.query_map([], |row| row.get::<_, String>(1))?;
-            columns
-                .collect::<Result<Vec<_>, _>>()?
-                .iter()
-                .any(|column| column == "saved_at")
-        };
         let transaction = connection.transaction()?;
-        if legacy_schema || schema_version < 10 {
-            // The pre-milestone prototype stored a fundamentally different world
-            // model; versions through 3 predate typed cargo, building jobs,
-            // technologies, and the seven-resource stockpile, and version 4 stored
-            // free-floating positions rather than exclusive cell claims and
-            // building footprints; version 5 used a coarser 30 by 20 grid; version 6 had an all-land
-            // map with no seed, elevation or water; versions 7 and 8 had 4×4 and 6×6 town centers and smaller buildings,
-            // whose footprints would now overlap their neighbours; version 9 had a
-            // 60 by 40 map. Those snapshots cannot be translated safely
-            // into the current deterministic world.
+        if schema_version != STORE_VERSION {
             transaction.execute_batch("DROP TABLE IF EXISTS world_state;")?;
         }
         transaction.execute_batch(
             "CREATE TABLE IF NOT EXISTS world_state (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 world_json TEXT NOT NULL
-            );
-            PRAGMA user_version = 10;",
+            );",
         )?;
+        transaction.pragma_update(None, "user_version", STORE_VERSION)?;
         transaction.commit()?;
         Ok(())
     }
@@ -80,7 +64,7 @@ impl Store {
         let Some(json) = json else {
             return Ok(None);
         };
-        let world = migration::load_world(&json)?;
+        let world: GameWorld = serde_json::from_str(&json)?;
         world
             .validate()
             .map_err(|error| format!("persisted world is corrupt: {error}"))?;
@@ -213,94 +197,6 @@ mod tests {
         store
     }
 
-    fn legacy_inventories() -> serde_json::Value {
-        let mut value = serde_json::to_value(GameWorld::default()).unwrap();
-        value.as_object_mut().unwrap().remove("inventories");
-        let stock = |wood| {
-            serde_json::to_value(aoa_game::Stockpile {
-                wood,
-                ..Default::default()
-            })
-            .unwrap()
-        };
-        let ship = |id, wood| {
-            serde_json::json!({
-                "id": id, "cell": {"column": 0, "row": 0},
-                "step": null, "destination": null, "heading": [1, 0],
-                "passengers": [], "goods": stock(wood)
-            })
-        };
-        value["stockpile"] = stock(10.0);
-        value["ships"] = serde_json::json!([ship("transport-home", 20.0)]);
-        value["islands"] = serde_json::json!([{
-            "id": 1, "terrain": value["terrain"], "explored_cells": [],
-            "units": [], "ships": [ship("transport-away", 40.0)],
-            "resources": [], "buildings": [], "stockpile": stock(30.0)
-        }]);
-        value
-    }
-
-    #[test]
-    fn legacy_island_and_ship_resources_are_pooled_once_and_saved() {
-        let path = temporary_db("shared-resources");
-        let store = store_raw(&path, &legacy_inventories());
-        let world = store.load().unwrap().unwrap();
-        assert_eq!(world.inventories[0].wood, 100.0);
-        assert_eq!(world.ships.len(), 2);
-        assert!(world.islands.is_empty());
-        assert_eq!(world.island_origins.len(), 2);
-        // Repeated reads and a save/reload must never credit resources twice.
-        assert_eq!(store.load().unwrap().unwrap(), world);
-        store.save(&world).unwrap();
-        assert_eq!(store.load().unwrap().unwrap(), world);
-        let json = serde_json::to_value(&world).unwrap();
-        assert!(json["islands"][0].get("stockpile").is_none());
-        assert!(json["ships"][0].get("goods").is_none());
-        std::fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn corrupt_legacy_resources_are_rejected_before_pooling() {
-        for (index, pointer, amount) in [
-            (0, "/islands/0/stockpile/wood", -1.0),
-            (1, "/ships/0/goods/wood", -1.0),
-            (2, "/islands/0/ships/0/goods/wood", 201.0),
-            (3, "/stockpile/wood", -1.0),
-        ] {
-            let path = temporary_db(&format!("bad-inventory-{index}"));
-            let mut value = legacy_inventories();
-            *value.pointer_mut(pointer).unwrap() = serde_json::json!(amount);
-            let store = store_raw(&path, &value);
-            assert!(store.load().unwrap_err().to_string().contains("corrupt"));
-            std::fs::remove_file(path).unwrap();
-        }
-    }
-
-    #[test]
-    fn legacy_pooling_rejects_overflow_and_malformed_stockpiles() {
-        for mode in 0..3 {
-            let path = temporary_db(&format!("malformed-inventory-{mode}"));
-            let mut value = legacy_inventories();
-            match mode {
-                0 => {
-                    value["stockpile"]["wood"] = serde_json::json!(1e308);
-                    value["islands"][0]["stockpile"]["wood"] = serde_json::json!(1e308);
-                }
-                1 => {
-                    value["ships"][0]["goods"]
-                        .as_object_mut()
-                        .unwrap()
-                        .remove("food");
-                }
-                _ => {
-                    value["islands"][0]["stockpile"]["wood"] = serde_json::Value::Null;
-                }
-            }
-            assert!(store_raw(&path, &value).load().is_err());
-            std::fs::remove_file(path).unwrap();
-        }
-    }
-
     #[test]
     fn save_missing_a_field_is_an_explicit_load_error() {
         let path = temporary_db("missing-field");
@@ -309,6 +205,45 @@ mod tests {
         let error = store_raw(&path, &value).load().unwrap_err().to_string();
         assert!(error.contains("missing field `cell`"), "{error}");
         std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn current_store_rejects_obsolete_fields_and_missing_required_fields() {
+        for (index, field) in [
+            "island_origins",
+            "economy_rules",
+            "ships",
+            "queue",
+            "islands",
+        ]
+        .iter()
+        .enumerate()
+        {
+            let path = temporary_db(&format!("schema-{index}"));
+            let mut value = serde_json::to_value(GameWorld::default()).unwrap();
+            match *field {
+                "queue" => {
+                    value["buildings"][0]
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("queue");
+                }
+                "islands" => {
+                    value["islands"] = serde_json::json!([]);
+                }
+                _ => {
+                    value.as_object_mut().unwrap().remove(*field);
+                }
+            }
+            let store = store_raw(&path, &value);
+            assert!(store.load().is_err(), "accepted obsolete schema: {field}");
+            store.initialize().unwrap();
+            assert!(
+                store.load().is_err(),
+                "reset corrupt current store: {field}"
+            );
+            std::fs::remove_file(path).unwrap();
+        }
     }
 
     #[test]
@@ -343,70 +278,35 @@ mod tests {
     }
 
     #[test]
-    fn legacy_schema_is_migrated_to_an_empty_current_store() {
-        let path = temporary_db("legacy");
-        let connection = Connection::open(&path).unwrap();
-        connection
-            .execute_batch(
-                "CREATE TABLE world_state (
-                    id INTEGER PRIMARY KEY CHECK (id = 1),
-                    world_json TEXT NOT NULL,
-                    saved_at TEXT NOT NULL
-                );
-                INSERT INTO world_state VALUES (1, '{\"legacy\":true}', '2026-08-01');",
-            )
-            .unwrap();
-        drop(connection);
+    fn incompatible_store_versions_reset_before_deserialization() {
+        for version in [0, 2, 10, STORE_VERSION + 1] {
+            let path = temporary_db(&format!("version-{version}"));
+            let connection = Connection::open(&path).unwrap();
+            connection
+                .execute_batch(
+                    "CREATE TABLE world_state (id INTEGER PRIMARY KEY, world_json TEXT NOT NULL);
+                 INSERT INTO world_state VALUES (1, 'incompatible snapshot');",
+                )
+                .unwrap();
+            connection
+                .pragma_update(None, "user_version", version)
+                .unwrap();
+            drop(connection);
 
-        let store = Store::from_path(&path);
-        store.initialize().unwrap();
-        assert_eq!(store.load().unwrap(), None);
-        store.save(&GameWorld::default()).unwrap();
-        assert!(store.load().unwrap().is_some());
-        std::fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn version_two_world_is_migrated_before_deserialization() {
-        let path = temporary_db("version-two");
-        let connection = Connection::open(&path).unwrap();
-        connection
-            .execute_batch(
-                "CREATE TABLE world_state (
-                    id INTEGER PRIMARY KEY CHECK (id = 1),
-                    world_json TEXT NOT NULL
-                );
-                INSERT INTO world_state VALUES (1, '{\"width\":1200,\"height\":800}');
-                PRAGMA user_version = 2;",
-            )
-            .unwrap();
-        drop(connection);
-
-        let store = Store::from_path(&path);
-        store.initialize().unwrap();
-        assert_eq!(store.load().unwrap(), None);
-        std::fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn version_three_world_is_migrated_before_deserialization() {
-        let path = temporary_db("version-three");
-        let connection = Connection::open(&path).unwrap();
-        connection
-            .execute_batch(
-                "CREATE TABLE world_state (
-                    id INTEGER PRIMARY KEY CHECK (id = 1),
-                    world_json TEXT NOT NULL
-                );
-                INSERT INTO world_state VALUES (1, '{\"width\":2400,\"height\":1600}');
-                PRAGMA user_version = 3;",
-            )
-            .unwrap();
-        drop(connection);
-
-        let store = Store::from_path(&path);
-        store.initialize().unwrap();
-        assert_eq!(store.load().unwrap(), None);
-        std::fs::remove_file(path).unwrap();
+            let store = Store::from_path(&path);
+            store.initialize().unwrap();
+            assert_eq!(store.load().unwrap(), None);
+            let world = GameWorld::default();
+            store.save(&world).unwrap();
+            store.initialize().unwrap();
+            assert_eq!(store.load().unwrap(), Some(world));
+            let connection = Connection::open(&path).unwrap();
+            let version: u32 = connection
+                .query_row("PRAGMA user_version", [], |row| row.get(0))
+                .unwrap();
+            assert_eq!(version, STORE_VERSION);
+            drop(connection);
+            std::fs::remove_file(path).unwrap();
+        }
     }
 }
