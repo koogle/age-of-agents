@@ -6,7 +6,7 @@ Read [README.md](README.md), especially **Proposed gameplay loop**, at the start
 
 Age of Empires informs the RTS controls; Anno informs the settlement economy.
 
-Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle units remain idle until the player commands them.
+Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle friendly units remain idle until the player commands them; hostile wildlife can pursue nearby units within its territory.
 
 ## Milestone 1
 
@@ -17,7 +17,7 @@ The current playable demo proves these loops:
 3. A player can construct a town center and train villagers through its authoritative task queue.
 4. A player can research five bounded gathering improvements through that same task queue.
 
-Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; inventories are island-local, supplemented by cargo in stopped shore ships (50 total resources, plus four passengers). Research remains shared. Treat combat, calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
+Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; inventories are island-local, supplemented by cargo in stopped shore ships (50 total resources, plus four passengers). Research remains shared. Territorial wolves/bears and explicit wildlife contact attacks are implemented; see [wildlife](docs/knowledge/wildlife.md). Broader combat, calamities and permanent progression remain future roadmap work. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
 ## Architecture
 
@@ -35,6 +35,7 @@ Keep the simulation deterministic. The world expands as the player discovers isl
 
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
+- Tap/click a visible wolf or bear with friendly units selected to issue a group attack order; with no units selected, inspect its health. Healers cannot attack. Retreat and Stop remain explicit player orders.
 - Tap/click a foundation with villagers selected to have them help build it.
 - Tap/click a town center (or a granary for food and fiber, or a lumber mill for wood) with villagers selected to have those carrying goods unload there. A villager holding goods shows the carry pose, even when stopped, except while actively gathering; partial loads must keep the work animation.
 - Villagers carry at most 20 typed units, deposit at the nearest reachable compatible completed storage site (including lumber mills for wood and stopped shore ships with room), and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: given a new gather, build, or field-preparation assignment, it delivers its cargo to a compatible completed drop site before starting, including partial loads of the same kind. It retains and resumes the new assignment automatically.
