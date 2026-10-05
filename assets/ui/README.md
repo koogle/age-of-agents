@@ -108,3 +108,4 @@ These files remain unused until integration PR #107 wires them into the HUD. Eac
 | `resource_rations` | [Review](sources/menu_icons/resource_rations/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_rations/provenance.json) |
 | `unit_guard` | [Review](sources/menu_icons/unit_guard/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_guard/provenance.json) |
 | `unit_archer` | [Review](sources/menu_icons/unit_archer/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_archer/provenance.json) |
+| `unit_healer` | [Review](sources/menu_icons/unit_healer/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_healer/provenance.json) |
