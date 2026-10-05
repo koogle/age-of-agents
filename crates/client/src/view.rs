@@ -304,10 +304,15 @@ impl WorldView {
             .iter()
             .filter(|cell| cell.elevation.is_some())
             .count();
-        if known != self.known_heights {
+        if known != self.known_heights
+            || self.heights.columns != next.columns
+            || self.heights.rows != next.rows
+        {
             self.known_heights = known;
             self.heights =
                 Heights::from_cells(next.terrain.iter().map(|cell| (cell.elevation, cell.biome)));
+            self.heights.columns = next.columns;
+            self.heights.rows = next.rows;
             self.heights_dirty = true;
         }
         let mut seen = Vec::with_capacity(next.units.len());

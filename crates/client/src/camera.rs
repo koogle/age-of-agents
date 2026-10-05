@@ -14,6 +14,7 @@ pub(crate) const PITCH: f32 = 0.6154797;
 
 pub struct Rig {
     pub target: Vec3,
+    pub map_size: Vec2,
     pub distance: f32,
     pub width: f32,
     pub height: f32,
@@ -22,6 +23,7 @@ pub struct Rig {
 impl Rig {
     pub fn new() -> Self {
         Self {
+            map_size: Vec2::new(COLUMNS, ROWS),
             target: Vec3::new(15.0, 0.0, 10.5),
             distance: 15.0,
             width: 1.0,
@@ -177,8 +179,8 @@ impl Rig {
 
     fn clamp(&mut self) {
         self.distance = self.distance.clamp(MIN_DISTANCE, MAX_DISTANCE);
-        self.target.x = self.target.x.clamp(-1.0, COLUMNS + 1.0);
-        self.target.z = self.target.z.clamp(-1.0, ROWS + 1.0);
+        self.target.x = self.target.x.clamp(-1.0, self.map_size.x + 1.0);
+        self.target.z = self.target.z.clamp(-1.0, self.map_size.y + 1.0);
     }
 
     /// Keep the ground point grabbed at `from` under the pointer now at `to`.

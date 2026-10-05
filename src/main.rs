@@ -411,21 +411,15 @@ mod tests {
             serde_json::json!({"column": unit.cell.column, "row": unit.cell.row})
         );
         assert_eq!(json["world"]["buildings"][0]["columns"], 5);
-        // Terrain is one character per cell: unseen cells reveal neither biome nor height.
-        let terrain = &json["world"]["terrain"];
-        let (cells, heights) = (
-            terrain["cells"].as_str().unwrap(),
-            terrain["heights"].as_str().unwrap(),
-        );
-        assert_eq!(cells.len(), 9600);
-        assert_eq!(heights.len(), 9600);
-        assert!(
-            cells
-                .bytes()
-                .zip(heights.bytes())
-                .all(|(c, h)| (c == b'.') == (h == b'.'))
-        );
-        assert!(cells.contains('.') && cells.bytes().any(|c| c.is_ascii_uppercase()));
+        // Decode the compact runs: unseen cells reveal neither biome nor height.
+        let snapshot: aoa_game::WorldSnapshot =
+            serde_json::from_value(json["world"].clone()).unwrap();
+        assert_eq!(snapshot.terrain.len(), 9600);
+        assert!(snapshot.terrain.iter().all(|cell| {
+            (cell.visibility == aoa_game::CellVisibility::Unseen) == cell.elevation.is_none()
+                && cell.elevation.is_none() == cell.biome.is_none()
+        }));
+        assert!(snapshot.terrain.iter().any(|cell| cell.elevation.is_some()));
         assert!(serde_json::to_string(&json).unwrap().len() < 30_000);
         assert!(json["world"]["resources"].as_array().unwrap().len() < world.resources.len());
     }

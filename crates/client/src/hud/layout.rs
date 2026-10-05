@@ -87,24 +87,12 @@ impl Hud {
         // Reserve the full time-control row above the globe on compact screens.
         let navigation_left = if narrow { gx - 48.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
-        let span = 38.0;
-        let (cx, cz) = (15.0, 10.0);
-        self.quads.push(Quad {
-            rect: globe,
-            uv: [
-                (cx - span / 2.0) / 30.0,
-                (cz - span / 2.0) / 20.0,
-                (cx + span / 2.0) / 30.0,
-                (cz + span / 2.0) / 20.0,
-            ],
-            color: [1.0; 4],
-            params: [3.0, 0.0, 0.0, 0.0],
-        });
+        self.map_size =
+            Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL;
+        let map = minimap::Minimap::new(self.map_size);
+        self.quads.push(map.quad(globe));
         self.shape(globe, [0.79, 0.59, 0.25, 1.0], 2.0, 6.0 * s);
-        let camera = Vec2::new(
-            gx + r + (model.camera.x - cx) / span * r * 2.0,
-            gy + r + (model.camera.y - cz) / span * r * 2.0,
-        );
+        let camera = Vec2::new(gx, gy) + map.local_of(model.camera) * r * 2.0;
         self.shape(
             [camera.x - 5.0 * s, camera.y - 5.0 * s, 10.0 * s, 10.0 * s],
             [1.0, 1.0, 1.0, 0.95],
@@ -113,7 +101,7 @@ impl Hud {
         );
         self.regions.push(Region {
             rect: globe,
-            action: Action::LookAt(Vec2::new(cx - span / 2.0, cz - span / 2.0)),
+            action: Action::LookAt(map.world_at(Vec2::splat(0.5))),
             enabled: true,
         });
         let speeds = [(0.0, "II"), (1.0, "1×"), (2.0, "2×")];
