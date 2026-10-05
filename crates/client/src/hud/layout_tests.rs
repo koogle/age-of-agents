@@ -258,3 +258,44 @@ fn completed_research_coin_explains_instead_of_dispatching_research() {
         assert!(matches!(hud.release(), Some(Action::Explain(_))));
     }
 }
+
+#[test]
+fn busy_villager_stop_uses_loaded_hand_and_preserves_cancel() {
+    let assets = pollster::block_on(crate::assets::Assets::load());
+    let atlas = build_atlas(&assets);
+    assert_ne!(
+        atlas.content["command_stop"].0,
+        atlas.content["command_cancel"].0
+    );
+    let mut snapshot = GameWorld::default().snapshot();
+    snapshot.units[0].unit.action = aoa_game::UnitAction::Move {
+        to: aoa_game::CellCoordinate::new(30, 30),
+    };
+    let units = [snapshot.units[0].unit.id.clone()];
+    let model = Model {
+        resource_island: 0,
+        snapshot: Some(&snapshot),
+        units: &units,
+        building: None,
+        ship: None,
+        build: BuildUi::Off,
+        show_grid: false,
+        toast: None,
+        camera: Vec2::ZERO,
+    };
+    let commands = selection_model(&snapshot, &model).unwrap().4;
+    let stop = commands.iter().find(|c| c.action == Action::Stop).unwrap();
+    assert_eq!(stop.icon, "command_stop");
+    for (width, height, scale) in [(1280.0, 800.0, 1.0), (390.0, 844.0, 2.0)] {
+        let mut hud = Hud::new();
+        hud.layout(&atlas, &model, width * scale, height * scale, scale);
+        let rect = hud
+            .regions
+            .iter()
+            .find(|r| r.action == Action::Stop)
+            .unwrap()
+            .rect;
+        assert!(hud.press(Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0)));
+        assert_eq!(hud.release(), Some(Action::Stop));
+    }
+}

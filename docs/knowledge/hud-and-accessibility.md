@@ -72,3 +72,12 @@ Top resources follow the pointer/touch island, including minimap inspection. Bui
 Mobile refinement (Jakob, 2026-10-05): in the compact HUD (width below 600 or height below 500 logical pixels), cargo paging uses 44px-wide chevron targets beside the resource columns, keeping the strip 78px tall. Desktop keeps labeled paging. Mouse/touch drags starting in cargo cancel the pressed action after 8 logical pixels; a predominantly horizontal swipe of at least 32px snaps one page on release, clamped to the available pages. This is swipe paging, without continuous or inertial scrolling. Drawing and hit testing share the strip bounds; reset those bounds every layout to avoid stale gesture capture.
 
 Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonoverlapping transfer/chevron targets, compact row height, DPI-scaled swipe thresholds and cancelled transfers. [Cargo browser replay](../verification/replay_cargo.py) exercises DPR-2 touch swipes/chevrons and DPR-1 desktop clicks/drags; it inspects outgoing commands against a presentation fixture rather than applying transfers to a save. Run with `--output DIR`, then separately with `--output DIR --desktop`. [Mobile row capture](../verification/2026-10-05/mobile-cargo-row.png). The all-13-resource stress fixture still crowds top-resource labels in short landscape; this change only adjusts cargo layout.
+
+## Dedicated menu icons (2026-10-05 audit)
+
+Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
+Track coverage in [the menu icon audit](../MENU_ICON_AUDIT.md). Inspect both command
+and queued-job mappings: a manifest entry alone does not make an icon available
+in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
+Stop already had authored artwork but was omitted from that list and used Cancel;
+restore the hand for land units and ships, retaining the X for cancellation.
