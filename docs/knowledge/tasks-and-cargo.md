@@ -58,6 +58,34 @@ Start with `gathering_tests.rs` and
 `crates/client/src/view/activity_tests.rs`; use a complete delivery/resumption
 cycle rather than treating one successful command as proof of the loop.
 
+## Automatic continuation at a patch boundary
+
+The developer reported regular-bush gatherers going Idle after automatic delivery,
+with nearby food remaining and no further clicks, especially at 2× (2026-10-05).
+A visible-production-layout replay reproduced this when `berries-34` was the last
+node harvested: its 10-cell circle excluded a neighboring patch, although other
+bushes in the connected exhausted patch were close enough. Starting on another
+bush could harvest both patches. Earlier field-exhaustion and direct-deposit
+observations did not explain this automatic failure.
+
+`next_resource` now measures distance from the connected exhausted wild-resource
+patch: adjacent cells of the same kind, excluding fields. It keeps the 10-cell
+limit, nearest-distance/ID ordering and reachable-target check. Disconnected
+exhausted patches cannot extend the range, fields retain their individual search
+origin, and Stop/manual replenishment remain unchanged. No persisted fields change.
+
+`finishing_the_far_side_of_a_bush_patch_keeps_nearby_food_in_range_after_delivery`
+fails before this change and passes at 1×/2× afterward. It fills one load across
+two bushes, resumes at the neighboring patch after delivery, credits all 60 food,
+and leaves distant food alone. Generated-world coverage uses two workers across
+seven seeds at 2×. The production-layout replay reconstructs only known terrain
+(unseen becomes water), so it is supporting evidence rather than an exact save.
+The [isolated browser comparison](../verification/2026-10-05/bush-delivery-2x.json)
+uses one gather command at 2× and no later input: old code delivers 20 then idles
+with 40 nearby food left; fixed code delivers 60 and leaves distant food untouched.
+Both runs have no page errors. Modal's API was unreachable during diagnosis despite configured credentials;
+production was only read through `/state` and was never reset or commanded.
+
 ## Keep this guide current
 
 Update this file when developer steering, implementation changes or investigation
