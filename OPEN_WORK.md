@@ -2,9 +2,9 @@
 
 - Generated a distinct sawn-timber resource icon through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline, using the existing wood art as reference. Source render, cutout, prompt, request IDs and preview are retained in `assets/ui/timber_sources`; estimated FAL cost $0.0448.
 - Registered the icon in the shared Rust HUD and UI manifest; used it for timber stockpiles, lumber-mill production and queued timber jobs. Regenerated the UI contact sheet. Raw wood and simulation rules are unchanged.
-- All icon normalization checks and the 282-frame sprite resolution audit pass; PNG/RGBA/transparent corners and light/dark/blue preview reviewed. All 183 workspace tests, formatting, native and WASM strict lint pass. Rebuilt the tracked browser bundle. Desktop and DPR2 phone lumber-mill selection with active/queued timber passes with no page errors; inspected HUD at normal and close zoom using a paused fixture. QA captures and fixture are in `/workspace/scratch/timber`.
+- All icon normalization checks and the 282-frame sprite resolution audit pass; PNG/RGBA/transparent corners and light/dark/blue preview reviewed. All 183 workspace tests, formatting, native and WASM strict lint pass. Rebuilt the tracked browser bundle. Desktop and DPR2 phone lumber-mill selection with active/queued timber passes with no page errors; inspected desktop HUD at normal/close zoom and phone HUD at normal zoom using a paused fixture. The additional phone close-zoom screenshot timed out under software rendering; normal phone selection and screenshot passed. QA captures and fixture are in `/workspace/scratch/timber`.
 - Thermonuclear review: small presentation-only mapping change, no dependencies or domain/persistence changes. No source files cross 1,000 lines.
-- Deployment unavailable: this environment has no Modal tooling/profile. Branch `feat/timber-icon` is ready for a review PR; not deployed.
+- Deployment unavailable: this environment has no Modal tooling/profile. Review PR: https://github.com/koogle/age-of-agents/pull/78 (`feat/timber-icon`); not deployed.
 
 # Previous handoff: cursor edge panning (2026-10-04)
 
