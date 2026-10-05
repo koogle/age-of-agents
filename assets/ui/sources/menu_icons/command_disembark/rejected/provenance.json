@@ -1,0 +1,76 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a short wooden ship gangplank ending on a small pale sandy shore, with one large ochre boot stepping down onto land, a clear landing-passengers symbol. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3702/gkjkPIAOMeq5yOx74Tlz9_cvuc7Egt.png",
+        "content_type": "image/png",
+        "file_name": "gkjkPIAOMeq5yOx74Tlz9_cvuc7Egt.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "source": "../refinement/draft-sheet.png",
+    "result": "../refinement/refined-sheet.png",
+    "sheet_size": [
+      1254,
+      1254
+    ],
+    "crop": [
+      314,
+      314,
+      627,
+      627
+    ],
+    "purpose": "Preserve the 4x4 cell layout and original identities; clean geometry, edges and diffusion artifacts; simplify small details; correct compass needle and disembark boot contact.",
+    "full_prompt": "../refinement/provenance.json"
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad3710/9YZods2owsiZdzqbkdNN__vL32XJLi.png",
+        "content_type": "image/png",
+        "file_name": "9YZods2owsiZdzqbkdNN__vL32XJLi.png",
+        "file_size": null,
+        "width": 313,
+        "height": 313
+      },
+      "mask_image": null
+    }
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "command_disembark.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239709.3628464,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "command_disembark",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-bf6d-76a2-ae27-2d27cfd65927",
+      "seconds": 9.0
+    },
+    {
+      "t": 1791239850.6002204,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:command_disembark",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-00ed-74a3-9a39-473d24efabf1",
+      "seconds": 2.4
+    }
+  ]
+}

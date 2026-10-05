@@ -14,7 +14,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 
 ## Implemented roadmap
 
-- Seeded islands with hills, rivers, biomes, clustered resources and fog of war.
+- Seeded islands with varied outlines and open bays, relief-derived mountains and downhill rivers, biomes, clustered resources and fog of war.
 - Villager and group orders for movement, gathering, carrying and construction.
 - 17 buildings, 13 resources/products, farming, processing, research and production queues.
 - Buildings unlocked through construction-material discovery.

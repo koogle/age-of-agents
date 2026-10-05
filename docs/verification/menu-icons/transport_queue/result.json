@@ -1,10 +1,14 @@
 {
   "name": "transport_queue",
-  "wasm_sha256": "10d857399be055ce3c2ceacd48954a549b63f6ae75b3034322a8e2c0b3507272",
+  "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
   "errors": [],
   "viewports": [
     "1280x800 DPR1 mouse",
-    "390x844 DPR2 touch"
+    "390x844 DPR2 touch (780x1688 captured pixels)"
   ],
-  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
+  "screenshots": [
+    "transport_queue-desktop.jpg",
+    "transport_queue-phone.jpg"
+  ],
+  "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
 }

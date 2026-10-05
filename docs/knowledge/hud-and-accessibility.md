@@ -32,6 +32,10 @@ The [compact HUD review](../COMPACT_HUD_REVIEW.md) contains the viewport matrix.
 Accessible DOM controls and additive touch selection remain implementation gaps;
 verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
+## Mobile time-control spacing
+
+User steering on 2026-10-05 requests a tighter mobile time-control row. The compact layout reduces center spacing from 44px to 36px for the existing 30px coins (6px visible gaps), with separate 36×44px hit regions. Keep the rightmost coin anchored and desktop positioning unchanged.
+
 ## Learned constraints and evidence
 
 **Evidence:** [#30](https://github.com/koogle/age-of-agents/pull/30),
@@ -73,6 +77,12 @@ Mobile refinement (Jakob, 2026-10-05): in the compact HUD (width below 600 or he
 
 Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonoverlapping transfer/chevron targets, compact row height, DPI-scaled swipe thresholds and cancelled transfers. [Cargo browser replay](../verification/replay_cargo.py) exercises DPR-2 touch swipes/chevrons and DPR-1 desktop clicks/drags; it inspects outgoing commands against a presentation fixture rather than applying transfers to a save. Run with `--output DIR`, then separately with `--output DIR --desktop`. [Mobile row capture](../verification/2026-10-05/mobile-cargo-row.png). The all-13-resource stress fixture still crowds top-resource labels in short landscape; this change only adjusts cargo layout.
 
+## Resource names on demand
+
+Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
+
+Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
+
 ## Dedicated menu icons (2026-10-05 audit)
 
 Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
@@ -83,3 +93,26 @@ Stop already had authored artwork but was omitted from that list and used Cancel
 restore the hand for land units and ships, retaining the X for cancellation.
 
 Production offers and queued jobs now share `selection.rs::product_icon`; add future product artwork there so the two surfaces cannot silently diverge. The transport queue regression also preserves the existing timber artwork.
+## Text transparency
+
+User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.
+
+## Dedicated icon integration (2026-10-05)
+
+The [menu audit](../MENU_ICON_AUDIT.md) maps all 13 resources, produced goods,
+specialist unit portraits, ship commands, construction categories and Back to
+distinct artwork. Production offers and queue entries share the exhaustive
+`selection.rs::product_icon` mapping; selection uses authored unit portraits.
+New keys must be added to `hud.rs::ICONS` and `assets/ui/manifest.json` together.
+The [style gate](asset-pipeline.md#style-acceptance-is-a-merge-gate) applies before
+merging art; the first draft set was rejected and retained as negative evidence.
+The 18 individual art PRs are merged; runtime integration and final verification
+pass in #107 (272 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
+
+`docs/verification/menu_icon_batch.py` reuses separate desktop and DPR-2 phone WebGL contexts across
+controlled scenes and resets selection/build mode between captures. It records
+mouse/touch wire commands and bundle hashes. Fixtures run at 1× because 0× now
+rejects gameplay commands. This proves presentation and dispatch only; domain
+tests and release verification remain separate gates.
+
+The integration preview exposed a secondary reuse: command hover text kept the selection thumbnail, and a selected build group kept the generic Build thumbnail. The fix makes the info-panel icon follow the hovered command or active category, preserving actions, text and panel geometry. Verify both mouse hover and touch selection alongside the medallions.

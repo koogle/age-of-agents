@@ -1,0 +1,76 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of three neatly stacked silver-blue refined metal ingots, clean trapezoidal ends and broad pale polished highlights, unmistakably manufactured metal bars not rocks. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3701/bi2hyz5m7W7IBGRQQ45h5_Mk1SWJ63.png",
+        "content_type": "image/png",
+        "file_name": "bi2hyz5m7W7IBGRQQ45h5_Mk1SWJ63.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "source": "../refinement/draft-sheet.png",
+    "result": "../refinement/refined-sheet.png",
+    "sheet_size": [
+      1254,
+      1254
+    ],
+    "crop": [
+      314,
+      0,
+      627,
+      314
+    ],
+    "purpose": "Preserve the 4x4 cell layout and original identities; clean geometry, edges and diffusion artifacts; simplify small details; correct compass needle and disembark boot contact.",
+    "full_prompt": "../refinement/provenance.json"
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad3710/HGaE7D2dN0TtWsOLLNy6y_0W5Z64f6.png",
+        "content_type": "image/png",
+        "file_name": "HGaE7D2dN0TtWsOLLNy6y_0W5Z64f6.png",
+        "file_size": null,
+        "width": 313,
+        "height": 314
+      },
+      "mask_image": null
+    }
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "resource_steel.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239700.1548624,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "resource_steel",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-9943-7d83-904a-a38bf83413cf",
+      "seconds": 9.5
+    },
+    {
+      "t": 1791239847.1038496,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:resource_steel",
+      "est_usd": 0.005,
+      "request_id": "01a10e36-f34c-7952-a06a-7a9bcd8a2316",
+      "seconds": 2.4
+    }
+  ]
+}

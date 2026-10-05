@@ -47,6 +47,61 @@ Midjourney is an alternative with separate tooling/account requirements in
 [its setup guide](../MIDJOURNEY.md); that document's environment observations are
 historical. Do not assume a local login or provider access exists in a new session.
 
+## Style acceptance is a merge gate
+
+**Developer steering, 2026-10-05:** Jakob flagged visual style drift during the
+menu-icon audit and asked for clearer enforcement. Technical image checks did
+not catch heavier contours, brighter washes and stronger shading in the draft
+refinement. Those initial illustrations were rejected; the corrected set was subsequently
+reviewed and merged individually in #112–#129, with runtime integration in #107.
+The [comparison](../verification/art-style/rejected-menu-drafts.png) records the
+approved kit on the left and rejected drafts on the right; rejected work is
+negative evidence, never a new style reference.
+
+The existing art direction remains authoritative: use
+[`diorama_primary.webp`](../../assets/reference/diorama_primary.webp) for world
+art, with older Mediterranean references supporting palette only. UI object
+icons use the established
+[wood](../../assets/ui/icons/resource_wood.png),
+[food](../../assets/ui/icons/resource_food.png) and
+[research](../../assets/ui/icons/tech_masonry.png) kit as their family reference.
+Use the existing seal/coin family for medallions and approved unit originals
+for portraits. This makes the existing rules explicit; it does not authorize
+restyling the shipped game or promoting the newest generated asset to a standard.
+
+Before generating or refining, record the exact approved reference files and
+revision in provenance. Attach those approved references to **every** refinement
+pass alongside the draft being edited. A sheet of new drafts alone is not an
+adequate style reference. Refine one representative asset first and inspect it
+against the approved kit before expanding a batch. Preserve rejected passes and
+record why they failed; model names and a matching prompt are not visual evidence.
+
+An art PR must include a completed style review with these acceptance criteria:
+
+| Criterion | Accept | Reject |
+| --- | --- | --- |
+| Ink | Fine dark-brown contours comparable to the approved sibling | Heavy black outlines, bold sticker edges |
+| Color | Restrained ochre, olive, terracotta, limestone and muted teal; subject-specific accents | Stronger saturation across the whole icon or a new palette |
+| Light and material | Soft, restrained watercolor/cel shading consistent with the family | Glossy bevels, dramatic gradients, hard high-contrast bands |
+| Shape and detail | Clear silhouette, sparse hatching, coherent geometry at display size | Dense decoration, tiny scattered details, distorted anatomy or perspective |
+| Camera and scale | Existing family viewpoint, optical weight and safe bounds | A new camera, oversized art, inconsistent anchors or proportions |
+| Integration | Clean alpha on dark green, parchment and blue; legible alongside siblings | White fringe, accidental shadow, frame or background, ambiguous meaning |
+
+Include reference/result comparisons at source size and **24/32px for icons**,
+plus the actual coin or resource-pill context on desktop and DPR-2 phone when
+wired into the game. World assets need gameplay and maximum-zoom comparisons.
+Show these previews in chat as well as linking retained evidence from the PR.
+Record a pass/fail and a concrete observation for every relevant criterion;
+fix failures before merging. Mark genuinely inapplicable checks with a reason.
+An art-only PR may defer runtime evidence to its named integration PR, which
+must supply that evidence before the new art is used in the game.
+
+PNG, alpha, normalization and resolution checks remain necessary but **cannot
+approve style**. Do not invent a numeric image similarity threshold or claim CI
+has judged appearance. The PR author must inspect the comparison; user approval
+is required only when otherwise mandated by the workflow or requested by the
+user. A failed style review blocks merging even when automated checks pass.
+
 ## Learned constraints and evidence
 
 **Evidence:** [#9](https://github.com/koogle/age-of-agents/pull/9),

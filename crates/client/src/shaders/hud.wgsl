@@ -62,6 +62,10 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
         let grey = vec3<f32>(dot(texel.rgb, vec3<f32>(0.299, 0.587, 0.114)));
         let rgb = mix(texel.rgb, grey, in.params.z);
         color = vec4<f32>(rgb * color.rgb, texel.a * color.a);
+    } else if mode == 4 {
+        // Glyphs use their original coverage mask: atlas mipmaps mix nearby
+        // packed content into the transparent space around small labels.
+        color.a *= textureSampleLevel(atlas, atlas_sampler, in.uv, 0.0).a;
     } else if mode == 1 {
         // Rounded rectangle with a soft one-pixel edge.
         let r = in.params.y;

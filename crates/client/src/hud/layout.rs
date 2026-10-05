@@ -25,6 +25,8 @@ impl Hud {
                 matches!(kind, ResourceKind::Wood | ResourceKind::Food) || *amount >= 1.0
             })
             .collect();
+        let mut resource_hint = None;
+        let row_height = 66.0;
         let d = 46.0 * s;
         let step = d + 18.0 * s;
         let per_row = ((width - 115.0 * s) / step).floor().max(1.0) as usize;
@@ -32,7 +34,7 @@ impl Hud {
             let row = index / per_row;
             let count = (shown.len() - row * per_row).min(per_row);
             let x = width - 16.0 * s - (count - index % per_row) as f32 * step + (step - d) / 2.0;
-            let y = (10.0 + row as f32 * 82.0) * s;
+            let y = (10.0 + row as f32 * row_height) * s;
             let icon = resource_icon(*kind);
             self.coin(atlas, icon, [x, y, d, d], true, false);
             let text = format!("{}", amount.floor() as i64);
@@ -51,17 +53,20 @@ impl Hud {
                 INK,
                 true,
             );
-            self.text(
-                atlas,
-                kind.name(),
-                (x + d / 2.0, y + d + 30.0 * s),
-                10.0 * s,
-                INK,
-                true,
-            );
+            let hit = [x, y, d, d + 16.0 * s];
+            let mut name = kind.name().to_owned();
+            name[..1].make_ascii_uppercase();
+            if self.hovered(hit) {
+                resource_hint = Some(name.clone());
+            }
+            self.regions.push(Region {
+                rect: hit,
+                action: Action::Explain(name),
+                enabled: true,
+            });
         }
 
-        let header_bottom = (shown.len().div_ceil(per_row) as f32 * 82.0 + 8.0) * s;
+        let header_bottom = (shown.len().div_ceil(per_row) as f32 * row_height + 8.0) * s;
         let label = format!(
             "Island {} · shore + nearby ships",
             model.resource_island + 1
@@ -91,7 +96,7 @@ impl Hud {
         let edge = if narrow { 12.0 } else { 18.0 } * s;
         let (gx, gy) = (width - edge - r * 2.0, height - edge - r * 2.0);
         // Reserve the full time-control row above the globe on compact screens.
-        let navigation_left = if narrow { gx - 48.0 * s } else { gx };
+        let navigation_left = if narrow { gx - 28.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
         self.map_size =
             Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL;
@@ -115,7 +120,7 @@ impl Hud {
             let angle = std::f32::consts::PI * (1.0 + 0.16 + index as f32 * 0.17);
             let c = 30.0 * s;
             let center = if narrow {
-                Vec2::new(gx + (-26.0 + index as f32 * 44.0) * s, gy - 26.0 * s)
+                Vec2::new(gx + (-10.0 + index as f32 * 36.0) * s, gy - 26.0 * s)
             } else {
                 Vec2::new(
                     gx + r + angle.cos() * (r + 22.0 * s),
@@ -124,7 +129,7 @@ impl Hud {
             };
             let rect = [center.x - c / 2.0, center.y - c / 2.0, c, c];
             let hit = if narrow {
-                [center.x - 22.0 * s, center.y - 22.0 * s, 44.0 * s, 44.0 * s]
+                [center.x - 18.0 * s, center.y - 22.0 * s, 36.0 * s, 44.0 * s]
             } else {
                 rect
             };
@@ -239,7 +244,13 @@ impl Hud {
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
         else {
-            self.toast(atlas, model.toast, width, s, toast_top);
+            self.toast(
+                atlas,
+                model.toast.or(resource_hint.as_deref()),
+                width,
+                s,
+                toast_top,
+            );
             return;
         };
         let gap = if narrow { 8.0 } else { 10.0 } * s;
@@ -312,7 +323,8 @@ impl Hud {
                 let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, row_step];
                 let hot = self.hovered(hit);
                 if hot {
-                    hover_text = Some((command.label.clone(), command.detail.clone()));
+                    hover_text =
+                        Some((command.icon, command.label.clone(), command.detail.clone()));
                 }
                 self.coin(
                     atlas,
@@ -402,7 +414,8 @@ impl Hud {
                 let hot = self.hovered(hit);
                 self.coin(atlas, command.icon, rect, true, hot);
                 if hot {
-                    hover_text = Some((command.label.clone(), command.detail.clone()));
+                    hover_text =
+                        Some((command.icon, command.label.clone(), command.detail.clone()));
                 }
                 self.regions.push(Region {
                     rect: hit,
@@ -429,7 +442,7 @@ impl Hud {
         } else {
             (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin)
         };
-        let (title, detail) = hover_text.unwrap_or((title, detail));
+        let (portrait, title, detail) = hover_text.unwrap_or((portrait, title, detail));
         let text_offset = if narrow { 52.0 } else { 64.0 } * s;
         let text_room = info_width - text_offset - if narrow { 12.0 } else { 16.0 } * s;
         let title_size = if narrow { 14.0 } else { 15.0 } * s;
@@ -510,6 +523,12 @@ impl Hud {
                 1.5 * s,
             );
         }
-        self.toast(atlas, model.toast, width, s, toast_top);
+        self.toast(
+            atlas,
+            model.toast.or(resource_hint.as_deref()),
+            width,
+            s,
+            toast_top,
+        );
     }
 }

@@ -129,16 +129,26 @@ pub(super) fn tech_info(tech: TechnologyKind) -> (&'static str, &'static str, &'
 pub(super) fn product_icon(product: ProductKind) -> &'static str {
     match product {
         ProductKind::TransportShip => "transport",
+        ProductKind::Villager => "command_train",
+        ProductKind::Guard => "unit_guard",
+        ProductKind::Archer => "unit_archer",
+        ProductKind::Healer => "unit_healer",
+        ProductKind::SiegeCart => "unit_siege_cart",
         ProductKind::Timber => "resource_timber",
-        ProductKind::Villager
-        | ProductKind::Guard
-        | ProductKind::Archer
-        | ProductKind::Healer
-        | ProductKind::SiegeCart
-        | ProductKind::Steel
-        | ProductKind::Bricks
-        | ProductKind::Cloth
-        | ProductKind::Rations => "command_train",
+        ProductKind::Steel => "resource_steel",
+        ProductKind::Bricks => "resource_bricks",
+        ProductKind::Cloth => "resource_cloth",
+        ProductKind::Rations => "resource_rations",
+    }
+}
+
+fn unit_icon(kind: aoa_game::UnitKind) -> &'static str {
+    match kind {
+        aoa_game::UnitKind::Villager => "portrait_villager",
+        aoa_game::UnitKind::Guard => "unit_guard",
+        aoa_game::UnitKind::Archer => "unit_archer",
+        aoa_game::UnitKind::Healer => "unit_healer",
+        aoa_game::UnitKind::SiegeCart => "unit_siege_cart",
     }
 }
 
@@ -254,7 +264,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 }
                 _ => ("Build", "Choose a building type"),
             };
-            return Some(("command_build", title.into(), detail.into(), None, commands));
+            let icon = match model.build {
+                BuildUi::Group(group) => group.icon(),
+                _ => "command_build",
+            };
+            return Some((icon, title.into(), detail.into(), None, commands));
         }
         if !workers {
             commands.clear();
@@ -340,7 +354,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             unit.unit.id.rsplit('-').next().unwrap_or("")
         );
         return Some((
-            "portrait_villager",
+            unit_icon(unit.unit.kind),
             title,
             format!("{activity}{cargo} · HP {:.0}/100", unit.unit.health),
             None,
@@ -422,7 +436,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .filter(|ship| ship.stopped() && ship.beside(building.building.footprint()))
         {
             commands.push(Command {
-                icon: "resource_wood",
+                icon: "command_cargo",
                 label: "Ship cargo".into(),
                 detail: format!(
                     "{} · {:.0}/50 resources · select to load or sail",
@@ -570,7 +584,16 @@ mod tests {
     fn queued_products_use_their_production_art() {
         for (product, expected) in [
             (ProductKind::TransportShip, "transport"),
+            (ProductKind::Villager, "command_train"),
+            (ProductKind::Guard, "unit_guard"),
+            (ProductKind::Archer, "unit_archer"),
+            (ProductKind::Healer, "unit_healer"),
+            (ProductKind::SiegeCart, "unit_siege_cart"),
             (ProductKind::Timber, "resource_timber"),
+            (ProductKind::Steel, "resource_steel"),
+            (ProductKind::Bricks, "resource_bricks"),
+            (ProductKind::Cloth, "resource_cloth"),
+            (ProductKind::Rations, "resource_rations"),
         ] {
             let mut snapshot = aoa_game::GameWorld::default().snapshot();
             let building = &mut snapshot.buildings[0].building;

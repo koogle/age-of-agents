@@ -102,3 +102,16 @@ keeps shader initialization costs manageable; this remains presentation/wire
 verification rather than a persisted-world gameplay test.
 
 Menu command fixtures use simulation speed 1× after the pause-contract fix (#105); their mocked positions remain controlled. A paused fixture is appropriate for frozen-frame checks, but gameplay orders must respect the authoritative pause contract.
+
+## Phone screenshot dimensions (2026-10-05)
+
+The menu integration review caught a false phone capture: changing dimensions
+through CDP on a Playwright context with a fixed desktop viewport satisfied
+`innerWidth/innerHeight/devicePixelRatio` checks, but `page.screenshot()` still
+returned desktop-sized pixels. Use separate contexts configured with the actual
+viewport and `device_scale_factor`, and assert captured pixel dimensions as well
+as browser metrics. The pre-integration batch-driver phone captures are
+superseded by the corrected #107 suite; do not use metadata alone as visual
+proof. Run all desktop scenes then all phone scenes, closing the previous context so only one large software WebGL world stays active.
+
+Unit-training fixtures must provide housing for active and queued unit jobs, even when the visible unit list is empty. A barracks-only fixture correctly disables training and cannot prove enabled-command dispatch; the menu suite supplies a separate house.
