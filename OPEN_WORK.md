@@ -1,4 +1,15 @@
-# Current handoff: field-research icon (2026-10-05)
+# Current handoff: shared resources and unit-only transport (2026-10-05)
+
+- User requested simplifying transport and opening a PR. Branch `fix/shared-island-resources` removes ship holds/transfer commands and keeps one global stockpile when exchanging islands.
+- Ship HUD now contains passenger/voyage controls only; resource HUD explicitly labels resources as shared across islands. Units retain personal gathering loads; away-island simulation remains paused.
+- Existing SQLite snapshots pool archived inventories and active/archived ship holds on load, with invalid amounts rejected and no double credit after save/reload.
+- All 186 workspace tests pass (17 server, 51 client, 118 domain), along with formatting and strict native/WASM lint. Rebuilt the tracked WebGL bundle; 282-frame sprite audit, transport assets and icon checks pass. Desktop 1280×800 mouse and phone 390×844/DPR2 touch checks passed: previous/next voyages retain shared totals, and touch passenger landing succeeds, with no page errors. Screenshots, browser logs and isolated QA database are under `/workspace/scratch/shared-resources`.
+- Thermonuclear review: removed the cargo-transfer concept end to end and removed island inventories rather than synchronizing copies. Simulation remains authoritative; atomic command handling and passenger ownership are unchanged. Migration is isolated in persistence, checks old values before pooling, and preserves corrupt-save errors. No dependencies or assets added; client files remain below 1,000 lines.
+- User authorized merging PR #83. Integrated master `9393efe` (field route protection and villager action flashes); Rust source merged cleanly. Combined verification passed: all 193 workspace tests, formatting, strict native/WASM lint, rebuilt browser bundle, and repeated desktop/phone voyages and touch landing with no page errors. Also integrated compact HUD master `7aaafdb`; adapted its layout fixtures to unit-only ships. All 57 client tests and both strict lint targets pass; rebuilt bundle and repeated desktop/phone voyage/landing checks pass. Server/domain tests remain valid for unchanged source. Integrated subsequent master `ddf2123` (fogged build-site exploration) as well. All 202 workspace tests and strict native/WASM lint pass; rebuilt the combined WebGL bundle. Final desktop/phone voyages and touch landing pass without page errors; ready for the authorized merge. Integrated final icon-only master `e1b4a02`; client tests, strict native/WASM lint, rebuilt browser bundle and icon audit pass. Simulation code is unchanged from the 202-test verified integration.
+
+# Previous handoff: explore fogged building sites (2026-10-05)
+
+# Previous handoff: field-research icon (2026-10-05)
 
 - Replaced Agriculture’s sickle-and-grain icon with a tilled field, seedlings and hoe through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline. The existing `tech_agriculture` key supplies available/disabled research buttons and queued research; no Rust, gameplay or WASM changes.
 - Preserved the previous icon, generated source, cutout, prompt, references, request IDs and small-size comparison in `assets/ui/field_research_sources`. Updated the generation subject and contact sheet; estimated FAL cost $0.0448.
@@ -9,7 +20,7 @@
 
 User authorized merging PRs #78 and #82. Timber PR #78 merged as dda155f; field-research PR #82 is now integrated with that master, retaining both generated icons and rebuilding the combined contact sheet. Combined icon checks and a fresh DPR2-phone town-center/queued-research preview pass without page errors; no Rust or browser-bundle diff from the verified timber merge. Ready for the authorized field-research merge. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Compact HUD integration passed all 57 client tests, both lint targets and a fresh-browser smoke. Integrated fog-placement PR #79 on master ddf2123; rebuilt bundle, client tests, formatting, strict native/WASM lint and fresh-browser lumber-mill smoke all pass. Ready for the authorized timber merge.
 
-# Current handoff: timber icon (2026-10-05)
+# Previous handoff: timber icon (2026-10-05)
 
 - Generated a distinct sawn-timber resource icon through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline, using the existing wood art as reference. Source render, cutout, prompt, request IDs and preview are retained in `assets/ui/timber_sources`; estimated FAL cost $0.0448.
 - Registered the icon in the shared Rust HUD and UI manifest; used it for timber stockpiles, lumber-mill production and queued timber jobs. Regenerated the UI contact sheet. Raw wood and simulation rules are unchanged.
@@ -17,7 +28,7 @@ User authorized merging PRs #78 and #82. Timber PR #78 merged as dda155f; field-
 - Thermonuclear review: small presentation-only mapping change, no dependencies or domain/persistence changes. No source files cross 1,000 lines.
 - Deployment unavailable: this environment has no Modal tooling/profile. Review PR: https://github.com/koogle/age-of-agents/pull/78 (`feat/timber-icon`); not deployed.
 
-# Current handoff: explore fogged building sites (2026-10-05)
+# Previous handoff: explore fogged building sites (2026-10-05)
 
 - User requested a PR for building placement outside current sight. Branch `fix/explore-before-building` is based on master `61fc87c`.
 - Fogged orders retain a typed, persisted exploration assignment. Villagers unload cargo first, explore, and create/pay for a foundation only after the whole footprint is currently visible and all existing placement checks pass. Stop/replacement, blocked/unreachable sites and lost affordability leave no foundation or charge. Visible placement remains immediate.
