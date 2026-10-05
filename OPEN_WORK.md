@@ -1,9 +1,10 @@
 # Current handoff: completed research indication (2026-10-05)
 
-- Completed research coins now show a persistent Done badge and explain “Already researched” plus the upgrade effect on hover/tap. Existing client disabling and authoritative duplicate rejection remain in force.
+- Completed research coins now show a persistent check mark badge and explain “Already researched” plus the upgrade effect on hover/tap. Existing client disabling and authoritative duplicate rejection remain in force.
 - Added a queue → completion → JSON save/reload regression test. All 184 workspace tests pass (13 server, 52 client, 119 domain), formatting and strict native/WASM lint pass; rebuilt the tracked WebGL bundle.
 - Live WebGL desktop 1280×800/DPR1 and phone 390×844/DPR2 checks passed against an isolated WebSocket presentation fixture: selection, incoming completion, visible badge, and disabled click/tap with no repeat research command or browser errors. Screenshots/script are under `/workspace/scratch/research-status`; no saved game or production state was touched.
-- Thermonuclear review: direct snapshot-driven text overlay, shared mouse/touch disabled handling, no added state/dependency/domain rules, changed client files below 1,000 lines.
+- Thermonuclear review: direct snapshot-driven status badge, shared mouse/touch disabled handling, one typographic check icon, no added state/dependency/domain rules, changed client files below 1,000 lines.
+- Check mark follow-up: replaced Done text with a small green typographic tick in an ivory circle at the coin’s lower-right corner. All 52 client tests, formatting, strict native/WASM lint, WebGL rebuild, symbol transparency, and desktop/phone completion and disabled-input checks pass. Updated PR #77.
 - Branch `fix/researched-tech-status` starts at merged master `61fc87c`. Modal deployment is unavailable in this environment (no Modal module/profile); the PR merge workflow deploys production.
 
 # Previous handoff: cursor edge panning (2026-10-04)
