@@ -54,7 +54,9 @@ assume they provide deduplication for replayed commands.
 
 The server ticks at 100 ms and publishes snapshots. The client reconnects after
 deploys and resets its sequence tracking because a restarted server starts a new
-sequence. Preserve the no-cache response policy and test reconnect plus rejection
+sequence. Its first fresh snapshot also resets presentation history; the bounded
+remote inbox coalesces repeated ticks and discards excessive pending history
+([recovery contract](runtime-debugging.md#reconnect-recovery)). Preserve the no-cache response policy and test reconnect plus rejection
 when changing this boundary. Do not replay uncertain state-changing commands
 blindly after reconnecting.
 
