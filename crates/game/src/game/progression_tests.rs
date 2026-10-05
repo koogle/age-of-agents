@@ -2,7 +2,7 @@ use super::tests::{cell, free_site, run};
 use super::*;
 
 #[test]
-fn new_games_only_offer_the_starter_economy_and_old_saves_keep_the_catalog() {
+fn new_games_offer_starter_economy_and_require_explicit_rules() {
     let w = GameWorld::generate(1);
     assert_eq!(w.economy_rules, EconomyRules::IslandProgression);
     assert_eq!(w.available_buildings().len(), STARTER_BUILDINGS.len());
@@ -22,11 +22,7 @@ fn new_games_only_offer_the_starter_economy_and_old_saves_keep_the_catalog() {
     );
     let mut old = serde_json::to_value(&w).unwrap();
     old.as_object_mut().unwrap().remove("economy_rules");
-    let old: GameWorld = serde_json::from_value(old).unwrap();
-    old.validate().unwrap();
-    assert_eq!(old.economy_rules, EconomyRules::Unrestricted);
-    assert_eq!(old.available_buildings(), BUILDABLE);
-    assert_eq!(old.resources, w.resources);
+    assert!(serde_json::from_value::<GameWorld>(old).is_err());
     let roundtrip: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
     assert_eq!(roundtrip, w);
 }

@@ -68,14 +68,14 @@ Deliver the smallest explicit catalogs and persisted state needed by later slice
 Gameplay acceptance:
 
 1. The snapshot exposes a stable catalog of the actual resources, building kinds, unit kinds, recipes, and technologies used by this roadmap; unknown persisted enum values fail explicitly rather than resetting the world.
-2. Existing saves migrate or deserialize with intentional defaults and retain units, stockpiles, orders, buildings, fog, navigation, and research.
+2. Current-version saves retain units, stockpiles, orders, buildings, fog, navigation, and research. Incompatible store versions reset; backward compatibility is deferred until explicitly requested.
 3. Scenario state has an explicit identifier, authoritative tick limit, objective progress, and running/won/lost outcome without yet claiming objectives are playable.
 4. Existing released gameplay remains behaviorally unchanged.
 
 Engineering acceptance:
 
 - Split `game.rs` before it or any frontend file grows beyond 1,000 lines; catalogs are direct typed constants/data, not a generic content engine.
-- Focused migration, catalog-integrity, serialization, and deterministic tick-boundary regressions pass.
+- Focused store-reset, catalog-integrity, serialization, and deterministic tick-boundary regressions pass.
 
 ## Slice B — Multi-unit control
 
@@ -97,7 +97,7 @@ Completed research remains visible with a bronze laurel seal with a green check 
 
 ## Building expansion — deployed
 
-User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. Existing harvesters keep their gathering order while another worker replenishes their field, including when returning with the previous harvest. New worlds now generate only food, wood and stone; the former all-resource generation belongs to existing saves. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
+User-directed implementation activates construction of all 17 catalog buildings. The build menu groups buildings into Town, Gathering, Production and Military, with distinct portraits from the authored HD sheets. Catalog manifests load at runtime so the cloud build does not require asset files before compilation. Catalog building construction-stage sprites and unit idle/walking sprites are now integrated; military/villager action sheets and base resources now use 512 px cells from recovered sources and reviewed refinements. Five processors make timber/steel/bricks/cloth/rations through the typed `Produce` command. Farms and mining camps provide matching drop-offs and a local, non-stacking 25% gathering bonus. Completed farms also unlock player-built 3×3 fields: 10 wood + 5 stone and 12 villager-seconds create 120 harvestable food. Fields have dedicated generated cleared-soil, cultivation, seedling and ripe-wheat art, including their menu portrait and placement preview. Preparation workers automatically harvest the completed field using the normal carry/deposit loop and custom hoeing animations. Field placement preserves existing walking and delivery routes, just like building foundations. Exhausted plots persist and require a new explicit order and the same paid labor to replenish; interruption and helpers preserve paid progress. Existing harvesters keep their gathering order while another worker replenishes their field, including when returning with the previous harvest. New worlds now generate only food, wood and stone; the full resource catalog remains available to domain test fixtures. Barracks/range/workshop/infirmary train the four defined non-worker unit types, with housing, idle movement and blocked-spawn handling; combat and healing remain deferred. Monuments are costly landmarks with extended vision, without scenario victory logic. Matching economy research is available at its building as well as the town center.
 
 The Rust HUD exposes grouped, labelled construction, production costs/progress and all stockpile totals. Compact phone and short-landscape layouts place actions beside the globe/speed controls, with queues and submenus wrapping upward. Catalog building and unit sprites are integrated; all audited unit action/facing frames now use 512 px cells. Costs and recipe quantities are initial balance values.
 
@@ -110,7 +110,7 @@ Status: planned.
 Gameplay acceptance:
 
 1. Coal appears only in compatible terrain and is extracted by villagers only after a Mining Camp is constructed beside it.
-2. Iron extraction also requires a Mining Camp; legacy iron remains discoverable but cannot be hand-gathered.
+2. Iron extraction also requires a Mining Camp; iron is discoverable but cannot be hand-gathered.
 3. A Smelter/Forge can queue steel batches; each batch atomically reserves iron plus coal, progresses visibly, and deposits steel exactly once.
 4. Invalid placement, missing inputs, full task queues, and inaccessible spawn/interaction cells reject without partial cost/input mutation.
 5. The building popover and stockpile HUD make prerequisites, costs, queue progress, blocked reasons, coal, and steel understandable.
