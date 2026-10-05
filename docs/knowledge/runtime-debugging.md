@@ -25,6 +25,56 @@ See [verification](verification-and-handoffs.md) for a controlled presentation r
 when the problem is visual. Store a minimal reproducer and the conditions that
 make it fail, not a full command transcript.
 
+## Pause contract
+
+Jakob reported orders and NPC movement during pause on 2026-10-05. At 0×,
+`GameWorld::apply_command` rejects gameplay orders atomically with `GamePaused`;
+speed controls remain available. Existing tasks resume when speed returns to 1×
+or 2×. Selection and camera controls remain available. Reset remains a separate,
+explicit world-management action. `WorldView::frame` holds
+interpolation, gait distance and work-animation time while paused, including
+unplayed remote movement; playback resumes from that held position.
+
+Regression entry points: `paused_orders_are_rejected_without_changing_tasks_or_spending_resources`
+in domain tests, `starvation_rebuffers_and_pause_freezes_until_resume` and
+`native_accumulator_and_view_agree_at_every_frame_and_across_speed_changes` in
+client movement tests, and `paused_gathering_holds_the_rendered_frame_and_resumes`
+in activity tests. Check both the authoritative snapshot and rendered frame:
+previously ticks stopped correctly while commands mutated tasks and the client
+continued buffered motion and wall-clock work animations.
+
+Verified 2026-10-05 on an isolated seed-123 hosted world using rebuilt WASM:
+Chromium desktop mouse (1280×800, DPR1) and emulated phone touch (390×844, DPR2)
+can pause/resume through the speed controls. While paused, WebSocket move, stop
+and production orders return the pause error and the entire `/state` snapshot
+remains unchanged; after resuming, ticks advance and orders succeed. This does
+not establish physical-phone or native-window appearance.
+
+## Reconnect recovery
+
+Jakob reported strange web catch-up after reconnecting on 2026-10-05. Inspection
+found that reconnect resets only the message sequence, preserving old playback
+history, and the remote inbox queues snapshots without a bound. Reconnect and
+excessive queued backlog now establish the newest snapshot as a fresh playback
+baseline, including paused worlds, without replaying missed movement or feedback.
+Ordinary short network delays retain interpolation; camera and selection survive
+a reconnect to the same world. `source/inbox.rs` keeps at most eight pending
+distinct-tick snapshots, coalesces same-tick broadcasts, and switches to only the
+newest snapshot until the renderer consumes a fresh baseline. Reconnect accepts
+a restarted sequence (including zero), clears old deliveries and signals
+`WorldView::reset_playback`; it never resends gameplay commands. The app clears
+old activity feedback and does not announce transitions that happened offline.
+A long stream gap can also correct position while paused before freezing again.
+
+The inbox and movement tests cover sequence restarts, short/long gaps, paused
+recovery, bounded backlog and uninterrupted short-delay interpolation. Run
+`python3 docs/verification/replay_reconnect.py --output /tmp/aoa-reconnect-check`
+after rebuilding WASM for real browser socket closure and suspended-rendering
+checks. Verified 2026-10-05 in Chromium at 960×640/DPR1 and emulated phone
+390×844/DPR2: sequence-zero reconnect displays the fresh paused position and
+remains still; a 40-snapshot burst displays only its final position. The controlled
+fixture measures sprite uploads and is not a gameplay or production test.
+
 ## Learned constraints and evidence
 
 **Evidence:** [#32](https://github.com/koogle/age-of-agents/pull/32) found a paused
