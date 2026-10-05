@@ -21,9 +21,9 @@
 
 # Active menu icon audit
 
-- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md): 20 fixes; 18 packed new/extracted icons are prepared in `/workspace/scratch/menu-icons/generated/` and pass normalization.
-- [PR #104](https://github.com/koogle/age-of-agents/pull/104) restores the Stop hand for units and ships. Integrated master `8f91557` including docks, shore pickup, wildlife/health and mobile cargo gestures. All 253 Rust tests pass (one manual benchmark ignored), native/WASM lint, formatting, 298-frame/icon checks and rebuilt bindings pass. Final desktop mouse and DPR-2 phone Stop dispatch pass without page errors; [evidence](docs/verification/menu-icons/stop/checks.txt). Ready for the authorized merge; deployment remains a separate workflow check.
-- Next: transport queue consistency, then dedicated resource, unit, ship/navigation and category icons, one PR per fix. Preserve unrelated open work below.
+- User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md): 20 fixes. Stop hand restoration [#104](https://github.com/koogle/age-of-agents/pull/104) is merged; deployment is tracked separately. No newly generated menu art has merged.
+- Jakob flagged style drift on 2026-10-05. The 14 new illustrations in the 18-icon draft set need rework; the four extracted unit portraits need comparison in their UI context. Normalization passed but did not establish a visual match. [Rejected comparison](docs/verification/art-style/rejected-menu-drafts.png) and [blocking style gate](docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) retain the finding and required checks.
+- Integration [#107](https://github.com/koogle/age-of-agents/pull/107) is draft. Preserve its transport queue fix and active-speed browser fixtures. New-art merges are paused pending style correction. Next: validate a representative refinement against approved references, then create/review/merge individual art PRs sequentially and wire the accepted set in the integration PR with complete game validation. Preserve unrelated handoff sections.
 
 # Wildlife integration (2026-10-05)
 

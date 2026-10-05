@@ -48,6 +48,8 @@ Use this review before committing meaningful changes. It is intentionally severe
 
 ## Asset standards
 
+- Complete the [style acceptance review](knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate): approved references, side-by-side evidence at actual size, and explicit findings for ink, color, shading, shape, camera/scale and integration. Reject drift even when technical checks pass.
+
 - File signature must actually be PNG.
 - Sprites must be RGBA with transparent corners.
 - Check for matte contamination on dark green, parchment, and blue backgrounds.
