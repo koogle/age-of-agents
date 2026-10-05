@@ -33,7 +33,7 @@ u.update(
     step=None,
     action={"type": "move", "to": {"column": 31, "row": 21}},
 )
-base["simulation_speed"] = 0
+base["simulation_speed"] = 1
 state = copy.deepcopy(base)
 clients = []
 commands = []
