@@ -6,7 +6,14 @@
 - All 189 workspace tests pass (13 server, 51 client, 125 domain), including six new regression tests and randomized material/occupancy checks. Formatting, strict native/WASM lint and generated JS syntax check pass.
 - Thermonuclear review: construction code is consolidated in a 140-line domain module; atomic placement is reused, pending sites own no cells or costs, bounds and worker type validate on reload, and no idle behavior or new navigation machinery was added.
 - Real browser menu → fog placement → exploration → completed house passes on desktop 1280×800/DPR1 and phone 390×844/DPR2 with touch input. Authoritative snapshots confirm no early foundation/cost, exactly one house and exactly 15 wood spent; no page errors. QA scripts, fixture and screenshots are under `/workspace/scratch/fog-build`.
-- User authorized merging PR #79. Integrated master `4b6fe9e` (villager action flashes); rebuilding the combined client and validating before merge. The existing Modal workflow deploys master merges.
+- User authorized merging PR #79. Integrated master `9393efe` (villager action flashes and field-route fix); added exploration status/reassignment coverage and rebuilding the combined client before merge. The existing Modal workflow deploys master merges.
+
+# Previous handoff: field gathering audit (2026-10-05)
+
+- Dedicated branch `fix/field-gathering-routes`; user has now authorized merging PR #80. Integrated master `4b6fe9e` (action flashes); source merges cleanly, handoffs preserved, combined bundle rebuilt; all 190 workspace tests, formatting and strict native/WASM lint pass. Fresh-browser smoke of the combined bundle also passes; ready for the authorized merge.
+- Confirmed fields already share ordinary gathering, deposits, resumption and same-kind continuation. Found and reproduced a field-placement gap: a permanent plot could cut off delivery routes while remaining reachable for preparation. Reuses building placement's route-preservation guard before mutation/spending.
+- Added regressions for atomic rejection from either side of a bottleneck, complete harvesting around a legal bypass across reload, and field/wild-food continuation in both directions. All ten focused field tests pass; the rejection test failed before the fix. All 186 workspace tests, formatting and strict native/WASM lint pass; rebuilt the tracked browser bundle. Desktop mouse and DPR2 phone touch each completed the prepare → harvest → six deliveries → idle flow with no page errors, using an isolated SQLite fixture under `/workspace/scratch/field-audit`. Rebuilt-client smoke also passes. Dedicated PR: https://github.com/koogle/age-of-agents/pull/80 (open, unmerged). No production deployment performed.
+- Audit and thermonuclear review: `docs/FIELD_GATHERING_REVIEW.md`. Existing blocked layouts are not migrated. Separately observed the existing idle-villager blockage in one-cell traffic; no general movement behavior change in this PR. User's precise saved layout is unavailable.
 
 # Previous handoff: villager action flashes (2026-10-05)
 
