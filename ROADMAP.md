@@ -58,7 +58,7 @@ Status: integrated into the current prototype; the shared Rust renderer has repl
 - [x] `Stop` order: abandon the current task, keeping cargo and foundation progress (no refunds needed); a new order replaces a busy villager's task the same way, atomically.
 - [x] Villager build menu: town center, house (+5 housing), granary (food and fiber drop-off), watchtower (sight 20), dock (must touch the sea; the fishing boat comes later). Training respects housing.
 - [x] Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
-- [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells when theirs runs out.
+- [x] Gatherers move on to the nearest reachable node of the same kind within 10 cells of the connected exhausted wild-resource patch (or individual field) when theirs runs out.
 - [x] Seeded island worldgen: deterministic integer-hash noise, sea, beaches, elevation with hills and impassable peaks, rivers with fords, biome-placed resource clusters, and a guaranteed fishing-boat budget (wood 300, food 150, stone 80, iron 60, fiber 60, clay 40, with 50% headroom) reachable from the start; compact terrain snapshots.
 - [x] Liveness: head-on standoffs resolve by deterministic yielding (lower index side-steps, highest index wins a contested cell); idle units never rest on another unit's reservation; a destination may be reserved while someone only walks through it.
 
