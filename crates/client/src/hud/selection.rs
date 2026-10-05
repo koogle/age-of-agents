@@ -29,7 +29,7 @@ pub(super) fn building_info(
             "building_lumber_mill",
             "lumber_mill",
             "Lumber mill",
-            "Turns wood into timber",
+            "Wood drop-off; turns wood into timber",
         ),
         BuildingKind::Smelter => (
             "building_smelter",
