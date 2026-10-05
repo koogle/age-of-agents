@@ -19,6 +19,7 @@ mod islands;
 #[cfg(test)]
 mod islands_tests;
 pub use islands::IslandState;
+use islands::starting_origins;
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
@@ -83,6 +84,8 @@ pub struct GameWorld {
     pub island_id: u64,
     #[serde(default)]
     pub islands: Vec<IslandState>,
+    #[serde(default = "starting_origins")]
+    pub island_origins: Vec<CellCoordinate>,
     /// The island this world was generated from.
     pub seed: u64,
     #[serde(default)]
@@ -126,6 +129,8 @@ pub struct WorldSnapshot {
     pub island_id: u64,
     #[serde(default)]
     pub island_count: usize,
+    #[serde(default = "starting_origins")]
+    pub island_origins: Vec<CellCoordinate>,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -343,6 +348,7 @@ impl GameWorld {
         let mut world = Self {
             island_id: 0,
             islands: Vec::new(),
+            island_origins: starting_origins(),
             seed: island.seed,
             economy_rules: EconomyRules::IslandProgression,
             tick: 0,
@@ -667,9 +673,9 @@ impl GameWorld {
         let water = |column: i32, row: i32| {
             column >= 0
                 && row >= 0
-                && column < i32::from(WORLD_COLUMNS)
-                && row < i32::from(WORLD_ROWS)
-                && self.terrain[row as usize * usize::from(WORLD_COLUMNS) + column as usize].biome
+                && column < i32::from(self.columns())
+                && row < i32::from(self.rows())
+                && self.terrain[row as usize * usize::from(self.columns()) + column as usize].biome
                     == TerrainBiome::Water
         };
         (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
@@ -747,6 +753,7 @@ impl GameWorld {
             }
         }
         self.tick_ships(dt);
+        self.expand_archipelago();
         for index in (0..self.units.len()).rev() {
             if let UnitAction::Board { ship_id } = self.units[index].action.clone() {
                 self.tick_board(index, &ship_id, dt);
@@ -774,35 +781,37 @@ impl GameWorld {
     pub fn snapshot(&self) -> WorldSnapshot {
         let visible = self.visible_cells();
         let explored: BTreeSet<_> = self.explored_cells.iter().copied().collect();
+        let mut visibility = vec![CellVisibility::Unseen; self.terrain.len()];
+        let index = |cell: CellCoordinate| {
+            usize::from(cell.row) * usize::from(self.columns()) + usize::from(cell.column)
+        };
+        for &cell in &self.explored_cells {
+            visibility[index(cell)] = CellVisibility::Explored;
+        }
+        for &cell in &visible {
+            visibility[index(cell)] = CellVisibility::Visible;
+        }
 
         WorldSnapshot {
             island_id: self.island_id,
-            island_count: self.islands.len() + 1,
+            island_count: self.island_origins.len(),
+            island_origins: self.island_origins.clone(),
             available_buildings: self.available_buildings(),
-            columns: WORLD_COLUMNS,
-            rows: WORLD_ROWS,
+            columns: self.columns(),
+            rows: self.rows(),
             tick: self.tick,
             simulation_speed: self.simulation_speed,
             terrain: self
                 .terrain
                 .iter()
-                .map(|cell| {
-                    let coordinate = cell.coordinate();
-                    let visibility = if visible.contains(&coordinate) {
-                        CellVisibility::Visible
-                    } else if explored.contains(&coordinate) {
-                        CellVisibility::Explored
-                    } else {
-                        CellVisibility::Unseen
-                    };
-                    SnapshotTerrainCell {
-                        column: cell.column,
-                        row: cell.row,
-                        biome: (visibility != CellVisibility::Unseen).then_some(cell.biome),
-                        elevation: (visibility != CellVisibility::Unseen)
-                            .then(|| terrain_codec::quantize(cell.elevation)),
-                        visibility,
-                    }
+                .zip(visibility)
+                .map(|(cell, visibility)| SnapshotTerrainCell {
+                    column: cell.column,
+                    row: cell.row,
+                    biome: (visibility != CellVisibility::Unseen).then_some(cell.biome),
+                    elevation: (visibility != CellVisibility::Unseen)
+                        .then(|| terrain_codec::quantize(cell.elevation)),
+                    visibility,
                 })
                 .collect(),
             units: self
@@ -875,15 +884,22 @@ impl GameWorld {
                     .map(|building| (building.footprint().center(), building.kind.sight_radius())),
             )
             .collect();
-        self.terrain
-            .iter()
-            .map(|cell| cell.coordinate())
-            .filter(|cell| {
-                let center = cell.center();
-                eyes.iter()
-                    .any(|(eye, radius)| eye.distance(center) <= *radius)
-            })
-            .collect()
+        let mut visible = BTreeSet::new();
+        for (eye, radius) in eyes {
+            let min_column = (eye.x - radius).floor().max(0.0) as u16;
+            let max_column = ((eye.x + radius).ceil() as u16).min(self.columns() - 1);
+            let min_row = (eye.y - radius).floor().max(0.0) as u16;
+            let max_row = ((eye.y + radius).ceil() as u16).min(self.rows() - 1);
+            for row in min_row..=max_row {
+                for column in min_column..=max_column {
+                    let cell = CellCoordinate::new(column, row);
+                    if eye.distance(cell.center()) <= radius {
+                        visible.insert(cell);
+                    }
+                }
+            }
+        }
+        visible
     }
 
     pub(super) fn gather_multiplier(&self, resource: ResourceKind) -> f64 {

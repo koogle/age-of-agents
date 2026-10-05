@@ -19,23 +19,28 @@ pub(super) enum Claim {
 }
 
 pub(super) struct Occupancy {
+    columns: u16,
+    rows: u16,
     impassable: Vec<bool>,
     claims: Vec<Option<Claim>>,
     reservations: Vec<Option<usize>>,
 }
 
 impl Occupancy {
-    fn index(cell: CellCoordinate) -> usize {
-        usize::from(cell.row) * usize::from(WORLD_COLUMNS) + usize::from(cell.column)
+    fn index(&self, cell: CellCoordinate) -> usize {
+        usize::from(cell.row) * usize::from(self.columns) + usize::from(cell.column)
     }
 
     pub(super) fn claim(&self, cell: CellCoordinate) -> Option<Claim> {
-        self.claims[Self::index(cell)]
+        if cell.column >= self.columns || cell.row >= self.rows {
+            return None;
+        }
+        self.claims.get(self.index(cell)).copied().flatten()
     }
 
     /// Water, peaks, rivers, buildings, foundations, and live resources: things nobody walks through.
     pub(super) fn is_static(&self, cell: CellCoordinate) -> bool {
-        self.impassable[Self::index(cell)]
+        (cell.column >= self.columns || cell.row >= self.rows || self.impassable[self.index(cell)])
             || matches!(
                 self.claim(cell),
                 Some(Claim::Building(_) | Claim::Resource(_))
@@ -47,16 +52,21 @@ impl Occupancy {
     }
 
     pub(super) fn reservation(&self, cell: CellCoordinate) -> Option<usize> {
-        self.reservations[Self::index(cell)]
+        if cell.column >= self.columns || cell.row >= self.rows {
+            return None;
+        }
+        self.reservations.get(self.index(cell)).copied().flatten()
     }
 
     pub(super) fn reserved_by_other(&self, cell: CellCoordinate, unit: Option<usize>) -> bool {
-        self.reservations[Self::index(cell)].is_some_and(|owner| Some(owner) != unit)
+        self.reservation(cell)
+            .is_some_and(|owner| Some(owner) != unit)
     }
 
     /// A cell `unit` may stop in: unclaimed by anyone else and unreserved by anyone else.
     pub(super) fn is_free_for(&self, cell: CellCoordinate, unit: Option<usize>) -> bool {
-        if self.impassable[Self::index(cell)] {
+        if cell.column >= self.columns || cell.row >= self.rows || self.impassable[self.index(cell)]
+        {
             return false;
         }
         let claimed = match self.claim(cell) {
@@ -77,25 +87,30 @@ impl GameWorld {
     }
 
     fn try_occupancy(&self) -> Result<Occupancy, String> {
-        let count = usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS);
+        let count = usize::from(self.columns()) * usize::from(self.rows());
         let impassable: Vec<bool> = self
             .terrain
             .iter()
             .map(|cell| !cell.biome.is_walkable())
             .collect();
         let mut occupancy = Occupancy {
+            columns: self.columns(),
+            rows: self.rows(),
             impassable: impassable.clone(),
             claims: vec![None; count],
             reservations: vec![None; count],
         };
         let mut claim = |cell: CellCoordinate, owner: Claim| {
-            if !in_bounds(cell) {
+            if !self.in_bounds(cell) {
                 return Err(format!("{owner:?} claims out-of-bounds cell {cell:?}"));
             }
-            if impassable[Occupancy::index(cell)] {
+            if impassable
+                [usize::from(cell.row) * usize::from(self.columns()) + usize::from(cell.column)]
+            {
                 return Err(format!("{owner:?} stands on impassable ground at {cell:?}"));
             }
-            let slot = &mut occupancy.claims[Occupancy::index(cell)];
+            let slot = &mut occupancy.claims
+                [usize::from(cell.row) * usize::from(self.columns()) + usize::from(cell.column)];
             if let Some(existing) = slot {
                 return Err(format!("{owner:?} and {existing:?} both claim {cell:?}"));
             }
@@ -110,8 +125,8 @@ impl GameWorld {
         for (index, resource) in self.resources.iter().enumerate() {
             if resource.amount > 0.0 || resource.field.is_some() {
                 let footprint = resource.footprint();
-                if footprint.origin.column > WORLD_COLUMNS - footprint.columns
-                    || footprint.origin.row > WORLD_ROWS - footprint.rows
+                if footprint.origin.column > self.columns() - footprint.columns
+                    || footprint.origin.row > self.rows() - footprint.rows
                 {
                     return Err(format!("{} footprint is outside the world", resource.id));
                 }
@@ -128,10 +143,10 @@ impl GameWorld {
         }
         for (index, unit) in self.units.iter().enumerate() {
             if let UnitAction::Move { to } = unit.action {
-                if !in_bounds(to) {
+                if !self.in_bounds(to) {
                     return Err(format!("{} moves out of bounds", unit.id));
                 }
-                let slot = Occupancy::index(to);
+                let slot = occupancy.index(to);
                 if let Some(owner) = occupancy.reservations[slot] {
                     return Err(format!(
                         "{} and {} reserve the same destination",
@@ -155,8 +170,9 @@ impl GameWorld {
     }
 
     pub(super) fn validate_local(&self) -> Result<(), String> {
-        let expected_terrain = (0..WORLD_ROWS)
-            .flat_map(|row| (0..WORLD_COLUMNS).map(move |column| CellCoordinate::new(column, row)));
+        let expected_terrain = (0..self.rows()).flat_map(|row| {
+            (0..self.columns()).map(move |column| CellCoordinate::new(column, row))
+        });
         if !self
             .terrain
             .iter()
@@ -165,7 +181,7 @@ impl GameWorld {
         {
             return Err("terrain is not a complete row-major grid".into());
         }
-        if !self.explored_cells.iter().all(|cell| in_bounds(*cell))
+        if !self.explored_cells.iter().all(|cell| self.in_bounds(*cell))
             || !self.explored_cells.is_sorted_by(|a, b| a < b)
         {
             return Err("explored cells are out of bounds or not strictly sorted".into());
@@ -301,8 +317,8 @@ impl GameWorld {
                     return Err(format!("{} cultivates no unfinished field", unit.id));
                 }
                 UnitAction::ExploreBuild { origin, kind }
-                    if origin.column > WORLD_COLUMNS - kind.size().0
-                        || origin.row > WORLD_ROWS - kind.size().1 =>
+                    if origin.column > self.columns() - kind.size().0
+                        || origin.row > self.rows() - kind.size().1 =>
                 {
                     return Err(format!("{} explores an invalid build site", unit.id));
                 }
@@ -340,10 +356,6 @@ impl GameWorld {
             .filter(|cell| occupancy.claim(*cell).is_some())
             .collect()
     }
-}
-
-pub(super) fn in_bounds(cell: CellCoordinate) -> bool {
-    cell.column < WORLD_COLUMNS && cell.row < WORLD_ROWS
 }
 
 fn unique_ids<'a>(ids: impl Iterator<Item = &'a str>, kind: &str) -> Result<(), String> {

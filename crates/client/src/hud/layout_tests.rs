@@ -23,6 +23,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         destination: None,
         heading: [1, 0],
         passengers: vec![],
+        home_dock_id: None,
     });
     let snapshot = world.snapshot();
     let units = [snapshot.units[0].unit.id.clone()];
@@ -88,7 +89,14 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     let center = Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0);
                     assert!(hud.press(center));
                     if matches!(action, Action::LookAt(_)) {
-                        assert_eq!(hud.release(), Some(Action::LookAt(Vec2::new(15.0, 10.0))));
+                        assert_eq!(
+                            hud.release(),
+                            Some(Action::LookAt(
+                                Vec2::new(snapshot.columns as f32, snapshot.rows as f32)
+                                    * crate::terrain::CELL
+                                    / 2.0
+                            ))
+                        );
                     } else {
                         assert_eq!(hud.release(), Some(action.clone()));
                     }

@@ -17,6 +17,9 @@ pub struct TransportShip {
     /// Last travel vector, retained when stopped for sprite facing.
     pub heading: [i8; 2],
     pub passengers: Vec<Unit>,
+    /// The dock that built the vessel; legacy ships learn it on departure.
+    #[serde(default)]
+    pub home_dock_id: Option<String>,
 }
 
 impl TransportShip {
@@ -52,9 +55,9 @@ impl GameWorld {
             .ok_or(CommandError::ShipNotFound)
     }
     fn water(&self, cell: CellCoordinate) -> bool {
-        occupancy::in_bounds(cell)
+        self.in_bounds(cell)
             && self.terrain
-                [usize::from(cell.row) * usize::from(WORLD_COLUMNS) + usize::from(cell.column)]
+                [usize::from(cell.row) * usize::from(self.columns()) + usize::from(cell.column)]
             .biome
                 == TerrainBiome::Water
     }
@@ -67,8 +70,8 @@ impl GameWorld {
                         && s.destination != Some(cell))
             })
     }
-    fn sea_paths(&self, ship: usize, from: CellCoordinate) -> PathTree {
-        PathTree::search(WORLD_COLUMNS, WORLD_ROWS, from, |c| {
+    pub(super) fn sea_paths(&self, ship: usize, from: CellCoordinate) -> PathTree {
+        PathTree::search(self.columns(), self.rows(), from, |c| {
             self.water_free(c, Some(ship))
         })
     }
@@ -89,11 +92,9 @@ impl GameWorld {
             destination: None,
             heading: [1, 0],
             passengers: Vec::new(),
+            home_dock_id: Some(self.buildings[building].id.clone()),
         });
         self.next_unit_id += 1;
-        if self.islands.is_empty() {
-            self.discover_island();
-        }
         true
     }
     pub(super) fn sail(&mut self, id: &str, to: CellCoordinate) -> Result<(), CommandError> {
@@ -102,7 +103,12 @@ impl GameWorld {
             return Err(CommandError::DestinationOccupied);
         }
         let from = self.ships[i].step.map_or(self.ships[i].cell, |s| s.to);
-        if self.sea_paths(i, from).cost(to).is_none() {
+        if PathTree::route(self.columns(), self.rows(), from, to, |c| {
+            self.water_free(c, Some(i))
+        })
+        .cost(to)
+        .is_none()
+        {
             return Err(CommandError::TargetUnreachable);
         }
         self.ships[i].destination = (from != to).then_some(to);
@@ -149,7 +155,12 @@ impl GameWorld {
                         self.ships[i].destination = None;
                         break;
                     }
-                    let Some(next) = self.sea_paths(i, self.ships[i].cell).first_step(to) else {
+                    let Some(next) =
+                        PathTree::route(self.columns(), self.rows(), self.ships[i].cell, to, |c| {
+                            self.water_free(c, Some(i))
+                        })
+                        .first_step(to)
+                    else {
                         break;
                     };
                     let from = self.ships[i].cell;
@@ -180,7 +191,7 @@ impl GameWorld {
             }
         }
     }
-    fn dock_for_ship(&self, ship: usize) -> Option<&Building> {
+    pub(super) fn dock_for_ship(&self, ship: usize) -> Option<&Building> {
         self.buildings.iter().find(|b| {
             b.kind == BuildingKind::Dock
                 && b.is_complete()
@@ -204,7 +215,9 @@ impl GameWorld {
         let from = self.units[unit]
             .step
             .map_or(self.units[unit].cell, |step| step.to);
-        let paths = PathTree::search(WORLD_COLUMNS, WORLD_ROWS, from, |c| !occupancy.is_static(c));
+        let paths = PathTree::search(self.columns(), self.rows(), from, |c| {
+            !occupancy.is_static(c)
+        });
         paths.nearest(
             self.landing_cells(ship)
                 .into_iter()
@@ -268,7 +281,7 @@ impl GameWorld {
             let from = cells[cursor];
             for (dx, dy) in [(0, -1), (-1, 0), (1, 0), (0, 1)] {
                 if let Some(next) =
-                    crate::navigation::offset(from, dx, dy, WORLD_COLUMNS, WORLD_ROWS)
+                    crate::navigation::offset(from, dx, dy, self.columns(), self.rows())
                     && occupancy.is_free_for(next, None)
                     && !cells.contains(&next)
                 {
@@ -336,7 +349,7 @@ impl GameWorld {
                     || unit.id == self.next_unit_name()
                     || unit.step.is_some()
                     || unit.action != UnitAction::Idle
-                    || !occupancy::in_bounds(unit.cell)
+                    || !self.in_bounds(unit.cell)
                     || unit
                         .cargo
                         .as_ref()

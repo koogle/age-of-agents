@@ -369,6 +369,7 @@ pub struct Hud {
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
     pressed: Option<Action>,
+    map_span: f32,
 }
 
 fn resource_icon(kind: ResourceKind) -> &'static str {
@@ -395,6 +396,7 @@ impl Hud {
             regions: Vec::new(),
             hover: None,
             pressed: None,
+            map_span: 1.0,
         }
     }
 
@@ -694,7 +696,7 @@ impl Hud {
                 if region.enabled {
                     self.pressed = Some(match &region.action {
                         Action::LookAt(origin) => {
-                            let span = 38.0;
+                            let span = self.map_span;
                             Action::LookAt(
                                 *origin
                                     + Vec2::new(

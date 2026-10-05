@@ -87,15 +87,20 @@ impl Hud {
         // Reserve the full time-control row above the globe on compact screens.
         let navigation_left = if narrow { gx - 48.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
-        let span = 38.0;
-        let (cx, cz) = (15.0, 10.0);
+        let (map_width, map_height) = (
+            snapshot.columns as f32 * crate::terrain::CELL,
+            snapshot.rows as f32 * crate::terrain::CELL,
+        );
+        let span = map_width.max(map_height) * 1.1;
+        self.map_span = span;
+        let (cx, cz) = (map_width / 2.0, map_height / 2.0);
         self.quads.push(Quad {
             rect: globe,
             uv: [
-                (cx - span / 2.0) / 30.0,
-                (cz - span / 2.0) / 20.0,
-                (cx + span / 2.0) / 30.0,
-                (cz + span / 2.0) / 20.0,
+                (cx - span / 2.0) / map_width,
+                (cz - span / 2.0) / map_height,
+                (cx + span / 2.0) / map_width,
+                (cz + span / 2.0) / map_height,
             ],
             color: [1.0; 4],
             params: [3.0, 0.0, 0.0, 0.0],
