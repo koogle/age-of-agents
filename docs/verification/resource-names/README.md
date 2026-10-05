@@ -26,3 +26,7 @@ existing hover state. It adds no game command, dependency, input mode or saved
 state; active action/error explanations take priority. Both modified client
 files remain below 1,000 lines. The requested removal of permanent names is
 explicit user steering.
+
+Merge integration: the shared presentation fixture now carries island-local
+`inventories`. The cargo/resource replay reads its resource keys from the first
+island inventory, replacing the obsolete `stockpile` access.

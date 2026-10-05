@@ -44,6 +44,11 @@ at the authoritative interaction cell. Read `view/movement_tests.rs` and
 `view/activity_tests.rs` before modifying timing or work poses. See [movement verification](../MOVEMENT_VERIFICATION.md) for the merged seeded
 frame-scenario suite and the scope of its historical verification.
 
+Reconnect explicitly resets playback even for short gaps or paused worlds,
+and an excessive remote inbox backlog collapses to the newest snapshot before
+presentation. These corrections do not reframe the camera or clear selection
+for the same world; see [recovery contract and replay](runtime-debugging.md#reconnect-recovery).
+
 ## Learned constraints and evidence
 
 **Evidence:** [#26](https://github.com/koogle/age-of-agents/pull/26) corrected flat

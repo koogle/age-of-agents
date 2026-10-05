@@ -184,7 +184,7 @@ fn the_presentation_clock_trails_the_newest_tick_and_never_passes_it() {
     let render = view.render_tick.unwrap();
     assert!(render <= view.latest_tick);
     assert!(view.latest_tick - render < PLAYOUT_TICKS + 1.0);
-    // A paused simulation stops the clock at the newest tick.
+    // A starved snapshot stream eventually holds at the newest tick.
     for _ in 0..50 {
         view.frame(0.1, None);
     }

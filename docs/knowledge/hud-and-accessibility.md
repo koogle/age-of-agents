@@ -32,6 +32,10 @@ The [compact HUD review](../COMPACT_HUD_REVIEW.md) contains the viewport matrix.
 Accessible DOM controls and additive touch selection remain implementation gaps;
 verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
+## Mobile time-control spacing
+
+User steering on 2026-10-05 requests a tighter mobile time-control row. The compact layout reduces center spacing from 44px to 36px for the existing 30px coins (6px visible gaps), with separate 36×44px hit regions. Keep the rightmost coin anchored and desktop positioning unchanged.
+
 ## Learned constraints and evidence
 
 **Evidence:** [#30](https://github.com/koogle/age-of-agents/pull/30),
@@ -87,3 +91,7 @@ and queued-job mappings: a manifest entry alone does not make an icon available
 in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
 Stop already had authored artwork but was omitted from that list and used Cancel;
 restore the hand for land units and ships, retaining the X for cancellation.
+
+## Text transparency
+
+User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.

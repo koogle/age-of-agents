@@ -21,7 +21,7 @@ args = parser.parse_args()
 OUT = args.output.resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 state = json.loads((ROOT / "docs/verification/presentation-fixture.json").read_text())
-stock = state.pop("stockpile")
+stock = state["inventories"][0]
 state.update(
     island_id=0,
     island_count=1,

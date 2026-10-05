@@ -56,8 +56,9 @@ without units selected, tapping reports species, health and instructions.
 Selection details show friendly health, floating text keeps only the latest damage
 feedback per entity, and red
 rings identify wildlife. Authored sprites are documented in
-[provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames
-are authored and mirrored; reverse-facing and animal attack poses are future art
+[provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
+the current stride and resume continues it. Attack orders are rejected while paused.
+Frames are authored and mirrored; reverse-facing and animal attack poses are future art
 work. Friendly hunting reuses existing villager chopping / military action art.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores

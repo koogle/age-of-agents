@@ -93,6 +93,8 @@ Clicking with carriers still orders a cargo deposit, as before.
 
 For browser pickup fixtures, the initial view centers on the first ship via
 `crates/client/src/islands.rs::frame_town_center`; `Rig::new`'s default target is
-not the rendered camera target. Use an isolated paused save, select the empty-handed
+not the rendered camera target. Use an isolated save, resume before issuing orders, select the empty-handed
 unit and click/tap the offshore ship, check the Board acknowledgement and destination,
-then resume and verify the passenger manifest only changes at the stopped berth.
+and verify the passenger manifest only changes at the stopped berth. At 0×, Board
+and Stop ship are rejected without mutating either actor; see the
+[pause contract](runtime-debugging.md#pause-contract).
