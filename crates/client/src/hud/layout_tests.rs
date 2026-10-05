@@ -16,16 +16,26 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
     world.economy_rules = EconomyRules::Unrestricted;
     world.stockpile.wood = 1000.0;
     world.stockpile.food = 1000.0;
+    world.ships.push(aoa_game::TransportShip {
+        id: "layout-ship".into(),
+        cell: aoa_game::CellCoordinate::new(0, 0),
+        step: None,
+        destination: None,
+        heading: [1, 0],
+        passengers: vec![],
+        goods: Default::default(),
+    });
     let snapshot = world.snapshot();
     let units = [snapshot.units[0].unit.id.clone()];
     let building = &snapshot.buildings[0].building.id;
     let mut states = vec![
-        (BuildUi::Off, false),
-        (BuildUi::Off, true),
-        (BuildUi::Categories, false),
+        (BuildUi::Off, false, false),
+        (BuildUi::Off, false, true),
+        (BuildUi::Off, true, false),
+        (BuildUi::Categories, false, false),
     ];
-    states.extend(BuildingGroup::ALL.map(|g| (BuildUi::Group(g), false)));
-    states.push((BuildUi::Placing(BuildingKind::House), false));
+    states.extend(BuildingGroup::ALL.map(|g| (BuildUi::Group(g), false, false)));
+    states.push((BuildUi::Placing(BuildingKind::House), false, false));
     for (width, height) in [
         (320.0, 844.0),
         (360.0, 844.0),
@@ -36,12 +46,12 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
         (1440.0, 900.0),
     ] {
         for scale in [1.0, 2.0] {
-            for &(build, town) in &states {
+            for &(build, town, ship) in &states {
                 let model = Model {
                     snapshot: Some(&snapshot),
-                    units: if town { &[] } else { &units },
+                    units: if town || ship { &[] } else { &units },
                     building: town.then_some(building.as_str()),
-                    ship: None,
+                    ship: ship.then_some("layout-ship"),
                     cargo_index: 0,
                     build,
                     show_grid: false,
@@ -89,7 +99,11 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     }
                 }
                 // The normal phone controls share the lowest 140 logical pixels.
-                if width >= 390.0 && (width < 600.0 || height < 500.0) && build == BuildUi::Off {
+                if width >= 390.0
+                    && (width < 600.0 || height < 500.0)
+                    && build == BuildUi::Off
+                    && !ship
+                {
                     for (rect, action) in &regions {
                         if !matches!(action, Action::Reset | Action::Grid) {
                             assert!(rect[1] >= (height - 140.0) * scale - 0.1, "{action:?}");
