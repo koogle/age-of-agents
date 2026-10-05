@@ -1,0 +1,168 @@
+use super::*;
+use aoa_game::{Command as GameCommand, EconomyRules, GameWorld, ProductKind};
+
+fn overlaps(a: [f32; 4], b: [f32; 4]) -> bool {
+    a[0] < b[0] + b[2] - 0.01
+        && b[0] < a[0] + a[2] - 0.01
+        && a[1] < b[1] + b[3] - 0.01
+        && b[1] < a[1] + a[3] - 0.01
+}
+
+#[test]
+fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
+    let assets = pollster::block_on(crate::assets::Assets::load());
+    let atlas = build_atlas(&assets);
+    let mut world = GameWorld::default();
+    world.economy_rules = EconomyRules::Unrestricted;
+    world.stockpile.wood = 1000.0;
+    world.stockpile.food = 1000.0;
+    world.ships.push(aoa_game::TransportShip {
+        id: "layout-ship".into(),
+        cell: aoa_game::CellCoordinate::new(0, 0),
+        step: None,
+        destination: None,
+        heading: [1, 0],
+        passengers: vec![],
+    });
+    let snapshot = world.snapshot();
+    let units = [snapshot.units[0].unit.id.clone()];
+    let building = &snapshot.buildings[0].building.id;
+    let mut states = vec![
+        (BuildUi::Off, false, false),
+        (BuildUi::Off, false, true),
+        (BuildUi::Off, true, false),
+        (BuildUi::Categories, false, false),
+    ];
+    states.extend(BuildingGroup::ALL.map(|g| (BuildUi::Group(g), false, false)));
+    states.push((BuildUi::Placing(BuildingKind::House), false, false));
+    for (width, height) in [
+        (320.0, 844.0),
+        (360.0, 844.0),
+        (390.0, 844.0),
+        (430.0, 844.0),
+        (599.0, 844.0),
+        (844.0, 390.0),
+        (1440.0, 900.0),
+    ] {
+        for scale in [1.0, 2.0] {
+            for &(build, town, ship) in &states {
+                let model = Model {
+                    snapshot: Some(&snapshot),
+                    units: if town || ship { &[] } else { &units },
+                    building: town.then_some(building.as_str()),
+                    ship: ship.then_some("layout-ship"),
+                    build,
+                    show_grid: false,
+                    toast: None,
+                    camera: Vec2::new(15.0, 10.0),
+                };
+                let mut hud = Hud::new();
+                hud.layout(&atlas, &model, width * scale, height * scale, scale);
+                let regions: Vec<_> = hud
+                    .regions
+                    .iter()
+                    .map(|r| (r.rect, r.action.clone()))
+                    .collect();
+                for (i, (rect, action)) in regions.iter().enumerate() {
+                    assert!(
+                        rect[0] >= 0.0 && rect[1] >= 0.0,
+                        "{width}: {action:?} {rect:?}"
+                    );
+                    assert!(rect[0] + rect[2] <= width * scale + 0.1);
+                    assert!(rect[1] + rect[3] <= height * scale + 0.1);
+                    for (other, other_action) in &regions[i + 1..] {
+                        // Desktop speed coins retain their existing circular shoulder
+                        // arrangement; their rectangles can touch the map's empty corner.
+                        let desktop_map_corner = width >= 600.0
+                            && height >= 500.0
+                            && matches!(
+                                (action, other_action),
+                                (Action::LookAt(_), Action::Speed(_))
+                                    | (Action::Speed(_), Action::LookAt(_))
+                            );
+                        assert!(
+                            desktop_map_corner || !overlaps(*rect, *other),
+                            "{width}: {action:?} overlaps {other_action:?}"
+                        );
+                    }
+                    let center = Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0);
+                    assert!(hud.press(center));
+                    if matches!(action, Action::LookAt(_)) {
+                        assert_eq!(hud.release(), Some(Action::LookAt(Vec2::new(15.0, 10.0))));
+                    } else {
+                        assert_eq!(hud.release(), Some(action.clone()));
+                    }
+                    if (width < 600.0 || height < 500.0) && matches!(action, Action::Speed(_)) {
+                        assert!(rect[2] >= 44.0 * scale && rect[3] >= 44.0 * scale);
+                    }
+                }
+                // The normal phone controls share the lowest 140 logical pixels.
+                if width >= 390.0
+                    && (width < 600.0 || height < 500.0)
+                    && build == BuildUi::Off
+                    && !ship
+                {
+                    for (rect, action) in &regions {
+                        if !matches!(action, Action::Reset | Action::Grid) {
+                            assert!(rect[1] >= (height - 140.0) * scale - 0.1, "{action:?}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
+    let assets = pollster::block_on(crate::assets::Assets::load());
+    let atlas = build_atlas(&assets);
+    let mut world = GameWorld::default();
+    world.economy_rules = EconomyRules::Unrestricted;
+    world.stockpile.wood = 1000.0;
+    world.buildings[0].kind = BuildingKind::LumberMill;
+    world.buildings[0].produces = BuildingKind::LumberMill.products().to_vec();
+    let id = world.buildings[0].id.clone();
+    for _ in 0..6 {
+        world
+            .apply_command(GameCommand::Produce {
+                building_id: id.clone(),
+                product: ProductKind::Timber,
+            })
+            .unwrap();
+    }
+    let snapshot = world.snapshot();
+    let model = Model {
+        snapshot: Some(&snapshot),
+        units: &[],
+        building: Some(&id),
+        ship: None,
+        build: BuildUi::Off,
+        show_grid: false,
+        toast: None,
+        camera: Vec2::new(15.0, 10.0),
+    };
+    for width in [320.0, 390.0, 599.0] {
+        let mut hud = Hud::new();
+        hud.layout(&atlas, &model, width, 844.0, 1.0);
+        let queued: Vec<_> = hud
+            .regions
+            .iter()
+            .filter(|r| matches!(r.action, Action::CancelQueuedJob(_)))
+            .collect();
+        assert_eq!(queued.len(), 5);
+        for q in queued {
+            assert!(q.rect[0] >= 0.0 && q.rect[1] > 0.0 && q.rect[0] + q.rect[2] <= width);
+            for other in &hud.regions {
+                if q.action != other.action {
+                    assert!(
+                        !overlaps(q.rect, other.rect),
+                        "{width}: {:?} overlaps {:?}",
+                        q.action,
+                        other.action
+                    );
+                }
+            }
+        }
+    }
+}
