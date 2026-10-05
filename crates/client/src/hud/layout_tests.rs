@@ -16,7 +16,6 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
     let camera = Vec2::new(36.0, 18.0);
     let model = Model {
         resource_island: 0,
-        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: None,
@@ -97,7 +96,6 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
             for &(build, town, ship) in &states {
                 let model = Model {
                     resource_island: 0,
-                    cargo_kind: ResourceKind::Wood,
                     snapshot: Some(&snapshot),
                     units: if town || ship { &[] } else { &units },
                     building: town.then_some(building.as_str()),
@@ -192,7 +190,6 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
     let snapshot = world.snapshot();
     let model = Model {
         resource_island: 0,
-        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: Some(&id),
@@ -238,7 +235,6 @@ fn completed_research_coin_explains_instead_of_dispatching_research() {
     let snapshot = world.snapshot();
     let model = Model {
         resource_island: 0,
-        cargo_kind: ResourceKind::Wood,
         snapshot: Some(&snapshot),
         units: &[],
         building: Some(&snapshot.buildings[0].building.id),

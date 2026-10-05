@@ -17,6 +17,7 @@ mod layout;
 mod layout_tests;
 mod minimap;
 pub use build_menu::BuildingGroup;
+mod cargo;
 mod selection;
 mod ships;
 use selection::{building_info, selection_model};
@@ -100,9 +101,9 @@ pub enum Action {
     Cancel,
     Stop,
     Disembark,
-    CargoKind,
     SelectShip(String),
-    TransferCargo(aoa_game::CargoDirection, f64),
+    CargoPage(usize),
+    TransferCargo(ResourceKind, aoa_game::CargoDirection, f64),
     Voyage(u64),
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
@@ -361,7 +362,6 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
 /// What the HUD needs from the app each frame.
 pub struct Model<'a> {
     pub resource_island: usize,
-    pub cargo_kind: ResourceKind,
     pub snapshot: Option<&'a WorldSnapshot>,
     pub units: &'a [String],
     pub building: Option<&'a str>,
@@ -373,6 +373,7 @@ pub struct Model<'a> {
 }
 
 pub struct Hud {
+    pub cargo_page: usize,
     pub quads: Vec<Quad>,
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
@@ -400,6 +401,7 @@ fn resource_icon(kind: ResourceKind) -> &'static str {
 impl Hud {
     pub fn new() -> Self {
         Self {
+            cargo_page: 0,
             quads: Vec::new(),
             regions: Vec::new(),
             hover: None,
