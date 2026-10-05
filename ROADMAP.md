@@ -12,6 +12,9 @@ Grow the gather/build demo into the Greek strategy roguelike described in [READM
 
 ## Current direction
 
+Dock presentation now includes all four shoreline-facing orientations and matching
+construction stages; placement previews use the same deterministic water-edge choice.
+
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and island inventories supplemented by movable ship storage are implemented. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
 Combat, calamities, treasures, and permanent progression are proposals, not playable features. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
