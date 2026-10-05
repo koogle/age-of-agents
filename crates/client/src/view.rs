@@ -15,6 +15,8 @@ mod catalog;
 mod fields;
 #[cfg(test)]
 mod movement_tests;
+#[cfg(test)]
+mod scenario_tests;
 mod selection;
 mod ships;
 pub(crate) use buildings::sprite as building_sprite;
@@ -356,6 +358,25 @@ impl WorldView {
         let Some(render_tick) = self.render_tick.as_mut() else {
             return;
         };
+        // A long outage cannot preserve both recency and every missed frame.
+        // Resynchronize once, then rebuild the small playout buffer. Never turn
+        // the correction into velocity, gait distance, or a walk through walls.
+        if local_tick.is_none() && self.latest_tick - *render_tick > 8.0 {
+            *render_tick = self.latest_tick;
+            self.buffering = true;
+            self.catching_up = false;
+            for entry in self.units.values_mut() {
+                if let Some(newest) = entry.samples.back().copied() {
+                    entry.samples.clear();
+                    entry.samples.push_back(newest);
+                    entry.position = newest.1;
+                }
+                entry.velocity = Vec3::ZERO;
+                entry.moving = false;
+                entry.still_for = 0.0;
+            }
+            return;
+        }
         let advance = dt as f64 / TICK_SECONDS;
         if let Some(local_tick) = local_tick {
             // Monotonic even across pause/resume: finish the last displayed step

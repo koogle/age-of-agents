@@ -36,12 +36,13 @@ Control-click/drag adds on Windows/Linux and Command does so on Mac. Modifier
 state is captured at press time; touch keeps its existing tap/pan path.
 
 PR #91 also changed movement presentation: local interpolation follows the
-simulation accumulator; remote playback buffers two ticks, retains unplayed
-history and catches up at at most 1.1× without clock jumps. Full authored gait
+simulation accumulator; remote playback buffers two ticks and catches up smoothly at at most 1.1× for
+short gaps. Merged PR #93 adds explicit resynchronization when lag exceeds eight
+ticks, resetting history/velocity without advancing gait before rebuilding the buffer. Full authored gait
 cycles replace the earlier two-pose gait, and work animation is gated by arrival
 at the authoritative interaction cell. Read `view/movement_tests.rs` and
-`view/activity_tests.rs` before modifying timing or work poses. These are merged
-contracts; the later recovery proposal in PR #93 is separate work.
+`view/activity_tests.rs` before modifying timing or work poses. See [movement verification](../MOVEMENT_VERIFICATION.md) for the merged seeded
+frame-scenario suite and the scope of its historical verification.
 
 ## Learned constraints and evidence
 
