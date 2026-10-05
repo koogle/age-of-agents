@@ -87,7 +87,9 @@ impl Hud {
         // Reserve the full time-control row above the globe on compact screens.
         let navigation_left = if narrow { gx - 48.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
-        let map = minimap::Minimap::new();
+        self.map_size =
+            Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL;
+        let map = minimap::Minimap::new(self.map_size);
         self.quads.push(map.quad(globe));
         self.shape(globe, [0.79, 0.59, 0.25, 1.0], 2.0, 6.0 * s);
         let camera = Vec2::new(gx, gy) + map.local_of(model.camera) * r * 2.0;

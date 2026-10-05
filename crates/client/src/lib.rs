@@ -227,7 +227,12 @@ impl App {
             None => {}
         }
         let point = self.ground_at(pixel)?;
-        let cell = terrain::cell_at(point.x, point.z)?;
+        let cell = terrain::cell_at(
+            point.x,
+            point.z,
+            self.view.heights.columns,
+            self.view.heights.rows,
+        )?;
         if let Some(resource) = snapshot
             .resources
             .iter()
@@ -628,6 +633,10 @@ impl App {
         if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {
             self.toast = None;
         }
+        self.rig.map_size = Vec2::new(
+            self.view.heights.columns as f32,
+            self.view.heights.rows as f32,
+        ) * terrain::CELL;
         self.edge_pan(dt as f32);
         self.view.frame(dt as f32);
         let ghost = match self.build {
@@ -647,16 +656,26 @@ impl App {
         if std::mem::take(&mut self.view.cells_dirty)
             && let Some((rgba, layers)) = self.view.cell_data()
         {
-            game.renderer.update_cells(&game.gpu.queue, &rgba, &layers);
+            game.renderer.update_cells(
+                &game.gpu,
+                &rgba,
+                &layers,
+                self.view.heights.columns,
+                self.view.heights.rows,
+            );
         }
         // Rebuilding the ground mesh costs several milliseconds and a large
         // upload; while villagers explore, exploration grows every tick, so
         // the mesh catches up at most once a second.
-        if plots_changed || (self.view.heights_dirty && now - self.ground_rebuilt_at >= 1.0) {
+        let region = game.renderer.ground_region(&self.rig);
+        if plots_changed
+            || game.renderer.ground_bounds != region
+            || (self.view.heights_dirty && now - self.ground_rebuilt_at >= 1.0)
+        {
             self.view.heights_dirty = false;
             self.ground_rebuilt_at = now;
             game.renderer
-                .update_ground(&game.gpu.queue, &self.view.heights);
+                .update_ground(&game.gpu.device, &self.view.heights, region);
             #[cfg(target_arch = "wasm32")]
             LAST_HEIGHTS.with(|heights| *heights.borrow_mut() = Some(self.view.heights.clone()));
         }
@@ -669,7 +688,7 @@ impl App {
             camera_up: up.extend(0.0).to_array(),
             camera_pos: eye.extend(1.0).to_array(),
             sun_dir: sun.extend(0.0).to_array(),
-            map_size: [terrain::COLUMNS, terrain::ROWS],
+            map_size: self.rig.map_size.to_array(),
             time: self.clock as f32,
             curve: self.rig.curve(),
             curve_center: [self.rig.target.x, self.rig.target.z],

@@ -26,9 +26,9 @@ pub fn cell_center(cell: CellCoordinate) -> Vec2 {
 }
 
 /// The cell under a world ground point, if it lies on the map.
-pub fn cell_at(x: f32, z: f32) -> Option<CellCoordinate> {
+pub fn cell_at(x: f32, z: f32, columns: u16, rows: u16) -> Option<CellCoordinate> {
     let (column, row) = ((x / CELL).floor(), (z / CELL).floor());
-    (column >= 0.0 && row >= 0.0 && column < WORLD_COLUMNS as f32 && row < WORLD_ROWS as f32)
+    (column >= 0.0 && row >= 0.0 && column < columns as f32 && row < rows as f32)
         .then(|| CellCoordinate::new(column as u16, row as u16))
 }
 pub const SEA_LEVEL: f32 = -0.32;
@@ -132,6 +132,8 @@ fn world_height(elevation: f32) -> f32 {
 /// Per-cell heights, interpolated between cell centres.
 #[derive(Clone)]
 pub struct Heights {
+    pub columns: u16,
+    pub rows: u16,
     cells: Vec<f32>,
     plots: Vec<plots::Plot>,
     preview: bool,
@@ -140,6 +142,8 @@ pub struct Heights {
 impl Heights {
     pub fn unknown() -> Self {
         Self {
+            columns: WORLD_COLUMNS,
+            rows: WORLD_ROWS,
             cells: vec![UNKNOWN_HEIGHT; usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS)],
             plots: Vec::new(),
             preview: false,
@@ -150,6 +154,8 @@ impl Heights {
     /// beds sink below their banks.
     pub fn from_cells(cells: impl Iterator<Item = (Option<f32>, Option<TerrainBiome>)>) -> Self {
         Self {
+            columns: WORLD_COLUMNS,
+            rows: WORLD_ROWS,
             plots: Vec::new(),
             preview: false,
             cells: cells
@@ -163,14 +169,11 @@ impl Heights {
     }
 
     fn cell(&self, column: i32, row: i32) -> f32 {
-        if column < 0
-            || row < 0
-            || column >= i32::from(WORLD_COLUMNS)
-            || row >= i32::from(WORLD_ROWS)
+        if column < 0 || row < 0 || column >= i32::from(self.columns) || row >= i32::from(self.rows)
         {
             return SEA_FLOOR;
         }
-        self.cells[row as usize * usize::from(WORLD_COLUMNS) + column as usize]
+        self.cells[row as usize * usize::from(self.columns) + column as usize]
     }
 
     /// Smooth ground height at a world point.
@@ -238,14 +241,26 @@ fn grid(
 }
 
 pub fn ground_mesh(heights: &Heights) -> Mesh<GroundVertex> {
-    let (width, depth) = (COLUMNS + MARGIN * 2.0, ROWS + MARGIN * 2.0);
-    let steps = (width as u32 * SUBDIVISIONS, depth as u32 * SUBDIVISIONS);
-    let (points, indices) = grid(width, depth, (-MARGIN, -MARGIN), steps);
+    ground_mesh_region(
+        heights,
+        [-MARGIN, -MARGIN, COLUMNS + MARGIN, ROWS + MARGIN],
+        SUBDIVISIONS,
+    )
+}
+
+pub fn ground_mesh_region(
+    heights: &Heights,
+    bounds: [f32; 4],
+    subdivisions: u32,
+) -> Mesh<GroundVertex> {
+    let (width, depth) = (bounds[2] - bounds[0], bounds[3] - bounds[1]);
+    let steps = (width as u32 * subdivisions, depth as u32 * subdivisions);
+    let (points, indices) = grid(width, depth, (bounds[0], bounds[1]), steps);
     // One height sample per vertex; normals come from the neighbouring
     // vertices, so a rebuild of the whole island stays cheap.
     let y: Vec<f32> = points.iter().map(|&(x, z)| heights.at(x, z)).collect();
     let (stride, last) = (steps.0 as usize + 1, (steps.0 as usize, steps.1 as usize));
-    let step = 1.0 / SUBDIVISIONS as f32;
+    let step = 1.0 / subdivisions as f32;
     let vertices = points
         .iter()
         .enumerate()
@@ -270,12 +285,7 @@ pub fn ground_mesh(heights: &Heights) -> Mesh<GroundVertex> {
 }
 
 pub fn sea_mesh() -> Mesh<[f32; 3]> {
-    let (points, indices) = grid(
-        400.0,
-        400.0,
-        (COLUMNS / 2.0 - 200.0, ROWS / 2.0 - 200.0),
-        (80, 80),
-    );
+    let (points, indices) = grid(400.0, 400.0, (-200.0, -200.0), (80, 80));
     Mesh {
         vertices: points.into_iter().map(|(x, z)| [x, SEA_LEVEL, z]).collect(),
         indices,

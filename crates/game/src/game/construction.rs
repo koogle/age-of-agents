@@ -21,7 +21,7 @@ impl GameWorld {
             columns,
             rows,
         };
-        if origin.column > WORLD_COLUMNS - columns || origin.row > WORLD_ROWS - rows {
+        if origin.column > self.columns() - columns || origin.row > self.rows() - rows {
             return Err(CommandError::InvalidBuildSite);
         }
         for &(resource, amount) in kind.cost() {
