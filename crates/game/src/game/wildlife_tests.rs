@@ -124,6 +124,16 @@ fn pause_reload_and_stop_preserve_health_cargo_and_determinism() {
     let before = world.clone();
     world.tick(10.0);
     assert_eq!(world, before);
+    assert_eq!(
+        world.apply_command(Command::Stop {
+            unit_id: "villager-1".into(),
+        }),
+        Err(CommandError::GamePaused)
+    );
+    assert_eq!(world, before);
+    world
+        .apply_command(Command::SetSimulationSpeed { multiplier: 1.0 })
+        .unwrap();
     world
         .apply_command(Command::Stop {
             unit_id: "villager-1".into(),

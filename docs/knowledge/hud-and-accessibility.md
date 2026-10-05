@@ -85,6 +85,7 @@ and queued-job mappings: a manifest entry alone does not make an icon available
 in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
 Stop already had authored artwork but was omitted from that list and used Cancel;
 restore the hand for land units and ships, retaining the X for cancellation.
+
 ## Text transparency
 
 User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.

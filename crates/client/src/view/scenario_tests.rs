@@ -130,8 +130,7 @@ fn seeded_npc_routes_are_correct_on_every_rendered_frame() {
                     let lo = time.floor() as usize;
                     let hi = time.ceil() as usize;
                     let alpha = (time - lo as f64) as f32;
-                    let (sprites, _) =
-                        view.draw_list(&sheets, &rig, frame as f32 / fps as f32, &selection);
+                    let (sprites, _) = view.draw_list(&sheets, &rig, &selection);
                     let bodies: Vec<_> = sprites
                         .iter()
                         .filter(|(sheet, _)| VILLAGER_SHEETS.contains(sheet))
