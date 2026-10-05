@@ -261,3 +261,5 @@
 {"t": 1790941054.2521956, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:r3_ships", "est_usd": 0.01, "request_id": "01a0fc67-ba33-7370-8329-638fb25494aa", "seconds": 2.8}
 {"t": 1790941056.5567095, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:r3_clouds", "est_usd": 0.01, "request_id": "01a0fc67-c40c-7cd3-b994-d94e4a0a63f1", "seconds": 2.6}
 {"t": 1790941056.780821, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:r3_fx", "est_usd": 0.01, "request_id": "01a0fc67-c4e2-7933-9183-c69e3c86c01b", "seconds": 2.6}
+{"t": 1791188416.1542451, "endpoint": "fal-ai/nano-banana/edit", "tag": "icon:resource_timber", "est_usd": 0.0398, "request_id": "01a10b26-1859-7960-8d2b-1f86ea4a46c4", "seconds": 7.7}
+{"t": 1791188429.267797, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:resource_timber.png", "est_usd": 0.005, "request_id": "01a10b26-5ff9-75c0-9019-6c2a1f3a90dd", "seconds": 2.5}
