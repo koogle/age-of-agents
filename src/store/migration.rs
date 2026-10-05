@@ -18,7 +18,9 @@ pub(super) fn load_world(json: &str) -> StoreResult<GameWorld> {
         }
     }
     value["stockpile"] = stock;
-    Ok(serde_json::from_value(value)?)
+    let mut world: GameWorld = serde_json::from_value(value)?;
+    world.unify_islands()?;
+    Ok(world)
 }
 
 fn pool_ship_holds(map: &mut Value, stock: &mut Value) -> StoreResult<()> {

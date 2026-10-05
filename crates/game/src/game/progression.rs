@@ -43,11 +43,11 @@ impl GameWorld {
     fn discovered(&self, kind: ResourceKind) -> bool {
         self.resources
             .iter()
-            .any(|r| r.kind == kind && self.explored_cells.contains(&r.cell))
+            .any(|r| r.kind == kind && self.explored_cells.binary_search(&r.cell).is_ok())
             || self.islands.iter().any(|i| {
                 i.resources
                     .iter()
-                    .any(|r| r.kind == kind && i.explored_cells.contains(&r.cell))
+                    .any(|r| r.kind == kind && i.explored_cells.binary_search(&r.cell).is_ok())
             })
     }
 

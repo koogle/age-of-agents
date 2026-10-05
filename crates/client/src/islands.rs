@@ -1,10 +1,12 @@
-//! Frame the arriving vessel on a new island, or the settlement on initial load.
+//! Frame the vessel or settlement on initial load/reset; discovery keeps the camera.
 use super::*;
 impl App {
     pub(super) fn frame_town_center(&mut self) {
         let Some(snapshot) = self.view.snapshot.as_ref() else {
             return;
         };
+        self.rig.map_size =
+            Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * terrain::CELL;
         if let Some(ship) = snapshot
             .ships
             .iter()

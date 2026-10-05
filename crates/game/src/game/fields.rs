@@ -49,8 +49,8 @@ impl GameWorld {
             columns: 3,
             rows: 3,
         };
-        if origin.column > WORLD_COLUMNS - footprint.columns
-            || origin.row > WORLD_ROWS - footprint.rows
+        if origin.column > self.columns() - footprint.columns
+            || origin.row > self.rows() - footprint.rows
             || !self.footprint_is_free(footprint)
         {
             return Err(CommandError::InvalidBuildSite);
