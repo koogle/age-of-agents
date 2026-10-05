@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of one cream triangular sail billowing from a short wooden mast above two simple muted turquoise waves, a compact clear sailing symbol. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3702/9yRmD8E-BDLrpaOIrjgMr_DRf6FcbO.png",
+        "content_type": "image/png",
+        "file_name": "9yRmD8E-BDLrpaOIrjgMr_DRf6FcbO.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      627,
+      314,
+      940,
+      627
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f7/KrMQnzmltHc_EZ6UxqC_f_JFg2fm9v.png",
+        "content_type": "image/png",
+        "file_name": "KrMQnzmltHc_EZ6UxqC_f_JFg2fm9v.png",
+        "file_size": null,
+        "width": 313,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242160.0750756,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:command_sail",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-3e90-7fc1-a859-a44336748a48",
+        "seconds": 2.3
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "command_sail.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239709.3804424,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "command_sail",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-c03c-7463-9dfd-b4f1a51b94ad",
+      "seconds": 8.8
+    },
+    {
+      "t": 1791239848.3629975,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:command_sail",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-007f-7422-94ec-d384044d0038",
+      "seconds": 0.2
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}
