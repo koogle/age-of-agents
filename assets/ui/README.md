@@ -73,3 +73,7 @@ Every icon under `icons/` (portraits excluded) is normalized by `scripts/normali
 - Made with `fal-ai/nano-banana/edit` using `resource_wood` and `command_train` as style references, then a BiRefNet cutout, `tools/norm.py` and `scripts/normalize_icons.py --write`.
 - Of two candidates, the plain palm was chosen; the other sat on a red disc, which would clash with the coin.
 - It reads distinctly from the X down to 24 px.
+
+## Timber icon (2026-10-05)
+
+`icons/resource_timber.png` distinguishes processed timber from raw wood in the resource display, lumber-mill production button, and queued timber jobs. Generated with FAL `fal-ai/nano-banana/edit` using the existing wood icon as the style reference, then cut out with `fal-ai/birefnet/v2` and normalized directly from the 1024px cutout with `scripts/normalize_icons.py`. Original render, cutout, exact prompt, reference, responses and request IDs are retained in `timber_sources/provenance.json`; estimated generation plus cutout cost is $0.0448. The existing wood art remains the kit’s style reference.

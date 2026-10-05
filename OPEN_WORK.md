@@ -1,3 +1,15 @@
+## Authorized icon PR merge
+
+User authorized merging PRs #78 and #82. Integrating current master (field-route fixes and action flashes), preserving both changes and rebuilding the browser bundle. Combined verification on master 9393efe passed all 190 tests, formatting, both strict lint targets, asset checks and a fresh-browser lumber-mill smoke. Compact HUD integration passed all 57 client tests, both lint targets and a fresh-browser smoke. Integrated fog-placement PR #79 on master ddf2123; rebuilt bundle, client tests, formatting, strict native/WASM lint and fresh-browser lumber-mill smoke all pass. Ready for the authorized timber merge.
+
+# Current handoff: timber icon (2026-10-05)
+
+- Generated a distinct sawn-timber resource icon through the existing FAL nano-banana/edit → BiRefNet → normalize_icons pipeline, using the existing wood art as reference. Source render, cutout, prompt, request IDs and preview are retained in `assets/ui/timber_sources`; estimated FAL cost $0.0448.
+- Registered the icon in the shared Rust HUD and UI manifest; used it for timber stockpiles, lumber-mill production and queued timber jobs. Regenerated the UI contact sheet. Raw wood and simulation rules are unchanged.
+- All icon normalization checks and the 282-frame sprite resolution audit pass; PNG/RGBA/transparent corners and light/dark/blue preview reviewed. All 183 workspace tests, formatting, native and WASM strict lint pass. Rebuilt the tracked browser bundle. Desktop and DPR2 phone lumber-mill selection with active/queued timber passes with no page errors; inspected desktop HUD at normal/close zoom and phone HUD at normal zoom using a paused fixture. The additional phone close-zoom screenshot timed out under software rendering; normal phone selection and screenshot passed. QA captures and fixture are in `/workspace/scratch/timber`.
+- Thermonuclear review: small presentation-only mapping change, no dependencies or domain/persistence changes. No source files cross 1,000 lines.
+- Deployment unavailable: this environment has no Modal tooling/profile. Review PR: https://github.com/koogle/age-of-agents/pull/78 (`feat/timber-icon`); not deployed.
+
 # Current handoff: explore fogged building sites (2026-10-05)
 
 - User requested a PR for building placement outside current sight. Branch `fix/explore-before-building` is based on master `61fc87c`.
