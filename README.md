@@ -16,7 +16,7 @@ Build a transport at a completed dock for 60 wood + 20 timber (20 seconds). Each
 
 ## Implemented roadmap
 
-- Seeded islands with hills, rivers, biomes, clustered resources, and fog of war.
+- Seeded islands with rounded, square, elongated, lobed and open-bay outlines; relief-derived mountains and downhill rivers, biomes, clustered resources, and fog of war.
 - Villager and group orders for movement, gathering, carrying, deposits, and shared construction that preserves unit escape routes.
 - Completed lumber mills accept wood for automatic gathering deliveries and click-to-unload; gatherers use the nearest reachable compatible drop-off and resume work.
 - Building orders in fog send the villager to explore first. A foundation is created and paid for only when the whole footprint is currently visible and placement is valid; blocked or unaffordable sites cancel without spending.

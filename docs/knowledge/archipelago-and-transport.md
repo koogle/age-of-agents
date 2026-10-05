@@ -70,3 +70,27 @@ focused topic from the [knowledge index](INDEX.md).
 Each discovered island owns a stockpile. A stopped shore ship contributes its cargo to that island’s available resources and accepts villager deposits up to its remaining 50-resource capacity. Cargo stays aboard on arrival and leaves with the ship; passengers have four independent seats. Research and training still require buildings. Explicit load/unload commands transfer up to 10 per button tap at a completed dock, without NPC labor.
 
 `storage.rs` owns compatible building/ship sites and local resource reservation. Costs consume shore stores first, then connected holds; production output and queue refunds remain on the job’s island. Partial deposits preserve the villager’s remainder when a ship fills or departs. Future automated trading ports are intended but not implemented. The shared map and all-settlement simulation remain intact.
+
+## Terrain-first generation (2026-10-05)
+
+Jakob requested varied outlines followed by relief and terrain-derived rivers.
+`worldgen/shape.rs` selects a seed-stable rounded, square, long, bay or lobed mask;
+rerolls preserve the family. The bay's central basin remains connected to the sea.
+`worldgen.rs` retains the main land component, applies coastal slopes and noisy
+ridge relief, and derives mountain/highland bands from the resulting elevation.
+
+`worldgen/drainage.rs` priority-floods depressions to spill height with a small
+positive gradient. Steepest cardinal descent defines a single acyclic drainage
+network; accumulated upstream cells select headwaters. Rivers follow that network
+through confluences to water; they no longer use a separate meander height field
+or independently flatten beds. Sandbar fords and reachable resource checks remain.
+This is a procedural relief approximation, not a physical erosion simulation.
+Snapshot height quantization can display tiny slopes as flat, but preserves order.
+
+Generation changes affect new games and newly discovered islands. Existing saved
+terrain remains authoritative; no persisted fields changed or save reset is needed.
+Run `cargo test -p aoa-game --locked worldgen` for shape, runoff, downhill-route,
+resource and settlement checks. Near-start wood and food must be within town-center
+sight, not merely within the wider resource-placement radius: the latter can leave
+a fresh settlement with no visible gather targets. The `island_preview` example exports fully explored
+snapshots; `docs/verification/island-generation/preview.py` renders relief comparisons.
