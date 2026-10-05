@@ -122,3 +122,24 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Wildlife release check (2026-10-05)
+
+During the wolves/bears implementation, Modal 1.5.3 installed successfully and
+current runtime credential bindings reported ready, but `python3 scripts/modal_manage.py status`
+returned "Could not connect to the Modal server" again. Treat this as connectivity
+failure, not proof of missing credentials; no direct deployment was attempted.
+## Modal proxy support (2026-10-05)
+
+In a managed environment with HTTP(S) proxy variables, Modal 1.6.1 requires the
+optional `python-socks` support installed by `python3 -m pip install
+'modal[api-proxy-support]'`. Without it, `modal app list` may end with the generic
+“Could not connect to the Modal server”; inspect the installed SDK's proxy
+support before treating that as missing credentials. Keep the inherited proxy
+and CA settings. Installing the extra fixed the read-only CLI check here.
+
+Check `python3 -m modal profile current` and `python3 -m modal profile list`
+before releasing. Environment-selected workspace identity can differ from the
+repository's `koogle-frick` production target; a successful empty app list does
+not establish the correct account. Do not deploy to a different workspace merely
+because its injected credentials work.

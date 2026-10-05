@@ -6,7 +6,7 @@ Read [README.md](README.md), especially **Proposed gameplay loop**, at the start
 
 Age of Empires informs the RTS controls; Anno informs the settlement economy.
 
-Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle units remain idle until the player commands them.
+Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle friendly units remain idle until the player commands them; hostile wildlife can pursue nearby units within its territory.
 
 ## Milestone 1
 
@@ -17,7 +17,7 @@ The current playable demo proves these loops:
 3. A player can construct a town center and train villagers through its authoritative task queue.
 4. A player can research five bounded gathering improvements through that same task queue.
 
-Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; inventories are island-local, supplemented by cargo in stopped shore ships (50 total resources, plus four passengers). Research remains shared. Treat combat, calamities, and permanent progression as future roadmap work, not existing behavior. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
+Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; inventories are island-local, supplemented by cargo in stopped shore ships (50 total resources, plus four passengers). Research remains shared. Territorial wolves/bears and explicit wildlife contact attacks are implemented; see [wildlife](docs/knowledge/wildlife.md). Broader combat, calamities and permanent progression remain future roadmap work. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
 ## Architecture
 
@@ -35,9 +35,10 @@ Keep the simulation deterministic. The world expands as the player discovers isl
 
 - Tap/click a villager to select it.
 - Tap/click a resource with a villager selected to issue a gather order.
+- Tap/click a visible wolf or bear with friendly units selected to issue a group attack order; with no units selected, inspect its health. Healers cannot attack. Retreat and Stop remain explicit player orders.
 - Tap/click a foundation with villagers selected to have them help build it.
 - Tap/click a town center (or a granary for food and fiber, or a lumber mill for wood) with villagers selected to have those carrying goods unload there. A villager holding goods shows the carry pose, even when stopped, except while actively gathering; partial loads must keep the work animation.
-- Villagers carry at most 20 typed units, deposit at the nearest reachable compatible completed storage site (including lumber mills for wood and stopped shore ships with room), and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of it, else go idle. A villager holding goods finishes that load or drops it off first: given a new gather, build, or field-preparation assignment, it delivers its cargo to a compatible completed drop site before starting, including partial loads of the same kind. It retains and resumes the new assignment automatically.
+- Villagers carry at most 20 typed units, deposit at the nearest reachable compatible completed storage site (including lumber mills for wood and stopped shore ships with room), and resume unfinished gathering. When a node runs out they move on to the nearest reachable node of the same kind within 10 cells of the connected exhausted wild-resource patch (or the individual field), else go idle. A villager holding goods finishes that load or drops it off first: given a new gather, build, or field-preparation assignment, it delivers its cargo to a compatible completed drop site before starting, including partial loads of the same kind. It retains and resumes the new assignment automatically.
 - Gathering is phase-driven: villagers wait at the node until full or depleted, and combined activity sprites replace duplicate unit-plus-resource rendering.
 - With villagers selected, a ring under the pointer previews the tap: gold over a resource or foundation, white over ground.
 - Tap/click the build button to open the grouped building menu (buildings unlocked by construction-material discovery plus farm fields; all 14 first-island buildings are initially available, and unaffordable ones stay visible in greyscale), pick one, then tap valid ground to issue a build order.
@@ -62,6 +63,7 @@ The target is a soft 3D tilt-shift diorama of a sunlit Greek island. `assets/ref
 - Generate sprites, textures, and UI art with FAL `fal-ai/nano-banana` and `fal-ai/nano-banana/edit`, using approved game art as the style reference. Use `fal-ai/birefnet/v2` for cutouts; `fal-ai/esrgan` is the upscaler used for the loading title, and `fal-ai/ideogram/v3` generated its lettering.
 - Treat initial generations as drafts that need an upscaling and cleanup pass. Use ChatGPT's image tool (`OpenAI image_gen`) for refinement, as with the building walls, roof tiles, and cobblestone; remove diffusion artifacts, broken geometry, stray details, and cutout fringes before integration.
 - Preserve the same palette, linework, lighting, camera, character identity, scale, and ground anchor across assets and animation/construction frames. Refine against approved sources rather than changing the style for each asset.
+- Treat the [style acceptance review](docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) as a blocking merge gate for art. Attach approved family references to generation and refinement, and include reference/result comparisons at actual display size. Technical asset checks do not establish a style match.
 - Keep original renders and record the model, references, request IDs, and edits alongside the asset. Pack from the highest-quality source into at least 512×512 sprite frames; prefer original high-resolution detail when available, and do not treat a larger canvas or DPI change as recovered detail.
 - Run `python3 scripts/check_sprite_resolution.py` and the relevant asset checks, then inspect maximum-zoom desktop and DPR-2 phone gameplay. `--report-only` inventories existing resolution gaps; it is not a passing integration check.
 

@@ -100,6 +100,8 @@ or session. Give files descriptive names, link related topics and list every new
 guide in the index. Keep indexes short; do not accumulate the guide bodies in
 `AGENTS.md`, `decisions.md`, the index or a giant retrospective.
 
+Keep the README concise, following the developer’s 2026-10-05 cleanup request: product direction, a short feature summary and basic setup. Put detailed behavior, UI changes and verification notes in their existing guides, not in the README.
+
 Update the existing owner in place; avoid duplicate competing instructions. Keep
 historical evidence and rejected approaches only where they explain a constraint.
 Label superseded material and link its replacement. Do not copy transcripts,

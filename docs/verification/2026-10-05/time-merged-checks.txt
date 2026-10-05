@@ -1,0 +1,10 @@
+2026-10-05 final integration against master 28a09a2
+264 Rust tests pass (13 server, 88 client, 163 domain), one manual benchmark ignored.
+Formatting, strict native/WASM Clippy, web/server builds and JS syntax pass.
+298 sprite frames pass; field, transport and icon checks pass; 6 release verifier tests pass.
+PASS combined master: DPR2 390x844; touch speeds 0/1/2; touch grid on; G off/on observed in rendered terrain uniforms; no page errors
+Terrain uniform grid.x observed 0 -> 1 -> 0 -> 1 via actual touch and keyboard input. Screenshots: time-merged-grid-phone.png, time-merged-controls.png.
+Existing layout matrix verifies bounds, separation and dispatch at narrow/landscape/desktop DPR1/2. The compact row retains one baseline with equal 36px center spacing.
+Grid rendering, placement footprint logic and simulation grid are unchanged. Existing placement/grid tests pass in the full suite.
+Thermonuclear review: only shared HUD geometry and glyph coverage sampling differ from master; no new dependencies, game commands, save changes or feature removal.
+Physical-device testing remains unperformed; production status is tracked in PR/release workflow.

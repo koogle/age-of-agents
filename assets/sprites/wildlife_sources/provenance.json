@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "prompt": "Create a professional game sprite sheet for a sunlit Greek island strategy game in soft painted 3D cel-shaded diorama style with fine ink outlines, warm rim lighting, matching the supplied Greek building style. Exactly two animals on plain white background, no shadows, no scenery, no letters: left half a dangerous lean grey wolf with natural anatomy, right half a stocky dark brown wild boar with tusks. Both full body at three-quarter isometric view looking toward lower right. Four anatomically correct legs each, all feet visible and aligned at same baseline. Each animal fills its half with generous empty margins. Crisp high resolution fur and anatomy; readable tiny RTS unit silhouettes. Not cute pets.",
+  "reference": "assets/reference/diorama_primary.webp",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3663/ti3ALAOSbehq_Ns6ob3at_QWhxJjv3.png",
+        "content_type": "image/png",
+        "file_name": "ti3ALAOSbehq_Ns6ob3at_QWhxJjv3.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  }
+}

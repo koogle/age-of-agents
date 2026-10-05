@@ -19,6 +19,7 @@ mod movement_tests;
 mod scenario_tests;
 mod selection;
 mod ships;
+mod wildlife;
 pub(crate) use buildings::sprite as building_sprite;
 pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
@@ -194,6 +195,7 @@ impl View {
 /// Something a tap can land on by its drawn picture, not the ground under it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Pick {
+    Animal(String),
     Ship(String),
     Resource(String),
     Building(String),
@@ -212,6 +214,7 @@ pub struct WorldView {
     units: HashMap<String, UnitEntry>,
     render_tick: Option<f64>,
     latest_tick: f64,
+    animation_time: f32,
     buffering: bool,
     catching_up: bool,
     pub cells_dirty: bool,
@@ -276,6 +279,7 @@ impl WorldView {
             units: HashMap::new(),
             render_tick: None,
             latest_tick: 0.0,
+            animation_time: 0.0,
             buffering: true,
             catching_up: false,
             cells_dirty: true,
@@ -353,6 +357,23 @@ impl WorldView {
         restarted
     }
 
+    /// A fresh connection/outage baseline is a correction, never animated travel.
+    pub fn reset_playback(&mut self) {
+        self.render_tick = Some(self.latest_tick);
+        self.buffering = true;
+        self.catching_up = false;
+        for entry in self.units.values_mut() {
+            if let Some(newest) = entry.samples.back().copied() {
+                entry.samples.clear();
+                entry.samples.push_back(newest);
+                entry.position = newest.1;
+            }
+            entry.velocity = Vec3::ZERO;
+            entry.moving = false;
+            entry.still_for = 0.0;
+        }
+    }
+
     /// Advances the presentation clock and unit positions.
     pub fn frame(&mut self, dt: f32, local_tick: Option<f64>) {
         let Some(render_tick) = self.render_tick.as_mut() else {
@@ -362,38 +383,26 @@ impl WorldView {
         // Resynchronize once, then rebuild the small playout buffer. Never turn
         // the correction into velocity, gait distance, or a walk through walls.
         if local_tick.is_none() && self.latest_tick - *render_tick > 8.0 {
-            *render_tick = self.latest_tick;
-            self.buffering = true;
-            self.catching_up = false;
-            for entry in self.units.values_mut() {
-                if let Some(newest) = entry.samples.back().copied() {
-                    entry.samples.clear();
-                    entry.samples.push_back(newest);
-                    entry.position = newest.1;
-                }
-                entry.velocity = Vec3::ZERO;
-                entry.moving = false;
-                entry.still_for = 0.0;
-            }
+            self.reset_playback();
             return;
         }
+        let speed = self.snapshot.as_ref().map_or(1.0, |s| s.simulation_speed);
+        if speed == 0.0 {
+            return;
+        }
+        self.animation_time += dt * speed as f32;
         let advance = dt as f64 / TICK_SECONDS;
         if let Some(local_tick) = local_tick {
-            // Monotonic even across pause/resume: finish the last displayed step
-            // without jumping to the paused snapshot or rewinding on resume.
+            // Resume the held position without jumping or rewinding.
             *render_tick = local_tick.max(*render_tick).min(*render_tick + advance);
         } else {
             let lag = self.latest_tick - *render_tick;
-            let paused = self
-                .snapshot
-                .as_ref()
-                .is_some_and(|s| s.simulation_speed == 0.0);
-            if paused || lag >= PLAYOUT_TICKS {
+            if lag >= PLAYOUT_TICKS {
                 self.buffering = false;
             }
             // Hysteresis avoids reacting to the ordinary 100 ms arrival staircase.
             // Recovery is bounded to 10% faster playback, never a clock jump.
-            if paused || lag <= PLAYOUT_TICKS {
+            if lag <= PLAYOUT_TICKS {
                 self.catching_up = false;
             } else if lag > PLAYOUT_TICKS + 2.0 {
                 self.catching_up = true;
@@ -477,7 +486,6 @@ impl WorldView {
         &mut self,
         sheets: &Sheets,
         rig: &Rig,
-        time: f32,
         selection: &Selection,
     ) -> (Vec<(usize, Sprite)>, Vec<Decal>) {
         let mut sprites = Vec::new();
@@ -571,6 +579,9 @@ impl WorldView {
                 center,
                 building.building.construction,
                 building.building.job.is_some(),
+                snapshot
+                    .dock_facing(building.building.origin)
+                    .unwrap_or_default(),
             );
             picks.push(Pickable {
                 pick: Pick::Building(building.building.id.clone()),
@@ -696,7 +707,7 @@ impl WorldView {
             } else if name == "idle" || (name == "carry" && !moving) {
                 0
             } else {
-                (time * fps) as usize % frames.len()
+                (self.animation_time * fps) as usize % frames.len()
             };
             let corrected_mirror = mirror
                 ^ (!military
@@ -734,6 +745,14 @@ impl WorldView {
             }
         }
         ships::draw(snapshot, selection, &mut sprites, &mut decals, &mut picks);
+        wildlife::draw(
+            snapshot,
+            heights,
+            self.animation_time,
+            &mut sprites,
+            &mut decals,
+            &mut picks,
+        );
         self.pickables = picks;
         (sprites, decals)
     }
@@ -794,6 +813,24 @@ fn work_target(
     position: Vec3,
 ) -> Option<(Vec2, &'static str)> {
     let (footprint, activity) = match &unit.action {
+        UnitAction::AttackAnimal { animal_id, .. } => {
+            let animal = snapshot
+                .animals
+                .iter()
+                .find(|a| &a.id == animal_id && a.step.is_none())?;
+            (
+                aoa_game::Footprint {
+                    origin: animal.cell,
+                    columns: 1,
+                    rows: 1,
+                },
+                if unit.kind == aoa_game::UnitKind::Villager {
+                    "chop"
+                } else {
+                    "action"
+                },
+            )
+        }
         UnitAction::Gather {
             resource_id,
             phase: GatherPhase::Gathering,
