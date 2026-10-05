@@ -1,9 +1,8 @@
 # Server protocol, snapshots and saves
 
-Read before: changing server transport, persistence, migration, test fixtures, or
-interacting with a hosted game. Source-reviewed 2026-10-05 against `b054655` in
+Read before: changing server transport, persistence, store resets, test fixtures, or
+interacting with a hosted game. Source-reviewed 2026-10-05 against the compatibility cleanup on `2bddab9` in
 [main.rs](../../src/main.rs), [store.rs](../../src/store.rs),
-[migration.rs](../../src/store/migration.rs) and
 [client source.rs](../../crates/client/src/source.rs).
 
 ## Modes and entry points
@@ -59,17 +58,20 @@ sequence. Preserve the no-cache response policy and test reconnect plus rejectio
 when changing this boundary. Do not replay uncertain state-changing commands
 blindly after reconnecting.
 
-## Snapshot and migration pitfalls
+## Snapshot and save-version policy
 
 - Terrain is encoded through [terrain_codec.rs](../../crates/game/src/game/terrain_codec.rs).
   `cells` and `heights` can be run-compressed; use the current decoder and runtime
   dimensions. String length is not decoded cell count.
-- Hosted saves contain authoritative `GameWorld` JSON in SQLite. Legacy island
-  and ship resources are pooled once, then islands are translated into continuous
-  coordinates and validated. Saving writes the current representation.
-- Corrupt stock, duplicate ownership and invalid occupancy are errors. The old
-  schema-reset code in `Store::initialize` is historical compatibility behavior,
-  not permission to reset a failing fixture or a user's world.
+- Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
+  waived backward compatibility on 2026-10-05 until he requests it again. There
+  are no old inventory/island migrations or historical required-field defaults.
+- `STORE_VERSION` in `src/store.rs` is 11. Bump it for incompatible persisted-model
+  changes; initialization atomically drops/recreates `world_state` when SQLite
+  `user_version` differs, then normal startup generates a fresh world. The reset
+  also applies to higher versions. Matching-version saves survive initialization.
+- Corrupt current-version JSON, stock, ownership or occupancy remains an explicit
+  error. Never use a load/validation failure as permission to silently reset.
 - Serialization changes affect hosted loads, snapshots, native/browser-local
   simulation, fixtures and production verifiers. Consult
   [archipelago](archipelago-and-transport.md) and
@@ -78,7 +80,7 @@ blindly after reconnecting.
 ## Verification and upkeep
 
 Use focused server/store tests and save round trips, including malformed values,
-repeated migration, failed persistence, and reload during movement/queues. The
+different-version resets, same-version reinitialization, failed persistence, and reload during movement/queues. The
 existing server test suite is `cargo test -p age-of-agents --locked`; command and
 snapshot changes also need domain/client checks and a real local WebSocket flow.
 These are recipes, not results of this documentation edit.

@@ -18,7 +18,7 @@ cancellation or queue UI. Maintained guide; source-reviewed 2026-10-05 against
 3. Account for both active and waiting trainees in housing. A blocked output
    keeps later queued work waiting; do not create units twice on repeated ticks.
 4. Preserve stable cancellation IDs: an old click cannot target a promoted task
-   or accidentally cancel its successor. Check save/reload and legacy empty queues.
+   or accidentally cancel its successor. Check current-format save/reload and required queue fields.
 5. Update [HUD state](hud-and-accessibility.md) and visible instructions/status
    together. Completed research stays visible as disabled with its effect explained.
 
@@ -28,7 +28,7 @@ Implemented in [PR #92](https://github.com/koogle/age-of-agents/pull/92), with m
 
 Fourteen wood/stone/timber buildings are initially available: Town Center, House, Granary, Farm, Lumber Mill, Dock, Watchtower, Mining Camp, Smelter, Kiln, Weaver, Kitchen, Barracks and Range. Unaffordable buildings remain visible in grey. Kitchen can make rations from food; other production still requires actual recipe inputs.
 
-Workshop unlocks with discovered clay for bricks; Infirmary with fiber for cloth; Monument with iron, coal, clay, fiber and gold for all its construction materials. Discovery persists after depletion and cannot be bypassed by hidden nodes or stock quantities. Legacy unrestricted saves retain access; no reset or migration is required for these revised gates.
+Workshop unlocks with discovered clay for bricks; Infirmary with fiber for cloth; Monument with iron, coal, clay, fiber and gold for all its construction materials. Discovery persists after depletion and cannot be bypassed by hidden nodes or stock quantities. The unlock rules add no state. Save compatibility is separately deferred by Jakob’s 2026-10-05 instruction: incompatible store versions reset, and current saves require explicit economy/queue fields; see [save policy](server-and-saves.md#snapshot-and-save-version-policy).
 
 Existing player-facing features remain important. Removing, hiding, disabling or adding prerequisites to them requires Jakob's explicit approval after a before/after impact review and before release; see [AGENTS.md](../../AGENTS.md#workflow). Starter simplification is not blanket approval for feature losses.
 
