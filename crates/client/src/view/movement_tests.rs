@@ -47,7 +47,7 @@ fn regular_remote_updates_do_not_modulate_walking_speed() {
 
 #[test]
 fn late_batches_keep_the_unplayed_path_without_position_or_clock_jumps() {
-    for gap in [3, 6, 15, 200] {
+    for gap in [3, 6] {
         let mut view = WorldView::new();
         warm(&mut view);
         for _ in 0..gap * 6 {
@@ -279,5 +279,42 @@ fn carrying_preserves_facing_and_anchor_when_the_authored_strip_faces_the_other_
         let carry_mirrored = carrying.uv[0] > carrying.uv[2];
         assert_eq!(walk_mirrored != carry_mirrored, variant < 2);
         assert_eq!(walking.anchor, carrying.anchor);
+    }
+}
+
+#[test]
+fn reconnect_restores_recency_in_one_frame_without_animating_the_correction() {
+    for gap in [9, 15, 300, 3000] {
+        for batch in [false, true] {
+            let mut view = WorldView::new();
+            warm(&mut view);
+            for _ in 0..60 {
+                view.frame(1.0 / 60.0, None);
+            }
+            let walked = view.units.values().next().unwrap().walked;
+            if batch {
+                for tick in 101..100 + gap {
+                    sample(&mut view, tick);
+                }
+            }
+            sample(&mut view, 100 + gap);
+            view.frame(1.0 / 60.0, None);
+            let entry = view.units.values().next().unwrap();
+            assert_eq!(
+                view.render_tick,
+                Some(view.latest_tick),
+                "gap={gap}, batch={batch}: stale replay"
+            );
+            assert_eq!(entry.velocity, Vec3::ZERO, "resync is not walking");
+            assert_eq!(entry.walked, walked, "resync must not advance gait");
+            assert_eq!(entry.samples.len(), 1);
+            for frame in 1..=600 {
+                if frame % 6 == 0 {
+                    sample(&mut view, 100 + gap + frame / 6);
+                }
+                view.frame(1.0 / 60.0, None);
+                assert!(view.latest_tick - view.render_tick.unwrap() <= 2.01);
+            }
+        }
     }
 }
