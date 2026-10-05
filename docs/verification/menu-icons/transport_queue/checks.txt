@@ -1,4 +1,4 @@
-transport_queue: 257 Rust tests pass; one manual benchmark ignored.
+transport_queue: 265 Rust tests pass in this run.
 Formatting, strict native and WASM Clippy, rebuilt WebAssembly/JS: PASS.
 Sprite resolution and all icon normalization checks: PASS.
 Desktop 1280x800 DPR1 mouse and 390x844 DPR2 touch: PASS; no page errors.

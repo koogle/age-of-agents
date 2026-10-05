@@ -43,7 +43,7 @@ def fixture(name, portrait=False):
         buildings=[],
         ships=[],
         ship_connections=[],
-        simulation_speed=0,
+        simulation_speed=1,
     )
     s["terrain"].update(cells="A" * 9600, heights="g" * 9600)
     s["units"] = s["units"][:1]

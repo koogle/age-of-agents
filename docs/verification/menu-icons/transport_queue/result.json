@@ -1,6 +1,6 @@
 {
   "name": "transport_queue",
-  "wasm_sha256": "0f5a55838ffcf3642c25f59de1b90b95271f89fbbbb6a1307697595346dd3810",
+  "wasm_sha256": "10d857399be055ce3c2ceacd48954a549b63f6ae75b3034322a8e2c0b3507272",
   "errors": [],
   "viewports": [
     "1280x800 DPR1 mouse",

@@ -26,6 +26,19 @@ The driver uses loopback port 8001, a retained fixture and controlled time. See
 and interpretation limits. Its assertions are not an end-to-end gameplay proof;
 UI commands against an isolated hosted save answer a different question.
 
+`python3 docs/verification/replay_reconnect.py --output /tmp/aoa-reconnect-check`
+uses loopback :8002 to close/reopen an actual browser WebSocket and deliver a
+40-snapshot burst while rendering is suspended. It checks the rendered villager
+anchor on desktop and emulated DPR2 phone, including a paused sequence restart.
+Both replay drivers share `presentation-fixture.json`; the inbox Rust tests
+parse it so missing required snapshot metadata fails before a browser load timeout.
+The reconnect driver keeps real WebSocket/retry timing and holds only animation
+frames for the background-tab scenario. It throttles rendering to 10 FPS for
+software WebGL; high-frame-rate motion remains covered by the Rust movement
+suite. Advancing a synthetic clock through every expensive WebGL frame made this
+reconnect test impractically slow, so it does not use the presentation driver's
+blanket clock control.
+
 Store reusable fixtures/drivers and selected evidence under `docs/verification/`
 when they support a lasting claim. A result should identify revision/bundle,
 mode, fixture/seed, viewport/DPI/platform, procedure, observed state and remaining
@@ -87,3 +100,5 @@ fixtures. It uses loopback :8012 and a fresh page for each rebuilt bundle, with
 verified desktop/phone metrics and actual mouse/touch events. Reusing the browser
 keeps shader initialization costs manageable; this remains presentation/wire
 verification rather than a persisted-world gameplay test.
+
+Menu command fixtures use simulation speed 1× after the pause-contract fix (#105); their mocked positions remain controlled. A paused fixture is appropriate for frozen-frame checks, but gameplay orders must respect the authoritative pause contract.

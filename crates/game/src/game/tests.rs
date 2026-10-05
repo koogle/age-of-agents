@@ -598,6 +598,91 @@ fn simulation_speed_is_authoritative_validated_and_can_pause() {
 }
 
 #[test]
+fn paused_orders_are_rejected_without_changing_tasks_or_spending_resources() {
+    let mut world = fixture::fixture();
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(5, 5),
+        })
+        .unwrap();
+    world.tick(0.1);
+    world
+        .apply_command(Command::SetSimulationSpeed { multiplier: 0.0 })
+        .unwrap();
+    let paused = world.clone();
+    for command in [
+        Command::Move {
+            unit_id: "villager-1".into(),
+            to: cell(6, 6),
+        },
+        Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "tree-1".into(),
+        },
+        Command::Stop {
+            unit_id: "villager-1".into(),
+        },
+        Command::Build {
+            unit_id: "villager-1".into(),
+            origin: cell(5, 5),
+            kind: BuildingKind::TownCenter,
+        },
+        Command::Produce {
+            building_id: "base-1".into(),
+            product: ProductKind::Villager,
+        },
+        Command::CancelQueuedJob {
+            building_id: "base-1".into(),
+            queue_id: 1,
+        },
+        Command::TransferShipCargo {
+            ship_id: "ship-1".into(),
+            kind: ResourceKind::Wood,
+            amount: 1.0,
+            direction: CargoDirection::Load,
+        },
+        Command::Board {
+            unit_id: "villager-1".into(),
+            ship_id: "ship-1".into(),
+        },
+        Command::AttackAnimal {
+            unit_ids: vec!["villager-1".into()],
+            animal_id: "wolf-1".into(),
+        },
+        Command::StopShip {
+            ship_id: "ship-1".into(),
+        },
+        Command::Disembark {
+            ship_id: "ship-1".into(),
+        },
+        Command::Sail {
+            ship_id: "ship-1".into(),
+            to: cell(0, 0),
+        },
+    ] {
+        assert_eq!(world.apply_command(command), Err(CommandError::GamePaused));
+        world.tick(10.0);
+        assert_eq!(world, paused);
+    }
+    assert_eq!(
+        world.apply_command(Command::SetSimulationSpeed { multiplier: 3.0 }),
+        Err(CommandError::InvalidSimulationSpeed)
+    );
+    assert_eq!(world, paused);
+    world
+        .apply_command(Command::SetSimulationSpeed { multiplier: 1.0 })
+        .unwrap();
+    world.tick(0.1);
+    assert_ne!(world.units[0], paused.units[0]);
+    world
+        .apply_command(Command::Stop {
+            unit_id: "villager-1".into(),
+        })
+        .unwrap();
+}
+
+#[test]
 fn a_new_order_replaces_a_busy_units_task() {
     let mut world = fixture::fixture();
     world
