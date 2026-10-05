@@ -2,8 +2,13 @@
 
 - Branch `feat/basic-roads`: dirt/stone road construction, two-endpoint mouse/touch placement, painted terrain surfaces and travel-time routing. Completed roads give friendly units 1.5× speed; wolves/bears remain unchanged. Crossings reuse existing surfaces.
 - Balance: two seconds labour/cell, with one stone per new stone cell. Costs reserve once; Stop/resume, helpers and unloading first preserve existing task rules. Store version 15 resets incompatible hosted saves under the development policy.
-- 278 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Final browser run is in progress; [reproduction and review](docs/verification/roads/README.md).
+- 278 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `8bf00b4` (approved productive-building availability and new art); combined checks are in progress; [reproduction and review](docs/verification/roads/README.md).
 - Not merged or deployed. Preserve the previous unresolved work below.
+
+# Productive building availability — 2026-10-05
+
+- User explicitly requested hiding advanced buildings such as Barracks until resources support construction and productive use, superseding construction-only visibility. Implemented shared domain gate; Barracks/Smelter require iron + coal, Kiln clay, Weaver fiber, Workshop clay + steel inputs. Ten starter buildings remain; Range is productive with food/timber. Temporary shortages still grey out choices.
+- No persistence/schema change or deletion of existing buildings/jobs. Discovery remains global and survives depletion. All 269 workspace tests pass (one existing manual benchmark ignored), including seven progression checks and the filtered HUD menu. Formatting, native/WASM strict lint and the rebuilt release browser bundle pass. Final desktop mouse and DPR2-phone touch Military/Production menu captures pass without page errors; [evidence and review](docs/verification/building-progression/README.md). User explicitly authorized PR creation and merge on 2026-10-05 after reviewing the result. [PR #131](https://github.com/koogle/age-of-agents/pull/131) is ready for the authorized merge, based on master `92aaf7e`; upstream additions are unwired menu art, and the rebuilt bundle is byte-identical. Production uses the master release workflow; release status is tracked separately.
 
 # Terrain-first island generation — PR #111
 
@@ -36,7 +41,7 @@
 
 - User authorized dedicated menu icons and sequential PR merges. [Audit](docs/MENU_ICON_AUDIT.md); Stop restoration #104 and blocking style review #110 are merged. No new menu icons are wired into gameplay yet.
 - The initial 14 generated illustrations were rejected for style drift. A reference-anchored refinement now has fine brown contours, restrained washes and comparisons at 24/32px on three backgrounds. Each icon lands in a separate art PR with its own provenance and style review; unit portraits retain approved atlas art.
-- Current art PR: `command_back`. Accepted art is retained under `assets/ui/sources/menu_icons/`; the audit ledger lists each sequential PR. Integration [#107](https://github.com/koogle/age-of-agents/pull/107) remains draft until all art, mappings and final desktop/DPR-2 phone validation pass. Preserve unrelated handoff sections. Merged is not deployed.
+- Current art PR: `category_military`. Accepted art is retained under `assets/ui/sources/menu_icons/`; the audit ledger lists each sequential PR. Integration [#107](https://github.com/koogle/age-of-agents/pull/107) remains draft until all art, mappings and final desktop/DPR-2 phone validation pass. Preserve unrelated handoff sections. Merged is not deployed.
 
 # Wildlife integration (2026-10-05)
 
