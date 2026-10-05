@@ -88,10 +88,10 @@ impl GameWorld {
         let start = self.units[unit].cell;
         let goals = self.goal_cells(unit, goal, occupancy);
         let clear = |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit);
-        let around = PathTree::search(self.columns(), self.rows(), start, clear);
-        if let Some(to) = around
-            .nearest(goals.iter().copied().filter(|cell| clear(*cell)))
-            .and_then(|target| around.first_step(target))
+        let clear_goals: Vec<_> = goals.iter().copied().filter(|cell| clear(*cell)).collect();
+        if let Some(to) =
+            PathTree::route_to_nearest(self.columns(), self.rows(), start, &clear_goals, clear)
+                .and_then(|(_, path)| path.first().copied())
         {
             return NextStep::Step(to);
         }
@@ -297,8 +297,17 @@ impl GameWorld {
     /// Whether `unit` could stand beside `footprint` once other units move aside.
     pub(super) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
         let occupancy = self.occupancy();
-        let goals = interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell));
-        self.static_paths(unit, &occupancy).nearest(goals).is_some()
+        let goals: Vec<_> = interaction_cells(footprint)
+            .filter(|cell| !occupancy.is_static(*cell))
+            .collect();
+        PathTree::route_to_nearest(
+            self.columns(),
+            self.rows(),
+            self.units[unit].cell,
+            &goals,
+            |cell| !occupancy.is_static(cell),
+        )
+        .is_some()
     }
 
     pub(super) fn validate_move_destination(
@@ -313,10 +322,16 @@ impl GameWorld {
         if !self.can_reserve(to, &[unit], &occupancy) {
             return Err(CommandError::DestinationOccupied);
         }
-        self.static_paths(unit, &occupancy)
-            .cost(to)
-            .map(|_| ())
-            .ok_or(CommandError::TargetUnreachable)
+        PathTree::route(
+            self.columns(),
+            self.rows(),
+            self.units[unit].cell,
+            to,
+            |cell| !occupancy.is_static(cell),
+        )
+        .cost(to)
+        .map(|_| ())
+        .ok_or(CommandError::TargetUnreachable)
     }
 
     /// Distinct, reachable, unreserved stopping cells for a group, nearest the
@@ -421,10 +436,7 @@ impl GameWorld {
     pub(super) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
         let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
-        let paths = self.static_paths(unit, &occupancy);
-        let clear = PathTree::search(self.columns(), self.rows(), self.units[unit].cell, |cell| {
-            !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit)
-        });
+
         self.buildings
             .iter()
             .filter(|building| {
@@ -437,20 +449,30 @@ impl GameWorld {
             .filter_map(|building| {
                 let footprint = building.footprint();
                 let goals = self.goal_cells(unit, Goal::Beside(footprint), &occupancy);
-                let available = clear
-                    .nearest(
-                        goals
-                            .iter()
-                            .copied()
-                            .filter(|cell| !occupancy.has_other_unit(*cell, unit)),
-                    )
-                    .and_then(|cell| clear.cost(cell));
+                let clear_goals: Vec<_> = goals
+                    .into_iter()
+                    .filter(|cell| !occupancy.has_other_unit(*cell, unit))
+                    .collect();
+                let available = PathTree::route_to_nearest(
+                    self.columns(),
+                    self.rows(),
+                    self.units[unit].cell,
+                    &clear_goals,
+                    |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit),
+                )
+                .map(|(cost, _)| cost);
                 let cost = available.or_else(|| {
-                    paths
-                        .nearest(
-                            interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell)),
-                        )
-                        .and_then(|cell| paths.cost(cell))
+                    let goals: Vec<_> = interaction_cells(footprint)
+                        .filter(|cell| !occupancy.is_static(*cell))
+                        .collect();
+                    PathTree::route_to_nearest(
+                        self.columns(),
+                        self.rows(),
+                        self.units[unit].cell,
+                        &goals,
+                        |cell| !occupancy.is_static(cell),
+                    )
+                    .map(|(cost, _)| cost)
                 })?;
                 Some(((available.is_none(), cost, &building.id), footprint))
             })

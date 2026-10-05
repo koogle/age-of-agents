@@ -27,6 +27,31 @@ After integrating source, rebuild the combined bundle and follow
 [README validation](../../README.md#contributing); a branch's old binary cannot
 validate a merged renderer or local simulation.
 
+## Test iteration and compilation
+
+Use `cargo test -p aoa-game --locked` during simulation-only work, and the full
+workspace suite before shipping. `[profile.test.package.aoa-game]` keeps domain
+code optimized with debug assertions; graphics/windowing dependencies use the
+default unoptimized test profile. This reduces first-build work, at the cost of
+slower client tests. A profile change invalidates affected build artifacts once.
+
+Separate compilation (`cargo test --workspace --locked --no-run --timings`) from
+execution (repeat `cargo test --workspace --locked` without editing sources).
+Cargo writes the dependency timeline to `target/cargo-timings/cargo-timing.html`.
+Do not compare runs while another build or benchmark competes for CPU.
+
+The 2026-10-05 investigation at `b054655` measured 115.8s warm on a four-CPU cloud
+quota: 0.25s build check, 0.48s server, 4.03s client, 110.12s domain. Instrumented
+serial soundness took 103.36s; 45,911 route searches accounted for 90.19s (87%).
+Explicit extra validation was about 1%, so removing invariant checks was rejected.
+The same eight seeds and 9,600 ticks on four workers took 31.91s in isolation.
+Soundness now uses at most four available workers and retains its aggregate
+accepted-build/gather assertions. After integrating `2bddab9`, the final warm workspace run with these changes
+passed 233 tests in 52.74s: 0.29s build check, 1.20s server, 15.72s client and
+34.79s domain. The baseline had 215 tests, so this is not an identical-suite
+comparison. The narrower profile increases client execution time while reducing
+compilation work. These are dated measurements, not CI budgets.
+
 ## Interacting with Modal and GitHub Actions
 
 [deploy.yml](../../.github/workflows/deploy.yml) runs quality checks then deploys
