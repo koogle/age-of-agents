@@ -1,0 +1,39 @@
+{
+  "generator": "OpenAI image_gen",
+  "date": "2026-10-05",
+  "reference": "../dock_complete.png",
+  "complete_strip": {
+    "file": "complete_strip.png",
+    "generation_id": "exec-8cd0d6c4-a553-4eb9-81bc-418b313ffd9f",
+    "size": [
+      2172,
+      724
+    ],
+    "prompt_summary": "Three other upright quarter-turn views of approved dock: pier lower-right, upper-right, upper-left. Transparent fixed-camera isometric art; preserve boathouse, boat, palette and ink lines."
+  },
+  "construction_draft": {
+    "file": "construction_draft.png",
+    "generation_id": "exec-7acb187d-e9f2-492e-b84c-d7027aafb7e3",
+    "status": "Rejected for integration: 418px cells; retained as refinement reference."
+  },
+  "construction_refinements": {
+    "east": "exec-78ea971d-9d84-4d02-98a3-303280bfa320",
+    "north": "exec-13787c2f-dd6b-445c-962d-ddf5f30462f6",
+    "west": "exec-a5e4ba67-d638-4e3d-85be-ed7fd7edf088"
+  },
+  "refinement_prompt_summary": "Refine each draft column into a native-detail 2172x724 horizontal strip: foundation, walls, roof without boat; preserve upright orientation, platform, warm palette and ink lines; clean silhouette speckles.",
+  "processing": "Split equal 724px cells without resizing. Pack using scripts/pack_building_sprites.py, shared scale/baseline per row; authored structural deck corners in ../footprints.json. No flat image rotation or mirroring.",
+  "facings": {
+    "dock": "south (+row, lower-left; original art)",
+    "dock_east": "east (+column, lower-right)",
+    "dock_north": "north (-row, upper-right)",
+    "dock_west": "west (-column, upper-left)"
+  },
+  "prompts": {
+    "complete": "Create a production sprite sheet of exactly THREE additional views of this same Greek wooden dock building, arranged in three equal columns on a wide transparent canvas. Each sprite at least 512 pixels tall. The reference is the fourth existing view; generate its three other quarter-turn orientations by rotating the OBJECT in 3D about the vertical axis, never rotating the flat image. Fixed isometric camera looking down 30 degrees, upright vertical posts. Left column: pier projects toward lower right (shed behind at upper left). Middle column: pier projects toward upper right (shed in foreground lower left, see rear wall). Right column: pier projects toward upper left (shed in foreground lower right, see rear wall). Match precisely the reference identity: small pale wooden boathouse, terracotta gable tiled roof, wooden pier with posts, coiled ropes, basket and one small cream-sailed boat alongside. Preserve proportions, warm colors, fine ink outlines, painted cel shaded game art. No terrain, no water, no shadows outside sprite, no labels or text. Full isolated sprites, generous transparent gaps, consistent scale and camera. Clean straight geometry and crisp roof tiles. Save resulting image to the workspace and return its local path.",
+    "construction_draft": "Create a 3 COLUMN by 3 ROW construction sprite sheet matching the three dock orientations in this reference exactly. Transparent background. Large square 2048x2048 canvas. Each cell contains one isolated full sprite at matching scale and anchor, no clipping, clear generous transparent margins. Columns match reference: left is pier toward lower-right, center pier toward upper-right with rear shed wall foreground, right pier toward upper-left with rear shed foreground. Row 1: foundation phase, wooden platform and short posts only, NO shed NO boat NO sail, deck foundation stays in EXACT ground position of final dock. Row 2: walls phase, same platform with unfinished shed wall timber framing and pale plank walls, NO roof NO boat NO sail. Row 3: roofing phase, same dock boathouse with finished terracotta roof, NO boat NO sail and fewer props. Preserve isometric fixed camera, correct geometry, fine brown ink linework, pale wood warm palette, hand painted cel shaded style from reference. The boathouse must stay on the same landward end of each platform in ALL rows. No text, labels, numbers, terrain, ground or water. These are game assets not an infographic. Return saved local path.",
+    "east": "Refine ONLY column 1 (east) of the first reference into a high detail wide horizontal sprite strip with THREE equal cells, at least 2048x700 pixels overall. Left: its wooden dock foundation. Center: its unfinished shed walls. Right: its completed roof without boat. These are exactly the three stages from that reference column, rearranged into ONE HORIZONTAL ROW, drawn at higher native detail, preserving camera and orientation. Pier extends lower-right from shed at upper-left. Match the paler warm wood and muted terracotta of second reference. Crisp clean ink outlines, clean geometrically consistent timber and roof tiles. Remove ALL red speckles and red cutout fringes around silhouettes. All three sprites same platform dimensions and anchor, include entire platform beneath shed and its extension. Transparent background, generous margins, no shadows, no text, no ground. Full detailed game art, not enlarged blurry pixels.",
+    "north": "Refine ONLY column 2 (north) of the first reference into a high detail wide horizontal sprite strip with THREE equal cells, at least 2048x700 pixels overall. Left: its wooden dock foundation. Center: its unfinished shed walls. Right: its completed roof without boat. These are exactly the three stages from that reference column, rearranged into ONE HORIZONTAL ROW, drawn at higher native detail, preserving camera and orientation. Pier extends upper-right from shed at lower-left, rear shed wall foreground. Match the paler warm wood and muted terracotta of second reference. Crisp clean ink outlines, clean geometrically consistent timber and roof tiles. Remove ALL red speckles and red cutout fringes around silhouettes. All three sprites same platform dimensions and anchor, include entire platform beneath shed and its extension. Transparent background, generous margins, no shadows, no text, no ground. Full detailed game art, not enlarged blurry pixels.",
+    "west": "Refine ONLY column 3 (west) of the first reference into a high detail wide horizontal sprite strip with THREE equal cells, at least 2048x700 pixels overall. Left: its wooden dock foundation. Center: its unfinished shed walls. Right: its completed roof without boat. These are exactly the three stages from that reference column, rearranged into ONE HORIZONTAL ROW, drawn at higher native detail, preserving camera and orientation. Pier extends upper-left from shed at lower-right, rear shed wall foreground. Match the paler warm wood and muted terracotta of second reference. Crisp clean ink outlines, clean geometrically consistent timber and roof tiles. Remove ALL red speckles and red cutout fringes around silhouettes. All three sprites same platform dimensions and anchor, include entire platform beneath shed and its extension. Transparent background, generous margins, no shadows, no text, no ground. Full detailed game art, not enlarged blurry pixels."
+  }
+}

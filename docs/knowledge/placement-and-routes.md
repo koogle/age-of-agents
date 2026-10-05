@@ -75,3 +75,20 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Dock orientation (2026-10-05)
+
+Docks automatically face their pier toward adjacent water, as requested on 2026-10-05.
+`game/coast.rs::dock_facing` chooses the edge with most adjacent water cells;
+ties prefer south, east, north, west. The existing 4×4 land footprint and coastal
+eligibility are unchanged, including single-cell water contact and exclusion of
+diagonal-only water. Both domain validation and client preview use this rule.
+
+The snapshot helper samples only disclosed terrain and falls back to south when
+no water is known. Placed docks and ghosts use the same helper. Static coastlines
+make facing derived data, so no new persisted field or save reset is needed.
+All four views have foundation, wall, roof and complete frames; see the
+[directional provenance](../../assets/sprites/building_sources/directions/provenance.json).
+
+Reproduce the visual check with `docs/verification/check_dock_facings.py`; see
+[verification and review](../verification/dock-facing/README.md) for scope and release limits.
