@@ -95,3 +95,9 @@ restore the hand for land units and ships, retaining the X for cancellation.
 ## Text transparency
 
 User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.
+
+## Concise building descriptions
+
+User steering (2026-10-05): shorten the granary description and omit technical
+qualifiers such as “no stacking.” Keep its drop-off role and nearby yield benefit
+in the HUD; detailed range, timing and stacking rules belong in the system guide.

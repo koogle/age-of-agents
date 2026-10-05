@@ -1,3 +1,10 @@
+# Granary field yield — 2026-10-05
+
+- User requested shorter copy: “Food/fiber drop-off · +50% nearby field yield.” Browser bundle rebuilt; strict native/WASM lint and refreshed desktop/phone selection checks pass with no browser errors.
+
+- Implemented +50% field yield within six cells of a completed granary, edge to edge, non-stacking. Evaluated at planting/replenishment completion; each boosted harvest has 180 food. Existing crops and food/fiber drop-offs are preserved; no save schema change.
+- 271 combined workspace tests pass (one existing benchmark ignored), strict native/WASM lint and rebuilt browser selection pass on desktop and DPR2 phone with no page errors. [Evidence and reproduction](docs/verification/granary/README.md). User authorized creating/merging the granary PR. [PR #132](https://github.com/koogle/age-of-agents/pull/132) integrates master `8bf00b4` (productive building availability) on `feat/granary-field-yield`; release will use the merge-triggered GitHub Actions workflow. Direct Modal access remains unavailable.
+
 # Productive building availability — 2026-10-05
 
 - User explicitly requested hiding advanced buildings such as Barracks until resources support construction and productive use, superseding construction-only visibility. Implemented shared domain gate; Barracks/Smelter require iron + coal, Kiln clay, Weaver fiber, Workshop clay + steel inputs. Ten starter buildings remain; Range is productive with food/timber. Temporary shortages still grey out choices.
