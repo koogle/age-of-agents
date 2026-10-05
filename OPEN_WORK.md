@@ -1,4 +1,11 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: field gathering audit (2026-10-05)
+
+- Dedicated branch `fix/field-gathering-routes`; user requested audit/fix in a PR, not a merge or deployment.
+- Confirmed fields already share ordinary gathering, deposits, resumption and same-kind continuation. Found and reproduced a field-placement gap: a permanent plot could cut off delivery routes while remaining reachable for preparation. Reuses building placement's route-preservation guard before mutation/spending.
+- Added regressions for atomic rejection from either side of a bottleneck, complete harvesting around a legal bypass across reload, and field/wild-food continuation in both directions. All ten focused field tests pass; the rejection test failed before the fix. All 186 workspace tests, formatting and strict native/WASM lint pass; rebuilt the tracked browser bundle. Desktop mouse and DPR2 phone touch each completed the prepare → harvest → six deliveries → idle flow with no page errors, using an isolated SQLite fixture under `/workspace/scratch/field-audit`. Rebuilt-client smoke also passes. Ready for the dedicated review PR; no merge or production deployment performed.
+- Audit and thermonuclear review: `docs/FIELD_GATHERING_REVIEW.md`. Existing blocked layouts are not migrated. Separately observed the existing idle-villager blockage in one-cell traffic; no general movement behavior change in this PR. User's precise saved layout is unavailable.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.
