@@ -1,4 +1,14 @@
-# Current handoff: compact mobile HUD (2026-10-05)
+# Current handoff: explore fogged building sites (2026-10-05)
+
+- User requested a PR for building placement outside current sight. Branch `fix/explore-before-building` is based on master `61fc87c`.
+- Fogged orders retain a typed, persisted exploration assignment. Villagers unload cargo first, explore, and create/pay for a foundation only after the whole footprint is currently visible and all existing placement checks pass. Stop/replacement, blocked/unreachable sites and lost affordability leave no foundation or charge. Visible placement remains immediate.
+- Mouse/touch placement accepts fogged building sites; selection shows “Exploring build site.” Field preparation retains its existing behavior. README/roadmap and tracked browser bundle updated; no new assets or dependencies.
+- Validation covers 199 tests: the full integration suite passed (13 server, 56 client, 128 domain), followed by all 58 client tests after the client-only compact-HUD merge. Strict native/WASM lint, formatting and generated JS syntax checks pass; browser bundle rebuilt. Seven new regressions cover exploration and its action feedback.
+- Thermonuclear review: construction code is consolidated in a 140-line domain module; atomic placement is reused, pending sites own no cells or costs, bounds and worker type validate on reload, and no idle behavior or new navigation machinery was added.
+- Real browser menu → fog placement → exploration → completed house passes on desktop 1280×800/DPR1 and phone 390×844/DPR2 with touch input. Authoritative snapshots confirm no early foundation/cost, exactly one house and exactly 15 wood spent; no page errors. QA scripts, fixture and screenshots are under `/workspace/scratch/fog-build`.
+- User authorized merging PR #79. Integrated master `7aaafdb` (action flashes, field-route safety and compact HUD); added exploration status/reassignment coverage. Final checks pass, including the compact-HUD touch menu → exploration → completed house flow with exactly 15 wood spent and no browser errors. Ready for the authorized merge. The existing Modal workflow deploys master merges.
+
+# Previous handoff: compact mobile HUD (2026-10-05)
 
 The requested shared Rust layout places actions bottom-left beside an 80px globe and a single row of 44px pause/1×/2× targets above it. Selection text, full queues and building submenus wrap upward within the left column; picking a building collapses the menu. Painted artwork is preserved. Earlier stacked mobile studies are superseded.
 
