@@ -20,7 +20,8 @@ pub(super) fn sheets() -> Sheets {
 }
 
 pub(super) fn unit_sprite(view: &mut WorldView, sheets: &Sheets, time: f32) -> (usize, Sprite) {
-    let (sprites, _) = view.draw_list(sheets, &Rig::new(), time, &Selection::default());
+    view.animation_time = time;
+    let (sprites, _) = view.draw_list(sheets, &Rig::new(), &Selection::default());
     let mut units = sprites
         .into_iter()
         .filter(|(sheet, _)| VILLAGER_SHEETS.contains(sheet));
@@ -79,6 +80,43 @@ fn all_gathering_activities_keep_animating_with_partial_cargo() {
             }
         }
     }
+}
+
+#[test]
+fn paused_gathering_holds_the_rendered_frame_and_resumes() {
+    let sheets = sheets();
+    let mut snapshot = GameWorld::default().snapshot();
+    snapshot.units.truncate(1);
+    snapshot.resources[0].kind = ResourceKind::Wood;
+    snapshot.units[0].unit.action = UnitAction::Gather {
+        resource_id: snapshot.resources[0].id.clone(),
+        phase: GatherPhase::Gathering,
+    };
+    park_beside_work(&mut snapshot);
+    let mut view = WorldView::new();
+    view.sync(snapshot.clone());
+    let draw = |view: &mut WorldView| {
+        view.draw_list(&sheets, &Rig::new(), &Selection::default())
+            .0
+            .into_iter()
+            .find(|(sheet, _)| VILLAGER_SHEETS.contains(sheet))
+            .unwrap()
+            .1
+            .uv
+    };
+    let before = draw(&mut view);
+    snapshot.simulation_speed = 0.0;
+    view.sync(snapshot.clone());
+    for local in [None, Some(0.0)] {
+        for _ in 0..60 {
+            view.frame(1.0 / 60.0, local);
+            assert_eq!(draw(&mut view), before);
+        }
+    }
+    snapshot.simulation_speed = 1.0;
+    view.sync(snapshot);
+    view.frame(1.1 / sheets.villager.fps["chop"], None);
+    assert_ne!(draw(&mut view), before);
 }
 
 #[test]
@@ -197,4 +235,48 @@ fn park_beside_work(snapshot: &mut WorldSnapshot) {
     snapshot.units[0].unit.cell = cell;
     snapshot.units[0].unit.step = None;
     snapshot.units[0].position = snapshot.units[0].unit.position();
+}
+
+#[test]
+fn paused_wildlife_holds_its_rendered_stride_until_resumed() {
+    let sheets = sheets();
+    let mut snapshot = GameWorld::default().snapshot();
+    let cell = snapshot.units[0].unit.cell;
+    snapshot.animals = vec![aoa_game::Animal {
+        id: "pause-wolf".into(),
+        kind: aoa_game::AnimalKind::Wolf,
+        home: cell,
+        cell,
+        step: Some(aoa_game::Step {
+            to: aoa_game::CellCoordinate::new(cell.column + 1, cell.row),
+            progress: 0.5,
+        }),
+        health: 40.0,
+        attack_seconds: 0.0,
+        heading: [1, 0],
+    }];
+    snapshot.simulation_speed = 0.0;
+    let mut view = WorldView::new();
+    view.sync(snapshot.clone());
+    let sprite = |view: &mut WorldView| {
+        view.draw_list(&sheets, &Rig::new(), &Selection::default())
+            .0
+            .into_iter()
+            .find(|(sheet, _)| *sheet == 13)
+            .unwrap()
+            .1
+    };
+    let before = sprite(&mut view);
+    for _ in 0..90 {
+        view.frame(1.0 / 60.0, None);
+        let held = sprite(&mut view);
+        assert_eq!(held.uv, before.uv);
+        assert_eq!(held.anchor, before.anchor);
+    }
+    snapshot.simulation_speed = 1.0;
+    view.sync(snapshot);
+    for _ in 0..15 {
+        view.frame(1.0 / 60.0, None);
+    }
+    assert_ne!(sprite(&mut view).uv, before.uv);
 }
