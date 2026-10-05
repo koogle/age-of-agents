@@ -25,6 +25,8 @@ impl Hud {
                 matches!(kind, ResourceKind::Wood | ResourceKind::Food) || *amount >= 1.0
             })
             .collect();
+        let mut resource_hint = None;
+        let row_height = 66.0;
         let d = 46.0 * s;
         let step = d + 18.0 * s;
         let per_row = ((width - 115.0 * s) / step).floor().max(1.0) as usize;
@@ -32,7 +34,7 @@ impl Hud {
             let row = index / per_row;
             let count = (shown.len() - row * per_row).min(per_row);
             let x = width - 16.0 * s - (count - index % per_row) as f32 * step + (step - d) / 2.0;
-            let y = (10.0 + row as f32 * 82.0) * s;
+            let y = (10.0 + row as f32 * row_height) * s;
             let icon = resource_icon(*kind);
             self.coin(atlas, icon, [x, y, d, d], true, false);
             let text = format!("{}", amount.floor() as i64);
@@ -51,17 +53,18 @@ impl Hud {
                 INK,
                 true,
             );
-            self.text(
-                atlas,
-                kind.name(),
-                (x + d / 2.0, y + d + 30.0 * s),
-                10.0 * s,
-                INK,
-                true,
-            );
+            let hit = [x, y, d, d + 16.0 * s];
+            if self.hovered(hit) {
+                resource_hint = Some(kind.name());
+            }
+            self.regions.push(Region {
+                rect: hit,
+                action: Action::Explain(kind.name().into()),
+                enabled: true,
+            });
         }
 
-        let header_bottom = (shown.len().div_ceil(per_row) as f32 * 82.0 + 8.0) * s;
+        let header_bottom = (shown.len().div_ceil(per_row) as f32 * row_height + 8.0) * s;
         let label = format!(
             "Island {} · shore + nearby ships",
             model.resource_island + 1
@@ -239,7 +242,7 @@ impl Hud {
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
         else {
-            self.toast(atlas, model.toast, width, s, toast_top);
+            self.toast(atlas, model.toast.or(resource_hint), width, s, toast_top);
             return;
         };
         let gap = if narrow { 8.0 } else { 10.0 } * s;
@@ -510,6 +513,6 @@ impl Hud {
                 1.5 * s,
             );
         }
-        self.toast(atlas, model.toast, width, s, toast_top);
+        self.toast(atlas, model.toast.or(resource_hint), width, s, toast_top);
     }
 }
