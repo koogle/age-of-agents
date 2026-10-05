@@ -18,6 +18,7 @@ tower-http = { version = "0.6", features = ["cors", "fs", "set-header"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# The soundness tests replay thousands of ticks with debug assertions on.
-[profile.test]
+# Optimize the simulation without optimizing the renderer dependency graph.
+# Debug assertions (including per-tick invariants) stay enabled.
+[profile.test.package.aoa-game]
 opt-level = 1
