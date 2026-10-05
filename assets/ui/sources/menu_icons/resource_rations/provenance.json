@@ -1,0 +1,93 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a compact packed travel ration: one round bread loaf and a small olive-green wrapped provisions bundle secured with twine, clear broad silhouette. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3701/W_epnOxMZp7F_2ZdN842s_akmnRq6P.png",
+        "content_type": "image/png",
+        "file_name": "W_epnOxMZp7F_2ZdN842s_akmnRq6P.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      0,
+      314,
+      314,
+      627
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f7/fvI3cakU1WzwvYkdwgdtK_apfv13ql.png",
+        "content_type": "image/png",
+        "file_name": "fvI3cakU1WzwvYkdwgdtK_apfv13ql.png",
+        "file_size": null,
+        "width": 314,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242160.0158694,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:resource_rations",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-3dfb-7371-aa15-5aceb2533247",
+        "seconds": 2.4
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "resource_rations.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239708.7108872,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "resource_rations",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-bc9a-78a3-98f2-329d7e993faf",
+      "seconds": 9.0
+    },
+    {
+      "t": 1791239823.8603477,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:resource_rations",
+      "est_usd": 0.005,
+      "request_id": "01a10e36-9894-7903-9b85-1a2918ed24e7",
+      "seconds": 2.4
+    },
+    {
+      "t": 1791239911.8656247,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:resource_rations",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-efbd-7011-a551-6f33c7319636",
+      "seconds": 2.5
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}
