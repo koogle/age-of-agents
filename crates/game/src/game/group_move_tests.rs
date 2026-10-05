@@ -5,7 +5,7 @@ use super::*;
 
 fn train_until(world: &mut GameWorld, count: usize) {
     house(world, count);
-    world.stockpile.food = 1_000.0;
+    world.inventories[0].food = 1_000.0;
     while world.units.len() < count {
         if world.buildings[0].job.is_none() {
             world

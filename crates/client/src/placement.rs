@@ -86,7 +86,11 @@ impl App {
                     && cell.visibility != aoa_game::CellVisibility::Visible
             })
         {
-            return Some((origin, snapshot.stockpile.affords(kind.cost())));
+            return Some((
+                origin,
+                snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
+                    .affords(kind.cost()),
+            ));
         }
         let blocked =
             snapshot.resources.iter().any(|r| {
@@ -110,24 +114,11 @@ impl App {
                         || cell.biome.is_some_and(|biome| !biome.is_walkable())
                 })
             });
-        let water = |column: i32, row: i32| {
-            column >= 0
-                && row >= 0
-                && column < i32::from(snapshot.columns)
-                && row < i32::from(snapshot.rows)
-                && snapshot.terrain[row as usize * snapshot.columns as usize + column as usize]
-                    .biome
-                    == Some(aoa_game::TerrainBiome::Water)
-        };
-        let (c0, r0) = (i32::from(origin.column), i32::from(origin.row));
-        let (c1, r1) = (c0 + i32::from(columns), r0 + i32::from(rows));
-        let coast = (c0..c1).any(|c| water(c, r0 - 1) || water(c, r1))
-            || (r0..r1).any(|r| water(c0 - 1, r) || water(c1, r));
+        let coast = snapshot.dock_facing(origin).is_some();
         Some((
             origin,
             !blocked
-                && snapshot
-                    .stockpile
+                && snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
                     .affords(if self.build == crate::hud::BuildUi::PlacingField {
                         aoa_game::FIELD_COST
                     } else {

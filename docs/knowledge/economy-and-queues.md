@@ -36,8 +36,7 @@ Transport must remain affordable before later-island materials are available. Ve
 
 Read [current decisions](../../decisions.md) and the
 [starter economy review](../STARTER_ECONOMY_REVIEW.md) for rationale; the review's
-old transport deferrals are explicitly historical. Deposited stocks are shared
-across islands; personal cargo is covered by [tasks and cargo](tasks-and-cargo.md).
+old transport deferrals are explicitly historical. Deposited stocks belong to individual islands, supplemented by stopped shore ships; costs reserve once from shore then ship cargo, while outputs/refunds remain on the job’s island. Research remains shared. Personal cargo is covered by [tasks and cargo](tasks-and-cargo.md).
 
 ## Checks and reusable learning
 

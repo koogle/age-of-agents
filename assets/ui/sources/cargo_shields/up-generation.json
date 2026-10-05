@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/buttons/coin_normal.png",
+  "prompt": "Create one standalone game UI button shaped like a small classical shield, viewed perfectly straight on. Rounded shoulders and a softly pointed bottom, symmetrical upright shield silhouette. Use the attached coin only as the STYLE reference: identical fine dark-brown ink outlines, warm antique bronze-gold raised rim, creamy ivory inset face, softly painted Mediterranean watercolor shading and subtle dimensional highlights. In the center put one very large, simple, bold dark olive arrow pointing straight UP: a broad triangular arrowhead and one short thick vertical shaft. The arrow must read clearly at 36 pixels. The arrow occupies most of the inset face. The whole shield fills 85 percent of the square frame. No circular coin around the shield. No lettering, no words, no numbers, no decoration, no ground, no cast shadow. Pure white background outside the shield.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad2bf8/eySUNvaNwbi_knWOkmIp-_gX4Zah0C.png",
+        "content_type": "image/png",
+        "file_name": "eySUNvaNwbi_knWOkmIp-_gX4Zah0C.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  }
+}

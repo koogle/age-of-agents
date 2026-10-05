@@ -8,6 +8,7 @@ fn vessel(cell: CellCoordinate) -> TransportShip {
         destination: None,
         heading: [1, 0],
         passengers: Vec::new(),
+        cargo: Default::default(),
         home_dock_id: None,
     }
 }
@@ -130,8 +131,7 @@ fn destination_shortcut_sails_without_swapping_or_teleporting() {
     assert_eq!(world, before);
 }
 
-#[test]
-fn both_settlements_keep_producing_from_shared_resources() {
+fn settled_islands() -> GameWorld {
     let mut world = GameWorld::default();
     world.discover_island();
     let mut base = world.buildings[0].clone();
@@ -150,7 +150,14 @@ fn both_settlements_keep_producing_from_shared_resources() {
         }
     }
     world.buildings.push(base);
-    world.stockpile.food = 1000.0;
+    world
+}
+
+#[test]
+fn both_settlements_keep_producing_from_local_resources() {
+    let mut world = settled_islands();
+    world.inventories[0].food = 1000.0;
+    world.inventories[1].food = 1000.0;
     for id in ["base-1", "base-away"] {
         world
             .apply_command(Command::Produce {
@@ -235,4 +242,36 @@ fn local_visibility_matches_the_reference_full_map_scan_after_expansion() {
         })
         .collect();
     assert_eq!(world.visible_cells(), expected);
+}
+
+#[test]
+fn local_training_cannot_spend_other_islands_food_and_refunds_stay_local() {
+    let mut world = settled_islands();
+    world.inventories[0].food = 100.0;
+    let order = Command::Produce {
+        building_id: "base-away".into(),
+        product: ProductKind::Villager,
+    };
+    let before = world.clone();
+    assert!(world.apply_command(order.clone()).is_err());
+    assert_eq!(world, before);
+    world.inventories[1].food = 100.0;
+    world.apply_command(order.clone()).unwrap();
+    world.apply_command(order).unwrap();
+    assert_eq!(world.inventories[0].food, 100.0);
+    assert_eq!(world.inventories[1].food, 100.0 - 2.0 * VILLAGER_FOOD_COST);
+    let building = world
+        .buildings
+        .iter()
+        .find(|b| b.id == "base-away")
+        .unwrap();
+    let queue_id = building.queue[0].id;
+    world
+        .apply_command(Command::CancelQueuedJob {
+            building_id: "base-away".into(),
+            queue_id,
+        })
+        .unwrap();
+    assert_eq!(world.inventories[1].food, 100.0 - VILLAGER_FOOD_COST);
+    assert_eq!(world.inventories[0].food, 100.0);
 }
