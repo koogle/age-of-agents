@@ -15,6 +15,7 @@ mod build_menu;
 mod layout;
 #[cfg(test)]
 mod layout_tests;
+mod minimap;
 pub use build_menu::BuildingGroup;
 mod selection;
 mod ships;
@@ -69,9 +70,11 @@ pub fn files() -> Vec<String> {
 #[derive(Clone, Copy, Pod, Zeroable, Debug)]
 pub struct Quad {
     pub rect: [f32; 4],
+    /// Atlas bounds; globe mode uses UV center and horizontal UV direction.
     pub uv: [f32; 4],
     pub color: [f32; 4],
     /// x = mode (0 texture, 1 rounded rect, 2 ring, 3 globe), y = radius or width.
+    /// Globe mode stores the vertical UV direction in yz.
     pub params: [f32; 4],
 }
 
@@ -369,7 +372,7 @@ pub struct Hud {
     regions: Vec<Region>,
     pub hover: Option<Vec2>,
     pressed: Option<Action>,
-    map_span: f32,
+    map_size: Vec2,
 }
 
 fn resource_icon(kind: ResourceKind) -> &'static str {
@@ -396,7 +399,7 @@ impl Hud {
             regions: Vec::new(),
             hover: None,
             pressed: None,
-            map_span: 1.0,
+            map_size: Vec2::new(crate::terrain::COLUMNS, crate::terrain::ROWS),
         }
     }
 
@@ -695,16 +698,10 @@ impl Hud {
             if at.x >= r[0] && at.x <= r[0] + r[2] && at.y >= r[1] && at.y <= r[1] + r[3] {
                 if region.enabled {
                     self.pressed = Some(match &region.action {
-                        Action::LookAt(origin) => {
-                            let span = self.map_span;
-                            Action::LookAt(
-                                *origin
-                                    + Vec2::new(
-                                        (at.x - r[0]) / r[2] * span,
-                                        (at.y - r[1]) / r[3] * span,
-                                    ),
-                            )
-                        }
+                        Action::LookAt(_) => Action::LookAt(
+                            minimap::Minimap::new(self.map_size)
+                                .world_at(Vec2::new((at.x - r[0]) / r[2], (at.y - r[1]) / r[3])),
+                        ),
                         action => action.clone(),
                     });
                 }

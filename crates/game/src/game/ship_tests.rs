@@ -318,3 +318,54 @@ fn docking_selects_a_reachable_water_berth_and_rejects_other_buildings() {
     assert!(w.ships[0].beside(w.buildings.last().unwrap().footprint()));
     w.validate().unwrap();
 }
+
+#[test]
+fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing() {
+    let mut world = harbor();
+    world.buildings.insert(
+        0,
+        building(BuildingKind::Dock, "other-dock", c(50, 26), None),
+    );
+    world.discover_island();
+    world.ships[0].cell = c(184, 0);
+    let id = world.ships[0].id.clone();
+    world
+        .apply_command(Command::Voyage {
+            ship_id: id,
+            island_id: 0,
+        })
+        .unwrap();
+    assert_eq!(world.ships[0].home_dock_id.as_deref(), Some("dock"));
+    assert_eq!(world.ships[0].cell, c(184, 0));
+    let target = world.ships[0].destination.unwrap();
+    assert!((20..24).contains(&target.column));
+    assert_eq!(target.row, 30);
+    for _ in 0..200 {
+        world.tick(0.5);
+    }
+    assert_eq!(world.ships[0].cell, target);
+    assert!(world.ships[0].stopped());
+}
+
+#[test]
+fn blocked_home_dock_rejects_the_continuous_return_atomically() {
+    let mut world = harbor();
+    world.discover_island();
+    world.ships[0].cell = c(184, 0);
+    for column in 20..24 {
+        let mut blocker = world.ships[0].clone();
+        blocker.id = format!("berth-{column}");
+        blocker.cell = c(column, 30);
+        world.ships.push(blocker);
+    }
+    let before = world.clone();
+    assert!(
+        world
+            .apply_command(Command::Voyage {
+                ship_id: world.ships[0].id.clone(),
+                island_id: 0
+            })
+            .is_err()
+    );
+    assert_eq!(world, before);
+}

@@ -37,6 +37,10 @@ fn vs(@builtin(vertex_index) index: u32, quad: Quad) -> VOut {
     out.clip = vec4<f32>(pixel.x / hud.screen.x * 2.0 - 1.0, 1.0 - pixel.y / hud.screen.y * 2.0, 0.0, 1.0);
     out.local = q;
     out.uv = mix(quad.uv.xy, quad.uv.zw, q);
+    if quad.params.x == 3.0 {
+        // Isometric map: world UV origin and both inverse-projected axes.
+        out.uv = quad.uv.xy + (q.x - 0.5) * quad.uv.zw + (q.y - 0.5) * quad.params.yz;
+    }
     out.color = quad.color;
     out.params = quad.params;
     out.size = quad.rect.zw;
