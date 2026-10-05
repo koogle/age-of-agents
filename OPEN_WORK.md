@@ -1,4 +1,10 @@
-# Current handoff: cursor edge panning (2026-10-04)
+# Current handoff: compact mobile HUD (2026-10-05)
+
+The requested shared Rust layout places actions bottom-left beside an 80px globe and 44px speed targets. Selection text, full queues and building submenus wrap upward within the left column; picking a building collapses the menu. Painted artwork is preserved. Earlier stacked mobile studies are superseded.
+
+Rebased onto current master `61fc87c`, retaining transport, islands, field harvesting and zoom-scaled edge panning. All 185 workspace tests, formatting, strict native/WASM Clippy and rebuilt browser bundle pass. Layout tests include ship controls and pass after the landscape queue-width refinement. Browser-local phone/menu/landscape replay has no page errors; authoritative combined touch checks pass for speed changes, full queues and cancellation/refunds. Final phone, submenu, placement, narrow-phone, landscape and desktop captures are saved in `docs/verification/2026-10-05/`; the browser replay has no page errors. Review: `docs/COMPACT_HUD_REVIEW.md`. Direct Modal deployment fails with “Token missing”; no production changes have been made. The scoped PR will remain unmerged for review.
+
+# Previous handoff: cursor edge panning (2026-10-04)
 
 - Increased full edge speed to 0.75 viewport heights per second (about 5× the previous horizontal speed). Screen-space conversion follows orthographic zoom and compensates for vertical isometric foreshortening; diagonal speed remains normalized.
 - Preserved the 32-logical-pixel ramp, focus/HUD/drag/touch guards, camera bounds, and keyboard/drag controls. Updated README and roadmap controls descriptions.

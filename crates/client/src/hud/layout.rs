@@ -344,7 +344,9 @@ impl Hud {
         };
         if !queued.is_empty() {
             let queue_width = if narrow {
-                selection_width
+                selection_width.min(
+                    ((queued.len().min(queue_columns) as f32 * 44.0 + 16.0) * s).max(168.0 * s),
+                )
             } else {
                 (queued.len() as f32 * 44.0 + 24.0).max(168.0) * s
             };
