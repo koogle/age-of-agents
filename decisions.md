@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).
+
 - **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. Subsequent direction sets one animal on the first island and more on the second: one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island ([wildlife](docs/knowledge/wildlife.md)).
 
 - **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
