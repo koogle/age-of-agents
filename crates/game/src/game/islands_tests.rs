@@ -131,47 +131,31 @@ fn destination_shortcut_sails_without_swapping_or_teleporting() {
     assert_eq!(world, before);
 }
 
-fn legacy_world() -> GameWorld {
+fn settled_islands() -> GameWorld {
     let mut world = GameWorld::default();
-    let mut away = GameWorld::generate(42);
-    away.units[0].id = "villager-away-1".into();
-    away.units[1].id = "villager-away-2".into();
-    away.buildings[0].id = "base-away".into();
-    world.islands.push(IslandState {
-        id: 1,
-        terrain: away.terrain,
-        explored_cells: away.explored_cells,
-        units: away.units,
-        ships: vec![vessel(CellCoordinate::new(0, 0))],
-        resources: away.resources,
-        buildings: away.buildings,
+    world.discover_island();
+    let mut base = world.buildings[0].clone();
+    base.id = "base-away".into();
+    base.origin.column += 184;
+    // Clear a settlement footprint and its adjacent production cells.
+    world.resources.retain(|r| {
+        r.cell.column.abs_diff(base.origin.column) > 12 || r.cell.row.abs_diff(base.origin.row) > 12
     });
+    for cell in &mut world.terrain {
+        if cell.column.abs_diff(base.origin.column) <= 12
+            && cell.row.abs_diff(base.origin.row) <= 12
+        {
+            cell.biome = TerrainBiome::Meadow;
+            cell.elevation = 0.0;
+        }
+    }
+    world.buildings.push(base);
     world
 }
 
 #[test]
-fn migration_preserves_every_settlement_and_orders_and_is_idempotent() {
-    let mut world = legacy_world();
-    let old = world.clone();
-    world.unify_islands().unwrap();
-    assert!(world.islands.is_empty());
-    assert_eq!(world.buildings.len(), 2);
-    assert_eq!(world.units.len(), 4);
-    assert_eq!(world.ships[0].cell, CellCoordinate::new(184, 0));
-    assert_eq!(world.inventories[0], old.inventories[0]);
-    let mut expected = old.islands[0].buildings[0].origin;
-    expected.column += 184;
-    assert_eq!(world.buildings[1].origin, expected);
-    let migrated = world.clone();
-    world.unify_islands().unwrap();
-    assert_eq!(world, migrated);
-    world.validate().unwrap();
-}
-
-#[test]
 fn both_settlements_keep_producing_from_local_resources() {
-    let mut world = legacy_world();
-    world.unify_islands().unwrap();
+    let mut world = settled_islands();
     world.inventories[0].food = 1000.0;
     world.inventories[1].food = 1000.0;
     for id in ["base-1", "base-away"] {
@@ -185,18 +169,9 @@ fn both_settlements_keep_producing_from_local_resources() {
     for _ in 0..100 {
         world.tick(1.0);
     }
-    assert_eq!(world.units.len(), 6);
-    assert!(world.units.iter().filter(|u| u.cell.column >= 184).count() >= 3);
+    assert_eq!(world.units.len(), 4);
+    assert!(world.units.iter().filter(|u| u.cell.column >= 184).count() >= 1);
     world.validate().unwrap();
-}
-
-#[test]
-fn migration_rejects_corrupt_archives_without_replacing_them() {
-    let mut world = legacy_world();
-    world.islands[0].terrain.pop();
-    let before = world.clone();
-    assert!(world.unify_islands().is_err());
-    assert_eq!(world, before);
 }
 
 #[test]
@@ -236,35 +211,6 @@ fn archipelago_budget() {
 }
 
 #[test]
-fn migration_translates_mid_voyage_steps_passengers_and_destinations() {
-    let mut world = legacy_world();
-    let island = &mut world.islands[0];
-    let passenger = island.units.remove(0);
-    let old_cell = passenger.cell;
-    island.ships[0].passengers.push(passenger);
-    island.ships[0].step = Some(Step {
-        to: CellCoordinate::new(1, 0),
-        progress: 0.3,
-    });
-    island.ships[0].destination = Some(CellCoordinate::new(5, 0));
-    world.unify_islands().unwrap();
-    let ship = &world.ships[0];
-    assert_eq!(
-        ship.step,
-        Some(Step {
-            to: CellCoordinate::new(185, 0),
-            progress: 0.3
-        })
-    );
-    assert_eq!(ship.destination, Some(CellCoordinate::new(189, 0)));
-    assert_eq!(
-        ship.passengers[0].cell,
-        CellCoordinate::new(old_cell.column + 184, old_cell.row)
-    );
-    world.validate().unwrap();
-}
-
-#[test]
 fn local_visibility_matches_the_reference_full_map_scan_after_expansion() {
     let mut world = GameWorld::default();
     world.discover_island();
@@ -300,8 +246,7 @@ fn local_visibility_matches_the_reference_full_map_scan_after_expansion() {
 
 #[test]
 fn local_training_cannot_spend_other_islands_food_and_refunds_stay_local() {
-    let mut world = legacy_world();
-    world.unify_islands().unwrap();
+    let mut world = settled_islands();
     world.inventories[0].food = 100.0;
     let order = Command::Produce {
         building_id: "base-away".into(),

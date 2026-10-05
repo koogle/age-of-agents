@@ -1,4 +1,4 @@
-//! Persistent islands in one coordinate space; archived maps are read only for save upgrades.
+//! Persistent islands in one coordinate space.
 use super::*;
 use crate::navigation::offset;
 
@@ -8,38 +8,7 @@ pub(super) fn starting_origins() -> Vec<CellCoordinate> {
     vec![CellCoordinate::new(0, 0)]
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct IslandState {
-    pub id: u64,
-    pub terrain: Vec<TerrainCell>,
-    pub explored_cells: Vec<CellCoordinate>,
-    pub units: Vec<Unit>,
-    pub ships: Vec<TransportShip>,
-    pub resources: Vec<ResourceNode>,
-    pub buildings: Vec<Building>,
-}
-
-impl IslandState {
-    fn exchange(&mut self, world: &mut GameWorld) {
-        use std::mem::swap;
-        swap(&mut self.id, &mut world.island_id);
-        swap(&mut self.terrain, &mut world.terrain);
-        swap(&mut self.explored_cells, &mut world.explored_cells);
-        swap(&mut self.units, &mut world.units);
-        swap(&mut self.ships, &mut world.ships);
-        swap(&mut self.resources, &mut world.resources);
-        swap(&mut self.buildings, &mut world.buildings);
-    }
-}
-
 impl GameWorld {
-    pub(super) fn all_buildings(&self) -> impl Iterator<Item = &Building> {
-        self.buildings
-            .iter()
-            .chain(self.islands.iter().flat_map(|i| i.buildings.iter()))
-    }
-
     pub fn columns(&self) -> u16 {
         self.terrain
             .last()
@@ -64,18 +33,19 @@ impl GameWorld {
         let columns = self.columns().max(origin.column + WORLD_COLUMNS);
         let rows = self.rows().max(origin.row + WORLD_ROWS);
         let generated = worldgen::destination(worldgen::mix(self.seed, id), id);
-        let mut island = IslandState {
-            id,
-            terrain: generated.terrain,
-            resources: generated.resources,
-            explored_cells: Vec::new(),
-            units: Vec::new(),
-            ships: Vec::new(),
-            buildings: Vec::new(),
-        };
-        island.translate(origin);
         self.resize_ocean(columns, rows);
-        self.merge_island(island);
+        let stride = usize::from(self.columns());
+        for mut cell in generated.terrain {
+            cell.column += origin.column;
+            cell.row += origin.row;
+            self.terrain[usize::from(cell.row) * stride + usize::from(cell.column)] = cell;
+        }
+        for mut node in generated.resources {
+            node.cell.column += origin.column;
+            node.cell.row += origin.row;
+            node.id = format!("island-{id}:{}", node.id);
+            self.resources.push(node);
+        }
         self.island_origins.push(origin);
         self.inventories.push(Stockpile::default());
     }
@@ -97,19 +67,6 @@ impl GameWorld {
             terrain[usize::from(cell.row) * usize::from(columns) + usize::from(cell.column)] = cell;
         }
         self.terrain = terrain;
-    }
-
-    fn merge_island(&mut self, island: IslandState) {
-        let columns = usize::from(self.columns());
-        for cell in island.terrain {
-            self.terrain[usize::from(cell.row) * columns + usize::from(cell.column)] = cell;
-        }
-        self.explored_cells.extend(island.explored_cells);
-        self.explored_cells.sort_unstable();
-        self.units.extend(island.units);
-        self.ships.extend(island.ships);
-        self.resources.extend(island.resources);
-        self.buildings.extend(island.buildings);
     }
 
     /// Discovery follows the frontier vessel; old coastlines never regenerate.
@@ -141,60 +98,9 @@ impl GameWorld {
         }
     }
 
-    /// Upgrade old local maps once, preserving orders, fog, queues and passengers.
-    pub fn unify_islands(&mut self) -> Result<(), String> {
-        if self.islands.is_empty() {
-            return Ok(());
-        }
-        self.validate()?;
-        let mut maps = self.islands.clone();
-        // Check all offsets before touching a validated legacy save.
-        if island_origin(maps.len() as u64).is_none() {
-            return Err("archipelago exceeds coordinate range".into());
-        }
-        self.islands.clear();
-        let mut current = IslandState {
-            id: 0,
-            terrain: Vec::new(),
-            explored_cells: Vec::new(),
-            units: Vec::new(),
-            ships: Vec::new(),
-            resources: Vec::new(),
-            buildings: Vec::new(),
-        };
-        current.exchange(self);
-        maps.push(current);
-        maps.sort_by_key(|i| i.id);
-        let origins: Vec<_> = maps
-            .iter()
-            .map(|i| island_origin(i.id).ok_or("archipelago exceeds coordinate range"))
-            .collect::<Result<_, _>>()?;
-        let columns = origins
-            .iter()
-            .map(|o| o.column + WORLD_COLUMNS)
-            .max()
-            .unwrap();
-        let rows = origins.iter().map(|o| o.row + WORLD_ROWS).max().unwrap();
-        self.resize_ocean(columns, rows);
-        self.island_origins.clear();
-        for mut island in maps {
-            let origin = origins[island.id as usize];
-            island.translate(origin);
-            self.merge_island(island);
-            self.island_origins.push(origin);
-        }
-        self.island_id = 0;
-        self.inventories
-            .resize(self.island_origins.len(), Stockpile::default());
-        self.validate()
-    }
-
-    /// Legacy destination commands now issue real sailing orders.
+    /// Destination shortcuts issue real sailing orders.
     pub(super) fn voyage(&mut self, ship_id: &str, id: u64) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
-        if self.ships[ship].home_dock_id.is_none() {
-            self.ships[ship].home_dock_id = self.dock_for_ship(ship).map(|dock| dock.id.clone());
-        }
         if id == self.island_origins.len() as u64 {
             let next = island_origin(id).ok_or(CommandError::InvalidDestination)?;
             let current = self.island_origins[id as usize - 1];
@@ -259,127 +165,40 @@ impl GameWorld {
     }
 
     pub(super) fn validate_islands(&self) -> Result<(), String> {
-        let ids: BTreeSet<_> = self
-            .islands
-            .iter()
-            .map(|i| i.id)
-            .chain([self.island_id])
-            .collect();
-        if ids.len() != self.islands.len() + 1 || !ids.iter().copied().eq(0..ids.len() as u64) {
-            return Err("island IDs are not a unique discovery sequence".into());
-        }
-        let mut research = BTreeSet::new();
-        for job in self.all_buildings().flat_map(Building::jobs) {
-            if let BuildingJob::Research { technology, .. } = job
-                && !research.insert(technology)
-            {
-                return Err("research queued on multiple islands".into());
-            }
-        }
         let mut entities = BTreeSet::new();
-        for (units, ships, buildings) in
-            std::iter::once((&self.units, &self.ships, &self.buildings)).chain(
-                self.islands
+        let (units, ships, buildings) = (&self.units, &self.ships, &self.buildings);
+        for id in units
+            .iter()
+            .map(|u| &u.id)
+            .chain(ships.iter().map(|s| &s.id))
+            .chain(
+                ships
                     .iter()
-                    .map(|i| (&i.units, &i.ships, &i.buildings)),
+                    .flat_map(|s| s.passengers.iter().map(|u| &u.id)),
             )
+            .chain(buildings.iter().map(|b| &b.id))
         {
-            for id in units
-                .iter()
-                .map(|u| &u.id)
-                .chain(ships.iter().map(|s| &s.id))
-                .chain(
-                    ships
-                        .iter()
-                        .flat_map(|s| s.passengers.iter().map(|u| &u.id)),
-                )
-                .chain(buildings.iter().map(|b| &b.id))
-            {
-                if !entities.insert(id) {
-                    return Err(format!("duplicate entity across islands: {id}"));
-                }
+            if !entities.insert(id) {
+                return Err(format!("duplicate entity across islands: {id}"));
             }
         }
-        if self.islands.is_empty() {
-            if self.island_origins.is_empty()
-                || self.island_origins.iter().enumerate().any(|(id, origin)| {
-                    island_origin(id as u64) != Some(*origin)
-                        || origin
-                            .column
-                            .checked_add(WORLD_COLUMNS)
-                            .is_none_or(|end| end > self.columns())
-                        || origin
-                            .row
-                            .checked_add(WORLD_ROWS)
-                            .is_none_or(|end| end > self.rows())
-                })
-            {
-                return Err("invalid archipelago origins".into());
-            }
-            return Ok(());
-        }
-        let mut local = self.clone();
-        let islands = std::mem::take(&mut local.islands);
-        for mut island in islands {
-            island.exchange(&mut local);
-            local.validate_local()?;
+        if self.island_id != 0
+            || self.island_origins.is_empty()
+            || self.island_origins.iter().enumerate().any(|(id, origin)| {
+                island_origin(id as u64) != Some(*origin)
+                    || origin
+                        .column
+                        .checked_add(WORLD_COLUMNS)
+                        .is_none_or(|end| end > self.columns())
+                    || origin
+                        .row
+                        .checked_add(WORLD_ROWS)
+                        .is_none_or(|end| end > self.rows())
+            })
+        {
+            return Err("invalid archipelago origins".into());
         }
         Ok(())
-    }
-}
-
-impl IslandState {
-    fn translate(&mut self, origin: CellCoordinate) {
-        let shift = |cell: &mut CellCoordinate| {
-            cell.column += origin.column;
-            cell.row += origin.row;
-        };
-        let prefix = |id: &mut String| {
-            *id = format!("island-{}:{id}", self.id);
-        };
-        let translate_unit = |unit: &mut Unit| {
-            shift(&mut unit.cell);
-            if let Some(step) = &mut unit.step {
-                shift(&mut step.to);
-            }
-            match &mut unit.action {
-                UnitAction::Move { to } => shift(to),
-                UnitAction::ExploreBuild { origin, .. } => shift(origin),
-                UnitAction::Gather { resource_id, .. } | UnitAction::Cultivate { resource_id } => {
-                    prefix(resource_id)
-                }
-                _ => {}
-            }
-        };
-        for cell in &mut self.terrain {
-            cell.column += origin.column;
-            cell.row += origin.row;
-        }
-        for cell in &mut self.explored_cells {
-            shift(cell);
-        }
-        for unit in &mut self.units {
-            translate_unit(unit);
-        }
-        for ship in &mut self.ships {
-            shift(&mut ship.cell);
-            if let Some(step) = &mut ship.step {
-                shift(&mut step.to);
-            }
-            if let Some(to) = &mut ship.destination {
-                shift(to);
-            }
-            for unit in &mut ship.passengers {
-                translate_unit(unit);
-            }
-        }
-        for node in &mut self.resources {
-            shift(&mut node.cell);
-            prefix(&mut node.id);
-        }
-        for building in &mut self.buildings {
-            shift(&mut building.origin);
-        }
     }
 }
 

@@ -172,10 +172,9 @@ pub enum UnitAction {
     Cultivate {
         resource_id: String,
     },
-    /// Carry the load to the complete building `building_id`, unload it
-    /// there, and stand idle.
+    /// Carry the load to a compatible building or stopped shore ship,
+    /// unload it there, and stand idle.
     Deposit {
-        #[serde(alias = "building_id")]
         storage_id: String,
     },
 }
@@ -244,7 +243,7 @@ pub struct ResourceNode {
     pub cell: CellCoordinate,
     pub amount: f64,
     pub capacity: f64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub field: Option<FieldState>,
 }
 
@@ -305,9 +304,7 @@ pub struct Building {
     pub researches: Vec<TechnologyKind>,
     pub job: Option<BuildingJob>,
     /// Paid tasks waiting behind the active job, in submission order.
-    #[serde(default)]
     pub queue: Vec<QueuedBuildingJob>,
-    #[serde(default)]
     pub next_queue_id: u64,
 }
 

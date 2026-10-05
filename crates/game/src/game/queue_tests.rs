@@ -196,14 +196,10 @@ fn processing_queue_limit_and_insufficient_inputs_reject_atomically() {
 }
 
 #[test]
-fn legacy_save_defaults_to_empty_queue_and_invalid_queues_are_rejected() {
+fn current_save_round_trips_queue_and_invalid_queues_are_rejected() {
     let mut world = funded_world();
     train(&mut world).unwrap();
-    let mut json = serde_json::to_value(&world).unwrap();
-    for b in json["buildings"].as_array_mut().unwrap() {
-        b.as_object_mut().unwrap().remove("queue");
-        b.as_object_mut().unwrap().remove("next_queue_id");
-    }
+    let json = serde_json::to_value(&world).unwrap();
     let loaded: GameWorld = serde_json::from_value(json).unwrap();
     assert_eq!(loaded, world);
     research(&mut world, TechnologyKind::Forestry).unwrap();
