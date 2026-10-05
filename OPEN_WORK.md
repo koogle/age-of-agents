@@ -2,7 +2,7 @@
 
 - Branch `feat/basic-roads`: dirt/stone road construction, two-endpoint mouse/touch placement, painted terrain surfaces and travel-time routing. Completed roads give friendly units 1.5× speed; wolves/bears remain unchanged. Crossings reuse existing surfaces.
 - Balance: two seconds labour/cell, with one stone per new stone cell. Costs reserve once; Stop/resume, helpers and unloading first preserve existing task rules. Store version 15 resets incompatible hosted saves under the development policy.
-- 278 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `8bf00b4` (approved productive-building availability and new art); combined checks are in progress; [reproduction and review](docs/verification/roads/README.md).
+- 280 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `8bf00b4` (approved productive-building availability and new art); combined desktop mouse and DPR-2 phone touch checks pass with correct line placement, completion and costs; [reproduction and review](docs/verification/roads/README.md).
 - Not merged or deployed. Preserve the previous unresolved work below.
 
 # Productive building availability — 2026-10-05
