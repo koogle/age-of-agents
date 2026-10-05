@@ -435,6 +435,6 @@
       }
     ]
   },
-  "integrated_base_revision": "10ee124f081bb7de7f0e00a6f8fb05111051d533",
-  "integration_note": "Repeated against combined docks, shore pickup, wildlife and mobile cargo paging. Isolated version-14 fixture adds health=100 and no animals; resource geometry and commands match baseline."
+  "integrated_base_revision": "e50ad7b7bd3554d7f72194c7266ec2938437fed9",
+  "integration_note": "Repeated against combined docks, shore pickup, wildlife, mobile cargo paging and Stop hand; subsequent README-only cleanup preserved. Version-14 fixture adds health=100 and no animals; geometry and commands match baseline."
 }
