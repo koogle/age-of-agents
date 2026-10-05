@@ -51,3 +51,4 @@ Art lands separately from runtime wiring in [#107](https://github.com/koogle/age
 | Icon | Review/source | PR |
 | --- | --- | --- |
 | `resource_coal` | [Style review](../assets/ui/sources/menu_icons/resource_coal/STYLE_REVIEW.md) | [#112](https://github.com/koogle/age-of-agents/pull/112) |
+| `resource_steel` | [Style review](../assets/ui/sources/menu_icons/resource_steel/STYLE_REVIEW.md) | PR_PENDING |
