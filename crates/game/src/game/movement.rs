@@ -31,15 +31,30 @@ impl GameWorld {
         loop {
             if let Some(step) = self.units[unit].step {
                 let length = self.units[unit].cell.center().distance(step.to.center());
-                let progress = step.progress + dt * MOVE_SPEED / length;
-                if progress < 1.0 {
+                // Cross the cell boundary halfway through a step. Apply the
+                // bonus only while physically on a completed road surface.
+                let (surface, boundary) = if step.progress < 0.5 {
+                    (self.units[unit].cell, 0.5)
+                } else {
+                    (step.to, 1.0)
+                };
+                let speed = MOVE_SPEED * 3.0 / f64::from(self.road_weight(surface));
+                let progress = step.progress + dt * speed / length;
+                if progress < boundary {
                     self.units[unit].step = Some(Step {
                         to: step.to,
                         progress,
                     });
                     return Travel::EnRoute;
                 }
-                dt = (progress - 1.0) * length / MOVE_SPEED;
+                dt = (progress - boundary) * length / speed;
+                if boundary == 0.5 {
+                    self.units[unit].step = Some(Step {
+                        to: step.to,
+                        progress: 0.5,
+                    });
+                    continue;
+                }
                 self.units[unit].cell = step.to;
                 self.units[unit].step = None;
             }
@@ -85,13 +100,20 @@ impl GameWorld {
     /// Prefers a route around other units; if none exists, approaches along the
     /// route through them and waits for them to clear.
     fn next_step(&self, unit: usize, goal: Goal, occupancy: &Occupancy) -> NextStep {
+        let roads = self.completed_road_cells();
         let start = self.units[unit].cell;
         let goals = self.goal_cells(unit, goal, occupancy);
         let clear = |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit);
         let clear_goals: Vec<_> = goals.iter().copied().filter(|cell| clear(*cell)).collect();
-        if let Some(to) =
-            PathTree::route_to_nearest(self.columns(), self.rows(), start, &clear_goals, clear)
-                .and_then(|(_, path)| path.first().copied())
+        if let Some(to) = PathTree::nearest_weighted(
+            self.columns(),
+            self.rows(),
+            start,
+            &clear_goals,
+            clear,
+            |cell| if roads.contains(&cell) { 2 } else { 3 },
+        )
+        .and_then(|(_, path)| path.first().copied())
         {
             return NextStep::Step(to);
         }
@@ -196,6 +218,13 @@ impl GameWorld {
     /// Where a unit is currently trying to walk, if anywhere.
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
+            UnitAction::BuildRoad { cells } => {
+                if self.units[unit].cargo.is_some() {
+                    self.nearest_drop_site(unit).map(Goal::Beside)
+                } else {
+                    self.next_road(cells).map(|r| Goal::Beside(r.footprint()))
+                }
+            }
             UnitAction::Board { ship_id } => self.boarding_goal(unit, ship_id).map(Goal::Cell),
             UnitAction::Move { to } => Some(Goal::Cell(*to)),
             UnitAction::Cultivate { resource_id } => {
@@ -253,9 +282,14 @@ impl GameWorld {
 
     /// Path tree over cells that are not statically blocked.
     pub(super) fn static_paths(&self, unit: usize, occupancy: &Occupancy) -> PathTree {
-        PathTree::search(self.columns(), self.rows(), self.units[unit].cell, |cell| {
-            !occupancy.is_static(cell)
-        })
+        let roads = self.completed_road_cells();
+        PathTree::search_weighted(
+            self.columns(),
+            self.rows(),
+            self.units[unit].cell,
+            |cell| !occupancy.is_static(cell),
+            |cell| if roads.contains(&cell) { 2 } else { 3 },
+        )
     }
 
     /// A foundation must not split any unit's reachable ground. Foundations
@@ -301,16 +335,18 @@ impl GameWorld {
 
     /// Whether `unit` could stand beside `footprint` once other units move aside.
     pub(super) fn can_reach_beside(&self, unit: usize, footprint: Footprint) -> bool {
+        let roads = self.completed_road_cells();
         let occupancy = self.occupancy();
         let goals: Vec<_> = interaction_cells(footprint)
             .filter(|cell| !occupancy.is_static(*cell))
             .collect();
-        PathTree::route_to_nearest(
+        PathTree::nearest_weighted(
             self.columns(),
             self.rows(),
             self.units[unit].cell,
             &goals,
             |cell| !occupancy.is_static(cell),
+            |cell| if roads.contains(&cell) { 2 } else { 3 },
         )
         .is_some()
     }
@@ -439,6 +475,7 @@ impl GameWorld {
     /// anything, a granary food and fiber) with the cheapest available route.
     /// Prefer routes clear of other villagers; wait only when all sites are busy.
     pub(super) fn nearest_drop_site(&self, unit: usize) -> Option<Footprint> {
+        let roads = self.completed_road_cells();
         let cargo = self.units[unit].cargo.as_ref().map(|cargo| cargo.kind);
         let occupancy = self.occupancy();
         self.storage_sites(cargo)
@@ -450,24 +487,26 @@ impl GameWorld {
                     .into_iter()
                     .filter(|cell| !occupancy.has_other_unit(*cell, unit))
                     .collect();
-                let available = PathTree::route_to_nearest(
+                let available = PathTree::nearest_weighted(
                     self.columns(),
                     self.rows(),
                     self.units[unit].cell,
                     &clear_goals,
                     |cell| !occupancy.is_static(cell) && !occupancy.has_other_unit(cell, unit),
+                    |cell| if roads.contains(&cell) { 2 } else { 3 },
                 )
                 .map(|(cost, _)| cost);
                 let cost = available.or_else(|| {
                     let goals: Vec<_> = interaction_cells(footprint)
                         .filter(|cell| !occupancy.is_static(*cell))
                         .collect();
-                    PathTree::route_to_nearest(
+                    PathTree::nearest_weighted(
                         self.columns(),
                         self.rows(),
                         self.units[unit].cell,
                         &goals,
                         |cell| !occupancy.is_static(cell),
+                        |cell| if roads.contains(&cell) { 2 } else { 3 },
                     )
                     .map(|(cost, _)| cost)
                 })?;

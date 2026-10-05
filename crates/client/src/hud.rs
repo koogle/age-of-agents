@@ -90,6 +90,10 @@ pub enum BuildUi {
     Group(BuildingGroup),
     Placing(BuildingKind),
     PlacingField,
+    PlacingRoad {
+        kind: aoa_game::RoadKind,
+        start: Option<aoa_game::CellCoordinate>,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -101,6 +105,7 @@ pub enum Action {
     /// Start placing this building.
     Place(BuildingKind),
     PlaceField,
+    PlaceRoad(aoa_game::RoadKind),
     Cancel,
     Stop,
     Disembark,
