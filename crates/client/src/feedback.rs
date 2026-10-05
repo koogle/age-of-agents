@@ -31,6 +31,12 @@ fn drop_off_status(unit: &Unit) -> Option<String> {
 // while walking to a node and starting work remain one gathering assignment.
 fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, String)> {
     let (text, target) = match &unit.action {
+        UnitAction::BuildRoad { cells } => {
+            return Some((
+                drop_off_status(unit).unwrap_or_else(|| "Building road".into()),
+                format!("road:{cells:?}"),
+            ));
+        }
         UnitAction::AttackAnimal { animal_id, .. } => {
             ("Attacking wildlife".into(), animal_id.as_str())
         }

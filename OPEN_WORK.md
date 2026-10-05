@@ -1,3 +1,10 @@
+# Basic roads — PR preparation (2026-10-05)
+
+- Branch `feat/basic-roads`: dirt/stone road construction, two-endpoint mouse/touch placement, painted terrain surfaces and travel-time routing. Completed roads give friendly units 1.5× speed; wolves/bears remain unchanged. Crossings reuse existing surfaces.
+- Balance: two seconds labour/cell, with one stone per new stone cell. Costs reserve once; Stop/resume, helpers and unloading first preserve existing task rules. Store version 15 resets incompatible hosted saves under the development policy.
+- 278 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Final browser run is in progress; [reproduction and review](docs/verification/roads/README.md).
+- Not merged or deployed. Preserve the previous unresolved work below.
+
 # Terrain-first island generation — PR #111
 
 - [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.

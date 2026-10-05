@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
+
 - **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).
 
 - **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. Subsequent direction sets one animal on the first island and more on the second: one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island ([wildlife](docs/knowledge/wildlife.md)).
