@@ -114,7 +114,7 @@ Animals and ships keep their unweighted routing and ordinary speeds.
 The ten focused road tests cover detours, travel-time storage selection, exact
 cell-boundary speed changes, diagonals/corners, animals, atomic rejection,
 Stop/resume, saved progress, unloading first, shared work and mixed crossings.
-The full workspace passes 278 tests (one manual benchmark ignored). Browser
+The full workspace passes 280 tests (one manual benchmark ignored). Browser
 procedure and visual evidence live in [road verification](../verification/roads/README.md).
 Resume one unfinished cell by clicking it with villagers selected, or reissue a
 line to resume its outstanding work; idle villagers never adopt road jobs.

@@ -74,18 +74,21 @@ async def main(output, mode_filter, screenshots):
                         def capture_socket(ws):
                             ws.on('framesent',lambda data:commands.append(json.loads(data)))
                         page.on('websocket',capture_socket)
-                        await page.add_init_script('const raf=window.requestAnimationFrame.bind(window); window.requestAnimationFrame=cb=>setTimeout(()=>raf(cb),90);')
+                        await page.add_init_script('const raf=window.requestAnimationFrame.bind(window); window.roadFrames=0; window.requestAnimationFrame=cb=>setTimeout(()=>raf(t=>{cb(t);window.roadFrames++;}),90);')
                         await page.goto(URL+'/play',wait_until='networkidle')
                         await page.locator('#loading').wait_for(state='detached',timeout=180000)
                         print(mode,'loaded',flush=True)
                         await page.evaluate("async () => window.debug=await import('/web/pkg/aoa_client.js')")
+                        async def settle(frames=3):
+                            before=await page.evaluate('window.roadFrames')
+                            await page.wait_for_function('(v)=>window.roadFrames>=v[0]+v[1]',arg=[before,frames],polling=100,timeout=120000)
                         async def ground(x,y):
                             return await page.evaluate('([x,z])=>Array.from(debug.debug_screen_of(x,debug.debug_height_at(x,z),z))',[(x+.5)*.5,(y+.5)*.5])
                         tap=page.touchscreen.tap if mode=='phone' else page.mouse.click
                         async def select():
-                            s=await state();u=s['units'][0]['cell'];p=await ground(u['column'],u['row']);await tap(p[0],p[1]-12);await asyncio.sleep(.4)
+                            s=await state();u=s['units'][0]['cell'];p=await ground(u['column'],u['row']);await tap(p[0],p[1]-12);await settle()
                         async def menu(count,index,labels=False):
-                            await tap(*button(width,height,count,index,labels));await asyncio.sleep(.4)
+                            await tap(*button(width,height,count,index,labels));await settle()
                         await select()
                         await capture(f'{mode}-before.png')
                         start_column = 31 if mode == 'phone' else 27
@@ -108,7 +111,7 @@ async def main(output, mode_filter, screenshots):
                             assert len(roads)==7 and all(r['work'] is None for r in roads), (mode,kind,s['units'],roads,commands)
                             assert {r['cell']['row'] for r in roads}=={row}
                             assert s['inventories'][0]['stone']==(30 if kind=='dirt' else 23)
-                            await asyncio.sleep(.6)
+                            await settle(6)
                             if kind == 'stone': await capture(f'{mode}-{kind}-complete.png')
                         assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==2,commands
                         assert not errors,errors
