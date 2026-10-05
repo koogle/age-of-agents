@@ -164,7 +164,22 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
     if model.ship.is_some() {
         return super::ships::selection(snapshot, model);
     }
-    let stock = &snapshot.stockpile;
+    let cell = snapshot
+        .buildings
+        .iter()
+        .find(|b| Some(b.building.id.as_str()) == model.building)
+        .map(|b| b.building.origin)
+        .or_else(|| {
+            snapshot
+                .units
+                .iter()
+                .find(|u| model.units.contains(&u.unit.id))
+                .map(|u| u.unit.cell)
+        });
+    let island = cell
+        .and_then(|c| aoa_game::island_at(&snapshot.island_origins, c))
+        .unwrap_or(model.resource_island);
+    let stock = &snapshot.inventories[island];
     if !model.units.is_empty() {
         let busy = snapshot
             .units
@@ -390,6 +405,25 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             action: Action::Produce(product),
         });
     }
+    if kind == BuildingKind::Dock {
+        for ship in snapshot
+            .ships
+            .iter()
+            .filter(|ship| ship.stopped() && ship.beside(building.building.footprint()))
+        {
+            commands.push(Command {
+                icon: "resource_wood",
+                label: "Ship cargo".into(),
+                detail: format!(
+                    "{} · {:.0}/50 resources · select to load or sail",
+                    ship.id,
+                    ship.cargo.total()
+                ),
+                enabled: true,
+                action: Action::SelectShip(ship.id.clone()),
+            });
+        }
+    }
     let known = &snapshot.researched_technologies;
     for &tech in &building.building.researches {
         let (icon, name, effect) = tech_info(tech);
@@ -530,6 +564,7 @@ mod tests {
         let snapshot = world.snapshot();
         let units = [snapshot.units[0].unit.id.clone()];
         let model = Model {
+            resource_island: 0,
             snapshot: Some(&snapshot),
             units: &units,
             building: None,
@@ -551,6 +586,7 @@ mod tests {
         let mut seen = Vec::new();
         for group in super::super::BuildingGroup::ALL {
             let model = Model {
+                resource_island: 0,
                 snapshot: Some(&snapshot),
                 units: &units,
                 building: None,
@@ -585,8 +621,8 @@ mod tests {
         assert_eq!(poor.len(), 1);
         assert_eq!(poor[0].action, Action::Produce(ProductKind::Steel));
         assert!(!poor[0].enabled);
-        world.stockpile.iron = 5.0;
-        world.stockpile.coal = 5.0;
+        world.inventories[0].iron = 5.0;
+        world.inventories[0].coal = 5.0;
         assert!(commands_for_town_center(&world)[0].enabled);
         world.buildings[0].job = Some(aoa_game::BuildingJob::Produce {
             product: ProductKind::Steel,
@@ -595,8 +631,8 @@ mod tests {
         assert!(commands_for_town_center(&world)[0].enabled);
         let building_id = world.buildings[0].id.clone();
         for _ in 0..aoa_game::MAX_QUEUED_JOBS {
-            world.stockpile.iron = 5.0;
-            world.stockpile.coal = 5.0;
+            world.inventories[0].iron = 5.0;
+            world.inventories[0].coal = 5.0;
             world
                 .apply_command(aoa_game::Command::Produce {
                     building_id: building_id.clone(),
@@ -604,13 +640,14 @@ mod tests {
                 })
                 .unwrap();
         }
-        world.stockpile.iron = 5.0;
-        world.stockpile.coal = 5.0;
+        world.inventories[0].iron = 5.0;
+        world.inventories[0].coal = 5.0;
         let full = commands_for_town_center(&world);
         assert!(!full[0].enabled);
         assert_eq!(full[0].detail, "Queue is full");
         let snapshot = world.snapshot();
         let model = Model {
+            resource_island: 0,
             snapshot: Some(&snapshot),
             units: &[],
             building: Some(&building_id),
@@ -637,6 +674,7 @@ mod tests {
     fn selected_town_center(world: &GameWorld) -> Selected {
         let snapshot = world.snapshot();
         let model = Model {
+            resource_island: 0,
             snapshot: Some(&snapshot),
             units: &[],
             building: Some(&snapshot.buildings[0].building.id),
@@ -714,12 +752,12 @@ mod tests {
     fn town_center_coins_follow_costs_and_prerequisites() {
         let mut world = GameWorld::default();
         world.economy_rules = aoa_game::EconomyRules::Unrestricted;
-        world.stockpile.food = 0.0;
-        world.stockpile.wood = 0.0;
+        world.inventories[0].food = 0.0;
+        world.inventories[0].wood = 0.0;
         let poor = commands_for_town_center(&world);
         assert!(poor.iter().all(|c| !c.enabled), "nothing is affordable");
-        world.stockpile.food = 100.0;
-        world.stockpile.wood = 100.0;
+        world.inventories[0].food = 100.0;
+        world.inventories[0].wood = 100.0;
         let rich = commands_for_town_center(&world);
         let enabled = |action: Action| rich.iter().find(|c| c.action == action).unwrap().enabled;
         assert!(enabled(Action::Produce(ProductKind::Villager)));
@@ -733,8 +771,8 @@ mod tests {
     #[test]
     fn completed_research_stays_visible_and_disabled_after_reload() {
         let mut world = GameWorld::default();
-        world.stockpile.food = 100.0;
-        world.stockpile.wood = 100.0;
+        world.inventories[0].food = 100.0;
+        world.inventories[0].wood = 100.0;
         world
             .apply_command(aoa_game::Command::Research {
                 building_id: world.buildings[0].id.clone(),
@@ -767,11 +805,12 @@ mod tests {
     fn build_menu_greys_out_what_the_stockpile_cannot_cover() {
         let mut world = GameWorld::default();
         world.economy_rules = aoa_game::EconomyRules::Unrestricted;
-        world.stockpile = Default::default();
-        world.stockpile.wood = 15.0;
+        world.inventories[0] = Default::default();
+        world.inventories[0].wood = 15.0;
         let snapshot = world.snapshot();
         let units = [snapshot.units[0].unit.id.clone()];
         let model = Model {
+            resource_island: 0,
             snapshot: Some(&snapshot),
             units: &units,
             building: None,

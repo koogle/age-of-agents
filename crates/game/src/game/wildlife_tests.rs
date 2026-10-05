@@ -57,12 +57,12 @@ fn animal_attacks_hurt_and_kill_once_releasing_cells_and_cargo() {
         kind: ResourceKind::Wood,
         amount: 10.0,
     });
-    let stock = world.stockpile.clone();
+    let stock = world.inventories.clone();
     for _ in 0..7 {
         world.tick(1.0);
     }
     assert!(!world.units.iter().any(|u| u.id == id));
-    assert_eq!(world.stockpile, stock);
+    assert_eq!(world.inventories, stock);
     assert_eq!(world.units[0].action, UnitAction::Idle);
     world.validate().unwrap();
 }

@@ -97,3 +97,18 @@ document links and whitespace checks pass. Fresh desktop browser verifies natura
 starter count and the combat fixture without page errors; evidence is in
 `/tmp/aoa-random-wildlife-browser`. No deployment was performed; the previously
 recorded Modal connectivity blocker remains.
+
+## Authorized master integration (2026-10-05)
+
+The user requested PR creation and merge to master. Reused PR #98 and integrated
+master `e7c8cb6`, preserving island inventories, 50-resource ship holds and all
+four shore-facing dock views. Resolved command variants by retaining both
+AttackAnimal and TransferShipCargo; discovery initializes both inventory and
+wildlife. Death tests now verify island inventories remain unchanged. Version 14
+identifies the combined save schema and rejects incompatible versions via the
+established reset policy. Generated WebAssembly is rebuilt from combined source.
+
+Thermonuclear review: no features removed. The existing carriers_for method moves
+unchanged to storage.rs to keep the shared client entrypoint under 1,000 lines.
+Wildlife remains sheet 13; extended building atlas rows remain intact. Both asset
+provenance ledger additions are retained.

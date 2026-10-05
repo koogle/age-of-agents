@@ -2,7 +2,7 @@
 
 Islands retain their 120×80 procedural layout. Discovery adds the next region in an expanding square spiral with 64 cells of open ocean between neighboring regions. The domain detects a ship within 12 cells of the next frontier and generates the adjacent island synchronously, before the vessel reaches that edge. The Explore shortcut sails toward that frontier; known-island shortcuts sail to a dock or clear coast. Manual sea commands use the same continuous movement. Camera position and entity identities survive discovery.
 
-All discovered settlements run in the same simulation, with shared resources and research. No distant-settlement pause or autonomous unit tasks are introduced. Legacy local-map saves are validated before conversion, translated into their permanent regions, and validated again. Unit steps, destinations, resource references, passengers, fog, buildings and queues are retained.
+All discovered settlements run in the same simulation, with island-local inventories and shared research. Stopped shore ships supplement their island’s resources with their 50-resource holds. No distant-settlement pause or autonomous unit tasks are introduced. Incompatible hosted saves reset by store version; historical map translation and inventory pooling are removed.
 
 ## Memory and scaling
 

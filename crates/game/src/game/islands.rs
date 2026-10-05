@@ -48,6 +48,7 @@ impl GameWorld {
         }
         self.island_origins.push(origin);
         self.populate_wildlife(id as usize);
+        self.inventories.push(Stockpile::default());
     }
 
     fn resize_ocean(&mut self, columns: u16, rows: u16) {

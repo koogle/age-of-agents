@@ -94,7 +94,7 @@ fn a_blocked_nearby_drop_off_does_not_hide_an_accessible_one() {
             Some(world.buildings[0].footprint())
         );
         run(&mut world, 30.0);
-        assert!(world.stockpile.amount(resource_kind) >= 20.0);
+        assert!(world.inventories[0].amount(resource_kind) >= 20.0);
         assert!(
             world.resources[0].amount < 40.0,
             "gathering resumes after unloading"
@@ -120,12 +120,12 @@ fn repeated_granary_deliveries_resume_until_the_resource_is_exhausted() {
         .unwrap();
     let mut deliveries = 0;
     for _ in 0..600 {
-        let before = world.stockpile.food;
+        let before = world.inventories[0].food;
         world.tick(0.1);
-        if world.stockpile.food > before {
+        if world.inventories[0].food > before {
             deliveries += 1;
             assert!(world.is_beside(0, world.buildings[1].footprint()));
-            assert!((world.stockpile.food - f64::from(deliveries) * 20.0).abs() < 1e-9);
+            assert!((world.inventories[0].food - f64::from(deliveries) * 20.0).abs() < 1e-9);
             assert!(world.units[0].cargo.is_none());
         }
     }
@@ -154,20 +154,20 @@ fn lumber_mill_deliveries_resume_and_credit_full_and_partial_wood_loads_once() {
         .unwrap();
     let mut delivered = Vec::new();
     for _ in 0..1000 {
-        let before = world.stockpile.wood;
+        let before = world.inventories[0].wood;
         world.tick(0.1);
-        if world.stockpile.wood > before {
+        if world.inventories[0].wood > before {
             assert!(world.is_beside(0, world.buildings[1].footprint()));
             assert!(world.units[0].cargo.is_none());
-            delivered.push(world.stockpile.wood - before);
+            delivered.push(world.inventories[0].wood - before);
         }
     }
     assert_eq!(delivered.len(), 3);
     for (actual, expected) in delivered.into_iter().zip([20.0, 20.0, 7.0]) {
         assert!((actual - expected).abs() < 1e-9);
     }
-    assert!((world.stockpile.wood - 47.0).abs() < 1e-9);
-    assert_eq!(world.stockpile.timber, 0.0);
+    assert!((world.inventories[0].wood - 47.0).abs() < 1e-9);
+    assert_eq!(world.inventories[0].timber, 0.0);
     assert_eq!(world.resources[0].amount, 0.0);
     assert_eq!(world.units[0].action, UnitAction::Idle);
     world.validate().unwrap();
@@ -188,7 +188,7 @@ fn lumber_mill_requires_completion_and_wood_for_automatic_and_explicit_unloading
     });
     let deposit = Command::Deposit {
         unit_id: "villager-1".into(),
-        building_id: "mill".into(),
+        storage_id: "mill".into(),
     };
     let before = world.clone();
     assert_eq!(
@@ -224,7 +224,7 @@ fn lumber_mill_requires_completion_and_wood_for_automatic_and_explicit_unloading
     );
     world.apply_command(deposit).unwrap();
     run(&mut world, 10.0);
-    assert_eq!(world.stockpile.wood, 7.0);
+    assert_eq!(world.inventories[0].wood, 7.0);
     assert!(world.units[0].cargo.is_none());
     assert!(world.is_beside(0, world.buildings[1].footprint()));
     assert_eq!(world.units[0].action, UnitAction::Idle);
@@ -259,10 +259,10 @@ fn a_busy_only_drop_site_keeps_cargo_and_retries() {
     assert_eq!(world.nearest_drop_site(0), Some(site));
     world.tick_gather(0, "berries".into(), GatherPhase::Returning, 0.1);
     assert_eq!(world.units[0].cargo.as_ref().unwrap().amount, 20.0);
-    assert_eq!(world.stockpile.food, 0.0);
+    assert_eq!(world.inventories[0].food, 0.0);
     world.units[1].action = UnitAction::Idle;
     run(&mut world, 30.0);
-    assert!(world.stockpile.food >= 20.0);
+    assert!(world.inventories[0].food >= 20.0);
     assert!(world.resources[0].amount < 40.0);
 }
 
@@ -299,7 +299,7 @@ fn reserved_resource_approach_waits_then_resumes_instead_of_idling() {
         world.units[1].action = UnitAction::Idle;
         run(&mut world, 30.0);
         assert!(
-            world.stockpile.food >= 20.0,
+            world.inventories[0].food >= 20.0,
             "the preserved loop gathers and unloads"
         );
     }
@@ -328,12 +328,12 @@ fn reassignment_unloads_the_old_kind_and_repeats_the_new_gathering_loop() {
                 .unwrap();
             let mut new_deliveries = 0;
             for _ in 0..600 {
-                let before = world.stockpile.food;
+                let before = world.inventories[0].food;
                 world.tick(0.1);
-                if world.stockpile.food - before > 1e-9 {
+                if world.inventories[0].food - before > 1e-9 {
                     new_deliveries += 1;
                 }
-                if world.stockpile.wood > 0.0 && world.resources[0].amount > 1e-9 {
+                if world.inventories[0].wood > 0.0 && world.resources[0].amount > 1e-9 {
                     assert!(
                         matches!(world.units[0].action, UnitAction::Gather { .. }),
                         "reassignment stops after unloading: {:?}",
@@ -344,7 +344,7 @@ fn reassignment_unloads_the_old_kind_and_repeats_the_new_gathering_loop() {
                     break;
                 }
             }
-            assert_eq!(world.stockpile.wood, amount);
+            assert_eq!(world.inventories[0].wood, amount);
             assert!(new_deliveries >= 2, "the reassigned loop must repeat");
         }
     }
@@ -448,13 +448,13 @@ fn even_a_partial_same_kind_load_is_unloaded_before_the_new_assignment() {
             break;
         }
     }
-    assert_eq!(world.stockpile.food, 7.0);
+    assert_eq!(world.inventories[0].food, 7.0);
     assert!(
         matches!(&world.units[0].action, UnitAction::Gather { resource_id, phase: GatherPhase::ToResource } if resource_id == "berries")
     );
     run(&mut world, 30.0);
     assert!(
-        world.stockpile.food >= 27.0,
+        world.inventories[0].food >= 27.0,
         "the new assignment continues automatically"
     );
 }
@@ -486,7 +486,7 @@ fn a_builder_waits_for_unloading_instead_of_starting_with_cargo() {
         .buildings
         .push(town_center("base-1", cell(25, 10), None));
     run(&mut world, 30.0);
-    assert_eq!(world.stockpile.wood, 7.0);
+    assert_eq!(world.inventories[0].wood, 7.0);
     assert!(world.units[0].cargo.is_none());
     assert!(world.buildings[0].is_complete());
 }

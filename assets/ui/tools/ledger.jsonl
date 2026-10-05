@@ -273,3 +273,11 @@
 {"t": 1791189372.9664748, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tech_agriculture_fields.png", "est_usd": 0.005, "request_id": "01a10b34-c707-77b2-b090-4b9b2c36dbf6", "seconds": 2.3}
 {"t": 1791238124.6968975, "endpoint": "fal-ai/nano-banana/edit", "tag": "wildlife-wolf-boar-draft", "est_usd": 0.04, "request_id": "01a10e1c-91ab-7893-b65c-aaee9d38b5a3", "seconds": 8.9}
 {"t": 1791238139.462653, "endpoint": "fal-ai/nano-banana/edit", "tag": "wildlife-wolf-bear-draft", "est_usd": 0.04, "request_id": "01a10e1c-cd51-7621-ae42-8b79d471f148", "seconds": 8.4}
+{"t": 1791211454.8802004, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield:up", "est_usd": 0.0398, "request_id": "01a10c85-9f67-7e02-96ca-c9d0067b31f7", "seconds": 8.6}
+{"t": 1791211474.1925888, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield:down", "est_usd": 0.0398, "request_id": "01a10c85-ee8c-7473-ab73-e545c89828b9", "seconds": 7.6}
+{"t": 1791211487.9329064, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield:cut:up", "est_usd": 0.005, "request_id": "01a10c86-3670-7780-a82b-666294bff341", "seconds": 3.0}
+{"t": 1791211501.4449234, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield:cut:down", "est_usd": 0.005, "request_id": "01a10c86-6b61-7b83-bf5b-843a86f90d88", "seconds": 2.9}
+{"t": 1791212188.970213, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield-classical:up", "est_usd": 0.0398, "request_id": "01a10c90-ca0d-7432-af7d-d7e3f203a2da", "seconds": 10.8}
+{"t": 1791212211.330497, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield-classical:down", "est_usd": 0.0398, "request_id": "01a10c91-2522-7cd0-be0c-a658a6b7d81c", "seconds": 9.9}
+{"t": 1791212227.299364, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield-classical:cut:up", "est_usd": 0.005, "request_id": "01a10c91-7e75-78d0-8522-a0451fdab643", "seconds": 3.0}
+{"t": 1791212244.6243057, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield-classical:cut:down", "est_usd": 0.005, "request_id": "01a10c91-b93d-77a1-a2ba-de1e38f77a6c", "seconds": 5.3}

@@ -13,6 +13,7 @@ mod placement;
 mod render;
 mod reset;
 mod source;
+mod storage;
 mod terrain;
 mod view;
 mod wildlife;
@@ -108,6 +109,7 @@ pub struct App {
     selection: Selection,
     pointer: Option<Pointer>,
     cursor: Vec2,
+    resource_island: usize,
     mouse_inside: bool,
     focused: bool,
     modifiers: ModifiersState,
@@ -181,6 +183,7 @@ impl App {
             selection: Selection::default(),
             pointer: None,
             cursor: Vec2::ZERO,
+            resource_island: 0,
             mouse_inside: false,
             focused: true,
             modifiers: ModifiersState::empty(),
@@ -314,6 +317,11 @@ impl App {
 
     fn act(&mut self, action: hud::Action) {
         match action {
+            hud::Action::SelectShip(id) => self.select_storage_ship(id),
+            hud::Action::TransferCargo(kind, direction, amount) => {
+                self.transfer_cargo(kind, direction, amount)
+            }
+            hud::Action::CargoPage(page) => self.hud.cargo_page = page,
             hud::Action::Voyage(island_id) => {
                 if let Some(ship_id) = self.selection.ship.clone() {
                     self.send(Command::Voyage { ship_id, island_id });
@@ -407,14 +415,7 @@ impl App {
             return;
         };
         if let Target::Ship(id) = target {
-            if !self.selection.units.is_empty() {
-                for unit_id in self.selection.units.clone() {
-                    self.send(Command::Board {
-                        unit_id,
-                        ship_id: id.clone(),
-                    });
-                }
-            }
+            self.order_ship_storage(&id);
             self.selection.units.clear();
             self.selection.building = None;
             self.selection.ship = Some(id);
@@ -499,7 +500,7 @@ impl App {
                 for unit_id in carriers {
                     self.send(Command::Deposit {
                         unit_id,
-                        building_id: building_id.clone(),
+                        storage_id: building_id.clone(),
                     });
                 }
                 // The building's own menu stays one tap away: it is selected.
@@ -515,32 +516,6 @@ impl App {
                 to: cell,
             }),
         }
-    }
-
-    /// Selected villagers carrying goods the complete building `id` accepts.
-    fn carriers_for(&self, id: &str) -> Vec<String> {
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
-            return Vec::new();
-        };
-        let Some(building) = snapshot
-            .buildings
-            .iter()
-            .find(|b| b.building.id == id && b.building.construction.is_none())
-        else {
-            return Vec::new();
-        };
-        snapshot
-            .units
-            .iter()
-            .filter(|u| self.selection.units.contains(&u.unit.id))
-            .filter(|u| {
-                u.unit
-                    .cargo
-                    .as_ref()
-                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
-            })
-            .map(|u| u.unit.id.clone())
-            .collect()
     }
 
     /// Stops every selected villager that is busy.
@@ -659,6 +634,7 @@ impl App {
                 .map(|(origin, ok)| (kind, origin, ok)),
             _ => None,
         };
+        self.update_resource_island();
         let plots_changed = self.level_building_plots(ghost);
         let hover = self.hover_decal();
         let Some(game) = self.game.as_mut() else {
@@ -743,11 +719,18 @@ impl App {
             let (columns, rows) = kind.size();
             let x = (origin.column as f32 + columns as f32 / 2.0) * terrain::CELL;
             let z = (origin.row as f32 + rows as f32 / 2.0) * terrain::CELL;
-            let center = Vec3::new(x, self.view.heights.at(x, z), z);
+            let heights = &self.view.heights;
+            let center = Vec3::new(x, heights.at(x, z), z);
+            let facing = self
+                .view
+                .snapshot
+                .as_ref()
+                .and_then(|s| s.dock_facing(origin))
+                .unwrap_or_default();
             let (sheet, mut preview) = if self.build == hud::BuildUi::PlacingField {
-                view::field_preview(&self.sheets, &self.view.heights, center)
+                view::field_preview(&self.sheets, heights, center)
             } else {
-                view::building_sprite(&self.sheets, &self.view.heights, kind, center, None, false)
+                view::building_sprite(&self.sheets, heights, kind, center, None, false, facing)
             };
             preview.tint = if ok {
                 [0.75, 1.0, 0.8, 0.48]
@@ -757,6 +740,7 @@ impl App {
             sprites.push((sheet, preview));
         }
         let model = hud::Model {
+            resource_island: self.resource_island,
             snapshot: self.view.snapshot.as_ref(),
             units: &self.selection.units,
             building: self.selection.building.as_deref(),
