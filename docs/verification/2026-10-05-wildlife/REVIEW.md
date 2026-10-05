@@ -34,7 +34,7 @@ anchors. Friendly attacks reuse existing work/military action sprites.
 
 ## Evidence
 
-236 Rust tests passed: 13 server, 75 client, 148 domain; one existing manual
+237 Rust tests passed: 13 server, 76 client, 148 domain; one existing manual
 benchmark remains ignored. Ten focused wildlife regressions cover deterministic
 safe spawning, visibility/atomic rejection, attacks and cleanup, cargo loss,
 pursuit/return, pause/reload, discovery, blocked diagonal contact and corruption.
@@ -47,7 +47,7 @@ seed 123, Chromium with software WebGL, desktop mouse at 1280×800 and emulated
 phone pinch/touch at 390×844 DPR2. Its controlled fixture places two guards and a
 wolf/bear near the camera; this does not represent natural spawn placement.
 It asserts explicit UI attack orders, damage to both sides and bear defeat, and
-records screenshots plus `results.json`. A phone close-up precedes zooming out to
+records screenshots plus `results.json`. A follow-up desktop run (`results-desktop.json`) verifies the final damage-label de-duplication; its focused regression also passes. A phone close-up precedes zooming out to
 bring the guards into its narrower viewport. Physical phones and native desktop
 appearance are not covered by emulation.
 

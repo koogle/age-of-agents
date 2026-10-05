@@ -17,7 +17,7 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 URL = 'http://127.0.0.1:8000'
 
-async def main(out):
+async def main(out, only):
     out.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as http:
         try:
@@ -70,6 +70,7 @@ async def main(out):
                 async with async_playwright() as p:
                     browser=await p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--enable-unsafe-swiftshader'])
                     for label,size,dpr in [('desktop',(1280,800),1),('phone',(390,844),2)]:
+                        if only and label != only: continue
                         with sqlite3.connect(db) as con:
                             con.execute('UPDATE world_state SET world_json=? WHERE id=1',(json.dumps(fixture),))
                         await start()
@@ -119,9 +120,12 @@ async def main(out):
                         await context.close();stop()
                     await browser.close()
             finally:stop()
-            (out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
-            print('Mouse and touch hunting, damage, defeat, and screenshots passed')
+            result_path=out/('results-'+only+'.json' if only else 'results.json')
+            result_path.write_text(json.dumps(results,indent=2)+'\n')
+            print(f'{only or "Mouse and touch"} hunting, damage, defeat, and screenshots passed')
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
-    asyncio.run(main(parser.parse_args().output))
+    parser.add_argument('--only',choices=['desktop','phone'])
+    args=parser.parse_args()
+    asyncio.run(main(args.output,args.only))

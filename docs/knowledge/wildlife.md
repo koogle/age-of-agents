@@ -48,7 +48,8 @@ hunting rather than enabling pursuit into fog using private coordinates.
 
 The shared mouse/touch path selects a friendly unit then taps an animal to attack;
 without units selected, tapping reports species, health and instructions.
-Selection details show friendly health, floating text reports damage, and red
+Selection details show friendly health, floating text keeps only the latest damage
+feedback per entity, and red
 rings identify wildlife. Authored sprites are documented in
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames
 are authored and mirrored; reverse-facing and animal attack poses are future art

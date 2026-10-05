@@ -65,7 +65,7 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
 }
 
 struct Label {
-    unit_id: Option<String>,
+    entity_id: Option<String>,
     text: String,
     at: Vec3,
     born: f64,
@@ -86,13 +86,22 @@ impl Feedback {
             return;
         }
         for animal in &next.animals {
+            let label_id = format!("animal:{}", animal.id);
+            let p = animal.position();
+            let at = terrain::world_of(p.x, p.y);
+            for label in &mut self.labels {
+                if label.entity_id.as_deref() == Some(&label_id) {
+                    label.at.x = at.x;
+                    label.at.z = at.y;
+                }
+            }
             if let Some(before) = previous.animals.iter().find(|a| a.id == animal.id)
                 && animal.health < before.health
             {
-                let p = animal.position();
-                let at = terrain::world_of(p.x, p.y);
+                self.labels
+                    .retain(|label| label.entity_id.as_deref() != Some(&label_id));
                 self.labels.push(Label {
-                    unit_id: None,
+                    entity_id: Some(label_id),
                     text: format!("{}: {:.0} HP", animal.kind.name(), animal.health),
                     at: Vec3::new(at.x, 0.8, at.y),
                     born: now,
@@ -109,7 +118,7 @@ impl Feedback {
             };
             let at = terrain::world_of(unit.position.x, unit.position.y);
             for label in &mut self.labels {
-                if label.unit_id.as_deref() == Some(&unit.unit.id) {
+                if label.entity_id.as_deref() == Some(&unit.unit.id) {
                     label.at.x = at.x;
                     label.at.z = at.y;
                 }
@@ -121,17 +130,19 @@ impl Feedback {
             {
                 // Keep the latest status readable when orders change rapidly.
                 self.labels
-                    .retain(|label| label.unit_id.as_deref() != Some(&unit.unit.id));
+                    .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
                 self.labels.push(Label {
-                    unit_id: Some(unit.unit.id.clone()),
+                    entity_id: Some(unit.unit.id.clone()),
                     text,
                     at: Vec3::new(at.x, 0.8, at.y),
                     born: now,
                 });
             }
             if unit.unit.health < before.unit.health {
+                self.labels
+                    .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
                 self.labels.push(Label {
-                    unit_id: None,
+                    entity_id: Some(unit.unit.id.clone()),
                     text: format!("-{:.0} HP", before.unit.health - unit.unit.health),
                     at: Vec3::new(at.x, 1.1, at.y),
                     born: now,
@@ -144,7 +155,7 @@ impl Feedback {
                 continue;
             }
             self.labels.push(Label {
-                unit_id: None,
+                entity_id: None,
                 text: format!(
                     "+{:.0} {}",
                     cargo.amount,
@@ -189,6 +200,21 @@ impl Feedback {
 mod tests {
     use super::*;
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
+
+    #[test]
+    fn repeated_damage_replaces_feedback_instead_of_stacking() {
+        let mut before = GameWorld::default().snapshot();
+        let mut feedback = Feedback::default();
+        for tick in 1..=4 {
+            let mut next = before.clone();
+            next.tick += 1;
+            next.units[0].unit.health -= 8.0;
+            feedback.observe(Some(&before), &next, f64::from(tick) * 0.1);
+            assert_eq!(feedback.labels.len(), 1);
+            assert_eq!(feedback.labels[0].text, "-8 HP");
+            before = next;
+        }
+    }
 
     #[test]
     fn unloading_announces_once_using_the_gain_animation() {
