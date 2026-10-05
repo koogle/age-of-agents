@@ -31,6 +31,7 @@ jobs:
         run: |
           node --input-type=module --check < web/pkg/aoa_client.js
           python3 -m py_compile modal_app.py scripts/modal_manage.py
+          python3 -m unittest discover -s scripts -p test_modal_manage.py
           python3 scripts/check_sprite_resolution.py
           python3 scripts/check_field_preparation_assets.py
           python3 scripts/check_transport_assets.py

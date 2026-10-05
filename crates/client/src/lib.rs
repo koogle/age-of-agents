@@ -414,7 +414,7 @@ impl App {
             return;
         }
         if let Target::Unit(id) = target {
-            self.selection.select_unit(id, additive);
+            self.selection.select_units(vec![id], additive);
             return;
         }
         if let Some(ship_id) = self.selection.ship.clone() {
@@ -638,7 +638,7 @@ impl App {
             self.view.heights.rows as f32,
         ) * terrain::CELL;
         self.edge_pan(dt as f32);
-        self.view.frame(dt as f32);
+        self.view.frame(dt as f32, self.source.presentation_tick());
         let ghost = match self.build {
             hud::BuildUi::PlacingField if !self.hud.covers(self.cursor) => self
                 .placement(self.cursor, aoa_game::BuildingKind::Farm)
@@ -724,13 +724,9 @@ impl App {
                 Vec2::new(self.rig.target.x, self.rig.target.z),
             )
         });
-        let (mut sprites, mut decals) = self.view.draw_list(
-            &self.sheets,
-            &self.rig,
-            self.clock as f32,
-            dt as f32,
-            &self.selection,
-        );
+        let (mut sprites, mut decals) =
+            self.view
+                .draw_list(&self.sheets, &self.rig, self.clock as f32, &self.selection);
         decals.extend(hover);
         if let Some((kind, origin, ok)) = ghost {
             let (columns, rows) = kind.size();
@@ -894,10 +890,13 @@ impl ApplicationHandler<Game> for App {
             WindowEvent::CursorLeft { .. } => self.mouse_inside = false,
             WindowEvent::Focused(true) => self.focused = true,
             WindowEvent::MouseInput { state, button, .. } => match state {
-                ElementState::Pressed => {
-                    self.press(self.cursor, button, self.modifiers.shift_key())
-                }
-                ElementState::Released => self.release(self.cursor, self.modifiers.shift_key()),
+                ElementState::Pressed => self.press(
+                    self.cursor,
+                    button,
+                    self.modifiers.shift_key(),
+                    gestures::additive_selection(self.modifiers),
+                ),
+                ElementState::Released => self.release(self.cursor),
             },
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
             WindowEvent::Focused(false) => {

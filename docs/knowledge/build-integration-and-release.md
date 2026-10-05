@@ -49,14 +49,16 @@ read-only diagnostics. Documentation maintenance does not require them.
 
 ## Known verifier mismatch
 
-Source inspection on 2026-10-05 at `b054655` found `verify_once` still requiring
-9,600 cells and `(120, 80)` and interpreting terrain as parallel character
-strings. The current [terrain codec](../../crates/game/src/game/terrain_codec.rs)
-supports compressed runs and expanded dimensions. The verifier also requires at
-least one land unit and some unseen terrain, which are fixture assumptions rather
-than universal world invariants. Until repaired and tested against current
-snapshots, a verifier failure can reflect these assumptions rather than a failed
-deploy; do not reset production to make it pass or skip the check and claim success.
+The earlier source review at `b054655` found fixed 9,600-cell/120×80 assumptions
+and no run decoding. Upstream commit `250f3ce`, integrated here via `0a863a4`,
+repairs those assumptions: `unpack_terrain` bounds run decoding by advertised
+runtime dimensions, and `scripts/test_modal_manage.py` covers the decoder in CI.
+Do not reopen that completed fix or restore the old character-count check.
+
+The verifier still requires a land unit and some unseen terrain; those are fixture
+assumptions, not universal world invariants. If such a check fails, inspect the
+actual world and distinguish verifier assumptions from deployment failures. Never
+reset production to satisfy the verifier or skip it and claim success.
 
 The script byte-compares only the listed bootstrap/asset files and checks WASM
 signatures/strings; it does not establish byte equality of the full bundle or
