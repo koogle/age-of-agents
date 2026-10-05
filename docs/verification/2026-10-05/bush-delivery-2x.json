@@ -1,0 +1,440 @@
+{
+  "base_revision": "75e754044db317d998ba8c32893215b9a7134df7",
+  "fixed_gathering_source_blob": "df7a146fcfd156803a4e923f76524ed7d81e4fcb",
+  "mode": "isolated hosted Chromium, 1280x800, software WebGL",
+  "fixture": {
+    "terrain": "all meadow",
+    "town_center": [
+      55,
+      41
+    ],
+    "villager": [
+      54,
+      46
+    ],
+    "food_nodes": [
+      {
+        "id": "patch-left",
+        "cell": [
+          45,
+          48
+        ],
+        "amount": 10
+      },
+      {
+        "id": "patch-right",
+        "cell": [
+          46,
+          48
+        ],
+        "amount": 10
+      },
+      {
+        "id": "next-patch",
+        "cell": [
+          56,
+          48
+        ],
+        "amount": 40
+      },
+      {
+        "id": "distant-patch",
+        "cell": [
+          80,
+          48
+        ],
+        "amount": 30
+      },
+      {
+        "id": "old-distant",
+        "cell": [
+          75,
+          48
+        ],
+        "amount": 0
+      }
+    ]
+  },
+  "commands": [
+    {
+      "type": "set_simulation_speed",
+      "multiplier": 2
+    },
+    {
+      "type": "gather",
+      "unit_id": "villager-1",
+      "resource_id": "patch-right"
+    }
+  ],
+  "subsequent_commands": [],
+  "before": {
+    "stored_food": 19.999999999999986,
+    "remaining": {
+      "patch-left": 0,
+      "patch-right": 0,
+      "next-patch": 40,
+      "distant-patch": 30,
+      "old-distant": 0
+    },
+    "page_errors": [],
+    "transitions": [
+      {
+        "tick": 0,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "stored_food": 0
+      },
+      {
+        "tick": 0,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-right",
+          "phase": "to_resource"
+        },
+        "cargo": null,
+        "stored_food": 0
+      },
+      {
+        "tick": 13,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-right",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 0.25719095841793743
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 38,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "to_resource"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 10
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 40,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 10.133333333333333
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 65,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "returning"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 19.999999999999986
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 80,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "depositing"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 19.999999999999986
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 81,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "stored_food": 19.999999999999986
+      }
+    ]
+  },
+  "after": {
+    "stored_food": 60.00000000000006,
+    "page_errors": [],
+    "remaining": {
+      "patch-left": 0,
+      "patch-right": 0,
+      "next-patch": 0,
+      "distant-patch": 30,
+      "old-distant": 0
+    },
+    "transitions": [
+      {
+        "tick": 0,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "stored_food": 0
+      },
+      {
+        "tick": 0,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-right",
+          "phase": "to_resource"
+        },
+        "cargo": null,
+        "stored_food": 0
+      },
+      {
+        "tick": 13,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-right",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 0.25719095841793743
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 38,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "to_resource"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 10
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 40,
+        "action": {
+          "type": "gather",
+          "resource_id": "patch-left",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 10.133333333333333
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 65,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "to_resource"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 19.999999999999986
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 80,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 19.999999999999986
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 81,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "returning"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 83,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "depositing"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 0
+      },
+      {
+        "tick": 84,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "to_resource"
+        },
+        "cargo": null,
+        "stored_food": 20
+      },
+      {
+        "tick": 86,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 0.13333333333333344
+        },
+        "stored_food": 20
+      },
+      {
+        "tick": 136,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "returning"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 20
+      },
+      {
+        "tick": 138,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "depositing"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 20
+      },
+      {
+        "tick": 139,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "to_resource"
+        },
+        "cargo": null,
+        "stored_food": 40
+      },
+      {
+        "tick": 141,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "gathering"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 0.13333333333333344
+        },
+        "stored_food": 40
+      },
+      {
+        "tick": 191,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "returning"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 40
+      },
+      {
+        "tick": 193,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "depositing"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 20
+        },
+        "stored_food": 40
+      },
+      {
+        "tick": 194,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "to_resource"
+        },
+        "cargo": null,
+        "stored_food": 60
+      },
+      {
+        "tick": 196,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "returning"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 5.395683899678261e-14
+        },
+        "stored_food": 60
+      },
+      {
+        "tick": 198,
+        "action": {
+          "type": "gather",
+          "resource_id": "next-patch",
+          "phase": "depositing"
+        },
+        "cargo": {
+          "kind": "food",
+          "amount": 5.395683899678261e-14
+        },
+        "stored_food": 60
+      },
+      {
+        "tick": 199,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "stored_food": 60.00000000000006
+      }
+    ]
+  },
+  "integrated_base_revision": "e50ad7b7bd3554d7f72194c7266ec2938437fed9",
+  "integration_note": "Repeated against combined docks, shore pickup, wildlife, mobile cargo paging and Stop hand; subsequent README-only cleanup preserved. Version-14 fixture adds health=100 and no animals; geometry and commands match baseline."
+}
