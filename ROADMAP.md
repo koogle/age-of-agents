@@ -81,7 +81,7 @@ Status: selected units use a broad ivory ground ring with a blue border in the s
 
 Gameplay acceptance:
 
-1. Intentional mouse Shift-drag from empty ground draws a readable selection rectangle and selects all visible friendly units whose projected feet are enclosed; ordinary drag still pans and click selection still works.
+1. Intentional mouse Shift-drag from empty ground draws a readable selection rectangle and replaces the selection with visible friendly units whose projected feet are enclosed; Control-drag (Command on Mac) adds enclosed units; ordinary drag still pans and click selection still works.
 2. Touch keeps pan/tap semantics and offers additive unit selection without accidental box selection.
 3. A group ground order is one typed authoritative command. Validation is atomic: one invalid/busy/member mismatch rejects the whole order without moving any unit.
 4. Accepted group movement assigns deterministic distinct reachable destinations, respects reservations/occupancy, and visibly moves every selected unit without stacking.
@@ -193,12 +193,12 @@ Gameplay acceptance:
 
 ## Integrated native presentation fixes
 
-- [x] Shift-click group selection and existing shared gather/construct commands.
+- [x] Control/Command-click additive group selection and existing shared gather/construct commands.
 - [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.
 - [x] Two-picture walking/carrying paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
 - [x] Keep partially visible buildings on screen when their ground anchors pass the near clipping plane at close zoom.
-- [x] Shift-drag from empty ground draws a selection box and adds enclosed visible units in native and WebGL2 clients.
+- [x] Shift-drag from empty ground draws a selection box and replaces the selection with enclosed visible units; Control-drag (Command on Mac) adds units in native and WebGL2 clients.
 - [ ] Additive touch selection and accessible DOM controls in the wgpu client remain open.
 - [ ] Explicit blocking/non-blocking task classification remains open; current domain allows valid replacement orders for all unit tasks.
 

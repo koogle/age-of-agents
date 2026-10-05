@@ -409,7 +409,7 @@ impl App {
             return;
         }
         if let Target::Unit(id) = target {
-            self.selection.select_unit(id, additive);
+            self.selection.select_units(vec![id], additive);
             return;
         }
         if let Some(ship_id) = self.selection.ship.clone() {
@@ -875,10 +875,13 @@ impl ApplicationHandler<Game> for App {
             WindowEvent::CursorLeft { .. } => self.mouse_inside = false,
             WindowEvent::Focused(true) => self.focused = true,
             WindowEvent::MouseInput { state, button, .. } => match state {
-                ElementState::Pressed => {
-                    self.press(self.cursor, button, self.modifiers.shift_key())
-                }
-                ElementState::Released => self.release(self.cursor, self.modifiers.shift_key()),
+                ElementState::Pressed => self.press(
+                    self.cursor,
+                    button,
+                    self.modifiers.shift_key(),
+                    gestures::additive_selection(self.modifiers),
+                ),
+                ElementState::Released => self.release(self.cursor),
             },
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
             WindowEvent::Focused(false) => {
