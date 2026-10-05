@@ -57,6 +57,7 @@ async def main(out, only):
                 await start();await command({'type':'set_simulation_speed','multiplier':0.0});stop()
                 with sqlite3.connect(db) as con:
                     fixture=json.loads(con.execute('SELECT world_json FROM world_state WHERE id=1').fetchone()[0])
+                assert [a['kind'] for a in fixture['animals']] == ['wolf'], fixture['animals']
                 x=fixture['units'][0]['cell']['column'];y=fixture['units'][0]['cell']['row']+3
                 fixture['resources']=[r for r in fixture['resources'] if not (x-9<=r['cell']['column']<=x+9 and y-2<=r['cell']['row']<=y+7)]
                 for t in fixture['terrain']:

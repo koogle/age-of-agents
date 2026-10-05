@@ -9,11 +9,15 @@ animals instead of timed events, then suggested a bear. The drought in PR #98
 was withdrawn; wolves and bears replace it. Bears replace the initially proposed
 boars. Friendly units remain player-controlled; pursuit is for hostile animals.
 
+The user subsequently requested one animal on the first island and more on the
+second. The implemented roster is one starter wolf, then two wolves and one bear
+on each later island, preserving safe-start placement.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
-attack orders, animal pursuit/damage and cleanup. Each generated island gets two
-wolves and one bear where valid cells exist. Starting animals are at least 26
+attack orders, animal pursuit/damage and cleanup. The first island gets one wolf; the second and later
+islands get two wolves and one bear where valid cells exist. Starting animals are at least 26
 cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships.
@@ -58,7 +62,8 @@ work. Friendly hunting reuses existing villager chopping / military action art.
 Store version 13 adds required health and wildlife state. Incompatible stores
 (including 11 and the withdrawn drought's 12) reset under the existing
 [save policy](server-and-saves.md). Current corrupt health, steps, cooldowns,
-claims or orders fail validation. Passengers retain health and remain safe at sea.
+claims or orders fail validation. Population tuning does not change the save schema:
+existing animals remain intact on reload; the roster applies when an island is generated. Passengers retain health and remain safe at sea.
 
 ## Verification
 
