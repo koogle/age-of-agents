@@ -49,11 +49,13 @@ const ICONS: [&str; 19] = [
     "portrait_group",
     "portrait_towncenter",
 ];
-const COINS: [&str; 4] = [
+const BUTTONS: [&str; 6] = [
     "coin_normal",
     "coin_hover",
     "coin_disabled",
     "coin_researched",
+    "shield_up",
+    "shield_down",
 ];
 
 pub fn files() -> Vec<String> {
@@ -61,7 +63,7 @@ pub fn files() -> Vec<String> {
         .iter()
         .map(|name| format!("ui/icons/{name}.png"))
         .collect();
-    files.extend(COINS.iter().map(|name| format!("ui/buttons/{name}.png")));
+    files.extend(BUTTONS.iter().map(|name| format!("ui/buttons/{name}.png")));
     files.push("fonts/Nunito-ExtraBold.ttf".into());
     files.push("fonts/Alegreya-MediumItalic.ttf".into());
     files
@@ -195,7 +197,7 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
     };
     let mut sprites = HashMap::new();
     let mut content = HashMap::new();
-    for name in COINS {
+    for name in BUTTONS {
         let coin = assets
             .image(&format!("ui/buttons/{name}.png"))
             .resized(192, 192);

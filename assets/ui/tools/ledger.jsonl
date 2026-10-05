@@ -271,3 +271,7 @@
 {"t": 1791188429.267797, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:resource_timber.png", "est_usd": 0.005, "request_id": "01a10b26-5ff9-75c0-9019-6c2a1f3a90dd", "seconds": 2.5}
 {"t": 1791189356.8951693, "endpoint": "fal-ai/nano-banana/edit", "tag": "icon:tech_agriculture_fields", "est_usd": 0.0398, "request_id": "01a10b34-75bc-7903-b58f-0c3c5a8df88e", "seconds": 7.0}
 {"t": 1791189372.9664748, "endpoint": "fal-ai/birefnet/v2", "tag": "cut:tech_agriculture_fields.png", "est_usd": 0.005, "request_id": "01a10b34-c707-77b2-b090-4b9b2c36dbf6", "seconds": 2.3}
+{"t": 1791211454.8802004, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield:up", "est_usd": 0.0398, "request_id": "01a10c85-9f67-7e02-96ca-c9d0067b31f7", "seconds": 8.6}
+{"t": 1791211474.1925888, "endpoint": "fal-ai/nano-banana/edit", "tag": "cargo-shield:down", "est_usd": 0.0398, "request_id": "01a10c85-ee8c-7473-ab73-e545c89828b9", "seconds": 7.6}
+{"t": 1791211487.9329064, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield:cut:up", "est_usd": 0.005, "request_id": "01a10c86-3670-7780-a82b-666294bff341", "seconds": 3.0}
+{"t": 1791211501.4449234, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield:cut:down", "est_usd": 0.005, "request_id": "01a10c86-6b61-7b83-bf5b-843a86f90d88", "seconds": 2.9}
