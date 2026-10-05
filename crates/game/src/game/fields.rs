@@ -56,6 +56,11 @@ impl GameWorld {
             return Err(CommandError::InvalidBuildSite);
         }
         self.afford_field()?;
+        // A plot blocks its cells even after harvest. Preserve delivery and
+        // escape routes just as we do when placing a building foundation.
+        if !self.placement_preserves_routes(footprint) {
+            return Err(CommandError::TargetUnreachable);
+        }
         let id = format!("field-{}-{}", origin.column, origin.row);
         if self.resources.iter().any(|r| r.id == id) {
             return Err(CommandError::InvalidBuildSite);
