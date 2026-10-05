@@ -9,6 +9,49 @@ fn overlaps(a: [f32; 4], b: [f32; 4]) -> bool {
 }
 
 #[test]
+fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
+    let assets = pollster::block_on(crate::assets::Assets::load());
+    let atlas = build_atlas(&assets);
+    let snapshot = GameWorld::default().snapshot();
+    let camera = Vec2::new(36.0, 18.0);
+    let model = Model {
+        snapshot: Some(&snapshot),
+        units: &[],
+        building: None,
+        ship: None,
+        build: BuildUi::Off,
+        show_grid: false,
+        toast: None,
+        camera,
+    };
+    let map = minimap::Minimap::new();
+    for (width, height, scale) in [(1280.0, 800.0, 1.0), (390.0, 844.0, 2.0)] {
+        let mut hud = Hud::new();
+        hud.layout(&atlas, &model, width * scale, height * scale, scale);
+        let globe = hud.quads.iter().find(|q| q.params[0] == 3.0).unwrap().rect;
+        let screen_of = |world| {
+            Vec2::new(globe[0], globe[1]) + map.local_of(world) * Vec2::new(globe[2], globe[3])
+        };
+        let marker = hud
+            .quads
+            .iter()
+            .find(|q| q.params[0] == 2.0 && (q.rect[2] - 10.0 * scale).abs() < 1e-5)
+            .unwrap();
+        assert!(
+            (Vec2::new(marker.rect[0], marker.rect[1]) + Vec2::splat(5.0 * scale))
+                .abs_diff_eq(screen_of(camera), 1e-4)
+        );
+        for point in [camera, Vec2::new(30.0, 20.0), Vec2::new(15.0, 12.0)] {
+            assert!(hud.press(screen_of(point)));
+            let Some(Action::LookAt(actual)) = hud.release() else {
+                panic!("minimap press must navigate");
+            };
+            assert!(actual.abs_diff_eq(point, 1e-4));
+        }
+    }
+}
+
+#[test]
 fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
     let assets = pollster::block_on(crate::assets::Assets::load());
     let atlas = build_atlas(&assets);
@@ -88,7 +131,12 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     let center = Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0);
                     assert!(hud.press(center));
                     if matches!(action, Action::LookAt(_)) {
-                        assert_eq!(hud.release(), Some(Action::LookAt(Vec2::new(15.0, 10.0))));
+                        assert_eq!(
+                            hud.release(),
+                            Some(Action::LookAt(
+                                Vec2::new(crate::terrain::COLUMNS, crate::terrain::ROWS) * 0.5
+                            ))
+                        );
                     } else {
                         assert_eq!(hud.release(), Some(action.clone()));
                     }

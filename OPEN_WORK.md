@@ -1,4 +1,12 @@
-# Current handoff: HQ copy audit (2026-10-05)
+# Current handoff: minimap orientation (2026-10-05)
+
+- User requested a dedicated PR and merge into the default branch (`master`). Branch `fix/minimap-orientation` starts from `eb6757c`; the separate selection-modifier PR #87 remains open.
+- Minimap terrain, camera marker and mouse/touch navigation share a projection derived from the fixed world camera. Replaces unrotated axes and stale 30×20 dimensions with full current world bounds; projected corners fit inside the globe.
+- Focused tests cover orientation against the actual world camera, world/local/shader round trips, full map bounds and real HUD press/marker alignment at desktop and DPR2 phone sizes. README/roadmap/design decision updated; no simulation, persistence or artwork changes.
+- Thermonuclear review: one small projection module replaces three independent coordinate formulas; uses existing camera axes and terrain bounds, no new dependencies/authority/interaction mode, client files remain below 1,000 lines.
+- Verification: all 209 workspace tests pass (17 server, 63 client, 129 domain, including long random-play); formatting, strict native/WASM lint, generated JS syntax and all asset checks pass. Rebuilt tracked JS/WASM. Real desktop normal/close zoom and DPR2-phone mouse/touch navigation along both world axes pass with no page errors. Current captures/logs are under `/workspace/scratch/minimap`; `desktop.png` and `phone.png` show the aligned map. Production deployment uses the merge-triggered workflow because direct Modal credentials are unavailable.
+
+# Previous handoff: HQ copy audit (2026-10-05)
 
 - PR #84: https://github.com/koogle/age-of-agents/pull/84. Branch `fix/hq-language` integrates master `d92b7db`, preserving compact HUD, gathering/exploration, shared resources, unit-only transports, timber/Agriculture art and the completed-research laurel badge.
 - Audited HQ descriptions, buttons, active/blocked tasks, research effects/completion/prerequisites, housing warnings and queued-task cancellation/refund wording. Active work reads "Training a villager", "Building a transport/siege cart", or "Making 5 timber". Completed research retains its bonus as "Research complete · Wood gathering +20%". Shared building labels receive the same grammar correction; this PR changes no gameplay, costs or persistence relative to master.
