@@ -71,7 +71,7 @@ async def main():
                 page = await browser.new_page(viewport={'width':w,'height':h},device_scale_factor=dpr,has_touch=dpr==2)
                 page.on('pageerror',lambda e: errors.append(str(e)))
                 await page.add_init_script('''
-                    window.requestAnimationFrame = cb => setTimeout(() => cb(performance.now()), 100);
+                    window.requestAnimationFrame = cb => setTimeout(() => cb(performance.now()), 250);
                     const Socket=window.WebSocket;
                     window.WebSocket=class extends Socket { constructor(...args) { super(...args);
                         this.addEventListener('message',event=>{const m=JSON.parse(event.data);

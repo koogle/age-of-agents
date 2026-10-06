@@ -1,3 +1,8 @@
+# Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
+
+- User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
+- Formatting, 289 combined workspace tests (one existing ignored benchmark), strict native/WASM lint and the release WASM rebuild pass. Desktop mouse and emulated DPR-2 phone touch browser checks pass without page errors; [visual evidence](docs/verification/build-subcategories/README.md). Code-quality review: one direct layout branch, no dependency or new state. User authorized PR creation and merge on 2026-10-06. Integrated master `f4d5b01`, preserving roads, wildlife, menu icons, building availability and granary yield. Combined checks and refreshed desktop/phone browser captures pass. Production uses the merge-triggered release workflow.
+
 # Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
 
 - User approved the refined road textures and authorized merging PR #133 on 2026-10-06. Branch `feat/basic-roads` integrates master `f985a92`, preserving dedicated menu icons, wildlife attack art, granary yield and building availability. Merge/release status is tracked by the linked PR and [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
@@ -80,7 +85,8 @@ User explicitly authorized merging PR #130. Integrating master `faa4b04`, preser
   field planting/replenishment cycle are implemented locally. Generated/refined
   jug art is integrated in the HUD and existing resource atlas. Save version 16
   resets older hosted worlds; no production state has changed.
-  All 271 workspace tests pass (one manual benchmark ignored); 299 sprite frames,
+  Combined verification: 293 workspace tests pass (one manual benchmark ignored);
+  all 96 client tests pass again after the final menu fix; 303 sprite frames,
   new icon normalization, existing atlas pixel preservation and six production
   verifier tests pass. Native/WASM strict lint, rebuilt WebGL, and final code/style review pass.
   Desktop mouse (1100x750) and emulated DPR-2 phone touch (430x932) both
@@ -91,7 +97,8 @@ User explicitly authorized merging PR #130. Integrating master `faa4b04`, preser
   heavy orange rendering to fine ink, pale clay and muted blue watercolor.
   Original art is retained as rejected evidence.
   User approved the corrected art and authorized merge on 2026-10-06.
-  Integrating current master before final combined verification and release. See [water guide](docs/knowledge/water-resource.md)
+  Integrated master `79d5899`; final desktop and DPR-2 touch replays pass.
+  Ready for authorized merge; production delivery follows GitHub Actions. See [water guide](docs/knowledge/water-resource.md)
   and [verification](docs/verification/water/README.md).
 
 - [PR #108](https://github.com/koogle/age-of-agents/pull/108): resource icons retain quantities and show capitalized names on hover/tap; rows compact to 66px. User authorized merging into master. Integrated master `2bedc41`; all 264 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass. Rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors; [screenshots and review](docs/verification/resource-names/README.md). Generated-bundle conflicts resolved by rebuilding; replay fixture reader updated for island inventories. Ready for the authorized merge; production delivery follows the merge-triggered Actions workflow.
