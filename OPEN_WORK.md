@@ -1,8 +1,8 @@
-# Road construction resumption — 2026-10-06
+# Road construction resumption — [PR #148](https://github.com/koogle/age-of-agents/pull/148)
 
-- User requested that resuming an interrupted road automatically completes its unfinished pieces. Implemented in the shared domain: a single-cell resume includes unfinished edge-connected road cells across bends, completed pieces and material changes; separate/corner-touching roads stay separate. Clicked piece first, deterministic remaining order, no repeated cost or save-schema change.
-- Verification: 296 workspace tests pass (one existing ignored benchmark), formatting and strict native/WASM lint pass; server and browser bundle rebuilt. Isolated desktop mouse and DPR-2 phone touch both stop and resume dirt/stone roads through one piece, complete all 14 cells and spend exactly seven stone, with no page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06). User authorized PR creation and merge after passing checks on 2026-10-06. Preparing integration with current master and fresh combined verification; production release will use the merge-triggered workflow.
-
+- User requested that resuming an interrupted road completes its unfinished pieces. Single-cell resume now assigns unfinished edge-connected road cells across bends, completed pieces and materials; separate/corner-touching roads remain separate. Costs and progress persist; no save-schema change.
+- Integrated master `de49ab4`, preserving boars, stronger wildlife, stationary NPC status feedback and refined stone-road/disembark artwork. All 298 workspace tests pass (one existing ignored benchmark), formatting/native/WASM lint, 307-frame/asset checks and six release-verifier tests pass. Rebuilt desktop mouse and DPR-2 phone touch both stop/resume dirt and stone through one piece, complete all 14 cells and spend exactly seven stone, without page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06).
+- User authorized PR creation and merge after checks pass on 2026-10-06. Merge status is tracked by PR #148; production release uses the merge-triggered [workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml). Deployment is verified separately.
 
 # Boar danger (2026-10-06)
 

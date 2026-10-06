@@ -144,5 +144,17 @@ both complete the interrupted dirt/stone roads through single-piece resumption,
 retain costs and report no page errors. [Results and build hashes](resume/results.json),
 [desktop final state](resume/desktop-state.json) and
 [phone final state](resume/phone-state.json) retain the evidence. Physical phones,
-native-window input and production deployment remain unverified; this change is
-local and unmerged.
+native-window input and production deployment remain unverified. These initial
+results precede integration with current master.
+
+Final integration with master `de49ab4` preserves boars, stronger wildlife,
+stationary NPC status messages and the refined stone-road/disembark assets.
+All 298 workspace tests, formatting, native/WASM strict lint, 307-frame/asset
+checks and six release-verifier tests pass; the current server/browser bundle is
+rebuilt. Desktop mouse and DPR-2 phone touch both pass the interrupted-road
+single-piece resume flow, with all 14 cells completed, exactly seven stone spent
+and no page errors. [Combined checks](resume/integrated/checks.json) and
+[browser results/hashes](resume/integrated/results.json) identify the tested build.
+The user authorized merging [PR #148](https://github.com/koogle/age-of-agents/pull/148)
+after passing checks. Production deployment is tracked separately by the
+[release workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
