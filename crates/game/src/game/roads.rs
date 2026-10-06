@@ -134,10 +134,7 @@ impl GameWorld {
         end: CellCoordinate,
         kind: RoadKind,
     ) -> Result<(), CommandError> {
-        let unit = self.ordered_unit(id)?;
-        if self.units[unit].kind != UnitKind::Villager {
-            return Err(CommandError::VillagerRequired);
-        }
+        let unit = self.ordered_villager(id)?;
         if !self.in_bounds(start) || !self.in_bounds(end) {
             return Err(CommandError::InvalidBuildSite);
         }
@@ -192,7 +189,7 @@ impl GameWorld {
     }
 
     pub(super) fn tick_road(&mut self, unit: usize, cells: Vec<CellCoordinate>, mut dt: f64) {
-        if self.drop_off_before_building(unit, dt) {
+        if self.unload_before_work(unit, dt) {
             return;
         }
         loop {

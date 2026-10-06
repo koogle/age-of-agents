@@ -1,5 +1,9 @@
 # Shore-facing dock verification — 2026-10-05
 
+Historical evidence: feature-specific generation/capture scripts were retired
+on 2026-10-06. Old commands below record how these results were obtained;
+consult [the retirement record](../RETIRED_TOOLS.md) for current checks and exact historical code.
+
 The dock pier now faces the edge of its 4×4 plot with the most adjacent water.
 Ties prefer south, east, north, then west; diagonal water and rivers do not count.
 The same domain helper serves construction eligibility, placement preview and

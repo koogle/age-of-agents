@@ -1,5 +1,9 @@
 # Road material refinement — 2026-10-06
 
+Historical evidence: feature-specific generation/capture scripts were retired
+on 2026-10-06. Old commands below record how these results were obtained;
+consult [the retirement record](../../RETIRED_TOOLS.md) for current checks and exact historical code.
+
 Jakob asked for both road textures to match the game style more closely after
 reviewing PR #133. Dirt now uses worn sandy ochre gouache instead of orange clay;
 stone uses irregular warm limestone instead of the regular building-plot grid.

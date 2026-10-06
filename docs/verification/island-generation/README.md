@@ -1,5 +1,9 @@
 # Terrain-first islands
 
+Historical evidence: feature-specific generation/capture scripts were retired
+on 2026-10-06. Old commands below record how these results were obtained;
+consult [the retirement record](../RETIRED_TOOLS.md) for current checks and exact historical code.
+
 Generation change, 2026-10-05. See the [generation guide](../../knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05).
 
 ## Reproduction

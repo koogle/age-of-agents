@@ -18,8 +18,6 @@ fn fixture() -> GameWorld {
     farm.id = "water-test-farm".into();
     farm.kind = BuildingKind::Farm;
     farm.origin = CellCoordinate::new(34, 22);
-    farm.produces = farm.kind.products().to_vec();
-    farm.researches = vec![];
     world.buildings.push(farm);
     world.units[0].cell = CellCoordinate::new(26, 22);
     world.units[1].cell = CellCoordinate::new(33, 24);

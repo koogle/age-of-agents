@@ -13,6 +13,7 @@ pub use coast::{DockFacing, dock_facing};
 mod construction_tests;
 mod domain;
 mod economy;
+pub use economy::{housing, population};
 #[cfg(test)]
 mod economy_tests;
 mod fields;
@@ -52,7 +53,7 @@ mod wildlife_tests;
 mod worldgen;
 
 pub use domain::*;
-pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
+pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_SIZE, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
@@ -76,6 +77,10 @@ pub const VILLAGER_PRODUCTION_SECONDS: f64 = 6.0;
 pub const RESEARCH_FOOD_COST: f64 = 40.0;
 pub const RESEARCH_WOOD_COST: f64 = 20.0;
 pub const RESEARCH_SECONDS: f64 = 8.0;
+pub const RESEARCH_COST: &[(ResourceKind, f64)] = &[
+    (ResourceKind::Food, RESEARCH_FOOD_COST),
+    (ResourceKind::Wood, RESEARCH_WOOD_COST),
+];
 pub const GATHERING_TECH_MULTIPLIER: f64 = 1.2;
 /// Minimum gap between resource clusters and starting-base clearance, in cells.
 /// Nodes within one cluster touch.
@@ -85,6 +90,7 @@ pub const STARTING_BASE_RESOURCE_CLEARANCE: f64 = 8.0;
 const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
+pub const UNIT_HEALTH: f64 = 100.0;
 /// The island new worlds get unless a seed is given.
 pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 
@@ -127,6 +133,8 @@ pub struct BuildingView {
     pub building: Building,
     pub columns: u16,
     pub rows: u16,
+    pub produces: Vec<ProductKind>,
+    pub researches: Vec<TechnologyKind>,
 }
 
 // Clients decode snapshots too; the catalog is static data they already have.
@@ -320,7 +328,12 @@ impl std::fmt::Display for CommandError {
                 "ship must be stopped beside a completed dock to transfer island storage"
             }
             Self::InvalidCargoAmount => "cargo amount must be finite and positive",
-            Self::ShipHoldFull => "ship can carry 50 resources in total",
+            Self::ShipHoldFull => {
+                return write!(
+                    f,
+                    "ship can carry {SHIP_RESOURCE_CAPACITY} resources in total"
+                );
+            }
             Self::ShipNotFound => "transport ship not found",
             Self::ShipMustBeStopped => "stop the ship before boarding or unloading",
             Self::ShipFull => "transport passenger capacity is full",
@@ -336,23 +349,25 @@ impl std::fmt::Display for CommandError {
             Self::FarmRequired => "a completed farm is required for fields",
             Self::FieldNotDepleted => "harvest the field before replenishing it",
             Self::InvalidDestination => "destination is outside the world",
-            Self::DestinationOccupied => "destination cell is occupied",
-            Self::TargetUnreachable => "target is unreachable",
-            Self::InvalidBuildSite => "build site is blocked or outside the world",
-            Self::InsufficientWood => "insufficient wood",
-            Self::InsufficientStone => "insufficient stone",
+            Self::DestinationOccupied => "Something already stands there.",
+            Self::TargetUnreachable => "No path leads there.",
+            Self::InvalidBuildSite => "That spot is not clear for building.",
+            Self::InsufficientWood => "Not enough wood for that building.",
+            Self::InsufficientStone => "Not enough stone for that building.",
             Self::NotBuildable => "villagers cannot build that",
-            Self::NeedsCoast => "a dock must touch the sea",
-            Self::PopulationCapReached => "population cap reached",
-            Self::NothingToDeposit => "unit is not carrying anything",
-            Self::BuildingRefusesCargo => "building does not take that cargo",
+            Self::NeedsCoast => "A dock must be built along the shore.",
+            Self::PopulationCapReached => "Build a house to make room for more villagers.",
+            Self::NothingToDeposit => "That villager has nothing to unload.",
+            Self::BuildingRefusesCargo => "That building does not take those goods.",
             Self::BuildingNotFound => "building not found",
             Self::BuildingQueueFull => "building queue is full",
             Self::QueuedJobNotFound => "queued task is no longer waiting",
             Self::BuildingUnderConstruction => "building is still under construction",
             Self::BuildingAlreadyComplete => "building is already complete",
             Self::ProductUnavailable => "building cannot produce that item",
-            Self::InsufficientFood => "insufficient food",
+            Self::InsufficientFood => {
+                return write!(f, "You need {VILLAGER_FOOD_COST} food to train a villager.");
+            }
             Self::InsufficientResources(kind) => return write!(f, "insufficient {}", kind.name()),
             Self::InsufficientProductionResources => "insufficient resources for production",
             Self::VillagerRequired => "only villagers can gather or build",
@@ -360,7 +375,12 @@ impl std::fmt::Display for CommandError {
             Self::TechnologyAlreadyResearched => "technology is already researched",
             Self::TechnologyInProgress => "technology is already being researched",
             Self::MissingTechnologyPrerequisite => "technology prerequisite is not researched",
-            Self::InsufficientResearchResources => "research requires 40 food and 20 wood",
+            Self::InsufficientResearchResources => {
+                return write!(
+                    f,
+                    "research requires {RESEARCH_FOOD_COST} food and {RESEARCH_WOOD_COST} wood"
+                );
+            }
             Self::GamePaused => "game is paused; resume to give orders",
             Self::InvalidSimulationSpeed => "simulation speed must be 0, 1, or 2",
         };
@@ -379,7 +399,7 @@ impl GameWorld {
     pub fn generate(seed: u64) -> Self {
         let island = worldgen::generate(seed);
         let villager = |number: u64, cell: CellCoordinate| Unit {
-            health: 100.0,
+            health: UNIT_HEALTH,
             id: format!("villager-{number}"),
             kind: UnitKind::Villager,
             cell,
@@ -431,25 +451,11 @@ fn building(
     origin: CellCoordinate,
     construction: Option<f64>,
 ) -> Building {
-    let town_center = kind == BuildingKind::TownCenter;
     Building {
         id: id.into(),
         kind,
         origin,
         construction,
-        produces: kind.products().to_vec(),
-        researches: if town_center {
-            TechnologyKind::ALL.to_vec()
-        } else {
-            match kind {
-                BuildingKind::MiningCamp => vec![TechnologyKind::Mining],
-                BuildingKind::Farm => vec![TechnologyKind::Agriculture],
-                BuildingKind::LumberMill => vec![TechnologyKind::Forestry],
-                BuildingKind::Kiln => vec![TechnologyKind::Masonry],
-                BuildingKind::Weaver => vec![TechnologyKind::Textiles],
-                _ => Vec::new(),
-            }
-        },
         job: None,
         queue: Vec::new(),
         next_queue_id: 0,
@@ -459,20 +465,21 @@ fn building(
 impl GameWorld {
     /// Applies a command atomically: on error the world is unchanged.
     pub fn apply_command(&mut self, command: Command) -> Result<(), CommandError> {
+        *self = self.clone().with_command(command)?;
+        Ok(())
+    }
+
+    /// Consume an isolated candidate; callers commit it only after success (and saving).
+    pub fn with_command(mut self, command: Command) -> Result<Self, CommandError> {
         if self.simulation_speed == 0.0 && !matches!(command, Command::SetSimulationSpeed { .. }) {
             return Err(CommandError::GamePaused);
         }
-        // A new order replaces a unit's current task, so validate it against a
-        // copy in which that unit has stopped; a rejected order leaves the
-        // world, and the unit's old task, untouched.
-        let mut next = self.clone();
-        next.execute(command)?;
-        *self = next;
+        self.execute(command)?;
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
             panic!("an accepted command broke a world invariant: {error}");
         }
-        Ok(())
+        Ok(self)
     }
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
@@ -538,10 +545,7 @@ impl GameWorld {
                 unit_id,
                 resource_id,
             } => {
-                let unit = self.ordered_unit(&unit_id)?;
-                if self.units[unit].kind != UnitKind::Villager {
-                    return Err(CommandError::VillagerRequired);
-                }
+                let unit = self.ordered_villager(&unit_id)?;
                 let resource = self
                     .resources
                     .iter()
@@ -578,10 +582,7 @@ impl GameWorld {
                 unit_id,
                 building_id,
             } => {
-                let unit = self.ordered_unit(&unit_id)?;
-                if self.units[unit].kind != UnitKind::Villager {
-                    return Err(CommandError::VillagerRequired);
-                }
+                let unit = self.ordered_villager(&unit_id)?;
                 let building = self
                     .buildings
                     .iter()
@@ -600,25 +601,15 @@ impl GameWorld {
                 product,
             } => {
                 let building = self.building_index_with_queue_space(&building_id)?;
-                if !self.buildings[building].kind.products().contains(&product)
-                    || !self.building_available(self.buildings[building].kind)
-                {
+                if !self.building_available(self.buildings[building].kind) {
                     return Err(CommandError::ProductUnavailable);
                 }
-                if product.unit_kind().is_some() && self.villagers_and_trainees() >= self.housing()
-                {
-                    return Err(CommandError::PopulationCapReached);
-                }
-                if !self
-                    .available_at(self.buildings[building].origin)
-                    .affords(product.cost())
-                {
-                    return Err(if product == ProductKind::Villager {
-                        CommandError::InsufficientFood
-                    } else {
-                        CommandError::InsufficientProductionResources
-                    });
-                }
+                self.buildings[building].check_production(
+                    product,
+                    &self.available_at(self.buildings[building].origin),
+                    self.villagers_and_trainees(),
+                    self.housing(),
+                )?;
                 self.spend_at(self.buildings[building].origin, product.cost())?;
                 self.buildings[building].enqueue(BuildingJob::Produce {
                     product,
@@ -630,34 +621,17 @@ impl GameWorld {
                 technology,
             } => {
                 let building = self.building_index_with_queue_space(&building_id)?;
-                if !self.buildings[building].researches.contains(&technology)
-                    || !self.technology_available(technology)
-                {
+                if !self.technology_available(technology) {
                     return Err(CommandError::TechnologyUnavailable);
                 }
-                if self.researched_technologies.contains(&technology) {
-                    return Err(CommandError::TechnologyAlreadyResearched);
-                }
-                if self.buildings.iter().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology)) {
-                    return Err(CommandError::TechnologyInProgress);
-                }
-                if technology
-                    .prerequisite()
-                    .is_some_and(|required| !self.researched_technologies.contains(&required))
-                {
-                    return Err(CommandError::MissingTechnologyPrerequisite);
-                }
-                let stock = self.available_at(self.buildings[building].origin);
-                if stock.food < RESEARCH_FOOD_COST || stock.wood < RESEARCH_WOOD_COST {
-                    return Err(CommandError::InsufficientResearchResources);
-                }
-                self.spend_at(
-                    self.buildings[building].origin,
-                    &[
-                        (ResourceKind::Food, RESEARCH_FOOD_COST),
-                        (ResourceKind::Wood, RESEARCH_WOOD_COST),
-                    ],
+                let queued = self.buildings.iter().flat_map(Building::jobs).any(|job| matches!(job, BuildingJob::Research { technology: t, .. } if *t == technology));
+                self.buildings[building].check_research(
+                    technology,
+                    &self.available_at(self.buildings[building].origin),
+                    &self.researched_technologies,
+                    queued,
                 )?;
+                self.spend_at(self.buildings[building].origin, RESEARCH_COST)?;
                 self.buildings[building].enqueue(BuildingJob::Research {
                     technology,
                     elapsed_seconds: 0.0,
@@ -723,23 +697,16 @@ impl GameWorld {
 
     /// Villagers the complete buildings can house.
     pub fn housing(&self) -> usize {
-        self.buildings
-            .iter()
-            .filter(|building| building.is_complete())
-            .map(|building| building.kind.housing())
-            .sum()
+        housing(self.buildings.iter())
     }
 
-    /// Living units plus those in training; processing jobs do not consume housing.
+    /// Living units plus active/waiting trainees, including ship passengers.
     pub fn villagers_and_trainees(&self) -> usize {
-        self.units.len()
-            + self.ships.iter().map(|s| s.passengers.len()).sum::<usize>()
-            + self
-                .buildings
-                .iter()
-                .flat_map(Building::jobs)
-                .filter(|job| matches!(job, BuildingJob::Produce { product, .. } if product.unit_kind().is_some()))
-                .count()
+        population(
+            self.units.len(),
+            self.ships.iter().map(|s| s.passengers.len()).sum(),
+            self.buildings.iter(),
+        )
     }
 
     /// Whether any cell beside the footprint (sharing an edge) is water.
@@ -769,14 +736,7 @@ impl GameWorld {
             .iter()
             .position(|building| building.id == building_id)
             .ok_or(CommandError::BuildingNotFound)?;
-        if !self.buildings[index].is_complete() {
-            return Err(CommandError::BuildingUnderConstruction);
-        }
-        if self.buildings[index].queue.len() >= MAX_QUEUED_JOBS
-            || self.buildings[index].next_queue_id == u64::MAX
-        {
-            return Err(CommandError::BuildingQueueFull);
-        }
+        self.buildings[index].check_queue_space()?;
         Ok(index)
     }
 
@@ -790,6 +750,14 @@ impl GameWorld {
             .ok_or(CommandError::UnitNotFound)?;
         self.units[index].action = UnitAction::Idle;
         Ok(index)
+    }
+
+    fn ordered_villager(&mut self, id: &str) -> Result<usize, CommandError> {
+        let unit = self.ordered_unit(id)?;
+        if self.units[unit].kind != UnitKind::Villager {
+            return Err(CommandError::VillagerRequired);
+        }
+        Ok(unit)
     }
 
     pub fn tick(&mut self, dt: f64) {
@@ -933,14 +901,22 @@ impl GameWorld {
                 })
                 .map(|building| {
                     let (columns, rows) = building.kind.size();
-                    let mut visible = building.clone();
-                    visible.produces = building.kind.products().to_vec();
-                    visible.researches.retain(|&t| self.technology_available(t));
-                    if !self.building_available(visible.kind) {
-                        visible.produces.clear();
-                    }
+                    let produces = if self.building_available(building.kind) {
+                        building.kind.products().to_vec()
+                    } else {
+                        Vec::new()
+                    };
+                    let researches = building
+                        .kind
+                        .researches()
+                        .iter()
+                        .copied()
+                        .filter(|&t| self.technology_available(t))
+                        .collect();
                     BuildingView {
-                        building: visible,
+                        building: building.clone(),
+                        produces,
+                        researches,
                         columns,
                         rows,
                     }

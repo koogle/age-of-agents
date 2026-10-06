@@ -153,3 +153,12 @@ before the first command reaches doctests. During road verification this produce
 `extern location for aoa_game does not exist` after unit tests passed. A sequential
 workspace rerun is required; a build-lock wait alone does not serialize the entire
 verification command.
+
+## Local profile check (2026-10-06)
+
+On the macOS host, Modal 1.5.3 reports default `radiantai` and also has the
+`koogle-frick` profile configured. Explicit `MODAL_PROFILE=koogle-frick` status
+successfully lists the production app. This supersedes historical unavailable
+profile findings for this host/session only; always inspect current profiles.
+The Rust subtraction pass uses the existing manual deploy-and-verify command;
+its outcome is recorded in [refactor evidence](../verification/rust-refactor/README.md).

@@ -276,11 +276,11 @@ async fn handle_client_message(state: &SharedState, text: &str) -> ServerMessage
         }) => {
             let (result, applied_sequence) = {
                 let mut world = state.world.lock().await;
-                let mut candidate = world.clone();
-                let result = candidate
-                    .apply_command(command)
+                let result = world
+                    .clone()
+                    .with_command(command)
                     .map_err(|error| error.to_string())
-                    .and_then(|()| {
+                    .and_then(|candidate| {
                         state.store.save(&candidate).map_err(|error| {
                             tracing::error!(%error, "accepted command could not be saved");
                             "command could not be saved".to_owned()
@@ -294,7 +294,7 @@ async fn handle_client_message(state: &SharedState, text: &str) -> ServerMessage
             ServerMessage::CommandResult {
                 request_id,
                 ok: result.is_ok(),
-                error: result.err().map(|error| error.to_string()),
+                error: result.err(),
                 applied_sequence,
             }
         }
@@ -323,6 +323,66 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     use super::*;
+
+    #[tokio::test]
+    async fn commands_commit_only_after_validation_and_successful_save() {
+        let path = std::env::temp_dir().join(format!(
+            "aoa-command-{}-{}.db",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let world = GameWorld::generate(17);
+        let original = world.clone();
+        let store = Store::from_path(&path);
+        store.initialize().unwrap();
+        store.save(&world).unwrap();
+        let (snapshots, _) = broadcast::channel(4);
+        let mut receiver = snapshots.subscribe();
+        let state = Arc::new(AppState {
+            world: Mutex::new(world),
+            snapshots,
+            next_snapshot_sequence: AtomicU64::new(0),
+            store,
+        });
+        let request = |speed| {
+            serde_json::json!({"type":"command", "request_id":"test",
+            "command":{"type":"set_simulation_speed", "multiplier":speed}})
+            .to_string()
+        };
+
+        let rejected = handle_client_message(&state, &request(7.0)).await;
+        let rejected = serde_json::to_value(rejected).unwrap();
+        assert_eq!(rejected["error"], "simulation speed must be 0, 1, or 2");
+        assert_eq!(*state.world.lock().await, original);
+        assert_eq!(state.store.load().unwrap(), Some(original.clone()));
+        assert!(receiver.try_recv().is_err());
+
+        // Force an actual SQLite write failure without modifying the live world.
+        let db = rusqlite::Connection::open(&path).unwrap();
+        db.execute_batch("DROP TABLE world_state;").unwrap();
+        let failed =
+            serde_json::to_value(handle_client_message(&state, &request(2.0)).await).unwrap();
+        assert_eq!(failed["ok"], false);
+        assert_eq!(failed["error"], "command could not be saved");
+        assert_eq!(*state.world.lock().await, original);
+        assert!(receiver.try_recv().is_err());
+
+        state.store.initialize().unwrap();
+        let saved =
+            serde_json::to_value(handle_client_message(&state, &request(2.0)).await).unwrap();
+        assert_eq!(saved["ok"], true);
+        assert_eq!(saved["applied_sequence"], 1);
+        let committed = state.world.lock().await.clone();
+        assert_eq!(committed.simulation_speed, 2.0);
+        assert_eq!(state.store.load().unwrap(), Some(committed));
+        assert!(receiver.try_recv().is_ok());
+        assert!(receiver.try_recv().is_err());
+        drop(db);
+        std::fs::remove_file(path).unwrap();
+    }
 
     #[tokio::test]
     async fn reset_replaces_and_persists_a_world_on_the_requested_island() {

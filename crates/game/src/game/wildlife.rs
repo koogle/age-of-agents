@@ -68,17 +68,7 @@ pub struct Animal {
 }
 impl Animal {
     pub fn position(&self) -> Position {
-        let from = self.cell.center();
-        match self.step {
-            Some(step) => {
-                let to = step.to.center();
-                Position {
-                    x: from.x + (to.x - from.x) * step.progress,
-                    y: from.y + (to.y - from.y) * step.progress,
-                }
-            }
-            None => from,
-        }
+        Position::on_step(self.cell, self.step)
     }
     fn footprint(&self) -> Footprint {
         Footprint {
@@ -405,7 +395,7 @@ impl GameWorld {
             .iter()
             .chain(self.ships.iter().flat_map(|s| &s.passengers))
         {
-            if !unit.health.is_finite() || unit.health <= 0.0 || unit.health > 100.0 {
+            if !unit.health.is_finite() || unit.health <= 0.0 || unit.health > UNIT_HEALTH {
                 return Err("invalid unit health".into());
             }
             if let UnitAction::AttackAnimal {
