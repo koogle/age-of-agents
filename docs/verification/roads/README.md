@@ -40,10 +40,12 @@ the previous Build/Stop layout on screen and click Stop accidentally.
 
 ## Checks
 
-Combined with master `5a28839`, retaining the approved productive-building
-availability gate, upstream art and granary field-yield bonus.
+Combined with master `f985a92`, retaining the approved productive-building
+availability gate, granary field-yield bonus, dedicated menu icons and wildlife
+attack art. The Roads category retains its Build icon; all four building category
+icons and Back navigation use the newly integrated artwork.
 
-- 282 Rust tests pass; one existing manual archipelago benchmark is ignored.
+- 289 Rust tests pass; one existing manual archipelago benchmark is ignored.
 - Native/WASM strict lint, formatting, rebuilt WASM and native server pass.
 - Sprite resolution, field/transport assets and icon normalization pass. Six
   release-verifier tests pass. Existing generated assets are reused unchanged.
@@ -51,7 +53,10 @@ availability gate, upstream art and granary field-yield bonus.
   without browser errors. [Result hashes](results.json) identify the server and WASM.
   The screenshots below show that build. The later granary-only integration is
   covered by the full Rust suite and a final desktop construction replay; see
-  [final integration results](granary-integration/results.json).
+  [granary integration results](granary-integration/results.json).
+- The final `f985a92` menu/wildlife integration passes both desktop mouse and
+  DPR2 touch construction replays without new screenshots; the approved road
+  textures are byte-identical. [Combined build results](merge-integration/results.json).
 
 ## Visual review
 
@@ -96,6 +101,9 @@ saves; malformed road progress/duplicate cells fail validation. Road validation
 follows terrain validation to avoid indexing malformed grids. Client files remain
 below 1,000 lines. Mouse/touch use one placement flow.
 
-Not merged or deployed. Physical phones and native window appearance are not
+User approved the refined art and authorized merge on 2026-10-06.
+[PR #133](https://github.com/koogle/age-of-agents/pull/133) and the
+[production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml)
+track merge/release state. Physical phones and native window appearance are not
 verified. Road speeds/routing are proven by domain tests; the browser driver
 verifies construction, charging, rendering and input.

@@ -1,0 +1,234 @@
+[
+  {
+    "name": "category_town",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "category_town-desktop.jpg",
+      "category_town-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "command_back",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "command_back-desktop.jpg",
+      "command_back-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "resource_coal",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "resource_coal-desktop.jpg",
+      "resource_coal-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "resource_steel",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "resource_steel-desktop.jpg",
+      "resource_steel-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "resource_bricks",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "resource_bricks-desktop.jpg",
+      "resource_bricks-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "resource_cloth",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "resource_cloth-desktop.jpg",
+      "resource_cloth-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "resource_rations",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "resource_rations-desktop.jpg",
+      "resource_rations-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "unit_guard",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "unit_guard-desktop.jpg",
+      "unit_guard-phone.jpg",
+      "unit_guard-portrait-desktop.jpg",
+      "unit_guard-portrait-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "unit_archer",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "unit_archer-desktop.jpg",
+      "unit_archer-phone.jpg",
+      "unit_archer-portrait-desktop.jpg",
+      "unit_archer-portrait-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "unit_healer",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "unit_healer-desktop.jpg",
+      "unit_healer-phone.jpg",
+      "unit_healer-portrait-desktop.jpg",
+      "unit_healer-portrait-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "unit_siege_cart",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "unit_siege_cart-desktop.jpg",
+      "unit_siege_cart-phone.jpg",
+      "unit_siege_cart-portrait-desktop.jpg",
+      "unit_siege_cart-portrait-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "transport_queue",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "transport_queue-desktop.jpg",
+      "transport_queue-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "command_disembark",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "command_disembark-desktop.jpg",
+      "command_disembark-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "command_sail",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "command_sail-desktop.jpg",
+      "command_sail-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "command_explore",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "command_explore-desktop.jpg",
+      "command_explore-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  },
+  {
+    "name": "command_cargo",
+    "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+    "errors": [],
+    "viewports": [
+      "1280x800 DPR1 mouse",
+      "390x844 DPR2 touch (780x1688 captured pixels)"
+    ],
+    "screenshots": [
+      "command_cargo-desktop.jpg",
+      "command_cargo-phone.jpg"
+    ],
+    "limitation": "Controlled snapshots and captured wire dispatch; no authoritative gameplay acceptance or physical-phone claim."
+  }
+]
