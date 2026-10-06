@@ -1,0 +1,1120 @@
+{
+  "illustration_count": 41,
+  "successful_requests": 80,
+  "estimated_usd": 1.8268,
+  "excluded_failed_request": "01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing",
+  "runtime_paths_changed": [],
+  "errors": [],
+  "outputs": [
+    {
+      "path": "01-calibration/dock_pair/original.png",
+      "size": [
+        1344,
+        768
+      ],
+      "mode": "RGB",
+      "sha256": "9e815b71c77fc80370f417aa5babe10e0d0515025d65e874e415b62ca82d6e43"
+    },
+    {
+      "path": "01-calibration/dock_pair/cutout.png",
+      "size": [
+        1344,
+        768
+      ],
+      "mode": "RGBA",
+      "sha256": "4821f0861453599d2096d91939cdc08ad2eefd816c908a3772ca9c62afe97594",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "01-calibration/resource_water/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "ba95f373a212bd477b25a2b9ee7c271ad7f7e583a3af70de922aa5cc54621d79"
+    },
+    {
+      "path": "01-calibration/resource_water/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "824bc47015891d54fd887782adb83c1cd9538332dffe9b1afb36444a2707d884",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "01-calibration/road_stone/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "346d62d86ea145ff986e0ae24c192e314cfd3bf92efe3cb3bcc438065ac8b5d9"
+    },
+    {
+      "path": "01-calibration/wolf_idle/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "ae6e56faf6c0be231d077499f5ecb69f66d89daf2821e9503f004c02797e84eb"
+    },
+    {
+      "path": "01-calibration/wolf_idle/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "e119ff3507c244a3e7115f75227c5ab59e5c5ab27bb4c17af32498319ef3ad6e",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "01b-calibration-repair/resource_water/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "bdde96290af6e20326f955c5569f6ab759327e98daf83d9a9fe39a183f331323"
+    },
+    {
+      "path": "01b-calibration-repair/resource_water/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "97c7e07e5df40111a220042b7ae581aa8f43d42d1b8604dfcec2876e83b34e0d",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_bricks/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "3101dd1c190479bb64e643fb1b72902ee0e40f50ced1b7ec29b88c8bfb0bdb58"
+    },
+    {
+      "path": "02-resources/resource_bricks/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "7b6c9dc962e13f00447cb1cefa086edd335ba486658da9b82457814adc7fde1e",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_cloth/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "ba2f7237308460fd5535831b0b2c3ecdfc20717fa4779aefb117cd99aa3cccc2"
+    },
+    {
+      "path": "02-resources/resource_cloth/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "f66d7f69b988d43ff8e693b7b2505df2589ac57f64ecaee587a43f2e71cf6dc0",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_coal/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "1107b3062efa8944c696d17211e36f0521ba40fca5649aca6ec4390c71692eb6"
+    },
+    {
+      "path": "02-resources/resource_coal/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "e9d389e1140cb9aec07b60fd5f627c0b5c35df494dfcc2566339d51c516ed71c",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_rations/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "eea09ad9e0a5a682a7aa06b10909f937f8eb7e59064635874c93a70718dec46c"
+    },
+    {
+      "path": "02-resources/resource_rations/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "2360d9b9b39f8950d97c9aa49f05334cf87f3ab02246db1135a8de7e76143afa",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_steel/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "e45c1eea6b408c00cc71906b8343a524f85b37e4c36f6ffc20f66fb2e4db3402"
+    },
+    {
+      "path": "02-resources/resource_steel/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "a5634ccfc014ebd1f10e56429bf5d199fe5ad51ae9fae15dee417d8b68c5ac81",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/resource_timber/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "328b9808e9d6c8f53f0381e2c1a4fd1278637150b90910e35533cf2b75226346"
+    },
+    {
+      "path": "02-resources/resource_timber/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ffae14e0a47839c23b66b1eb2e3fadd13c636432952ed55ed7d1636ba005ae79",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "02-resources/tech_agriculture/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "3f02fcb547796eb64a797b2cfe170dca93faaa2c0bb4e1e8ef77dcdc4ee5a223"
+    },
+    {
+      "path": "02-resources/tech_agriculture/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "efd16b0c5fd75ff89010f6957153250eef07c0f4c12d06f610041349a0098e99",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/category_gathering/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "b106fbc492c61c4136e65ecbf8e3e95cac54049f3703cf33e57fd7bf70ed01a5"
+    },
+    {
+      "path": "03-menu/category_gathering/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d0d3bb6653e2e106c939c78286ff5128ac09de09a8c17d223d00b4e7a025b3ef",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/category_military/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "750be727d70b074f8a7818709256f83a457587bb3d3d1900c7069870b286097a"
+    },
+    {
+      "path": "03-menu/category_military/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "11ab39d437e652ce01b25ec35b22cd5503881697bf11cad6dbec95cc1acf6a79",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/category_production/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "76939f3ed62adfe340c1d1937dd7b0e5c0bf330492796d86bfc3a9736c16aaf0"
+    },
+    {
+      "path": "03-menu/category_production/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "3ba431fa52e1dd234644baca6e4eaa80064c58daa68bd58590189f644c921ead",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/category_town/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "01bfcb05efeb2fdeb2820eb5eee14f0f38c1763365b94d5527a24c283a495b40"
+    },
+    {
+      "path": "03-menu/category_town/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "8ddfed05b22d7d7fe5f7cd3ee2039433c3f7ab98e887b459697564e340ddf182",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/command_back/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "bd279e9785d29f1e1382d02bef4563f2b482e8a64bee8fade064f7fa3e7214a9"
+    },
+    {
+      "path": "03-menu/command_back/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "1d740d015374c7c79e1e95157cfb640233e1c6a3520c38443aaa560c66b2fe30",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/command_cargo/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "119e3b242a1d397679d4119b0328c4b58843f12664b811f5cbef94c5c51c8aad"
+    },
+    {
+      "path": "03-menu/command_cargo/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "98ceba42b8edf78112c7201c505d8305c617134257ef195984f051bf011350fa",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/command_disembark/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "0648792d17f8c29c32f3bba7727139b47748acf442197e94193dab54733b5dc0"
+    },
+    {
+      "path": "03-menu/command_disembark/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ded3e4edf6d90aae5c2668b73dc4b121eb79fb41f091591f179dfed7edfb2e36",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "4f2baae396f54c1b0633261d6e82153dbad3dd2f7ab3cde16f51cde9aa3b8e64"
+    },
+    {
+      "path": "03-menu/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "f5558a1f102eaa2a68c991428a27bdd3b14b2169d7511ea538d702a1dcf7394b",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "03-menu/command_sail/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "3b5fc401b5d78b97d4ed8ef5b87248e906bac05dfd87046f6624308d56d4d5b8"
+    },
+    {
+      "path": "03-menu/command_sail/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "8e9c434b415d41540b9f2c33e5c8c091df4090edf38c5cc56adc83944477a451",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/coin_researched/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "9fdbec200f96cbb8f68617100a71ced8301b4b88783c4acbf3c636aa5dffd04a"
+    },
+    {
+      "path": "04-units-seals/coin_researched/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "19593461c33c2673596c471c96567439a169a778afcb7e02aedfd9783ee6a1d4",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/shield_down/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "d5b1be343a5820d7eb9419ebcc0179fd4897e486cedb1ca66cf33a6d5a468285"
+    },
+    {
+      "path": "04-units-seals/shield_down/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "a4b930098bf3ee0417de707610932d8f08579246274e3111237279f78a34fba0",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/shield_up/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "42c45602bf1423ef31128ea74a2e89e4f0e4b03493e0dc0ce826e586bca109f8"
+    },
+    {
+      "path": "04-units-seals/shield_up/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "300c582717252f31972c29e9591ed8e8f725777d87fd8ab95d49bdcd60623c2d",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/unit_archer/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "b0faa00cd687ae2be1468aac114c2b9729adb5c7432a05c24d4a53ac86d4fbe2"
+    },
+    {
+      "path": "04-units-seals/unit_archer/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "447a43e2886c983b18ce69c3936774ccb0bf711fc7a32163c3dd1bce09f32dd9",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/unit_guard/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "c90556918f2811925281b3dfdc67d36f5d2e3f29a263743eede4d569b9e493bc"
+    },
+    {
+      "path": "04-units-seals/unit_guard/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "71d1366bc5c16bbc83ba9bbd3b6906789a430f0654b257237a3e47271c874cc4",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/unit_healer/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "a256db793b93b72ae34d41d77b3a64ba0d8fb091ff9504256c6395960b99d655"
+    },
+    {
+      "path": "04-units-seals/unit_healer/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ff2059b041399cf99c8d57cad34e9cc492b6b381e73668cc008aade5036e894c",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "04-units-seals/unit_siege_cart/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "9020ede7c99dbbdeca32413ee85d5d2b85e014c194048b444f3b18b7b1ed0953"
+    },
+    {
+      "path": "04-units-seals/unit_siege_cart/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "6c2f59ce2d0d5b4614719232ce3ef8963bba23df0a9e7ad325aef345e725ba7c",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "05-world/bear_idle/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "c91d39f3725c7b17379d293674f4e9926f7a3966b1ef038af57159de655e17dd"
+    },
+    {
+      "path": "05-world/bear_idle/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ae19a1d65251232ae646fd0434a1b87879c9b77dd3a11b25cf4c26a2fc66bfc1",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "05-world/dock_front/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "26d9b7773c39a85076e54cb5f5ca02dea00332bc330f8e9e8638966fdb264983"
+    },
+    {
+      "path": "05-world/dock_front/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "0fd38d9e6478c7b4c98907e3bacd35e5b309720fa6c73c716098495554b48e95",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "05-world/dock_rear/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "5dd3c536ba2df9cf1281cdb21cc806f612815d653f9fc84f7810a985e87a40f5"
+    },
+    {
+      "path": "05-world/dock_rear/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "54118f8b408ef2d17dfea5c09ab0f11dd320c1541f5b82718f108aa2ac607b19",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "05-world/road_dirt/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "d69103f5a0691d2964635d9f6529d514d7b6d545adef1450614e1457de13a6ba"
+    },
+    {
+      "path": "06-dock-material-repair/dock_rear_matched_timber/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "13c63396895e1191d3f3c310ba10ef4b0fa5735819da0a954370ceb0dbb0a4ff"
+    },
+    {
+      "path": "06-dock-material-repair/dock_rear_matched_timber/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d5f5329ad1bc77611d7b4e5f044aed9b570d26231558eb6e7dc62aa68c324fbb",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "07-targeted-repairs/category_military/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "bec257478f2acf401d87a1cb3bf102aa724d8b7aee94f6687480ac08e95305db"
+    },
+    {
+      "path": "07-targeted-repairs/category_military/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "bd43f570079eb4f5eb8beb15a60638fcee23a751c582373cd3a86195bd441306",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "07-targeted-repairs/command_back/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "33ae154f6f4e61f4c5e526e376f7dafe0c8a97992ab070e668e33378387f430e"
+    },
+    {
+      "path": "07-targeted-repairs/command_back/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "6bcd77ca90cc05c5fd2b299365671d64da58e045f510c4c27c424a36e62c3ae6",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "07-targeted-repairs/command_cargo/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "336b18f59c1425ed8a76953016a1866c80cd699d61b203c836de528515244a2e"
+    },
+    {
+      "path": "07-targeted-repairs/command_cargo/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "c0f876440b94e53e92ae502d805bbcf713015138a27a329f67b9799a7f4811f0",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "07-targeted-repairs/dock_rear_single_sail/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "5136beca44cb9a6409ad4d13b2d5a30bfb3efdccb8a4fdcaeb02caf48dec8795"
+    },
+    {
+      "path": "07-targeted-repairs/dock_rear_single_sail/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "46258295ffc6a3118a7e13bc16246f417cec93d0d2298fd37cd40f343fa009ab",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "07-targeted-repairs/tech_agriculture/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "13b1b31f6b671d4508060bb3fc3d241f9fa2caf3b70e1b7617d383e246bcc828"
+    },
+    {
+      "path": "07-targeted-repairs/tech_agriculture/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "da985e262d7c364823be7443f1746826c81ec97c7dca74c8b2b591fa345119de",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_archer/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "265dc3a09e8803c5dd04dba2f57523269733a18fa77a4f207d4c05aae9d9085b"
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_archer/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "1b7f8eb068de457254be434e97302fdd4c4a00c4c198e2c3b4829f2957ca421a",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_guard/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "60891d72661b4e2f21c4a265dbda110ef03fc0d2560a58c3ca029ce5aab28a42"
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_guard/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "be7c28031c494030a01ece5fed2d97cf4b673d49f495893452946775a9d0cd40",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_healer/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "f8b56642a01db44ea82d536c285b2dde0df9f555238741e4149df6813378beab"
+    },
+    {
+      "path": "08-full-figure-unit-repair/unit_healer/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "47e9138656e0acb2887daef84a26fea9b993fe5e99073329f13c982fe3d70afe",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}
