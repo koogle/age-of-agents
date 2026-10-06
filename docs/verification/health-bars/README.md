@@ -40,4 +40,6 @@ native/WASM lint. The rebuilt WebGL replay passes all three health fractions on
 desktop and DPR2 phone with zero page errors; PNG dimensions are 1280×800 and
 780×1688 respectively. `results.json` records the tested bundle SHA-256 and
 uploaded geometry. Final screenshots are the six PNGs alongside this file.
-No merge or production deployment was performed.
+User authorized PR creation and merge after reviewing the preview. Merge and
+production release status are tracked by [PR #152](https://github.com/koogle/age-of-agents/pull/152)
+and its merge-triggered Actions run; these local checks do not establish deployment.
