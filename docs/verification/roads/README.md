@@ -19,6 +19,10 @@ cargo build -p aoa-game --example roads_fixture --locked
 python3 docs/verification/check_roads.py --output /tmp/road-check
 ```
 
+The browser driver needs a Python environment with `aiohttp` and `playwright`
+and an installed Chromium. In the managed workspace, use the default Python;
+cloud activation for Cargo can select a different Python without these packages.
+
 The driver creates an isolated temporary SQLite save and server on loopback
 port 8000. It refuses to start when that port is occupied and never opens the
 configured or production database. It uses a flat, visible settlement from
@@ -36,15 +40,18 @@ the previous Build/Stop layout on screen and click Stop accidentally.
 
 ## Checks
 
-Combined with master `8bf00b4`, retaining the approved productive-building
-availability gate and upstream art.
+Combined with master `5a28839`, retaining the approved productive-building
+availability gate, upstream art and granary field-yield bonus.
 
-- 280 Rust tests pass; one existing manual archipelago benchmark is ignored.
+- 282 Rust tests pass; one existing manual archipelago benchmark is ignored.
 - Native/WASM strict lint, formatting, rebuilt WASM and native server pass.
 - Sprite resolution, field/transport assets and icon normalization pass. Six
   release-verifier tests pass. Existing generated assets are reused unchanged.
-- Desktop mouse and DPR-2 phone touch both pass against the combined build,
+- Desktop mouse and DPR-2 phone touch both pass against the `8bf00b4` integration,
   without browser errors. [Result hashes](results.json) identify the server and WASM.
+  The screenshots below show that build. The later granary-only integration is
+  covered by the full Rust suite and a final desktop construction replay; see
+  [final integration results](granary-integration/results.json).
 
 ## Visual review
 

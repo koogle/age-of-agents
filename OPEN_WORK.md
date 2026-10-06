@@ -2,8 +2,8 @@
 
 - Branch `feat/basic-roads`: dirt/stone road construction, two-endpoint mouse/touch placement, painted terrain surfaces and travel-time routing. Completed roads give friendly units 1.5× speed; wolves/bears remain unchanged. Crossings reuse existing surfaces.
 - Balance: two seconds labour/cell, with one stone per new stone cell. Costs reserve once; Stop/resume, helpers and unloading first preserve existing task rules. Store version 15 resets incompatible hosted saves under the development policy.
-- 280 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `8bf00b4` (approved productive-building availability and new art); combined desktop mouse and DPR-2 phone touch checks pass with correct line placement, completion and costs; [reproduction and review](docs/verification/roads/README.md).
-- Integrating granary-yield master `5a28839`; combined verification in progress. Not merged or deployed. Preserve the previous unresolved work below.
+- 282 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `5a28839`, preserving productive-building availability, new art and granary yield. Desktop mouse and DPR-2 phone touch checks pass after the availability integration; the latest granary integration also passes the desktop replay with correct line placement, completion and costs; [reproduction and review](docs/verification/roads/README.md).
+- PR #133 is ready for review; combined verification passes. Not merged or deployed. Preserve the previous unresolved work below.
 
 # Granary field yield — 2026-10-05
 
