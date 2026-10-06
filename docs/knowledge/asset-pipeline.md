@@ -143,3 +143,9 @@ cell is 724×724 before packing down to 512×512. Manual structural deck corners
 register each construction stage, and the atlas manifest drives texture dimensions.
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
+
+## Wildlife style correction (2026-10-05)
+
+Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.
+
+Follow-up direction: compare wildlife directly with existing NPCs, not only the world mood board. Attach `villager_idle_hd.png` and `hd_sources/units/guard_idle_front_cut.png` to refinement; judge the same sparse contours, broad quiet color areas and cel shadow treatment side by side at matched gameplay scale. First softer fur pass still has excessive faceted texture and is rejected as the final style.

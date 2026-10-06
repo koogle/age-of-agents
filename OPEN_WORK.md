@@ -1,3 +1,16 @@
+## Authorized animal PR merge — 2026-10-06
+
+User explicitly authorized merging PR #130. Integrating master `faa4b04`, preserving terrain, productive building availability, granary yield and menu artwork. Source merges cleanly; generated web files are rebuilt. Combined verification passes: 278 tests, formatting, native/WASM lint, all asset checks, six release-verifier tests and rebuilt desktop/DPR-2 phone combat acceptance without page errors. Evidence: `docs/verification/2026-10-05-animal-attacks/merged-combat-results.json`. Merge/release status: https://github.com/koogle/age-of-agents/pull/130 and the master deployment workflow.
+
+## Animal attack frames — 2026-10-05
+
+- Extending PR #130 at the user's request with two authored attack poses per species, preserving the NPC-matched style. Eight-frame atlas; idle/walk cells preserved, attacks registered by planted rear paws. `attack_seconds` selects windup/strike, pause freezes poses, and animals face their contacted target. No balance/save changes.
+- 266 Rust tests, native/WASM lint, rebuilt web/server and 302-frame resolution audit pass. Browser pose replay passes on desktop/DPR-2 phone, including rendered UVs, pause, mirroring and reviewed normal/maximum-zoom captures. Real-server desktop mouse and DPR-2 phone touch hunting, mutual damage, defeat/cleanup and zero page errors pass. Sources/provenance and review: `docs/verification/2026-10-05-animal-attacks/`. Merge authorized on 2026-10-06; see integration note above.
+
+## Animal style refinement — 2026-10-05
+
+- PR #130: https://github.com/koogle/age-of-agents/pull/130 (`fix/animal-art-style`, from master `079d348`), tested and pushed; merge authorized on 2026-10-06 (see integration note above). User requested less generic animals and explicit comparison to existing NPCs. New wolf/bear idle/walk art uses the shipped villager and guard references; a textured first pass was rejected and retained. NPC contact sheet and review: `docs/verification/2026-10-05-animal-style/`.
+- Registered all four paw baselines with `scripts/pack_wildlife.py`; no animal behavior or save changes. 264 Rust tests (one existing ignored benchmark), strict native/WASM lint, 298-frame resolution audit, four common paw baseline/bounds checks and six release-verifier tests pass. Rebuilt desktop/DPR-2 phone hunting checks pass with no page errors; gameplay and true maximum-zoom screenshots reviewed against guards/buildings and the NPC contact sheet. Corrected capture driver sends repeated wheel events because individual zoom factors clamp. Direct Modal profile is `radiantai`, not the documented production target; profile listing also failed to connect. Do not deploy to a different account.
 # Granary field yield — 2026-10-05
 
 - User requested shorter copy: “Food/fiber drop-off · +50% nearby field yield.” Browser bundle rebuilt; strict native/WASM lint and refreshed desktop/phone selection checks pass with no browser errors.

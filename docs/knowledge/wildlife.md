@@ -58,8 +58,8 @@ feedback per entity, and red
 rings identify wildlife. Authored sprites are documented in
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
-Frames are authored and mirrored; reverse-facing and animal attack poses are future art
-work. Friendly hunting reuses existing villager chopping / military action art.
+Frames are authored and mirrored; reverse-facing poses remain future art work.
+Both animals now have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
 (including 12 and the earlier branch-only wildlife schema 13) reset under the existing
@@ -86,3 +86,26 @@ Browser-verifier timing: software-rendered screenshot capture can take enough
 wall time for combat and subsequent attacks to finish. Pause authoritative
 simulation while capturing combat frames, and track unit injury/death across
 polls rather than requiring an injured survivor at the final sample.
+
+## NPC-matched art (2026-10-05)
+
+The animal style correction uses the shipped villager family and guard originals as direct references, in addition to the island diorama. Broad cel color areas and fine brown contours replace the original detailed fur. `scripts/pack_wildlife.py` registers the four idle/walk poses at y=590 in 627px cells; attack frames align planted rear paws to idle while the renderer retains that baseline. Sources, the rejected first pass and exact final prompt remain in `assets/sprites/wildlife_sources/`. No animal rules or save schema change. The browser verifier accepts `--closeups` to capture each animal at the camera minimum distance in both desktop and DPR-2 phone viewports, then reloads the paused fixture before interaction acceptance.
+
+Maximum-zoom capture detail: wheel input clamps each event to a 0.5 scale factor in `lib.rs`; use multiple events (eight cover the full 140-to-5 distance range), not one extreme delta. A large delta alone is not proof of maximum zoom.
+
+## Attack-frame extension (2026-10-05)
+
+At Jakob's request, the animal art refinement adds wolf bite and bear swipe windup/strike poses in the NPC-matched style. The existing authoritative `attack_seconds` timer drives them, so idle/proximity alone never triggers attacks and pause freezes the combat pose. Combat balance and save schema are preserved; heading faces the contacted target even when the animal did not need to move first.
+
+The renderer uses columns 0/1 for idle/walk, column 2 for `0 < attack_seconds < 0.6`,
+and column 3 for `attack_seconds >= 0.6`. The damage-timer reset supplies an idle
+recovery beat; a moving animal uses locomotion. No client proximity heuristic
+starts an attack. The simulation updates heading on clear melee contact, so a
+stationary animal faces its target. Damage cadence, balance and save schema are
+unchanged. Paused snapshots preserve attack poses independent of wall time.
+
+`docs/verification/replay_animal_attacks.py` serves controlled paused snapshots
+on loopback :8013 and observes actual WebGL instance UVs for both species,
+windup/strike/recovery and mirroring. It captures normal and maximum zoom on
+desktop/DPR-2 phone. This isolates visual acceptance; the real-server wildlife
+verifier and domain tests still establish combat behavior.
