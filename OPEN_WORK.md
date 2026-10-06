@@ -1,3 +1,7 @@
+# Bounded run plan — 2026-10-06
+
+- Jakob asked for a plan to close the loop on a single run: 5–7 scattered islands planned up front, the final island's temple and Artifact of the Gods revealed at the start, escalating monsters (barbarians, skeletons, cyclops, giant snakes, minotaur, centaur, lions, with variants and distinct behaviors). The ordered proposal with four decisions awaiting his confirmation is [docs/RUN_PLAN.md](docs/RUN_PLAN.md). Documentation only; no code or save changes. Next: Jakob confirms the decisions, then Phase 1 (archipelago plan and globe reveal) starts.
+
 # Local branch integration — 2026-10-06
 
 - Jakob requested rebasing and merging the current checkout’s local changes into the main branch, named `master` in this repository. Fetch confirmed the checkout already matched `origin/master` at `5eb7bd4`; remaining changes are release-status documentation and the existing `.pi` Taskplane configuration/template. No runtime or asset changes. JSON parsing, relative file links and `git diff --check` pass; documentation/scope review found no blockers. Other feature branches/worktrees remain independent.
