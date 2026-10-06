@@ -1,0 +1,17 @@
+{
+  "wasm_sha256": "d86201c5f60cf426e9abb0c0829f9768e4f3ee31c333017a4e2d7e90bda1f861",
+  "results": [
+    {
+      "mode": "desktop",
+      "viewport": [
+        1280,
+        800,
+        1
+      ],
+      "road_cells": 14,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "8076aa59fa6ef1634992d38364ea1b8dde15323d1b1a99eda636f7fac2ed459f"
+    }
+  ]
+}

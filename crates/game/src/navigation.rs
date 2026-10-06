@@ -28,7 +28,7 @@ impl PathTree {
         start: CellCoordinate,
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
-        Self::search_to(columns, rows, start, None, &[], passable)
+        Self::search_to(columns, rows, start, None, &[], passable, None)
     }
 
     /// A* to one target; unlike a complete tree, unrelated ocean is not flooded.
@@ -39,7 +39,7 @@ impl PathTree {
         target: CellCoordinate,
         passable: impl Fn(CellCoordinate) -> bool,
     ) -> Self {
-        Self::search_to(columns, rows, start, Some(target), &[], passable)
+        Self::search_to(columns, rows, start, Some(target), &[], passable, None)
     }
 
     /// Stop Dijkstra when the cheapest goal is settled. Uses the same cell-order
@@ -56,7 +56,35 @@ impl PathTree {
         if goals.is_empty() {
             return None;
         }
-        let tree = Self::search_to(columns, rows, start, None, goals, passable);
+        let tree = Self::search_to(columns, rows, start, None, goals, passable, None);
+        tree.nearest(goals.iter().copied())
+            .map(|goal| (tree.cost(goal).unwrap(), tree.path_to(goal)))
+    }
+
+    /// Complete travel-time tree; weights are positive time per cell.
+    pub fn search_weighted(
+        columns: u16,
+        rows: u16,
+        start: CellCoordinate,
+        passable: impl Fn(CellCoordinate) -> bool,
+        weight: impl Fn(CellCoordinate) -> u32,
+    ) -> Self {
+        Self::search_to(columns, rows, start, None, &[], passable, Some(&weight))
+    }
+
+    /// Bounded Dijkstra with travel-time costs; retains deterministic goal ties.
+    pub fn nearest_weighted(
+        columns: u16,
+        rows: u16,
+        start: CellCoordinate,
+        goals: &[CellCoordinate],
+        passable: impl Fn(CellCoordinate) -> bool,
+        weight: impl Fn(CellCoordinate) -> u32,
+    ) -> Option<(u32, Vec<CellCoordinate>)> {
+        if goals.is_empty() {
+            return None;
+        }
+        let tree = Self::search_to(columns, rows, start, None, goals, passable, Some(&weight));
         tree.nearest(goals.iter().copied())
             .map(|goal| (tree.cost(goal).unwrap(), tree.path_to(goal)))
     }
@@ -68,6 +96,7 @@ impl PathTree {
         target: Option<CellCoordinate>,
         goals: &[CellCoordinate],
         passable: impl Fn(CellCoordinate) -> bool,
+        weight: Option<&dyn Fn(CellCoordinate) -> u32>,
     ) -> Self {
         let estimate = |cell: CellCoordinate| {
             target.map_or(0, |goal| {
@@ -99,7 +128,17 @@ impl PathTree {
                 break;
             }
             for (next, step_cost) in steps(current, columns, rows, &passable) {
-                let candidate = cost + step_cost;
+                // A step spends half its distance in each endpoint cell.
+                // Milliscale geometry closely matches Euclidean movement time.
+                let step_cost = weight.map_or(step_cost, |weight| {
+                    let distance = if current.column == next.column || current.row == next.row {
+                        1000
+                    } else {
+                        1414
+                    };
+                    distance * (weight(current).max(1) + weight(next).max(1))
+                });
+                let candidate = cost.saturating_add(step_cost);
                 let index = tree.index(next);
                 if candidate < tree.cost[index] {
                     tree.cost[index] = candidate;

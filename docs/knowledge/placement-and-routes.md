@@ -92,3 +92,29 @@ All four views have foundation, wall, roof and complete frames; see the
 
 Reproduce the visual check with `docs/verification/check_dock_facings.py`; see
 [verification and review](../verification/dock-facing/README.md) for scope and release limits.
+
+## Basic roads (2026-10-05)
+
+Jakob requested dirt roads costing labour only, stone roads costing stone,
+straight-line placement and +50% movement speed excluding animals. Road surfaces
+live separately from blocking buildings in `game/roads.rs`. Initial balance is
+two seconds of labour per cell and one stone per stone cell. Both types grant
+1.5× speed when complete; unfinished cells remain walkable at ordinary speed.
+Orders use inclusive horizontal/vertical endpoints, require visible walkable
+land on one island, reserve new-cell costs once, and can resume existing
+work. Crossing segments retain existing material and charge only for new cells. Buildings may still cover road cells; their ordinary occupancy takes priority.
+
+The client Roads group uses two taps/clicks and snaps the endpoint to the dominant
+axis. Roads use dedicated painted earth and irregular limestone swatches; building plots retain their original cobblestone. See the [road material review](../verification/roads/style/README.md).
+Weighted Dijkstra minimizes travel time for friendly movement and drop-site
+selection. Each edge averages endpoint traversal time, matching the movement
+speed on transitions; diagonal costs approximate Euclidean distance at milliscale.
+Animals and ships keep their unweighted routing and ordinary speeds.
+
+The ten focused road tests cover detours, travel-time storage selection, exact
+cell-boundary speed changes, diagonals/corners, animals, atomic rejection,
+Stop/resume, saved progress, unloading first, shared work and mixed crossings.
+The full workspace passes 289 tests (one manual benchmark ignored). Browser
+procedure and visual evidence live in [road verification](../verification/roads/README.md).
+Resume one unfinished cell by clicking it with villagers selected, or reissue a
+line to resume its outstanding work; idle villagers never adopt road jobs.

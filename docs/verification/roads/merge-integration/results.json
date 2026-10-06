@@ -1,0 +1,33 @@
+{
+  "wasm_sha256": "21b9ea2bab79a8ab0db449c17026f079e4825c92eee0834d4197dde601c05c40",
+  "results": [
+    {
+      "mode": "desktop",
+      "viewport": [
+        1280,
+        800,
+        1
+      ],
+      "road_cells": 14,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "2d04152ce3ed64641d149b679500a76d6c4df3f6e08287cc3158a96d38983783"
+    },
+    {
+      "mode": "phone",
+      "viewport": [
+        390,
+        844,
+        2
+      ],
+      "road_cells": 14,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "2d04152ce3ed64641d149b679500a76d6c4df3f6e08287cc3158a96d38983783"
+    }
+  ],
+  "road_assets_sha256": {
+    "road_dirt.png": "c787edc155f9ca9598b31674e304a23dc50a92cd02851f1cdcc9f096116f8a1a",
+    "road_stone.png": "733826ebcab5c1577e7c1125a5a97b75c4f29ab9011590f63a2fa1cf601af588"
+  }
+}

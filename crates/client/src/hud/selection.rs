@@ -217,6 +217,18 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .filter(|u| model.units.contains(&u.unit.id))
             .all(|u| u.unit.kind == aoa_game::UnitKind::Villager);
         let mut commands = match model.build {
+            BuildUi::PlacingRoad { kind, start } => vec![Command {
+                icon: "command_cancel",
+                label: kind.name().into(),
+                detail: if start.is_some() {
+                    "Tap the end · Snaps to a straight line · Esc to cancel"
+                } else {
+                    "Tap the start · Esc to cancel"
+                }
+                .into(),
+                enabled: true,
+                action: Action::Cancel,
+            }],
             BuildUi::PlacingField => vec![Command {
                 icon: "command_cancel",
                 label: "Place field".into(),
@@ -301,6 +313,12 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .iter()
             .find(|u| u.unit.id == model.units[0])?;
         let activity = match &unit.unit.action {
+            UnitAction::BuildRoad { .. } => if unit.unit.cargo.is_some() {
+                "Unloading before road work"
+            } else {
+                "Building road"
+            }
+            .into(),
             UnitAction::AttackAnimal { .. } => "Attacking wildlife".into(),
             UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),

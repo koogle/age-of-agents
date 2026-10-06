@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
+
 - **Granary yield (2026-10-05):** Granaries boost nearby field yields while retaining food/fiber storage. Initial balance is +50% within six cells edge to edge, non-stacking and evaluated at planting/replenishment completion; existing harvests are unchanged.
 
 - **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).

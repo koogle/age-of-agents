@@ -58,7 +58,12 @@ fn category_and_back_icons_preserve_navigation_actions() {
         .map(|c| c.icon)
         .collect();
     assert_eq!(icons.len(), BuildingGroup::ALL.len());
-    assert!(icons.iter().all(|key| key.starts_with("category_")));
+    // Building groups use their authored category art; basic Roads keeps Build.
+    assert!(
+        icons
+            .iter()
+            .all(|key| key.starts_with("category_") || *key == "command_build")
+    );
     let close = categories.last().unwrap();
     assert_eq!(
         (close.icon, &close.action),
