@@ -1,7 +1,15 @@
 {
-  "illustration_count": 55,
-  "successful_requests": 108,
-  "estimated_usd": 2.454,
+  "illustration_count": 58,
+  "successful_requests": 113,
+  "request_ledger_scope": "FAL only",
+  "external_refinements": [
+    {
+      "path": "12c-openai-map-refinement/command_explore/provenance.json",
+      "model": "OpenAI image_gen",
+      "generation_cost_usd": null
+    }
+  ],
+  "estimated_usd": 2.5486,
   "excluded_failed_request": "01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing",
   "runtime_paths_changed": [],
   "errors": [],
@@ -1497,6 +1505,90 @@
       ],
       "mode": "RGBA",
       "sha256": "43d6930121376ab89455b7a66e9e22f4ef026a640c3a63d7542740278b7eb0de",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "12-map-fine-lines/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "274c7633feed099e15cc4eefc972840843beaabe8b5cf9e70fb57a767f40e320"
+    },
+    {
+      "path": "12-map-fine-lines/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "13f25b23d54827bae75afa56953d3c89d7b6a41138b05d8ddfa727ba87e5894a",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "12b-map-line-only-retry/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "3eac6358df3ce7784387ae2c8591fc65ad362313b7ff7bffc76f91f2d8790aa0"
+    },
+    {
+      "path": "12b-map-line-only-retry/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "f440e00b886a90cb61ee92110c238010462da6f76d24bbe7ab472fb71ef40edb",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "12c-openai-map-refinement/command_explore/original.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "sha256": "045e1e98846f8536773f3ed5e22f51dbdcd3837476a88c2171ef17525bbb91ba"
+    },
+    {
+      "path": "12c-openai-map-refinement/command_explore/cutout.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "31b0cb36a7e9fa3a1f527e3a4a39b3a47ccfbc195f79eb566bd2299ae16624bb",
       "alpha_extrema": [
         0,
         255

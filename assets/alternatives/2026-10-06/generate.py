@@ -9,6 +9,9 @@ import falcall
 falcall.LEDGER=str(OUT/'ledger.jsonl')
 def generate(item,batch):
  dest=OUT/batch/item['name']; dest.mkdir(parents=True,exist_ok=True)
+ if item.get('external_refinement'):
+  if not (dest/'original.png').exists():raise RuntimeError('External refinement must be imported; never regenerate with FAL')
+  return item['name']+' external refinement retained; no generation'
  if (dest/'original.png').exists() and (item['family']=='texture' or (dest/'cutout.png').exists()): return item['name']+' exists'
  refs=[dict(path=p,sha256=hashlib.sha256((ROOT/p).read_bytes()).hexdigest()) for p in item['references']]
  if (dest/'response.json').exists():

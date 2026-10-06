@@ -74,7 +74,8 @@ boot/cuff. All remain unapproved. See cel/era correction comparison sheets.
 ## Four-subject painted-cel refinement (user requested continued work)
 
 Bounded to steel, wolf, Explore and military shield, with exactly one targeted
-retry each. Cloth/sandal were not regenerated. No further generation followed.
+retry each. Cloth/sandal were not regenerated. That batch stopped; the later
+map-only user request below is separate.
 
 | Subject | Concrete result | Remaining limit |
 | --- | --- | --- |
@@ -88,3 +89,42 @@ No unlimited polishing: eight illustration attempts total (four initial, four
 targeted retries), estimated $0.3584 across sixteen successful FAL calls. Prior
 outputs/prompts retained. The lead comparison and separate steel A/B sheet show
 source-size and 24/32px evidence, not a claim that newest is best.
+
+## Latest user preference and map-only correction
+
+Jakob likes the calibrations shown, but wants thinner map linework. Treat current
+calibration direction as preferred, not individual runtime approval. Keep all
+other candidates fixed; correct only the outer/map/star/fold ink of latest
+`11d-map-shield-targeted-retries/command_explore`. No palette/layout/texture change
+authorized. Existing wolf recolor failure and other verification limits remain.
+
+Map line-only first attempt rejected: it rotated the composition, changed teal
+islands to green, added islands and enlarged/moved the star. The preferred 11d map
+is unchanged. One narrowly specified retry uses only the approved HD villager
+style strip and exact map subject to reduce reference confusion.
+
+Second FAL map-only attempt preserves composition but does not visibly reduce
+the thick outer stroke at 128/24/32px. It is a failed correction, not promoted over
+the preferred original. A dark-brown-pixel diagnostic is effectively unchanged
+(11,559 before versus 11,591 after); this is supporting evidence only, not a style
+score or certified line-width measurement. Two bounded attempts, four successful
+FAL calls, estimated $0.0896. No automatic model substitution performed.
+
+## Disclosed OpenAI map refinement outcome
+
+After both bounded FAL line edits failed, root disclosed the repository refinement
+route and used OpenAI image_gen on the preferred 11d map ONLY. No villager/UI
+images were directly attached to that call; source-chain references and this
+review remain available. Generation ID: `exec-219b5bfa-102b-45fb-8ea0-477804f3049d`.
+Unknown backend/version/cost are recorded as unknown, not fabricated.
+
+The 128px comparison shows materially finer outer, fold, coastline and star ink.
+At 24/32px the paper, islands and star still read on grey/parchment/green/blue.
+Palette/composition remain close; 1254px output versus 1024px source is not a claim
+of pixel-exact preservation. Existing shadow is preserved, not newly solved.
+This is the latest unapproved map correction; other liked calibrations remain
+unchanged. Runtime normalization/gameplay approval remains pending.
+
+Map follow-up subtotal: two FAL illustrations/two cutouts ($0.0896 estimate),
+plus one BiRefNet cutout of OpenAI result ($0.005 estimate). OpenAI cost unknown.
+The FAL runner refuses to regenerate externally refined entries as FAL outputs.

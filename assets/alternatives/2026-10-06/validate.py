@@ -32,7 +32,7 @@ if runtime:errors.append('runtime changed '+repr(runtime))
 batches=json.loads((BASE/'batches.json').read_text());covered={x['name'] for group in batches.values() for x in group}
 scope=json.loads((BASE/'scope.json').read_text());names={Path(x).stem for x in scope['runtime_paths'] if x.startswith('assets/ui/')}
 if names-covered:errors.append('missing UI subjects '+repr(names-covered))
-report={'illustration_count':len(list(BASE.glob('*/*/original.png'))),'successful_requests':len(ledger),'estimated_usd':round(sum(x['est_usd'] for x in ledger),4),'excluded_failed_request':'01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing','runtime_paths_changed':runtime,'errors':errors,'outputs':outputs}
+report={'illustration_count':len(list(BASE.glob('*/*/original.png'))),'successful_requests':len(ledger),'request_ledger_scope':'FAL only','external_refinements':[dict(path=str(p.relative_to(BASE)),model=json.loads(p.read_text())['model'],generation_cost_usd=json.loads(p.read_text()).get('generation_cost_usd')) for p in BASE.glob('*/*/provenance.json') if json.loads(p.read_text()).get('external_refinement')],'estimated_usd':round(sum(x['est_usd'] for x in ledger),4),'excluded_failed_request':'01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing','runtime_paths_changed':runtime,'errors':errors,'outputs':outputs}
 (BASE/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print({k:v for k,v in report.items() if k!='outputs'})
 raise SystemExit(bool(errors))

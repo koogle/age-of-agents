@@ -1,12 +1,19 @@
 # Alternatives from the original villager model — unapproved
 
-55 retained illustration attempts, including rejected/repaired passes, from 108
-successful FAL requests (estimated $2.4540, excluding one API validation failure).
+58 retained illustration outputs: 57 FAL attempts and one disclosed OpenAI
+refinement. 113 successful FAL requests have an estimated subtotal of $2.5486.
+OpenAI refinement cost/backend version and one failed FAL request billing are
+unknown; they are not included in that subtotal.
 
 Candidate art only. No runtime image, atlas, manifest, code or retained villager
 has changed. These are review choices, not permission to replace existing art.
 
-Latest bounded follow-up: [four-subject comparison](painted-cel-refinement-comparison.jpg)
+Latest map-only correction: [fine-line before/after](map-line-weight-comparison.jpg).
+Two FAL edits failed; disclosed OpenAI image_gen refinement visibly thins the
+ink while keeping composition/palette close. The new map awaits visual response
+and is not runtime-approved. Other user-liked calibrations are unchanged.
+
+Previous bounded follow-up: [four-subject comparison](painted-cel-refinement-comparison.jpg)
 and [steel A/B options](painted-steel-options-comparison.jpg). Shield is promising;
 wolf recolor failed, map retains shadow/line issues, and steel remains a choice.
 
@@ -31,10 +38,9 @@ historical drafts, screenshots, every construction stage or complete animations.
 Water has one shared UI/world candidate. Docks use front and rear only; opposite
 orientations remain a mirroring concern tracked separately in PR #144.
 
-The unchanged original villagers are the identity/style anchor. All generation
-requests attach the approved villager master; world requests also attach the
-primary diorama, while UI requests attach the original wood/food/masonry kit
-(or established blank coin for seal-family candidates). Newer runtime images
+The unchanged original villagers are the identity/style anchor. FAL generation
+batches use that master or retained HD villager strips plus appropriate world/UI
+references; exact ordered inputs are recorded per request. Newer runtime images
 provide subject geometry only. A low-resolution subject copy failed in calibration
 and was removed from subsequent icon requests.
 
@@ -53,17 +59,21 @@ chain and selection are documented. The exact animation prompt IS retained:
 identity/proportions, three-quarter RTS camera and isolated white background.
 Those original prompt constraints are adapted to each new subject here.
 
-All new illustration calls use that same exact endpoint. BiRefNet v2 removes
-backgrounds, as in the original pipeline. No generator was silently substituted.
-No second-model refinement, runtime packing or upscaling has been performed;
-these original 1024px-class renders remain initial candidates requiring cleanup
-and integration validation before any future replacement.
+All base illustrations use that same exact endpoint. After two failed narrow
+map edits, root explicitly disclosed the repository OpenAI image_gen refinement
+route to the user. Its sole direct image input was the preferred 11d map, not
+villager/UI images; those remain indirect source-chain and review references.
+The exact prompt, generation ID, source hash and tool metadata are retained in
+`12c-openai-map-refinement/command_explore/`. No backend/version or generation
+cost is invented. 1254px output closely retains the 1024px composition/palette,
+not pixel-exact geometry. BiRefNet v2 makes the cutout. No runtime packing or
+integration occurred.
 
 ## Batches and reproducibility
 
 [batches.json](batches.json) retains every exact prompt and ordered reference path.
 Each candidate directory holds `original.png`, optional `cutout.png`, model,
-reference SHA256 hashes, source revision and raw provider response. The
+reference SHA256 hashes, source revision and FAL response or explicit external-tool metadata. The
 [ledger](ledger.jsonl) records request IDs, tags, elapsed time and estimated costs.
 [Calibration notes](calibration-notes.md) preserve rejected approaches.
 `reference_revision` names the base for repository references; references under

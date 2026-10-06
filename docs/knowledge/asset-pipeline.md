@@ -273,3 +273,20 @@ kit can be a 313px crop while `generated.png` retains 1024px. File names do not
 establish HD source quality. In this bounded follow-up, strong wolf geometry
 references were copied without requested recoloring; preserve that failure and
 stop at the retry bound rather than calling near-identical output an improvement.
+
+## Map line-weight correction (2026-10-06)
+
+Jakob likes the visible calibration direction, except the map linework remains
+too thick. Refine only the current Explore map contours: thinner outer edge,
+coastline, star and fold ink matching approved villagers/UI kit. Preserve layout,
+silhouette, palette, paper/islands/star and existing texture; no wider redraw.
+This is preference for the direction, not runtime/merge approval or acceptance
+of the failed wolf recolor. Keep originals and compare at 128/24/32px; at most one
+targeted retry after the initial map-only pass.
+
+Both original-model narrow map edits failed: one redesigned the image, one
+retained the thick stroke. Root then disclosed OpenAI image_gen refinement and
+used the preferred map as its sole direct image input. The resulting contour is
+visibly finer at 128/24/32px; retain the exact direct-input distinction, source
+chain and unknown OpenAI cost/backend. Never relabel an external refinement as
+a FAL illustration or infer runtime approval from the user liking a direction.
