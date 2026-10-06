@@ -1,3 +1,9 @@
+# Building selection preserves gathering — [PR #149](https://github.com/koogle/age-of-agents/pull/149)
+
+- User requested that selecting/switching buildings with a gathering villager selected must not force an early unload or replace its gathering loop. Building-click unload candidates now exclude every Gather phase; stopped/other compatible carriers still unload, including mixed selections. Hover preview uses the same candidate filter. No domain, protocol or save changes.
+- Validation passes: 296 workspace tests (one existing ignored benchmark), formatting, strict native/WASM lint, rebuilt web client, desktop mouse and emulated DPR2 phone touch across all four gathering phases and stopped-carrier controls. [Evidence and review](docs/verification/building-selection/README.md). No page errors; phone targets are verified inside the viewport. User authorized PR creation and merge on 2026-10-06. Integrated master `de49ab4`, preserving boars and stationary NPC feedback. Combined verification passes: tests, strict native/WASM lint, rebuilt web client, 307-frame/field/transport/icon audits, six release-verifier tests, desktop mouse and DPR2 touch across all phases with no page errors. Merge/release status is tracked by PR #149 and the production workflow. Production release will use the merge-triggered workflow. Preserve previous unresolved work below.
+
+
 # Boar danger (2026-10-06)
 
 - User approved merging the boar implementation and selected art. Integrating master `806512c`, preserving stronger wolves/bears, stationary status messages and current road/disembark art. Boars retain their reviewed 60 HP/10 damage; wolf/bear balance is unchanged. Combined verification passes: 295 workspace tests, native/WASM lint, rebuilt client/server, asset checks, six release-verifier tests and desktop mouse/DPR-2 touch boar hunting with no page errors. Ready for the authorized PR merge; production is tracked by the merge-triggered workflow.
@@ -6,6 +12,7 @@
 
 - Implemented locally: one starter boar, 2–3 later-island boars, preserving existing wolves/bears and safe placement. Shared combat/selection, authored four-pose art, no save reset.
 - 294 workspace tests (one manual benchmark ignored), strict native/WASM lint, rebuilt browser/server and 307-frame sprite audit pass. Desktop mouse and DPR-2 phone touch hunting/defeat pass, with normal/max-zoom art captures and no page errors. Additional pose replay passed desktop phases/pause/mirroring and reached phone close-ups after phase assertions; remaining duplicate close-ups were stopped due slow SwiftShader, so no full pose-replay completion is claimed. Evidence and review: [boars](docs/verification/boars/REVIEW.md). Not deployed.
+
 # Stationary NPC status feedback — [PR #146](https://github.com/koogle/age-of-agents/pull/146)
 
 - User requested status messages remain at their spawn position and rise/fade instead of following the NPC. Implemented in shared client feedback; existing timing, rapid-order replacement and damage tracking are preserved. No simulation/save change.
