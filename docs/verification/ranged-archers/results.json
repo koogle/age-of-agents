@@ -12,18 +12,18 @@
         "id": "archer-0",
         "kind": "archer",
         "cell": {
-          "column": 52,
+          "column": 50,
           "row": 43
         },
         "step": null,
         "action": {
           "type": "attack_animal",
           "animal_id": "wolf",
-          "elapsed_seconds": 0.16192881254230188
+          "elapsed_seconds": 0.6285954792089684
         },
         "cargo": null,
         "position": {
-          "x": 52.5,
+          "x": 50.5,
           "y": 43.5
         }
       },
@@ -35,16 +35,10 @@
           "row": 43
         },
         "cell": {
-          "column": 55,
+          "column": 54,
           "row": 43
         },
-        "step": {
-          "to": {
-            "column": 54,
-            "row": 43
-          },
-          "progress": 0.0
-        },
+        "step": null,
         "health": 300.0,
         "attack_seconds": 0.0,
         "heading": [
@@ -52,7 +46,11 @@
           0
         ]
       },
-      "distance": 3.0
+      "distance": 4.0
+    },
+    "first_hit": {
+      "distance": 3.5,
+      "wolf_health": 282.0
     },
     "injured_animals": [
       {
@@ -63,12 +61,18 @@
           "row": 43
         },
         "cell": {
-          "column": 53,
+          "column": 54,
           "row": 43
         },
-        "step": null,
+        "step": {
+          "to": {
+            "column": 53,
+            "row": 43
+          },
+          "progress": 0.5
+        },
         "health": 282.0,
-        "attack_seconds": 0.2,
+        "attack_seconds": 0.0,
         "heading": [
           -1,
           0
@@ -78,26 +82,8 @@
     "units_hurt": true,
     "survivors": [
       {
-        "health": 100.0,
-        "id": "archer-1",
-        "kind": "archer",
-        "cell": {
-          "column": 51,
-          "row": 43
-        },
-        "step": null,
-        "action": {
-          "type": "idle"
-        },
-        "cargo": null,
-        "position": {
-          "x": 51.5,
-          "y": 43.5
-        }
-      },
-      {
-        "health": 100.0,
-        "id": "archer-2",
+        "health": 30.0,
+        "id": "archer-0",
         "kind": "archer",
         "cell": {
           "column": 50,
@@ -115,10 +101,28 @@
       },
       {
         "health": 100.0,
-        "id": "archer-3",
+        "id": "archer-1",
         "kind": "archer",
         "cell": {
-          "column": 51,
+          "column": 49,
+          "row": 43
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 49.5,
+          "y": 43.5
+        }
+      },
+      {
+        "health": 100.0,
+        "id": "archer-2",
+        "kind": "archer",
+        "cell": {
+          "column": 49,
           "row": 41
         },
         "step": null,
@@ -127,8 +131,26 @@
         },
         "cargo": null,
         "position": {
-          "x": 51.5,
+          "x": 49.5,
           "y": 41.5
+        }
+      },
+      {
+        "health": 100.0,
+        "id": "archer-3",
+        "kind": "archer",
+        "cell": {
+          "column": 48,
+          "row": 43
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 48.5,
+          "y": 43.5
         }
       }
     ],
@@ -147,18 +169,18 @@
         "id": "archer-0",
         "kind": "archer",
         "cell": {
-          "column": 52,
+          "column": 50,
           "row": 43
         },
         "step": null,
         "action": {
           "type": "attack_animal",
           "animal_id": "wolf",
-          "elapsed_seconds": 0.06192881254230186
+          "elapsed_seconds": 0.6285954792089684
         },
         "cargo": null,
         "position": {
-          "x": 52.5,
+          "x": 50.5,
           "y": 43.5
         }
       },
@@ -170,7 +192,7 @@
           "row": 43
         },
         "cell": {
-          "column": 55,
+          "column": 54,
           "row": 43
         },
         "step": null,
@@ -181,7 +203,11 @@
           0
         ]
       },
-      "distance": 3.0
+      "distance": 4.0
+    },
+    "first_hit": {
+      "distance": 3.5,
+      "wolf_health": 282.0
     },
     "injured_animals": [
       {
@@ -192,10 +218,16 @@
           "row": 43
         },
         "cell": {
-          "column": 53,
+          "column": 54,
           "row": 43
         },
-        "step": null,
+        "step": {
+          "to": {
+            "column": 53,
+            "row": 43
+          },
+          "progress": 0.5
+        },
         "health": 282.0,
         "attack_seconds": 0.0,
         "heading": [
@@ -207,26 +239,8 @@
     "units_hurt": true,
     "survivors": [
       {
-        "health": 100.0,
-        "id": "archer-1",
-        "kind": "archer",
-        "cell": {
-          "column": 51,
-          "row": 43
-        },
-        "step": null,
-        "action": {
-          "type": "idle"
-        },
-        "cargo": null,
-        "position": {
-          "x": 51.5,
-          "y": 43.5
-        }
-      },
-      {
-        "health": 100.0,
-        "id": "archer-2",
+        "health": 30.0,
+        "id": "archer-0",
         "kind": "archer",
         "cell": {
           "column": 50,
@@ -244,10 +258,28 @@
       },
       {
         "health": 100.0,
-        "id": "archer-3",
+        "id": "archer-1",
         "kind": "archer",
         "cell": {
-          "column": 51,
+          "column": 49,
+          "row": 43
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 49.5,
+          "y": 43.5
+        }
+      },
+      {
+        "health": 100.0,
+        "id": "archer-2",
+        "kind": "archer",
+        "cell": {
+          "column": 49,
           "row": 41
         },
         "step": null,
@@ -256,8 +288,26 @@
         },
         "cargo": null,
         "position": {
-          "x": 51.5,
+          "x": 49.5,
           "y": 41.5
+        }
+      },
+      {
+        "health": 100.0,
+        "id": "archer-3",
+        "kind": "archer",
+        "cell": {
+          "column": 48,
+          "row": 43
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 48.5,
+          "y": 43.5
         }
       }
     ],

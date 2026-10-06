@@ -166,7 +166,7 @@ A combined default prototype scenario requires steel production, exploration, an
 
 ## Slice F — Combat foundation
 
-Status: wildlife melee combat and four-cell archer attacks are implemented; building health, factions and general combat remain planned.
+Status: wildlife melee combat and six-cell archer attacks are implemented; building health, factions and general combat remain planned.
 
 Gameplay acceptance:
 

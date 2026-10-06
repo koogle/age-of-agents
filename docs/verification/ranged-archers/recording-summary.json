@@ -1,5 +1,6 @@
 {
   "mode": "isolated hosted server, seed 123 controlled fixture",
+  "archer_range": 6,
   "simulation_speed": 1,
   "viewport": [
     960,
@@ -10,21 +11,23 @@
     500
   ],
   "fps": 10,
-  "seconds": 22.4,
+  "seconds": 27.4,
   "examples": [
     {
       "name": "one-archer",
-      "fight_seconds": 5.36,
+      "fight_seconds": 5.72,
+      "first_hit_distance": 3.0,
       "survivors": 0,
       "animals_remaining": 1,
       "animal_health": [
-        246.0
+        228.0
       ],
       "page_errors": []
     },
     {
       "name": "four-archers",
-      "fight_seconds": 7.26,
+      "fight_seconds": 6.27,
+      "first_hit_distance": 3.0,
       "survivors": 3,
       "animals_remaining": 0,
       "animal_health": [],

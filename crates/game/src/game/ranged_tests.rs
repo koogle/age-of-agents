@@ -41,14 +41,14 @@ fn hunter_tick(world: &mut GameWorld, dt: f64) {
 }
 
 #[test]
-fn archer_fires_at_four_cells_and_walks_only_when_out_of_range() {
-    let mut world = encounter(4);
+fn archer_fires_at_six_cells_and_walks_only_when_out_of_range() {
+    let mut world = encounter(6);
     order(&mut world).unwrap();
     hunter_tick(&mut world, 1.0);
     assert_eq!(world.units[0].cell, CellCoordinate::new(10, 10));
     assert!(world.units[0].step.is_none());
     assert_eq!(world.animals[0].health, 282.0);
-    let mut world = encounter(6);
+    let mut world = encounter(8);
     order(&mut world).unwrap();
     for _ in 0..30 {
         hunter_tick(&mut world, 0.1);
@@ -59,14 +59,14 @@ fn archer_fires_at_four_cells_and_walks_only_when_out_of_range() {
             .cell
             .center()
             .distance(world.animals[0].cell.center()),
-        4.0
+        6.0
     );
     assert!(world.units[0].step.is_none());
 }
 
 #[test]
 fn movement_and_lost_range_reset_the_shot_windup() {
-    let mut world = encounter(4);
+    let mut world = encounter(6);
     order(&mut world).unwrap();
     hunter_tick(&mut world, 0.9);
     world.animals[0].cell.column += 1;
@@ -87,17 +87,17 @@ fn movement_and_lost_range_reset_the_shot_windup() {
 
 #[test]
 fn archers_can_hit_moving_targets_but_cannot_shoot_outside_range() {
-    let mut world = encounter(3);
+    let mut world = encounter(5);
     order(&mut world).unwrap();
     world.animals[0].step = Some(Step {
-        to: CellCoordinate::new(14, 10),
+        to: CellCoordinate::new(16, 10),
         progress: 0.5,
     });
     hunter_tick(&mut world, 1.0);
     assert_eq!(world.animals[0].health, 282.0);
-    world.animals[0].cell = CellCoordinate::new(14, 10);
+    world.animals[0].cell = CellCoordinate::new(16, 10);
     world.animals[0].step = Some(Step {
-        to: CellCoordinate::new(15, 10),
+        to: CellCoordinate::new(17, 10),
         progress: 0.5,
     });
     hunter_tick(&mut world, 1.0);
@@ -106,7 +106,7 @@ fn archers_can_hit_moving_targets_but_cannot_shoot_outside_range() {
 
 #[test]
 fn shots_cross_water_and_friendly_units_but_mixed_unreachable_orders_are_atomic() {
-    let mut world = encounter(4);
+    let mut world = encounter(6);
     let columns = world.columns();
     for row in 0..world.rows() {
         world.terrain[usize::from(row) * usize::from(columns) + 12].biome = TerrainBiome::River;
@@ -138,7 +138,7 @@ fn shots_cross_water_and_friendly_units_but_mixed_unreachable_orders_are_atomic(
 
 #[test]
 fn clear_shots_reject_obstacles_and_touching_diagonal_corners() {
-    let mut world = encounter(4);
+    let mut world = encounter(6);
     let from = world.units[0].cell;
     let to = world.animals[0].cell;
     let blocker = CellCoordinate::new(12, 10);
@@ -182,7 +182,7 @@ fn clear_shots_reject_obstacles_and_touching_diagonal_corners() {
 
 #[test]
 fn ranged_orders_pause_reload_stop_and_cancel_when_target_is_hidden() {
-    let mut world = encounter(4);
+    let mut world = encounter(6);
     order(&mut world).unwrap();
     hunter_tick(&mut world, 0.4);
     let mut replay: GameWorld =
@@ -214,7 +214,7 @@ fn ranged_orders_pause_reload_stop_and_cancel_when_target_is_hidden() {
 #[test]
 fn open_ground_ranged_wolf_encounters_still_need_a_squad() {
     for count in 1..=5 {
-        let mut world = encounter(4);
+        let mut world = encounter(6);
         let template = world.units[0].clone();
         for i in 1..count {
             let mut archer = template.clone();
@@ -233,4 +233,40 @@ fn open_ground_ranged_wolf_encounters_still_need_a_squad() {
         assert_eq!(world.animals.is_empty(), count >= 3);
         assert_eq!(world.units.is_empty(), count < 3);
     }
+}
+
+#[test]
+fn first_damage_lands_while_wolf_is_still_several_cells_away() {
+    let mut world = encounter(7);
+    order(&mut world).unwrap();
+    for _ in 0..100 {
+        world.tick(0.1);
+        world.validate().unwrap();
+        if world.animals[0].health < 300.0 {
+            let distance = world.units[0]
+                .cell
+                .center()
+                .distance(world.animals[0].position());
+            assert!(
+                distance >= 3.0,
+                "first shot landed only {distance} cells away"
+            );
+            assert_eq!(world.units[0].health, 100.0);
+            return;
+        }
+    }
+    panic!("archer never fired");
+}
+
+#[test]
+fn bears_respond_to_ranged_attackers_outside_normal_proximity_aggro() {
+    let mut world = encounter(6);
+    world.animals[0].kind = AnimalKind::Bear;
+    world.animals[0].health = AnimalKind::Bear.max_health();
+    world.tick(0.1);
+    assert!(world.animals[0].step.is_none());
+    order(&mut world).unwrap();
+    world.tick(0.1);
+    assert!(world.animals[0].step.is_some());
+    world.validate().unwrap();
 }

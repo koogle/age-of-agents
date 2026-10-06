@@ -319,7 +319,8 @@ impl GameWorld {
                 .filter(|(_, u)| {
                     u.health > 0.0
                         && u.cell.center().distance(home.center()) <= territory
-                        && u.cell.center().distance(cell.center()) <= animal.kind.aggro()
+                        && (u.cell.center().distance(cell.center()) <= animal.kind.aggro()
+                            || matches!(&u.action, UnitAction::AttackAnimal { animal_id, .. } if animal_id == &animal.id))
                 })
                 .min_by(|(_, a), (_, b)| {
                     a.cell

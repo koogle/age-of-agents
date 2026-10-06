@@ -23,10 +23,20 @@ arrival can change casualties. Existing saved current health is preserved; incre
 damage applies immediately, and new animals spawn at the increased maximum.
 There is no schema change or world reset.
 
+## Ranged-distance correction (2026-10-06)
+
+Jakob reviewed the recording and clarified that wolves closing the gap is fine;
+archers should start firing earlier. This is not a request for automatic retreat. Correction:
+raise effective range from four to six simulation cells and verify actual damage
+lands before contact, rather than accepting a positive windup timer as evidence.
+Animals now respond to explicit attackers within their territory beyond ordinary
+proximity aggro, preventing longer-range archers from freely shooting idle bears.
+Retreat remains player-controlled; an approaching wolf may still reach melee.
+
 ## Ranged archers (2026-10-06)
 
 Jakob requested true distance attacks in a separate PR after the strength change.
-Archers stop at a clear firing position within four cells and deal 18 damage
+Archers stop at a clear firing position within six cells and deal 18 damage
 per one-second windup, including against moving visible animals. Existing
 road-weighted routing finds firing positions; blocked temporary positions wait.
 Buildings, live non-water resources and mountains block the shot, including
@@ -42,9 +52,9 @@ schema change. Dead/hidden targets clear the order. Mixed groups validate each
 member against its own attack reach before assigning any orders.
 
 Open-ground approach tests at 100ms: one/two archers lose to a full-health wolf;
-three/four/five win with two/three/four survivors respectively. Ranged positions
+three/four/five win; casualties depend on position and arrival order. Ranged positions
 across water can protect archers from melee wildlife; terrain and approach order
-therefore matter. No automatic retaliation or retreat is added.
+therefore matter. No friendly automatic retaliation or retreat is added.
 
 ## Implemented rules
 
@@ -62,7 +72,7 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
-Their damage is 10/25/18/35 per second respectively; archers use four-cell
+Their damage is 10/25/18/35 per second respectively; archers use six-cell
 shots and the others require contact. This is a bounded wildlife combat slice:
 healing, building damage, factions/raids,
 loot and run-ending rules remain unimplemented. Wolves require a squad; bears

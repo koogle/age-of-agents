@@ -132,6 +132,7 @@ async def main(out, only, closeups=False):
                         await command({'type':'set_simulation_speed','multiplier':2.0})
                         injured=None
                         ranged=None
+                        first_hit=None
                         injured_units=False
                         for _ in range(120):
                             await asyncio.sleep(.15)
@@ -150,6 +151,14 @@ async def main(out, only, closeups=False):
                                         await command({'type':'set_simulation_speed','multiplier':2.0})
                                         break
                             if wolf and wolf['health']<300 and injured is None:
+                                def position(entity):
+                                    at=entity['cell']; step=entity['step']
+                                    if not step:return at['column'],at['row']
+                                    return (at['column']+(step['to']['column']-at['column'])*step['progress'],at['row']+(step['to']['row']-at['row'])*step['progress'])
+                                ax,ay=position(wolf)
+                                nearest=min(((position(u)[0]-ax)**2+(position(u)[1]-ay)**2)**.5 for u in live['units'])
+                                first_hit={'distance':nearest,'wolf_health':wolf['health']}
+                                assert nearest>=3.0, first_hit
                                 injured=copy.deepcopy(live)
                                 await command({'type':'set_simulation_speed','multiplier':0.0})
                                 await page.screenshot(path=str(out/(label+'-combat.png')))
@@ -166,7 +175,7 @@ async def main(out, only, closeups=False):
                         await page.screenshot(path=str(out/(label+'-after.png')))
                         assert not errors,errors
                         results.append({'viewport':label,'ordered':ordered['units'][0]['action'],
-                                        'ranged':ranged,'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
+                                        'ranged':ranged,'first_hit':first_hit,'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
                         await context.close();stop()
                     await browser.close()
             finally:stop()

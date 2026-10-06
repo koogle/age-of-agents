@@ -1,9 +1,11 @@
 # Ranged archers — 2026-10-06
 
+- User clarified that wolves may close the gap; archers should fire earlier, without automatic retreat. Increased range to six cells and added actual-first-damage distance checks (windup alone was inadequate evidence); wildlife responds to explicit attackers within its territory. 304 tests, strict native/WASM lint and rebuilt desktop/phone checks pass: first damage lands at 3.5 cells in both browsers. Refreshed normal-speed GIF/MP4 show earlier shots and the wolf closing in.
+
 - User requested recorded examples: added a short normal-speed GIF and MP4 with one-archer loss and four-archer victory, plus a reproducible isolated recording driver. [Clips](docs/verification/ranged-archers/README.md#recorded-examples).
 
-- Separate PR requested: archers now stop within four cells with clear sight and fire at moving wildlife; existing roads/traffic, explicit orders, damage cadence and save schema are preserved. Obstacles block arrows; water and units do not. Existing bow art follows authoritative windup.
-- 302 workspace tests, strict native/WASM lint, formatting, rebuilt server/WASM and desktop/DPR2-phone combat pass with zero page errors. Open-ground wolf fights still require 3–5 archers. [Review, reproduction and captures](docs/verification/ranged-archers/README.md). [PR #142](https://github.com/koogle/age-of-agents/pull/142) is open on `feat/ranged-archers`; not merged or deployed. Integrated master `0c7b649` afterward: only the approved Disembark icon/docs changed upstream, leaving tested runtime source and WASM unchanged.
+- Separate PR requested: archers now stop within six cells with clear sight and fire at moving wildlife; existing roads/traffic, explicit orders, damage cadence and save schema are preserved. Obstacles block arrows; water and units do not. Existing bow art follows authoritative windup.
+- 304 workspace tests, strict native/WASM lint, formatting, rebuilt server/WASM and desktop/DPR2-phone combat pass with zero page errors. Open-ground wolf fights still require 3–5 archers. [Review, reproduction and captures](docs/verification/ranged-archers/README.md). [PR #142](https://github.com/koogle/age-of-agents/pull/142) is open on `feat/ranged-archers`; not merged or deployed. Integrated master `0c7b649` afterward: only the approved Disembark icon/docs changed upstream, leaving tested runtime source and WASM unchanged.
 
 # Stronger wildlife — 2026-10-06
 

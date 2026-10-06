@@ -3,7 +3,7 @@ use super::occupancy::{Claim, Occupancy};
 use super::*;
 use crate::navigation::offset;
 
-const ARCHER_RANGE: i32 = 4;
+const ARCHER_RANGE: i32 = 6;
 
 impl GameWorld {
     pub(super) fn archer_positions(

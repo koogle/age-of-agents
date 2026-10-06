@@ -120,7 +120,7 @@ async def main(out, only=None):
                         path=await video.path()
                         results.append({'example':label,'source':str(path),'start':clip_start,'duration':duration,'states':frames,'errors':errors})
                         (out/'recording.json').write_text(json.dumps(results,indent=2)+'\n')
-                        title='1 archer - wolf wins' if count==1 else '4 archers - squad wins'
+                        title='6-cell range - 1 archer' if count==1 else '6-cell range - 4 archers'
                         subprocess.run(['ffmpeg','-y','-loglevel','error','-ss',str(clip_start),'-i',str(path),'-vf',f"fps=10,drawbox=x=0:y=0:w=iw:h=42:color=black@0.65:t=fill,drawtext=text='{title}':fontcolor=white:fontsize=22:x=20:y=10",'-c:v','libx264','-pix_fmt','yuv420p',str(out/(label+'.mp4'))],check=True)
                         print(label+' recorded',flush=True)
                     await browser.close()

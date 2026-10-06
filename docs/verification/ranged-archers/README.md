@@ -2,7 +2,7 @@
 
 Separate follow-up to stronger wildlife PR #135, requested by Jakob.
 
-Archers approach a clear firing position within four cells and hold there,
+Archers approach a clear firing position within six cells and hold there,
 shooting for 18 damage per one-second windup. Existing travel/road weighting,
 cell claims and traffic handling remain authoritative. Shots can hit moving
 animals if both step endpoints are clear and in range. Moving or losing a clear
@@ -18,28 +18,31 @@ The existing bow action aims at the animal while the server timer is active.
 
 ## Verification
 
-- 302 workspace tests pass (one existing manual benchmark ignored), including
-  seven new ranged-domain regressions and the client bow-pose regression.
+- 304 workspace tests pass (one existing manual benchmark ignored), including
+  nine ranged-domain regressions and the client bow-pose regression.
 - Strict native/WASM Clippy, formatting, rebuilt server and WASM pass.
 - Domain coverage: range boundaries, approach/stop, obstacles/corners, moving
   targets, windup reset, river crossings, mixed-group rejection, pause, replay,
-  Stop, hidden targets and one-to-five-archer wolf fights.
-- Open-ground ranged fixture: one/two archers lose; three/four/five win with
-  two/three/four survivors. Existing adjacent-contact outcomes remain covered.
+  Stop, hidden targets, actual first-hit distance, bear response beyond proximity
+  aggro and one-to-five-archer wolf fights.
+- Open-ground ranged fixture: one/two archers lose; three/four/five win. Existing adjacent-contact outcomes remain covered.
   Water barriers and terrain can change outcomes; no claim applies to every layout.
 
 Browser reproduction after rebuilding: `python3 docs/verification/verify_wildlife.py
 --output /tmp/ranged-archers-browser`. The isolated SQLite world uses actual mouse
 and emulated touch to attack, followed by an explicit squad command over WebSocket
 (additive touch selection remains unimplemented). It requires a stationary archer
-with an active shot timer beyond melee distance, captures its paused bow pose,
-and checks mutual damage, defeat, order cleanup and zero page errors.
+with an active shot timer beyond melee distance, then requires actual damage
+before the nearest archer is within three cells. Desktop and phone both measured
+the first hit at 3.5 cells (wolf HP 282), with four survivors. Captures show
+[first damage on desktop](desktop-combat.png) and [phone](phone-combat.png).
+Mutual damage, defeat, order cleanup and zero page errors also pass.
 Desktop (1280×800 DPR1) and emulated phone (390×844 DPR2) both pass, with
 no page errors. [Observed state](results.json), [desktop firing](desktop-ranged.png),
 and [phone firing](phone-ranged.png) retain the result. Capture pixel dimensions
 are verified. Physical phones and native-window appearance remain unverified.
 
-WASM SHA256: `05359f7b4cf333d38afb8d3d769bf3baeb915afbac9ca1b1a6a64de4d910e704`.
+WASM SHA256: `f26b95c13b97b4bf54e69b10df8988159af07e0eb0b3f28b9217ce479e6b67e5`.
 
 ## Code-quality review
 
@@ -53,8 +56,7 @@ this changes its firing distance and activation, not its style.
 ## Recorded examples
 
 [Looping GIF](ranged-examples.gif) and [MP4](ranged-examples.mp4) show a lone
-archer losing, followed by four archers defeating a full-health wolf with three
-survivors. Actual local browser capture at normal simulation speed; the title
+archer losing, followed by four archers defeating a full-health wolf; the current recording summary gives survivors. Actual local browser capture at normal simulation speed; the title
 labels identify examples. These are controlled encounters, not production footage.
 [Recording summary](recording-summary.json) records outcomes and capture settings.
 
@@ -65,3 +67,8 @@ The recorder pauses only after the outcome and allows the rendered snapshot to
 settle before closing. Concatenate the two MP4s with ffmpeg's concat filter; GIF
 export uses 10fps, width 800, a 128-color palette and Bayer dithering. No gameplay
 code changed for the recording.
+
+The original four-cell recording was rejected because the first windup did not
+prove earlier damage. The six-cell correction keeps wolves closing the gap and
+preserves explicit retreat. Wildlife responds to ordered attackers within its
+territory, even outside ordinary aggro range; no new persisted target is needed.
