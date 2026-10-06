@@ -152,7 +152,8 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                         assert!(rect[2] >= 36.0 * scale && rect[3] >= 44.0 * scale);
                     }
                 }
-                // The normal phone controls share the lowest 140 logical pixels.
+                // Bottom action/navigation controls share the lowest 140 logical pixels.
+                // Building upgrades live in the description header above this band.
                 if width >= 390.0
                     && (width < 600.0 || height < 500.0)
                     && build == BuildUi::Off
@@ -162,7 +163,12 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                         // Resource-name explanations now live in the top bar.
                         let resource_name = matches!(action, Action::Explain(name)
                             if ResourceKind::ALL.iter().any(|kind| name.eq_ignore_ascii_case(kind.name())));
-                        if !matches!(action, Action::Reset | Action::Grid) && !resource_name {
+                        let header_upgrade = matches!(action, Action::UpgradeBuilding)
+                            || matches!(action, Action::Explain(text) if text.starts_with("Upgrade to masonry:") || text.starts_with("Masonry complete:"));
+                        if !matches!(action, Action::Reset | Action::Grid)
+                            && !resource_name
+                            && !header_upgrade
+                        {
                             assert!(rect[1] >= (height - 140.0) * scale - 0.1, "{action:?}");
                         }
                     }

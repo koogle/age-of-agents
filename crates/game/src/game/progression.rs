@@ -40,7 +40,7 @@ pub const STARTER_RESOURCE_BUDGET: [(ResourceKind, f64); 4] = [
 ];
 
 impl GameWorld {
-    fn discovered(&self, kind: ResourceKind) -> bool {
+    pub(super) fn discovered(&self, kind: ResourceKind) -> bool {
         self.resources
             .iter()
             .any(|r| r.kind == kind && self.explored_cells.binary_search(&r.cell).is_ok())

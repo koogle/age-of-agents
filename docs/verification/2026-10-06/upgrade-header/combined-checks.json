@@ -1,0 +1,16 @@
+{
+  "integrated_master": "0c7b649",
+  "save_version": 17,
+  "tests": {
+    "server": 13,
+    "client": 99,
+    "domain": 195,
+    "ignored": 1
+  },
+  "native_strict_clippy": "pass",
+  "wasm_strict_clippy": "pass",
+  "format": "pass",
+  "sprite_frames": 388,
+  "release_verifier_tests": 6,
+  "wasm_sha256": "b0a2788067b13f581be36c2ea644e21eddf2a3376cc806978e913cb2640999b3"
+}

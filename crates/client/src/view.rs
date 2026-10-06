@@ -596,6 +596,11 @@ impl WorldView {
                     .dock_facing(building.building.origin)
                     .unwrap_or_default(),
             );
+            let sheet = if building.building.masonry {
+                buildings::masonry_sheet(sheet)
+            } else {
+                sheet
+            };
             picks.push(Pickable {
                 pick: Pick::Building(building.building.id.clone()),
                 sprite,

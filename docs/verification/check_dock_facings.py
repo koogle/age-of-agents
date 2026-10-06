@@ -18,13 +18,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def fixture(direction):
     state = json.loads((Path(__file__).parent / 'presentation-fixture.json').read_text())
-    stock = state.pop('stockpile')
+    stock = state['stored_inventories'][0]
     state.update(island_id=0, island_count=1, island_origins=[{'column': 0, 'row': 0}],
                  inventories=[stock], stored_inventories=[stock], ship_connections=[], ships=[])
     state['units'] = []
     state['resources'] = []
     state['buildings'] = [dict(id='dock-test', kind='dock', origin={'column': 28, 'row': 19},
-                               construction=None, produces=['transport_ship'], researches=[], job=None,
+                               masonry=False, construction=None, produces=['transport_ship'], researches=[], job=None,
                                queue=[], next_queue_id=0, columns=4, rows=4)]
     water = {'south': lambda x, y: y >= 23, 'east': lambda x, y: x >= 32,
              'north': lambda x, y: y < 19, 'west': lambda x, y: x < 28}[direction]
@@ -34,7 +34,7 @@ def fixture(direction):
     return state
 
 
-async def main(output):
+async def main(output, material_tiers_only=False):
     output.mkdir(parents=True, exist_ok=True)
     clients = []
 
@@ -111,7 +111,12 @@ async def main(output):
                 await page.clock.run_for(34)
                 selected = await page.evaluate("async () => Array.from((await import('/web/pkg/aoa_client.js')).debug_screen_of(15,0,10.5))[3]")
                 assert selected == 1, (name, direction, 'dock picking failed')
-                for work, stage in [(0, 'foundation'), (3, 'walls'), (6, 'roof')]:
+                upgraded = copy.deepcopy(state)
+                upgraded['buildings'][0]['masonry'] = True
+                await send(upgraded)
+                await page.screenshot(path=str(output / f'{name}-{direction}-masonry.png'))
+                stages = [(6, 'roof')] if material_tiers_only else [(0, 'foundation'), (3, 'walls'), (6, 'roof')]
+                for work, stage in stages:
                     building = copy.deepcopy(state)
                     building['buildings'][0]['construction'] = work
                     await send(building)
@@ -120,10 +125,12 @@ async def main(output):
         await browser.close()
     await runner.cleanup()
     assert not errors, errors
-    print(json.dumps({'browser_errors': errors, 'captures': 32}))
+    print(json.dumps({'browser_errors': errors, 'captures': 24 if material_tiers_only else 40}))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    asyncio.run(main(parser.parse_args().output))
+    parser.add_argument('--material-tiers-only', action='store_true')
+    args = parser.parse_args()
+    asyncio.run(main(args.output, args.material_tiers_only))

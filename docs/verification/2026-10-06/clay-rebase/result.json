@@ -1,0 +1,31 @@
+{
+  "base": "806512c",
+  "previous_head": "74f470515403ce81ef65c53ce3dc36f1c29a020a",
+  "wasm_sha256": "a41cbcb7900479233dabe168920196a4952638e74e4472565a57d9e14826af48",
+  "upgrade_flows": [
+    {
+      "mode": "desktop",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    },
+    {
+      "mode": "phone",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    }
+  ],
+  "tests": {
+    "server": 13,
+    "client": 99,
+    "domain": 195,
+    "ignored": 1
+  },
+  "native_and_wasm_strict_lint": "pass",
+  "asset_frames": 388,
+  "icon_normalization": "pass",
+  "python_verifier_tests": 6
+}

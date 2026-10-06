@@ -68,7 +68,7 @@ blindly after reconnecting.
 - Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
   waived backward compatibility on 2026-10-05 until he requests it again. There
   are no old inventory/island migrations or historical required-field defaults.
-- `STORE_VERSION` in `src/store.rs` is 16 (adds required water balances to island inventories and ship cargo). Bump it for incompatible persisted-model
+- `STORE_VERSION` in `src/store.rs` is 17 (combines roads/water with specialist research catalogs and upgraded-building job requirements). Bump it for incompatible persisted-model
   changes; initialization atomically drops/recreates `world_state` when SQLite
   `user_version` differs, then normal startup generates a fresh world. The reset
   also applies to higher versions. Matching-version saves survive initialization.
@@ -105,3 +105,6 @@ error before any cell indexing.
 Water integration after roads uses store version 16: roads already shipped
 version 15. Water balances are required, so version 15 must also reset before
 deserialization under the established development policy.
+
+Combined material-tier/research integration advances to version 17, resetting
+version-16 water worlds before reading the required masonry/catalog state.

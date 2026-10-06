@@ -6,6 +6,16 @@ Status: maintained guide. Source-reviewed 2026-10-05 against `b054655`; historic
 PR results below are evidence, not newly run verification. Repository code paths
 in backticks are relative to the root.
 
+## Material progression (2026-10-05)
+
+Local change, pending release verification: island 2 supplies clay alongside
+iron/coal, island 3 clay, island 4 fiber; the destination pattern repeats.
+Each also supplies starter food/wood/stone. Jakob explicitly requested second-island
+clay; the revised working default retains metals on island 2 to preserve existing
+steel access. Existing
+discovery, continuous sailing and island-local inventories are unchanged. See the
+[economy guide](economy-and-queues.md) for paid building material upgrades.
+
 ## Working with this system
 
 The domain owns discovery and sailing; the client presents destinations and sends

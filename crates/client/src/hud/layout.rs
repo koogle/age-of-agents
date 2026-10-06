@@ -242,7 +242,8 @@ impl Hud {
         }
 
         // Selection: info pill plus a glass bar of command coins.
-        let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
+        let Some((portrait, title, detail, progress, mut commands)) =
+            selection_model(snapshot, model)
         else {
             self.toast(
                 atlas,
@@ -253,6 +254,10 @@ impl Hud {
             );
             return;
         };
+        let upgrade = commands
+            .iter()
+            .position(|c| c.action == Action::UpgradeBuilding)
+            .map(|index| commands.remove(index));
         let gap = if narrow { 8.0 } else { 10.0 } * s;
         let margin = 12.0 * s;
         let padding = if narrow { 8.0 } else { 14.0 } * s;
@@ -275,7 +280,11 @@ impl Hud {
         let rows = count.div_ceil(per_row);
         let columns = count.min(per_row);
         let bar_width = columns as f32 * (m + gap) - gap + 2.0 * padding;
-        let bar_height = rows as f32 * row_step - gap + 12.0 * s;
+        let bar_height = if commands.is_empty() {
+            0.0
+        } else {
+            rows as f32 * row_step - gap + 12.0 * s
+        };
         let bar = if narrow {
             [margin, height - edge - bar_height, bar_width, bar_height]
         } else {
@@ -448,24 +457,62 @@ impl Hud {
                 Self::text_width(atlas, t, 15.0 * s).max(Self::text_width(atlas, d, 12.0 * s))
             })
             .fold(0.0, f32::max);
-        let info_width = if narrow {
+        let info_width = if upgrade.is_some() {
+            if narrow {
+                selection_width
+            } else {
+                (440.0 * s).min(width - 2.0 * margin)
+            }
+        } else if narrow {
             selection_width.min((widest + 64.0 * s).max(156.0 * s))
         } else {
             (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin)
         };
-        let (portrait, title, detail) = hover_text.unwrap_or((portrait, title, detail));
+        // Building identity stays fixed; action explanations use the toast instead.
+        let mut action_hint = if upgrade.is_some() {
+            hover_text
+                .as_ref()
+                .map(|(_, label, detail)| format!("{label}: {detail}"))
+        } else {
+            None
+        };
+        let (portrait, title, detail) = if upgrade.is_some() {
+            (portrait, title, detail)
+        } else {
+            hover_text.unwrap_or((portrait, title, detail))
+        };
         let text_offset = if narrow { 52.0 } else { 64.0 } * s;
         let text_room = info_width - text_offset - if narrow { 12.0 } else { 16.0 } * s;
-        let title_size = if narrow { 14.0 } else { 15.0 } * s;
-        let title_lines = if narrow {
+        let title = if upgrade.is_some() {
+            title.trim_end_matches(" · Masonry").to_string()
+        } else {
+            title
+        };
+        let mut title_size = if narrow { 14.0 } else { 15.0 } * s;
+        if upgrade.is_some() {
+            let room = text_room - 48.0 * s;
+            title_size *= (room / Self::text_width(atlas, &title, title_size)).min(1.0);
+        }
+        let title_lines = if upgrade.is_some() {
+            vec![title]
+        } else if narrow {
             Self::wrapped_lines(atlas, &title, title_size, text_room)
         } else {
             vec![title]
         };
-        let detail_lines = Self::wrapped_lines(atlas, &detail, 12.0 * s, text_room);
+        let detail_lines = if upgrade.is_some() {
+            Vec::new()
+        } else {
+            Self::wrapped_lines(atlas, &detail, 12.0 * s, text_room)
+        };
         let title_extra = title_lines.len().saturating_sub(1) as f32 * 16.0 * s;
         let extra = title_extra + detail_lines.len().saturating_sub(1) as f32 * 14.0 * s;
-        let info_height = if narrow { 48.0 } else { 52.0 } * s + extra;
+        let detail_top = (if narrow { 36.0 } else { 40.0 }) * s + title_extra;
+        let info_height = if upgrade.is_some() {
+            52.0 * s
+        } else {
+            (if narrow { 48.0 } else { 52.0 }) * s + extra
+        };
         let info_gap = if narrow { 8.0 } else { 12.0 } * s;
         let info = [
             if narrow {
@@ -479,13 +526,83 @@ impl Hud {
         ];
         self.cargo_panel(atlas, model, width, info[1] - 8.0 * s, s, narrow);
         self.shape(info, GLASS, 1.0, 26.0 * s);
+        if let Some(command) = &upgrade {
+            let description_hit = [info[0], info[1], info[2] - 56.0 * s, info[3]];
+            let explanation = format!("{}: {detail}", title_lines[0]);
+            if self.hovered(description_hit) {
+                action_hint = Some(explanation.clone());
+            }
+            self.regions.push(Region {
+                rect: description_hit,
+                action: Action::Explain(explanation),
+                enabled: true,
+            });
+            let hit = [
+                info[0] + info[2] - 52.0 * s,
+                info[1] + 4.0 * s,
+                44.0 * s,
+                44.0 * s,
+            ];
+            let hot = self.hovered(hit);
+            if hot {
+                action_hint = Some(format!("{}: {}", command.label, command.detail));
+            }
+            // One brick arrow communicates both the upgrade and its material.
+            let lift = if hot && command.enabled {
+                -3.0 * s
+            } else {
+                0.0
+            };
+            if let Some(&(uv, size)) = atlas.content.get(command.icon) {
+                let scale = 36.0 * s / size.x.max(size.y);
+                self.quads.push(Quad {
+                    rect: [
+                        hit[0] + (44.0 * s - size.x * scale) / 2.0,
+                        hit[1] + 4.0 * s + lift,
+                        size.x * scale,
+                        size.y * scale,
+                    ],
+                    uv,
+                    color: if command.enabled {
+                        [1.0; 4]
+                    } else {
+                        [0.85, 0.85, 0.85, 0.8]
+                    },
+                    params: [0.0, 0.0, if command.enabled { 0.0 } else { 1.0 }, 0.0],
+                });
+            }
+            self.regions.push(Region {
+                rect: hit,
+                action: if command.enabled {
+                    command.action.clone()
+                } else {
+                    Action::Explain(format!("{}: {}", command.label, command.detail))
+                },
+                enabled: true,
+            });
+        }
+
         let portrait_size = if narrow { 32.0 } else { 40.0 } * s;
+        let portrait = if snapshot
+            .buildings
+            .iter()
+            .any(|b| Some(b.building.id.as_str()) == model.building && b.building.masonry)
+        {
+            format!("{portrait}_masonry")
+        } else {
+            portrait.to_string()
+        };
         self.sprite(
             atlas,
-            portrait,
+            &portrait,
             [
                 info[0] + 10.0 * s,
-                info[1] + if narrow { 8.0 } else { 6.0 } * s,
+                info[1]
+                    + if upgrade.is_some() {
+                        (52.0 * s - portrait_size) / 2.0
+                    } else {
+                        (if narrow { 8.0 } else { 6.0 }) * s
+                    },
                 portrait_size,
                 portrait_size,
             ],
@@ -497,7 +614,12 @@ impl Hud {
                 text,
                 (
                     info[0] + text_offset,
-                    info[1] + (if narrow { 20.0 } else { 23.0 } + line as f32 * 16.0) * s,
+                    info[1]
+                        + if upgrade.is_some() {
+                            26.0 * s + title_size * 0.35
+                        } else {
+                            (if narrow { 20.0 } else { 23.0 } + line as f32 * 16.0) * s
+                        },
                 ),
                 title_size,
                 INK,
@@ -510,9 +632,7 @@ impl Hud {
                 text,
                 (
                     info[0] + text_offset,
-                    info[1]
-                        + title_extra
-                        + (if narrow { 36.0 } else { 40.0 } + line as f32 * 14.0) * s,
+                    info[1] + detail_top + line as f32 * 14.0 * s,
                 ),
                 12.0 * s,
                 MUTED,
@@ -536,7 +656,10 @@ impl Hud {
         }
         self.toast(
             atlas,
-            model.toast.or(resource_hint.as_deref()),
+            model
+                .toast
+                .or(action_hint.as_deref())
+                .or(resource_hint.as_deref()),
             width,
             s,
             toast_top,

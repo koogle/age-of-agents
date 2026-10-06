@@ -1,0 +1,75 @@
+{
+  "bundle_sha256": "224fca5132a96fb357ede9cde39a6392256fb101da1936f03665d8f44bcc5f15",
+  "checks": [
+    {
+      "mode": "desktop",
+      "phase": "idle",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 1
+    },
+    {
+      "mode": "desktop",
+      "phase": "to_resource",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "desktop",
+      "phase": "gathering",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "desktop",
+      "phase": "returning",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "desktop",
+      "phase": "depositing",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "phone",
+      "phase": "idle",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 1
+    },
+    {
+      "mode": "phone",
+      "phase": "to_resource",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "phone",
+      "phase": "gathering",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "phone",
+      "phase": "returning",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    },
+    {
+      "mode": "phone",
+      "phase": "depositing",
+      "building_selected": true,
+      "switch_issued_orders": false,
+      "deposit_orders": 0
+    }
+  ]
+}

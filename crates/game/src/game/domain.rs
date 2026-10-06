@@ -305,6 +305,8 @@ pub enum UnitKind {
 pub struct Building {
     pub id: String,
     pub kind: BuildingKind,
+    /// Completed clay/brick material upgrade on the existing plot.
+    pub masonry: bool,
     /// North-west cell of the footprint.
     pub origin: CellCoordinate,
     /// `Some(seconds of work done)` while this is a foundation; `None` once complete.
@@ -440,11 +442,11 @@ impl BuildingKind {
             Self::Barracks | Self::Range => {
                 &[(ResourceKind::Timber, 20.0), (ResourceKind::Stone, 20.0)]
             }
-            Self::Workshop => &[(ResourceKind::Timber, 25.0), (ResourceKind::Bricks, 15.0)],
+            Self::Workshop => &[(ResourceKind::Timber, 25.0), (ResourceKind::Stone, 15.0)],
             Self::Infirmary => &[(ResourceKind::Timber, 15.0), (ResourceKind::Cloth, 10.0)],
             Self::Monument => &[
                 (ResourceKind::Timber, 30.0),
-                (ResourceKind::Bricks, 30.0),
+                (ResourceKind::Stone, 30.0),
                 (ResourceKind::Cloth, 15.0),
                 (ResourceKind::Gold, 20.0),
                 (ResourceKind::Steel, 15.0),
@@ -516,6 +518,9 @@ pub enum ProductKind {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum BuildingJob {
+    Upgrade {
+        elapsed_seconds: f64,
+    },
     Produce {
         product: ProductKind,
         elapsed_seconds: f64,
@@ -538,6 +543,10 @@ pub enum TechnologyKind {
 
 impl TechnologyKind {
     pub const ALL: [Self; 5] = ROADMAP_TECHNOLOGIES;
+
+    pub const fn requires_masonry(self) -> bool {
+        !matches!(self, Self::Masonry)
+    }
 
     pub fn prerequisite(self) -> Option<Self> {
         match self {

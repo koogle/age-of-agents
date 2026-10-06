@@ -1,0 +1,20 @@
+{
+  "source_base": "6b159e0 + master f985a92 + brick research change",
+  "wasm_sha256": "2e3371e979d1d1b7edb76ea56be5667422ab923d2a7a5b63d67c6511933ac04e",
+  "checks": [
+    {
+      "mode": "desktop",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    },
+    {
+      "mode": "phone",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    }
+  ]
+}

@@ -6,11 +6,19 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Core-building investment (2026-10-06):** Keep a consistent upgrade control at the description panel’s top-right and encourage upgrading chosen core buildings. Do not impose hard count limits; future rare-resource costs can constrain advanced upgrades naturally.
+
+- **Brick research unlocks (2026-10-06):** Optional specialist research requires a completed brick upgrade: Farm/Agriculture, Lumber Mill/Forestry, Mining Camp/Mining and Weaver/Textiles. Keep Masonry research and basic production available without upgrades ([economy guide](docs/knowledge/economy-and-queues.md#brick-upgrades-unlock-optional-research-2026-10-06)).
+
+- **Building material progression (2026-10-05; implemented locally):** Clay belongs on the second island; retain the building catalog, give base buildings wood or thatched roofs, and add clay/brick upgraded versions. See the [economy guide](docs/knowledge/economy-and-queues.md#material-tiers) for upgrade/progression details.
+
 - **Boars (2026-10-06):** Add the retained boar concept alongside wolves and bears: one boar on the first island, 2–3 on later islands, preserving territorial combat and safe starts. Existing saved populations stay intact; the roster applies to newly generated islands.
+
 
 - **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).
 
 - **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
+
 
 - **Granary yield (2026-10-05):** Granaries boost nearby field yields while retaining food/fiber storage. Initial balance is +50% within six cells edge to edge, non-stacking and evaluated at planting/replenishment completion; existing harvests are unchanged.
 

@@ -1,0 +1,19 @@
+{
+  "wasm_sha256": "b0a2788067b13f581be36c2ea644e21eddf2a3376cc806978e913cb2640999b3",
+  "flows": [
+    {
+      "mode": "desktop",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    },
+    {
+      "mode": "phone",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    }
+  ]
+}

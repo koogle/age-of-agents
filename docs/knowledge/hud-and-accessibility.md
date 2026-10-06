@@ -136,3 +136,50 @@ The integration preview exposed a secondary reuse: command hover text kept the s
 User steering (2026-10-05): shorten the granary description and omit technical
 qualifiers such as “no stacking.” Keep its drop-off role and nearby yield benefit
 in the HUD; detailed range, timing and stacking rules belong in the system guide.
+
+## Brick-gated research (2026-10-06)
+
+Optional specialist research remains visible but disabled until that building
+finishes its masonry upgrade. Hover/tap explains “Requires brick upgrade” plus
+the bonus. Queued upgrades do not enable it; completed global research keeps its
+completed explanation. See [rules and verification](../verification/2026-10-06/brick-research/README.md).
+
+## Core-building upgrade placement (2026-10-06)
+
+Jakob wants one consistent upgrade control in the top-right of the selected
+building's description panel, separate from production/research actions. Keep
+building identity visible while hovering actions; use explanations for costs,
+locks and state. Preserve a generous phone target and the same placement for
+available, unavailable, pending and completed upgrades. Keep upgrade costs and research payoff in the button hover explanation, not the
+building description (Jakob’s follow-up, 2026-10-06). Do not imply bonuses for
+buildings whose masonry tier currently changes appearance only.
+
+The design goal is investment in core buildings, bringing resources together to
+improve or specialize a building. Current spending is island-local plus stopped
+shore ships, not an individual building inventory. Jakob clarified that there should be no hard building/upgrade count limit. Later
+rare-resource costs can constrain how many advanced upgrades a player can afford;
+those rare-resource tiers remain future design work.
+
+Implemented with one shared upgrade control and a 44px target for all 17 completed
+building kinds. Hover explanations use the toast, preserving the title and
+button geometry. [Desktop/phone evidence](../verification/2026-10-06/upgrade-header/README.md).
+
+Latest refinement: Jakob prefers the up arrow itself made of brick,
+replacing the separate overlapping brick badge. Keep the shared target and hover
+behavior, and keep upgrade copy out of the building description.
+
+New icon names must be registered both in `assets/ui/manifest.json` and the
+client HUD `ICONS` list; the latter drives loading and atlas packing. The upgrade
+layout check asserts the arrow is present to prevent missing upgrade artwork.
+
+[Brick-arrow refinement and verification](../verification/2026-10-06/upgrade-header/brick-arrow/README.md).
+
+Single-row refinement (2026-10-06): Jakob still sees two rows of text.
+Working assumption stated in chat: completed-building cards show the name and
+brick arrow in one row; hovering/tapping the name area explains the normal
+building role or active work status. Keep the visual progress bar.
+
+Implemented as a 52px completed-building header: name fits one line, the
+brick arrow remains a separate 44px target, and the description/current work
+uses the name-area hover/tap explanation.
+[Single-row evidence](../verification/2026-10-06/upgrade-header/single-row/README.md).

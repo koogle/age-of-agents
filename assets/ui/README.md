@@ -134,3 +134,7 @@ See [comparison and verification](../../docs/verification/water/README.md).
 | `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
 | `category_production` | [Review](sources/menu_icons/category_production/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_production/provenance.json) |
 | `category_military` | [Review](sources/menu_icons/category_military/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_military/provenance.json) |
+
+Upgrade headers use an up arrow made of terracotta bricks, matched to the existing
+brick resource palette.
+[Source and provenance](sources/upgrade/README.md).

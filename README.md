@@ -19,7 +19,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - Villager and group orders for movement, gathering, carrying and construction.
 - Straight dirt/stone roads with labour costs and 50% faster friendly movement.
 - 17 buildings, 14 resources/products, farming with granary yield bonuses, processing, research and production queues.
-- Buildings unlocked when discovered resources support construction and productive use.
+- Buildings unlocked when discovered resources support construction and productive use; second-island clay and paid masonry upgrades that unlock specialist research.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
 - Territorial wolves, bears and boars, unit health and hunting orders.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.

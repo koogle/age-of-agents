@@ -11,6 +11,19 @@ use crate::{
 
 type Corners = [[f32; 2]; 4];
 
+/// Matching material atlases retain the same frame layout and plot registration.
+/// Order matches `sheet_images` in lib.rs.
+pub(super) fn masonry_sheet(sheet: usize) -> usize {
+    match sheet {
+        SHEET_TOWN_CENTER => 14,
+        SHEET_BUILDINGS => 15,
+        7 => 16,
+        8 => 17,
+        9 => 18,
+        _ => unreachable!("masonry is only defined for building sheets"),
+    }
+}
+
 pub(super) struct Frame {
     pub sheet: usize,
     pub rect: [f32; 4],

@@ -81,8 +81,8 @@ the current stride and resume continues it. Attack orders are rejected while pau
 Frames are authored and mirrored; reverse-facing poses remain future art work.
 All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
 
-Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
-(including 12 and the earlier branch-only wildlife schema 13) reset under the existing
+Store version 15 adds building material tiers to the island inventory, ship cargo, health and wildlife schema introduced in version 14. Incompatible stores
+(including version 14 and earlier branch-only schemas) reset under the existing
 [save policy](server-and-saves.md). Current corrupt health, steps, cooldowns,
 claims or orders fail validation. Population tuning does not change the save schema:
 existing animals remain intact on reload; the roster applies when an island is generated. Passengers retain health and remain safe at sea.

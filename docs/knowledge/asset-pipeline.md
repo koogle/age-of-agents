@@ -149,6 +149,36 @@ Compare siblings and unaffected pixels. Show images during progress as required
 by [#66](https://github.com/koogle/age-of-agents/pull/66); a prose assurance of
 quality gives the user no opportunity to catch the next mismatch.
 
+## Requested building material progression (2026-10-05)
+
+Implemented locally from Jakob’s request: preserve the existing building
+identities, replace base-building clay/tile roofs with wood or thatch, and add
+clay/brick upgraded versions. Preserve approved sources for upgraded art where
+suitable. Keep structural kiln/furnace stone distinct from clay roof tiles; a
+starter kiln must remain buildable before bricks can be produced. Thatch is an
+art/material treatment here, not a request to add another inventory resource or
+to require island-4 fiber for starter buildings. Cover construction stages,
+completed sprites, working variants and menu portraits consistently.
+
+Sources, provenance and packing instructions: [material sources](../../assets/sprites/material_sources/README.md). Both tiers, construction stages and selection/menu portraits are integrated. The base monument retains its stone finish; its upgraded pedestal uses brick.
+
+### Material-tier generation findings
+
+The 2026-10-05 material pass found that whole 4×4/4×5 atlas edits returned roughly
+1254px square/1121×1403 images: only about 280–313 authored pixels per cell.
+Those drafts were rejected, not enlarged to pass the 512px gate. Two-frame strips
+returned roughly 1774×887 with enough per-frame detail. Retain originals and pack
+down with `scripts/pack_material_sprites.py`; `_masonry.png` sheets share original
+manifest coordinates. Inspect actual dimensions rather than trusting the prompt.
+
+Giving a whole catalog atlas while asking for a numbered row can change building
+identity: farm became a mine, range became barracks, and dock lost its sailboat.
+Use an isolated crop of the exact stage pair (or retained high-resolution source)
+for corrections. Inspect silhouette/props as well as roofs before integration.
+Near-transparent pixels can contain saturated RGB at alpha 1/2; previews may
+exaggerate them. Packing discards alpha ≤8 before downsampling, while preserving
+opaque art. No procedural roof recoloring or texture generation is used.
+
 ## Keep this guide current
 
 Update this file when developer steering, implementation changes or investigation
@@ -159,13 +189,36 @@ focused topic from the [knowledge index](INDEX.md).
 ## Directional dock integration (2026-10-05)
 
 The building packer appends three directional rows to the existing atlas, keeping
-all original pixels and UV rectangles. Use the retained 2172×724 strips in
+all original UV rectangles (the later material pass replaces roof pixels). Use the retained 2172×724 strips in
 `assets/sprites/building_sources/directions`; the earlier 1254×1254 construction
 sheet was rejected because its cells were only 418px. Each integrated source
 cell is 724×724 before packing down to 512×512. Manual structural deck corners
 register each construction stage, and the atlas manifest drives texture dimensions.
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
+
+The material-tier integration also covers all four dock facings: masonry preserves the upstream directional atlas, while three isolated-reference generated strips replace only the starter roofs. Both HD atlases share 2048×3584 dimensions and unchanged directional deck corners. Run the material packer after the original building packer. The directional browser fixture now includes the required material flag and captures both tiers.
+
+## House linework correction (2026-10-05)
+
+User feedback on the material-tier preview: the new houses' linework differs;
+enforce the approved style more strongly. Implemented for house and granary roof/complete stages: compare each new
+house stage directly with `building_sources/clean_roofs/house_*.png` at equal
+rendered size. Keep fine warm ink, sparse material marks and soft two-tone shading;
+reject dense straw hatching, heavy black roof seams and glossy strand highlights.
+Changing roof material must not introduce another illustration style. Validate
+construction and completion together, then inspect desktop and DPR2-phone views.
+
+The accepted correction uses broad muted thatch masses, retaining sparse warm ink
+and the original architectural details. Original high-resolution clean-roof art
+is the style master; the corrected house additionally guides the granary thatch.
+Both authored strips have 887px cells, packed down to 512px. Earlier material
+sources and provenance remain in `material_sources/superseded_linework/`.
+
+House correction evidence and criterion-by-criterion visual acceptance are in
+[the linework review](../verification/2026-10-05/house-linework/README.md).
+The follow-up integrates master `92aaf7e`, retaining terrain-first generation,
+resource-name hints and individually reviewed menu icons before rebuilding WASM.
 
 ## Water icon correction (2026-10-06)
 
@@ -189,6 +242,7 @@ and DPR-2 phone evidence; both pass in the [material review](../verification/roa
 Road materials occupy layers 11/12 of the existing texture array and use its
 mirrored, mip-clamped sampling; retain full-resolution originals and record exact
 prompts/reference hashes before integration.
+
 
 ## Wildlife style correction (2026-10-05)
 

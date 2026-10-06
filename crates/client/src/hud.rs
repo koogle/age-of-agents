@@ -18,6 +18,8 @@ mod layout_tests;
 #[cfg(test)]
 mod menu_icon_tests;
 mod minimap;
+#[cfg(test)]
+mod upgrade_layout_tests;
 pub use build_menu::BuildingGroup;
 mod cargo;
 mod selection;
@@ -30,7 +32,7 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 39] = [
+const ICONS: [&str; 40] = [
     "resource_water",
     "resource_wood",
     "resource_timber",
@@ -53,6 +55,7 @@ const ICONS: [&str; 39] = [
     "command_explore",
     "command_cargo",
     "command_back",
+    "command_upgrade",
     "category_town",
     "category_gathering",
     "category_production",
@@ -137,6 +140,7 @@ pub enum Action {
     Produce(aoa_game::ProductKind),
     BuildGroup(BuildingGroup),
     Research(TechnologyKind),
+    UpgradeBuilding,
     CancelQueuedJob(u64),
     /// Globe click: look at this map point.
     LookAt(Vec2),
@@ -274,7 +278,14 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
         let frames: serde_json::Value =
             serde_json::from_slice(assets.bytes(&format!("sprites/{name}.json")))
                 .expect("building frames");
-        (name, (assets.image(&format!("sprites/{name}.png")), frames))
+        (
+            name,
+            (
+                assets.image(&format!("sprites/{name}.png")),
+                assets.image(&format!("sprites/{name}_masonry.png")),
+                frames,
+            ),
+        )
     })
     .collect();
     let portraits = BUILDABLE
@@ -295,30 +306,41 @@ pub fn build_atlas(assets: &Assets) -> Atlas {
             false,
         )));
     for (icon, atlas, row, town_center) in portraits {
-        let (sheet, frames) = &sheets[atlas];
-        let rect = if town_center {
-            &frames["frames"]["complete"]
-        } else {
-            &frames["frames"][row][3]
-        };
-        let [fx, fy, fw, fh] =
-            [0, 1, 2, 3].map(|i| rect[i].as_u64().expect("frame rectangle") as u32);
-        let cell = sheet.crop(fx, fy, fw, fh);
-        let (x0, y0, x1, y1) = painted_bounds(&cell);
-        let painted = cell.crop(x0, y0, x1 - x0, y1 - y0);
-        let fit = 160.0 / (painted.width.max(painted.height) as f32);
-        let (w, h) = (
-            ((painted.width as f32 * fit) as u32).max(1),
-            ((painted.height as f32 * fit) as u32).max(1),
-        );
-        let painted = painted.resized(w, h);
-        let at = place(w, h);
-        blit(&mut image, &painted, at);
-        sprites.insert(icon.to_string(), uv(at, w, h));
-        content.insert(
-            icon.to_string(),
-            (uv(at, w, h), Vec2::new(w as f32, h as f32)),
-        );
+        let (base, upgraded, frames) = &sheets[atlas];
+        for masonry in [false, true] {
+            if masonry && icon == "field" {
+                continue;
+            }
+            let sheet = if masonry { upgraded } else { base };
+            let icon = if masonry {
+                format!("{icon}_masonry")
+            } else {
+                icon.to_string()
+            };
+            let rect = if town_center {
+                &frames["frames"]["complete"]
+            } else {
+                &frames["frames"][row][3]
+            };
+            let [fx, fy, fw, fh] =
+                [0, 1, 2, 3].map(|i| rect[i].as_u64().expect("frame rectangle") as u32);
+            let cell = sheet.crop(fx, fy, fw, fh);
+            let (x0, y0, x1, y1) = painted_bounds(&cell);
+            let painted = cell.crop(x0, y0, x1 - x0, y1 - y0);
+            let fit = 160.0 / (painted.width.max(painted.height) as f32);
+            let (w, h) = (
+                ((painted.width as f32 * fit) as u32).max(1),
+                ((painted.height as f32 * fit) as u32).max(1),
+            );
+            let painted = painted.resized(w, h);
+            let at = place(w, h);
+            blit(&mut image, &painted, at);
+            sprites.insert(icon.to_string(), uv(at, w, h));
+            content.insert(
+                icon.to_string(),
+                (uv(at, w, h), Vec2::new(w as f32, h as f32)),
+            );
+        }
     }
     let mut fonts = Vec::new();
     for (path, css_em) in [

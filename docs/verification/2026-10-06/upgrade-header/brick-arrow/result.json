@@ -1,0 +1,20 @@
+{
+  "wasm_sha256": "e6886f6b3d0e68ed437a2cc1f877e8ffdb999d8fd173367a0cfda50f1574fd5d",
+  "icon_sha256": "b04d8d68f906b7b553e6bfb7204c40e76ef126ab85eace9be59d52b5135920f7",
+  "flows": [
+    {
+      "mode": "desktop",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    },
+    {
+      "mode": "phone",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    }
+  ]
+}

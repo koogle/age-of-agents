@@ -48,7 +48,7 @@ fn discovery_keeps_home_and_places_deterministic_separated_islands() {
         }
     }
     for (i, kinds) in [
-        vec![ResourceKind::Iron, ResourceKind::Coal],
+        vec![ResourceKind::Iron, ResourceKind::Coal, ResourceKind::Clay],
         vec![ResourceKind::Clay],
         vec![ResourceKind::Fiber],
     ]
@@ -56,6 +56,15 @@ fn discovery_keeps_home_and_places_deterministic_separated_islands() {
     .enumerate()
     {
         let origin = a.island_origins[i + 1];
+        assert!(
+            a.resources
+                .iter()
+                .filter(|r| r.cell.column >= origin.column
+                    && r.cell.column < origin.column + WORLD_COLUMNS
+                    && r.cell.row >= origin.row
+                    && r.cell.row < origin.row + WORLD_ROWS)
+                .all(|r| STARTER_RESOURCES.contains(&r.kind) || kinds.contains(&r.kind))
+        );
         for kind in kinds {
             assert!(a.resources.iter().any(|r| r.kind == *kind
                 && r.cell.column >= origin.column

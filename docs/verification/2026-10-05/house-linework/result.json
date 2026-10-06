@@ -1,0 +1,9 @@
+{
+  "browser_errors": [],
+  "captures": 16,
+  "phone": "emulated DPR2; wheel-controlled zoom",
+  "fixture": "presentation only",
+  "source": "e421b50 merged with master 92aaf7e",
+  "atlas_sha256": "1afedc5af0d7babe4fe00834f5ced4cadb41f6e39a0931cb6d16a55758859a0c",
+  "wasm_sha256": "ea19c7d9910a4f48c3551af4aa0c7352991f1890dd3fcd72db6c1b0948a3e775"
+}

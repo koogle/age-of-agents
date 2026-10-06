@@ -14,11 +14,7 @@ fn new_games_offer_starter_economy_and_require_explicit_rules() {
     );
     assert_eq!(
         w.snapshot().buildings[0].building.researches,
-        vec![
-            TechnologyKind::Forestry,
-            TechnologyKind::Agriculture,
-            TechnologyKind::Masonry
-        ]
+        vec![TechnologyKind::Masonry]
     );
     let mut old = serde_json::to_value(&w).unwrap();
     old.as_object_mut().unwrap().remove("economy_rules");
@@ -105,7 +101,9 @@ fn discovering_complementary_materials_unlocks_industries_and_persists_after_dep
     assert!(!w.building_available(BuildingKind::Workshop));
     assert!(!w.building_available(BuildingKind::Smelter));
     assert!(!w.building_available(BuildingKind::Barracks));
+    assert!(!w.masonry_upgrades_available());
     w.explored_cells.push(cell(4, 2));
+    assert!(w.masonry_upgrades_available());
     assert!(w.building_available(BuildingKind::Kiln));
     assert!(
         !w.building_available(BuildingKind::Workshop),
@@ -185,18 +183,12 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
             w.inventories[0].add(r, -amount);
         }
     }
-    for technology in [
-        TechnologyKind::Forestry,
-        TechnologyKind::Agriculture,
-        TechnologyKind::Masonry,
-    ] {
-        w.apply_command(Command::Research {
-            building_id: "base-1".into(),
-            technology,
-        })
-        .unwrap();
-        run(&mut w, RESEARCH_SECONDS + 0.1);
-    }
+    w.apply_command(Command::Research {
+        building_id: "base-1".into(),
+        technology: TechnologyKind::Masonry,
+    })
+    .unwrap();
+    run(&mut w, RESEARCH_SECONDS + 0.1);
     w.apply_command(Command::Produce {
         building_id: "base-1".into(),
         product: ProductKind::Villager,
@@ -312,5 +304,5 @@ fn second_island_metal_discovery_unlocks_barracks_and_smelter() {
     assert!(w.building_available(BuildingKind::Smelter));
     assert!(!w.building_available(BuildingKind::Kiln));
     assert!(!w.building_available(BuildingKind::Weaver));
-    assert!(!w.building_available(BuildingKind::Workshop));
+    assert!(w.building_available(BuildingKind::Workshop));
 }

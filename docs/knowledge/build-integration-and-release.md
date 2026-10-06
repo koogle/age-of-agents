@@ -123,6 +123,11 @@ changes the procedure, contract, failure modes or verification limits. Record th
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
 
+## Material-tier release check (2026-10-05)
+
+The verifier now compares town-center/base-building art and all five masonry PNG atlases, and checks the upgrade WASM label/snapshot capability. Local Modal SDK 1.6.1 `status` failed with “Could not connect to the Modal server” despite runtime readiness reporting configured credentials. Installing the proxy-support extra (see below) repaired the read-only connection. API workspace lookup then confirmed `radiantai`, with no configured `koogle-frick` profile, so the production identity remains unavailable here. No deployment was attempted to the mismatched workspace. Use the existing merge-triggered workflow after review; do not claim deployment or reset production to satisfy checks.
+
+
 ## Wildlife release check (2026-10-05)
 
 During the wolves/bears implementation, Modal 1.5.3 installed successfully and
@@ -153,3 +158,17 @@ before the first command reaches doctests. During road verification this produce
 `extern location for aoa_game does not exist` after unit tests passed. A sequential
 workspace rerun is required; a build-lock wait alone does not serialize the entire
 verification command.
+
+## Rebasing a branch with feature changes in merge resolutions
+
+PR #103 (2026-10-06) contained specialist-research changes in integration merge
+commits. Dropping merges during a normal replay could lose that behavior. For
+the user-authorized rebase, preserve a local backup, consolidate the verified
+final tree against its last merged main commit, then replay that feature commit
+onto the newly fetched main. Compare source/assets against the backup and the
+new main to verify only expected upstream differences, rebuild JS/WASM, and
+check the actual combined browser flow. Push with an explicit force-with-lease
+against the remote SHA observed before the rebase; stop if the remote moved.
+Use this procedure for user-authorized history rewrites.
+[PR #103 rebase evidence](../verification/2026-10-06/clay-rebase/README.md) records
+the combined checks and distinguishes earlier bundle hashes from the final base.

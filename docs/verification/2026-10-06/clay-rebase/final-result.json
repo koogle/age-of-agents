@@ -1,0 +1,32 @@
+{
+  "base": "50d02e1d02f97499f58d52078b177612967c0ec8",
+  "previous_head": "74f470515403ce81ef65c53ce3dc36f1c29a020a",
+  "wasm_sha256": "224fca5132a96fb357ede9cde39a6392256fb101da1936f03665d8f44bcc5f15",
+  "upgrade_flows": [
+    {
+      "mode": "desktop",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    },
+    {
+      "mode": "phone",
+      "errors": [],
+      "locked_click_sent_no_research": true,
+      "research_paid_once": true,
+      "reload_preserves_completion": true
+    }
+  ],
+  "tests": {
+    "server": 13,
+    "client": 100,
+    "domain": 196,
+    "ignored": 1
+  },
+  "native_and_wasm_strict_lint": "pass",
+  "asset_frames": 392,
+  "icon_normalization": "pass",
+  "python_verifier_tests": 6,
+  "asset_checks_scope": "Passed on de49ab4 integration; assets and release-verifier code unchanged by subsequent selection fix."
+}

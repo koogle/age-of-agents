@@ -42,14 +42,14 @@ implementation, and verification.
 
 ## Resource-based island progression
 
-Implemented for fresh games: food/wood/stone nodes and renewable water, timber and rations processing, ten starter buildings plus fields, and Forestry/Agriculture/Masonry research. Building availability requires discoverable construction inputs and, for production buildings, at least one usable recipe. Barracks and Smelter need iron and coal, Kiln needs clay, Weaver needs fiber, Workshop needs clay plus iron and coal, Infirmary needs fiber, and Monument needs clay/fiber/gold/iron/coal. Range remains available initially because archers use food and timber. Useful buildings remain visible when temporarily unaffordable. Discovery survives depletion and saving across islands; hidden deposits and injected stock do not bypass unlocks. Existing buildings and saves remain intact.
+Implemented for fresh games: food/wood/stone nodes and renewable water, timber and rations processing, ten productive starter buildings plus fields, and Masonry research. Construction and productive-use resource discovery unlock later buildings; stock shortages leave available buildings grey. Clay on island 2 unlocks paid masonry upgrades; upgraded Farm, Lumber Mill, Mining Camp and Weaver unlock their optional research bonuses. Basic farming, processing and first departure require no brick upgrade. Discovery survives depletion and saving; hidden nodes and injected stocks do not bypass it. See the [economy guide](docs/knowledge/economy-and-queues.md) for prerequisites and save policy.
 
 The first transport is a playable dock recipe costing 60 wood + 20 timber, taking 20 seconds. It holds four passengers, sails on water, and lands passengers at clear shore. Each island has its own inventory; ships carry an additional 50 resources and share their cargo while stopped at shore. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields consume wood, stone, water and labor for ordinary food.
 
 Remaining acceptance criteria:
 
 1. Implemented: dock-built transport approaches reachable shore for boarding orders and boards/lands existing units, retaining identities and personal carried loads. Water navigation, seat reservations, safe landings, interrupted orders and save compatibility are covered. Departure needs no cloth or metal.
-2. Implemented: sailing toward the map frontier generates an adjacent island; continuous ocean crossings reach the persistent second island with iron/coal for steel; further islands introduce clay/bricks and fiber/cloth separately. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
+2. Implemented: sailing toward the map frontier generates an adjacent island; continuous ocean crossings reach the persistent second island with clay for bricks and building upgrades alongside its existing iron/coal for steel; further islands supply additional clay and fiber for cloth. Their resources complement earlier islands instead of replacing them; preserve productive first-island farms and forests.
 3. Implemented: island-local inventories and 50-resource ship holds fund outposts. Cargo stays aboard and is available while stopped at shore; dock controls transfer it directly. All discovered settlements keep running.
 4. Show the next useful unlock and its missing input as expansion becomes playable. No age progression, automatic inter-island shipping, combat or adversaries in this foundation PR.
 
@@ -244,4 +244,27 @@ Island storage: stopped shore ships supplement local construction/production cos
 - [x] `250f3ce` updates `scripts/modal_manage.py::verify_once` for bounded compressed terrain and runtime dimensions, with decoder regressions in CI. The earlier documentation review's fixed-map finding is resolved.
 - The verifier still assumes a land unit and unseen terrain. Diagnose those separately if a valid world lacks them; see [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
 
+## Building material tiers — implemented locally; release pending (2026-10-05)
+
+Clay joins iron/coal on island 2; island 3 retains clay, and fiber remains on
+island 4. Starter buildings use wood/thatch roofing, and their masonry material
+versions require a paid in-place upgrade using bricks and timber. The base kiln
+uses wood/stone so producing the first bricks does not require bricks. Workshop
+and Monument replace base brick costs with stone; all 17 building types and their
+functions remain, with ten initially constructible types under the productive-use rule. Material upgrades unlock four optional specialist research bonuses; they grant no automatic
+stat bonuses. Both art tiers are integrated; catalog and browser evidence are retained under `docs/verification/2026-10-05/material-tiers/`.
+
+Upgrades reuse the existing queue with a 20-second duration, charge once, refund
+waiting cancellation fully, reject duplicate orders and retain the building ID
+and footprint. Save version 16 stores the tier explicitly and validates specialist research and resets incompatible
+hosted worlds. See the [economy guide](docs/knowledge/economy-and-queues.md).
+
 Island generation uses rounded, square, elongated, lobed and open-bay outlines, with shared relief and downhill drainage; starter resources remain visible and reachable.
+
+## Future core-building specialization
+
+Encourage investment in selected core buildings through further upgrades funded
+by rare resources brought to a settlement. Scarcity should constrain how many
+advanced upgrades a player can afford; do not impose hard one-per-kind limits.
+Specific rare resources, upgrade branches, costs and effects remain to be designed.
+Current masonry upgrades unlock the four existing specialist research bonuses.

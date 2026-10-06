@@ -10,7 +10,8 @@
       "sail": "icons/command_sail.png",
       "explore": "icons/command_explore.png",
       "cargo": "icons/command_cargo.png",
-      "back": "icons/command_back.png"
+      "back": "icons/command_back.png",
+      "upgrade": "icons/command_upgrade.png"
     },
     "portrait": {
       "group": "icons/portrait_group.png",

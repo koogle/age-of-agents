@@ -52,6 +52,18 @@ impl UnitKind {
 }
 
 impl BuildingKind {
+    /// Research belongs to its specialist; Masonry remains available before bricks.
+    pub const fn technologies(self) -> &'static [TechnologyKind] {
+        match self {
+            Self::TownCenter | Self::Kiln => &[TechnologyKind::Masonry],
+            Self::Farm => &[TechnologyKind::Agriculture],
+            Self::LumberMill => &[TechnologyKind::Forestry],
+            Self::MiningCamp => &[TechnologyKind::Mining],
+            Self::Weaver => &[TechnologyKind::Textiles],
+            _ => &[],
+        }
+    }
+
     pub const fn products(self) -> &'static [ProductKind] {
         match self {
             Self::Dock => &[ProductKind::TransportShip],
@@ -143,6 +155,11 @@ impl GameWorld {
         let entry = building.queue.remove(index);
         let origin = building.origin;
         match entry.job {
+            BuildingJob::Upgrade { .. } => {
+                for &(kind, amount) in building.kind.upgrade_cost() {
+                    self.credit_at(origin, kind, amount);
+                }
+            }
             BuildingJob::Produce { product, .. } => {
                 for &(kind, amount) in product.cost() {
                     self.credit_at(origin, kind, amount);
@@ -178,6 +195,14 @@ impl GameWorld {
             return;
         };
         match job {
+            BuildingJob::Upgrade { elapsed_seconds } => {
+                let elapsed_seconds = elapsed_seconds + dt;
+                if elapsed_seconds + f64::EPSILON < BUILDING_UPGRADE_SECONDS {
+                    self.buildings[index].job = Some(BuildingJob::Upgrade { elapsed_seconds });
+                    return;
+                }
+                self.buildings[index].masonry = true;
+            }
             BuildingJob::Produce {
                 product,
                 elapsed_seconds,

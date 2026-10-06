@@ -288,6 +288,10 @@ mod tests {
         for kind in aoa_game::BUILDABLE {
             let icon = building_info(kind).0;
             assert!(
+                atlas.sprites.contains_key(&format!("{icon}_masonry")),
+                "missing upgraded portrait for {kind:?}"
+            );
+            assert!(
                 icons.insert(icon),
                 "placeholder portrait reused for {kind:?}"
             );
