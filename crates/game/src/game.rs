@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 
 mod coast;
 mod construction;
+mod roads;
+pub use roads::{ROAD_WORK_SECONDS, Road, RoadKind, road_line};
+#[cfg(test)]
+mod roads_tests;
 pub use coast::{DockFacing, dock_facing};
 #[cfg(test)]
 mod construction_tests;
@@ -99,6 +103,7 @@ pub struct GameWorld {
     pub units: Vec<Unit>,
     pub ships: Vec<TransportShip>,
     pub animals: Vec<Animal>,
+    pub roads: Vec<Road>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<Building>,
     pub inventories: Vec<Stockpile>,
@@ -140,6 +145,7 @@ pub struct WorldSnapshot {
     pub units: Vec<UnitView>,
     pub ships: Vec<TransportShip>,
     pub animals: Vec<Animal>,
+    pub roads: Vec<Road>,
     pub resources: Vec<ResourceNode>,
     pub buildings: Vec<BuildingView>,
     /// Usable balances per island, including connected ship holds.
@@ -156,6 +162,12 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    BuildRoad {
+        unit_id: String,
+        start: CellCoordinate,
+        end: CellCoordinate,
+        kind: RoadKind,
+    },
     AttackAnimal {
         unit_ids: Vec<String>,
         animal_id: String,
@@ -390,6 +402,7 @@ impl GameWorld {
             ],
             ships: Vec::new(),
             animals: Vec::new(),
+            roads: Vec::new(),
             resources: island.resources,
             buildings: vec![town_center("base-1", island.town_center, None)],
             inventories: vec![Stockpile::default()],
@@ -464,6 +477,12 @@ impl GameWorld {
 
     fn execute(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
+            Command::BuildRoad {
+                unit_id,
+                start,
+                end,
+                kind,
+            } => self.order_road(&unit_id, start, end, kind)?,
             Command::AttackAnimal {
                 unit_ids,
                 animal_id,
@@ -797,6 +816,7 @@ impl GameWorld {
                 } => self.tick_attack_animal(index, &animal_id, elapsed_seconds, dt),
                 UnitAction::Board { .. } => {}
                 UnitAction::Move { to } => self.tick_move(index, to, dt),
+                UnitAction::BuildRoad { cells } => self.tick_road(index, cells, dt),
                 UnitAction::Gather { resource_id, phase } => {
                     self.tick_gather(index, resource_id, phase, dt)
                 }
@@ -852,6 +872,12 @@ impl GameWorld {
         }
 
         WorldSnapshot {
+            roads: self
+                .roads
+                .iter()
+                .filter(|r| explored.contains(&r.cell))
+                .cloned()
+                .collect(),
             animals: self
                 .animals
                 .iter()

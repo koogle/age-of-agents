@@ -1,6 +1,6 @@
 Describe the problem, resulting behavior, and validation performed.
 
-For art changes, complete the [style review](../blob/master/docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) before merging:
+For art changes, complete the [style review](https://github.com/koogle/age-of-agents/blob/master/docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) before merging:
 
 - Approved family references and provenance:
 - Reference/result comparison (source size and actual display size):

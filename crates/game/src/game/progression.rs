@@ -9,7 +9,7 @@ pub enum EconomyRules {
     IslandProgression,
 }
 
-pub const STARTER_BUILDINGS: [BuildingKind; 14] = [
+pub const STARTER_BUILDINGS: [BuildingKind; 10] = [
     BuildingKind::TownCenter,
     BuildingKind::House,
     BuildingKind::Granary,
@@ -18,11 +18,7 @@ pub const STARTER_BUILDINGS: [BuildingKind; 14] = [
     BuildingKind::Dock,
     BuildingKind::Watchtower,
     BuildingKind::MiningCamp,
-    BuildingKind::Smelter,
-    BuildingKind::Kiln,
-    BuildingKind::Weaver,
     BuildingKind::Kitchen,
-    BuildingKind::Barracks,
     BuildingKind::Range,
 ];
 pub const STARTER_RESOURCES: [ResourceKind; 3] =
@@ -45,20 +41,30 @@ impl GameWorld {
             .any(|r| r.kind == kind && self.explored_cells.binary_search(&r.cell).is_ok())
     }
 
-    /// Unlock construction from discoverable cost inputs, independently of current
-    /// stock and the recipes a completed building can run.
+    fn resource_available(&self, resource: ResourceKind) -> bool {
+        use ResourceKind::*;
+        match resource {
+            Wood | Food | Stone | Timber | Rations => true,
+            Steel => self.discovered(Iron) && self.discovered(Coal),
+            Bricks => self.discovered(Clay),
+            Cloth => self.discovered(Fiber),
+            raw => self.discovered(raw),
+        }
+    }
+
+    /// Discovery must support construction and at least one production recipe.
+    /// Buildings without recipes provide housing, storage, gathering or vision.
+    /// Temporary stock shortages affect affordability, not menu visibility.
     pub fn building_available(&self, kind: BuildingKind) -> bool {
         self.economy_rules == EconomyRules::Unrestricted
-            || kind.cost().iter().all(|&(resource, _)| {
-                use ResourceKind::*;
-                match resource {
-                    Wood | Food | Stone | Timber | Rations => true,
-                    Steel => self.discovered(Iron) && self.discovered(Coal),
-                    Bricks => self.discovered(Clay),
-                    Cloth => self.discovered(Fiber),
-                    raw => self.discovered(raw),
-                }
-            })
+            || (kind.cost().iter().all(|&(r, _)| self.resource_available(r))
+                && (kind.products().is_empty()
+                    || kind.products().iter().any(|product| {
+                        product
+                            .cost()
+                            .iter()
+                            .all(|&(r, _)| self.resource_available(r))
+                    })))
     }
 
     pub fn technology_available(&self, technology: TechnologyKind) -> bool {

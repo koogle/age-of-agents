@@ -56,3 +56,18 @@ About **$0.64**: twelve nano-banana/edit generations (ten textures plus the clay
 `cobblestone.png` is an opaque 1254×1254 illustrated limestone swatch with warm cream stone, light sandy mortar and fine brown outlines matching the original house art. Generation provenance is in `cobblestone.provenance.json`. FAL nano-banana/edit rejected the initial request with a content-check error; the replacement was generated with OpenAI image_gen.
 
 The renderer mirrors the swatch in world space and clamps sampling inside each mip level, so repeated tiles meet at identical pixels without blurring or doubling the painted contours. It still covers exact building claims and placement previews, independently of the optional grid overlay. Original `assets/sprites/tile_stone.png` is retained but no longer used for paving.
+
+## Roads (2026-10-06)
+
+`road_dirt.png` and `road_stone.png` are dedicated opaque 1254×1254 painted
+swatches, refined with OpenAI image_gen from approved clay/paving and attached
+meadow/primary-diorama references. [Exact prompts and provenance](roads.provenance.json)
+record the reference revision, hashes and output originals. The dirt uses worn
+sandy ochre brushwork; stone uses irregular warm limestone with fine brown joints.
+
+The Rust asset manifest loads these after the unchanged plot material (array
+layers 11 and 12). Sources remain at full resolution; upload resamples to 512×512
+with mipmaps, using the same mirrored/clamped sampling as plots. This guarantees
+continuous repeat edges even though the generated source is not assumed to wrap.
+No biome or building-plot pixels were changed. See the
+[style comparison and gameplay review](../../docs/verification/roads/style/README.md).

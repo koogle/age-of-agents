@@ -1,0 +1,178 @@
+[
+  {
+    "viewport": "desktop",
+    "ordered": {
+      "type": "attack_animal",
+      "animal_id": "bear",
+      "elapsed_seconds": 0.0
+    },
+    "injured_animals": [
+      {
+        "id": "bear",
+        "kind": "bear",
+        "home": {
+          "column": 53,
+          "row": 43
+        },
+        "cell": {
+          "column": 52,
+          "row": 43
+        },
+        "step": null,
+        "health": 75.0,
+        "attack_seconds": 0.0,
+        "heading": [
+          0,
+          -1
+        ]
+      },
+      {
+        "id": "wolf",
+        "kind": "wolf",
+        "home": {
+          "column": 45,
+          "row": 44
+        },
+        "cell": {
+          "column": 47,
+          "row": 43
+        },
+        "step": null,
+        "health": 40.0,
+        "attack_seconds": 0.6000000000000001,
+        "heading": [
+          1,
+          -1
+        ]
+      }
+    ],
+    "units_hurt": true,
+    "survivors": [
+      {
+        "health": 52.0,
+        "id": "villager-1",
+        "kind": "guard",
+        "cell": {
+          "column": 52,
+          "row": 42
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 52.5,
+          "y": 42.5
+        }
+      },
+      {
+        "health": 60.0,
+        "id": "villager-2",
+        "kind": "guard",
+        "cell": {
+          "column": 48,
+          "row": 42
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 48.5,
+          "y": 42.5
+        }
+      }
+    ],
+    "errors": []
+  },
+  {
+    "viewport": "phone",
+    "ordered": {
+      "type": "attack_animal",
+      "animal_id": "bear",
+      "elapsed_seconds": 0.0
+    },
+    "injured_animals": [
+      {
+        "id": "bear",
+        "kind": "bear",
+        "home": {
+          "column": 53,
+          "row": 43
+        },
+        "cell": {
+          "column": 52,
+          "row": 43
+        },
+        "step": null,
+        "health": 75.0,
+        "attack_seconds": 0.0,
+        "heading": [
+          0,
+          -1
+        ]
+      },
+      {
+        "id": "wolf",
+        "kind": "wolf",
+        "home": {
+          "column": 45,
+          "row": 44
+        },
+        "cell": {
+          "column": 47,
+          "row": 43
+        },
+        "step": null,
+        "health": 40.0,
+        "attack_seconds": 0.2,
+        "heading": [
+          1,
+          -1
+        ]
+      }
+    ],
+    "units_hurt": true,
+    "survivors": [
+      {
+        "health": 52.0,
+        "id": "villager-1",
+        "kind": "guard",
+        "cell": {
+          "column": 52,
+          "row": 42
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 52.5,
+          "y": 42.5
+        }
+      },
+      {
+        "health": 44.0,
+        "id": "villager-2",
+        "kind": "guard",
+        "cell": {
+          "column": 48,
+          "row": 42
+        },
+        "step": null,
+        "action": {
+          "type": "idle"
+        },
+        "cargo": null,
+        "position": {
+          "x": 48.5,
+          "y": 42.5
+        }
+      }
+    ],
+    "errors": []
+  }
+]

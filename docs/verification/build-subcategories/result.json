@@ -1,6 +1,6 @@
 {
-  "scene": "after",
-  "wasm_sha256": "1dbfb972fcfd182301340e0a41b70607a4e118fcc0ceb5ca610411006f12ec54",
+  "scene": "merged",
+  "wasm_sha256": "a2f1023631cee04fdcb9fd4704e5b37a1c21648e38fb5f65c65e00a67111d98d",
   "viewports": [
     "1280x800 DPR1 mouse",
     "390x844 DPR2 touch"

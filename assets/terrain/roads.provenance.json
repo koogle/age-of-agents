@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-06",
+  "tool": "OpenAI image_gen",
+  "model": "not exposed by tool",
+  "method": "reference-attached refinement; unmodified original output retained as runtime source; renderer resizes to 512 and mirror-clamps every mip",
+  "reference_revision": "c1dae31650e9768602a3bfeedc3b8611dcf2ad47",
+  "references": {
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da",
+    "assets/terrain/meadow.webp": "d675f5f889e00bc994e55e31ec09d7f02059db74fee08ae985ddd69181be4f0e",
+    "assets/terrain/clayland.webp": "2aee062b11ca60aa2899e9b67a8c4028f42cd761fbe3a341cdb794a40804ad8c",
+    "assets/terrain/cobblestone.png": "87e11c75415e150ec16bee2dfaf4b0044e3403bf27b4cda6666ebf6551ee3d0b"
+  },
+  "outputs": {
+    "dirt": {
+      "file": "assets/terrain/road_dirt.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "sha256": "c787edc155f9ca9598b31674e304a23dc50a92cd02851f1cdcc9f096116f8a1a",
+      "retained_generation": "/workspace/generated_images/exec-adfc36fe-70ca-4cd5-a91a-7da35f6d8227.png"
+    },
+    "stone": {
+      "file": "assets/terrain/road_stone.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "sha256": "733826ebcab5c1577e7c1125a5a97b75c4f29ab9011590f63a2fa1cf601af588",
+      "retained_generation": "/workspace/generated_images/exec-b3f25e6f-0891-467f-8178-56db70daa957.png"
+    }
+  },
+  "direction": {
+    "dirt": "Refine approved clayland into full-frame overhead muted worn sandy ochre earth, gentle gouache strokes and sparse tiny finely outlined limestone pebbles; meadow and primary diorama attached as style references. No road boundary, grass border, deep cracks, orange desert, vignette or strong shadows. Uniform tileable material.",
+    "stone": "Refine approved cobblestone into full-frame overhead closely fitted irregular rounded limestone cobbles, warm grey, sand and cream; thin sandy taupe joints and delicate brown contours, soft two-tone edge shading, sparse chips. Meadow and primary diorama attached as style references. No regular brick grid, black grout, gloss, high contrast, perspective or road boundary."
+  },
+  "prompts": {
+    "dirt": "Refine the FIRST image into a dedicated DIRT ROAD MATERIAL texture for this Greek island painted strategy game, using the second image's delicate painted terrain treatment and third image's warm muted Mediterranean palette as approved style references. Output a single square 1024x1024 opaque flat perfectly overhead material swatch filling edge to edge, no perspective, no road boundaries, no grass border, no objects or text. Replace orange clay with softly worn dusty khaki ochre earth, muted tan / warm taupe / pale sandy umber. Hand-painted gouache, soft irregular broad brush patches, sparse tiny embedded warm limestone pebbles with very fine delicate brown contours, subtle faint worn marks in multiple directions, NOT deep cracks or orange desert. Extremely restrained soft shading, no raised relief or strong shadows. Uniform density throughout, no vignette or central focal point. Should harmonize next to the approved watercolor meadow and cream stone Greek buildings. Make opposite edges seamlessly tileable. This is the full dirt material, NOT an illustration of a road on grass.",
+    "stone": "Refine the FIRST approved painted paving image into a dedicated STONE ROAD MATERIAL for this Greek island strategy game, retaining its fine delicate brown lines and restrained warm limestone palette. Use second image for soft painted gouache treatment and third for approved Mediterranean world style. Single square opaque flat perfectly overhead 1024x1024 material swatch fills entire image edge to edge; no road boundaries, grass borders, perspective, labels or objects. Change the regular brick grid to closely fitted irregular rounded polygon limestone cobbles, roughly 9 stones across, staggered natural hand-laid arrangement, no repetitive rectangular rows. Colors muted pale sand, warm grey limestone and cream, slightly darker than original but still light, thin sandy warm-taupe joints. Fine brown hand-drawn contours, soft subtle TWO tone cel shadow along tiny portions of edges, delicate watercolor brush variation, sparse tiny chips. No dark grout, black outlines, glossy bevel, photoreal rocky relief or high contrast. Keep stones nearly flat and ground-level. Uniform scale and density, no vignette or focal point. Opposite edges should tile seamlessly. This should read as a worn little Greek village stone lane next to painted meadow, not a bathroom mosaic or a building foundation."
+  },
+  "reference_order": {
+    "dirt": [
+      "assets/terrain/clayland.webp",
+      "assets/terrain/meadow.webp",
+      "assets/reference/diorama_primary.webp"
+    ],
+    "stone": [
+      "assets/terrain/cobblestone.png",
+      "assets/terrain/meadow.webp",
+      "assets/reference/diorama_primary.webp"
+    ]
+  }
+}
