@@ -1,3 +1,8 @@
+# Stronger wildlife — 2026-10-06
+
+- Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
+- 290 workspace tests, formatting, native/WASM strict lint, rebuilt web/server and desktop/DPR2-phone real combat pass with zero page errors. [Evidence and review](docs/verification/stronger-wildlife/README.md). Branch `feat/stronger-wildlife` is ready for PR review; not merged or deployed.
+
 # Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
 
 - User approved the refined road textures and authorized merging PR #133 on 2026-10-06. Branch `feat/basic-roads` integrates master `f985a92`, preserving dedicated menu icons, wildlife attack art, granary yield and building availability. Merge/release status is tracked by the linked PR and [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
