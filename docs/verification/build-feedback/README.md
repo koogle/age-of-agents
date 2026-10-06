@@ -29,3 +29,5 @@ Visual review confirms readable, wrapped menu details; no top-middle build banne
 - [Phone road placement](phone-road-placement.png), [blocked placement](phone-blocked-building.png) and [delayed rejection](phone-server-rejection.png).
 
 User authorized merge on 2026-10-06. Integrating master `9919648`; complaints preserve its stationary spawn anchors while rising/fading. Combined Rust/lint/asset checks and six release-verifier tests pass. Refreshed desktop/phone browser acceptance passes with zero page errors. Merge and production deployment are tracked by the pull request and master release workflow.
+
+Final integration also includes master `7725420` (approved dirt-road artwork). That update changes only assets/documentation, so the verified source and WASM are unchanged. [PR #151](https://github.com/koogle/age-of-agents/pull/151) is authorized for merge; deployment is verified separately.

@@ -62,8 +62,9 @@ The renderer mirrors the swatch in world space and clamps sampling inside each m
 `road_dirt.png` and `road_stone.png` are dedicated opaque 1254×1254 painted
 swatches, refined with OpenAI image_gen from approved clay/paving and attached
 meadow/primary-diorama references. [Exact prompts and provenance](roads.provenance.json)
-record the reference revision, hashes and output originals. The dirt uses worn
-sandy ochre brushwork; stone uses irregular warm limestone with fine brown joints.
+record the reference revision, hashes and output originals. The initial dirt used
+sandy ochre brushwork; the readability correction below deepens it to packed-earth
+brown. Stone uses irregular limestone with fine brown joints.
 
 The Rust asset manifest loads these after the unchanged plot material (array
 layers 11 and 12). Sources remain at full resolution; upload resamples to 512×512
@@ -80,3 +81,12 @@ The layout, scale and sampling are unchanged. The initial sandy output is retain
 in `road_sources/stone-sandy-before.png`; [follow-up provenance](road_sources/stone-contrast.provenance.json)
 records the exact prompt and reference hashes. See the
 [before/after and gameplay review](../../docs/verification/roads/stone-contrast/README.md).
+
+### Dirt readability correction
+
+The pale sandy dirt was recreated as deeper muted ochre-brown packed earth after
+Jakob reported it was hard to see. The previous source is retained in
+`road_sources/dirt-sandy-before.png`; [follow-up provenance](road_sources/dirt-readability.provenance.json)
+records approved references and the exact prompt. The generated full-resolution
+PNG replaces only the dirt material; sampling and stone/biome/plot assets remain
+unchanged. See the [comparison and verification](../../docs/verification/roads/dirt-readability/README.md).
