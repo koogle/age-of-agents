@@ -12,6 +12,7 @@ mod islands;
 mod placement;
 mod render;
 mod reset;
+mod roads;
 mod snapshots;
 mod source;
 mod storage;
@@ -336,6 +337,9 @@ impl App {
             hud::Action::Speed(multiplier) => self.send(Command::SetSimulationSpeed { multiplier }),
             hud::Action::Grid => self.show_grid = !self.show_grid,
             hud::Action::Build => self.build = hud::BuildUi::Categories,
+            hud::Action::PlaceRoad(kind) => {
+                self.build = hud::BuildUi::PlacingRoad { kind, start: None }
+            }
             hud::Action::PlaceField => self.build = hud::BuildUi::PlacingField,
             hud::Action::BuildGroup(group) => self.build = hud::BuildUi::Group(group),
             hud::Action::Place(kind) => self.build = hud::BuildUi::Placing(kind),
@@ -383,6 +387,9 @@ impl App {
     }
 
     fn tap(&mut self, pixel: Vec2, additive: bool) {
+        if self.road_tap(pixel) {
+            return;
+        }
         if let Some(kind) = match self.build {
             hud::BuildUi::Placing(kind) => Some(kind),
             hud::BuildUi::PlacingField => Some(aoa_game::BuildingKind::Farm),
@@ -457,6 +464,9 @@ impl App {
                 Target::Foundation(id) | Target::Building(id) => Some(id),
                 _ => None,
             };
+            return;
+        }
+        if self.resume_road(&target, &units) {
             return;
         }
         match target {
@@ -613,6 +623,7 @@ impl App {
                 .map(|(origin, ok)| (kind, origin, ok)),
             _ => None,
         };
+        let road_preview = self.road_preview(self.cursor);
         self.update_resource_island();
         let plots_changed = self.level_building_plots(ghost);
         let hover = self.hover_decal();
@@ -660,22 +671,34 @@ impl App {
             curve_center: [self.rig.target.x, self.rig.target.z],
             fog_near: self.rig.distance + 8.0,
             fog_far: self.rig.distance * 2.0 + 60.0,
-            placement: ghost.map_or([0.0; 4], |(kind, origin, _)| {
-                let (columns, rows) = kind.size();
-                [
-                    origin.column as f32 * terrain::CELL,
-                    origin.row as f32 * terrain::CELL,
-                    columns as f32 * terrain::CELL,
-                    rows as f32 * terrain::CELL,
-                ]
-            }),
-            placement_color: ghost.map_or([0.0; 4], |(_, _, ok)| {
-                if ok {
-                    [0.3, 0.8, 0.4, 1.0]
-                } else {
-                    [0.9, 0.25, 0.2, 1.0]
-                }
-            }),
+            placement: ghost.map_or(
+                road_preview.map_or([0.0; 4], |p| p.0),
+                |(kind, origin, _)| {
+                    let (columns, rows) = kind.size();
+                    [
+                        origin.column as f32 * terrain::CELL,
+                        origin.row as f32 * terrain::CELL,
+                        columns as f32 * terrain::CELL,
+                        rows as f32 * terrain::CELL,
+                    ]
+                },
+            ),
+            placement_color: ghost.map_or(
+                road_preview.map_or([0.0; 4], |p| {
+                    if p.1 {
+                        [0.3, 0.8, 0.4, 0.8]
+                    } else {
+                        [0.9, 0.25, 0.2, 0.8]
+                    }
+                }),
+                |(_, _, ok)| {
+                    if ok {
+                        [0.3, 0.8, 0.4, 1.0]
+                    } else {
+                        [0.9, 0.25, 0.2, 1.0]
+                    }
+                },
+            ),
             grid: [if self.show_grid { 1.0 } else { 0.0 }, 0.0, 0.0, 0.0],
         };
         #[cfg(target_arch = "wasm32")]

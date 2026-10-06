@@ -143,3 +143,13 @@ before releasing. Environment-selected workspace identity can differ from the
 repository's `koogle-frick` production target; a successful empty app list does
 not establish the correct account. Do not deploy to a different workspace merely
 because its injected credentials work.
+
+## Shared-target verification ordering (2026-10-05)
+
+Run workspace tests through completion before running another native Cargo build
+or Clippy against the same `target` directory. Cargo releases its build lock
+before executing tests; a concurrent build can replace dependency artifacts
+before the first command reaches doctests. During road verification this produced
+`extern location for aoa_game does not exist` after unit tests passed. A sequential
+workspace rerun is required; a build-lock wait alone does not serialize the entire
+verification command.

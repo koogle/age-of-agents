@@ -144,6 +144,19 @@ register each construction stage, and the atlas manifest drives texture dimensio
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
 
+## Road surface refinement (2026-10-06)
+
+Jakob requested closer style matching for both roads after PR #133. The initial
+clay-biome reuse reads too orange and building-plot paving reads too regular.
+Dedicated painted road swatches were refined against `diorama_primary.webp`,
+`terrain/meadow.webp` and the approved `terrain/cobblestone.png`: muted worn earth,
+irregular warm limestone, restrained shading and fine brown joints. Preserve
+building plots and biome textures. Acceptance requires normal/max-zoom desktop
+and DPR-2 phone evidence; both pass in the [material review](../verification/roads/style/README.md).
+Road materials occupy layers 11/12 of the existing texture array and use its
+mirrored, mip-clamped sampling; retain full-resolution originals and record exact
+prompts/reference hashes before integration.
+
 ## Wildlife style correction (2026-10-05)
 
 Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.

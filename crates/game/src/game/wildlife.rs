@@ -204,14 +204,20 @@ impl GameWorld {
         if from.touches(to) && !self.melee_clear(from, to) {
             let occupancy = self.occupancy();
             let clear = |c| occupancy.is_free_for(c, Some(unit));
+            let roads = self.completed_road_cells();
             let goals: Vec<_> = [(0, -1), (-1, 0), (1, 0), (0, 1)]
                 .into_iter()
                 .filter_map(|(x, y)| offset(to, x, y, self.columns(), self.rows()))
                 .filter(|c| clear(*c))
                 .collect();
-            if let Some((_, path)) =
-                PathTree::route_to_nearest(self.columns(), self.rows(), from, &goals, clear)
-                && let Some(&goal) = path.last()
+            if let Some((_, path)) = PathTree::nearest_weighted(
+                self.columns(),
+                self.rows(),
+                from,
+                &goals,
+                clear,
+                |cell| if roads.contains(&cell) { 2 } else { 3 },
+            ) && let Some(&goal) = path.last()
             {
                 self.travel(unit, Goal::Cell(goal), dt);
             }

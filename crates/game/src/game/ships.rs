@@ -230,6 +230,7 @@ impl GameWorld {
         self.boarding_goal_at(unit, berth)
     }
     fn boarding_goal_at(&self, unit: usize, berth: CellCoordinate) -> Option<CellCoordinate> {
+        let roads = self.completed_road_cells();
         let occupancy = self.occupancy();
         let from = self.units[unit]
             .step
@@ -241,9 +242,14 @@ impl GameWorld {
             .filter(|&c| occupancy.is_free_for(c, Some(unit)))
             .collect();
         let route = |goals: &[CellCoordinate]| {
-            PathTree::route_to_nearest(self.columns(), self.rows(), from, goals, |c| {
-                !occupancy.is_static(c)
-            })
+            PathTree::nearest_weighted(
+                self.columns(),
+                self.rows(),
+                from,
+                goals,
+                |c| !occupancy.is_static(c),
+                |c| if roads.contains(&c) { 2 } else { 3 },
+            )
         };
         // A full shoreline is temporary: let queued passengers wait behind
         // one another instead of losing their seat while the ship approaches.

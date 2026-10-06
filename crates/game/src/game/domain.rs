@@ -147,6 +147,9 @@ pub struct SnapshotTerrainCell {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum UnitAction {
+    BuildRoad {
+        cells: Vec<CellCoordinate>,
+    },
     AttackAnimal {
         animal_id: String,
         elapsed_seconds: f64,
