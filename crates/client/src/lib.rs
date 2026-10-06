@@ -760,6 +760,7 @@ impl App {
         {
             self.hud.selection_box(pointer.down_at, self.cursor, scale);
         }
+        self.view.draw_health(&mut self.hud, &self.rig, scale);
         self.feedback.draw(
             &mut self.hud,
             &self.atlas,

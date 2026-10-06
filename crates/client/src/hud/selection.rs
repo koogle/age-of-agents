@@ -398,7 +398,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         return Some((
             unit_icon(unit.unit.kind),
             title,
-            format!("{activity}{cargo} · HP {:.0}/100", unit.unit.health),
+            format!("{activity}{cargo}"),
             None,
             commands,
         ));
@@ -618,9 +618,9 @@ mod tests {
             resource_id: "outside-fog".into(),
             phase: aoa_game::GatherPhase::ToResource,
         };
-        assert_eq!(unit_detail(&world), "Heading out to gather · HP 100/100");
+        assert_eq!(unit_detail(&world), "Heading out to gather");
         world.units[0].health = 76.0;
-        assert!(unit_detail(&world).ends_with("HP 76/100"));
+        assert_eq!(unit_detail(&world), "Heading out to gather");
     }
 
     #[test]

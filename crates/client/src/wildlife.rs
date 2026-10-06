@@ -15,12 +15,7 @@ impl App {
             .and_then(|s| s.animals.iter().find(|a| a.id == id))
         {
             self.toast = Some((
-                format!(
-                    "{} · {:.0}/{:.0} health · Select units, then tap to attack",
-                    animal.kind.name(),
-                    animal.health,
-                    animal.kind.max_health()
-                ),
+                format!("{} · Select units, then tap to attack", animal.kind.name()),
                 now_seconds() + 4.0,
             ));
         }

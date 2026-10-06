@@ -1,3 +1,8 @@
+# Overhead health bars — [PR #152](https://github.com/koogle/age-of-agents/pull/152)
+
+- Implemented thin green/orange/red bars for villagers, other friendly land units and visible animals, replacing selected-status/inspection HP text and floating combat numbers. No simulation, balance or save changes.
+- Validation: 303 workspace tests pass (one existing ignored benchmark); refreshed 101 client tests pass after the visual adjustment. Formatting, native/WASM strict lint and rebuilt WebGL pass. Desktop and emulated DPR2 phone verify all three colors/widths on villagers, guards and all animal species, with zero page errors and correct capture dimensions. [Evidence and review](docs/verification/health-bars/README.md). User authorized PR creation and merge on 2026-10-06. Based on current master `581bbaa`; no integration changes needed. Production release is tracked by the merge-triggered workflow.
+
 # Build hints and NPC feedback — [PR #151](https://github.com/koogle/age-of-agents/pull/151)
 
 - User requested removing the top-middle build bubble, placing its text in the build menu information area, and showing NPC commands/complaints as fading overhead status. Implemented menu/placement details, local blocked-site feedback, movement status and request-ID-correlated server rejections. No simulation, protocol shape or save change.
