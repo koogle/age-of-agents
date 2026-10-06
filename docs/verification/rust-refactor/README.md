@@ -1,7 +1,7 @@
 # Test/tooling subtraction — 2026-10-06
 
 Implemented on `codex/reduce-tests-tooling`, integrated with master `a8188f1`.
-Prepared for review; not deployed. Jakob requested substantial source reduction,
+[Draft PR #153](https://github.com/koogle/age-of-agents/pull/153) is pushed; not merged or deployed. Jakob requested substantial source reduction,
 including repetitive tests/fixtures and Python tooling.
 
 ## Measured savings
