@@ -1,4 +1,4 @@
-//! Short-lived action and resource labels from authoritative snapshots.
+//! Fading unit feedback from authoritative snapshots and command outcomes.
 use aoa_game::{GatherPhase, Unit, UnitAction, WorldSnapshot};
 use glam::Vec3;
 
@@ -41,7 +41,9 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
             ("Attacking wildlife".into(), animal_id.as_str())
         }
         UnitAction::Idle => ("Idle".into(), ""),
-        UnitAction::Move { .. } => return None,
+        UnitAction::Move { to } => {
+            return Some(("Moving".into(), format!("{},{}", to.column, to.row)));
+        }
         UnitAction::Board { ship_id } => ("Boarding transport".into(), ship_id.as_str()),
         UnitAction::ExploreBuild { origin, kind } => {
             return Some((
@@ -85,6 +87,25 @@ pub struct Feedback {
 }
 
 impl Feedback {
+    /// Replace the unit's transient status, using the same spawn anchor and fade as activities.
+    pub fn message(&mut self, snapshot: &WorldSnapshot, units: &[String], text: &str, now: f64) {
+        for unit in snapshot.units.iter().filter(|u| units.contains(&u.unit.id)) {
+            let at = terrain::world_of(unit.position.x, unit.position.y);
+            self.labels
+                .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
+            self.labels.push(Label {
+                entity_id: Some(unit.unit.id.clone()),
+                follows_entity: false,
+                text: text.into(),
+                at: Vec3::new(at.x, 0.8, at.y),
+                born: now,
+            });
+        }
+        if self.labels.len() > 64 {
+            self.labels.drain(..self.labels.len() - 64);
+        }
+    }
+
     pub fn observe(&mut self, previous: Option<&WorldSnapshot>, next: &WorldSnapshot, now: f64) {
         let Some(previous) = previous else {
             return;
@@ -212,6 +233,26 @@ impl Feedback {
 mod tests {
     use super::*;
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
+
+    #[test]
+    fn complaints_replace_status_and_stay_at_the_original_anchor() {
+        let before = GameWorld::default().snapshot();
+        let id = before.units[0].unit.id.clone();
+        let mut feedback = Feedback::default();
+        feedback.message(&before, std::slice::from_ref(&id), "Blocked", 1.0);
+        feedback.message(&before, std::slice::from_ref(&id), "Not enough stone", 1.2);
+        let mut next = before.clone();
+        next.units[0].position.x += 2.0;
+        feedback.observe(Some(&before), &next, 1.3);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].entity_id.as_deref(), Some(id.as_str()));
+        assert_eq!(feedback.labels[0].text, "Not enough stone");
+        assert_eq!(feedback.labels[0].born, 1.2);
+        assert_eq!(
+            feedback.labels[0].at.x,
+            before.units[0].position.x as f32 * terrain::CELL
+        );
+    }
 
     #[test]
     fn repeated_damage_replaces_feedback_instead_of_stacking() {
@@ -397,7 +438,7 @@ mod tests {
     }
 
     #[test]
-    fn assignments_flash_once_and_plain_walking_stays_quiet() {
+    fn assignments_and_movement_flash_once() {
         let before = GameWorld::default().snapshot();
         for (action, expected) in [
             (
@@ -446,7 +487,9 @@ mod tests {
         };
         let mut feedback = Feedback::default();
         feedback.observe(Some(&before), &walking, 1.0);
-        assert!(feedback.labels.is_empty());
+        feedback.observe(Some(&walking), &walking, 1.1);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Moving");
         feedback.observe(Some(&walking), &before, 2.0);
         assert_eq!(feedback.labels[0].text, "Idle");
     }

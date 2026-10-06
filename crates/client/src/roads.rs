@@ -114,10 +114,7 @@ impl App {
                     };
                 }
             } else {
-                self.toast = Some((
-                    "Road needs clear visible land and enough stone.".into(),
-                    crate::now_seconds() + 3.0,
-                ));
+                self.command_feedback("Road blocked or not enough stone.");
             }
         }
         true

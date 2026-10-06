@@ -1,0 +1,40 @@
+{
+  "wasm_sha256": "89c0d7fe337bed0ae3c71512db444e1e35f178051d3a3315e5eec9e5dce85ad8",
+  "results": [
+    {
+      "mode": "desktop",
+      "viewport": [
+        1280,
+        800
+      ],
+      "dpr": 1,
+      "errors": [],
+      "checks": [
+        "menu hint",
+        "placement detail",
+        "no top banner",
+        "blocked building overhead",
+        "fade expiry",
+        "delayed rejection original unit"
+      ]
+    },
+    {
+      "mode": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "dpr": 2,
+      "errors": [],
+      "checks": [
+        "menu hint",
+        "placement detail",
+        "no top banner",
+        "blocked building overhead",
+        "fade expiry",
+        "delayed rejection original unit"
+      ]
+    }
+  ],
+  "scope": "Controlled WebSocket presentation; not production or physical-device verification."
+}
