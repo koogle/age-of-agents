@@ -118,7 +118,8 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let plot_q = xz - g.placement.xy;
     let preview_plot = g.placement_color.a > 0.0
         && all(plot_q >= vec2<f32>(0.0)) && all(plot_q < g.placement.zw);
-    let occupied_plot = textureLoad(ground_index, vec2<i32>(floor(xz * 2.0)), 0).g > 0.5;
+    let surface = i32(round(textureLoad(ground_index, vec2<i32>(floor(xz * 2.0)), 0).g * 255.0));
+    let occupied_plot = surface == 255;
     // Mirror the illustrated swatch at its edges: neighboring repeats meet at
     // identical texels, without blurring or doubling the hand-drawn outlines.
     let paving_uv = 1.0 - abs(fract(xz / 1.8) * 2.0 - 1.0);
@@ -129,6 +130,12 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let mip = clamp(ceil(log2(max(density, 1.0))), 0.0, 9.0);
     let inset = vec2<f32>(0.5 * exp2(mip)) / texels;
     let paving = textureSampleLevel(ground_layers, repeat_sampler, clamp(paving_uv, inset, 1.0 - inset), 10, mip).rgb;
+    // Road-specific paintings retain their authored palette and fine contours.
+    // Mirror/clamp like plots so adjoining cells and texture repeats have no seams.
+    let road_layer = select(11, 12, surface == 2);
+    let road = textureSampleLevel(ground_layers, repeat_sampler, clamp(paving_uv, inset, 1.0 - inset), road_layer, mip).rgb;
+    if surface == 1 || surface == 2 { color = road; }
+    if surface == 3 { color = mix(color, road, 0.55); }
     if occupied_plot || preview_plot {
         color = paving;
     }

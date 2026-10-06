@@ -15,6 +15,8 @@ mod build_menu;
 mod layout;
 #[cfg(test)]
 mod layout_tests;
+#[cfg(test)]
+mod menu_icon_tests;
 mod minimap;
 pub use build_menu::BuildingGroup;
 mod cargo;
@@ -28,7 +30,7 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 21] = [
+const ICONS: [&str; 39] = [
     "resource_water",
     "resource_wood",
     "resource_timber",
@@ -41,6 +43,24 @@ const ICONS: [&str; 21] = [
     "command_build",
     "command_cancel",
     "command_stop",
+    "resource_coal",
+    "resource_steel",
+    "resource_bricks",
+    "resource_cloth",
+    "resource_rations",
+    "command_disembark",
+    "command_sail",
+    "command_explore",
+    "command_cargo",
+    "command_back",
+    "category_town",
+    "category_gathering",
+    "category_production",
+    "category_military",
+    "unit_guard",
+    "unit_archer",
+    "unit_healer",
+    "unit_siege_cart",
     "command_train",
     "tech_forestry",
     "tech_agriculture",
@@ -91,6 +111,10 @@ pub enum BuildUi {
     Group(BuildingGroup),
     Placing(BuildingKind),
     PlacingField,
+    PlacingRoad {
+        kind: aoa_game::RoadKind,
+        start: Option<aoa_game::CellCoordinate>,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -102,6 +126,7 @@ pub enum Action {
     /// Start placing this building.
     Place(BuildingKind),
     PlaceField,
+    PlaceRoad(aoa_game::RoadKind),
     Cancel,
     Stop,
     Disembark,
@@ -394,13 +419,14 @@ fn resource_icon(kind: ResourceKind) -> &'static str {
         ResourceKind::Stone => "resource_stone",
         ResourceKind::Gold => "resource_gold",
         ResourceKind::Iron => "resource_iron",
+        ResourceKind::Coal => "resource_coal",
         ResourceKind::Clay => "resource_clay",
         ResourceKind::Fiber => "resource_fiber",
-        ResourceKind::Coal | ResourceKind::Steel => "resource_iron",
         ResourceKind::Timber => "resource_timber",
-        ResourceKind::Bricks => "resource_clay",
-        ResourceKind::Cloth => "resource_fiber",
-        ResourceKind::Rations => "resource_food",
+        ResourceKind::Steel => "resource_steel",
+        ResourceKind::Bricks => "resource_bricks",
+        ResourceKind::Cloth => "resource_cloth",
+        ResourceKind::Rations => "resource_rations",
     }
 }
 

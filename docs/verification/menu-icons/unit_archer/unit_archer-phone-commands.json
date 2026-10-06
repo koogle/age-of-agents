@@ -1,0 +1,11 @@
+[
+  {
+    "command": {
+      "building_id": "base-1",
+      "product": "archer",
+      "type": "produce"
+    },
+    "request_id": "r6",
+    "type": "command"
+  }
+]

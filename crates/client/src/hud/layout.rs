@@ -323,7 +323,8 @@ impl Hud {
                 let hit = [rect[0] - gap / 2.0, rect[1] - gap / 2.0, m + gap, row_step];
                 let hot = self.hovered(hit);
                 if hot {
-                    hover_text = Some((command.label.clone(), command.detail.clone()));
+                    hover_text =
+                        Some((command.icon, command.label.clone(), command.detail.clone()));
                 }
                 self.coin(
                     atlas,
@@ -413,7 +414,8 @@ impl Hud {
                 let hot = self.hovered(hit);
                 self.coin(atlas, command.icon, rect, true, hot);
                 if hot {
-                    hover_text = Some((command.label.clone(), command.detail.clone()));
+                    hover_text =
+                        Some((command.icon, command.label.clone(), command.detail.clone()));
                 }
                 self.regions.push(Region {
                     rect: hit,
@@ -440,7 +442,7 @@ impl Hud {
         } else {
             (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin)
         };
-        let (title, detail) = hover_text.unwrap_or((title, detail));
+        let (portrait, title, detail) = hover_text.unwrap_or((portrait, title, detail));
         let text_offset = if narrow { 52.0 } else { 64.0 } * s;
         let text_room = info_width - text_offset - if narrow { 12.0 } else { 16.0 } * s;
         let title_size = if narrow { 14.0 } else { 15.0 } * s;

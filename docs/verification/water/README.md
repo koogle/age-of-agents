@@ -1,7 +1,8 @@
 # Water resource verification
 
-Working-tree implementation based on `1bed03a`. Verification completed
-2026-10-06 UTC. Not committed, merged or deployed.
+Initial implementation based on `1bed03a`; integrating master `f4d5b01` for
+the authorized merge on 2026-10-06. The corrected artwork was explicitly
+approved by the user. Combined verification is recorded below.
 
 ## Reproduction
 
@@ -72,7 +73,7 @@ validation. Water source placement is isolated in a small worldgen module and
 checks both terrain connectivity and resource approaches. No new autonomous
 worker task, building, command, inventory system, or dependency was added.
 
-Save version 15 reflects required water balances. Existing current-version
+Save version 16 reflects required water balances. Existing current-version
 corruption handling remains unchanged. All modified client files remain below
 1,000 lines. Final Rust verification: all 271 workspace tests pass (13 server, 89 client,
 169 domain; one manual benchmark ignored), formatting and strict native/WASM

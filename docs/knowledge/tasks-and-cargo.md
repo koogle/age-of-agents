@@ -109,3 +109,23 @@ Water gathering uses the existing carry/deliver/resume task. Drawing water does
 not reduce a riverbank source's finite bookkeeping amount; it does increase
 finite personal cargo and storage normally. Stop still cancels collection.
 See [water](water-resource.md) for placement and per-cycle field costs.
+
+## Granary field yield (2026-10-05)
+
+User request: give granaries a yield benefit for nearby fields. Completed
+granaries within six cells of a field's footprint give
+50% more food (180 instead of 120), determined when paid preparation completes.
+Use the existing square/Chebyshev neighborhood convention, measured edge to edge;
+multiple granaries do not stack. Recalculate capacity on each replenishment,
+leaving an already-growing harvest unchanged. Preserve food/fiber drop-offs,
+farm gathering speed, explicit preparation orders, costs and 20-unit carrying.
+
+The rule is in `fields.rs::tick_cultivate`, at the transition from preparation to
+harvesting. It updates both capacity and remaining food once; it does not alter
+wild resource nodes or multiply gathering speed. No persisted fields change.
+`cargo test -p aoa-game --locked granary_yield` covers the inclusive diagonal
+boundary, opposite footprint edges, unfinished buildings, no stacking, save
+round-trip, full delivery and capacity recalculation on the next paid harvest.
+
+[Granary verification](../verification/granary/README.md) records the domain checks,
+desktop/phone description captures, reproduction and release limitation.

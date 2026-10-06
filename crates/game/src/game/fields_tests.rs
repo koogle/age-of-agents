@@ -516,3 +516,63 @@ fn replenishment_handoff_handles_worker_order_partial_cargo_and_reload() {
         }
     }
 }
+
+#[test]
+fn granary_yield_uses_completed_non_stacking_edge_to_edge_range() {
+    for (origins, construction, expected) in [
+        (vec![], None, 120.0),
+        (vec![cell(18, 18)], None, 180.0), // Diagonal six-cell boundary.
+        (vec![cell(19, 18)], None, 120.0), // Seven cells from field's edge.
+        (vec![cell(2, 2)], None, 180.0),   // Opposite footprint edges, not origins.
+        (vec![cell(18, 18)], Some(0.0), 120.0),
+        (vec![cell(18, 18), cell(2, 2)], None, 180.0),
+    ] {
+        let mut w = world();
+        for (i, origin) in origins.into_iter().enumerate() {
+            w.buildings.push(building(
+                BuildingKind::Granary,
+                &format!("granary-{i}"),
+                origin,
+                construction,
+            ));
+        }
+        plant(&mut w).unwrap();
+        w.tick_cultivate(0, "field-10-10", FIELD_WORK_SECONDS);
+        assert_eq!(w.resources[0].capacity, expected);
+        assert_eq!(w.resources[0].amount, expected);
+        w.validate().unwrap();
+        w = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+        run(&mut w, 300.0);
+        assert!((w.inventories[0].food - expected).abs() < 1e-8);
+        assert_eq!(w.resources[0].amount, 0.0);
+        assert_eq!(w.units[0].action, UnitAction::Idle);
+        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn granary_yield_is_recalculated_at_each_preparation_completion() {
+    let mut w = world();
+    plant(&mut w).unwrap();
+    // A granary completed during preparation benefits this harvest.
+    w.buildings.push(building(
+        BuildingKind::Granary,
+        "granary",
+        cell(18, 18),
+        None,
+    ));
+    w.tick_cultivate(0, "field-10-10", FIELD_WORK_SECONDS);
+    assert_eq!(w.resources[0].capacity, 180.0);
+    w.buildings.pop();
+    run(&mut w, 300.0);
+    assert!((w.inventories[0].food - 180.0).abs() < 1e-8);
+    cultivate(&mut w, 1).unwrap();
+    run(&mut w, 300.0);
+    assert_eq!(w.resources[0].capacity, 120.0);
+    assert!((w.inventories[0].food - 300.0).abs() < 1e-8);
+    assert_eq!(
+        (w.inventories[0].wood, w.inventories[0].stone),
+        (80.0, 90.0)
+    );
+    w.validate().unwrap();
+}

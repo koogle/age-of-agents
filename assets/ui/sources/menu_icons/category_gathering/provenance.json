@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of one small wicker gathering basket holding a ripe red apple and a golden wheat head, strong single silhouette, no loose objects. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3703/XTwOEzw8SUCgBSZRW4zp1_Tu9hRrGC.png",
+        "content_type": "image/png",
+        "file_name": "XTwOEzw8SUCgBSZRW4zp1_Tu9hRrGC.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      940,
+      627,
+      1254,
+      940
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f8/G4A2amKw7hf15ca6aZ6HZ_tJGN6Imv.png",
+        "content_type": "image/png",
+        "file_name": "G4A2amKw7hf15ca6aZ6HZ_tJGN6Imv.png",
+        "file_size": null,
+        "width": 314,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242163.5537007,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:category_gathering",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-4c03-7db1-b416-95f660413ef5",
+        "seconds": 2.3
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "category_gathering.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239718.8800876,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "category_gathering",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-e571-7542-9c52-235060ef52ca",
+      "seconds": 8.8
+    },
+    {
+      "t": 1791239854.2675357,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:category_gathering",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-0f20-7d41-83c9-4738836c3ee8",
+      "seconds": 2.4
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}

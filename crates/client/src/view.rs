@@ -471,6 +471,18 @@ impl WorldView {
                 }
             }
         }
+        for road in &snapshot.roads {
+            let index =
+                road.cell.row as usize * snapshot.columns as usize + road.cell.column as usize;
+            // Preserve building paving where a later footprint covers a road.
+            if layers[index * 2 + 1] == 0 {
+                layers[index * 2 + 1] = match (road.kind, road.work.is_none()) {
+                    (aoa_game::RoadKind::Dirt, true) => 1,
+                    (aoa_game::RoadKind::Stone, true) => 2,
+                    (_, false) => 3,
+                };
+            }
+        }
         Some((rgba, layers))
     }
 
@@ -842,6 +854,15 @@ fn work_target(
         UnitAction::Cultivate { resource_id } => {
             let resource = snapshot.resources.iter().find(|r| &r.id == resource_id)?;
             (resource.footprint(), "cultivate")
+        }
+        UnitAction::BuildRoad { cells } if unit.cargo.is_none() => {
+            let road = cells.iter().find_map(|c| {
+                snapshot
+                    .roads
+                    .iter()
+                    .find(|r| r.cell == *c && r.work.is_some())
+            })?;
+            (road.footprint(), "build")
         }
         UnitAction::Build { building_id } => {
             let building = snapshot

@@ -23,7 +23,21 @@ base = json.loads(Path(__file__).with_name("menu-icon-fixture.json").read_text()
 base["terrain"]["cells"] = "A" * (base["columns"] * base["rows"])
 base["terrain"]["heights"] = "g" * (base["columns"] * base["rows"])
 base["resources"] = []
+buildings = base["buildings"]
 base["buildings"] = []
+if args.name == "granary":
+    base["buildings"] = [
+        dict(
+            buildings[0],
+            id="granary-test",
+            kind="granary",
+            origin={"column": 29, "row": 20},
+            columns=3,
+            rows=3,
+            produces=[],
+            researches=[],
+        )
+    ]
 base["ships"] = []
 base["units"] = base["units"][:1]
 u = base["units"][0]
@@ -33,7 +47,13 @@ u.update(
     step=None,
     action={"type": "move", "to": {"column": 31, "row": 21}},
 )
-base["simulation_speed"] = 0
+if args.name == "granary":
+    u.update(
+        cell={"column": 30, "row": 25},
+        position={"x": 30.5, "y": 25.5},
+        action={"type": "idle"},
+    )
+base["simulation_speed"] = 1
 state = copy.deepcopy(base)
 clients = []
 commands = []
@@ -105,7 +125,18 @@ async def main():
             print(mode, "snapshots sent", flush=True)
             await page.locator("#loading").wait_for(state="detached", timeout=120000)
             tap = page.touchscreen.tap if mode == "phone" else page.mouse.click
-            await tap(w / 2, h / 2 - 20)
+            if args.name == "granary":
+                project = """async () => {
+                    const m = await import('/web/pkg/aoa_client.js');
+                    const x=15.25, z=10.75;
+                    return Array.from(m.debug_screen_of(x,m.debug_height_at(x,z),z));
+                }"""
+                point = await page.evaluate(project)
+                await tap(point[0], point[1] - 12)
+                await asyncio.sleep(0.5)
+                assert (await page.evaluate(project))[3] == 1
+            else:
+                await tap(w / 2, h / 2 - 20)
             await asyncio.sleep(0.5)
             await page.screenshot(path=str(args.output / f"{args.name}-{mode}.png"))
             quads = await page.evaluate("window.hudQuads")
@@ -128,7 +159,7 @@ async def main():
             assert not errors, errors
             print(
                 mode,
-                "browser loaded, screenshot captured, dispatch checked",
+                "browser loaded, screenshot captured, selection/dispatch checked",
                 flush=True,
             )
             await page.close()

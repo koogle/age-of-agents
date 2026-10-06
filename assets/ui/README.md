@@ -1,12 +1,12 @@
 # UI art kit
 
-Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The canvas HUD loads the icons (`frontend/hud-content.js` maps its keys to these files); `manifest.json` lists everything.
+Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The Rust canvas HUD loads the icons (`crates/client/src/hud.rs::ICONS` lists the files); `manifest.json` lists everything.
 
 ## Files
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `icons/<group>_<name>.png` | 128×128 RGBA | 18 icons: resource (wood, food, stone, gold, iron, clay, fiber), command (build, cancel, train), tech (forestry, agriculture, masonry, mining, textiles), portrait (villager, group, towncenter). Content fills the square with 6% padding. |
+| `icons/<group>_<name>.png` | 128×128 RGBA | 38 icons covering resources, commands, research, unit portraits and construction categories. Content fills the square with 6% padding. |
 | `paper_tile.png` | 512×512 RGB | Seamless cream paper with faint fibre. Use `repeat` wrapping. |
 | `border_strip.png` | 123×32 RGBA | One horizontal Greek-key band (8 meander periods); outer ink rule on top. Repeat along x; transpose for vertical edges. |
 | `border_frame.png` | 310×310 RGBA | 9-slice frame, inset 32 px on all sides, transparent inside and outside. Each edge holds exactly two strips, so tile edges (`repeat`/`round`); stretching distorts the meander. |
@@ -97,7 +97,7 @@ Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipelin
 
 ## Dedicated menu icon additions
 
-These files remain unused until integration PR #107 wires them into the HUD. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
+Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
 
 | Icon | Sources and visual review |
 | --- | --- |
@@ -124,3 +124,8 @@ references, draft, refinement, and provenance are retained under `sources/water/
 `python3 scripts/pack_water.py` packs the normalized icon and the matching 512px
 riverbank marker into the existing resource atlas without modifying old frames.
 See [comparison and verification](../../docs/verification/water/README.md).
+
+| `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
+| `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
+| `category_production` | [Review](sources/menu_icons/category_production/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_production/provenance.json) |
+| `category_military` | [Review](sources/menu_icons/category_military/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_military/provenance.json) |

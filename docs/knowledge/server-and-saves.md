@@ -68,7 +68,7 @@ blindly after reconnecting.
 - Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
   waived backward compatibility on 2026-10-05 until he requests it again. There
   are no old inventory/island migrations or historical required-field defaults.
-- `STORE_VERSION` in `src/store.rs` is 15 (adds required water balances to island inventories and ship cargo). Bump it for incompatible persisted-model
+- `STORE_VERSION` in `src/store.rs` is 16 (adds required water balances to island inventories and ship cargo). Bump it for incompatible persisted-model
   changes; initialization atomically drops/recreates `world_state` when SQLite
   `user_version` differs, then normal startup generates a fresh world. The reset
   also applies to higher versions. Matching-version saves survive initialization.
@@ -93,3 +93,15 @@ the final architectural decision. Historical sources:
 [#35](https://github.com/koogle/age-of-agents/pull/35),
 [#83](https://github.com/koogle/age-of-agents/pull/83),
 [#90](https://github.com/koogle/age-of-agents/pull/90).
+
+## Road state (2026-10-05)
+
+Basic roads add a required `roads` array to worlds and snapshots, plus typed
+`build_road` commands/tasks. Store version 15 resets older development saves;
+current saves retain road material, unfinished labour and assigned line cells.
+Road validation runs after terrain validation, so malformed terrain returns an
+error before any cell indexing.
+
+Water integration after roads uses store version 16: roads already shipped
+version 15. Water balances are required, so version 15 must also reset before
+deserialization under the established development policy.
