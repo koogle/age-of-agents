@@ -209,6 +209,14 @@ impl Renderer {
                 .image("terrain/cobblestone.png")
                 .resized(GROUND_SIZE, GROUND_SIZE),
         );
+        // Dedicated road materials follow the plot layer without changing biomes.
+        for name in ["road_dirt", "road_stone"] {
+            layers.push(
+                assets
+                    .image(&format!("terrain/{name}.png"))
+                    .resized(GROUND_SIZE, GROUND_SIZE),
+            );
+        }
         let ground_layers = upload_texture(device, &gpu.queue, &layers, "ground layers");
         let repeat = device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::Repeat,
