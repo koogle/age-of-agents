@@ -1,3 +1,7 @@
+# Stone road contrast refinement — 2026-10-06
+
+- User requested less sandy, slightly stronger stone paving after roads PR #133 merged. The revised neutral limestone and clearer joints preserve the painted style; user confirmed “yeah I prefer that” after viewing the comparison. Stone-only runtime asset change; 294 tests, formatting, strict native/WASM lint, asset checks and desktop/DPR2 phone construction plus normal/max-zoom review pass. [Before/after, provenance and evidence](docs/verification/roads/stone-contrast/README.md). Branch `fix/stone-road-contrast` is ready for review; not merged or deployed.
+
 # Stronger wildlife — 2026-10-06
 
 - Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
