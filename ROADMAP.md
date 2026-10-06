@@ -220,7 +220,7 @@ Gameplay acceptance:
 - [x] Control/Command-click additive group selection and existing shared gather/construct commands.
 - [x] Globe minimap terrain, camera marker and click/touch navigation share the world view’s isometric orientation and fit the full current map.
 
-- [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.
+- [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief assignment, drop-off and idle announcements rising/fading at their initial world positions like resource-gain feedback, with plain walking excluded.
 - [x] Full authored walking/carrying cycles paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
 - [x] Keep partially visible buildings on screen when their ground anchors pass the near clipping plane at close zoom.
