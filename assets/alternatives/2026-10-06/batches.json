@@ -731,5 +731,50 @@
       "review_status": "FAILED COLOR CORRECTION: still tan; geometry retained, no improvement claimed",
       "prompt": "Image1 original villager and image2 primary Greek diorama are approved STYLE only. Image3 is the exact wolf GEOMETRY to retain. Edit the WOLF COAT COLORS, keeping EXACT same RIGHT-facing muzzle, head/body silhouette, slightly elevated camera, paws/leg positions, tail position and animal scale as image3. Replace ALL tan/brown dorsal coat with unmistakably natural COOL SLATE GREY (roughly #7f8c92), one darker cool-grey cel shadow (roughly #616f79). Keep a restrained pale CREAM underside/muzzle. Brown/tan upper coat must be gone; do NOT simply copy original colors. Simplify interior fur into two broad quiet painted cel masses and fewer jagged fur cuts, no individual hair strokes, no texture noise, no dense mane. Match villagers gentle Ghibli painted-cel planes/fine brown pen; do not add realistic modeling or gradients. No new body parts/props, no pose change, no face turned toward camera. White background, no ground/shadow/text."
     }
+  ],
+  "12-map-fine-lines": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png",
+        "assets/sprites/hd_sources/spr/idle_front_cut.png",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "cel_prompt": "map-lines-only-prompt.txt",
+      "review_status": "REJECTED: changed layout, colors, island count and star",
+      "prompt": "EDIT ONLY IMAGE1, the current map. Images2-5 are APPROVED STYLE references only for fine brown pen stroke weight (original retained villager HD strip and wood/food/masonry UI kit). Keep EXACT image1 composition and pixels of paper, paint, color, shadows and texture. Reduce the thickness of every existing brown ink stroke by about55 percent: outer parchment contour, curled folds, island coastlines, star outline and its interior seams. Replace thick marker/sticker lines with fine delicate brown PEN lines, centered on the same existing paths, same brown hue. Do not erase coastlines or make the star illegible; should read at24/32px. Do not move, reshape, resize or recolor the map, paper, islands or celestial star. Do not add/remove details, texture, islands, shadows, folds, devices, compass rose or lettering. Return the SAME map illustration with materially thinner linework only, same framing on white background. No other redesign."
+    }
+  ],
+  "12b-map-line-only-retry": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/hd_sources/spr/idle_front_cut.png",
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png"
+      ],
+      "cel_prompt": "map-lines-only-prompt.txt",
+      "review_status": "FAILED LINE CORRECTION: composition retained, no material thinning",
+      "prompt": "IMAGE1 is STYLE reference ONLY for delicate thin brown pen strokes. IMAGE2 is the EXACT MAP TO EDIT. Do not copy or draw the people. Return IMAGE2 with only its BROWN INK LINES made approximately HALF AS THICK, centered on the existing exact paths. This is surgical stroke-weight correction, NOT a new illustration. Keep the tall vertical paper, four curled corners, top five-point teal star, one large lower teal island and one small bottom-left teal island EXACTLY in their existing positions/sizes/colors. Keep the exact cream parchment wash, tan edge shading, all existing texture and shadow unchanged. Both OUTSIDE CONTOUR and interior coastline/star/fold lines must visibly become thinner, approximately1-2px pen strokes instead of thick outlines. Same brown hue. Coastline remains continuous and readable24px. Do NOT rotate, widen, recolor, simplify shapes, add details, add islands, move star, draw compass rose or change composition. SAME source map framing on white; LINE THICKNESS ONLY."
+    }
+  ],
+  "12c-openai-map-refinement": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png"
+      ],
+      "prompt": "Make a precise restrained refinement of this EXACT supplied game UI icon. It is already approved in composition, shapes, colours and painted cel style. The ONLY requested change is noticeably FINER linework. Reduce the thickness of every dark-brown ink contour by roughly 50 percent: particularly the outer parchment outline, curled corner/fold lines, island/coastline contours and star ink lines. Keep each line on its EXISTING path. Fine delicate brown pen lines, not bold cartoon/sticker outlines. Do not redesign, reposition, recolor, rescale, rotate, simplify or add objects. Preserve exactly the vertical parchment silhouette with its four folded/curling corners, the separate five-point teal celestial star printed in the upper half, the one larger teal island shape and small teal island lower down, their exact relative placements and sizes, cream parchment colours, subtle painted two-tone shading, existing sparse texture, the white background and the generous existing white margins. No compass, compass needle, compass rose, labels, letters, new texture or additional embellishments. Do not thicken the contours with a second offset line. The resulting image must look like the SAME icon with visibly thinner and lighter-touch brown ink when scaled to128px and24/32px. Preserve the existing image dimensions/composition as closely as possible.",
+      "external_refinement": true,
+      "model": "OpenAI image_gen",
+      "review_status": "UNAPPROVED MAP CORRECTION: preferred direction, visibly finer lines; candidate only"
+    }
   ]
 }

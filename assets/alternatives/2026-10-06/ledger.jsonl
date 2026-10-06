@@ -106,3 +106,8 @@
 {"t": 1791275010.430936, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:11d-map-shield-targeted-retries:category_military", "est_usd": 0.005, "request_id": "01a1104f-806f-7e53-9ff6-0081bbba5223", "seconds": 2.3}
 {"t": 1791275075.0927124, "endpoint": "fal-ai/nano-banana/edit", "tag": "alternative:11e-wolf-cool-coat-retry:wolf_idle", "est_usd": 0.0398, "request_id": "01a11050-5876-7150-9ffe-503c3ce2c72d", "seconds": 11.6}
 {"t": 1791275081.0053759, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:11e-wolf-cool-coat-retry:wolf_idle", "est_usd": 0.005, "request_id": "01a11050-9262-7bd1-a4f6-78b3dbbbf4f0", "seconds": 2.7}
+{"t": 1791278860.5108032, "endpoint": "fal-ai/nano-banana/edit", "tag": "alternative:12-map-fine-lines:command_explore", "est_usd": 0.0398, "request_id": "01a1108a-19d7-76f3-8287-96e74598b8b2", "seconds": 12.0}
+{"t": 1791278865.7707984, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:12-map-fine-lines:command_explore", "est_usd": 0.005, "request_id": "01a1108a-53a4-77f2-a8d1-eb26e6e65d7c", "seconds": 2.4}
+{"t": 1791278929.6129131, "endpoint": "fal-ai/nano-banana/edit", "tag": "alternative:12b-map-line-only-retry:command_explore", "est_usd": 0.0398, "request_id": "01a1108b-31ed-7871-98ac-cd7611d4715d", "seconds": 9.4}
+{"t": 1791278934.973618, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:12b-map-line-only-retry:command_explore", "est_usd": 0.005, "request_id": "01a1108b-6212-7e40-b3dd-4e45cd1c0785", "seconds": 2.4}
+{"t": 1791279085.1690106, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:12c-openai-map-refinement:command_explore", "est_usd": 0.005, "request_id": "01a1108d-abfc-7fa3-88c2-07d17fa3202d", "seconds": 2.6}
