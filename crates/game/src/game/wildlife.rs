@@ -20,8 +20,8 @@ impl AnimalKind {
     }
     pub fn max_health(self) -> f64 {
         match self {
-            Self::Wolf => 40.0,
-            Self::Bear => 100.0,
+            Self::Wolf => 300.0,
+            Self::Bear => 600.0,
             Self::Boar => 60.0,
         }
     }
@@ -48,8 +48,8 @@ impl AnimalKind {
     }
     fn damage(self) -> f64 {
         match self {
-            Self::Wolf => 8.0,
-            Self::Bear => 16.0,
+            Self::Wolf => 35.0,
+            Self::Bear => 50.0,
             Self::Boar => 10.0,
         }
     }

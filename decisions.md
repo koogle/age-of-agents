@@ -55,6 +55,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 - **Selection modifiers:** Shift-drag replaces the unit selection with the enclosed units. Control-click/drag adds units on Windows/Linux, Command does so on Mac, and adding already selected units keeps them selected.
 - **Movement presentation:** Local interpolation follows the simulation accumulator; remote playback retains unplayed samples, buffers two ticks after starvation, and catches up at at most 1.1× for short delays. Remote lag above eight ticks triggers an explicit resynchronization to the newest snapshot without animating the correction; a long outage cannot preserve both every historical frame and current responsiveness. Villagers use every gait pose and animate work at their authoritative interaction cell, with no visual movement toward the target.
 
+- **Wildlife strength (2026-10-06):** Wolves require roughly 3–5 archers (300 HP, 35 damage per contact hit); bears are tougher (600 HP, 50 damage). Existing saved health remains intact; new spawns use the higher maximum.
+
 ## Superseded designs
 
 These explain the path to the current design, not requirements to restore.

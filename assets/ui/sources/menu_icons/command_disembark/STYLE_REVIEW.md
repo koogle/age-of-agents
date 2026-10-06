@@ -1,3 +1,6 @@
+> Current Disembark artwork: [joined-platform correction](../disembark_platform/README.md).
+> The two-board simplification was subsequently rejected by the user.
+
 > Refinement (2026-10-06): the simpler replacement is reviewed in
 > [the simplification review](../simplification/STYLE_REVIEW.md), with
 > [before/after evidence](../simplification/comparison.png). The review below

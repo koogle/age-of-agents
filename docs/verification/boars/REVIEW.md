@@ -85,3 +85,18 @@ Fresh desktop/phone normal and maximum-zoom art evidence is in `approved/`;
 `capture_approved.py` reproduces it using a paused fixture and synthetic zoom.
 It is an art preview, not a new touch-combat or physical-device test.
 Final capture status is recorded in `approved/results.json`. Not deployed.
+
+## Authorized merge integration
+
+User approved merging on 2026-10-06. Integrated master `806512c`, preserving
+300-HP/35-damage wolves, 600-HP/50-damage bears, stationary status feedback,
+and updated stone-road/disembark art. Boars retain 60 HP/10 damage as the
+lighter threat. No balance regression, save reset or existing feature removal.
+
+Combined 295 workspace tests pass (one manual benchmark ignored), as do native
+and WASM strict lint, formatting, rebuilt browser/server, all asset checks,
+generated-JS syntax and six deployment-verifier tests. Thermonuclear review:
+typed species extension only, deterministic bounded generation, shared existing
+combat paths, no dependencies/frameworks or save-model changes; master behavior
+is preserved. Combined mouse/touch browser acceptance is recorded separately
+in `merged-hunting/results.json` after completion.

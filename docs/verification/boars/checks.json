@@ -23,5 +23,14 @@
     "wildlife_client_test": "pass",
     "native_and_wasm_lint": "pass",
     "simulation_and_wasm": "unchanged"
+  },
+  "merge_integration": {
+    "base": "806512c",
+    "workspace_tests": 295,
+    "native_and_wasm_lint": "pass",
+    "mouse_touch_hunting": "pass",
+    "errors": [],
+    "wasm_sha256": "295092203630861c3b3281d095b317be038201ede1694dcd5b4fc016d53404b2",
+    "atlas_sha256": "47a2b519cf7f912664e24b2bf04f8f1c0a394354d3305a3583589988a915a24d"
   }
 }

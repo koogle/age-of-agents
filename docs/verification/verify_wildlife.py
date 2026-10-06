@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Real-server wildlife mouse/touch acceptance using a temporary SQLite fixture.
 Requires rebuilt debug server, WebAssembly, aiohttp, Playwright and Chromium.
-No production resources are accessed. Fixtures put two guards beside wild animals.
+No production resources are accessed. Fixtures pit four archers against a full-health wolf.
 """
 import argparse
 import asyncio
@@ -17,7 +17,7 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 URL = 'http://127.0.0.1:8000'
 
-async def main(out, only, closeups=False, target='bear'):
+async def main(out, only, closeups=False, target='wolf'):
     out.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as http:
         try:
@@ -63,10 +63,15 @@ async def main(out, only, closeups=False, target='bear'):
                 for t in fixture['terrain']:
                     if x-9<=t['column']<=x+9 and y-2<=t['row']<=y+7:
                         t['biome']='meadow';t['elevation']=0.3
+                target_hp = 60.0 if target == 'boar' else 300.0
+                target_at = cell(x+4 if target == 'boar' else x+7,y+1)
+                companion = 'wolf' if target == 'boar' else 'bear'
+                template=copy.deepcopy(fixture['units'][0])
+                fixture['units']=[copy.deepcopy(template) for _ in range(2 if target == 'boar' else 4)]
                 for i,u in enumerate(fixture['units']):
-                    u.update(kind='guard',health=100.0,cell=cell(x-i,y),step=None,action={'type':'idle'},cargo=None)
+                    u.update(id=f'archer-{i}',kind='guard' if target == 'boar' else 'archer',health=100.0,cell=cell(x-i,y),step=None,action={'type':'idle'},cargo=None)
                 fixture['animals']=[]
-                for name,kind,at,hp in [(target,target,cell(x+4,y+1),60.0 if target == 'boar' else 100.0),('wolf','wolf',cell(x-4,y+2),40.0)]:
+                for name,kind,at,hp in [(target,target,target_at,target_hp),(companion,companion,cell(x-8,y+6),300.0 if companion == 'wolf' else 600.0)]:
                     fixture['animals'].append({'id':name,'kind':kind,'home':at,'cell':at,'step':None,'health':hp,'attack_seconds':0.0,'heading':[1,0]})
                 async with async_playwright() as p:
                     browser=await p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--enable-unsafe-swiftshader'])
@@ -97,7 +102,7 @@ async def main(out, only, closeups=False, target='bear'):
                         click=page.touchscreen.tap if dpr==2 else page.mouse.click
                         await page.screenshot(path=str(out/(label+'-wildlife.png')))
                         if closeups:
-                            for kind, at in [('wolf', cell(x-4,y+2)), (target, cell(x+4,y+1))]:
+                            for kind, at in [(target, target_at), (companion, cell(x-8,y+6))]:
                                 # Center each animal, then hit the camera's minimum distance.
                                 # This is visual evidence; mouse/touch command acceptance follows.
                                 point = await screen(at, .3)
@@ -120,10 +125,14 @@ async def main(out, only, closeups=False, target='bear'):
                         await click(*(await screen(cell(x,y),.3)))
                         await page.wait_for_timeout(250)
                         await command({'type':'set_simulation_speed','multiplier':1.0})
-                        await click(*(await screen(cell(x+4,y+1),.35)))
+                        await click(*(await screen(target_at,.35)))
                         await page.wait_for_timeout(400)
                         ordered=await state()
                         assert ordered['units'][0]['action']['type']=='attack_animal', ordered['units'][0]['action']
+                        # Touch has no additive selection yet; retain actual pointer
+                        # attack acceptance, then explicitly order the whole squad.
+                        if target != 'boar':
+                            await command({'type':'attack_animal','unit_ids':[u['id'] for u in ordered['units']], 'animal_id':target})
                         await command({'type':'set_simulation_speed','multiplier':2.0})
                         injured=None
                         injured_units=False
@@ -132,7 +141,7 @@ async def main(out, only, closeups=False, target='bear'):
                             live=await state()
                             injured_units |= any(u['health']<100 for u in live['units']) or len(live['units']) < len(ordered['units'])
                             animal=next((a for a in live['animals'] if a['id']==target),None)
-                            if animal and animal['health']<(60 if target == 'boar' else 100) and injured is None:
+                            if animal and animal['health']<target_hp and injured is None:
                                 injured=copy.deepcopy(live)
                                 await command({'type':'set_simulation_speed','multiplier':0.0})
                                 await page.screenshot(path=str(out/(label+'-combat.png')))
@@ -141,6 +150,8 @@ async def main(out, only, closeups=False, target='bear'):
                         else:raise AssertionError(f'{target} was not defeated')
                         assert injured is not None
                         assert injured_units, 'Animal must fight back'
+                        assert live['units'], 'The hunters must survive'
+                        assert all(u['action']['type']=='idle' for u in live['units']), 'Hunting orders must clear'
                         await command({'type':'set_simulation_speed','multiplier':0.0})
                         await page.wait_for_timeout(300)
                         await page.screenshot(path=str(out/(label+'-after.png')))
@@ -158,6 +169,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--only',choices=['desktop','phone'])
     parser.add_argument('--closeups',action='store_true',help='Capture each animal at maximum zoom')
-    parser.add_argument('--target', choices=['bear', 'boar'], default='bear')
+    parser.add_argument('--target', choices=['wolf','boar'], default='wolf')
     args=parser.parse_args()
-    asyncio.run(main(args.output,args.only,args.closeups, args.target))
+    asyncio.run(main(args.output,args.only,args.closeups,args.target))
