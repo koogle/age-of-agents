@@ -41,7 +41,7 @@ if __name__=='__main__':
    gallery.append((batch,name))
   sheet.save(BASE/(batch+'-comparison.jpg'),quality=93)
  links=['<!doctype html><meta charset="utf-8"><title>Unapproved art alternatives</title><style>body{font:16px system-ui;background:#d6d8d7;margin:30px}img{max-width:100%}section{margin-bottom:32px}a{color:#124565}</style><h1>Unapproved alternatives — 6 October 2026</h1><p>Original villagers and runtime assets unchanged. Latest cel and era corrections appear first; red captions mark rejected historical/style attempts retained below. No gameplay approval.</p>']
- for p in sorted(BASE.glob('*comparison.jpg'),key=lambda p:(0 if p.name.startswith(('cel-','era-')) else 1,p.name)):links.append(f'<h2>{html.escape(p.stem)}</h2><img src="{p.name}">')
+ for p in sorted(BASE.glob('*comparison.jpg'),key=lambda p:(-1 if p.name.startswith('painted-') else 0 if p.name.startswith(('cel-','era-')) else 1,p.name)):links.append(f'<h2>{html.escape(p.stem)}</h2><img src="{p.name}">')
  for batch,items in batches.items():
   for i in items:
    folder=BASE/batch/i['name']

@@ -15,7 +15,7 @@ def generate(item,batch):
   # A resumed download must retain the prompt that actually produced the image.
   result=json.loads((dest/'response.json').read_text())
  else:
-  templates=[item.get('era_prompt','era-prompt.txt'),'cel-prompt.txt']
+  templates=[item.get('era_prompt','era-prompt.txt'),item.get('cel_prompt','cel-prompt.txt')]
   prompt=item['prompt']+' '+' '.join((OUT/t).read_text().strip() for t in templates)
   record=dict(item,prompt=prompt,model='fal-ai/nano-banana/edit',reference_revision='1984e9b',references=refs,status='unapproved candidate; no runtime replacement',prompt_templates=[dict(path=t,sha256=hashlib.sha256((OUT/t).read_bytes()).hexdigest()) for t in templates])
   (dest/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')

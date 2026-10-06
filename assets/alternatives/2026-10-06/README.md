@@ -1,12 +1,16 @@
 # Alternatives from the original villager model — unapproved
 
-47 retained illustration attempts, including rejected/repaired passes, from 92
-successful FAL requests (estimated $2.0956, excluding one API validation failure).
+55 retained illustration attempts, including rejected/repaired passes, from 108
+successful FAL requests (estimated $2.4540, excluding one API validation failure).
 
 Candidate art only. No runtime image, atlas, manifest, code or retained villager
 has changed. These are review choices, not permission to replace existing art.
 
-Latest user corrections: [era audit](ERA_REVIEW.md), [era comparison](era-correction-comparison.jpg),
+Latest bounded follow-up: [four-subject comparison](painted-cel-refinement-comparison.jpg)
+and [steel A/B options](painted-steel-options-comparison.jpg). Shield is promising;
+wolf recolor failed, map retains shadow/line issues, and steel remains a choice.
+
+Earlier user corrections: [era audit](ERA_REVIEW.md), [era comparison](era-correction-comparison.jpg),
 and [three-subject cel calibration](cel-correction-comparison.jpg). Broad expansion
 is paused; all remain unapproved. The steel calibration still needs less shine.
 

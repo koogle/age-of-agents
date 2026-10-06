@@ -255,3 +255,21 @@ specular gradients, PBR-like material modeling, microtexture or dense fur.
 Original UI wood/food may support readability but must not pull material rendering
 toward realism. Earlier glossy steel/cloth/shield, realistic bread and detailed
 wolf alternatives are not preferred defaults; label their review status visibly.
+
+## Bounded painted-cel refinement (2026-10-06)
+
+After seeing comparisons, Jakob asked to keep working on them. The next bounded
+review covers steel, wolf, Explore and military shield only; cloth and sandal
+remain tentative. Preserve hand-painted Ghibli cel character, not sterile flat
+vector diagrams. Restrained painted variation and a small soft highlight are
+allowed when consistent with the original villagers; avoid gloss/PBR and noise.
+Lock original wolf right-facing silhouette/camera with retained HD subject art,
+while simplifying fur. Keep map contours fine and its celestial star distinct
+from a compass rose. Inspect the representative before any targeted retries;
+maximum one retry per subject for a concrete defect, no broad regeneration.
+
+Check actual reference dimensions before submission: `refined.png` in the menu
+kit can be a 313px crop while `generated.png` retains 1024px. File names do not
+establish HD source quality. In this bounded follow-up, strong wolf geometry
+references were copied without requested recoloring; preserve that failure and
+stop at the retry bound rather than calling near-identical output an improvement.

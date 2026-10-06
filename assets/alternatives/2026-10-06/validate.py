@@ -10,6 +10,8 @@ for p in sorted(BASE.glob('*/*/provenance.json')):
  rec=json.loads(p.read_text())
  for r in rec['references']:
   if digest(ROOT/r['path'])!=r['sha256']:errors.append('reference hash '+r['path'])
+ for t in rec.get('prompt_templates',[]):
+  if digest(BASE/t['path'])!=t['sha256']:errors.append('prompt template hash '+t['path'])
  for name in ['original.png','cutout.png']:
   f=p.parent/name
   if not f.exists():continue
