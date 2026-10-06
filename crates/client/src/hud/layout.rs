@@ -359,6 +359,17 @@ impl Hud {
                 });
             }
         }
+        if matches!(model.build, BuildUi::Group(_)) {
+            let hint = hover_text.map(|(title, detail)| format!("{title}: {detail}"));
+            self.toast(
+                atlas,
+                model.toast.or(resource_hint.as_deref()).or(hint.as_deref()),
+                width,
+                s,
+                toast_top,
+            );
+            return;
+        }
         // A separate, ordered row of waiting tasks. Tapping any coin cancels
         // that task and refunds its paid inputs; the active task stays above.
         let queued = selection::queued_commands(snapshot, model);
