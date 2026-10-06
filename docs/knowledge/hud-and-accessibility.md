@@ -38,7 +38,7 @@ User steering (2026-10-06, updated): remove the top-middle build hint bubble; sh
 
 ## NPC status feedback
 
-User steering (2026-10-06): status messages should remain at the world position where they appeared, rising and fading out instead of following the NPC. Implemented in `feedback.rs`: status labels retain their initial anchor while the existing 1.4-second rise/fade runs. Entity IDs still replace feedback on rapid orders; only damage labels track movement. The regression test moves the NPC on both axes and checks replacement at its new position. Desktop and emulated DPR-2 phone WebGL replay checks fixed horizontal position, upward motion, fade and expiry without page errors; [evidence and reproduction](../verification/status-feedback/README.md).
+User steering (2026-10-06): status messages should remain at the world position where they appeared, rising and fading out instead of following the NPC. Implemented in `feedback.rs`: status labels retain their initial anchor while the existing 1.4-second rise/fade runs. Entity IDs still replace feedback on rapid orders; health now follows units through persistent bars instead of damage labels (see [wildlife health display](wildlife.md#health-display-direction-2026-10-06)). The regression test moves the NPC on both axes and checks replacement at its new position. Desktop and emulated DPR-2 phone WebGL replay checks fixed horizontal position, upward motion, fade and expiry without page errors; [evidence and reproduction](../verification/status-feedback/README.md).
 
 ## Mobile time-control spacing
 
