@@ -20,7 +20,8 @@
       "iron": "icons/resource_iron.png",
       "stone": "icons/resource_stone.png",
       "timber": "icons/resource_timber.png",
-      "wood": "icons/resource_wood.png"
+      "wood": "icons/resource_wood.png",
+      "water": "icons/resource_water.png"
     },
     "tech": {
       "agriculture": "icons/tech_agriculture.png",

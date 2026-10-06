@@ -25,17 +25,22 @@ pub const STARTER_BUILDINGS: [BuildingKind; 14] = [
     BuildingKind::Barracks,
     BuildingKind::Range,
 ];
-pub const STARTER_RESOURCES: [ResourceKind; 3] =
-    [ResourceKind::Wood, ResourceKind::Food, ResourceKind::Stone];
+pub const STARTER_RESOURCES: [ResourceKind; 4] = [
+    ResourceKind::Wood,
+    ResourceKind::Food,
+    ResourceKind::Stone,
+    ResourceKind::Water,
+];
 /// First transport recipe; no metal or cloth prerequisite.
 pub const FIRST_TRANSPORT_COST: [(ResourceKind, f64); 2] =
     [(ResourceKind::Wood, 60.0), (ResourceKind::Timber, 20.0)];
 /// Reachable raw supplies for settlement, processing, research and departure,
 /// before the generator adds its 50% safety margin. Timber is made from wood.
-pub const STARTER_RESOURCE_BUDGET: [(ResourceKind, f64); 3] = [
+pub const STARTER_RESOURCE_BUDGET: [(ResourceKind, f64); 4] = [
     (ResourceKind::Wood, 400.0),
     (ResourceKind::Food, 200.0),
     (ResourceKind::Stone, 80.0),
+    (ResourceKind::Water, 10.0),
 ];
 
 impl GameWorld {

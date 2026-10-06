@@ -74,7 +74,8 @@ pub(super) fn compatible_biomes(kind: ResourceKind) -> &'static [TerrainBiome] {
         ResourceKind::Iron => &[TerrainBiome::Highland, TerrainBiome::Scrubland],
         ResourceKind::Clay => &[TerrainBiome::Clayland, TerrainBiome::Wetland],
         ResourceKind::Fiber => &[TerrainBiome::Wetland, TerrainBiome::Prairie],
-        ResourceKind::Coal
+        ResourceKind::Water
+        | ResourceKind::Coal
         | ResourceKind::Timber
         | ResourceKind::Steel
         | ResourceKind::Bricks

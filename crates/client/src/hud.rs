@@ -28,7 +28,8 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 20] = [
+const ICONS: [&str; 21] = [
+    "resource_water",
     "resource_wood",
     "resource_timber",
     "resource_food",
@@ -387,6 +388,7 @@ pub struct Hud {
 
 fn resource_icon(kind: ResourceKind) -> &'static str {
     match kind {
+        ResourceKind::Water => "resource_water",
         ResourceKind::Wood => "resource_wood",
         ResourceKind::Food => "resource_food",
         ResourceKind::Stone => "resource_stone",

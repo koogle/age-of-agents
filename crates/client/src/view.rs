@@ -256,6 +256,7 @@ fn activity_for(kind: ResourceKind) -> &'static str {
 
 fn node_for(kind: ResourceKind) -> &'static str {
     match kind {
+        ResourceKind::Water => "water",
         ResourceKind::Food => "berry",
         ResourceKind::Gold => "gold",
         ResourceKind::Iron | ResourceKind::Coal => "iron",

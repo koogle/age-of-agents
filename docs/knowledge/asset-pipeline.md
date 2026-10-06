@@ -142,3 +142,13 @@ cell is 724×724 before packing down to 512×512. Manual structural deck corners
 register each construction stage, and the atlas manifest drives texture dimensions.
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
+
+## Water icon correction (2026-10-06)
+
+User rejected the initial water icon as inconsistent with the established style.
+The earlier water review overstated the match: the jug has heavy contours,
+saturated orange shading and broad highlights beside the finer, restrained
+resource kit. That style pass is superseded. Use approved wood/food/masonry
+references directly for the correction; the rejected jug is subject reference
+only. Retain the rejected source and compare the replacement at 24/32px before
+integration. Technical validity does not establish visual consistency.

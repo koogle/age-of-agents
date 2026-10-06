@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).
+
 - **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).
 
 - **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. Subsequent direction sets one animal on the first island and more on the second: one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island ([wildlife](docs/knowledge/wildlife.md)).

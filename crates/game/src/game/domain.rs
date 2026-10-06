@@ -271,6 +271,7 @@ impl ResourceNode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ResourceKind {
+    Water,
     Wood,
     Food,
     Stone,
@@ -557,6 +558,7 @@ impl TechnologyKind {
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Stockpile {
+    pub water: f64,
     pub wood: f64,
     pub food: f64,
     pub stone: f64,
@@ -573,8 +575,9 @@ pub struct Stockpile {
 }
 
 impl Stockpile {
-    pub(super) fn entries(&self) -> [(&'static str, f64); 13] {
+    pub(super) fn entries(&self) -> [(&'static str, f64); 14] {
         [
+            ("water", self.water),
             ("wood", self.wood),
             ("food", self.food),
             ("stone", self.stone),
@@ -593,6 +596,7 @@ impl Stockpile {
 
     pub fn amount(&self, kind: ResourceKind) -> f64 {
         match kind {
+            ResourceKind::Water => self.water,
             ResourceKind::Wood => self.wood,
             ResourceKind::Food => self.food,
             ResourceKind::Stone => self.stone,
@@ -617,6 +621,7 @@ impl Stockpile {
 
     pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
         match kind {
+            ResourceKind::Water => self.water += amount,
             ResourceKind::Wood => self.wood += amount,
             ResourceKind::Food => self.food += amount,
             ResourceKind::Stone => self.stone += amount,
@@ -662,7 +667,8 @@ impl DomainCatalog {
     }
 }
 
-pub const ROADMAP_RESOURCES: [ResourceKind; 13] = [
+pub const ROADMAP_RESOURCES: [ResourceKind; 14] = [
+    ResourceKind::Water,
     ResourceKind::Wood,
     ResourceKind::Food,
     ResourceKind::Stone,

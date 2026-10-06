@@ -18,6 +18,7 @@ use super::*;
 
 mod drainage;
 mod shape;
+mod water;
 /// How many mountain ranges an island has, at least and at most.
 const RANGES: (usize, usize) = (3, 4);
 const MAX_ATTEMPTS: u64 = 64;
@@ -358,7 +359,8 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
 
     let (town_center, villagers) = choose_start(&terrain, &coast)?;
     let resources = place_resources(&terrain, &ford, town_center, &mut rng, kinds);
-    let resources = reachable_only(&terrain, resources, town_center, villagers[0]);
+    let mut resources = reachable_only(&terrain, resources, town_center, villagers[0]);
+    water::place(&terrain, &ford, &mut resources, town_center, villagers[0]);
     let enough = STARTER_RESOURCE_BUDGET.iter().all(|&(kind, cost)| {
         let total: f64 = resources
             .iter()
