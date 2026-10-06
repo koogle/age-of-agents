@@ -1,5 +1,9 @@
 # Productive building visibility (2026-10-05)
 
+Historical evidence: feature-specific generation/capture scripts were retired
+on 2026-10-06. Old commands below record how these results were obtained;
+consult [the retirement record](../RETIRED_TOOLS.md) for current checks and exact historical code.
+
 User-requested replacement for construction-only discovery: buildings need
 obtainable construction inputs and a productive use. Production buildings must
 have at least one recipe supported by discovered raw resources. Housing,

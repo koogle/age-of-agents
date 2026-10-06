@@ -13,7 +13,7 @@ fn new_games_offer_starter_economy_and_require_explicit_rules() {
             .all(|r| STARTER_RESOURCES.contains(&r.kind))
     );
     assert_eq!(
-        w.snapshot().buildings[0].building.researches,
+        w.snapshot().buildings[0].researches,
         vec![
             TechnologyKind::Forestry,
             TechnologyKind::Agriculture,

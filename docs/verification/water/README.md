@@ -1,5 +1,9 @@
 # Water resource verification
 
+Historical evidence: feature-specific generation/capture scripts were retired
+on 2026-10-06. Old commands below record how these results were obtained;
+consult [the retirement record](../RETIRED_TOOLS.md) for current checks and exact historical code.
+
 Initial implementation based on `1bed03a`; integrating master `79d5899` for
 the authorized merge on 2026-10-06. The corrected artwork was explicitly
 approved by the user. Combined verification is recorded below.

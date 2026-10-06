@@ -2,8 +2,7 @@
 //! the command coins for a villager (build menu, stop) or a building (train,
 //! research). Pure functions of the snapshot, tested without a GPU.
 use aoa_game::{
-    BuildingKind, ProductKind, RESEARCH_FOOD_COST, RESEARCH_WOOD_COST, ResourceKind,
-    TechnologyKind, UnitAction, WorldSnapshot,
+    BuildingKind, ProductKind, ResourceKind, TechnologyKind, UnitAction, WorldSnapshot,
 };
 
 use super::{Action, BuildUi, Model};
@@ -352,7 +351,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             {
                 format!(
                     "Unloading {} before building",
-                    resource_name(unit.unit.cargo.as_ref().unwrap().kind)
+                    unit.unit.cargo.as_ref().unwrap().kind.name()
                 )
             }
             UnitAction::ExploreBuild { .. } => "Exploring build site".into(),
@@ -360,7 +359,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             UnitAction::Cultivate { .. } if unit.unit.cargo.is_some() => {
                 format!(
                     "Unloading {} before preparing field",
-                    resource_name(unit.unit.cargo.as_ref().unwrap().kind)
+                    unit.unit.cargo.as_ref().unwrap().kind.name()
                 )
             }
             UnitAction::Cultivate { .. } => "Preparing field".into(),
@@ -371,11 +370,11 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 aoa_game::GatherPhase::Returning | aoa_game::GatherPhase::Depositing
                     if unit.unit.cargo.is_some() =>
                 {
-                    let carried = resource_name(unit.unit.cargo.as_ref().unwrap().kind);
+                    let carried = unit.unit.cargo.as_ref().unwrap().kind.name();
                     match snapshot.resources.iter().find(|r| &r.id == resource_id) {
                         Some(resource) => format!(
                             "Unloading {carried} before gathering {}",
-                            resource_name(resource.kind)
+                            resource.kind.name()
                         ),
                         None => format!("Unloading {carried} first"),
                     }
@@ -419,7 +418,6 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         ));
     }
     let job = building.building.job.as_ref();
-    let queue_full = building.building.queue.len() >= aoa_game::MAX_QUEUED_JOBS;
     let (detail, progress) = match job {
         Some(aoa_game::BuildingJob::Produce {
             product,
@@ -443,31 +441,32 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         ),
         None => (purpose.to_string(), None),
     };
-    let housing: usize = snapshot
-        .buildings
-        .iter()
-        .filter(|b| b.building.is_complete())
-        .map(|b| b.building.kind.housing())
-        .sum();
-    let population = snapshot.units.len() + snapshot.ships.iter().map(|s| s.passengers.len()).sum::<usize>() + snapshot.buildings.iter().flat_map(|b| b.building.jobs()).filter(|job| matches!(job, aoa_game::BuildingJob::Produce { product, .. } if product.unit_kind().is_some())).count();
+    let housing = aoa_game::housing(snapshot.buildings.iter().map(|b| &b.building));
+    let population = aoa_game::population(
+        snapshot.units.len(),
+        snapshot.ships.iter().map(|s| s.passengers.len()).sum(),
+        snapshot.buildings.iter().map(|b| &b.building),
+    );
     let mut commands = Vec::new();
-    for &product in &building.building.produces {
-        let crowded = product.unit_kind().is_some() && population >= housing;
+    for &product in &building.produces {
+        let eligibility = building
+            .building
+            .check_production(product, stock, population, housing);
         commands.push(Command {
             icon: product_icon(product),
             label: product_label(product, false),
-            detail: if queue_full {
-                "Queue is full".into()
-            } else if crowded {
-                "Build a house for more housing".into()
-            } else {
-                format!(
+            detail: match eligibility {
+                Err(aoa_game::CommandError::BuildingQueueFull) => "Queue is full".into(),
+                Err(aoa_game::CommandError::PopulationCapReached) => {
+                    "Build a house for more housing".into()
+                }
+                _ => format!(
                     "{} · {} seconds",
                     cost_text(product.cost()),
                     product.seconds()
-                )
+                ),
             },
-            enabled: !queue_full && !crowded && stock.affords(product.cost()),
+            enabled: eligibility.is_ok(),
             action: Action::Produce(product),
         });
     }
@@ -481,9 +480,10 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 icon: "command_cargo",
                 label: "Ship cargo".into(),
                 detail: format!(
-                    "{} · {:.0}/50 resources · select to load or sail",
+                    "{} · {:.0}/{} resources · select to load or sail",
                     ship.id,
-                    ship.cargo.total()
+                    ship.cargo.total(),
+                    aoa_game::SHIP_RESOURCE_CAPACITY
                 ),
                 enabled: true,
                 action: Action::SelectShip(ship.id.clone()),
@@ -491,35 +491,29 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
         }
     }
     let known = &snapshot.researched_technologies;
-    for &tech in &building.building.researches {
+    for &tech in &building.researches {
         let (icon, name, effect) = tech_info(tech);
-        let done = known.contains(&tech);
         let queued = snapshot.buildings.iter().flat_map(|b| b.building.jobs()).any(|job| matches!(job, aoa_game::BuildingJob::Research { technology, .. } if *technology == tech));
-        let blocked = tech.prerequisite().filter(|p| !known.contains(p));
-        let detail = if done {
+        let eligibility = building.building.check_research(tech, stock, known, queued);
+        let detail = if known.contains(&tech) {
             format!("Research complete · {effect}")
         } else if queued {
-            "Research queued or in progress".to_string()
-        } else if queue_full {
-            "Queue is full".to_string()
-        } else if let Some(p) = blocked {
-            format!("Requires {} research", tech_info(p).1)
+            "Research queued or in progress".into()
         } else {
-            format!(
-                "{effect} · {} food, {} wood",
-                RESEARCH_FOOD_COST, RESEARCH_WOOD_COST
-            )
+            match eligibility {
+                Err(aoa_game::CommandError::BuildingQueueFull) => "Queue is full".into(),
+                Err(aoa_game::CommandError::MissingTechnologyPrerequisite) => format!(
+                    "Requires {} research",
+                    tech_info(tech.prerequisite().unwrap()).1
+                ),
+                _ => format!("{effect} · {}", cost_text(aoa_game::RESEARCH_COST)),
+            }
         };
         commands.push(Command {
             icon,
             label: name.into(),
             detail,
-            enabled: !done
-                && !queued
-                && blocked.is_none()
-                && !queue_full
-                && stock.food >= RESEARCH_FOOD_COST
-                && stock.wood >= RESEARCH_WOOD_COST,
+            enabled: eligibility.is_ok(),
             action: Action::Research(tech),
         });
     }
@@ -542,21 +536,16 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
         .iter()
         .enumerate()
         .map(|(index, entry)| {
-            let (icon, name, cost) = match entry.job {
-                aoa_game::BuildingJob::Produce { product, .. } => (
-                    product_icon(product),
-                    product_label(product, false),
-                    cost_text(product.cost()),
-                ),
+            let (icon, name) = match entry.job {
+                aoa_game::BuildingJob::Produce { product, .. } => {
+                    (product_icon(product), product_label(product, false))
+                }
                 aoa_game::BuildingJob::Research { technology, .. } => {
                     let (icon, name, _) = tech_info(technology);
-                    (
-                        icon,
-                        format!("Research {name}"),
-                        format!("{RESEARCH_FOOD_COST} food, {RESEARCH_WOOD_COST} wood"),
-                    )
+                    (icon, format!("Research {name}"))
                 }
             };
+            let cost = cost_text(entry.job.cost());
             Command {
                 icon,
                 label: format!("Cancel task {}: {name}", index + 1),
@@ -566,25 +555,6 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
             }
         })
         .collect()
-}
-
-fn resource_name(kind: ResourceKind) -> &'static str {
-    match kind {
-        ResourceKind::Water => "water",
-        ResourceKind::Wood => "wood",
-        ResourceKind::Food => "food",
-        ResourceKind::Stone => "stone",
-        ResourceKind::Gold => "gold",
-        ResourceKind::Iron => "iron",
-        ResourceKind::Coal => "coal",
-        ResourceKind::Clay => "clay",
-        ResourceKind::Fiber => "fiber",
-        ResourceKind::Timber => "timber",
-        ResourceKind::Steel => "steel",
-        ResourceKind::Bricks => "bricks",
-        ResourceKind::Cloth => "cloth",
-        ResourceKind::Rations => "rations",
-    }
 }
 
 #[cfg(test)]
@@ -639,8 +609,8 @@ mod tests {
             (ProductKind::Rations, "resource_rations"),
         ] {
             let mut snapshot = aoa_game::GameWorld::default().snapshot();
+            snapshot.buildings[0].produces = vec![product];
             let building = &mut snapshot.buildings[0].building;
-            building.produces = vec![product];
             building.queue = vec![aoa_game::QueuedBuildingJob {
                 id: 1,
                 job: aoa_game::BuildingJob::Produce {
@@ -747,8 +717,6 @@ mod tests {
         let mut world = GameWorld::default();
         world.economy_rules = aoa_game::EconomyRules::Unrestricted;
         world.buildings[0].kind = BuildingKind::Smelter;
-        world.buildings[0].produces = BuildingKind::Smelter.products().to_vec();
-        world.buildings[0].researches.clear();
         let poor = commands_for_town_center(&world);
         assert_eq!(poor.len(), 1);
         assert_eq!(poor[0].action, Action::Produce(ProductKind::Steel));

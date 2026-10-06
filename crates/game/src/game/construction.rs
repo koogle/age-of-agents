@@ -8,10 +8,7 @@ impl GameWorld {
         origin: CellCoordinate,
         kind: BuildingKind,
     ) -> Result<(), CommandError> {
-        let unit = self.ordered_unit(unit_id)?;
-        if self.units[unit].kind != UnitKind::Villager {
-            return Err(CommandError::VillagerRequired);
-        }
+        let unit = self.ordered_villager(unit_id)?;
         if !self.building_available(kind) {
             return Err(CommandError::NotBuildable);
         }
@@ -25,14 +22,12 @@ impl GameWorld {
             return Err(CommandError::InvalidBuildSite);
         }
         let available = self.available_at(origin);
-        for &(resource, amount) in kind.cost() {
-            if available.amount(resource) < amount {
-                return Err(match resource {
-                    ResourceKind::Stone => CommandError::InsufficientStone,
-                    ResourceKind::Wood => CommandError::InsufficientWood,
-                    kind => CommandError::InsufficientResources(kind),
-                });
-            }
+        if let Some(resource) = available.missing_resource(kind.cost()) {
+            return Err(match resource {
+                ResourceKind::Stone => CommandError::InsufficientStone,
+                ResourceKind::Wood => CommandError::InsufficientWood,
+                kind => CommandError::InsufficientResources(kind),
+            });
         }
         if !self.build_site_visible(footprint) {
             self.units[unit].action = UnitAction::ExploreBuild { origin, kind };
@@ -73,7 +68,7 @@ impl GameWorld {
         kind: BuildingKind,
         dt: f64,
     ) {
-        if self.drop_off_before_building(unit, dt) {
+        if self.unload_before_work(unit, dt) {
             return;
         }
         let (columns, rows) = kind.size();
@@ -108,7 +103,7 @@ impl GameWorld {
             self.units[unit].action = UnitAction::Idle;
             return;
         };
-        if self.drop_off_before_building(unit, dt) {
+        if self.unload_before_work(unit, dt) {
             return;
         }
         let remaining =

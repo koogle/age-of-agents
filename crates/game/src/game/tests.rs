@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::collections::BTreeMap;
 
 use super::movement::interaction_cells;
 use super::*;
@@ -97,97 +97,6 @@ pub(super) fn run(world: &mut GameWorld, seconds: f64) {
 }
 
 #[test]
-fn voronoi_terrain_is_fixed_and_deterministic() {
-    assert_eq!(fixture::fixture().terrain, fixture::fixture().terrain);
-    let world = fixture::fixture();
-    let coordinates: BTreeSet<_> = world.terrain.iter().map(|cell| cell.coordinate()).collect();
-    let cells = usize::from(WORLD_COLUMNS) * usize::from(WORLD_ROWS);
-    assert_eq!(world.terrain.len(), cells);
-    assert_eq!(coordinates.len(), cells);
-    let biomes: BTreeSet<_> = world.terrain.iter().map(|cell| cell.biome).collect();
-    assert_eq!(biomes.len(), 8);
-}
-
-#[test]
-fn every_voronoi_biome_is_one_coherent_region() {
-    let world = fixture::fixture();
-    let mut regions: BTreeMap<_, BTreeSet<_>> = BTreeMap::new();
-    for terrain in &world.terrain {
-        regions
-            .entry(terrain.biome)
-            .or_default()
-            .insert(terrain.coordinate());
-    }
-    for (biome, region) in regions {
-        let mut reached = BTreeSet::new();
-        let mut queue = VecDeque::from([*region.first().unwrap()]);
-        while let Some(current) = queue.pop_front() {
-            if !reached.insert(current) {
-                continue;
-            }
-            for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
-                if let Some(next) =
-                    crate::navigation::offset(current, dx, dy, WORLD_COLUMNS, WORLD_ROWS)
-                    && region.contains(&next)
-                {
-                    queue.push_back(next);
-                }
-            }
-        }
-        assert_eq!(reached, region, "{biome:?} is not coherent");
-    }
-}
-
-#[test]
-fn resources_are_deterministic_clustered_and_biome_compatible() {
-    let world = fixture::fixture();
-    assert_eq!(world.resources, fixture::fixture().resources);
-    let mut counts = BTreeMap::new();
-    for resource in &world.resources {
-        *counts.entry(resource.kind).or_insert(0) += 1;
-    }
-    assert_eq!(
-        counts,
-        BTreeMap::from([
-            (ResourceKind::Wood, 30),
-            (ResourceKind::Food, 10),
-            (ResourceKind::Stone, 8),
-            (ResourceKind::Gold, 4),
-            (ResourceKind::Iron, 4),
-            (ResourceKind::Clay, 6),
-            (ResourceKind::Fiber, 6),
-        ])
-    );
-    let base = Position {
-        x: f64::from(WORLD_COLUMNS) / 2.0,
-        y: f64::from(WORLD_ROWS) / 2.0,
-    };
-    for (index, resource) in world.resources.iter().enumerate() {
-        let biome = world.terrain[usize::from(resource.cell.row) * usize::from(WORLD_COLUMNS)
-            + usize::from(resource.cell.column)]
-        .biome;
-        assert!(fixture::compatible_biomes(resource.kind).contains(&biome));
-        assert!(resource.cell.center().distance(base) >= STARTING_BASE_RESOURCE_CLEARANCE);
-        assert_eq!(resource.amount, resource.capacity);
-        for other in &world.resources[index + 1..] {
-            assert_ne!(resource.cell, other.cell);
-            // Nodes of one kind may touch inside a cluster; different kinds
-            // never share a cluster.
-            if resource.kind != other.kind {
-                assert!(
-                    resource.cell.center().distance(other.cell.center()) + f64::EPSILON
-                        >= RESOURCE_CLUSTER_SEPARATION
-                );
-            }
-        }
-        // Every node in a cluster touches another node of its kind.
-        assert!(world.resources.iter().any(|other| other.id != resource.id
-            && other.kind == resource.kind
-            && other.cell.touches(resource.cell)));
-    }
-}
-
-#[test]
 fn default_world_is_valid_and_has_a_productive_base() {
     let world = fixture::fixture();
     world.validate().unwrap();
@@ -196,7 +105,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
     assert_eq!(base.kind, BuildingKind::TownCenter);
     assert!(base.is_complete());
     assert_eq!(base.footprint().cells().count(), 25);
-    assert_eq!(base.researches, TechnologyKind::ALL);
+    assert_eq!(base.kind.researches(), TechnologyKind::ALL);
     for unit in &world.units {
         assert!(base.footprint().is_interaction_cell(unit.cell));
     }
@@ -1186,7 +1095,7 @@ fn each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched() {
     let house = world.buildings.last().unwrap();
     assert_eq!(house.kind, BuildingKind::House);
     assert_eq!(house.footprint().columns, 3);
-    assert!(house.produces.is_empty() && house.researches.is_empty());
+    assert!(house.kind.products().is_empty() && house.kind.researches().is_empty());
     world.resources.clear();
     let before = world.clone();
     assert_eq!(

@@ -257,7 +257,7 @@ impl GameWorld {
     /// A builder carrying goods takes them to a drop site before building.
     /// Returns whether the unit is still on that errand. With no reachable
     /// drop site the new assignment waits with its cargo intact.
-    pub(super) fn drop_off_before_building(&mut self, unit_index: usize, dt: f64) -> bool {
+    pub(super) fn unload_before_work(&mut self, unit_index: usize, dt: f64) -> bool {
         if self.units[unit_index].cargo.is_none() {
             return false;
         }

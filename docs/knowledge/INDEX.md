@@ -22,6 +22,7 @@ of current behavior.
 | Native/WebGL build, branch integration, Modal/Actions | [Build, integration and release](build-integration-and-release.md) | Verification; GitHub history |
 | Browser fixtures, evidence, platform limits, handoffs | [Verification and handoffs](verification-and-handoffs.md) | Affected system guide |
 | PR state, review discussions, historical investigation | [GitHub history](github-history.md) | Verification; affected system guide |
+| Rust duplication, shared constraints, simplification | [Rust simplification audit](rust-simplification-audit.md) | Affected domain, HUD and server guides |
 
 The linked guides contain procedures, system entry points, reusable findings,
 failure modes and evidence. Existing detailed specs, benchmarks, asset provenance

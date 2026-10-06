@@ -68,7 +68,7 @@ blindly after reconnecting.
 - Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
   waived backward compatibility on 2026-10-05 until he requests it again. There
   are no old inventory/island migrations or historical required-field defaults.
-- `STORE_VERSION` in `src/store.rs` is 16 (adds required water balances to island inventories and ship cargo). Bump it for incompatible persisted-model
+- `STORE_VERSION` in `src/store.rs` is 17 (building production/research capabilities are derived from kind rather than persisted). Bump it for incompatible persisted-model
   changes; initialization atomically drops/recreates `world_state` when SQLite
   `user_version` differs, then normal startup generates a fresh world. The reset
   also applies to higher versions. Matching-version saves survive initialization.
@@ -105,3 +105,20 @@ error before any cell indexing.
 Water integration after roads uses store version 16: roads already shipped
 version 15. Water balances are required, so version 15 must also reset before
 deserialization under the established development policy.
+
+## Shared constraints and command candidates (2026-10-06)
+
+The Rust simplification removes authoritative `Building::produces/researches`;
+`BuildingKind` owns these capabilities. `BuildingView` retains derived,
+progression-filtered lists, preserving the snapshot wire shape. Version 17
+resets earlier development saves; matching-version saves remain persistent.
+`GameWorld::with_command` consumes an isolated candidate and returns it only on
+successful validation. Hosted commands clone once, save the returned candidate,
+then commit/publish; native/local `apply_command` uses the same operation.
+Domain rejection and SQLite failure must both leave live state unchanged.
+
+Command acknowledgements retain the existing string `error` envelope. Domain
+`CommandError` formatting owns player-facing rejection text, and both clients
+show it directly; the duplicate client string translation is removed. Persistence,
+malformed messages and connection status remain text. No command is replayed
+during reconnect.

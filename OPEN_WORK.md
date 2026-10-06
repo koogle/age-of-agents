@@ -1,3 +1,8 @@
+# Test/tooling subtraction — 2026-10-06
+
+- Jakob explicitly requested cutting repetitive tests/fixtures and substantially reducing Python. On `codex/reduce-tests-tooling`, integrated with master `a8188f1`: 1,843 Python lines removed (32.2%; 74 → 42 files), plus 216 Rust lines. Retired historical scripts remain recoverable through [the retirement record](docs/verification/RETIRED_TOOLS.md); active checks, packers, original art and provenance remain.
+- Mechanics fixtures use flat terrain/fixed patches; three fixture-generator self-tests are removed, while real gameplay/world-generation coverage remains. Earlier shared-domain/renderer cleanup and one-clone command handling are retained. Save version 17 resets older hosted development saves. All 301 integrated Rust tests, strict native/WASM lint, builds, asset checks and rebuilt desktop/phone acceptance pass. First release attempt was interrupted before activation; this branch is prepared for review and undeployed. [Audit](docs/knowledge/rust-simplification-audit.md), [verification](docs/verification/rust-refactor/README.md).
+
 # Overhead health bars — [PR #152](https://github.com/koogle/age-of-agents/pull/152)
 
 - Implemented thin green/orange/red bars for villagers, other friendly land units and visible animals, replacing selected-status/inspection HP text and floating combat numbers. No simulation, balance or save changes.

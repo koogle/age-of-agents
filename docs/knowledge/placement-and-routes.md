@@ -128,3 +128,11 @@ Costs and progress are retained; idle villagers never adopt road jobs.
 Road tasks now accept a nonempty list of distinct existing cells, rather than
 requiring a straight line. Placement still requires straight endpoints. The save
 shape and version are unchanged, and resumed network tasks survive reload.
+
+## Shared dimensions and interpolation (2026-10-06)
+
+`FIELD_SIZE` owns field dimensions in the domain and placement preview. Land
+units, wildlife and ships share cell/step position interpolation; movement speed
+and routing stay separate. The proposed expanded footprint geometry helpers were
+not retained: they grew source without sufficient subtraction. Existing placement,
+route-preservation and distance scans remain unchanged.

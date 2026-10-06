@@ -1,5 +1,10 @@
 # Loading-screen art
 
+Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
+their references below describe provenance, not current reproduction commands.
+Active offline packers and original art are retained. See
+[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+
 Art for the `/play` loading screen (`web/index.html`): a painted title and buildings that rise in four stages while the game downloads. The runtime uses `title.webp` here and the lossless 512 px frames in `assets/sprites/towncenter.{png,json}` and `assets/sprites/buildings_hd.{png,json}`. The canvas uses device-pixel resolution and high-quality smoothing. The older 256 px `buildings.webp`/JSON and contact sheet are historical sources only, no longer fetched by `/play`.
 
 | File | Size | Use |
