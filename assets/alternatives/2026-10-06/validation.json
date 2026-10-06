@@ -1,7 +1,7 @@
 {
-  "illustration_count": 41,
-  "successful_requests": 80,
-  "estimated_usd": 1.8268,
+  "illustration_count": 47,
+  "successful_requests": 92,
+  "estimated_usd": 2.0956,
   "excluded_failed_request": "01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing",
   "runtime_paths_changed": [],
   "errors": [],
@@ -1105,6 +1105,174 @@
       ],
       "mode": "RGBA",
       "sha256": "47e9138656e0acb2887daef84a26fea9b993fe5e99073329f13c982fe3d70afe",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "09-era-corrections/command_disembark/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "ae407e09543ab8f44c5b38f609bed1520de35853f5e9e7a77b72c8d9643e32cd"
+    },
+    {
+      "path": "09-era-corrections/command_disembark/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "23ee2855bce98576cc84f5f4dbcce0451002b59b9f14da9c36a04134ecae4027",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "09-era-corrections/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "7266d2c9ced3490b4dae917aecda6b1eed5640d567a19937b22faa0210ec3baa"
+    },
+    {
+      "path": "09-era-corrections/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "38e15d54dd60842427aab3854ef7273f41313b9863d1ce51a7bf5cfbd2a980c6",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "09b-era-explore-calibration/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "22dace9bb0cb3bb9b12be9cfcc4562a49a2819c8c905876e588aa407bb3197d2"
+    },
+    {
+      "path": "09b-era-explore-calibration/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "897405cfb158e2d814c445862e80a03b7fb4590cc953a7de1ba435c4c599d45b",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "10-cel-calibration/resource_cloth/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "662c4a3d8965016f216010d4c771133acd1ea82b5500c7c8035a230548f763fb"
+    },
+    {
+      "path": "10-cel-calibration/resource_cloth/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "ac11762f1cb54d2e19fa85d492721dc0869cc28b5c91a400ff92bc4fad53f67e",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "10-cel-calibration/resource_steel/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "b6b8663940a4c9de4988a5b9092436823fae851078b46c41715bd81cb45dd3da"
+    },
+    {
+      "path": "10-cel-calibration/resource_steel/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "eda9cd6d4bb7fc590a043086ac57f0a6dd975f22990b16f0932a9fa32199b4ce",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "10-cel-calibration/wolf_idle/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "21aeab269320784fa3af005d8bd4241211279a32e3c76872776064c541f878b6"
+    },
+    {
+      "path": "10-cel-calibration/wolf_idle/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "405c0e4a03acdc9b58604868ad9a4d77c9b72df39c60f2022d0e8407a0272210",
       "alpha_extrema": [
         0,
         255

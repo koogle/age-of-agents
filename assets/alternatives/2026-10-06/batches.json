@@ -24,7 +24,7 @@
       ],
       "family": "sprite",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "NEEDS CEL CORRECTION: dense modeled fur"
     },
     {
       "name": "dock_pair",
@@ -92,7 +92,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "STYLE REJECTED: glossy gradients/material realism"
     },
     {
       "name": "resource_bricks",
@@ -118,7 +118,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "STYLE REJECTED: satin highlights"
     },
     {
       "name": "resource_rations",
@@ -131,7 +131,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "STYLE REJECTED: realistic specular bread/apple"
     },
     {
       "name": "resource_timber",
@@ -211,7 +211,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "REJECTED: glossy highlight"
+      "review_status": "STYLE REJECTED: glossy domed shield"
     },
     {
       "name": "command_cargo",
@@ -224,7 +224,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "REJECTED: invented emblems"
+      "review_status": "ERA REJECTED: invented medieval heraldic emblem"
     },
     {
       "name": "command_disembark",
@@ -237,7 +237,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "ERA REJECTED: modern lace-up boot/cuff"
     },
     {
       "name": "command_sail",
@@ -263,7 +263,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "UNAPPROVED: direction candidate; see style review"
+      "review_status": "ERA REJECTED: magnetic compass"
     },
     {
       "name": "command_back",
@@ -342,7 +342,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "NEEDS REFINEMENT: mismatched paired shield"
+      "review_status": "ERA REJECTED: medieval heater-shield silhouette"
     },
     {
       "name": "shield_down",
@@ -354,7 +354,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "NEEDS REFINEMENT: mismatched paired shield"
+      "review_status": "ERA REJECTED: heraldic shield silhouette"
     },
     {
       "name": "coin_researched",
@@ -459,7 +459,7 @@
       ],
       "family": "icon",
       "aspect_ratio": "1:1",
-      "review_status": "NEEDS REFINEMENT: gradient-heavy shield"
+      "review_status": "STYLE REJECTED: gradient-heavy shield"
     },
     {
       "name": "command_back",
@@ -536,6 +536,88 @@
       "family": "icon",
       "aspect_ratio": "1:1",
       "review_status": "UNAPPROVED: full-figure identity candidate"
+    }
+  ],
+  "09-era-corrections": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "ERA/READABILITY REJECTED: eight-point star resembles compass rose",
+      "prompt": "All attached images are approved STYLE only. Draw a NEW high-resolution game UI illustration with the original villager fine thin dark-brown pen contours, broad quiet flat watercolor/cel areas, sparse details, matte surfaces and controlled blue-teal accents. Centered isolated object on pure white, no cast shadow, border, letters or text. Readable at 24 and 32 pixels. One simple small ancient-style parchment map, only slightly curled at two corners, with a single broad dark-teal coastline enclosing one small island and a SINGLE prominent four-point celestial navigation star beside the island near the top. The star is a star in the sky, not an instrument or compass rose; no surrounding circle, bearings, axes, pointers or numbered marks. Sparse open parchment area, muted cream paper, map silhouette compact and distinct from boat or cargo crate. No compass, needle, telescope, sextant, navigation routes, dotted paths, modern pins, grid, scale bar, legend or lettering."
+    },
+    {
+      "name": "command_disembark",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: sandaled landing-foot candidate",
+      "prompt": "All attached images are approved STYLE only. Draw a NEW high-resolution game UI illustration with the original villager fine thin dark-brown pen contours, broad quiet flat watercolor/cel areas, sparse details, matte surfaces and controlled blue-teal accents. Centered isolated object on pure white, no cast shadow, border, letters or text. Readable at 24 and 32 pixels. One bare lower leg and foot wearing a SIMPLE ancient Greek brown leather sandal, with two plain straps and a thin flat sole, stepping down onto one short sturdy wooden pier plank platform. Open toes visible, no laces, boot, tall shaft, trouser cuff, rubber sole or metal eyelets. One foot only, simple clear downward landing action, no floating leg stump ornament. Preserve landing/disembark meaning, no waves, sand mound, boat or extra props."
+    }
+  ],
+  "10-cel-calibration": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "NEEDS STYLE CORRECTION: simplified but edge shine/gradients remain",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. Exactly two stacked rectangular forged steel ingots for an ancient Greek strategy-game resource icon, matte cool blue-grey flat top planes and a single darker slate shadow plane. Simple clear trapezoid profiles, no chrome reflections, scratches, mottling or white shine. Three-quarter view; clear at 24px."
+    },
+    {
+      "name": "resource_cloth",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: two-tone cel calibration",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. One simply folded rectangle of royal-blue linen cloth like the villager scarf, a broad muted blue face and ONE darker blue shadow shape along folds, one thin cream selvage. Flat matte cloth, no satin sheen, no undulating gradients, no decorative stitches. Three-quarter view; clear at 24px."
+    },
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: two-tone cel calibration",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. Exactly one alert grey wolf in slightly elevated three-quarter front view. Broad quiet muted blue-grey body, one simple darker grey cel shadow shape, pale cream muzzle/chest. Draw four coherent legs and characteristic pointed ears, slender muzzle and bushy tail with a simple silhouette. NO individual hairs, fur striations, realistic mane, dense tufts or modeling; at most three short interior fur marks. Keep simple friendly illustrated NPC treatment, not a detailed wildlife painting."
+    }
+  ],
+  "09b-era-explore-calibration": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: celestial-star coastline map",
+      "prompt": "Use attached original villager and Greek diorama as STYLE authority. Draw one simple game UI icon: a small ancient parchment scroll map with a SINGLE island coastline in muted teal, and ONE tiny ordinary FIVE-POINT star floating just ABOVE the scroll in the sky, visibly separate from paper. The star has five equal points like a simple celestial star, NOT four/eight directional points and NOT a compass rose. No compass instrument, compass rose, needle, bearing lines, grid, arrows, telescope, sextant, modern pin, routes, lettering or legend. Compact silhouette legible24px, distinct from ship/cargo icon. Soft Ghibli TWO-TONE CEL shading, flat cream parchment plus one simple muted shadow, flat teal map mark, fine sparse brown ink, no gradients, gloss, realistic texture, mottling, heavy outlines or tattered-edge decoration. White background, no shadow or extra props."
     }
   ]
 }

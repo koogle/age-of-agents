@@ -1,7 +1,7 @@
 """World candidate comparisons and mirrored texture repeats, for review only."""
 from review import *
 B=BASE
-rows=[('Wolf',ROOT/'assets/sprites/wildlife.png',(0,0,627,627),B/'01-calibration/wolf_idle/cutout.png'),('Bear',ROOT/'assets/sprites/wildlife.png',(0,627,627,1254),B/'05-world/bear_idle/cutout.png'),('Dock front',ROOT/'assets/sprites/building_sources/dock_complete.png',None,B/'05-world/dock_front/cutout.png'),('Dock rear',ROOT/'assets/sprites/building_sources/directions/dock_north_complete.png',None,B/'07-targeted-repairs/dock_rear_single_sail/cutout.png')]
+rows=[('Wolf',ROOT/'assets/sprites/wildlife.png',(0,0,627,627),B/'10-cel-calibration/wolf_idle/cutout.png'),('Bear',ROOT/'assets/sprites/wildlife.png',(0,627,627,1254),B/'05-world/bear_idle/cutout.png'),('Dock front',ROOT/'assets/sprites/building_sources/dock_complete.png',None,B/'05-world/dock_front/cutout.png'),('Dock rear',ROOT/'assets/sprites/building_sources/directions/dock_north_complete.png',None,B/'07-targeted-repairs/dock_rear_single_sail/cutout.png')]
 sheet=Image.new('RGB',(1100,1300),'#d6d8d7');d=ImageDraw.Draw(sheet)
 d.text((20,10),'UNAPPROVED WORLD ALTERNATIVES | current left, candidate middle; small-scale previews right',fill='#202020')
 for j,(name,old,box,new) in enumerate(rows):

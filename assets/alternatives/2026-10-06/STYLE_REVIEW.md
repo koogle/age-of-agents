@@ -12,6 +12,7 @@ not a passing integration gate.
 | Light/material | Wolf/bear use broad cel planes. Shield/portrait metal and rations apple introduce brighter highlights. Military retry reduces white highlight but retains a gradient. | Reject glossy candidates for integration. |
 | Shape/detail | Cargo repair removes invented emblems. Agriculture repair makes seedlings legible. Town roof/basket have excess repeated detail; explore is busier. Portrait identity is not verified against unit masters. | Mixed; simplify before integration. |
 | Camera/scale | Rear dock repair preserves a rear facade and one sail, with brown timber matching front direction. Animals change facing/proportions; dock supports/material details change. | No animation/anchor or geometry approval. |
+| Era fit | Magnetic compass rejected in runtime and candidate; lace-up boot and heraldic shield candidates require correction. See ERA_REVIEW.md for all subjects. | Blocks runtime acceptance. |
 | Alpha/integration | BiRefNet cutouts exist, PNG/alpha checks pass, multiple-background sheets inspected. Source images are not normalized runtime icons or packed frames. Shields differ in silhouette/arrow treatment. | Not integration-ready; paired shield normalization/regeneration required. |
 
 ## Retained failures and preferred review variants
@@ -53,3 +54,19 @@ deployment is claimed for candidates that are not wired into the game. World
 comparisons use equal thumbnail bounds, not authoritative in-game relative scale.
 Future integration must regenerate construction/animation variants, register
 anchors, normalize icons, refine artifacts and pass the complete style gate.
+
+## User correction: preserve cel-shaded Ghibli look
+
+On 2026-10-06 Jakob found some alternatives too realistic. Broad expansion is
+paused. Steel gradients, satin cloth, bread highlights, the domed shield and
+dense wolf fur are rejected/need correction. A three-subject steel/cloth/wolf
+calibration uses the original villager and primary diorama only as style authority;
+color separation is retained while simplifying to two-tone cel forms. No further
+broad regeneration is authorized by this calibration.
+
+Calibration outcome: cloth loses satin shine and wolf uses much quieter fur
+masses, closer to retained NPCs. Wolf facing/proportions still differ. Steel is
+simpler but retains edge glints/gradients and is NOT a style pass. No further
+generation expanded from this calibration. Era map removes compass/rose but has
+a heavier contour and baked shadow requiring cleanup; sandal removes modern
+boot/cuff. All remain unapproved. See cel/era correction comparison sheets.
