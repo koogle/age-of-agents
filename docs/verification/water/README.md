@@ -1,6 +1,6 @@
 # Water resource verification
 
-Initial implementation based on `1bed03a`; integrating master `f4d5b01` for
+Initial implementation based on `1bed03a`; integrating master `79d5899` for
 the authorized merge on 2026-10-06. The corrected artwork was explicitly
 approved by the user. Combined verification is recorded below.
 
@@ -49,8 +49,9 @@ comparison are preserved under `assets/ui/sources/water/rejected/`.
 
 The correction changes artwork only. `check_art.py` captures current desktop
 and DPR-2 phone presentation without rerunning the gameplay sequence. The presentation snapshot sets water
-to 20 so the HUD pill is visible; this is not collection evidence. Earlier
-mechanics screenshots below retain the old artwork and are historical evidence.
+to 20 so the HUD pill is visible; this is not collection evidence. The
+`art-*` captures retain the standalone correction preview; the gameplay captures
+below are refreshed during combined merge verification.
 
 Corrected runtime review: desktop and DPR-2 phone HUD, riverbank and maximum
 zoom inspected; fine contours and pale clay remain legible, the blue mouth
@@ -95,3 +96,26 @@ The accelerated driver waits for the final snapshot and rendered frames before
 clicking depleted fields, avoiding stale-view commands during batched ticks.
 Neither these accelerated replays nor emulation establish physical-phone or
 production performance. Existing accessibility gaps remain tracked separately.
+
+## Combined merge verification (2026-10-06)
+
+Integrated master `79d5899`, including roads, granary yields, productive-building
+availability, dedicated menu art, wildlife attacks and the subcategory card fix.
+The combined suite passes 293 tests (13 server, 96 client, 184 domain; one manual
+benchmark ignored). After the final layout-only upstream integration, all 96
+client tests pass again, with strict native/WASM lint, formatting and a freshly
+rebuilt WebGL bundle. All 303 sprite frames and icon/field/transport checks pass,
+as do the six release-verifier tests. Store version 16 deliberately supersedes
+roads' already-shipped version 15.
+
+Review: water remains a typed resource through existing inventory, carrying and
+spending paths; the only gathering exception preserves source amount. Field
+costs are still reserved once in the domain. The granary multiplier, road
+travel-time routing and current building unlock rules are preserved. No new
+dependency, autonomous job or client-side gameplay authority was introduced.
+
+The final combined browser replay passes on desktop mouse and DPR-2 phone touch,
+collecting 22.133333333333333 water, spending exactly 20 across two preparation
+cycles and delivering 240 food on each platform. Source amount remains 120; all
+commands are accepted and no browser errors occur. Gameplay/maximum-zoom captures
+were refreshed with the final bundle and approved art.
