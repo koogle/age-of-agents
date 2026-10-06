@@ -158,3 +158,20 @@ and no page errors. [Combined checks](resume/integrated/checks.json) and
 The user authorized merging [PR #148](https://github.com/koogle/age-of-agents/pull/148)
 after passing checks. Production deployment is tracked separately by the
 [release workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
+
+Subsequent integration with master `50d02e1` preserves the building-selection
+change that keeps gatherers working. All 299 workspace tests, formatting and
+native/WASM strict lint pass, and the combined browser bundle is rebuilt.
+The final focused replay passes on desktop mouse and DPR-2 phone touch:
+14 interrupted pieces finish through single-piece resume, paid progress is retained,
+stone stays at 23 and no page errors occur. [Current checks](resume/current/checks.json)
+and [browser results/hashes](resume/current/results.json) identify that build.
+
+Use `python3 docs/verification/check_roads.py --resume-only --no-screenshots
+--output /tmp/road-resume-check` for this focused flow. It loads an isolated
+save with partially worked, already paid dirt/stone foundations, issues acknowledged
+Stop orders, checks frozen progress and uses actual clicks/taps to resume. It
+expects two single-piece road commands. This verifies resumption of existing
+work; use the default full replay to also verify placement menus and new-cell
+charging. The full replay above passed before this unrelated building-selection
+integration, which changes the building-target branch rather than ground orders.
