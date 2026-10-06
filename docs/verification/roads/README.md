@@ -55,9 +55,16 @@ availability gate, upstream art and granary field-yield bonus.
 
 ## Visual review
 
-Existing approved clayland paint supplies the dirt surface; the existing
-cobblestone swatch supplies stone. These retain the terrain lighting, fog and
-perspective. No new generated art or asset edits. Ink/material match is inherited
+**Updated 2026-10-06:** the user requested closer style matching. Dedicated road
+materials replace the original reuse below; see the [current refinement and
+visual evidence](style/README.md). The following screenshots retain the original
+construction verification and are historical material previews.
+
+### Original material pass
+
+The original pass used approved clayland paint for dirt and the existing
+cobblestone swatch for stone. These retained the terrain lighting, fog and
+perspective. At that stage there was no new generated art or asset editing. Ink/material match was inherited
 from those swatches; straight boundaries are deliberate grid edges. The existing
 Build and stone medallions retain the approved palette and scale, with explicit
 Dirt road / Stone road labels. Retained captures: [desktop before](desktop-before.png),

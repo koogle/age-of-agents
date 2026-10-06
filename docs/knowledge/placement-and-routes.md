@@ -105,7 +105,7 @@ land on one island, reserve new-cell costs once, and can resume existing
 work. Crossing segments retain existing material and charge only for new cells. Buildings may still cover road cells; their ordinary occupancy takes priority.
 
 The client Roads group uses two taps/clicks and snaps the endpoint to the dominant
-axis. Roads use the existing painted clay and cobblestone terrain textures.
+axis. Roads use dedicated painted earth and irregular limestone swatches; building plots retain their original cobblestone. See the [road material review](../verification/roads/style/README.md).
 Weighted Dijkstra minimizes travel time for friendly movement and drop-site
 selection. Each edge averages endpoint traversal time, matching the movement
 speed on transitions; diagonal costs approximate Euclidean distance at milliscale.

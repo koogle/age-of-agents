@@ -113,6 +113,14 @@ async def main(output, mode_filter, screenshots):
                             assert s['inventories'][0]['stone']==(30 if kind=='dirt' else 23)
                             await settle(6)
                             if kind == 'stone': await capture(f'{mode}-{kind}-complete.png')
+                        if screenshots:
+                            # Anchor maximum zoom on both road strips, after input checks.
+                            p=await ground(start_column+3,25)
+                            await page.mouse.move(*p[:2])
+                            for _ in range(3):
+                                await page.mouse.wheel(0,-5000)
+                                await settle()
+                            await capture(f'{mode}-maximum-zoom.png')
                         assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==2,commands
                         assert not errors,errors
                         results.append({'mode':mode,'viewport':[width,height,dpr],'road_cells':14,'stone_remaining':23,'errors':errors,'server_sha256':hashlib.sha256((ROOT/'target/debug/age-of-agents').read_bytes()).hexdigest()})

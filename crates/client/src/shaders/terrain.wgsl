@@ -130,11 +130,12 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let mip = clamp(ceil(log2(max(density, 1.0))), 0.0, 9.0);
     let inset = vec2<f32>(0.5 * exp2(mip)) / texels;
     let paving = textureSampleLevel(ground_layers, repeat_sampler, clamp(paving_uv, inset, 1.0 - inset), 10, mip).rgb;
-    // Roads follow the terrain, using the existing painted earth and paving.
-    let earth = paint_sample(xz, 7).rgb * vec3<f32>(0.75, 0.78, 0.83);
-    if surface == 1 { color = earth; }
-    if surface == 2 { color = paving; }
-    if surface == 3 { color = mix(color, earth, 0.55); }
+    // Road-specific paintings retain their authored palette and fine contours.
+    // Mirror/clamp like plots so adjoining cells and texture repeats have no seams.
+    let road_layer = select(11, 12, surface == 2);
+    let road = textureSampleLevel(ground_layers, repeat_sampler, clamp(paving_uv, inset, 1.0 - inset), road_layer, mip).rgb;
+    if surface == 1 || surface == 2 { color = road; }
+    if surface == 3 { color = mix(color, road, 0.55); }
     if occupied_plot || preview_plot {
         color = paving;
     }
