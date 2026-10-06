@@ -1,0 +1,31 @@
+Browser worker ready
+category_town desktop loading new context
+category_town desktop connected
+category_town desktop sending fixture
+category_town desktop capturing
+category_town desktop menu PASS
+command_cargo desktop loading new context
+command_cargo desktop connected
+command_cargo desktop sending fixture
+command_cargo desktop capturing
+command_cargo desktop menu PASS
+command_disembark desktop loading new context
+command_disembark desktop connected
+command_disembark desktop sending fixture
+command_disembark desktop capturing
+command_disembark desktop menu PASS
+category_town phone loading new context
+category_town phone connected
+category_town phone sending fixture
+category_town phone capturing
+category_town phone menu PASS
+command_cargo phone loading new context
+command_cargo phone connected
+command_cargo phone sending fixture
+command_cargo phone capturing
+command_cargo phone menu PASS
+command_disembark phone loading new context
+command_disembark phone connected
+command_disembark phone sending fixture
+command_disembark phone capturing
+command_disembark phone menu PASS
