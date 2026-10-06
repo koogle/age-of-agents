@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-06",
+  "tool": "OpenAI image_gen",
+  "model": "not exposed",
+  "reference_revision": "14ead90",
+  "reference_order": [
+    "assets/terrain/road_sources/stone-sandy-before.png",
+    "assets/terrain/cobblestone.png",
+    "assets/reference/diorama_primary.webp"
+  ],
+  "reference_sha256": {
+    "assets/terrain/road_sources/stone-sandy-before.png": "733826ebcab5c1577e7c1125a5a97b75c4f29ab9011590f63a2fa1cf601af588",
+    "assets/terrain/cobblestone.png": "87e11c75415e150ec16bee2dfaf4b0044e3403bf27b4cda6666ebf6551ee3d0b",
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+  },
+  "prompt_file": "stone-contrast-prompt.txt",
+  "output": "../road_stone.png",
+  "output_sha256": "8409efa2a26cd787343a71e8f21a089501efaecfe2a6bbcba0b9d49db9a552c9",
+  "size": [
+    1254,
+    1254
+  ],
+  "mode": "RGB",
+  "generated_source": "/workspace/generated_images/exec-b4106861-12f3-4443-8e6d-ba73ec93cf29.png",
+  "postprocessing": "None; unchanged 512px mirrored/mipmapped runtime sampling.",
+  "reason": "User said the merged stone street looked too sandy and requested slightly stronger definition. Neutralize yellow cast and modestly strengthen joints and soft shading; preserve layout."
+}

@@ -220,3 +220,12 @@ material mismatch in west as well. The two-view reduction does not fix or approv
 that difference. A future art correction should match timber across both source
 views while preserving directional shading, geometry and construction stages.
 No recoloring is included in the mirroring PR.
+
+## Stone road readability follow-up (2026-10-06)
+
+After merging roads, Jakob said the stone street had drifted too far toward sand
+and requested slightly stronger material definition. Refine only stone toward
+neutral limestone grey with modestly deeper fine joints and clearer soft face
+shading; retain the irregular layout and painted style. Dirt stays unchanged.
+Jakob preferred the revised neutral-limestone texture after seeing the comparison.
+Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).

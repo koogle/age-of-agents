@@ -84,3 +84,8 @@ with the driver; selected retained JPGs are compressed previews.
 Browser checks use
 isolated snapshot fixtures, not saved games or production. Native windows and
 physical phones are outside this check; the PR is not a deployment.
+
+Integrated master `1984e9b` after verification, preserving its independently
+reviewed stone-road asset and documentation. No Rust, dock atlas or browser
+bundle changes came from that merge; the tested hashes still match. The dock
+fixture contains no roads. Only handoff/art-guide text conflicts required resolution.
