@@ -1,6 +1,6 @@
 //! Regressions for rendered work frames after the first item enters the load.
 use super::*;
-use aoa_game::{CarriedResource, GameWorld};
+use aoa_game::{CarriedResource, CellCoordinate, GameWorld};
 
 pub(super) fn sheets() -> Sheets {
     Sheets::parse(
@@ -279,4 +279,42 @@ fn paused_wildlife_holds_its_rendered_stride_until_resumed() {
         view.frame(1.0 / 60.0, None);
     }
     assert_ne!(sprite(&mut view).uv, before.uv);
+}
+
+#[test]
+fn archer_bow_pose_uses_authoritative_windup_at_range_and_aims_at_moving_animal() {
+    let world = GameWorld::default();
+    let mut snapshot = world.snapshot();
+    snapshot.animals = world.animals.clone();
+    let unit = &mut snapshot.units[0].unit;
+    unit.kind = aoa_game::UnitKind::Archer;
+    unit.cell = CellCoordinate::new(10, 10);
+    unit.step = None;
+    unit.action = UnitAction::AttackAnimal {
+        animal_id: snapshot.animals[0].id.clone(),
+        elapsed_seconds: 0.4,
+    };
+    snapshot.animals[0].cell = CellCoordinate::new(14, 10);
+    snapshot.animals[0].step = Some(aoa_game::Step {
+        to: CellCoordinate::new(13, 10),
+        progress: 0.5,
+    });
+    let unit = &snapshot.units[0].unit;
+    let at = terrain::cell_center(unit.cell);
+    let position = Vec3::new(at.x, 0.0, at.y);
+    let target = snapshot.animals[0].position();
+    assert_eq!(
+        work_target(&snapshot, unit, position),
+        Some((terrain::world_of(target.x, target.y), "action"))
+    );
+    snapshot.simulation_speed = 0.0;
+    assert!(work_target(&snapshot, &snapshot.units[0].unit, position).is_some());
+    let UnitAction::AttackAnimal {
+        elapsed_seconds, ..
+    } = &mut snapshot.units[0].unit.action
+    else {
+        unreachable!()
+    };
+    *elapsed_seconds = 0.0;
+    assert!(work_target(&snapshot, &snapshot.units[0].unit, position).is_none());
 }

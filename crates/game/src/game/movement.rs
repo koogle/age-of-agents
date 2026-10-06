@@ -11,6 +11,7 @@ use crate::navigation::{PathTree, offset};
 #[derive(Debug, Clone, Copy)]
 pub(super) enum Goal {
     Cell(CellCoordinate),
+    ArcherRange(CellCoordinate),
     /// Any free cell touching the footprint, including diagonally.
     Beside(Footprint),
 }
@@ -80,6 +81,10 @@ impl GameWorld {
         self.units[unit].step.is_none()
             && match goal {
                 Goal::Cell(cell) => here == cell,
+                Goal::ArcherRange(target) => {
+                    self.archer_shot_clear(here, target, occupancy)
+                        && !occupancy.reserved_by_other(here, Some(unit))
+                }
                 Goal::Beside(footprint) => {
                     footprint.is_interaction_cell(here)
                         && !occupancy.reserved_by_other(here, Some(unit))
@@ -90,6 +95,11 @@ impl GameWorld {
     fn goal_cells(&self, unit: usize, goal: Goal, occupancy: &Occupancy) -> Vec<CellCoordinate> {
         match goal {
             Goal::Cell(cell) => vec![cell],
+            Goal::ArcherRange(target) => self
+                .archer_positions(target, occupancy)
+                .into_iter()
+                .filter(|cell| !occupancy.reserved_by_other(*cell, Some(unit)))
+                .collect(),
             Goal::Beside(footprint) => interaction_cells(footprint)
                 .filter(|cell| !occupancy.is_static(*cell))
                 .filter(|cell| !occupancy.reserved_by_other(*cell, Some(unit)))
@@ -126,6 +136,13 @@ impl GameWorld {
                     .nearest(
                         interaction_cells(footprint).filter(|cell| !occupancy.is_static(*cell)),
                     )
+                    .is_some()
+            {
+                return NextStep::Wait;
+            }
+            if let Goal::ArcherRange(target) = goal
+                && through
+                    .nearest(self.archer_positions(target, occupancy))
                     .is_some()
             {
                 return NextStep::Wait;
@@ -218,6 +235,19 @@ impl GameWorld {
     /// Where a unit is currently trying to walk, if anywhere.
     fn walking_goal(&self, unit: usize) -> Option<Goal> {
         match &self.units[unit].action {
+            UnitAction::AttackAnimal { animal_id, .. } => {
+                self.animals.iter().find(|a| &a.id == animal_id).map(|a| {
+                    if self.units[unit].kind == UnitKind::Archer {
+                        Goal::ArcherRange(a.cell)
+                    } else {
+                        Goal::Beside(Footprint {
+                            origin: a.cell,
+                            columns: 1,
+                            rows: 1,
+                        })
+                    }
+                })
+            }
             UnitAction::BuildRoad { cells } => {
                 if self.units[unit].cargo.is_some() {
                     self.nearest_drop_site(unit).map(Goal::Beside)

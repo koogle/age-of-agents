@@ -55,6 +55,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 - **Wildlife strength (2026-10-06):** Wolves require roughly 3–5 archers (300 HP, 35 damage per contact hit); bears are tougher (600 HP, 50 damage). Existing saved health remains intact; new spawns use the higher maximum.
 
+- **Ranged archers (2026-10-06):** Explicit wildlife attacks stop at a clear position within four cells and fire at 18 damage per second; melee units retain contact attacks. Reuse existing routing and bow art; preserve saves and player-controlled retreat.
+
 ## Superseded designs
 
 These explain the path to the current design, not requirements to restore.

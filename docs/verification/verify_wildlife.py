@@ -131,12 +131,24 @@ async def main(out, only, closeups=False):
                         await command({'type':'attack_animal','unit_ids':[u['id'] for u in ordered['units']], 'animal_id':'wolf'})
                         await command({'type':'set_simulation_speed','multiplier':2.0})
                         injured=None
+                        ranged=None
                         injured_units=False
                         for _ in range(120):
                             await asyncio.sleep(.15)
                             live=await state()
                             injured_units |= any(u['health']<100 for u in live['units']) or len(live['units']) < len(ordered['units'])
                             wolf=next((a for a in live['animals'] if a['id']=='wolf'),None)
+                            if wolf and ranged is None:
+                                for hunter in live['units']:
+                                    action=hunter['action']
+                                    distance=((hunter['cell']['column']-wolf['cell']['column'])**2+(hunter['cell']['row']-wolf['cell']['row'])**2)**.5
+                                    if hunter['step'] is None and action['type']=='attack_animal' and action['elapsed_seconds']>0 and distance>1.5:
+                                        ranged={'hunter':copy.deepcopy(hunter),'animal':copy.deepcopy(wolf),'distance':distance}
+                                        await command({'type':'set_simulation_speed','multiplier':0.0})
+                                        await page.wait_for_timeout(300)
+                                        await page.screenshot(path=str(out/(label+'-ranged.png')))
+                                        await command({'type':'set_simulation_speed','multiplier':2.0})
+                                        break
                             if wolf and wolf['health']<300 and injured is None:
                                 injured=copy.deepcopy(live)
                                 await command({'type':'set_simulation_speed','multiplier':0.0})
@@ -144,6 +156,7 @@ async def main(out, only, closeups=False):
                                 await command({'type':'set_simulation_speed','multiplier':2.0})
                             if not wolf:break
                         else:raise AssertionError('Wolf was not defeated')
+                        assert ranged is not None, "Archer must fire before reaching melee contact"
                         assert injured is not None
                         assert injured_units, 'Animal must fight back'
                         assert live['units'], 'The squad must survive the wolf'
@@ -153,7 +166,7 @@ async def main(out, only, closeups=False):
                         await page.screenshot(path=str(out/(label+'-after.png')))
                         assert not errors,errors
                         results.append({'viewport':label,'ordered':ordered['units'][0]['action'],
-                                        'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
+                                        'ranged':ranged,'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
                         await context.close();stop()
                     await browser.close()
             finally:stop()

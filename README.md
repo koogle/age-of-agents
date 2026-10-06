@@ -21,8 +21,8 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - 17 buildings, 14 resources/products, farming with granary yield bonuses, processing, research and production queues.
 - Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
-- Territorial wolves and bears, unit health and hunting orders.
-- Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
+- Territorial wolves and bears, unit health, hunting orders and ranged archers.
+- Guard, archer, healer and siege-cart production; healing and broader combat remain future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
 - SQLite saves for hosted games; native and browser-local games are in-memory.
 

@@ -23,6 +23,29 @@ arrival can change casualties. Existing saved current health is preserved; incre
 damage applies immediately, and new animals spawn at the increased maximum.
 There is no schema change or world reset.
 
+## Ranged archers (2026-10-06)
+
+Jakob requested true distance attacks in a separate PR after the strength change.
+Archers stop at a clear firing position within four cells and deal 18 damage
+per one-second windup, including against moving visible animals. Existing
+road-weighted routing finds firing positions; blocked temporary positions wait.
+Buildings, live non-water resources and mountains block the shot, including
+diagonal corners. Water and friendly units do not. Both endpoints of a moving
+animal must be in range and clear; archers finish existing steps before shooting.
+Movement/lost shots reset the windup. Archers hold position as animals close,
+and pursue if range is lost; retreat remains an explicit order.
+
+The existing authored bow action aims at the target when the authoritative
+attack timer is positive; it freezes on pause. Damage resolves at release using
+the existing cooldown, without persistent projectiles, ammunition or a save
+schema change. Dead/hidden targets clear the order. Mixed groups validate each
+member against its own attack reach before assigning any orders.
+
+Open-ground approach tests at 100ms: one/two archers lose to a full-health wolf;
+three/four/five win with two/three/four survivors respectively. Ranged positions
+across water can protect archers from melee wildlife; terrain and approach order
+therefore matter. No automatic retaliation or retreat is added.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
@@ -39,8 +62,9 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
-Their contact damage is 10/25/18/35 per second respectively. This is a bounded
-wildlife combat slice: ranged attacks, healing, building damage, factions/raids,
+Their damage is 10/25/18/35 per second respectively; archers use four-cell
+shots and the others require contact. This is a bounded wildlife combat slice:
+healing, building damage, factions/raids,
 loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
 villagers move faster than predators. No friendly automatic retaliation.
@@ -68,7 +92,8 @@ rings identify wildlife. Authored sprites are documented in
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
 Frames are authored and mirrored; reverse-facing poses remain future art work.
-Both animals now have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
+Both animals now have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art; archers
+use the authored bow action at range.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
 (including 12 and the earlier branch-only wildlife schema 13) reset under the existing
@@ -124,3 +149,7 @@ Stronger-wolf browser fixtures start the attack target outside its six-cell aggr
 radius. Otherwise resuming simulation before clicking can move the wolf away
 from its captured screen position and dispatch a ground move instead of an attack.
 Balance evidence and reproduction: [stronger wildlife](../verification/stronger-wildlife/README.md).
+
+Ranged acceptance and captures: [ranged archers](../verification/ranged-archers/README.md).
+The real-server verifier requires an active stationary firing timer beyond melee
+distance, then verifies mutual damage and cleanup on desktop and emulated phone.

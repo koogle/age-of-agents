@@ -118,3 +118,11 @@ The full workspace passes 289 tests (one manual benchmark ignored). Browser
 procedure and visual evidence live in [road verification](../verification/roads/README.md).
 Resume one unfinished cell by clicking it with villagers selected, or reissue a
 line to resume its outstanding work; idle villagers never adopt road jobs.
+
+## Archer firing positions (2026-10-06)
+
+`Goal::ArcherRange` uses the existing weighted movement and temporary-reservation
+handling with reachable clear-shot cells in a four-cell radius. Static blockers
+for walking differ from shot blockers: arrows cross water and units, but buildings,
+live non-water resources and mountain cells stop them. A supercover trace checks
+both sides of diagonal corners. See [wildlife](wildlife.md) for combat timing.
