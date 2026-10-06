@@ -102,3 +102,10 @@ focused topic from the [knowledge index](INDEX.md).
 ## Building and ship storage
 
 PR #94 generalizes delivery targets to `storage_id`: completed compatible buildings and stopped shore ships with remaining hold capacity. Preserve residual personal cargo on a partial deposit, and reselect a compatible site if a ship moves away. `storage.rs` and `ship_tests.rs` cover local spending, capacity, transfers, and deposit resumption. Bounded nearest-goal routing applies to both kinds of storage site.
+
+## Renewable water collection
+
+Water gathering uses the existing carry/deliver/resume task. Drawing water does
+not reduce a riverbank source's finite bookkeeping amount; it does increase
+finite personal cargo and storage normally. Stop still cancels collection.
+See [water](water-resource.md) for placement and per-cycle field costs.

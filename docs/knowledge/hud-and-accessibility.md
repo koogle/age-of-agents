@@ -95,3 +95,10 @@ restore the hand for land units and ships, retaining the X for cancellation.
 ## Text transparency
 
 User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.
+
+## Field placement costs (2026-10-05)
+
+With water added as a required field input, the placement information pill now
+shows the full shared cost continuously: 10 wood, 5 stone, 10 water, plus work
+time and food yield. Mouse and touch both get this without relying on hover.
+See [water verification](../verification/water/README.md).

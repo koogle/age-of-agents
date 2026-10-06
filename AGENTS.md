@@ -13,7 +13,7 @@ Despite the project name, the initial game contains **no LLM-controlled or auton
 The current playable demo proves these loops:
 
 1. Isometric terrain tiles render cleanly on desktop and mobile.
-2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across eight biome-compatible raw resources.
+2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across nine raw resources, including renewable riverbank water.
 3. A player can construct a town center and train villagers through its authoritative task queue.
 4. A player can research five bounded gathering improvements through that same task queue.
 

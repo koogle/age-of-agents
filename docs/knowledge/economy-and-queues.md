@@ -38,6 +38,13 @@ Read [current decisions](../../decisions.md) and the
 [starter economy review](../STARTER_ECONOMY_REVIEW.md) for rationale; the review's
 old transport deferrals are explicitly historical. Deposited stocks belong to individual islands, supplemented by stopped shore ships; costs reserve once from shore then ship cargo, while outputs/refunds remain on the job’s island. Research remains shared. Personal cargo is covered by [tasks and cargo](tasks-and-cargo.md).
 
+## Water and fields (2026-10-05)
+
+Water is a basic island-local resource collected at renewable riverbank sources.
+Fields reserve 10 water alongside 10 wood and 5 stone once per planting or
+replenishment cycle. A preparation helper/resumed order does not pay again.
+The source placement, storage and save contract is in the [water guide](water-resource.md).
+
 ## Checks and reusable learning
 
 ```bash

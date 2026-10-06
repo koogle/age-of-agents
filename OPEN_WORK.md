@@ -42,6 +42,25 @@
 
 # Open work
 
+- Water resource (2026-10-05): Jakob approved the first slice and implementation.
+  Renewable riverbank sources, typed water inventory/cargo, and 10 water per
+  field planting/replenishment cycle are implemented locally. Generated/refined
+  jug art is integrated in the HUD and existing resource atlas. Save version 15
+  resets older hosted worlds; no production state has changed.
+  All 271 workspace tests pass (one manual benchmark ignored); 299 sprite frames,
+  new icon normalization, existing atlas pixel preservation and six production
+  verifier tests pass. Native/WASM strict lint, rebuilt WebGL, and final code/style review pass.
+  Desktop mouse (1100x750) and emulated DPR-2 phone touch (430x932) both
+  collect water, plant and replenish fields, spend exactly 20 water, and deliver
+  240 food without browser errors. Placement costs remain visible without hover.
+  Maximum-zoom captures pass after correcting transparent ground-anchor padding.
+  User rejected the initial water icon style on 2026-10-06; corrected the
+  heavy orange rendering to fine ink, pale clay and muted blue watercolor.
+  Original art is retained as rejected evidence.
+  User approved the corrected art and authorized merge on 2026-10-06.
+  Integrating current master before final combined verification and release. See [water guide](docs/knowledge/water-resource.md)
+  and [verification](docs/verification/water/README.md).
+
 - [PR #108](https://github.com/koogle/age-of-agents/pull/108): resource icons retain quantities and show capitalized names on hover/tap; rows compact to 66px. User authorized merging into master. Integrated master `2bedc41`; all 264 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass. Rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors; [screenshots and review](docs/verification/resource-names/README.md). Generated-bundle conflicts resolved by rebuilding; replay fixture reader updated for island inventories. Ready for the authorized merge; production delivery follows the merge-triggered Actions workflow.
 
 - README cleanup: restored the concise scope of `9ce5f17`, retaining current features and setup, including merged wildlife combat. Detailed implementation notes stay in existing guides. Documentation-only; links and whitespace checked. User authorized PR creation and merge.

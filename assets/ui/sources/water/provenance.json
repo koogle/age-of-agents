@@ -1,0 +1,55 @@
+{
+  "revision": "1bed03a",
+  "references": [
+    "assets/ui/icons/resource_wood.png",
+    "assets/ui/icons/resource_food.png",
+    "assets/ui/icons/tech_masonry.png"
+  ],
+  "model": "fal-ai/nano-banana/edit",
+  "prompt": "The attached images are approved STYLE REFERENCES. Create one single water resource game icon: a simple squat Greek terracotta water jug with one curved handle and a wide open mouth clearly showing muted turquoise fresh water, with a small turquoise water droplet beside the lip. Exactly match the fine dark brown ink contours, sparse hatching, restrained flat watercolor washes, gentle cel shading and three-quarter upper view of the references. Muted terracotta and cream body, subtle teal water. No decoration, no text, no border, no dramatic gloss or heavy black outlines. Centered isolated object on pure white background, no cast shadow. Clear silhouette at 24 pixels.",
+  "status": "Revised after user style rejection, 2026-10-06; earlier style pass superseded. Rejected version retained in rejected/.",
+  "refinement": {
+    "model": "OpenAI image_gen",
+    "references": [
+      "assets/ui/sources/water/draft.png",
+      "assets/ui/icons/resource_wood.png",
+      "assets/ui/icons/resource_food.png",
+      "assets/ui/icons/tech_masonry.png"
+    ],
+    "output": "rejected/refined.png",
+    "notes": "Rejected by user: contours too heavy, shading too saturated. Superseded by correction.",
+    "prompt": "Refine the first image, a water jug resource icon, to match the next three approved game icons exactly in visual style: fine crisp dark-brown ink contours, restrained cel/watercolor shading with gentle two-tone forms, sparse hatching. Preserve the terracotta jug, handle, wide elliptical opening with clearly visible muted teal fresh water, and small water droplet beside the lip. Remove soft diffusion blur, simplify highlights so not glossy, clean coherent handle geometry. Keep its compact silhouette. No decoration, text, borders or ground shadow. Single isolated jug on transparent background. Retain muted terracotta, cream and teal palette. Render at 1024 square, with finely resolved original edges. This will be used as a 24px resource icon and small isometric game world jug."
+  },
+  "packing": "python3 scripts/pack_water.py",
+  "requests": [
+    {
+      "t": 1791243476.0872636,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "water:icon",
+      "est_usd": 0.0398,
+      "request_id": "01a10e6e-30c3-76e0-b325-ebf09664b608",
+      "seconds": 11.2
+    },
+    {
+      "t": 1791243479.2245765,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "water:cut",
+      "est_usd": 0.005,
+      "request_id": "01a10e6e-6004-75e1-8e68-85ca4b27d6f5",
+      "seconds": 2.2
+    }
+  ],
+  "packing_notes": "HUD uses shared icon normalization. World frame crops on alpha > 40 to remove nearly transparent diffusion fringe, then fits within 464px and places visible ground contact at y=496; unitsPerPixel=0.0018 preserves gameplay scale.",
+  "correction": {
+    "model": "OpenAI image_gen",
+    "source": "/workspace/generated_images/exec-ee71155c-84ce-4bfc-a77f-0186e297d35b.png",
+    "references": [
+      "assets/ui/icons/resource_wood.png",
+      "assets/ui/icons/resource_food.png",
+      "assets/ui/icons/tech_masonry.png",
+      "assets/ui/sources/water/rejected/refined.png"
+    ],
+    "output": "refined.png",
+    "prompt": "Create a corrected water resource icon for the game whose APPROVED art style is shown in images 1,2,3. Image 4 is the REJECTED water icon: its thick contours, overly saturated orange gradient, glossy highlight and cartoon pot do not fit. Replace its rendering completely to match the first three references. One compact squat ancient Greek water pitcher, simple rounded handle right, broad open elliptical mouth showing calm muted blue-teal fresh water. Pale buff ochre ceramic, subtle desaturated terracotta on shadow side, very fine delicate dark brown ink contour, sparse fine hand drawn interior material marks, flat restrained watercolor washes, slight paper grain within object only. No broad shiny white highlight, no thick outline, no harsh dark shading bands, no floating drop, no sparkles, no ground shadow. Elevated three-quarter view matching the wood and stone references. Compact readily identifiable silhouette at 24px. Fill about 80 percent of canvas, single isolated object, transparent background. The ceramic should have the light warm parchment/ochre tonality of reference 3 and restrained shading of reference 1, with enough blue water visible to identify water."
+  }
+}
