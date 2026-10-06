@@ -1,3 +1,18 @@
+PASS villager.json: 34 frames, cells [(512, 512)]
+PASS villager_woman.json: 34 frames, cells [(512, 512)]
+PASS villager_elder.json: 34 frames, cells [(512, 512)]
+PASS villager_field_preparation.json: 12 frames, cells [(512, 512)]
+PASS villager_idle_hd.json: 12 frames, cells [(512, 512)]
+PASS resources.json: 22 frames, cells [(512, 512)]
+PASS towncenter.json: 5 frames, cells [(512, 512)]
+PASS buildings_hd.json: 28 frames, cells [(512, 512)]
+PASS buildings_economy.json: 20 frames, cells [(512, 512)]
+PASS buildings_crafts.json: 16 frames, cells [(512, 512)]
+PASS buildings_civic.json: 16 frames, cells [(512, 512)]
+PASS units.json: 60 frames, cells [(512, 512)]
+PASS transport.json: 2 frames, cells [(512, 512)]
+PASS wildlife.json: 8 frames, cells [(627, 627)]
+Checked 303 frames; 0 below the HD frame minimum.
 PASS category_gathering.png
 PASS category_military.png
 PASS category_production.png
@@ -23,6 +38,7 @@ PASS resource_rations.png
 PASS resource_steel.png
 PASS resource_stone.png
 PASS resource_timber.png
+PASS resource_water.png
 PASS resource_wood.png
 PASS tech_agriculture.png
 PASS tech_forestry.png
@@ -33,26 +49,8 @@ PASS unit_archer.png
 PASS unit_guard.png
 PASS unit_healer.png
 PASS unit_siege_cart.png
-PASS villager.json: 34 frames, cells [(512, 512)]
-PASS villager_woman.json: 34 frames, cells [(512, 512)]
-PASS villager_elder.json: 34 frames, cells [(512, 512)]
-PASS villager_field_preparation.json: 12 frames, cells [(512, 512)]
-PASS villager_idle_hd.json: 12 frames, cells [(512, 512)]
-PASS resources.json: 21 frames, cells [(512, 512)]
-PASS towncenter.json: 5 frames, cells [(512, 512)]
-PASS buildings_hd.json: 28 frames, cells [(512, 512)]
-PASS buildings_economy.json: 20 frames, cells [(512, 512)]
-PASS buildings_crafts.json: 16 frames, cells [(512, 512)]
-PASS buildings_civic.json: 16 frames, cells [(512, 512)]
-PASS units.json: 60 frames, cells [(512, 512)]
-PASS transport.json: 2 frames, cells [(512, 512)]
-PASS wildlife.json: 8 frames, cells [(627, 627)]
-Checked 302 frames; 0 below the HD frame minimum.
-PASS villager_field_preparation.json: 12 frames, cells [(512, 512)]
-PASS field preparation: 12 distinct transparent HD poses, aligned feet, original HD sources
-PASS transport: two registered transparent 512px frames from retained high-resolution sources
 ......
 ----------------------------------------------------------------------
-Ran 6 tests in 0.002s
+Ran 6 tests in 0.003s
 
 OK

@@ -8,11 +8,11 @@ change. Sources and per-icon findings live in the
 
 ## Validation
 
-Base: master `79d5899` (preserves roads, refined wildlife and removed build-subcategory title cards). 289 Rust tests pass
-(13 server, 95 client, 181 domain; one existing manual benchmark ignored).
+Base: master `1a45e0d` (preserves roads, refined wildlife, removed build-subcategory title cards and riverbank water). 293 Rust tests pass
+(13 server, 96 client, 184 domain; one existing manual benchmark ignored).
 Formatting and strict native/all-target/all-feature and WASM Clippy pass. The
 client was rebuilt from this combined source; its WASM hash is recorded separately
-from the upstream artifact (the Rust source itself is unchanged by this PR). Asset checks cover all 302 world
+from the upstream artifact (the Rust source itself is unchanged by this PR). Asset checks cover all 303 world
 frames, field/transport checks, icon normalization, four RGBA PNG signatures,
 transparent corners and six release-verifier tests. [Checks/hashes](checks.json).
 

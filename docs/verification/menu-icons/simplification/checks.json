@@ -1,17 +1,17 @@
 {
-  "base_revision": "79d5899",
+  "base_revision": "1a45e0d",
   "rust_tests": {
     "server": 13,
-    "client": 95,
-    "domain": 181,
-    "passed_total": 289,
+    "client": 96,
+    "domain": 184,
+    "passed_total": 293,
     "ignored_manual_benchmark": 1
   },
   "strict_native_and_wasm_clippy": "pass",
   "format": "pass",
   "rebuilt_bundle_identical_to_base": false,
-  "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
-  "sprite_frames_checked": 302,
+  "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
+  "sprite_frames_checked": 303,
   "release_verifier_tests": 6,
   "icons": [
     {
@@ -53,10 +53,11 @@
   ],
   "browser": "pass",
   "bundle_note": "Rebuilt on combined master; Rust source is unchanged by this art PR, generated WASM differs from upstream artifact.",
+  "fresh_context_per_scene": true,
   "browser_results": [
     {
       "name": "category_town",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "1280x800 DPR1 desktop"
@@ -69,7 +70,7 @@
     },
     {
       "name": "category_town",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "390x844 DPR2 phone"
@@ -82,7 +83,7 @@
     },
     {
       "name": "command_cargo",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "1280x800 DPR1 desktop"
@@ -95,7 +96,7 @@
     },
     {
       "name": "command_cargo",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "390x844 DPR2 phone"
@@ -108,7 +109,7 @@
     },
     {
       "name": "command_disembark",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "1280x800 DPR1 desktop"
@@ -121,7 +122,7 @@
     },
     {
       "name": "command_disembark",
-      "wasm_sha256": "17e7c05d4ee9140763960d7dbe6c1707a41f9d92e01190ae45dd8a8aa6c29f8f",
+      "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
       "errors": [],
       "viewports": [
         "390x844 DPR2 phone"
@@ -132,6 +133,5 @@
         1688
       ]
     }
-  ],
-  "fresh_context_per_scene": true
+  ]
 }
