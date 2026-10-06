@@ -13,6 +13,8 @@ of current behavior.
 | Gathering, cargo, reassignment, field work | [Tasks and cargo](tasks-and-cargo.md) | Placement/routes; HUD |
 | Water resource, riverbank collection, irrigation | [Water integration notes](water-resource.md) | Tasks/cargo; economy; archipelago; server/saves |
 | Foundations, fields, occupancy, reachability | [Placement and routes](placement-and-routes.md) | Tasks/cargo; rendering/input |
+
+| Foundations, fields, roads, occupancy, reachability | [Placement and routes](placement-and-routes.md) | Tasks/cargo; rendering/input |
 | Production, research, refunds, housing, unlocks | [Economy and queues](economy-and-queues.md) | Server/saves; HUD |
 | Camera, terrain, picking, selection, minimap | [Rendering and input](rendering-and-input.md) | HUD; archipelago |
 | Frozen worlds, stuck workers, delayed input | [Runtime debugging](runtime-debugging.md) | Server/saves; affected domain guide |

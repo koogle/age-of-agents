@@ -31,8 +31,8 @@ No idle workers start collecting automatically, and Stop remains authoritative.
 
 `fields.rs::FIELD_COST` is shared by planting, replenishment, and HUD costs:
 10 wood + 5 stone + 10 water. It is reserved once when preparation starts.
-Helpers, Stop/resume and reload do not pay again. The harvest remains 120 food
-and does not drain water while growing or being harvested. Replenishment remains
+Helpers, Stop/resume and reload do not pay again. The harvest yields 120 food, or 180 with the merged nearby completed granary
+bonus, and does not drain water while growing or being harvested. Replenishment remains
 an explicit paid order. Other recipes and building availability are unchanged.
 
 ## Client and assets
@@ -52,7 +52,7 @@ Consult [assets](asset-pipeline.md) before revising it.
 
 ## Persistence and verification
 
-Save version 15 adds required `water` balances, resetting incompatible hosted
+Save version 16 adds required `water` balances, resetting incompatible hosted
 worlds under the development policy. Matching-version saves persist and corrupt
 current saves remain errors. See [server and saves](server-and-saves.md).
 The shared browser fixture and production inventory verifier include water.

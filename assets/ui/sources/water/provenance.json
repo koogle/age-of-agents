@@ -7,7 +7,7 @@
   ],
   "model": "fal-ai/nano-banana/edit",
   "prompt": "The attached images are approved STYLE REFERENCES. Create one single water resource game icon: a simple squat Greek terracotta water jug with one curved handle and a wide open mouth clearly showing muted turquoise fresh water, with a small turquoise water droplet beside the lip. Exactly match the fine dark brown ink contours, sparse hatching, restrained flat watercolor washes, gentle cel shading and three-quarter upper view of the references. Muted terracotta and cream body, subtle teal water. No decoration, no text, no border, no dramatic gloss or heavy black outlines. Centered isolated object on pure white background, no cast shadow. Clear silhouette at 24 pixels.",
-  "status": "Revised after user style rejection, 2026-10-06; earlier style pass superseded. Rejected version retained in rejected/.",
+  "status": "Corrected artwork approved by user on 2026-10-06; merge authorized. Earlier rejected style pass remains superseded; source retained in rejected/.",
   "refinement": {
     "model": "OpenAI image_gen",
     "references": [

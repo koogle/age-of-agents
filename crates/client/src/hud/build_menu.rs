@@ -11,14 +11,16 @@ pub enum BuildingGroup {
     Gathering,
     Production,
     Military,
+    Roads,
 }
 
 impl BuildingGroup {
-    pub const ALL: [Self; 4] = [
+    pub const ALL: [Self; 5] = [
         Self::Town,
         Self::Gathering,
         Self::Production,
         Self::Military,
+        Self::Roads,
     ];
     pub fn name(self) -> &'static str {
         match self {
@@ -26,11 +28,22 @@ impl BuildingGroup {
             Self::Gathering => "Gathering",
             Self::Production => "Production",
             Self::Military => "Military",
+            Self::Roads => "Roads",
+        }
+    }
+    pub(super) fn icon(self) -> &'static str {
+        match self {
+            Self::Town => "category_town",
+            Self::Gathering => "category_gathering",
+            Self::Production => "category_production",
+            Self::Military => "category_military",
+            Self::Roads => "command_build",
         }
     }
     fn buildings(self) -> &'static [BuildingKind] {
         use BuildingKind::*;
         match self {
+            Self::Roads => &[],
             Self::Town => &[TownCenter, House, Granary, Dock, Monument],
             Self::Gathering => &[Farm, MiningCamp],
             Self::Production => &[LumberMill, Smelter, Kiln, Weaver, Kitchen],
@@ -76,13 +89,14 @@ pub(super) fn commands(
         BuildingGroup::ALL
             .into_iter()
             .filter(|group| {
-                group
-                    .buildings()
-                    .iter()
-                    .any(|kind| available.contains(kind))
+                *group == BuildingGroup::Roads
+                    || group
+                        .buildings()
+                        .iter()
+                        .any(|kind| available.contains(kind))
             })
             .map(|group| Command {
-                icon: building_info(group.buildings()[0]).0,
+                icon: group.icon(),
                 label: group.name().into(),
                 detail: group
                     .buildings()
@@ -96,13 +110,35 @@ pub(super) fn commands(
             })
             .collect::<Vec<_>>()
     };
+    if build == BuildUi::Group(BuildingGroup::Roads) {
+        for kind in [aoa_game::RoadKind::Dirt, aoa_game::RoadKind::Stone] {
+            commands.push(Command {
+                icon: if kind == aoa_game::RoadKind::Dirt {
+                    "command_build"
+                } else {
+                    "resource_stone"
+                },
+                label: kind.name().into(),
+                detail: format!(
+                    "{} · 2 s work per cell · +50% movement · straight lines",
+                    if kind == aoa_game::RoadKind::Dirt {
+                        "Labour only"
+                    } else {
+                        "1 stone per cell"
+                    }
+                ),
+                enabled: stock.stone >= kind.stone_per_cell(),
+                action: Action::PlaceRoad(kind),
+            });
+        }
+    }
     if build == BuildUi::Group(BuildingGroup::Gathering) {
         commands.push(Command {
             icon: "field",
             label: "Field".into(),
             detail: if has_farm {
                 format!(
-                    "{} · {} s work · {} food; tap depleted fields to replenish",
+                    "{} · {} s work · {} food (+50% near a granary); tap depleted fields to replenish",
                     cost_text(aoa_game::FIELD_COST),
                     aoa_game::FIELD_WORK_SECONDS,
                     aoa_game::FIELD_FOOD
@@ -115,7 +151,11 @@ pub(super) fn commands(
         });
     }
     commands.push(Command {
-        icon: "command_cancel",
+        icon: if build == BuildUi::Categories {
+            "command_cancel"
+        } else {
+            "command_back"
+        },
         label: if build == BuildUi::Categories {
             "Close"
         } else {
@@ -147,7 +187,7 @@ mod tests {
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(categories.len(), 5); // All four groups and Close.
+        assert_eq!(categories.len(), 6); // All five groups and Close.
         assert!(
             categories
                 .iter()
@@ -166,19 +206,18 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![
                 Action::Place(BuildingKind::Watchtower),
-                Action::Place(BuildingKind::Barracks),
                 Action::Place(BuildingKind::Range),
                 Action::Build
             ]
         );
-        assert!(!military[1].enabled, "unaffordable barracks stays visible");
+        assert!(!military[1].enabled, "unaffordable range stays visible");
         let production = commands(
             BuildUi::Group(BuildingGroup::Production),
             &stock,
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(production.len(), 6);
+        assert_eq!(production.len(), 3);
         assert_eq!(
             production[0].action,
             Action::Place(BuildingKind::LumberMill)
@@ -192,6 +231,25 @@ mod tests {
         assert_eq!(gathering.len(), 4); // Farm, Mining Camp, Field, All types.
         assert_eq!(gathering[2].action, Action::PlaceField);
         assert!(!gathering[2].enabled);
+    }
+
+    #[test]
+    fn roads_are_basic_choices_with_labour_only_dirt_and_stone_costs() {
+        let menu = commands(
+            BuildUi::Group(BuildingGroup::Roads),
+            &Stockpile::default(),
+            false,
+            &[],
+        );
+        assert_eq!(menu[0].action, Action::PlaceRoad(aoa_game::RoadKind::Dirt));
+        assert!(menu[0].enabled);
+        assert_eq!(menu[1].action, Action::PlaceRoad(aoa_game::RoadKind::Stone));
+        assert!(!menu[1].enabled);
+        assert!(
+            commands(BuildUi::Categories, &Stockpile::default(), false, &[])
+                .iter()
+                .any(|c| c.action == Action::BuildGroup(BuildingGroup::Roads))
+        );
     }
 
     #[test]
@@ -243,7 +301,7 @@ mod tests {
     fn categories_and_back_navigation_are_available_without_resources() {
         let stock = Stockpile::default();
         let categories = commands(BuildUi::Categories, &stock, false, &aoa_game::BUILDABLE);
-        assert_eq!(categories.len(), 5);
+        assert_eq!(categories.len(), 6);
         for (command, group) in categories.iter().zip(BuildingGroup::ALL) {
             assert_eq!(command.action, Action::BuildGroup(group));
             assert!(command.enabled);

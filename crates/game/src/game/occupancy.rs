@@ -189,6 +189,7 @@ impl GameWorld {
         {
             return Err("terrain is not a complete row-major grid".into());
         }
+        self.validate_roads()?;
         if !self.explored_cells.iter().all(|cell| self.in_bounds(*cell))
             || !self.explored_cells.is_sorted_by(|a, b| a < b)
         {
@@ -320,7 +321,8 @@ impl GameWorld {
                 return Err(format!("{} carries an invalid load", unit.id));
             }
             match &unit.action {
-                UnitAction::Gather { .. }
+                UnitAction::BuildRoad { .. }
+                | UnitAction::Gather { .. }
                 | UnitAction::Build { .. }
                 | UnitAction::ExploreBuild { .. }
                 | UnitAction::Cultivate { .. }

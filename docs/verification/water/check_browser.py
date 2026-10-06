@@ -151,7 +151,7 @@ async def main():
                 assert water>=20
                 await page.screenshot(path=str(OUT/f'{name}-water-stored.png'))
                 await button(0,1) # Build
-                await button(1,5,True) # Gathering
+                await button(1,6,True) # Gathering (including Roads and Back)
                 await button(2,4,True) # Field
                 await page.screenshot(path=str(OUT/f'{name}-field-cost.png'))
                 await world_tap(30.5,25.5)

@@ -5,7 +5,12 @@
       "build": "icons/command_build.png",
       "cancel": "icons/command_cancel.png",
       "train": "icons/command_train.png",
-      "stop": "icons/command_stop.png"
+      "stop": "icons/command_stop.png",
+      "disembark": "icons/command_disembark.png",
+      "sail": "icons/command_sail.png",
+      "explore": "icons/command_explore.png",
+      "cargo": "icons/command_cargo.png",
+      "back": "icons/command_back.png"
     },
     "portrait": {
       "group": "icons/portrait_group.png",
@@ -21,6 +26,11 @@
       "stone": "icons/resource_stone.png",
       "timber": "icons/resource_timber.png",
       "wood": "icons/resource_wood.png",
+      "coal": "icons/resource_coal.png",
+      "steel": "icons/resource_steel.png",
+      "bricks": "icons/resource_bricks.png",
+      "cloth": "icons/resource_cloth.png",
+      "rations": "icons/resource_rations.png",
       "water": "icons/resource_water.png"
     },
     "tech": {
@@ -29,6 +39,18 @@
       "masonry": "icons/tech_masonry.png",
       "mining": "icons/tech_mining.png",
       "textiles": "icons/tech_textiles.png"
+    },
+    "category": {
+      "town": "icons/category_town.png",
+      "gathering": "icons/category_gathering.png",
+      "production": "icons/category_production.png",
+      "military": "icons/category_military.png"
+    },
+    "unit": {
+      "guard": "icons/unit_guard.png",
+      "archer": "icons/unit_archer.png",
+      "healer": "icons/unit_healer.png",
+      "siege_cart": "icons/unit_siege_cart.png"
     }
   },
   "textures": {

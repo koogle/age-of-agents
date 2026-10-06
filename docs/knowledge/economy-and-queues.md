@@ -24,13 +24,9 @@ cancellation or queue UI. Maintained guide; source-reviewed 2026-10-05 against
 
 ## Starter progression and resources
 
-Implemented in [PR #92](https://github.com/koogle/age-of-agents/pull/92), with merge authorized on 2026-10-05: construction availability follows each building's costs, independently of current stock or the production recipes it can run. The user clarified that every building constructible from first-island materials must be available initially; discovery then expands the menu. This replaces the earlier six-building starter restriction.
+Jakob's 2026-10-05 correction supersedes PR #92's construction-only rule: show a building only when discovered resources support both construction and a productive use. Production buildings must have at least one recipe whose inputs can be supplied, including processed-material prerequisites. Non-production buildings retain their housing, storage, gathering or vision utility.
 
-Fourteen wood/stone/timber buildings are initially available: Town Center, House, Granary, Farm, Lumber Mill, Dock, Watchtower, Mining Camp, Smelter, Kiln, Weaver, Kitchen, Barracks and Range. Unaffordable buildings remain visible in grey. Kitchen can make rations from food; other production still requires actual recipe inputs.
-
-Workshop unlocks with discovered clay for bricks; Infirmary with fiber for cloth; Monument with iron, coal, clay, fiber and gold for all its construction materials. Discovery persists after depletion and cannot be bypassed by hidden nodes or stock quantities. The unlock rules add no state. Save compatibility is separately deferred by Jakob’s 2026-10-05 instruction: incompatible store versions reset, and current saves require explicit economy/queue fields; see [save policy](server-and-saves.md#snapshot-and-save-version-policy).
-
-Existing player-facing features remain important. Removing, hiding, disabling or adding prerequisites to them requires Jakob's explicit approval after a before/after impact review and before release; see [AGENTS.md](../../AGENTS.md#workflow). Starter simplification is not blanket approval for feature losses.
+This explicitly authorizes hiding Barracks, Smelter, Kiln and Weaver on island one; Workshop additionally needs steel inputs as well as clay. Range remains useful because its archer recipe uses only food and timber. Keep ten starter buildings, grey out temporary stock shortages, and unlock later choices through resource discovery rather than a hardcoded island number. Discovery remains global across explored islands and persists after depletion; hidden nodes and injected stock do not bypass it. Existing buildings, jobs and saves remain intact; no schema change is needed.
 
 Transport must remain affordable before later-island materials are available. Verify the whole budget, including raw wood consumed to make timber, rather than only the final recipe price.
 
@@ -65,3 +61,5 @@ Update this file after economic steering, a changed queue contract, or a newly
 discovered failure case. Mark balance proposals as proposed until implemented;
 write the useful procedure or invariant here and only its short accepted rationale
 in `decisions.md`.
+
+Verification and reproducible menu captures: [productive building visibility](../verification/building-progression/README.md).
