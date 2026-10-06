@@ -1,0 +1,9 @@
+{
+  "name": "command_sail",
+  "wasm_sha256": "501ae3b24b5731ad2e3098001d591235421f8ada260bcd05554c5c280d485093",
+  "errors": [],
+  "viewports": [
+    "1280x800 DPR1 desktop"
+  ],
+  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
+}

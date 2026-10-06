@@ -26,11 +26,18 @@ base["resources"] = []
 buildings = base["buildings"]
 base["buildings"] = []
 if args.name == "granary":
-    base["buildings"] = [dict(
-        buildings[0], id="granary-test", kind="granary",
-        origin={"column": 29, "row": 20}, columns=3, rows=3,
-        produces=[], researches=[],
-    )]
+    base["buildings"] = [
+        dict(
+            buildings[0],
+            id="granary-test",
+            kind="granary",
+            origin={"column": 29, "row": 20},
+            columns=3,
+            rows=3,
+            produces=[],
+            researches=[],
+        )
+    ]
 base["ships"] = []
 base["units"] = base["units"][:1]
 u = base["units"][0]
@@ -41,9 +48,12 @@ u.update(
     action={"type": "move", "to": {"column": 31, "row": 21}},
 )
 if args.name == "granary":
-    u.update(cell={"column": 30, "row": 25},
-             position={"x": 30.5, "y": 25.5}, action={"type": "idle"})
-base["simulation_speed"] = 0
+    u.update(
+        cell={"column": 30, "row": 25},
+        position={"x": 30.5, "y": 25.5},
+        action={"type": "idle"},
+    )
+base["simulation_speed"] = 1
 state = copy.deepcopy(base)
 clients = []
 commands = []

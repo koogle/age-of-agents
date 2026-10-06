@@ -12,8 +12,8 @@ Approved family references: existing units atlas and retained `source.png`; no n
 | Shape/detail | Pass: Approved siege-cart frame retains the wood wheels, sling and blue flag silhouette. |
 | Camera/scale | Pass: original front idle frame; normalized optical weight and safe circle |
 | Alpha/background | Pass: silhouette inspected on three backgrounds, transparent corners, no visible white matte |
-| Runtime integration | Pending in [#107](https://github.com/koogle/age-of-agents/pull/107); this PR adds unused art only |
+| Runtime integration | Pass in [#107](https://github.com/koogle/age-of-agents/pull/107): [desktop/phone evidence](../../../../../docs/verification/menu-icons/unit_siege_cart/result.json) |
 
 The larger source is retained alongside provenance. No model calls; extracted directly from the approved 512px atlas frame.
 
-Technical validation: PNG signature, RGBA, 128×128 output, transparent corners and icon normalization. Runtime mapping, desktop/phone use and full combined game validation belong to #107 before these assets appear in gameplay.
+Technical validation: PNG signature, RGBA, 128×128 output, transparent corners and icon normalization. Runtime mapping, desktop/phone use and full combined validation pass in #107; see the integration evidence above.
