@@ -57,3 +57,38 @@ The packer writes both PNG and JSON; all eight frames exceed the 512px minimum.
 
 [Attack comparison and integration review](../../../docs/verification/2026-10-05-animal-attacks/REVIEW.md)
 records style, grounded registration and desktop/phone evidence.
+
+## Boars, 2026-10-06
+
+Jakob requested the retained `draft.png` boar as an additional danger.
+`boar-refined.png` is the unmodified transparent second OpenAI image_gen result,
+refined against that original and the approved NPC-matched wildlife sheet.
+Exact prompts, source outputs and reference hashes are in `boar-provenance.json`.
+`boar-detailed-rejected.png` preserves the first pass, rejected for dense fur
+strokes; the final pass matches the approved family’s broad cel masses.
+Four 627px source cells hold idle, walk, lowered-head windup and tusk strike.
+The packer appends them as a third atlas row (2508×1881), preserving all eight
+wolf/bear frames byte-for-byte. No original source pixels are enlarged.
+
+[Boar style and integration evidence](../../../docs/verification/boars/REVIEW.md)
+records the final comparison, desktop and phone hunting, and verification scope.
+
+## Reopened style review
+
+The user rejected the integrated result as not there yet. Two follow-up idle
+studies and exact prompts/reference hashes are retained in the `boar-npc-study`
+and `boar-silhouette-study` files. Neither is accepted or integrated: the first
+still has large angular patches; the second has more natural anatomy but too
+much fine fur texture. Prior style acceptance is superseded. Gameplay tests
+remain valid; no runtime pixels changed during this review.
+
+## Selected boar family (2026-10-06)
+
+Jakob selected the first follow-up study, `boar-npc-study.png`, superseding the
+agent’s earlier assessment. `boar-approved-animation.png` extends that exact
+light taupe design to idle, walk, windup and strike, with a second tool pass
+restoring safe transparent margins around the snouts. The edge draft and both
+exact prompts are retained; see `boar-approved-animation-provenance.json`.
+This is now the packed third atlas row. The prior `boar-refined.png` is retained
+as rejected history. Wolf and bear pixels, frame dimensions and gameplay rules
+are unchanged.
