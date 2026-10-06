@@ -16,10 +16,10 @@ are the original wood and masonry icons under `../refinement/`.
 
 | Runtime replacement | PR state |
 | --- | --- |
-| Cargo | Refined runtime PNG in this revision |
-| Gathering | Refined runtime PNG in this revision |
-| Town | Refined runtime PNG in this revision |
-| Disembark | Verification in progress |
+| Cargo | Merged [#137](https://github.com/koogle/age-of-agents/pull/137) |
+| Gathering | Merged [#138](https://github.com/koogle/age-of-agents/pull/138) |
+| Town | Merged [#139](https://github.com/koogle/age-of-agents/pull/139) |
+| Disembark | Refined runtime PNG in this revision |
 
 The earlier per-icon source folders describe the first dedicated-icon release.
 This folder owns this subsequent refinement and its packing provenance.
