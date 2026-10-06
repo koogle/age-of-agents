@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-06",
+  "model": "OpenAI image_gen",
+  "imagegen_output_file": "exec-af1c0a09-8c5d-4be5-989a-454dab5113d7.png",
+  "prompt": "Correct the DISembark icon. Image1 contains three icons: ONLY use the boot/landing icon at the RIGHT as the current design. Its two thick planks are a rejected regression. Image2 is the earlier full wooden platform composition: use it to restore the STRUCTURE. Images3 (wood) and4 (masonry) are the approved STYLE references. Output ONE standalone icon, not a sheet. Keep the simpler tan boot from image1, its restrained colors, thin brown ink, quiet watercolor planes, and small sand/teal shoreline. Replace the two block-like boards with a proper compact rectangular wooden landing platform made from FIVE or SIX narrow, parallel wooden deck boards joined side-by-side, with visible continuous front support beam and small corner timber ends. The deck must read as a coherent little landing stage, not loose blocks, not stone steps, and be broad enough to support the boot. Follow the earlier platform image2 perspective and construction, but retain the calmer simplified boot and shoreline of image1. Fine understated outlines, minimal wood grain, no tiny nail heads or scattered pebbles, no dense hatch texture, no heavy black contour, no glossy highlight. Keep the platform wood warm desaturated oak distinct from pale sand and muted teal water. One boot only. Same three-quarter view and compact silhouette. Transparent background, no extra objects, no text, no frame, no cast shadow. Strong clear deck-board divisions that remain legible as wooden decking when reduced to a small game menu icon.",
+  "references": [
+    "../simplification/simplified-three-icon-draft.png",
+    "../command_disembark/refined.png",
+    "../refinement/resource_wood.png",
+    "../refinement/tech_masonry.png"
+  ],
+  "reason": "User identified the two-plank platform in #140 as a regression. Restore structural cues while retaining simpler boot and restrained style.",
+  "packing": "pack.py uses existing scripts/normalize_icons.py directly from the retained RGBA source; no repainting.",
+  "status": "Visual, alpha, normalization and desktop/phone menu verification passed",
+  "hashes": {
+    "refined.png": "0956c52197d68daa7e5c9e9247bd8e18ebd4cc37922b6a13321dbb5cfe6ce74c",
+    "before.png": "0f1e6b955237815a020fe8dfd4b683d2215c9efc7788f9d463417aae01508a6b",
+    "command_disembark.png": "8e414ddc8832a713c6e1f4b7ae8ee50a9780bc18d0cb9673b8c80053d49e1685"
+  }
+}
