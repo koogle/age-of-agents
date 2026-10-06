@@ -22,7 +22,7 @@
       "retained_generation": "/workspace/generated_images/exec-adfc36fe-70ca-4cd5-a91a-7da35f6d8227.png"
     },
     "stone": {
-      "file": "assets/terrain/road_stone.png",
+      "file": "assets/terrain/road_sources/stone-sandy-before.png",
       "size": [
         1254,
         1254
@@ -51,5 +51,6 @@
       "assets/terrain/meadow.webp",
       "assets/reference/diorama_primary.webp"
     ]
-  }
+  },
+  "stone_followup": "road_sources/stone-contrast.provenance.json"
 }
