@@ -62,9 +62,10 @@ def fixture(name, portrait=False):
             for k in stock:
                 stock[k] = 500.0
     # Keep all current building categories visible; their costs/commands remain typed.
-    s["available_buildings"] = [
-        x["kind"] if isinstance(x, dict) else x for x in s["catalog"]["buildings"]
-    ]
+    if name != "category_starter":
+        s["available_buildings"] = [
+            x["kind"] if isinstance(x, dict) else x for x in s["catalog"]["buildings"]
+        ]
     if name in PRODUCTS and not portrait:
         kind, product = PRODUCTS[name]
         s["units"] = []
@@ -182,7 +183,7 @@ async def send():
 
 async def coin(page, mode, index):
     q = await page.evaluate(
-        """window.hudQuads.filter(q=>Math.abs(q[2]/devicePixelRatio-(innerWidth<600?44:52))<.1 && Math.abs(q[3]-q[2])<.1 && q[1]/devicePixelRatio>innerHeight/2).map(q=>q.slice(0,4).map(v=>v/devicePixelRatio)).sort((a,b)=>a[1]-b[1]||a[0]-b[0])"""
+        """window.hudQuads.filter(q=>Math.abs(q[2]/devicePixelRatio-(innerWidth<600?44:52))<.1 && Math.abs(q[3]-q[2])<.1 && q[1]/devicePixelRatio>innerHeight/2).map(q=>q.slice(0,4).map(v=>v/devicePixelRatio)).sort((a,b)=>Math.abs(a[1]-b[1])>8?a[1]-b[1]:a[0]-b[0])"""
     )
     assert q, ("no command coins", mode)
     rect = q[index]
@@ -216,9 +217,8 @@ async def run(browser, request):
             page = await context.new_page()
             page.on("pageerror", lambda e, errors=errors: errors.append(str(e)))
             await page.add_init_script(HOOK)
-            cdp = await context.new_cdp_session(page)
-            persistent[mode] = (context, page, cdp, errors)
-        context, page, cdp, errors = persistent[mode]
+            persistent[mode] = (context, page, errors)
+        context, page, errors = persistent[mode]
         errors.clear()
         for portrait in scenes:
             state = fixture(name, portrait)
@@ -250,6 +250,15 @@ async def run(browser, request):
                 await coin(page, mode, 0)
                 if name == "command_back":
                     await coin(page, mode, 0)
+                elif name == "category_starter":
+                    await coin(page, mode, 2)
+                    count = await page.evaluate(
+                        "window.hudQuads.filter(q=>Math.abs(q[2]/devicePixelRatio-(innerWidth<600?44:52))<.1 && Math.abs(q[3]-q[2])<.1 && q[1]/devicePixelRatio>innerHeight/2).length"
+                    )
+                    assert count == 3, (
+                        "starter Production must contain Lumber mill, Kitchen and Back",
+                        count,
+                    )
             label = name + ("-portrait" if portrait else "")
             print(name, mode, "capturing", flush=True)
             await page.screenshot(

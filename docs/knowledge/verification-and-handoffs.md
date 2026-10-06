@@ -115,3 +115,5 @@ superseded by the corrected #107 suite; do not use metadata alone as visual
 proof. Run all desktop scenes then all phone scenes, closing the previous context so only one large software WebGL world stays active.
 
 Unit-training fixtures must provide housing for active and queued unit jobs, even when the visible unit list is empty. A barracks-only fixture correctly disables training and cannot prove enabled-command dispatch; the menu suite supplies a separate house.
+
+Canvas command medallions lift by 3 physical pixels on hover. When selecting them from captured quads, group nearby y-coordinates into a row before sorting left-to-right; a strict y-first sort moves the hovered command to index zero and can click the wrong category.

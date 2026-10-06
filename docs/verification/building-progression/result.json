@@ -1,0 +1,17 @@
+{
+  "available_buildings": [
+    "town_center",
+    "house",
+    "granary",
+    "watchtower",
+    "dock",
+    "mining_camp",
+    "farm",
+    "lumber_mill",
+    "kitchen",
+    "range"
+  ],
+  "wasm_sha256": "66308bf1aba85bb9107ab0fa39ee7e578fba042d4416928a7edc97c060d5ce10",
+  "errors": [],
+  "scope": "Domain-exported availability; flattened presentation fixture; desktop mouse and emulated DPR2 phone touch. Inspect menu screenshots separately."
+}

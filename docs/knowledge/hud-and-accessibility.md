@@ -107,7 +107,7 @@ New keys must be added to `hud.rs::ICONS` and `assets/ui/manifest.json` together
 The [style gate](asset-pipeline.md#style-acceptance-is-a-merge-gate) applies before
 merging art; the first draft set was rejected and retained as negative evidence.
 The 18 individual art PRs are merged; runtime integration and final verification
-pass in #107 (272 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
+pass in #107 (274 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
 
 `docs/verification/menu_icon_batch.py` reuses separate desktop and DPR-2 phone WebGL contexts across
 controlled scenes and resets selection/build mode between captures. It records
