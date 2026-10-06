@@ -11,12 +11,15 @@ def generate(item,batch):
  dest=OUT/batch/item['name']; dest.mkdir(parents=True,exist_ok=True)
  if (dest/'original.png').exists() and (item['family']=='texture' or (dest/'cutout.png').exists()): return item['name']+' exists'
  refs=[dict(path=p,sha256=hashlib.sha256((ROOT/p).read_bytes()).hexdigest()) for p in item['references']]
- record=dict(item,model='fal-ai/nano-banana/edit',reference_revision='1984e9b',references=refs,status='unapproved candidate; no runtime replacement')
- (dest/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')
- args=dict(prompt=item['prompt'],image_urls=[falcall.data_uri(ROOT/p['path']) for p in refs],num_images=1,output_format='png',aspect_ratio=item['aspect_ratio'])
  if (dest/'response.json').exists():
+  # A resumed download must retain the prompt that actually produced the image.
   result=json.loads((dest/'response.json').read_text())
  else:
+  templates=[item.get('era_prompt','era-prompt.txt'),'cel-prompt.txt']
+  prompt=item['prompt']+' '+' '.join((OUT/t).read_text().strip() for t in templates)
+  record=dict(item,prompt=prompt,model='fal-ai/nano-banana/edit',reference_revision='1984e9b',references=refs,status='unapproved candidate; no runtime replacement',prompt_templates=[dict(path=t,sha256=hashlib.sha256((OUT/t).read_bytes()).hexdigest()) for t in templates])
+  (dest/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')
+  args=dict(prompt=prompt,image_urls=[falcall.data_uri(ROOT/p['path']) for p in refs],num_images=1,output_format='png',aspect_ratio=item['aspect_ratio'])
   result=falcall.run(record['model'],args,.0398,f'alternative:{batch}:{item["name"]}')
   (dest/'response.json').write_text(json.dumps(result,indent=2)+'\n')
  falcall.download(result['images'][0]['url'],str(dest/'original.png'))

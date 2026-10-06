@@ -1,10 +1,14 @@
 # Alternatives from the original villager model — unapproved
 
-41 retained illustration attempts, including rejected/repaired passes, from 80
-successful FAL requests (estimated $1.8268, excluding one API validation failure).
+47 retained illustration attempts, including rejected/repaired passes, from 92
+successful FAL requests (estimated $2.0956, excluding one API validation failure).
 
 Candidate art only. No runtime image, atlas, manifest, code or retained villager
 has changed. These are review choices, not permission to replace existing art.
+
+Latest user corrections: [era audit](ERA_REVIEW.md), [era comparison](era-correction-comparison.jpg),
+and [three-subject cel calibration](cel-correction-comparison.jpg). Broad expansion
+is paused; all remain unapproved. The steel calibration still needs less shine.
 
 Open [the gallery](index.html), [resource comparison](02-resources-comparison.jpg),
 [menu comparison](03-menu-comparison.jpg), [world comparison](world-comparison.jpg)
@@ -87,3 +91,11 @@ readability. Rejected attempts remain visible and labelled for comparison.
 Construction states, wildlife gait/attack continuity, registration, normalized
 runtime alpha, actual desktop/phone gameplay and maximum-zoom acceptance remain
 future integration work. No deployment was performed.
+
+Future NEW generation requests append `era-prompt.txt` and `cel-prompt.txt`;
+completed/resumed historical responses preserve the exact prompts originally
+used. This does not rewrite historical generation instructions or hashes.
+
+The era/cel follow-up adds six illustration attempts and twelve successful calls,
+estimated $0.2688. Only two Explore concepts and three cel calibration subjects
+were generated; broader expansion remains paused.

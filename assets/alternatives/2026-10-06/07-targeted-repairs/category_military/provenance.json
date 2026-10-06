@@ -23,5 +23,5 @@
   "aspect_ratio": "1:1",
   "model": "fal-ai/nano-banana/edit",
   "reference_revision": "1984e9b",
-  "status": "NEEDS REFINEMENT: gradient-heavy shield"
+  "status": "STYLE REJECTED: gradient-heavy shield"
 }
