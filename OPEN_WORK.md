@@ -3,6 +3,27 @@
 - User requested recreation because the sandy dirt road is hard to see. Replaced only `assets/terrain/road_dirt.png` with generated deeper ochre-brown packed earth, retaining the original and exact reference/prompt provenance. [Comparison and review](docs/verification/roads/dirt-readability/README.md).
 - 294 workspace tests and formatting pass; 303-frame resolution audit passes. Native/WASM strict lint and web/server rebuild pass. Desktop mouse and DPR2 phone touch construction plus normal/maximum-zoom visibility pass with zero page errors. User approved the visual result and explicitly authorized merge on 2026-10-06. Merge/release verification is in progress; preserve previous unresolved items below.
 
+# Road construction resumption — [PR #148](https://github.com/koogle/age-of-agents/pull/148)
+
+- User requested that resuming an interrupted road completes its unfinished pieces. Single-cell resume now assigns unfinished edge-connected road cells across bends, completed pieces and materials; separate/corner-touching roads remain separate. Costs and progress persist; no save-schema change.
+- Integrated master `50d02e1`, preserving uninterrupted gathering during building selection, boars, stronger wildlife, stationary NPC status feedback and refined stone-road/disembark artwork. All 299 workspace tests pass (one existing ignored benchmark), formatting/native/WASM lint, 307-frame/asset checks and six release-verifier tests pass. Full placement/Stop/resume checks pass on the boar integration; the latest rebuilt desktop mouse and DPR-2 phone touch checks resume paid dirt/stone foundations through one piece, complete all 14 cells and retain the seven-stone charge, without page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06).
+- User authorized PR creation and merge after checks pass on 2026-10-06. Merge status is tracked by PR #148; production release uses the merge-triggered [workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml). Deployment is verified separately.
+
+# Building selection preserves gathering — [PR #149](https://github.com/koogle/age-of-agents/pull/149)
+
+- User requested that selecting/switching buildings with a gathering villager selected must not force an early unload or replace its gathering loop. Building-click unload candidates now exclude every Gather phase; stopped/other compatible carriers still unload, including mixed selections. Hover preview uses the same candidate filter. No domain, protocol or save changes.
+- Validation passes: 296 workspace tests (one existing ignored benchmark), formatting, strict native/WASM lint, rebuilt web client, desktop mouse and emulated DPR2 phone touch across all four gathering phases and stopped-carrier controls. [Evidence and review](docs/verification/building-selection/README.md). No page errors; phone targets are verified inside the viewport. User authorized PR creation and merge on 2026-10-06. Integrated master `de49ab4`, preserving boars and stationary NPC feedback. Combined verification passes: tests, strict native/WASM lint, rebuilt web client, 307-frame/field/transport/icon audits, six release-verifier tests, desktop mouse and DPR2 touch across all phases with no page errors. Merge/release status is tracked by PR #149 and the production workflow. Production release will use the merge-triggered workflow. Preserve previous unresolved work below.
+
+
+# Boar danger (2026-10-06)
+
+- User approved merging the boar implementation and selected art. Integrating master `806512c`, preserving stronger wolves/bears, stationary status messages and current road/disembark art. Boars retain their reviewed 60 HP/10 damage; wolf/bear balance is unchanged. Combined verification passes: 295 workspace tests, native/WASM lint, rebuilt client/server, asset checks, six release-verifier tests and desktop mouse/DPR-2 touch boar hunting with no page errors. Ready for the authorized PR merge; production is tracked by the merge-triggered workflow.
+
+- User selected the first follow-up study (`boar-npc-study.png`). Its lighter taupe/cel style is integrated across all four poses, with safe cell margins and original-resolution packing. Fresh 307-frame audit, client pose test and native/WASM lint pass; fresh normal/max-zoom desktop and DPR-2 phone art captures pass with no browser errors. See `docs/verification/boars/approved/`. The second study is not selected.
+
+- Implemented locally: one starter boar, 2–3 later-island boars, preserving existing wolves/bears and safe placement. Shared combat/selection, authored four-pose art, no save reset.
+- 294 workspace tests (one manual benchmark ignored), strict native/WASM lint, rebuilt browser/server and 307-frame sprite audit pass. Desktop mouse and DPR-2 phone touch hunting/defeat pass, with normal/max-zoom art captures and no page errors. Additional pose replay passed desktop phases/pause/mirroring and reached phone close-ups after phase assertions; remaining duplicate close-ups were stopped due slow SwiftShader, so no full pose-replay completion is claimed. Evidence and review: [boars](docs/verification/boars/REVIEW.md). Not deployed.
+
 # Stationary NPC status feedback — [PR #146](https://github.com/koogle/age-of-agents/pull/146)
 
 - User requested status messages remain at their spawn position and rise/fade instead of following the NPC. Implemented in shared client feedback; existing timing, rapid-order replacement and damage tracking are preserved. No simulation/save change.

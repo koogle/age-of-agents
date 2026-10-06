@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-06",
+  "model": "OpenAI image_gen",
+  "prompt": "boar-approved-animation-prompt.txt",
+  "user_direction": "Use the first follow-up study; user said the first one I like",
+  "references": {
+    "assets/sprites/wildlife_sources/boar-npc-study.png": "62e4122b9dc01a2584ebff686c84eb92bc4fb986136ff0ab901057e4426ae7e0",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+  },
+  "draft_output": "/workspace/generated_images/exec-3e9914ed-8d36-42b0-a2ec-36afbc406a5e.png",
+  "draft_review": "Identity matches selected study, but right snouts touch/cross cell edges; padding repair required.",
+  "source_output": "/workspace/generated_images/exec-0704df7a-6e49-43d2-b72b-64af4541fd59.png",
+  "padding_prompt": "boar-approved-padding-prompt.txt",
+  "padding_references": [
+    "boar-approved-animation-edge-draft.png",
+    "boar-npc-study.png"
+  ],
+  "source_size": [
+    1254,
+    1254
+  ],
+  "packing": "Original 627px source cells without enlargement, registered to y=590 with planted rear hoof offsets. Wolf/bear pixels and manifest dimensions unchanged."
+}
