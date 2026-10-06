@@ -1,3 +1,8 @@
+# Stationary NPC status feedback — 2026-10-06
+
+- User requested status messages remain at their spawn position and rise/fade instead of following the NPC. Implemented in shared client feedback; existing timing, rapid-order replacement and damage tracking are preserved. No simulation/save change.
+- All 293 workspace tests pass (one existing ignored benchmark), along with formatting, strict native/WASM lint, rebuilt release WebGL and desktop/DPR-2 phone animation replay. Fixed horizontal position, rise, fade and expiry pass with no page errors; [evidence](docs/verification/status-feedback/README.md). Code-quality review passes; User authorized PR creation and merge on 2026-10-06. Preparing integration with current master and the merge-triggered production workflow. Modal selects `radiantai`; profile listing fails to connect, so the production target is not verified and no deployment was attempted.
+
 # Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
 
 - User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
