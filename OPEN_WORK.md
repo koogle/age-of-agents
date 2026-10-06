@@ -1,3 +1,15 @@
+# Dock artwork reuse (2026-10-06)
+
+- User requested a first PR halving dock images through mirroring. Branch
+  `refactor/mirrored-dock-views` keeps south/north and mirrors them for east/west,
+  including ground registration and all construction stages. Dock atlas frames
+  drop 16→8; the building PNG is 31.2% smaller. Redundant derived cutouts are removed,
+  original generation strips retained. All 294 workspace tests, strict native/WASM
+  lint, formatting, rebuilt WebGL, 295-frame audit and retained-pixel checks pass.
+  Browser replay passes 40 desktop/DPR-2 phone captures and all mouse/touch picking
+  checks with no JavaScript errors. Ready for PR review. See
+  [evidence](docs/verification/dock-mirroring/README.md). No merge/deployment requested.
+
 # Stronger wildlife — 2026-10-06
 
 - Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.

@@ -1,0 +1,25 @@
+{
+  "browser_errors": [],
+  "captures": 40,
+  "wasm_sha256": "ee0bfd23d11432d0f9b9dcc75e241e4a691653f895a23f570f98ea916e7b73a2",
+  "atlas_sha256": "12d029a6deb6e52be7193cc8e304b07839846b6b5bc6b5be07aaaa7a044b5776",
+  "desktop": {
+    "width": 1200,
+    "height": 900,
+    "dpr": 1
+  },
+  "phone": {
+    "width": 390,
+    "height": 844,
+    "dpr": 2
+  },
+  "workspace_tests_passed": 294,
+  "workspace_tests_ignored": 1,
+  "sprite_frames_checked": 295,
+  "retained_frame_pixels_and_footprints": "identical to 0c7b649",
+  "native_clippy": "pass",
+  "wasm_clippy": "pass",
+  "cargo_fmt": "pass",
+  "web_release_build": "pass",
+  "js_sha256": "a20e2e8f72b7245f7cdafbaf297d862fa0671265e134e94f2341b04d23aed30f"
+}
