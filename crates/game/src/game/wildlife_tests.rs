@@ -86,18 +86,58 @@ fn animal_attacks_hurt_and_kill_once_releasing_cells_and_cargo() {
     world.validate().unwrap();
 }
 
-#[test]
-fn explicit_hunting_kills_animal_and_clears_all_orders() {
-    let mut world = wildlife(AnimalKind::Wolf);
-    attack(&mut world);
-    for _ in 0..4 {
-        world.tick(1.0);
+fn archer_encounter(kind: AnimalKind, count: usize) -> GameWorld {
+    let mut world = wildlife(kind);
+    let template = world.units[0].clone();
+    let positions = [(10, 10), (11, 9), (12, 10), (11, 11), (10, 9)];
+    world.units = positions[..count]
+        .iter()
+        .enumerate()
+        .map(|(i, &(x, y))| {
+            let mut unit = template.clone();
+            unit.id = format!("archer-{i}");
+            unit.kind = UnitKind::Archer;
+            unit.cell = CellCoordinate::new(x, y);
+            unit
+        })
+        .collect();
+    world.refresh_exploration();
+    world
+        .apply_command(Command::AttackAnimal {
+            unit_ids: world.units.iter().map(|u| u.id.clone()).collect(),
+            animal_id: "beast".into(),
+        })
+        .unwrap();
+    for _ in 0..600 {
+        world.tick(0.1);
+        world.validate().unwrap();
+        if world.animals.is_empty() || world.units.is_empty() {
+            break;
+        }
     }
-    assert!(world.animals.is_empty());
-    assert_eq!(world.units[0].action, UnitAction::Idle);
-    assert_eq!(world.units[0].health, 76.0);
-    assert_eq!(world.units[1].health, 100.0);
-    world.validate().unwrap();
+    world
+}
+
+#[test]
+fn wolf_requires_three_to_five_archers() {
+    for count in 1..=5 {
+        let world = archer_encounter(AnimalKind::Wolf, count);
+        assert_eq!(world.units.len(), [0, 0, 1, 3, 4][count - 1]);
+        assert_eq!(world.animals.is_empty(), count >= 3);
+        if count >= 3 {
+            assert!(!world.units.is_empty());
+            assert!(world.units.iter().all(|u| u.action == UnitAction::Idle));
+        } else {
+            assert!(world.units.is_empty());
+        }
+    }
+}
+
+#[test]
+fn bear_is_more_dangerous_than_a_wolf() {
+    let world = archer_encounter(AnimalKind::Bear, 3);
+    assert!(world.units.is_empty());
+    assert!(!world.animals.is_empty());
 }
 
 #[test]
@@ -215,6 +255,8 @@ fn corrupt_health_cooldown_and_occupancy_are_rejected() {
         let mut bad = world.clone();
         bad.units[0].health = health;
         assert!(bad.validate().is_err());
+    }
+    for health in [f64::NAN, 0.0, AnimalKind::Bear.max_health() + 1.0] {
         let mut bad = world.clone();
         bad.animals[0].health = health;
         assert!(bad.validate().is_err());
@@ -248,7 +290,7 @@ fn melee_cannot_damage_through_blocked_diagonal_corners() {
     };
     world.tick(0.1);
     assert_eq!(world.units[0].health, 100.0);
-    assert_eq!(world.animals[0].health, 100.0);
+    assert_eq!(world.animals[0].health, AnimalKind::Bear.max_health());
     assert!(
         world.units[0].step.is_some(),
         "hunter should seek a clear attack position"

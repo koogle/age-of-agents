@@ -1,5 +1,9 @@
 # Simpler menu icons — style review
 
+**Disembark finding superseded, 2026-10-06:** Jakob rejected the two-board
+platform as a structural regression. See the [platform correction](../disembark_platform/README.md).
+The other three refinements are unchanged.
+
 User direction, 2026-10-06: refine selected icons and make them slightly simpler;
 subsequently show the results and merge. This is the follow-up to PR #107, with
 four independent runtime replacements: Cargo, Gathering, Town and Disembark.

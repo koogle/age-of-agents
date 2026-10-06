@@ -16,7 +16,10 @@ P.add_argument('--output', type=Path, required=True)
 args = P.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
 clients = []
-HOOK = """window.statusQuads=[];
+HOOK = """// Throttle initial software rendering before the paused clock takes over.
+window.requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),100);
+window.cancelAnimationFrame=id=>clearTimeout(id);
+window.statusQuads=[];
 const p=WebGL2RenderingContext.prototype,o=p.bufferSubData;
 p.bufferSubData=function(t,off,data,start=0,length){
  if(data&&data.buffer){

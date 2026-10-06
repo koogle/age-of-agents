@@ -28,7 +28,5 @@ Code-quality review: one presentation flag separates replacement identity from
 movement tracking; no new dependency, simulation logic, renderer layer or input
 path. The existing rapid-order and label-count bounds remain intact. Regression
 coverage checks both world axes, replacement at a new position and preserved
-damage tracking. Workspace tests pass (293 tests, one existing ignored benchmark),
-and strict native/WASM lint passes. Release WebGL rebuild and desktop/phone browser checks pass. Production is
-not deployed: Modal selects `radiantai`, and profile listing fails to connect,
-so access to the documented `koogle-frick` target is unverified.
+damage tracking. Workspace tests pass (294 combined tests, one existing ignored benchmark),
+and strict native/WASM lint passes. Integrated master `1984e9b`, preserving stronger wildlife and refined stone-road/disembark artwork. Release WebGL rebuild, asset audits, six release-verifier tests and refreshed desktop/phone browser checks pass. User authorized PR creation and merge on 2026-10-06; production uses the merge-triggered workflow. Direct Modal access remains unavailable.

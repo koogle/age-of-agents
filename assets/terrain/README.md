@@ -71,3 +71,12 @@ with mipmaps, using the same mirrored/clamped sampling as plots. This guarantees
 continuous repeat edges even though the generated source is not assumed to wrap.
 No biome or building-plot pixels were changed. See the
 [style comparison and gameplay review](../../docs/verification/roads/style/README.md).
+
+### Stone readability correction
+
+The stone material was subsequently cooled toward neutral limestone and given
+slightly stronger joints and soft face shading after Jakob found it too sandy.
+The layout, scale and sampling are unchanged. The initial sandy output is retained
+in `road_sources/stone-sandy-before.png`; [follow-up provenance](road_sources/stone-contrast.provenance.json)
+records the exact prompt and reference hashes. See the
+[before/after and gameplay review](../../docs/verification/roads/stone-contrast/README.md).
