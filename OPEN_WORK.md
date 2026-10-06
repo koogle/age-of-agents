@@ -1,9 +1,16 @@
-# Basic roads — PR preparation (2026-10-05)
+# Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
 
 - Branch `feat/basic-roads`: dirt/stone road construction, two-endpoint mouse/touch placement, painted terrain surfaces and travel-time routing. Completed roads give friendly units 1.5× speed; wolves/bears remain unchanged. Crossings reuse existing surfaces.
 - Balance: two seconds labour/cell, with one stone per new stone cell. Costs reserve once; Stop/resume, helpers and unloading first preserve existing task rules. Store version 15 resets incompatible hosted saves under the development policy.
 - 280 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint and formatting pass, rebuilt browser/server and relevant asset/verifier checks pass. Integrated master `8bf00b4` (approved productive-building availability and new art); combined desktop mouse and DPR-2 phone touch checks pass with correct line placement, completion and costs; [reproduction and review](docs/verification/roads/README.md).
-- Not merged or deployed. Preserve the previous unresolved work below.
+- Integrating granary-yield master `5a28839`; combined verification in progress. Not merged or deployed. Preserve the previous unresolved work below.
+
+# Granary field yield — 2026-10-05
+
+- User requested shorter copy: “Food/fiber drop-off · +50% nearby field yield.” Browser bundle rebuilt; strict native/WASM lint and refreshed desktop/phone selection checks pass with no browser errors.
+
+- Implemented +50% field yield within six cells of a completed granary, edge to edge, non-stacking. Evaluated at planting/replenishment completion; each boosted harvest has 180 food. Existing crops and food/fiber drop-offs are preserved; no save schema change.
+- 271 combined workspace tests pass (one existing benchmark ignored), strict native/WASM lint and rebuilt browser selection pass on desktop and DPR2 phone with no page errors. [Evidence and reproduction](docs/verification/granary/README.md). User authorized creating/merging the granary PR. [PR #132](https://github.com/koogle/age-of-agents/pull/132) integrates master `8bf00b4` (productive building availability) on `feat/granary-field-yield`; release will use the merge-triggered GitHub Actions workflow. Direct Modal access remains unavailable.
 
 # Productive building availability — 2026-10-05
 
