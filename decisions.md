@@ -6,6 +6,7 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Build hints and NPC feedback (2026-10-06):** Show build details and placement instructions in the building menu information area, replacing the top-middle bubble. NPC command/status messages and complaints fade over the addressed unit’s head, including blocked placement and delayed server rejections ([HUD guide](docs/knowledge/hud-and-accessibility.md)).
 - **Boars (2026-10-06):** Add the retained boar concept alongside wolves and bears: one boar on the first island, 2–3 on later islands, preserving territorial combat and safe starts. Existing saved populations stay intact; the roster applies to newly generated islands.
 
 - **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).

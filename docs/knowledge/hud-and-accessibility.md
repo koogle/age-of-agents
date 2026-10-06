@@ -34,7 +34,7 @@ verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
 ## Build subcategory card
 
-User steering (2026-10-06): remove the top title/description card inside build subcategories. Keep the building buttons, labels and back navigation; show hover costs through the existing explanation toast. This is a presentation-only change with no save impact. [Desktop and phone verification](../verification/build-subcategories/README.md).
+User steering (2026-10-06, updated): remove the top-middle build hint bubble; show hovered build details in the menu's existing information area. Placement instructions remain in that area on mouse and touch. Commands and complaints from NPCs, including blocked placement and server rejection, belong in the fading overhead status. This supersedes the earlier subcategory-card removal/toast routing. Implemented in the shared HUD: build groups reuse the info panel, placement keeps costs/instructions visible, and local failures use `Feedback::message`. Server failures retain the command’s unit IDs and correlate replies by request ID, independently of current selection. Movement also flashes its status. Resource/system information uses the selection detail area or a lower hint when nothing is selected. Desktop mouse and DPR2-phone touch checks, 302 combined workspace tests and strict native/WASM lint pass; [evidence and reproduction](../verification/build-feedback/README.md). No simulation or save changes.
 
 ## NPC status feedback
 
@@ -87,7 +87,7 @@ Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonov
 
 ## Resource names on demand
 
-Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the existing explanation pill; tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
+Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the selection detail area (or a lower hint when nothing is selected); tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
 
 Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
 
@@ -107,7 +107,7 @@ User feedback on 2026-10-05 identified colored rectangular backgrounds behind sp
 
 ## Field placement costs (2026-10-05)
 
-With water added as a required field input, the placement information pill now
+With water added as a required field input, the placement information area now
 shows the full shared cost continuously: 10 wood, 5 stone, 10 water, plus work
 time and food yield. Mouse and touch both get this without relying on hover.
 See [water verification](../verification/water/README.md).

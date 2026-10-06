@@ -377,6 +377,7 @@ impl App {
                 }
             }
             hud::Action::LookAt(point) => self.rig.look_at(point.x, point.y),
+            hud::Action::CommandFeedback(reason) => self.command_feedback(&reason),
             hud::Action::Explain(reason) => self.toast = Some((reason, now_seconds() + 3.0)),
             hud::Action::Reset => {
                 if let Some(seed) = reset::choose_seed() {
@@ -417,10 +418,7 @@ impl App {
                 });
                 self.build = hud::BuildUi::Off;
             } else {
-                self.toast = Some((
-                    "That spot is not clear for building.".into(),
-                    now_seconds() + 3.0,
-                ));
+                self.command_feedback("That spot is not clear for building.");
             }
             return;
         }

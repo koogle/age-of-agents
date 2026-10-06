@@ -142,8 +142,10 @@ pub enum Action {
     LookAt(Vec2),
     /// Opens the reset confirmation and seed input.
     Reset,
-    /// A tap on an unavailable command: say why in the toast line.
+    /// Resource and system information.
     Explain(String),
+    /// A rejected or unavailable unit command.
+    CommandFeedback(String),
 }
 
 struct Region {
@@ -688,27 +690,18 @@ impl Hud {
         lines
     }
 
-    fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32, top: f32) {
+    fn toast(&mut self, atlas: &Atlas, toast: Option<&str>, width: f32, s: f32, bottom: f32) {
         if let Some(text) = toast {
-            // Below the resource coins (and the paused pill), so it never
-            // covers the counts on a narrow screen.
+            // Unselected resource/system hints sit above bottom navigation.
             let lines = Self::wrapped_lines(atlas, text, 14.0 * s, width - 60.0 * s);
             let w = lines
                 .iter()
                 .map(|line| Self::text_width(atlas, line, 14.0 * s))
                 .fold(0.0_f32, f32::max)
                 + 36.0 * s;
-            self.shape(
-                [
-                    (width - w) / 2.0,
-                    top,
-                    w,
-                    (18.0 + 18.0 * lines.len() as f32) * s,
-                ],
-                GLASS,
-                1.0,
-                17.0 * s,
-            );
+            let height = (18.0 + 18.0 * lines.len() as f32) * s;
+            let top = bottom - height;
+            self.shape([(width - w) / 2.0, top, w, height], GLASS, 1.0, 17.0 * s);
             for (index, line) in lines.iter().enumerate() {
                 self.text(
                     atlas,
