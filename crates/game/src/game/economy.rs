@@ -2,43 +2,6 @@
 //! completes once, or waits at the building when a unit has no free spawn cell.
 use super::*;
 
-impl ResourceKind {
-    pub const ALL: [Self; 14] = [
-        Self::Water,
-        Self::Wood,
-        Self::Food,
-        Self::Stone,
-        Self::Gold,
-        Self::Iron,
-        Self::Coal,
-        Self::Clay,
-        Self::Fiber,
-        Self::Timber,
-        Self::Steel,
-        Self::Bricks,
-        Self::Cloth,
-        Self::Rations,
-    ];
-    pub const fn name(self) -> &'static str {
-        match self {
-            Self::Water => "water",
-            Self::Wood => "wood",
-            Self::Food => "food",
-            Self::Stone => "stone",
-            Self::Gold => "gold",
-            Self::Iron => "iron",
-            Self::Coal => "coal",
-            Self::Clay => "clay",
-            Self::Fiber => "fiber",
-            Self::Timber => "timber",
-            Self::Steel => "steel",
-            Self::Bricks => "bricks",
-            Self::Cloth => "cloth",
-            Self::Rations => "rations",
-        }
-    }
-}
-
 impl UnitKind {
     pub const fn name(self) -> &'static str {
         match self {
@@ -142,16 +105,8 @@ impl GameWorld {
             .ok_or(CommandError::QueuedJobNotFound)?;
         let entry = building.queue.remove(index);
         let origin = building.origin;
-        match entry.job {
-            BuildingJob::Produce { product, .. } => {
-                for &(kind, amount) in product.cost() {
-                    self.credit_at(origin, kind, amount);
-                }
-            }
-            BuildingJob::Research { .. } => {
-                self.credit_at(origin, ResourceKind::Food, RESEARCH_FOOD_COST);
-                self.credit_at(origin, ResourceKind::Wood, RESEARCH_WOOD_COST);
-            }
+        for &(kind, amount) in entry.job.cost() {
+            self.credit_at(origin, kind, amount);
         }
         Ok(())
     }
@@ -207,7 +162,7 @@ impl GameWorld {
                         return;
                     };
                     self.units.push(Unit {
-                        health: 100.0,
+                        health: UNIT_HEALTH,
                         id: self.next_unit_name(),
                         kind,
                         cell,
@@ -242,5 +197,108 @@ impl GameWorld {
         } else {
             Some(building.queue.remove(0).job)
         };
+    }
+}
+
+impl BuildingKind {
+    pub const fn researches(self) -> &'static [TechnologyKind] {
+        match self {
+            Self::TownCenter => &TechnologyKind::ALL,
+            Self::MiningCamp => &[TechnologyKind::Mining],
+            Self::Farm => &[TechnologyKind::Agriculture],
+            Self::LumberMill => &[TechnologyKind::Forestry],
+            Self::Kiln => &[TechnologyKind::Masonry],
+            Self::Weaver => &[TechnologyKind::Textiles],
+            _ => &[],
+        }
+    }
+}
+
+impl Building {
+    pub fn check_queue_space(&self) -> Result<(), CommandError> {
+        if !self.is_complete() {
+            return Err(CommandError::BuildingUnderConstruction);
+        }
+        if self.queue.len() >= MAX_QUEUED_JOBS || self.next_queue_id == u64::MAX {
+            return Err(CommandError::BuildingQueueFull);
+        }
+        Ok(())
+    }
+
+    pub fn check_production(
+        &self,
+        product: ProductKind,
+        stock: &Stockpile,
+        population: usize,
+        housing: usize,
+    ) -> Result<(), CommandError> {
+        self.check_queue_space()?;
+        if !self.kind.products().contains(&product) {
+            return Err(CommandError::ProductUnavailable);
+        }
+        if product.unit_kind().is_some() && population >= housing {
+            return Err(CommandError::PopulationCapReached);
+        }
+        if !stock.affords(product.cost()) {
+            return Err(if product == ProductKind::Villager {
+                CommandError::InsufficientFood
+            } else {
+                CommandError::InsufficientProductionResources
+            });
+        }
+        Ok(())
+    }
+
+    pub fn check_research(
+        &self,
+        technology: TechnologyKind,
+        stock: &Stockpile,
+        known: &[TechnologyKind],
+        queued: bool,
+    ) -> Result<(), CommandError> {
+        self.check_queue_space()?;
+        if !self.kind.researches().contains(&technology) {
+            return Err(CommandError::TechnologyUnavailable);
+        }
+        if known.contains(&technology) {
+            return Err(CommandError::TechnologyAlreadyResearched);
+        }
+        if queued {
+            return Err(CommandError::TechnologyInProgress);
+        }
+        if technology
+            .prerequisite()
+            .is_some_and(|p| !known.contains(&p))
+        {
+            return Err(CommandError::MissingTechnologyPrerequisite);
+        }
+        if !stock.affords(RESEARCH_COST) {
+            return Err(CommandError::InsufficientResearchResources);
+        }
+        Ok(())
+    }
+}
+
+pub fn housing<'a>(buildings: impl Iterator<Item = &'a Building>) -> usize {
+    buildings
+        .filter(|b| b.is_complete())
+        .map(|b| b.kind.housing())
+        .sum()
+}
+
+pub fn population<'a>(
+    land_units: usize,
+    passengers: usize,
+    buildings: impl Iterator<Item = &'a Building>,
+) -> usize {
+    land_units + passengers + buildings.flat_map(Building::jobs).filter(|job| matches!(job, BuildingJob::Produce { product, .. } if product.unit_kind().is_some())).count()
+}
+
+impl BuildingJob {
+    pub fn cost(&self) -> &'static [(ResourceKind, f64)] {
+        match self {
+            Self::Produce { product, .. } => product.cost(),
+            Self::Research { .. } => RESEARCH_COST,
+        }
     }
 }

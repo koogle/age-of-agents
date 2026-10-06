@@ -79,7 +79,11 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     }
     Some((
         "transport",
-        format!("Transport · {:.0}/50 resources", ship.cargo.total()),
+        format!(
+            "Transport · {:.0}/{} resources",
+            ship.cargo.total(),
+            aoa_game::SHIP_RESOURCE_CAPACITY
+        ),
         format!(
             "{}/{TRANSPORT_PASSENGERS} passengers · {}",
             ship.passengers.len(),

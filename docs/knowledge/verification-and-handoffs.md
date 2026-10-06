@@ -83,15 +83,11 @@ focused topic from the [knowledge index](INDEX.md).
 
 ## Menu icon verification
 
-`python docs/verification/menu_icons.py --name stop --output /tmp/menu-stop`
-serves a controlled current-schema snapshot on loopback :8011, loads the current
-WASM and assets, captures desktop/DPR-2 phone views and checks Stop wire dispatch.
-It never touches hosted saves. This verifies presentation and pointer/touch
-dispatch, not domain acceptance. Use native domain tests for authoritative behavior.
-In this cloud executor, source `/workspace/.cloud-setup/activate.sh` when Rust is
-not on PATH; check/install the matching WASM target and wasm-bindgen version.
-Software WebGL can take roughly a minute for initial shaders; a real-time snapshot
-feed avoids clock instrumentation blocking first-frame initialization.
+Use the maintained batch driver below for menu presentation and pointer/touch
+dispatch. The former single-icon driver and dated feature-specific captures are
+retired; see [the retirement record](../verification/RETIRED_TOOLS.md). Domain
+tests remain the authority for gameplay, and real-server road/wildlife drivers
+exercise acceptance against an isolated save.
 
 For sequential icon verification, `menu_icon_batch.py --queue DIR` keeps Chromium
 alive and accepts a single `request.json` with `name` and `output`. It writes
@@ -139,3 +135,14 @@ case to prove the intended target ID: an offscreen phone mill tap initially left
 the town center selected while selection counts still looked correct. The fixed
 fixture zooms out for setup, uses touch for selection, and verifies a stopped
 carrier's deposit names the mill before testing gathering exclusions.
+
+## Subtraction policy (2026-10-06)
+
+Jakob explicitly requested cutting repetitive tests/fixtures and substantially
+reducing Python. Retire one-off historical capture/generation scripts whose
+results and provenance are already retained; keep current acceptance drivers,
+release checks and offline rebuild paths. Preserve useful behavioral regressions;
+fixture-generator self-tests and duplicated setup are candidates for removal.
+This does not authorize removing gameplay, art sources, provenance or save safety.
+Retired tools and their replacement/recovery paths are listed in
+[the retirement record](../verification/RETIRED_TOOLS.md).

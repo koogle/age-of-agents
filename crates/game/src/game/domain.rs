@@ -11,6 +11,17 @@ pub struct Position {
 }
 
 impl Position {
+    pub(super) fn on_step(cell: CellCoordinate, step: Option<Step>) -> Self {
+        let from = cell.center();
+        step.map_or(from, |s| {
+            let to = s.to.center();
+            Self {
+                x: from.x + (to.x - from.x) * s.progress,
+                y: from.y + (to.y - from.y) * s.progress,
+            }
+        })
+    }
+
     pub(super) fn distance(self, other: Self) -> f64 {
         (self.x - other.x).hypot(self.y - other.y)
     }
@@ -223,17 +234,7 @@ impl Unit {
     }
 
     pub fn position(&self) -> Position {
-        let from = self.cell.center();
-        match self.step {
-            None => from,
-            Some(step) => {
-                let to = step.to.center();
-                Position {
-                    x: from.x + (to.x - from.x) * step.progress,
-                    y: from.y + (to.y - from.y) * step.progress,
-                }
-            }
-        }
+        Position::on_step(self.cell, self.step)
     }
 }
 
@@ -263,31 +264,17 @@ pub struct FieldState {
 
 impl ResourceNode {
     pub fn footprint(&self) -> Footprint {
+        let size = if self.field.is_some() {
+            super::FIELD_SIZE
+        } else {
+            1
+        };
         Footprint {
             origin: self.cell,
-            columns: if self.field.is_some() { 3 } else { 1 },
-            rows: if self.field.is_some() { 3 } else { 1 },
+            columns: size,
+            rows: size,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ResourceKind {
-    Water,
-    Wood,
-    Food,
-    Stone,
-    Gold,
-    Iron,
-    Coal,
-    Clay,
-    Fiber,
-    Timber,
-    Steel,
-    Bricks,
-    Cloth,
-    Rations,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -309,8 +296,6 @@ pub struct Building {
     pub origin: CellCoordinate,
     /// `Some(seconds of work done)` while this is a foundation; `None` once complete.
     pub construction: Option<f64>,
-    pub produces: Vec<ProductKind>,
-    pub researches: Vec<TechnologyKind>,
     pub job: Option<BuildingJob>,
     /// Paid tasks waiting behind the active job, in submission order.
     pub queue: Vec<QueuedBuildingJob>,
@@ -559,86 +544,55 @@ impl TechnologyKind {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-pub struct Stockpile {
-    pub water: f64,
-    pub wood: f64,
-    pub food: f64,
-    pub stone: f64,
-    pub gold: f64,
-    pub iron: f64,
-    pub coal: f64,
-    pub clay: f64,
-    pub fiber: f64,
-    pub timber: f64,
-    pub steel: f64,
-    pub bricks: f64,
-    pub cloth: f64,
-    pub rations: f64,
+// One fixed catalog owns resource spelling, order and typed inventory fields.
+macro_rules! resources {
+    ($($kind:ident => $field:ident),+ $(,)?) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+        #[serde(rename_all = "snake_case")]
+        pub enum ResourceKind { $($kind),+ }
+
+        #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+        pub struct Stockpile { $(pub $field: f64),+ }
+
+        impl ResourceKind {
+            pub const ALL: [Self; 14] = [$(Self::$kind),+];
+            pub const fn name(self) -> &'static str {
+                match self { $(Self::$kind => stringify!($field)),+ }
+            }
+        }
+        impl Stockpile {
+            pub(super) fn entries(&self) -> [(&'static str, f64); 14] {
+                [$( (stringify!($field), self.$field) ),+]
+            }
+            pub fn amount(&self, kind: ResourceKind) -> f64 {
+                match kind { $(ResourceKind::$kind => self.$field),+ }
+            }
+            pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
+                match kind { $(ResourceKind::$kind => self.$field += amount),+ }
+            }
+        }
+    };
+}
+resources! {
+    Water => water, Wood => wood, Food => food, Stone => stone,
+    Gold => gold, Iron => iron, Coal => coal, Clay => clay, Fiber => fiber,
+    Timber => timber, Steel => steel, Bricks => bricks, Cloth => cloth, Rations => rations,
 }
 
 impl Stockpile {
-    pub(super) fn entries(&self) -> [(&'static str, f64); 14] {
-        [
-            ("water", self.water),
-            ("wood", self.wood),
-            ("food", self.food),
-            ("stone", self.stone),
-            ("gold", self.gold),
-            ("iron", self.iron),
-            ("coal", self.coal),
-            ("clay", self.clay),
-            ("fiber", self.fiber),
-            ("timber", self.timber),
-            ("steel", self.steel),
-            ("bricks", self.bricks),
-            ("cloth", self.cloth),
-            ("rations", self.rations),
-        ]
-    }
-
-    pub fn amount(&self, kind: ResourceKind) -> f64 {
-        match kind {
-            ResourceKind::Water => self.water,
-            ResourceKind::Wood => self.wood,
-            ResourceKind::Food => self.food,
-            ResourceKind::Stone => self.stone,
-            ResourceKind::Gold => self.gold,
-            ResourceKind::Iron => self.iron,
-            ResourceKind::Coal => self.coal,
-            ResourceKind::Clay => self.clay,
-            ResourceKind::Fiber => self.fiber,
-            ResourceKind::Timber => self.timber,
-            ResourceKind::Steel => self.steel,
-            ResourceKind::Bricks => self.bricks,
-            ResourceKind::Cloth => self.cloth,
-            ResourceKind::Rations => self.rations,
-        }
-    }
-
     /// Whether every cost is covered.
     pub fn affords(&self, cost: &[(ResourceKind, f64)]) -> bool {
-        cost.iter()
-            .all(|(kind, amount)| self.amount(*kind) >= *amount)
+        self.missing_resource(cost).is_none()
     }
 
-    pub(super) fn add(&mut self, kind: ResourceKind, amount: f64) {
-        match kind {
-            ResourceKind::Water => self.water += amount,
-            ResourceKind::Wood => self.wood += amount,
-            ResourceKind::Food => self.food += amount,
-            ResourceKind::Stone => self.stone += amount,
-            ResourceKind::Gold => self.gold += amount,
-            ResourceKind::Iron => self.iron += amount,
-            ResourceKind::Coal => self.coal += amount,
-            ResourceKind::Clay => self.clay += amount,
-            ResourceKind::Fiber => self.fiber += amount,
-            ResourceKind::Timber => self.timber += amount,
-            ResourceKind::Steel => self.steel += amount,
-            ResourceKind::Bricks => self.bricks += amount,
-            ResourceKind::Cloth => self.cloth += amount,
-            ResourceKind::Rations => self.rations += amount,
-        }
+    pub fn missing_resource(&self, cost: &[(ResourceKind, f64)]) -> Option<ResourceKind> {
+        cost.iter()
+            .find(|(kind, amount)| {
+                self.amount(*kind)
+                    .partial_cmp(amount)
+                    .is_none_or(std::cmp::Ordering::is_lt)
+            })
+            .map(|(kind, _)| *kind)
     }
 }
 
@@ -670,22 +624,7 @@ impl DomainCatalog {
     }
 }
 
-pub const ROADMAP_RESOURCES: [ResourceKind; 14] = [
-    ResourceKind::Water,
-    ResourceKind::Wood,
-    ResourceKind::Food,
-    ResourceKind::Stone,
-    ResourceKind::Gold,
-    ResourceKind::Iron,
-    ResourceKind::Coal,
-    ResourceKind::Clay,
-    ResourceKind::Fiber,
-    ResourceKind::Timber,
-    ResourceKind::Steel,
-    ResourceKind::Bricks,
-    ResourceKind::Cloth,
-    ResourceKind::Rations,
-];
+pub const ROADMAP_RESOURCES: [ResourceKind; 14] = ResourceKind::ALL;
 
 pub const ROADMAP_BUILDINGS: [BuildingKind; 17] = [
     BuildingKind::TownCenter,

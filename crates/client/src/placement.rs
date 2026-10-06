@@ -33,8 +33,8 @@ impl App {
                     [
                         r.cell.column as f32 * terrain::CELL,
                         r.cell.row as f32 * terrain::CELL,
-                        3.0 * terrain::CELL,
-                        3.0 * terrain::CELL,
+                        aoa_game::FIELD_SIZE as f32 * terrain::CELL,
+                        aoa_game::FIELD_SIZE as f32 * terrain::CELL,
                     ]
                 }),
         );

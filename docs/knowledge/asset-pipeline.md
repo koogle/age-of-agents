@@ -15,10 +15,10 @@ provenance. Start from approved art and retained originals.
 
 1. Identify the asset family, manifest, packer, render size and target states.
    Check whether existing high-resolution sources solve the problem first.
-2. For FAL generation, inspect the appropriate script under `assets/*/tools/`
-   and its reference files before running it. Scripts can make multiple paid
-   calls and assume a particular working directory; do not launch the whole
-   generator to repair one frame. The existing
+2. For FAL generation, inspect the approved reference files and retained provenance.
+   Historical batch generators are retired; recover an old recipe only when
+   needed through [the retirement record](../verification/RETIRED_TOOLS.md).
+   Do not launch an old paid batch to repair one frame. The existing
    [falcall.py](../../assets/ui/tools/falcall.py) uses `FAL_KEY`, submits to the
    queue, polls and records request/cost provenance. Check current credentials
    and network readiness without printing secrets; old environment notes are

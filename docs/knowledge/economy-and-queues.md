@@ -63,3 +63,14 @@ write the useful procedure or invariant here and only its short accepted rationa
 in `decisions.md`.
 
 Verification and reproducible menu captures: [productive building visibility](../verification/building-progression/README.md).
+
+## Shared rule ownership (2026-10-06)
+
+`Building::check_production/check_research/check_queue_space` supply typed
+eligibility to both authoritative submission and HUD disabled-state generation.
+Progression-filtered snapshot offers remain in `BuildingView`; the world still
+revalidates discovery before accepting work. Public `housing/population` helpers
+share counting across world and disclosed snapshots. `Stockpile::missing_resource`
+owns cost checks; `RESEARCH_COST` and `BuildingJob::cost` own charging/refunds and
+cost descriptions. Keep HUD wording/precedence in the client. Buildings derive
+products and research from kind; capability removal uses save version 17.

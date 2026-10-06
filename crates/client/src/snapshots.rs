@@ -1,5 +1,5 @@
 //! Apply world updates and command feedback without replaying missed history.
-use crate::{App, feedback, friendly};
+use crate::{App, feedback};
 
 impl App {
     pub(super) fn command_feedback(&mut self, text: &str) {
@@ -37,7 +37,7 @@ impl App {
         }
         for result in self.source.take_results() {
             if let Err(error) = result {
-                let text = friendly(&error.message);
+                let text = error.message;
                 if error.units.is_empty() {
                     self.toast = Some((text, now + 3.0));
                 } else if let Some(snapshot) = &self.view.snapshot {

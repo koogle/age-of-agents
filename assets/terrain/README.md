@@ -1,5 +1,10 @@
 # Painted ground textures
 
+Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
+their references below describe provenance, not current reproduction commands.
+Active offline packers and original art are retained. See
+[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+
 One seamless, top-down painted texture per biome, sampled by `frontend/ground-paint.js` from `/assets/terrain/<name>.webp`. One repeat covers 4×4 cells, and the shader blends biome borders itself.
 
 | File | Size | Use |

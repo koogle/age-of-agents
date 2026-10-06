@@ -107,10 +107,8 @@ impl GameWorld {
             .island_at(cell)
             .ok_or(CommandError::InvalidDestination)?;
         let available = self.available_on(island);
-        for &(kind, amount) in cost {
-            if available.amount(kind) < amount {
-                return Err(CommandError::InsufficientResources(kind));
-            }
+        if let Some(kind) = available.missing_resource(cost) {
+            return Err(CommandError::InsufficientResources(kind));
         }
         let ships: Vec<_> = (0..self.ships.len())
             .filter(|&i| self.connected_island(i) == Some(island))

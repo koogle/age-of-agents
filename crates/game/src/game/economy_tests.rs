@@ -53,7 +53,7 @@ fn all_catalog_buildings_construct_complete_and_charge_exactly_once() {
             world.tick(0.1);
         }
         assert!(world.buildings[1].is_complete(), "{kind:?}");
-        assert_eq!(world.buildings[1].produces, kind.products());
+        assert_eq!(world.buildings[1].kind, kind);
         assert_eq!(world.buildings.len(), 2);
         world.validate().unwrap();
     }

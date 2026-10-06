@@ -300,7 +300,7 @@ impl GameWorld {
                         return Err(format!("{} has an unavailable product", building.id));
                     }
                     BuildingJob::Research { technology, .. }
-                        if !building.researches.contains(technology)
+                        if !building.kind.researches().contains(technology)
                             || self.researched_technologies.contains(technology) =>
                     {
                         return Err(format!("{} has invalid research", building.id));

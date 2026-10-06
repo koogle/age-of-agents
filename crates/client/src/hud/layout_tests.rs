@@ -180,7 +180,6 @@ fn full_mobile_queue_wraps_without_covering_navigation_or_commands() {
     world.economy_rules = EconomyRules::Unrestricted;
     world.inventories[0].wood = 1000.0;
     world.buildings[0].kind = BuildingKind::LumberMill;
-    world.buildings[0].produces = BuildingKind::LumberMill.products().to_vec();
     let id = world.buildings[0].id.clone();
     for _ in 0..6 {
         world

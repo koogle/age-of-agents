@@ -1,5 +1,10 @@
 # Villager billboard sprites
 
+Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
+their references below describe provenance, not current reproduction commands.
+Active offline packers and original art are retained. See
+[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+
 Three villagers in the illustrated ink-and-wash style of the UI icon kit, rendered as camera-facing billboards in the shared Rust client. All villager actions, military actions/facings and base resource stages now use lossless 512×512 cells.
 
 | Sheet | Who |
