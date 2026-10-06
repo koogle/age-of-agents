@@ -124,3 +124,15 @@ fixture. The 2026-10-06 icon refinement replay found center-screen selection
 unreliable when reusing a context across dock, land-unit and open-water scenes.
 Fresh contexts isolate the scenes; do not accept an empty-action screenshot as
 proof merely because it produced no browser errors.
+
+## Task-selection fixtures (2026-10-06)
+
+The [building-selection replay](../verification/building_selection.py) sends
+three startup snapshots, then explicit updates for each controlled task phase.
+A continuous feed during SwiftShader startup left the test observing an earlier
+phase; task-only fixtures do not need a continuously advancing snapshot stream.
+Check projected tap coordinates against the viewport and use a positive command
+case to prove the intended target ID: an offscreen phone mill tap initially left
+the town center selected while selection counts still looked correct. The fixed
+fixture zooms out for setup, uses touch for selection, and verifies a stopped
+carrier's deposit names the mill before testing gathering exclusions.

@@ -38,10 +38,14 @@ the candidates are a plain data function so mixed-group selection can be tested
 without a renderer. Removed the duplicate building-selection branch. No new
 input mode, dependency, autonomous behavior or domain/save changes. Unit tests
 cover all four gathering phases in a mixed selection, compatible/incompatible
-storage, missing cargo and empty selection/snapshot. All 295 workspace tests pass (one existing manual benchmark ignored), along
+storage, missing cargo and empty selection/snapshot. All 296 combined workspace tests pass (one existing manual benchmark ignored), along
 with formatting, strict native and WASM lint, rebuilt WebGL output and whitespace
 checks. Desktop mouse and DPR2 phone touch pass all four gathering phases plus
 stopped-carrier controls with no page errors; results and bundle hash are in
 [results.json](results.json). The corrected phone replay zooms out to verify both
 storage targets inside the viewport. Native-window appearance and physical
-phones are unverified. Not deployed.
+phones are unverified. Integrated master `de49ab4`, preserving boars and stationary
+status feedback; 307-frame/field/transport/icon audits and six release-verifier
+tests pass. User authorized creation and merge of [PR #149](https://github.com/koogle/age-of-agents/pull/149)
+on 2026-10-06; merge and deployment status are tracked by that PR and the
+[production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
