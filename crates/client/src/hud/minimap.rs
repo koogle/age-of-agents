@@ -33,7 +33,8 @@ impl Minimap {
     }
 
     /// The globe quad; `texture` is the world size the cell texture covers,
-    /// which may be smaller than the fitted map (uncharted sea outside it).
+    /// which may be smaller than the fitted map. The fitted map's extent in
+    /// texture UV rides in `color.xy` so the shader can fog it like unexplored land.
     pub(super) fn quad(&self, rect: [f32; 4], texture: Vec2) -> Quad {
         let inverse = self.projection.inverse();
         let horizontal = inverse.x_axis / texture;
@@ -42,16 +43,20 @@ impl Minimap {
         Quad {
             rect,
             uv: [center.x, center.y, horizontal.x, horizontal.y],
-            color: [1.0; 4],
+            color: [
+                self.center.x * 2.0 / texture.x,
+                self.center.y * 2.0 / texture.y,
+                1.0,
+                1.0,
+            ],
             params: [3.0, vertical.x, vertical.y, 0.0],
         }
     }
 }
 
 impl Hud {
-    /// Uncharted planned islands as pale parchment shapes and the temple
-    /// island's marker, both visible from the first turn of a run.
-    pub(super) fn archipelago(
+    /// The temple island's marker: the one place revealed through the fog.
+    pub(super) fn temple_marker(
         &mut self,
         atlas: &Atlas,
         snapshot: &WorldSnapshot,
@@ -60,35 +65,24 @@ impl Hud {
     ) {
         let cell = crate::terrain::CELL;
         let size = Vec2::new(globe[2], globe[3]);
-        let at = |site: aoa_game::CellCoordinate| {
-            let center = Vec2::new(
-                site.column as f32 + WORLD_COLUMNS as f32 / 2.0,
-                site.row as f32 + WORLD_ROWS as f32 / 2.0,
-            ) * cell;
-            Vec2::new(globe[0], globe[1]) + map.local_of(center) * size
-        };
+        let site = snapshot.temple_site;
+        let center = Vec2::new(
+            site.column as f32 + WORLD_COLUMNS as f32 / 2.0,
+            site.row as f32 + WORLD_ROWS as f32 / 2.0,
+        ) * cell;
+        let p = Vec2::new(globe[0], globe[1]) + map.local_of(center) * size;
         // One island region spans about this much of the globe.
         let span = (map.local_of(Vec2::new(WORLD_COLUMNS as f32, 0.0) * cell)
             - map.local_of(Vec2::ZERO))
         .length()
             * size.x;
-        for site in &snapshot.archipelago {
-            if snapshot.island_origins.contains(site) {
-                continue;
-            }
-            let p = at(*site);
-            let d = span * 0.8;
-            let rect = [p.x - d / 2.0, p.y - d / 2.0, d, d];
-            self.shape(rect, [0.93, 0.86, 0.68, 0.95], 1.0, d / 2.0);
-            self.shape(rect, [0.42, 0.3, 0.18, 0.8], 2.0, 1.5 * size.x / 136.0);
-        }
-        let Some(temple) = snapshot.archipelago.last() else {
-            return;
-        };
-        let p = at(*temple);
         let d = (span * 1.3).max(34.0 * size.x / 136.0);
-        let rect = [p.x - d / 2.0, p.y - d * 0.62, d, d];
-        self.sprite(atlas, "goal_temple", rect, [1.0; 4]);
+        self.sprite(
+            atlas,
+            "goal_temple",
+            [p.x - d / 2.0, p.y - d * 0.62, d, d],
+            [1.0; 4],
+        );
     }
 }
 

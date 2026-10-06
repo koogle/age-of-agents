@@ -57,12 +57,11 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
             action: Action::Voyage(id),
         });
     }
-    let planned = snapshot.archipelago.len() as u64;
-    if count < planned {
+    if snapshot.uncharted_islands {
         commands.push(Command {
             icon: "command_explore",
-            label: format!("Explore · {} of {planned} islands charted", count),
-            detail: "Sail to the nearest uncharted island on the globe".into(),
+            label: "Explore beyond the coast".into(),
+            detail: "Sail into the fog toward the nearest uncharted island".into(),
             enabled: ship.stopped(),
             action: Action::Voyage(count),
         });
@@ -147,12 +146,13 @@ mod tests {
         assert_eq!(actions[0].icon, "command_disembark");
         assert_eq!(actions[1].icon, "command_explore");
         snapshot.island_count = 2;
-        snapshot.island_origins.push(snapshot.archipelago[1]);
+        snapshot
+            .island_origins
+            .push(aoa_game::archipelago_plan(0)[1]);
         assert_eq!(commands(&snapshot)[1].icon, "command_sail");
         assert_eq!(commands(&snapshot)[2].action, Action::Voyage(2));
         // A fully charted run offers no further exploration.
-        snapshot.island_count = snapshot.archipelago.len();
-        snapshot.island_origins = snapshot.archipelago.clone();
+        snapshot.uncharted_islands = false;
         assert!(
             commands(&snapshot)
                 .iter()

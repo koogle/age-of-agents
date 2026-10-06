@@ -263,7 +263,17 @@ fn expanded_snapshot_terrain_round_trips_runtime_dimensions() {
         (loaded.columns, loaded.rows),
         plan_extent(&world.island_origins)
     );
-    assert_eq!(loaded.archipelago, archipelago_plan(world.seed));
+    // Fog: only the temple site is revealed, not the other planned islands.
+    assert_eq!(
+        Some(&loaded.temple_site),
+        archipelago_plan(world.seed).last()
+    );
+    assert!(loaded.uncharted_islands);
+    let json = serde_json::to_string(&snapshot).unwrap();
+    for site in &archipelago_plan(world.seed)[3..] {
+        let hidden = serde_json::to_string(site).unwrap();
+        assert!(*site == loaded.temple_site || !json.contains(&hidden));
+    }
 }
 
 #[test]

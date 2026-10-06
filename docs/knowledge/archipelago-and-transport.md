@@ -87,15 +87,22 @@ Implemented in `crates/game/src/game/islands.rs`:
   ship the world stays 120×80, which keeps early play and most tests unchanged.
 - `Voyage` with `island_id == island_count` (Explore) sails to open water 8 cells
   outside the nearest undiscovered site; with every site charted it is rejected.
-- Snapshots carry `archipelago` (the plan). The globe fits `plan_extent`, draws
-  uncharted sites as parchment discs, the temple site with the generated
-  `goal_temple` icon, and unseen open sea between islands as sea (the client flags
-  those cells with the water colour; `island_at` decides). The resource label reads
-  "Island N of M"; the ship panel's Explore shows charted/planned counts.
+- Snapshots reveal only `temple_site` and whether `uncharted_islands` remain; the
+  other planned sites, their count and positions never leave the server. The globe
+  reaches at least the temple region and draws the generated `goal_temple` icon
+  there. Everything unexplored, including sea beyond the received map, is
+  parchment fog (the shader receives the fitted extent in the globe quad's
+  `color.xy`); only beyond the map is open sea.
+
+**Steering (Jakob, 2026-10-06):** the first version drew every uncharted island
+on the globe and showed open sea between islands. Jakob rejected that: the world
+stays shrouded in fog and only the treasure's location is shown. Do not reveal
+other planned sites, their count ("Island N of M"), or uncharted sea.
 
 Store version 18 resets spiral-placed worlds. Tests: `islands_tests` cover plan
 bounds/separation/determinism over 200 seeds, approach discovery without ship
-jumps, Explore charting a whole run and its rejection afterwards.
+jumps, Explore charting a whole run and its rejection afterwards, and that
+snapshots omit uncharted non-temple sites.
 `cargo run -p aoa-game --example archipelago_preview -- <seed> <charted>` exports
 a paused snapshot after real Explore voyages; [capture and screenshots](../verification/archipelago-plan/README.md).
 
