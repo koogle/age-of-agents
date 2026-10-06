@@ -49,6 +49,14 @@ historical. Do not assume a local login or provider access exists in a new sessi
 
 ## Style acceptance is a merge gate
 
+**Developer correction, 2026-10-06:** Jakob identified the two-board Disembark
+refinement in #140 as a regression. Restore a recognizable joined wooden landing
+platform with several deck boards; simplification must preserve structural cues,
+not merely the boot and shoreline. Retain the restrained palette, simpler boot
+and sparse texture. The [platform correction](../../assets/ui/sources/menu_icons/disembark_platform/README.md)
+passes visual, alpha and fresh desktop/DPR-2 phone dispatch checks; the prior
+Disembark shape/detail pass is superseded by this user feedback.
+
 **Developer steering, 2026-10-06:** After comparing the rejected and merged
 menu icons, Jakob requested further refinement and slightly simpler icons.
 Keep the established thin brown ink and restrained watercolor family. Reduce
@@ -191,3 +199,12 @@ Follow-up direction: compare wildlife directly with existing NPCs, not only the 
 The corrected water art was explicitly accepted by the user on 2026-10-06
 ("Looks much better"). It uses pale clay, muted blue water and finer ink; the
 comparison and desktop/DPR-2 previews are in the water verification folder.
+
+## Stone road readability follow-up (2026-10-06)
+
+After merging roads, Jakob said the stone street had drifted too far toward sand
+and requested slightly stronger material definition. Refine only stone toward
+neutral limestone grey with modestly deeper fine joints and clearer soft face
+shading; retain the irregular layout and painted style. Dirt stays unchanged.
+Jakob preferred the revised neutral-limestone texture after seeing the comparison.
+Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
