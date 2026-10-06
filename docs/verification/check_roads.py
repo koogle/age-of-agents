@@ -103,6 +103,24 @@ async def main(output, mode_filter, screenshots):
                             await asyncio.sleep(.3)
                             if kind == 'dirt': await capture(f'{mode}-{kind}-preview.png')
                             await tap(*p[:2])
+                            # Interrupt paid work, then resume by clicking one unfinished piece.
+                            async with client.ws_connect(URL+'/ws') as control:
+                                unit_id = (await state())['units'][0]['id']
+                                await control.send_json({'type':'command','request_id':'road-stop',
+                                    'command':{'type':'stop','unit_id':unit_id}})
+                                async for message in control:
+                                    reply=json.loads(message.data)
+                                    if reply.get('request_id')=='road-stop':
+                                        assert reply['ok'],reply
+                                        break
+                            stopped=await state()
+                            unfinished=[r for r in stopped['roads'] if r['kind']==kind and r['work'] is not None]
+                            assert len(unfinished)>1, stopped
+                            await asyncio.sleep(.3)
+                            assert (await state())['roads']==stopped['roads']
+                            await settle(6)
+                            target=unfinished[len(unfinished)//2]['cell']
+                            p=await ground(target['column'],target['row']);await tap(*p[:2])
                             for _ in range(350):
                                 s=await state()
                                 roads=[r for r in s['roads'] if r['kind']==kind]
@@ -121,9 +139,9 @@ async def main(output, mode_filter, screenshots):
                                 await page.mouse.wheel(0,-5000)
                                 await settle()
                             await capture(f'{mode}-maximum-zoom.png')
-                        assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==2,commands
+                        assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==4,commands
                         assert not errors,errors
-                        results.append({'mode':mode,'viewport':[width,height,dpr],'road_cells':14,'stone_remaining':23,'errors':errors,'server_sha256':hashlib.sha256((ROOT/'target/debug/age-of-agents').read_bytes()).hexdigest()})
+                        results.append({'mode':mode,'viewport':[width,height,dpr],'road_cells':14,'resumed_by_single_cell':True,'stone_remaining':23,'errors':errors,'server_sha256':hashlib.sha256((ROOT/'target/debug/age-of-agents').read_bytes()).hexdigest()})
                         (output/f'{mode}-state.json').write_text(json.dumps(await state()))
                         print(mode,'passed',flush=True)
                         await page.close()
