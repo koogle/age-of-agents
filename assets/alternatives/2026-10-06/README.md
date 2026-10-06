@@ -1,4 +1,4 @@
-# Alternatives from the original villager model — unapproved
+# Alternatives from the original villager model — reviewed candidate archive
 
 58 retained illustration outputs: 57 FAL attempts and one disclosed OpenAI
 refinement. 113 successful FAL requests have an estimated subtotal of $2.5486.
@@ -10,8 +10,8 @@ has changed. These are review choices, not permission to replace existing art.
 
 Latest map-only correction: [fine-line before/after](map-line-weight-comparison.jpg).
 Two FAL edits failed; disclosed OpenAI image_gen refinement visibly thins the
-ink while keeping composition/palette close. The new map awaits visual response
-and is not runtime-approved. Other user-liked calibrations are unchanged.
+ink while keeping composition/palette close. Jakob preferred the latest versions, including this map, and authorized merging
+PR #145 on 2026-10-06. Runtime integration remains pending. Other user-liked calibrations are unchanged.
 
 Previous bounded follow-up: [four-subject comparison](painted-cel-refinement-comparison.jpg)
 and [steel A/B options](painted-steel-options-comparison.jpg). Shield is promising;

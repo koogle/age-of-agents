@@ -210,7 +210,7 @@ shading; retain the irregular layout and painted style. Dirt stays unchanged.
 Jakob preferred the revised neutral-limestone texture after seeing the comparison.
 Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
 
-## Alternative batches (2026-10-06, pending review)
+## Alternative batches (2026-10-06, reviewed archive)
 
 Jakob requested alternatives for recently merged art using the original villager
 model and similar prompts, to restore consistency and controlled color accents.
@@ -220,7 +220,9 @@ The retained originals use `fal-ai/nano-banana/edit` (see sprite README and
 Newer assets supply subject geometry only; approved villagers, primary diorama
 and original UI kit supply style. Review a small calibration batch before
 scaling; rear dock timber should share the front material rather than turn grey.
-These alternatives remain unapproved and are not integration-ready animations.
+Jakob preferred the latest calibrations including the thin-line map and explicitly
+authorized merging the candidate archive in PR #145 on 2026-10-06. Rejected
+attempts remain rejected; these are not integration-ready animations.
 
 The first batches confirm that reusing the same model is insufficient: small
 128px subject references can be copied as blurred enlargements, explicit rear-view
@@ -280,8 +282,8 @@ Jakob likes the visible calibration direction, except the map linework remains
 too thick. Refine only the current Explore map contours: thinner outer edge,
 coastline, star and fold ink matching approved villagers/UI kit. Preserve layout,
 silhouette, palette, paper/islands/star and existing texture; no wider redraw.
-This is preference for the direction, not runtime/merge approval or acceptance
-of the failed wolf recolor. Keep originals and compare at 128/24/32px; at most one
+This initial preference did not approve runtime integration or accept the failed
+wolf recolor; later explicit archive merge authorization is recorded above. Keep originals and compare at 128/24/32px; at most one
 targeted retry after the initial map-only pass.
 
 Both original-model narrow map edits failed: one redesigned the image, one
@@ -290,3 +292,13 @@ used the preferred map as its sole direct image input. The resulting contour is
 visibly finer at 128/24/32px; retain the exact direct-input distinction, source
 chain and unknown OpenAI cost/backend. Never relabel an external refinement as
 a FAL illustration or infer runtime approval from the user liking a direction.
+
+## Dirt road readability follow-up (2026-10-06)
+
+Jakob reports the sandy dirt road is visually hard to see and requests recreation.
+The earlier dirt integration pass does not establish sufficient readability.
+The local replacement uses deeper ochre-brown packed earth with restrained painted
+variation, retaining the diorama/meadow family, fine pebble contours and mirrored
+sampling. Desktop and emulated DPR2 phone default/maximum zoom show clearer separation
+from meadow, retaining fine detail without visible repeat seams. Judge the result under actual terrain lighting;
+source contrast alone is insufficient. [Follow-up evidence](../verification/roads/dirt-readability/README.md).

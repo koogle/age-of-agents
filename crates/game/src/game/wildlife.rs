@@ -7,6 +7,7 @@ use crate::navigation::{PathTree, offset};
 pub enum AnimalKind {
     Wolf,
     Bear,
+    Boar,
 }
 
 impl AnimalKind {
@@ -14,36 +15,42 @@ impl AnimalKind {
         match self {
             Self::Wolf => "Wolf",
             Self::Bear => "Bear",
+            Self::Boar => "Boar",
         }
     }
     pub fn max_health(self) -> f64 {
         match self {
             Self::Wolf => 300.0,
             Self::Bear => 600.0,
+            Self::Boar => 60.0,
         }
     }
     fn aggro(self) -> f64 {
         match self {
             Self::Wolf => 6.0,
             Self::Bear => 4.0,
+            Self::Boar => 4.0,
         }
     }
     fn territory(self) -> f64 {
         match self {
             Self::Wolf => 10.0,
             Self::Bear => 6.0,
+            Self::Boar => 8.0,
         }
     }
     fn speed(self) -> f64 {
         match self {
             Self::Wolf => 2.5,
             Self::Bear => 1.8,
+            Self::Boar => 2.2,
         }
     }
     fn damage(self) -> f64 {
         match self {
             Self::Wolf => 35.0,
             Self::Bear => 50.0,
+            Self::Boar => 10.0,
         }
     }
 }
@@ -90,8 +97,15 @@ impl GameWorld {
         } else {
             2 + (worldgen::mix(self.seed ^ 0x7769_6c64_6c69_6665, island as u64) % 3) as usize
         };
-        for number in 0..count {
-            let kind = if island > 0 && number == count - 1 {
+        let boars = if island == 0 {
+            1
+        } else {
+            2 + (worldgen::mix(self.seed ^ 0x626f_6172, island as u64) % 2) as usize
+        };
+        for number in 0..count + boars {
+            let kind = if number >= count {
+                AnimalKind::Boar
+            } else if island > 0 && number == count - 1 {
                 AnimalKind::Bear
             } else {
                 AnimalKind::Wolf

@@ -294,7 +294,14 @@ impl App {
                 (Vec2::new(c.x, c.z), 1.2, HOVER_WORK)
             }
             Target::Ground(cell) => (terrain::cell_center(cell), 0.24, HOVER_GROUND),
-            Target::Building(id) if !self.carriers_for(&id).is_empty() => {
+            Target::Building(id)
+                if !storage::carriers_for(
+                    self.view.snapshot.as_ref(),
+                    &self.selection.units,
+                    &id,
+                )
+                .is_empty() =>
+            {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
                 let c = view::footprint_center(&self.view.heights, building);
                 (
@@ -370,6 +377,7 @@ impl App {
                 }
             }
             hud::Action::LookAt(point) => self.rig.look_at(point.x, point.y),
+            hud::Action::CommandFeedback(reason) => self.command_feedback(&reason),
             hud::Action::Explain(reason) => self.toast = Some((reason, now_seconds() + 3.0)),
             hud::Action::Reset => {
                 if let Some(seed) = reset::choose_seed() {
@@ -410,10 +418,7 @@ impl App {
                 });
                 self.build = hud::BuildUi::Off;
             } else {
-                self.toast = Some((
-                    "That spot is not clear for building.".into(),
-                    now_seconds() + 3.0,
-                ));
+                self.command_feedback("That spot is not clear for building.");
             }
             return;
         }
@@ -500,21 +505,15 @@ impl App {
                 }
             }
             Target::Building(building_id) => {
-                // Selected villagers holding goods this building takes unload
-                // there; otherwise the tap selects the building.
-                let carriers = self.carriers_for(&building_id);
-                if carriers.is_empty() {
-                    self.selection.units.clear();
-                    self.selection.building = Some(building_id);
-                    return;
-                }
+                let carriers =
+                    storage::carriers_for(self.view.snapshot.as_ref(), &units, &building_id);
                 for unit_id in carriers {
                     self.send(Command::Deposit {
                         unit_id,
                         storage_id: building_id.clone(),
                     });
                 }
-                // The building's own menu stays one tap away: it is selected.
+                // Open the building menu whether or not any carriers unload.
                 self.selection.units.clear();
                 self.selection.building = Some(building_id);
             }
@@ -761,6 +760,7 @@ impl App {
         {
             self.hud.selection_box(pointer.down_at, self.cursor, scale);
         }
+        self.view.draw_health(&mut self.hud, &self.rig, scale);
         self.feedback.draw(
             &mut self.hud,
             &self.atlas,

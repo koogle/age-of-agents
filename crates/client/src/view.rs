@@ -13,6 +13,7 @@ mod activity_tests;
 mod buildings;
 mod catalog;
 mod fields;
+mod health;
 #[cfg(test)]
 mod movement_tests;
 #[cfg(test)]

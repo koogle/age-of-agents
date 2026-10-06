@@ -1,5 +1,10 @@
 # Candidate style review — not approved for runtime
 
+Current decision (2026-10-06): Jakob preferred the latest calibrations, including
+the thin-line map, and explicitly authorized merging PR #145 as a candidate
+archive. Earlier rejection findings remain valid; this does not establish runtime
+readiness or select a steel A/B variant.
+
 Human-visible inspection of all batch sheets, 24/32px icon comparisons and world
 source previews completed on 2026-10-06. Model sameness did not guarantee style:
 several failures below survived explicit prompts. This batch is for selection,
@@ -122,7 +127,7 @@ The 128px comparison shows materially finer outer, fold, coastline and star ink.
 At 24/32px the paper, islands and star still read on grey/parchment/green/blue.
 Palette/composition remain close; 1254px output versus 1024px source is not a claim
 of pixel-exact preservation. Existing shadow is preserved, not newly solved.
-This is the latest unapproved map correction; other liked calibrations remain
+This is the latest user-preferred map correction; other liked calibrations remain
 unchanged. Runtime normalization/gameplay approval remains pending.
 
 Map follow-up subtotal: two FAL illustrations/two cutouts ($0.0896 estimate),

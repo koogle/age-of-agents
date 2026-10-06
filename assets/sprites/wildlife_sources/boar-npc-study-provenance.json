@@ -1,0 +1,18 @@
+{
+  "status": "User-selected style reference; integrated via boar-approved-animation.png",
+  "model": "OpenAI image_gen",
+  "date": "2026-10-06",
+  "base_revision": "b786f46d4fcbc0e70800b36a25fea5874b682cbb",
+  "prompt": "boar-npc-study-prompt.txt",
+  "references": {
+    "assets/sprites/wildlife_sources/boar-refined.png": "78e6cf542afe2d873cd1572d653361ed6f73df86dd802d30122450d0637761aa",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5",
+    "assets/sprites/villager_idle_hd.png": "4ffd31e2f1cfd0be413a7ae68bdd0414dd3ef230f1782fb1ea40f1d2b551c6ef",
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da",
+    "assets/sprites/wildlife_sources/draft.png": "a019d18ba82a7eacb78b5c0bddc9f63e15546bf5d778bea7b9ea6d6be285e904"
+  },
+  "reason": "User says previous style is not there yet; reference NPC originals directly and review one representative pose.",
+  "source_output": "/workspace/generated_images/exec-d6e132b6-b242-4a1e-9789-b9e933e2d95a.png",
+  "prior_agent_review": "Not accepted: quieter color, but retains large jagged patches and long, broad-hoofed legs.",
+  "review": "User explicitly selected the first of the two studies on 2026-10-06; this supersedes the prior agent assessment."
+}
