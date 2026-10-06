@@ -93,6 +93,40 @@ impl GameWorld {
             .find_map(|c| self.roads.iter().find(|r| r.cell == *c && r.work.is_some()))
     }
 
+    /// Resume the edge-connected road network, crossing completed pieces and bends.
+    fn unfinished_connected_road(&self, start: CellCoordinate) -> Vec<CellCoordinate> {
+        let mut remaining: BTreeSet<_> = self.roads.iter().map(|r| r.cell).collect();
+        let unfinished: BTreeSet<_> = self
+            .roads
+            .iter()
+            .filter(|r| r.work.is_some())
+            .map(|r| r.cell)
+            .collect();
+        let mut pending = vec![start];
+        let mut connected = BTreeSet::new();
+        while let Some(cell) = pending.pop() {
+            if !remaining.remove(&cell) {
+                continue;
+            }
+            connected.insert(cell);
+            for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
+                if let (Some(column), Some(row)) = (
+                    cell.column.checked_add_signed(dx),
+                    cell.row.checked_add_signed(dy),
+                ) {
+                    pending.push(CellCoordinate::new(column, row));
+                }
+            }
+        }
+        let mut cells = vec![start];
+        cells.extend(
+            connected
+                .into_iter()
+                .filter(|&cell| cell != start && unfinished.contains(&cell)),
+        );
+        cells
+    }
+
     pub(super) fn order_road(
         &mut self,
         id: &str,
@@ -107,7 +141,16 @@ impl GameWorld {
         if !self.in_bounds(start) || !self.in_bounds(end) {
             return Err(CommandError::InvalidBuildSite);
         }
-        let cells = road_line(start, end).ok_or(CommandError::InvalidBuildSite)?;
+        let resuming = start == end
+            && self
+                .roads
+                .iter()
+                .any(|r| r.cell == start && r.work.is_some());
+        let cells = if resuming {
+            self.unfinished_connected_road(start)
+        } else {
+            road_line(start, end).ok_or(CommandError::InvalidBuildSite)?
+        };
         let island =
             island_at(&self.island_origins, start).ok_or(CommandError::InvalidBuildSite)?;
         let visible = self.visible_cells();
@@ -116,7 +159,7 @@ impl GameWorld {
         let mut new = Vec::new();
         for &cell in &cells {
             if island_at(&self.island_origins, cell) != Some(island)
-                || !visible.contains(&cell)
+                || (!visible.contains(&cell) && (!resuming || cell == start))
                 || occupancy.is_static(cell)
             {
                 return Err(CommandError::InvalidBuildSite);
@@ -194,10 +237,10 @@ impl GameWorld {
             }
         }
         for unit in &self.units {
-            if let UnitAction::BuildRoad { cells: line } = &unit.action
-                && (line.is_empty()
-                    || !line.iter().all(|c| cells.contains(c))
-                    || road_line(line[0], *line.last().unwrap()).as_ref() != Some(line))
+            if let UnitAction::BuildRoad { cells: task } = &unit.action
+                && (task.is_empty()
+                    || !task.iter().all(|c| cells.contains(c))
+                    || task.iter().copied().collect::<BTreeSet<_>>().len() != task.len())
             {
                 return Err("invalid road construction task".into());
             }

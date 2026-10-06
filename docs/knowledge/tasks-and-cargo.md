@@ -129,3 +129,15 @@ round-trip, full delivery and capacity recalculation on the next paid harvest.
 
 [Granary verification](../verification/granary/README.md) records the domain checks,
 desktop/phone description captures, reproduction and release limitation.
+
+## Building selection during gathering (2026-10-06)
+
+User steering: selecting or switching buildings must not issue an early deposit
+order to selected villagers already in a gathering loop, including travel,
+gathering, automatic return and unloading. The client filters those
+villagers from the building-click deposit candidates and hover order preview;
+it retains manual unloading for other carriers and normal automatic delivery/resumption.
+
+Verification: `storage::tests::building_selection_preserves_every_gathering_phase_in_mixed_groups`
+checks mixed gathering/stopped selections; [browser replay and review](../verification/building-selection/README.md)
+exercise real desktop mouse and emulated DPR2 touch selection and command dispatch.

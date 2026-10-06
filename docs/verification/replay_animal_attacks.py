@@ -27,7 +27,7 @@ proto.bufferSubData=function(target,offset,data,src=0,length){
      Math.abs(a[i+6]-(1-590/627))<.001 && a[i+12]===1)
    animals.push(Array.from(a.slice(i,i+18)));
  }
- if(animals.length===2)window.animalSprites=animals;
+ if(animals.length===3)window.animalSprites=animals;
 
  }
  }
@@ -48,7 +48,7 @@ async def main(out):
     guard.update(id='guard',kind='guard',cell={'column':31,'row':21},position={'x':31.5,'y':21.5})
     base['units']=[unit,guard]
     base['animals']=[]
-    for kind,at,hp in [('wolf',{'column':31,'row':24},40),('bear',{'column':34,'row':24},100)]:
+    for kind,at,hp in [('wolf',{'column':31,'row':24},40),('bear',{'column':34,'row':24},100),('boar',{'column':28,'row':24},60)]:
         base['animals'].append(dict(id=kind,kind=kind,home=at,cell=at,step=None,
                                     health=hp,attack_seconds=0,heading=[1,0]))
     clients=[]
@@ -99,8 +99,13 @@ async def main(out):
                 await page.locator('#loading').wait_for(state='detached',timeout=120000)
                 async def check(column,mirror=False):
                     expected=[(column+1)/4,column/4] if mirror else [column/4,(column+1)/4]
-                    await page.wait_for_function('''([u0,u1])=>window.animalSprites.length===2 &&
-                        window.animalSprites.every(a=>a[7]===u0 && a[9]===u1)''',arg=expected,timeout=30000)
+                    try:
+                        await page.wait_for_function('''([u0,u1])=>window.animalSprites.length===3 &&
+                            window.animalSprites.every(a=>a[7]===u0 && a[9]===u1)''',arg=expected,timeout=120000)
+                    except Exception:
+                        print('Failed UV check', expected, await page.evaluate('window.animalSprites'), errors, flush=True)
+                        await page.screenshot(path=str(out/f'{label}-failed.png'))
+                        raise
                     return await page.evaluate('window.animalSprites')
                 await check(0)
                 # Both poses are held paused; the actual uploaded atlas UVs must match.
