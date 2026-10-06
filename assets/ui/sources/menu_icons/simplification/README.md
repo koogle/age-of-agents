@@ -17,7 +17,7 @@ are the original wood and masonry icons under `../refinement/`.
 | Runtime replacement | PR state |
 | --- | --- |
 | Cargo | Refined runtime PNG in this revision |
-| Gathering | Verification in progress |
+| Gathering | Refined runtime PNG in this revision |
 | Town | Verification in progress |
 | Disembark | Verification in progress |
 
