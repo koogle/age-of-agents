@@ -313,3 +313,101 @@ fn crossing_roads_share_existing_surfaces_without_charging_twice() {
         RoadKind::Dirt
     );
 }
+
+#[test]
+fn clicking_interrupted_road_resumes_connected_work_across_completed_bends() {
+    for kind in [RoadKind::Dirt, RoadKind::Stone] {
+        let mut w = world();
+        w.inventories[0].stone = 10.0;
+        order(&mut w, kind, cell(10, 11), cell(13, 11)).unwrap();
+        w.tick(2.5);
+        assert!(w.roads[0].work.is_none());
+        assert!(w.roads[1].work.is_some_and(|work| work > 0.0));
+        w.apply_command(Command::Stop {
+            unit_id: w.units[0].id.clone(),
+        })
+        .unwrap();
+        lay(
+            &mut w,
+            RoadKind::Dirt,
+            cell(13, 12),
+            cell(13, 13),
+            Some(0.5),
+        );
+        w.roads
+            .iter_mut()
+            .find(|r| r.cell == cell(13, 12))
+            .unwrap()
+            .work = None;
+        // Corner contact and a separate nearby road do not extend the assignment.
+        lay(&mut w, kind, cell(14, 14), cell(15, 14), Some(0.25));
+        lay(&mut w, kind, cell(10, 15), cell(12, 15), Some(0.0));
+        let paid_stone = w.inventories[0].stone;
+        let progress = w.roads.clone();
+        order(&mut w, kind, cell(12, 11), cell(12, 11)).unwrap();
+        assert_eq!(w.roads, progress);
+        // The clicked cell is worked first; completion on either side is retained.
+        let UnitAction::BuildRoad { cells } = &w.units[0].action else {
+            panic!("expected road work")
+        };
+        assert_eq!(cells[0], cell(12, 11));
+        assert_eq!(cells.len(), 4);
+        w.validate().unwrap();
+        let mut w: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+        w.validate().unwrap();
+        for _ in 0..300 {
+            w.tick(0.1);
+        }
+        assert!(w.roads[..6].iter().all(|r| r.work.is_none()));
+        assert!(w.roads[6..].iter().all(|r| r.work.is_some()));
+        assert_eq!(w.inventories[0].stone, paid_stone);
+        assert_eq!(w.units[0].action, UnitAction::Idle);
+        w.validate().unwrap();
+    }
+}
+
+#[test]
+fn blocked_connected_road_resume_rejects_without_changing_progress_or_order() {
+    let mut w = world();
+    lay(
+        &mut w,
+        RoadKind::Stone,
+        cell(10, 11),
+        cell(13, 11),
+        Some(0.5),
+    );
+    w.buildings.push(building(
+        BuildingKind::House,
+        "over-road",
+        cell(13, 11),
+        None,
+    ));
+    w.validate().unwrap();
+    let before = w.clone();
+    assert_eq!(
+        order(&mut w, RoadKind::Stone, cell(10, 11), cell(10, 11)),
+        Err(CommandError::InvalidBuildSite)
+    );
+    assert_eq!(w, before);
+}
+
+#[test]
+fn road_resume_keeps_existing_work_beyond_current_sight() {
+    let mut w = world();
+    w.buildings[0].origin = cell(70, 60);
+    lay(
+        &mut w,
+        RoadKind::Dirt,
+        cell(10, 11),
+        cell(23, 11),
+        Some(0.0),
+    );
+    assert!(!w.visible_cells().contains(&cell(23, 11)));
+    order(&mut w, RoadKind::Dirt, cell(10, 11), cell(10, 11)).unwrap();
+    for _ in 0..500 {
+        w.tick(0.1);
+    }
+    assert!(w.roads.iter().all(|r| r.work.is_none()));
+    assert_eq!(w.units[0].action, UnitAction::Idle);
+    w.validate().unwrap();
+}
