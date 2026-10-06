@@ -1,3 +1,8 @@
+# Stronger wildlife — 2026-10-06
+
+- Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
+- 290 workspace tests, formatting, native/WASM strict lint, rebuilt web/server and desktop/DPR2-phone real combat pass with zero page errors. [Evidence and review](docs/verification/stronger-wildlife/README.md). User authorized merging [PR #135](https://github.com/koogle/age-of-agents/pull/135). Integrated master `b786f46`, preserving water and refined menus. Combined verification passes: 294 Rust tests, native/WASM strict lint, rebuilt browser/server, all asset checks, six release-verifier tests, and desktop/DPR2-phone combat with zero page errors. Merge and deployment status are tracked by the PR and production workflow.
+
 # Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
 
 - User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
