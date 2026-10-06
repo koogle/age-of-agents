@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-05",
+  "model": "OpenAI image_gen",
+  "base_revision": "8fca242",
+  "source": "npc-attack-refined.png",
+  "tool_output": "/workspace/generated_images/exec-d37be016-79b9-4311-bc86-65376698240a.png",
+  "prompt_file": "npc-attack-prompt.txt",
+  "references": [
+    "assets/sprites/wildlife_sources/npc-style-refined.png",
+    "assets/sprites/villager_idle_hd.png",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png"
+  ],
+  "reference_sha256": {
+    "assets/sprites/wildlife_sources/npc-style-refined.png": "3fee74707fefc4f3c502c58740c80ba27f731cbc6d6edcef9bc43eaf7a6be2ff",
+    "assets/sprites/villager_idle_hd.png": "4ffd31e2f1cfd0be413a7ae68bdd0414dd3ef230f1782fb1ea40f1d2b551c6ef",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+  },
+  "layout": "2x2 original 627px cells: wolf windup/strike, bear windup/strike",
+  "packing": "Common 589/627 scale; append to columns 2/3 of 4-column atlas. Align measured planted rear paws against idle; do not normalize an airborne front paw to the ground. See scripts/pack_wildlife.py for exact source landmarks.",
+  "style_review": "Same NPC family: fine warm brown outlines, broad muted cel colors, sparse fur, unchanged animal identities. Existing idle/walk pixels retained.",
+  "atlas": {
+    "size": [
+      2508,
+      1254
+    ],
+    "frames": 8,
+    "cell_size": [
+      627,
+      627
+    ],
+    "sha256": "d5a420a077a76124ccfcb0b336908f0a303c1562fca4116f21ad61d680056ce7"
+  }
+}

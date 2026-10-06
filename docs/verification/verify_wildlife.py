@@ -17,7 +17,7 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 URL = 'http://127.0.0.1:8000'
 
-async def main(out, only):
+async def main(out, only, closeups=False):
     out.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as http:
         try:
@@ -81,18 +81,42 @@ async def main(out, only):
                         await page.goto(URL,wait_until='networkidle')
                         await page.locator('#loading').wait_for(state='detached',timeout=90000)
                         await page.wait_for_timeout(700)
-                        if dpr == 2:
-                            await page.screenshot(path=str(out/(label+"-closeup.png")))
+                        async def phone_overview():
                             touch = await context.new_cdp_session(page)
                             await touch.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[{'x':60,'y':420},{'x':330,'y':420}]})
                             for step in range(1,11):
                                 await touch.send('Input.dispatchTouchEvent', {'type':'touchMove','touchPoints':[{'x':60+step*9.5,'y':420},{'x':330-step*9.5,'y':420}]})
                             await touch.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
                             await page.wait_for_timeout(700)
+                            await touch.detach()
+                        if dpr == 2:
+                            await page.screenshot(path=str(out/(label+"-closeup.png")))
+                            await phone_overview()
                         async def screen(at,lift):
                             return await page.evaluate('''async ([c,lift])=>{const m=await import('/web/pkg/aoa_client.js');const x=(c.column+.5)*.5,z=(c.row+.5)*.5;return Array.from(m.debug_screen_of(x,m.debug_height_at(x,z)+lift,z)).slice(0,2)}''',[at,lift])
                         click=page.touchscreen.tap if dpr==2 else page.mouse.click
                         await page.screenshot(path=str(out/(label+'-wildlife.png')))
+                        if closeups:
+                            for kind, at in [('wolf', cell(x-4,y+2)), ('bear', cell(x+4,y+1))]:
+                                # Center each animal, then hit the camera's minimum distance.
+                                # This is visual evidence; mouse/touch command acceptance follows.
+                                point = await screen(at, .3)
+                                await page.mouse.move(*point)
+                                await page.mouse.down()
+                                await page.mouse.move(size[0]/2, size[1]/2, steps=12)
+                                await page.mouse.up()
+                                # Each wheel event clamps its factor to 0.5, so one
+                                # large delta cannot reach minimum zoom from overview.
+                                for _ in range(8):
+                                    await page.mouse.wheel(0, -10000)
+                                    await page.wait_for_timeout(100)
+                                await page.wait_for_timeout(700)
+                                await page.screenshot(path=str(out/(label+'-'+kind+'-maxzoom.png')))
+                                await page.reload(wait_until='networkidle')
+                                await page.locator('#loading').wait_for(state='detached',timeout=90000)
+                                await page.wait_for_timeout(700)
+                            if dpr == 2:
+                                await phone_overview()
                         await click(*(await screen(cell(x,y),.3)))
                         await page.wait_for_timeout(250)
                         await command({'type':'set_simulation_speed','multiplier':1.0})
@@ -133,5 +157,6 @@ async def main(out, only):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--only',choices=['desktop','phone'])
+    parser.add_argument('--closeups',action='store_true',help='Capture each animal at maximum zoom')
     args=parser.parse_args()
-    asyncio.run(main(args.output,args.only))
+    asyncio.run(main(args.output,args.only,args.closeups))

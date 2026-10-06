@@ -1,0 +1,9 @@
+{
+  "name": "resource_cloth",
+  "wasm_sha256": "22ab6485ac25b20c077f52b4a2a51ba8a8eec0c46e71f618edb826bed316f818",
+  "errors": [],
+  "viewports": [
+    "1280x800 DPR1 desktop"
+  ],
+  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
+}

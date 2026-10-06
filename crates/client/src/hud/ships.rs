@@ -8,7 +8,7 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         .iter()
         .find(|s| Some(s.id.as_str()) == model.ship)?;
     let mut commands = vec![Command {
-        icon: "portrait_group",
+        icon: "command_disembark",
         label: "Land passengers".into(),
         detail: if ship.passengers.is_empty() {
             "Select units, then tap this ship to board".into()
@@ -49,7 +49,11 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
     {
         let frontier = id >= snapshot.island_count as u64;
         commands.push(Command {
-            icon: "transport",
+            icon: if frontier {
+                "command_explore"
+            } else {
+                "command_sail"
+            },
             label: if frontier {
                 "Explore beyond the coast".into()
             } else {
@@ -137,6 +141,11 @@ mod tests {
         assert_eq!(actions.len(), 2);
         assert_eq!(actions[1].action, Action::Voyage(1));
         assert_eq!(actions[0].action, Action::Disembark);
+        assert_eq!(actions[0].icon, "command_disembark");
+        assert_eq!(actions[1].icon, "command_explore");
+        snapshot.island_count = 2;
+        snapshot.island_origins.push(CellCoordinate::new(184, 0));
+        assert_eq!(commands(&snapshot)[1].icon, "command_sail");
         assert!(!actions[0].enabled);
         snapshot.ships[0]
             .passengers
