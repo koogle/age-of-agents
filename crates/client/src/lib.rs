@@ -793,25 +793,6 @@ pub(crate) fn loading(fraction: f64, text: &str) {
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn loading(_fraction: f64, _text: &str) {}
 
-/// Plain-language versions of the server's rejection reasons.
-fn friendly(error: &str) -> String {
-    match error {
-        "destination cell is occupied" => "Something already stands there.".into(),
-        "target is unreachable" => "No path leads there.".into(),
-        "build site is blocked or outside the world" => {
-            "That spot is not clear for building.".into()
-        }
-        "insufficient wood" => "Not enough wood for that building.".into(),
-        "insufficient stone" => "Not enough stone for that building.".into(),
-        "a dock must touch the sea" => "A dock must be built along the shore.".into(),
-        "unit is not carrying anything" => "That villager has nothing to unload.".into(),
-        "building does not take that cargo" => "That building does not take those goods.".into(),
-        "population cap reached" => "Build a house to make room for more villagers.".into(),
-        "insufficient food" => "You need 50 food to train a villager.".into(),
-        other => other.to_string(),
-    }
-}
-
 fn sheet_images(assets: &Assets) -> Vec<Rgba> {
     vec![
         assets.image("sprites/villager.png"),

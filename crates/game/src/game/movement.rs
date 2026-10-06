@@ -243,7 +243,7 @@ impl GameWorld {
             UnitAction::Build { .. } | UnitAction::ExploreBuild { .. }
                 if self.units[unit].cargo.is_some() =>
             {
-                // Dropping goods off first; see `drop_off_before_building`.
+                // Dropping goods off first; see `unload_before_work`.
                 self.nearest_drop_site(unit).map(Goal::Beside)
             }
             UnitAction::ExploreBuild { origin, kind } => {

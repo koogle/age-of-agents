@@ -295,3 +295,26 @@ pub fn ensure_capacity(device: &wgpu::Device, buffer: &mut wgpu::Buffer, bytes: 
         *buffer = instance_buffer(device, (bytes as u64).next_power_of_two());
     }
 }
+
+/// Renderer bindings are contiguous; slice order is the shader binding number.
+pub fn bind_group(
+    device: &wgpu::Device,
+    label: &str,
+    layout: &wgpu::BindGroupLayout,
+    resources: &[wgpu::BindingResource<'_>],
+) -> wgpu::BindGroup {
+    let entries: Vec<_> = resources
+        .iter()
+        .cloned()
+        .enumerate()
+        .map(|(binding, resource)| wgpu::BindGroupEntry {
+            binding: binding as u32,
+            resource,
+        })
+        .collect();
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some(label),
+        layout,
+        entries: &entries,
+    })
+}

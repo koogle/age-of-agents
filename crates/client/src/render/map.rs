@@ -64,77 +64,44 @@ impl Renderer {
             width,
             height,
         );
-        self.globals_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("map globals"),
-            layout: &self.globals_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.globals.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &self.cells.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&self.linear),
-                },
+        self.globals_group = bind_group(
+            device,
+            "map globals",
+            &self.globals_layout,
+            &[
+                self.globals.as_entire_binding(),
+                wgpu::BindingResource::TextureView(&self.cells.create_view(&Default::default())),
+                wgpu::BindingResource::Sampler(&self.linear),
             ],
-        });
-        self.terrain_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("map terrain"),
-            layout: &self.terrain_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&self.ground_layers.create_view(
-                        &wgpu::TextureViewDescriptor {
-                            dimension: Some(wgpu::TextureViewDimension::D2Array),
-                            ..Default::default()
-                        },
-                    )),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &self.ground_index.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&self.repeat),
-                },
+        );
+        self.terrain_group = bind_group(
+            device,
+            "map terrain",
+            &self.terrain_layout,
+            &[
+                wgpu::BindingResource::TextureView(&self.ground_layers.create_view(
+                    &wgpu::TextureViewDescriptor {
+                        dimension: Some(wgpu::TextureViewDimension::D2Array),
+                        ..Default::default()
+                    },
+                )),
+                wgpu::BindingResource::TextureView(
+                    &self.ground_index.create_view(&Default::default()),
+                ),
+                wgpu::BindingResource::Sampler(&self.repeat),
             ],
-        });
-        self.hud_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("map hud"),
-            layout: &self.hud_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.hud_uniform.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &self.atlas.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&self.sprite_sampler),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 3,
-                    resource: wgpu::BindingResource::TextureView(
-                        &self.cells.create_view(&Default::default()),
-                    ),
-                },
+        );
+        self.hud_group = bind_group(
+            device,
+            "map hud",
+            &self.hud_layout,
+            &[
+                self.hud_uniform.as_entire_binding(),
+                wgpu::BindingResource::TextureView(&self.atlas.create_view(&Default::default())),
+                wgpu::BindingResource::Sampler(&self.sprite_sampler),
+                wgpu::BindingResource::TextureView(&self.cells.create_view(&Default::default())),
             ],
-        });
+        );
     }
 
     pub fn update_cells(&mut self, gpu: &Gpu, rgba: &[u8], layers: &[u8], columns: u16, rows: u16) {

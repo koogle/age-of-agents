@@ -1,5 +1,10 @@
 # UI art kit
 
+Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
+their references below describe provenance, not current reproduction commands.
+Active offline packers and original art are retained. See
+[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+
 Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The Rust canvas HUD loads the icons (`crates/client/src/hud.rs::ICONS` lists the files); `manifest.json` lists everything.
 
 ## Files

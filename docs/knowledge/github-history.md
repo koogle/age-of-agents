@@ -66,3 +66,18 @@ In this environment on 2026-10-05, `gh pr edit --body-file` failed because its G
 connected GitHub app remained available. Use the app for PR metadata and an
 expected-head-SHA merge; do not replace or expose credentials. Public repository
 Actions run metadata can also be read through GitHub REST without authentication.
+
+## Git transport identity (macOS, 2026-10-06)
+
+The SSH key can select a different account from the active `gh` login. A push
+was denied to `jakob-arda` even though `gh` was authenticated as repository owner
+`koogle`. The authorized branch push succeeded using the existing active login
+through a per-command HTTPS credential helper, without changing global SSH/Git
+settings or exposing a token:
+
+```bash
+git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push https://github.com/koogle/age-of-agents.git HEAD:refs/heads/BRANCH
+```
+
+Use the actual intended branch; check the active login first. This is a transport
+procedure, not authorization to publish or merge unrelated changes.

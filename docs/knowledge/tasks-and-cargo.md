@@ -141,3 +141,10 @@ it retains manual unloading for other carriers and normal automatic delivery/res
 Verification: `storage::tests::building_selection_preserves_every_gathering_phase_in_mixed_groups`
 checks mixed gathering/stopped selections; [browser replay and review](../verification/building-selection/README.md)
 exercise real desktop mouse and emulated DPR2 touch selection and command dispatch.
+
+## Worker validation (2026-10-06)
+
+Worker commands use `ordered_villager`, retaining atomic rejection through the
+command candidate. The existing unload/resume helper is now `unload_before_work`
+because it serves buildings, fields and roads. Their completion transitions stay
+explicit; this refactor adds no automatic task selection.

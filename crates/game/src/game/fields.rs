@@ -7,6 +7,7 @@ pub const FIELD_COST: &[(ResourceKind, f64)] = &[
     (ResourceKind::Stone, 5.0),
     (ResourceKind::Water, 10.0),
 ];
+pub const FIELD_SIZE: u16 = 3;
 pub const FIELD_FOOD: f64 = 120.0;
 pub const FIELD_WORK_SECONDS: f64 = 12.0;
 pub const GRANARY_FIELD_RADIUS: u16 = 6;
@@ -14,10 +15,7 @@ pub const GRANARY_FIELD_YIELD_MULTIPLIER: f64 = 1.5;
 
 impl GameWorld {
     fn field_worker(&mut self, unit_id: &str) -> Result<usize, CommandError> {
-        let unit = self.ordered_unit(unit_id)?;
-        if self.units[unit].kind != UnitKind::Villager {
-            return Err(CommandError::VillagerRequired);
-        }
+        let unit = self.ordered_villager(unit_id)?;
         if !self
             .buildings
             .iter()
@@ -30,10 +28,8 @@ impl GameWorld {
 
     fn afford_field(&self, origin: CellCoordinate) -> Result<(), CommandError> {
         let available = self.available_at(origin);
-        for &(kind, amount) in FIELD_COST {
-            if available.amount(kind) < amount {
-                return Err(CommandError::InsufficientResources(kind));
-            }
+        if let Some(kind) = available.missing_resource(FIELD_COST) {
+            return Err(CommandError::InsufficientResources(kind));
         }
         Ok(())
     }
@@ -46,8 +42,8 @@ impl GameWorld {
         let unit = self.field_worker(unit_id)?;
         let footprint = Footprint {
             origin,
-            columns: 3,
-            rows: 3,
+            columns: FIELD_SIZE,
+            rows: FIELD_SIZE,
         };
         if origin.column > self.columns() - footprint.columns
             || origin.row > self.rows() - footprint.rows
@@ -119,7 +115,7 @@ impl GameWorld {
             self.units[unit].action = UnitAction::Idle;
             return;
         };
-        if self.drop_off_before_building(unit, dt) {
+        if self.unload_before_work(unit, dt) {
             return;
         }
         let remaining = match self.travel(unit, Goal::Beside(self.resources[index].footprint()), dt)

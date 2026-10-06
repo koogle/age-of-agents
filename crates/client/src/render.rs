@@ -6,8 +6,9 @@ use wgpu::util::DeviceExt;
 
 use crate::assets::{Assets, Rgba};
 use crate::gpu::{
-    DEPTH_FORMAT, Gpu, PipelineSpec, SCENE_FORMAT, data_texture, ensure_capacity, instance_buffer,
-    pipeline, render_target, sampler_entry, shader, texture_entry, uniform_entry, upload_texture,
+    DEPTH_FORMAT, Gpu, PipelineSpec, SCENE_FORMAT, bind_group, data_texture, ensure_capacity,
+    instance_buffer, pipeline, render_target, sampler_entry, shader, texture_entry, uniform_entry,
+    upload_texture,
 };
 use crate::hud::Quad;
 use crate::terrain::{self, GroundVertex};
@@ -173,26 +174,16 @@ impl Renderer {
                 sampler_entry(2, wgpu::SamplerBindingType::Filtering),
             ],
         });
-        let globals_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("globals"),
-            layout: &globals_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: globals.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &cells.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&linear),
-                },
+        let globals_group = bind_group(
+            device,
+            "globals",
+            &globals_layout,
+            &[
+                globals.as_entire_binding(),
+                wgpu::BindingResource::TextureView(&cells.create_view(&Default::default())),
+                wgpu::BindingResource::Sampler(&linear),
             ],
-        });
+        );
 
         // Ground: painted biome textures as one mipmapped array.
         let mut layers: Vec<Rgba> = terrain::GROUND_LAYERS
@@ -242,31 +233,21 @@ impl Renderer {
                 sampler_entry(2, wgpu::SamplerBindingType::Filtering),
             ],
         });
-        let terrain_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("terrain"),
-            layout: &terrain_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&ground_layers.create_view(
-                        &wgpu::TextureViewDescriptor {
-                            dimension: Some(wgpu::TextureViewDimension::D2Array),
-                            ..Default::default()
-                        },
-                    )),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &ground_index.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&repeat),
-                },
+        let terrain_group = bind_group(
+            device,
+            "terrain",
+            &terrain_layout,
+            &[
+                wgpu::BindingResource::TextureView(&ground_layers.create_view(
+                    &wgpu::TextureViewDescriptor {
+                        dimension: Some(wgpu::TextureViewDimension::D2Array),
+                        ..Default::default()
+                    },
+                )),
+                wgpu::BindingResource::TextureView(&ground_index.create_view(&Default::default())),
+                wgpu::BindingResource::Sampler(&repeat),
             ],
-        });
+        );
         let terrain_module = shader(device, "terrain", include_str!("shaders/terrain.wgsl"));
         let ground_attributes =
             wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32];
@@ -378,22 +359,17 @@ impl Renderer {
                 let texture =
                     upload_texture(device, &gpu.queue, std::slice::from_ref(image), "sheet");
                 Sheet {
-                    bind_group: device.create_bind_group(&wgpu::BindGroupDescriptor {
-                        label: Some("sheet"),
-                        layout: &sheet_layout,
-                        entries: &[
-                            wgpu::BindGroupEntry {
-                                binding: 0,
-                                resource: wgpu::BindingResource::TextureView(
-                                    &texture.create_view(&Default::default()),
-                                ),
-                            },
-                            wgpu::BindGroupEntry {
-                                binding: 1,
-                                resource: wgpu::BindingResource::Sampler(&sprite_sampler),
-                            },
+                    bind_group: bind_group(
+                        device,
+                        "sheet",
+                        &sheet_layout,
+                        &[
+                            wgpu::BindingResource::TextureView(
+                                &texture.create_view(&Default::default()),
+                            ),
+                            wgpu::BindingResource::Sampler(&sprite_sampler),
                         ],
-                    }),
+                    ),
                 }
             })
             .collect();
@@ -576,32 +552,17 @@ impl Renderer {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        let hud_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("hud"),
-            layout: &hud_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: hud_uniform.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(
-                        &atlas.create_view(&Default::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(&sprite_sampler),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 3,
-                    resource: wgpu::BindingResource::TextureView(
-                        &cells.create_view(&Default::default()),
-                    ),
-                },
+        let hud_group = bind_group(
+            device,
+            "hud",
+            &hud_layout,
+            &[
+                hud_uniform.as_entire_binding(),
+                wgpu::BindingResource::TextureView(&atlas.create_view(&Default::default())),
+                wgpu::BindingResource::Sampler(&sprite_sampler),
+                wgpu::BindingResource::TextureView(&cells.create_view(&Default::default())),
             ],
-        });
+        );
         let hud_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("hud"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shaders/hud.wgsl").into()),
@@ -689,28 +650,17 @@ impl Renderer {
         let inked = render_target(device, SCENE_FORMAT, width, height);
         let half = render_target(device, SCENE_FORMAT, width, height);
         let group = |uniform: &wgpu::Buffer, image: &wgpu::TextureView| {
-            device.create_bind_group(&wgpu::BindGroupDescriptor {
-                label: Some("post"),
+            bind_group(
+                device,
+                "post",
                 layout,
-                entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: uniform.as_entire_binding(),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: wgpu::BindingResource::TextureView(image),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 2,
-                        resource: wgpu::BindingResource::Sampler(sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 3,
-                        resource: wgpu::BindingResource::TextureView(&depth),
-                    },
+                &[
+                    uniform.as_entire_binding(),
+                    wgpu::BindingResource::TextureView(image),
+                    wgpu::BindingResource::Sampler(sampler),
+                    wgpu::BindingResource::TextureView(&depth),
                 ],
-            })
+            )
         };
         let ink_group = group(&uniforms[0], &scene);
         let blur_h_group = group(&uniforms[1], &inked);

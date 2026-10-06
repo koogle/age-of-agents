@@ -24,11 +24,7 @@ pub struct TransportShip {
 
 impl TransportShip {
     pub fn position(&self) -> Position {
-        let from = self.cell.center();
-        self.step.map_or(from, |s| Position {
-            x: from.x + (s.to.center().x - from.x) * s.progress,
-            y: from.y + (s.to.center().y - from.y) * s.progress,
-        })
+        Position::on_step(self.cell, self.step)
     }
     pub fn stopped(&self) -> bool {
         self.step.is_none() && self.destination.is_none()

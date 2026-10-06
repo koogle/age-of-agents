@@ -81,3 +81,11 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Rust subtraction pass (2026-10-06)
+
+Jakob clarified that the refactor should reduce source lines. Repeated
+GPU bind-group descriptor construction is consolidated with one local helper for the renderer's
+contiguous bindings. Resource order, texture views, layout, filtering and shader
+behavior are preserved. This is GPU setup glue, not a renderer/engine framework.
+Desktop/phone verification is tracked in [refactor evidence](../verification/rust-refactor/README.md).

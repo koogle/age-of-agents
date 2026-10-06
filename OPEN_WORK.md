@@ -1,3 +1,8 @@
+# Test/tooling subtraction — [PR #153](https://github.com/koogle/age-of-agents/pull/153)
+
+- Jakob explicitly requested cutting repetitive tests/fixtures and substantially reducing Python. On `codex/reduce-tests-tooling`, integrated with master `a8188f1`: 1,843 Python lines removed (32.2%; 74 → 42 files), plus 216 Rust lines. Retired historical scripts remain recoverable through [the retirement record](docs/verification/RETIRED_TOOLS.md); active checks, packers, original art and provenance remain.
+- Mechanics fixtures use flat terrain/fixed patches; three fixture-generator self-tests are removed, while real gameplay/world-generation coverage remains. Earlier shared-domain/renderer cleanup and one-clone command handling are retained. Save version 17 resets older hosted development saves. All 301 integrated Rust tests, strict native/WASM lint, builds, asset checks and rebuilt desktop/phone acceptance pass. Jakob explicitly authorized merging PR #153 on 2026-10-06. Integrated art-archive master `831bfcc`; only handoff prose conflicted and both entries are preserved. Runtime and active assets are unchanged by that integration; prior runtime verification remains applicable. Merge-triggered production release will be checked separately. [Audit](docs/knowledge/rust-simplification-audit.md), [verification](docs/verification/rust-refactor/README.md).
+
 # Art alternatives — [PR #145](https://github.com/koogle/age-of-agents/pull/145)
 
 - Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
