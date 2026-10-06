@@ -23,8 +23,8 @@ tick); the browser does not run the simulation. No page errors were reported.
 
 | File | Shows |
 | --- | --- |
-| `snap_7_1-desktop.png`, `snap_7_1-phone.png` | Fresh run, seed 7: six planned islands, five uncharted discs, the temple marker, "Island 1 of 6". |
-| `snap_7_4-desktop.png`, `snap_7_4-phone.png` | Same seed after three Explore voyages: four charted islands, the revealed sailing route, one uncharted disc and the temple. |
+| `snap_7_1-desktop.png`, `snap_7_1-phone.png` | Fresh run, seed 7: the globe reaches the temple island; everything but the start island is fog; only the temple marker is shown. |
+| `snap_7_4-desktop.png`, `snap_7_4-phone.png` | Same seed after three Explore voyages: the sailed route and coasts seen from the ship are revealed; uncharted islands stay hidden. |
 | `globe-crops.png` | Both globes enlarged 3× from the desktop captures. |
 
 Not checked: physical devices, a live server session, or a full run reaching the

@@ -6,7 +6,7 @@ The current prototype is an island-exploration RTS economy with a shared Rust si
 
 ## Proposed gameplay loop
 
-Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. Each run plans 5–7 islands spread across the sea; the farthest holds a temple with the Artifact of the Gods, shown on the globe from the start, and each island generates as you reach it.
+Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. Each run plans 5–7 islands spread across the sea; the farthest holds a temple with the Artifact of the Gods. The rest of the world stays under fog: only the temple is marked on the globe from the start, and each island generates as you reach it.
 
 Time keeps moving as you expand. Planned threats include pirates and mythical creatures, followed by increasingly destructive calamities. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs.
 
@@ -21,7 +21,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - 17 buildings, 14 resources/products, farming with granary yield bonuses, processing, research and production queues.
 - Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
-- A seeded 5–7 island archipelago per run with the temple island marked on the globe; the temple, artifact and run victory are not implemented yet.
+- A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe; the temple, artifact and run victory are not implemented yet.
 - Territorial wolves, bears and boars, unit health and hunting orders.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.

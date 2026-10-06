@@ -25,8 +25,8 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
         toast: None,
         camera,
     };
-    // The globe fits the whole planned run, not only the charted islands.
-    let (columns, rows) = aoa_game::plan_extent(&snapshot.archipelago);
+    // The globe reaches the temple island, not only the charted islands.
+    let (columns, rows) = aoa_game::plan_extent(&[snapshot.temple_site]);
     assert!(columns > snapshot.columns && rows > snapshot.rows);
     let map = minimap::Minimap::new(Vec2::new(columns as f32, rows as f32) * crate::terrain::CELL);
     for (width, height, scale) in [(1280.0, 800.0, 1.0), (390.0, 844.0, 2.0)] {

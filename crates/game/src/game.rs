@@ -144,8 +144,9 @@ pub struct WorldSnapshot {
     pub island_id: u64,
     pub island_count: usize,
     pub island_origins: Vec<CellCoordinate>,
-    /// Every planned island site of this run; the last holds the temple.
-    pub archipelago: Vec<CellCoordinate>,
+    /// The temple island's site, the only planned site revealed before discovery.
+    pub temple_site: CellCoordinate,
+    pub uncharted_islands: bool,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -860,7 +861,8 @@ impl GameWorld {
             island_id: self.island_id,
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
-            archipelago: archipelago_plan(self.seed),
+            temple_site: *archipelago_plan(self.seed).last().expect("planned sites"),
+            uncharted_islands: !self.undiscovered_sites().is_empty(),
             available_buildings: self.available_buildings(),
             columns: self.columns(),
             rows: self.rows(),

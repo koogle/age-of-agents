@@ -68,9 +68,8 @@ impl Hud {
 
         let header_bottom = (shown.len().div_ceil(per_row) as f32 * row_height + 8.0) * s;
         let label = format!(
-            "Island {} of {} · shore + nearby ships",
-            model.resource_island + 1,
-            snapshot.archipelago.len()
+            "Island {} · shore + nearby ships",
+            model.resource_island + 1
         );
         let shared_label = label.as_str();
         self.text(
@@ -93,15 +92,16 @@ impl Hud {
         // Reserve the full time-control row above the globe on compact screens.
         let navigation_left = if narrow { gx - 28.0 * s } else { gx };
         let globe = [gx, gy, r * 2.0, r * 2.0];
-        // The globe fits the whole planned run, charted or not.
+        // The globe reaches the temple island from the first turn; everything
+        // unexplored, including that far sea, stays under fog.
         let texture =
             Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL;
-        let (columns, rows) = aoa_game::plan_extent(&snapshot.archipelago);
+        let (columns, rows) = aoa_game::plan_extent(&[snapshot.temple_site]);
         self.map_size = texture.max(Vec2::new(columns as f32, rows as f32) * crate::terrain::CELL);
         let map = minimap::Minimap::new(self.map_size);
         self.quads.push(map.quad(globe, texture));
         self.shape(globe, [0.79, 0.59, 0.25, 1.0], 2.0, 6.0 * s);
-        self.archipelago(atlas, snapshot, &map, globe);
+        self.temple_marker(atlas, snapshot, &map, globe);
         let camera = Vec2::new(gx, gy) + map.local_of(model.camera) * r * 2.0;
         self.shape(
             [camera.x - 5.0 * s, camera.y - 5.0 * s, 10.0 * s, 10.0 * s],
