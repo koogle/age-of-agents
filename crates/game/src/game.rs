@@ -46,10 +46,14 @@ mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
 mod terrain_codec;
+#[cfg(test)]
+mod upgrade_tests;
+mod upgrades;
 mod wildlife;
 #[cfg(test)]
 mod wildlife_tests;
 mod worldgen;
+pub use upgrades::BUILDING_UPGRADE_SECONDS;
 
 pub use domain::*;
 pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_WORK_SECONDS};
@@ -136,6 +140,7 @@ pub struct WorldSnapshot {
     pub island_count: usize,
     pub island_origins: Vec<CellCoordinate>,
     pub available_buildings: Vec<BuildingKind>,
+    pub masonry_upgrades_available: bool,
     pub columns: u16,
     pub rows: u16,
     pub tick: u64,
@@ -162,6 +167,9 @@ pub struct WorldSnapshot {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Command {
+    UpgradeBuilding {
+        building_id: String,
+    },
     BuildRoad {
         unit_id: String,
         start: CellCoordinate,
@@ -264,6 +272,8 @@ pub enum Command {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandError {
+    UpgradeUnavailable,
+    BuildingAlreadyUpgraded,
     AnimalNotVisible,
     CannotAttack,
     ShipStorageUnavailable,
@@ -304,6 +314,7 @@ pub enum CommandError {
     InsufficientProductionResources,
     VillagerRequired,
     TechnologyUnavailable,
+    MasonryUpgradeRequired,
     TechnologyAlreadyResearched,
     TechnologyInProgress,
     MissingTechnologyPrerequisite,
@@ -315,6 +326,10 @@ pub enum CommandError {
 impl std::fmt::Display for CommandError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
+            Self::UpgradeUnavailable => "discover clay to unlock masonry upgrades",
+            Self::BuildingAlreadyUpgraded => {
+                "building is already upgraded or has an upgrade queued"
+            }
             Self::StorageUnavailable => "storage is unavailable, unreachable from shore, or full",
             Self::ShipStorageUnavailable => {
                 "ship must be stopped beside a completed dock to transfer island storage"
@@ -356,6 +371,7 @@ impl std::fmt::Display for CommandError {
             Self::InsufficientResources(kind) => return write!(f, "insufficient {}", kind.name()),
             Self::InsufficientProductionResources => "insufficient resources for production",
             Self::VillagerRequired => "only villagers can gather or build",
+            Self::MasonryUpgradeRequired => "upgrade this building to masonry before researching",
             Self::TechnologyUnavailable => "building cannot research that technology",
             Self::TechnologyAlreadyResearched => "technology is already researched",
             Self::TechnologyInProgress => "technology is already being researched",
@@ -431,25 +447,14 @@ fn building(
     origin: CellCoordinate,
     construction: Option<f64>,
 ) -> Building {
-    let town_center = kind == BuildingKind::TownCenter;
     Building {
         id: id.into(),
         kind,
+        masonry: false,
         origin,
         construction,
         produces: kind.products().to_vec(),
-        researches: if town_center {
-            TechnologyKind::ALL.to_vec()
-        } else {
-            match kind {
-                BuildingKind::MiningCamp => vec![TechnologyKind::Mining],
-                BuildingKind::Farm => vec![TechnologyKind::Agriculture],
-                BuildingKind::LumberMill => vec![TechnologyKind::Forestry],
-                BuildingKind::Kiln => vec![TechnologyKind::Masonry],
-                BuildingKind::Weaver => vec![TechnologyKind::Textiles],
-                _ => Vec::new(),
-            }
-        },
+        researches: kind.technologies().to_vec(),
         job: None,
         queue: Vec::new(),
         next_queue_id: 0,
@@ -625,15 +630,22 @@ impl GameWorld {
                     elapsed_seconds: 0.0,
                 });
             }
+            Command::UpgradeBuilding { building_id } => self.upgrade_building(&building_id)?,
             Command::Research {
                 building_id,
                 technology,
             } => {
                 let building = self.building_index_with_queue_space(&building_id)?;
-                if !self.buildings[building].researches.contains(&technology)
+                if !self.buildings[building]
+                    .kind
+                    .technologies()
+                    .contains(&technology)
                     || !self.technology_available(technology)
                 {
                     return Err(CommandError::TechnologyUnavailable);
+                }
+                if technology.requires_masonry() && !self.buildings[building].masonry {
+                    return Err(CommandError::MasonryUpgradeRequired);
                 }
                 if self.researched_technologies.contains(&technology) {
                     return Err(CommandError::TechnologyAlreadyResearched);
@@ -890,6 +902,7 @@ impl GameWorld {
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
             available_buildings: self.available_buildings(),
+            masonry_upgrades_available: self.masonry_upgrades_available(),
             columns: self.columns(),
             rows: self.rows(),
             tick: self.tick,
@@ -935,7 +948,13 @@ impl GameWorld {
                     let (columns, rows) = building.kind.size();
                     let mut visible = building.clone();
                     visible.produces = building.kind.products().to_vec();
-                    visible.researches.retain(|&t| self.technology_available(t));
+                    visible.researches = building
+                        .kind
+                        .technologies()
+                        .iter()
+                        .copied()
+                        .filter(|&t| self.technology_available(t))
+                        .collect();
                     if !self.building_available(visible.kind) {
                         visible.produces.clear();
                     }

@@ -39,7 +39,7 @@ def frame_rects(value: object):
                     yield f"{index}/{path}".rstrip("/"), rect
 
 
-def audit(path: Path, minimum: int) -> tuple[int, int]:
+def audit(path: Path, minimum: int, image_path: Path | None = None) -> tuple[int, int]:
     data = json.loads(path.read_text())
     frames = data.get("animations", data.get("frames", data.get("people", data.get("nodes"))))
     if "units" in data:
@@ -48,7 +48,7 @@ def audit(path: Path, minimum: int) -> tuple[int, int]:
     if not found:
         print(f"FAIL {path.name}: no frame rectangles")
         return 0, 1
-    with Image.open(path.with_suffix(".png")) as image:
+    with Image.open(image_path or path.with_suffix(".png")) as image:
         if image.format != "PNG" or image.mode != "RGBA":
             raise ValueError(f"{path.name}: expected lossless RGBA PNG")
         if "size" in data and list(image.size) != data["size"]:
@@ -62,7 +62,8 @@ def audit(path: Path, minimum: int) -> tuple[int, int]:
     low = [(name, rect) for name, rect in found if min(rect[2:]) < minimum]
     dimensions = sorted({(rect[2], rect[3]) for _, rect in found})
     status = "NEEDS HD REPACK" if low else "PASS"
-    print(f"{status} {path.name}: {len(found)} frames, cells {dimensions}")
+    label = image_path.name if image_path else path.name
+    print(f"{status} {label}: {len(found)} frames, cells {dimensions}")
     # Names make it clear that walking, carrying and work/action strips were audited.
     if low:
         depth = 2 if "units" in data else 1
@@ -90,6 +91,12 @@ def main() -> int:
                 return 1
             checked += count
             failed += low
+            if name in {"towncenter.json", "buildings_hd.json", "buildings_economy.json",
+                        "buildings_crafts.json", "buildings_civic.json"}:
+                masonry = path.with_name(f"{path.stem}_masonry.png")
+                count, low = audit(path, args.min_frame_px, masonry)
+                checked += count
+                failed += low
     if not checked:
         parser.error("no sprite manifests found")
     print(f"Checked {checked} frames; {failed} below the HD frame minimum.")

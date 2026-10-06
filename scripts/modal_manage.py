@@ -109,14 +109,23 @@ def verify_once() -> None:
         raise RuntimeError("production does not serve the grouped building menu")
     if b"Place field" not in wasm:
         raise RuntimeError("production does not serve replenishable fields")
-    for sheet in ("buildings_economy", "buildings_crafts", "buildings_civic", "units",
+    for sheet in ("towncenter", "buildings_hd", "buildings_economy", "buildings_crafts", "buildings_civic", "units",
                   "villager_field_preparation"):
         for extension in ("json", "png"):
             path = f"assets/sprites/{sheet}.{extension}"
             if fetch(f"/{path}") != (ROOT / path).read_bytes():
                 raise RuntimeError(f"production {path} does not match the catalog")
 
+    for sheet in ("towncenter", "buildings_hd", "buildings_economy", "buildings_crafts", "buildings_civic"):
+        path = f"assets/sprites/{sheet}_masonry.png"
+        if fetch(f"/{path}") != (ROOT / path).read_bytes():
+            raise RuntimeError(f"production {path} does not match the masonry catalog")
+    if b"Upgrade to masonry" not in wasm:
+        raise RuntimeError("production does not serve material upgrades")
+
     state = json.loads(fetch("/state"))
+    if not isinstance(state.get("masonry_upgrades_available"), bool):
+        raise RuntimeError("production does not expose material progression")
     # The continuous map grows; both terrain channels may contain encoded runs.
     encoded = state.get("terrain", {})
     columns, rows = state.get("columns"), state.get("rows")

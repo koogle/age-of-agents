@@ -29,20 +29,20 @@ fn cancel(world: &mut GameWorld, queue_id: u64) -> Result<(), CommandError> {
 fn mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload() {
     let mut world = funded_world();
     train(&mut world).unwrap();
-    research(&mut world, TechnologyKind::Forestry).unwrap();
-    train(&mut world).unwrap();
     research(&mut world, TechnologyKind::Masonry).unwrap();
+    train(&mut world).unwrap();
+    train(&mut world).unwrap();
     assert_eq!(
         (world.inventories[0].food, world.inventories[0].wood),
-        (820.0, 960.0)
+        (810.0, 980.0)
     );
     let cancelled = world.buildings[0].queue[1].id;
     cancel(&mut world, cancelled).unwrap();
     assert_eq!(
         (world.inventories[0].food, world.inventories[0].wood),
-        (870.0, 960.0)
+        (860.0, 980.0)
     );
-    assert_eq!(world.villagers_and_trainees(), 3);
+    assert_eq!(world.villagers_and_trainees(), 4);
     let before = world.clone();
     assert_eq!(
         cancel(&mut world, cancelled),
@@ -59,15 +59,12 @@ fn mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload(
         assert_eq!(world, loaded);
         world.validate().unwrap();
     }
-    assert_eq!(world.units.len(), 3);
-    assert_eq!(
-        world.researched_technologies,
-        vec![TechnologyKind::Forestry, TechnologyKind::Masonry]
-    );
+    assert_eq!(world.units.len(), 4);
+    assert_eq!(world.researched_technologies, vec![TechnologyKind::Masonry]);
     assert!(world.buildings[0].jobs().next().is_none());
     assert_eq!(
         (world.inventories[0].food, world.inventories[0].wood),
-        (870.0, 960.0)
+        (860.0, 980.0)
     );
 }
 
@@ -75,10 +72,10 @@ fn mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload(
 fn cancellation_cannot_target_promoted_job_or_reuse_its_id() {
     let mut world = funded_world();
     train(&mut world).unwrap();
-    research(&mut world, TechnologyKind::Forestry).unwrap();
+    research(&mut world, TechnologyKind::Masonry).unwrap();
     let promoted = world.buildings[0].queue[0].id;
     world.tick(VILLAGER_PRODUCTION_SECONDS);
-    research(&mut world, TechnologyKind::Masonry).unwrap();
+    train(&mut world).unwrap();
     assert_ne!(world.buildings[0].queue[0].id, promoted);
     let before = world.clone();
     assert_eq!(
@@ -92,7 +89,7 @@ fn cancellation_cannot_target_promoted_job_or_reuse_its_id() {
         (world.inventories[0].food, world.inventories[0].wood),
         (910.0, 980.0)
     );
-    research(&mut world, TechnologyKind::Masonry).unwrap();
+    train(&mut world).unwrap();
     assert!(world.buildings[0].queue[0].id > waiting);
 }
 
@@ -115,24 +112,36 @@ fn waiting_trainees_reserve_housing_and_cancellation_releases_it() {
 #[test]
 fn waiting_research_is_unique_across_buildings_and_prerequisites_still_apply() {
     let mut world = funded_world();
+    world.resources.clear();
     world.buildings.push(building(
-        BuildingKind::LumberMill,
+        BuildingKind::Kiln,
         "mill",
         CellCoordinate::new(10, 10),
         None,
     ));
     train(&mut world).unwrap();
-    research(&mut world, TechnologyKind::Forestry).unwrap();
+    research(&mut world, TechnologyKind::Masonry).unwrap();
+    let mut camp = building(
+        BuildingKind::MiningCamp,
+        "camp",
+        CellCoordinate::new(20, 10),
+        None,
+    );
+    camp.masonry = true;
+    world.buildings.push(camp);
     let before = world.clone();
     assert_eq!(
         world.apply_command(Command::Research {
             building_id: "mill".into(),
-            technology: TechnologyKind::Forestry
+            technology: TechnologyKind::Masonry
         }),
         Err(CommandError::TechnologyInProgress)
     );
     assert_eq!(
-        research(&mut world, TechnologyKind::Mining),
+        world.apply_command(Command::Research {
+            building_id: "camp".into(),
+            technology: TechnologyKind::Mining
+        }),
         Err(CommandError::MissingTechnologyPrerequisite)
     );
     assert_eq!(world, before);
@@ -141,7 +150,7 @@ fn waiting_research_is_unique_across_buildings_and_prerequisites_still_apply() {
     world
         .apply_command(Command::Research {
             building_id: "mill".into(),
-            technology: TechnologyKind::Forestry,
+            technology: TechnologyKind::Masonry,
         })
         .unwrap();
 }
@@ -202,7 +211,7 @@ fn current_save_round_trips_queue_and_invalid_queues_are_rejected() {
     let json = serde_json::to_value(&world).unwrap();
     let loaded: GameWorld = serde_json::from_value(json).unwrap();
     assert_eq!(loaded, world);
-    research(&mut world, TechnologyKind::Forestry).unwrap();
+    research(&mut world, TechnologyKind::Masonry).unwrap();
     let valid = world.clone();
     world.buildings[0].queue[0].job = BuildingJob::Produce {
         product: ProductKind::Steel,
@@ -214,7 +223,7 @@ fn current_save_round_trips_queue_and_invalid_queues_are_rejected() {
     assert!(world.validate().is_err());
     world = valid.clone();
     world.buildings[0].queue[0].job = BuildingJob::Research {
-        technology: TechnologyKind::Forestry,
+        technology: TechnologyKind::Masonry,
         elapsed_seconds: 0.1,
     };
     assert!(world.validate().is_err());

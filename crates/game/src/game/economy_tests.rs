@@ -199,11 +199,15 @@ fn blocked_spawn_waits_without_recharging_then_completes_once() {
 #[test]
 fn research_cannot_be_reserved_twice_at_different_buildings() {
     let mut world = world_with(BuildingKind::Farm);
+    world.buildings[1].masonry = true;
+    let mut second = building(BuildingKind::Farm, "other-farm", cell(20, 10), None);
+    second.masonry = true;
+    world.buildings.push(second);
     world.inventories[0].food = 100.0;
     world.inventories[0].wood = 100.0;
     world
         .apply_command(Command::Research {
-            building_id: "base-1".into(),
+            building_id: "other-farm".into(),
             technology: TechnologyKind::Agriculture,
         })
         .unwrap();

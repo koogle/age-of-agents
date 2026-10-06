@@ -1,0 +1,280 @@
+{
+  "date": "2026-10-05",
+  "model": "OpenAI image_gen (backend model and request ID not exposed)",
+  "packing": "scripts/pack_material_sprites.py",
+  "sources": [
+    {
+      "file": "barracks_pair.png",
+      "sha256": "7acd5988253a376c4baec3969e0af5413ce17c0d07b78a34fb5d3c545e45b081",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-7a70313a-1883-4c28-ad9c-d6b44a8230da.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "buildings_crafts_original.png",
+      "sha256": "bb94e595f708cbe108cd524b525c73b74ccdad76d44595b779c5ee8c28dc37df",
+      "size": [
+        2048,
+        2048
+      ],
+      "generated_artifact": null,
+      "source": "retained original crafts atlas",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "dock_pair.png",
+      "sha256": "a2423698d2c345c282a1ee6a5f2cb793440a6336d7e9ef131e46617f83917f5b",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-3ffc816a-9133-46cb-a4a5-6e3097984222.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "farm_pair.png",
+      "sha256": "7fee91499f0971e9bc9cbf2d704a89605fa307cc340a221dba17dfd3e3f3a932",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-166fbdf1-7a58-45c8-994e-8c26d8318fe9.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "granary_pair.png",
+      "sha256": "bf62a317be40b9f10c2d2d8cb4eb44538e8f8ba9f2cd1b54e8250ed3f1be6d21",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-15c4d09b-38e4-428e-8584-da4ad84ea3bc.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "house_complete.png",
+      "sha256": "dff5cb80cd85f0796ce9f199eff1863f4dc2948514ae9387f7093c9e92e71fb0",
+      "size": [
+        1254,
+        1254
+      ],
+      "generated_artifact": "exec-9d6d4d4c-0532-4f71-9c86-9633506e0a1d.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "house_pair.png",
+      "sha256": "349d9826f5ec26ad66c757da0897d55d3544554d83dde3219177c97e6844edc5",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-9afd6f86-54b6-47c5-8cf1-59a58175e863.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "infirmary_pair.png",
+      "sha256": "e47137996d83bc23b238653f0c9f62d0d128ca3d2b40625a23e8fc6c1c0c9b38",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-6857701b-e73b-4daa-a085-6a9bfa2b498e.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "kiln_early.png",
+      "sha256": "f4dc67636d09d6e5feca58d2a11389000836156c02ae1381c57bf25676f91a15",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-9f7e6dd4-44ad-48e0-a157-3cb34b489d1f.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "kiln_late.png",
+      "sha256": "81e3ca163826ffedb61c4ace6af5348b67558d07857e0cfb5478f77ef16de12b",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-97a9349e-f114-4a6a-a695-6eb205fdabaa.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "kitchen_pair.png",
+      "sha256": "0a2130e24f529c8553178a5ea39149845381be2a98c7f625402bb3889fbd6ea3",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-010e6d83-e518-4267-9885-d2994afae042.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "lumber_mill_pair.png",
+      "sha256": "5e6e757419f87b83f379998cf674ba7aeff8c5c7b43eeef334df04670a50d7d5",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-3d1a70f7-9631-482f-9b52-cf1e3fe7bd3f.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "mining_camp_pair.png",
+      "sha256": "45df625705f8f87bad14980d8b94b5c1c4fdb5c78d3ccc1bb9abd6bf31d91c34",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-d1e604b1-a442-45fa-b3bd-51effb15eb79.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "monument_masonry.png",
+      "sha256": "4de0f26c0a07459f93771499c4dfb64fabe52d0d671ec18dc8404a278e58b7ad",
+      "size": [
+        1254,
+        1254
+      ],
+      "generated_artifact": "exec-11887e12-38f3-42a2-ad5d-248232d774f7.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "range_pair.png",
+      "sha256": "024b5dae1fc60eefd85f2052014e874042712b4659bbf63796e98be65ce06625",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-a24b7ea3-cf1d-4c74-98e9-77256cce77ad.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "smelter_pair.png",
+      "sha256": "f9c816a7a0d985693000fa8dc72c2b4b91d47fb798ce97f91f23be6d1adf03db",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-7250a132-cb1b-4cbb-bcb9-6ffe40f8d96c.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "towncenter_complete_pair.png",
+      "sha256": "84b295abc5541431ecc7e9e613761f7c9389c4f12ddf03b74177dfc998922061",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-9035a65c-239b-42d1-ba87-bb836c91edfb.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "watchtower_pair.png",
+      "sha256": "adc61fe946415dc9f98cb7fa1d817f11baaf89c59151a126d9404220430c5bdd",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-8617e8f2-04df-456e-a1b1-3200be3a062d.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "weaver_pair.png",
+      "sha256": "b51b99d158274db962f003c710908ff4ddbd51b28860231b6ee50432f59f4a24",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-f3d3f9d6-beb5-48c2-86c1-9a2fbd5500a8.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "weaver_walls.png",
+      "sha256": "5517891c7aef5826b7c7013492ba2255f940569d7e343746ec46584f7cbe6054",
+      "size": [
+        1254,
+        1254
+      ],
+      "generated_artifact": "exec-1b721d3c-c065-4344-a613-28d01fa809af.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "workshop_pair.png",
+      "sha256": "51798b800483d1d8447e11e54610129370f21f98f9b52f60ad666f6b7aa3c872",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-91ea8eea-b4b1-43ca-9121-279481044245.png",
+      "source": "OpenAI image_gen edit",
+      "prompt_summary": "Preserve exact Greek isometric building identity and construction stage; replace clay roof with wood/thatch, or masonry monument pedestal; transparent background. See README for stage exceptions."
+    },
+    {
+      "file": "dock_east_pair.png",
+      "sha256": "4e9708b9bf7cad208e8ec353d49e6f18b9a60f3d8f67dc1089aefdff631e1bdb",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-eb6fa10b-fb0a-4443-bde2-23cd602d4d28.png",
+      "source": "OpenAI image_gen edit",
+      "references": [
+        "references/dock_east.png"
+      ],
+      "prompt_summary": "Preserve exact east-facing two-frame dock orientation, shed/deck, pillars, ropes and right-frame sailboat. Replace only terracotta roof with warm brown wooden shingles/planks; transparent background, equal cells, high detail."
+    },
+    {
+      "file": "dock_north_pair.png",
+      "sha256": "d6566f06215f049df7c24cc67a14625f53b196662199d1bd6e72222838913fb5",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-372a50f6-a465-4a41-b3e4-39938b84642c.png",
+      "source": "OpenAI image_gen edit",
+      "references": [
+        "references/dock_north.png"
+      ],
+      "prompt_summary": "Preserve exact north-facing two-frame dock orientation, shed/deck, pillars, ropes and right-frame sailboat. Replace only terracotta roof with warm brown wooden shingles/planks; transparent background, equal cells, high detail."
+    },
+    {
+      "file": "dock_west_pair.png",
+      "sha256": "86441cc1ab02c34ee33a0c6f28f20375618e2148a5879c686743df71dcb70aba",
+      "size": [
+        1774,
+        887
+      ],
+      "generated_artifact": "exec-c935c799-7a47-4705-aa37-d29819cde21d.png",
+      "source": "OpenAI image_gen edit",
+      "references": [
+        "references/dock_west.png"
+      ],
+      "prompt_summary": "Preserve exact west-facing two-frame dock orientation, shed/deck, pillars, ropes and right-frame sailboat. Replace only terracotta roof with warm brown wooden shingles/planks; transparent background, equal cells, high detail."
+    }
+  ]
+}

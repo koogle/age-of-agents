@@ -360,6 +360,11 @@ impl App {
                     });
                 }
             }
+            hud::Action::UpgradeBuilding => {
+                if let Some(building_id) = self.selection.building.clone() {
+                    self.send(Command::UpgradeBuilding { building_id });
+                }
+            }
             hud::Action::Research(technology) => {
                 if let Some(building_id) = self.selection.building.clone() {
                     self.send(Command::Research {
@@ -829,6 +834,11 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/transport.png"),
         assets.image("sprites/villager_field_preparation.png"),
         assets.image("sprites/wildlife.png"),
+        assets.image("sprites/towncenter_masonry.png"),
+        assets.image("sprites/buildings_hd_masonry.png"),
+        assets.image("sprites/buildings_economy_masonry.png"),
+        assets.image("sprites/buildings_crafts_masonry.png"),
+        assets.image("sprites/buildings_civic_masonry.png"),
     ]
 }
 

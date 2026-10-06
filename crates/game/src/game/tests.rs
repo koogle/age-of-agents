@@ -196,7 +196,7 @@ fn default_world_is_valid_and_has_a_productive_base() {
     assert_eq!(base.kind, BuildingKind::TownCenter);
     assert!(base.is_complete());
     assert_eq!(base.footprint().cells().count(), 25);
-    assert_eq!(base.researches, TechnologyKind::ALL);
+    assert_eq!(base.researches, vec![TechnologyKind::Masonry]);
     for unit in &world.units {
         assert!(base.footprint().is_interaction_cell(unit.cell));
     }
@@ -519,7 +519,7 @@ fn research_uses_the_slot_reserves_once_and_enforces_prerequisites() {
     let before = world.clone();
     assert_eq!(
         world.apply_command(research(TechnologyKind::Mining)),
-        Err(CommandError::MissingTechnologyPrerequisite)
+        Err(CommandError::TechnologyUnavailable)
     );
     assert_eq!(world, before);
     world

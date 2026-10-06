@@ -1,0 +1,39 @@
+{
+  "mode": "desktop mouse",
+  "viewport": [
+    1440,
+    900
+  ],
+  "browser": "151.0.7922.173",
+  "errors": [],
+  "commands": [
+    {
+      "command": {
+        "multiplier": 1,
+        "type": "set_simulation_speed"
+      },
+      "request_id": "r1",
+      "type": "command"
+    },
+    {
+      "command": {
+        "building_id": "base-1",
+        "type": "upgrade_building"
+      },
+      "request_id": "r2",
+      "type": "command"
+    },
+    {
+      "command": {
+        "multiplier": 2,
+        "type": "set_simulation_speed"
+      },
+      "request_id": "r3",
+      "type": "command"
+    }
+  ],
+  "bricks_after": 70.0,
+  "timber_after": 85.0,
+  "masonry": true,
+  "captured_art": false
+}

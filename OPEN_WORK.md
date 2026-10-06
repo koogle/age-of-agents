@@ -1,3 +1,31 @@
+# Rebase of PR #103 — 2026-10-06
+
+- User requested rebasing against main; repository main is `master`. Rebased the final feature diff onto `50d02e1`, preserving gathering loops during building selection, territorial boars, the newer neutral stone roads and stationary NPC status labels. Prior merged feature history is retained locally at `backup/clay-before-rebase-20261006`; final changes were consolidated before replay to preserve merge-only research and material resolutions.
+- Verification complete: 309 tests, formatting, strict native/WASM lint, rebuilt web/server, 392-frame/icon audits and six release-verifier tests pass. Final desktop mouse/DPR2-phone touch building-selection and upgrade/research/payment/reload checks pass without page errors. [Rebase evidence](docs/verification/2026-10-06/clay-rebase/README.md). Single-row headers, brick upgrade arrows, island-local payment, specialist research and schema 17 remain the requested behavior. Updating existing PR #103 with an explicit force-with-lease; no merge or deployment is requested.
+
+# Current work: consistent upgrade headers (2026-10-06)
+
+- PR #103: up arrow made of brick at the single-row header’s right edge for all 17 completed building kinds; upgrade benefits/costs appear on hover, not in the building description. No hard upgrade/building count limit; future rare-resource upgrade costs remain proposed.
+- Latest follow-up: completed-building headers have one text row (name), with role/current-work details on name hover/tap. A visual progress bar remains. Final 99 client tests, native/WASM strict lint and rebuilt WebGL pass; final desktop mouse/DPR2-phone touch inspection and upgrade/research/payment/reload flows pass without page errors. [Single-row evidence](docs/verification/2026-10-06/upgrade-header/single-row/README.md).
+- Brick arrow replaces the separate badge; upgrade copy is hover-only. Full 307 tests and final 99 client recheck pass, strict native/WASM lint and final desktop/phone replay pass. [Updated preview and evidence](docs/verification/2026-10-06/upgrade-header/brick-arrow/README.md).
+- Initial 291 tests, strict native/WASM lint and desktop/phone upgrade/research/reload flow pass. Integrated master `0c7b649` to preserve roads, water, stronger wildlife and refined menu icons. Combined saves use version 17 because master already shipped water under version 16. Combined 307 Rust tests (13 server, 99 client, 195 domain; one ignored benchmark), strict native/WASM lint, formatting, rebuilt web/server and 388-frame asset checks pass. Final combined desktop mouse and DPR2-phone touch upgrade/research/payment/reload flows pass with no page errors. [Header evidence](docs/verification/2026-10-06/upgrade-header/README.md). No merge to master or deployment.
+
+# Current work: brick upgrades unlock specialist research (2026-10-06)
+
+- PR #103 / `feat/clay-building-tiers`: Agriculture requires an upgraded Farm, Forestry an upgraded Lumber Mill, Mining an upgraded Mining Camp, and Textiles an upgraded Weaver. The Town Center/Kiln retain ungated Masonry. Basic farming, processing, transport and granary yield are unchanged. Research costs, prerequisite technologies and global uniqueness remain. The HUD explains locked research; the domain rejects it before payment.
+- Integrated master `f985a92`, resolving the earlier productive-availability conflict and preserving the new menu/wildlife art, granary yield and ten-building starter catalog. Workshop's stone base cost still requires metal discovery for productive use. Save version 16 resets prior catalogs/jobs under the existing development policy.
+- 290 Rust tests pass (13 server, 96 client, 181 domain; one manual benchmark ignored), formatting and strict native/WASM lint pass, and web/server builds complete. Progression/store tests rechecked after lint cleanup and explicit version-15 reset coverage. Desktop mouse and DPR2-phone touch farm upgrade/research/payment/reload checks pass with no page errors. All 387 sprite frames, icon checks and six Python verifier tests pass. [Evidence](docs/verification/2026-10-06/brick-research/README.md). No merge/deployment; production release uses the existing workflow because local Modal credentials target another workspace.
+- House/granary linework correction remains integrated. [Art review](docs/verification/2026-10-05/house-linework/README.md). Earlier material-tier verification below describes its prior revision.
+
+# Current work: clay and building material tiers (2026-10-05)
+
+- [PR #103](https://github.com/koogle/age-of-agents/pull/103), branch `feat/clay-building-tiers`, integrates main through `2bedc41`; runtime integration `d79a318`. Clay joins iron/coal on island 2. All 17 buildings keep their functions, with wood/thatch starter art and paid in-place masonry upgrades. Workshop/Monument base costs use stone; 15 starter buildings. No stat bonuses. Save version 15 resets incompatible saves under current policy.
+- Preserves island storage/ships, all four dock facings, shore pickup, wildlife, mobile cargo, Stop artwork, concise README, gathering continuation, pause/reconnect and compact time controls. Upgrade payment/refunds stay local; paused orders spend nothing and require resuming. Wildlife uses sprite slot 13, masonry 14–18. [Sources/provenance](assets/sprites/material_sources/README.md).
+- Verification: full workspace 273 tests pass (13 server, 89 client, 171 domain; one manual benchmark ignored); all 89 client tests were rechecked after the final client-only time-control integration. Formatting, strict native/WASM lint, rebuilt web client, six Python verifier tests, isolated HTTP verifier, 383-frame sprite audit and icon/field/transport checks pass. Actual desktop mouse and DPR2-phone touch resume/upgrade/payment/reload pass without page errors. All 24 directional dock captures/picking checks pass. SQLite persists the completed tier under schema 15. [Review/evidence](docs/verification/2026-10-05/material-tiers/README.md).
+- Earlier handoff was ready for review; see the current correction above for the newer integration. No merge or deployment. Modal proxy support repaired the connection, but API lookup confirms injected credentials select `radiantai`, not production `koogle-frick`. No deployment to that different workspace. Use the existing production workflow after review. Task-owned QA servers are stopped. Earlier unresolved work remains below.
+
+# Integrated terrain-first island generation — PR #111
+
 # Building selection preserves gathering — [PR #149](https://github.com/koogle/age-of-agents/pull/149)
 
 - User requested that selecting/switching buildings with a gathering villager selected must not force an early unload or replace its gathering loop. Building-click unload candidates now exclude every Gather phase; stopped/other compatible carriers still unload, including mixed selections. Hover preview uses the same candidate filter. No domain, protocol or save changes.
@@ -22,6 +50,7 @@
 
 - User requested less sandy, slightly stronger stone paving after roads PR #133 merged. The revised neutral limestone and clearer joints preserve the painted style; user confirmed “yeah I prefer that” after viewing the comparison. Stone-only runtime asset change; 294 tests, formatting, strict native/WASM lint, asset checks and desktop/DPR2 phone construction plus normal/max-zoom review pass. [Before/after, provenance and evidence](docs/verification/roads/stone-contrast/README.md). User explicitly authorized merging PR #143 on 2026-10-06. Merge/release status is tracked by the linked PR and the [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
 
+
 # Stronger wildlife — 2026-10-06
 
 - Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
@@ -38,6 +67,7 @@
 - Straight dirt/stone roads take two worker-seconds per cell; dirt costs labour only and stone adds one stone per new cell. Completed roads give friendly land units +50% speed with travel-time routing; animals remain unboosted. Stop/resume, shared labour, unloading first and mixed crossings preserve paid progress. Save version 15 resets incompatible development saves.
 - Final combined validation: 289 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint, formatting, asset audits, six release-verifier tests and rebuilt browser/server pass. Desktop mouse and DPR2 touch construction both pass with 14 completed road cells, exactly seven stone charged and no browser errors; [reproduction/results](docs/verification/roads/README.md).
 - User-approved dedicated sandy dirt and irregular warm limestone retain original plots/biomes. Normal/max-zoom desktop and DPR2 phone style review passes; [art provenance and evidence](docs/verification/roads/style/README.md). Final integration changes menu/wildlife code, not road texture bytes. Physical phones and native-window appearance remain unverified. Preserve previous unresolved work below.
+
 
 ## Authorized animal PR merge — 2026-10-06
 

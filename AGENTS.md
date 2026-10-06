@@ -15,7 +15,7 @@ The current playable demo proves these loops:
 1. Isometric terrain tiles render cleanly on desktop and mobile.
 2. A player can command a villager through typed gathering, bounded carrying, town-center deposits, and deterministic resumption across nine raw resources, including renewable riverbank water.
 3. A player can construct a town center and train villagers through its authoritative task queue.
-4. A player can research five bounded gathering improvements through that same task queue.
+4. A player can research five bounded gathering improvements: Masonry at the Town Center/Kiln, and four optional bonuses at upgraded specialist buildings.
 
 Keep the simulation deterministic. The world expands as the player discovers islands, without a fixed island-count cap. Islands share one map and all discovered settlements simulate; inventories are island-local, supplemented by cargo in stopped shore ships (50 total resources, plus four passengers). Research remains shared. Territorial wolves/bears/boars and explicit wildlife contact attacks are implemented; see [wildlife](docs/knowledge/wildlife.md). Broader combat, calamities and permanent progression remain future roadmap work. Do not add pathfinding frameworks, autonomous task selection (beyond a gatherer moving on to the next node of the same kind), LLM calls, multiplayer, or generalized engine abstractions before this milestone is excellent.
 
@@ -54,7 +54,7 @@ The target is a soft 3D tilt-shift diorama of a sunlit Greek island. `assets/ref
 
 - Studio Ghibli-leaning cel look: soft two-tone toon ramp (no hard multi-band posterization), a warm rim light, fine one-pixel pen lines on every silhouette and crease (as in `mediterranean_4.webp`), and painted generated ground textures. The look is driven by rendering, palette, painted textures and sprites more than by model detail.
 - Tilt-shift depth of field, puffy cumulus clouds, a distant snow-capped volcano, ships on a deep blue-teal sea.
-- White limestone and marble, terracotta roofs, dark cypresses, olive trees, yellow-green and ochre land; striking accents against soft pastel-leaning tones.
+- White limestone and marble, wood/thatch base roofs and terracotta masonry-upgrade roofs, dark cypresses, olive trees, yellow-green and ochre land; striking accents against soft pastel-leaning tones.
 - The interface is mostly hidden: a round globe minimap, a small speed pill, a resource pill listing only what the player has, and glossy round medallion buttons that appear only when something is selected. Icons and ornament should come from generated art (FAL/Midjourney), not hand-drawn code shapes.
 - Readability at actual gameplay size matters more than close-up detail. No photorealism, text in images, or inconsistent character identity between animation frames.
 
@@ -63,6 +63,8 @@ The target is a soft 3D tilt-shift diorama of a sunlit Greek island. `assets/ref
 - Generate sprites, textures, and UI art with FAL `fal-ai/nano-banana` and `fal-ai/nano-banana/edit`, using approved game art as the style reference. Use `fal-ai/birefnet/v2` for cutouts; `fal-ai/esrgan` is the upscaler used for the loading title, and `fal-ai/ideogram/v3` generated its lettering.
 - Treat initial generations as drafts that need an upscaling and cleanup pass. Use ChatGPT's image tool (`OpenAI image_gen`) for refinement, as with the building walls, roof tiles, and cobblestone; remove diffusion artifacts, broken geometry, stray details, and cutout fringes before integration.
 - Preserve the same palette, linework, lighting, camera, character identity, scale, and ground anchor across assets and animation/construction frames. Refine against approved sources rather than changing the style for each asset.
+- For roof material edits, use the original high-resolution building as the style master. Match fine warm ink and sparse two-tone detail at equal rendered size; reject dense straw hatching, heavy black seams and glossy strand highlights. Compare construction and completed stages together; see [linework guidance](docs/knowledge/asset-pipeline.md#house-linework-correction-2026-10-05).
+
 - Treat the [style acceptance review](docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) as a blocking merge gate for art. Attach approved family references to generation and refinement, and include reference/result comparisons at actual display size. Technical asset checks do not establish a style match.
 - Keep original renders and record the model, references, request IDs, and edits alongside the asset. Pack from the highest-quality source into at least 512×512 sprite frames; prefer original high-resolution detail when available, and do not treat a larger canvas or DPI change as recovered detail.
 - Run `python3 scripts/check_sprite_resolution.py` and the relevant asset checks, then inspect maximum-zoom desktop and DPR-2 phone gameplay. `--report-only` inventories existing resolution gaps; it is not a passing integration check.

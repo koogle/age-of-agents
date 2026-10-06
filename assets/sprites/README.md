@@ -328,14 +328,18 @@ The 2048×1536 RGBA atlas has twelve 512×512 cells, feet at `[256,480]`, standi
 
 FAL credentials were unavailable in this session, so the built-in OpenAI image tool generated the poses against the approved identity masters and a refined hoeing draft. The draft atlases were rejected for insufficient source resolution. `field_preparation_sources/provenance.json` records generation IDs, references, exact prompts and the exception; no FAL spend occurred. `villager_field_preparation_preview.gif` shows the cycle at gameplay scale. Reproduce with `python3 scripts/pack_field_preparation.py` (Pillow), then run `python3 scripts/check_field_preparation_assets.py`. The new cycle passes the HD minimum; the full sprite audit also includes this cycle.
 
+## Wood/thatch and masonry tiers (2026-10-05)
+
+Starter building sheets now use wood/thatch roofs and stone ovens; `_masonry.png` sheets retain terracotta finishes. All share original frame manifests. See [sources/provenance](material_sources/README.md) and [verification](../../docs/verification/2026-10-05/material-tiers/README.md).
+
 ## Shore-facing docks (2026-10-05)
 
-`buildings_hd` now has seven rows (2048×3584): its four original rows remain
-pixel-identical, followed by `dock_east`, `dock_north`, and `dock_west`. The
+`buildings_hd` now has seven rows (2048×3584): its four original row coordinates are unchanged, followed by `dock_east`, `dock_north`, and `dock_west`. The
 original `dock` faces south (+row). Every row has four 512×512 construction
-frames, packed from retained 724×724 directional source cells. These are upright
-quarter-turn views, not rotated billboards. `scripts/pack_building_sprites.py`
-reproduces the atlas; structural deck corners in `building_sources/footprints.json`
+frames. Masonry views are packed from retained 724×724 directional source cells;
+starter roof/complete frames use the newer wood-roof strips in `material_sources/`. These are upright
+quarter-turn views, not rotated billboards. `scripts/pack_building_sprites.py` followed by `scripts/pack_material_sprites.py`
+reproduces both material atlases; structural deck corners in `building_sources/footprints.json`
 register the art to the same 4×4 plot. Sources and generation/refinement details
 are in [directions/provenance.json](building_sources/directions/provenance.json).
 

@@ -21,6 +21,8 @@ Each fix goes through a PR and the repository verification/release process.
 | Town, Gathering, Production, Military categories | First building in each group | Dedicated category symbols | [PR #107](https://github.com/koogle/age-of-agents/pull/107), verified |
 | All types (back) | Cancel X | Dedicated back icon | [PR #107](https://github.com/koogle/age-of-agents/pull/107), verified |
 
+| Masonry upgrade (PR #103) | Existing clay resource art on command/queue | Dedicated building-upgrade medallion | Pending |
+
 ## Already covered
 
 All 17 buildable buildings and Field have distinct finished generated sprite

@@ -1,0 +1,40 @@
+{
+  "mode": "DPR2 phone touch",
+  "viewport": [
+    390,
+    844
+  ],
+  "browser": "151.0.7922.173",
+  "errors": [],
+  "commands": [
+    {
+      "command": {
+        "multiplier": 1,
+        "type": "set_simulation_speed"
+      },
+      "request_id": "r1",
+      "type": "command"
+    },
+    {
+      "command": {
+        "building_id": "base-1",
+        "type": "upgrade_building"
+      },
+      "request_id": "r2",
+      "type": "command"
+    },
+    {
+      "command": {
+        "multiplier": 2,
+        "type": "set_simulation_speed"
+      },
+      "request_id": "r3",
+      "type": "command"
+    }
+  ],
+  "bricks_after": 70.0,
+  "timber_after": 85.0,
+  "masonry": true,
+  "full_art_capture": false,
+  "completed_capture": true
+}

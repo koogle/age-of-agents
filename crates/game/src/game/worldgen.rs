@@ -713,10 +713,10 @@ fn reachable_only(
 #[cfg(test)]
 mod tests;
 
-/// Each destination supplies one complementary chain in its native biomes.
+/// Destinations retain their chains; the first expansion also introduces clay.
 pub(super) fn destination(seed: u64, id: u64) -> Island {
     let special: &[ResourceKind] = match (id - 1) % 3 {
-        0 => &[ResourceKind::Iron, ResourceKind::Coal],
+        0 => &[ResourceKind::Iron, ResourceKind::Coal, ResourceKind::Clay],
         1 => &[ResourceKind::Clay],
         _ => &[ResourceKind::Fiber],
     };

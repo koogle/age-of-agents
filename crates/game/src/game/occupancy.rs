@@ -270,11 +270,19 @@ impl GameWorld {
                             }
                             | BuildingJob::Research {
                                 elapsed_seconds, ..
-                            } => elapsed_seconds != 0.0,
+                            }
+                            | BuildingJob::Upgrade { elapsed_seconds } => elapsed_seconds != 0.0,
                         }
                 })
             {
                 return Err(format!("{} has an invalid task queue", building.id));
+            }
+            let upgrades = building
+                .jobs()
+                .filter(|job| matches!(job, BuildingJob::Upgrade { .. }))
+                .count();
+            if upgrades > 1 || (building.masonry && (upgrades > 0 || !building.is_complete())) {
+                return Err(format!("{} has invalid masonry upgrade state", building.id));
             }
             for job in building.jobs() {
                 let elapsed = match job {
@@ -283,7 +291,8 @@ impl GameWorld {
                     }
                     | BuildingJob::Research {
                         elapsed_seconds, ..
-                    } => *elapsed_seconds,
+                    }
+                    | BuildingJob::Upgrade { elapsed_seconds } => *elapsed_seconds,
                 };
                 if !(building.is_complete() && elapsed.is_finite() && elapsed >= 0.0) {
                     return Err(format!("{} has an invalid job", building.id));
@@ -294,13 +303,19 @@ impl GameWorld {
                     return Err("a technology is queued more than once".into());
                 }
                 match job {
+                    BuildingJob::Upgrade { elapsed_seconds }
+                        if *elapsed_seconds >= BUILDING_UPGRADE_SECONDS =>
+                    {
+                        return Err(format!("{} has invalid upgrade progress", building.id));
+                    }
                     BuildingJob::Produce { product, .. }
                         if !building.kind.products().contains(product) =>
                     {
                         return Err(format!("{} has an unavailable product", building.id));
                     }
                     BuildingJob::Research { technology, .. }
-                        if !building.researches.contains(technology)
+                        if !building.kind.technologies().contains(technology)
+                            || (technology.requires_masonry() && !building.masonry)
                             || self.researched_technologies.contains(technology) =>
                     {
                         return Err(format!("{} has invalid research", building.id));
