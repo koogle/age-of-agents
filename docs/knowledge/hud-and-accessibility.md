@@ -36,6 +36,10 @@ verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
 User steering (2026-10-06): remove the top title/description card inside build subcategories. Keep the building buttons, labels and back navigation; show hover costs through the existing explanation toast. This is a presentation-only change with no save impact. [Desktop and phone verification](../verification/build-subcategories/README.md).
 
+## NPC status feedback
+
+User steering (2026-10-06): status messages should remain at the world position where they appeared, rising and fading out instead of following the NPC. Implemented in `feedback.rs`: status labels retain their initial anchor while the existing 1.4-second rise/fade runs. Entity IDs still replace feedback on rapid orders; only damage labels track movement. The regression test moves the NPC on both axes and checks replacement at its new position. Desktop and emulated DPR-2 phone WebGL replay checks fixed horizontal position, upward motion, fade and expiry without page errors; [evidence and reproduction](../verification/status-feedback/README.md).
+
 ## Mobile time-control spacing
 
 User steering on 2026-10-05 requests a tighter mobile time-control row. The compact layout reduces center spacing from 44px to 36px for the existing 30px coins (6px visible gaps), with separate 36×44px hit regions. Keep the rightmost coin anchored and desktop positioning unchanged.

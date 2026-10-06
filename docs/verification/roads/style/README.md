@@ -12,7 +12,8 @@ and generated originals are recorded in [provenance](../../../../assets/terrain/
 Both refinements were made with OpenAI image_gen, attaching the primary diorama,
 painted meadow and their respective original clay/paving image. The unmodified
 1254×1254 PNGs are retained as [dirt](../../../../assets/terrain/road_dirt.png) and
-[stone](../../../../assets/terrain/road_stone.png). There are no additional art passes.
+[stone](../../../../assets/terrain/road_sources/stone-sandy-before.png). This records the first material pass. A later user-requested
+[stone contrast correction](../stone-contrast/README.md) supersedes its sandy stone palette.
 
 ![Approved references above, refined materials repeated below](comparison.png)
 
