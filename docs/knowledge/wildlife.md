@@ -14,6 +14,15 @@ second, then requested some variation in later-island counts. Generation retains
 starter wolf and chooses 2–4 animals per later island from the world seed and island
 index, with one bear and the remainder wolves, preserving safe-start placement.
 
+## Strength tuning (2026-10-06)
+
+Jakob requested substantially more animal health and damage, with one wolf requiring
+3–5 archers. Full-health contact tests yield zero survivors with one/two archers,
+one with three, three with four, and four with five. Positioning and staggered
+arrival can change casualties. Existing saved current health is preserved; increased
+damage applies immediately, and new animals spawn at the increased maximum.
+There is no schema change or world reset.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
@@ -25,15 +34,15 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 
 | Kind | Health | Damage / second in contact | Speed (cells/s) | Aggro / territory radius |
 | --- | --- | --- | --- | --- |
-| Wolf | 40 | 8 | 2.5 | 6 / 10 |
-| Bear | 100 | 16 | 1.8 | 4 / 6 |
+| Wolf | 300 | 35 | 2.5 | 6 / 10 |
+| Bear | 600 | 50 | 1.8 | 4 / 6 |
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
 Their contact damage is 10/25/18/35 per second respectively. This is a bounded
 wildlife combat slice: ranged attacks, healing, building damage, factions/raids,
-loot and run-ending rules remain unimplemented. Two villagers or a guard can
-fight a bear more safely than a lone villager. Retreat is possible because
+loot and run-ending rules remain unimplemented. Wolves require a squad; bears
+are stronger still and defeat three archers in the contact fixture. Retreat is possible because
 villagers move faster than predators. No friendly automatic retaliation.
 
 Attack orders validate all members and current target visibility before mutation.
@@ -75,9 +84,10 @@ pursuit/return, pause/reload, discovery, corner attacks and malformed saves.
 Existing randomized soundness, queues, cargo and transport suites remain active.
 
 Run `python3 docs/verification/verify_wildlife.py --output /tmp/aoa-wildlife-check`
-after rebuilding server/WebAssembly. This real-server fixture places guards and
+after rebuilding server/WebAssembly. This real-server fixture places four archers and full-health
 animals near the starting camera, then uses actual desktop mouse and emulated
-phone touch to select a guard and attack a bear. It verifies damage both ways,
+phone touch to select an archer and attack a wolf. A subsequent explicit WebSocket
+group order recruits the squad (additive touch selection is not implemented). It verifies damage both ways,
 defeat and cleanup, captures screenshots and checks page errors. The controlled
 fixture is not evidence of natural spawn placement (domain tests cover that).
 See [review/evidence](../verification/2026-10-05-wildlife/REVIEW.md).
@@ -109,3 +119,8 @@ on loopback :8013 and observes actual WebGL instance UVs for both species,
 windup/strike/recovery and mirroring. It captures normal and maximum zoom on
 desktop/DPR-2 phone. This isolates visual acceptance; the real-server wildlife
 verifier and domain tests still establish combat behavior.
+
+Stronger-wolf browser fixtures start the attack target outside its six-cell aggro
+radius. Otherwise resuming simulation before clicking can move the wolf away
+from its captured screen position and dispatch a ground move instead of an attack.
+Balance evidence and reproduction: [stronger wildlife](../verification/stronger-wildlife/README.md).
