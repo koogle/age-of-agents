@@ -1,0 +1,12 @@
+{
+  "tool": "OpenAI image_gen",
+  "prompt": "background-repair-prompt.txt",
+  "source": "../refined.png",
+  "approved_references": [
+    "../../refinement/resource_wood.png",
+    "../../refinement/tech_masonry.png"
+  ],
+  "result": "background-repair-heavy.png",
+  "status": "rejected",
+  "reason": "Preserved the landing platform but thickened linework and increased saturation. Accepted cutout instead uses BiRefNet General Use Light on the original refined icon."
+}

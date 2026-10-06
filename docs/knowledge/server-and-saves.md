@@ -93,3 +93,11 @@ the final architectural decision. Historical sources:
 [#35](https://github.com/koogle/age-of-agents/pull/35),
 [#83](https://github.com/koogle/age-of-agents/pull/83),
 [#90](https://github.com/koogle/age-of-agents/pull/90).
+
+## Road state (2026-10-05)
+
+Basic roads add a required `roads` array to worlds and snapshots, plus typed
+`build_road` commands/tasks. Store version 15 resets older development saves;
+current saves retain road material, unfinished labour and assigned line cells.
+Road validation runs after terrain validation, so malformed terrain returns an
+error before any cell indexing.

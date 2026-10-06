@@ -168,7 +168,9 @@ impl App {
         }
         if matches!(
             self.build,
-            hud::BuildUi::Placing(_) | hud::BuildUi::PlacingField
+            hud::BuildUi::Placing(_)
+                | hud::BuildUi::PlacingField
+                | hud::BuildUi::PlacingRoad { .. }
         ) && pointer.button == MouseButton::Left
         {
             return;

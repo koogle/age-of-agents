@@ -6,6 +6,8 @@ pub const FIELD_COST: &[(ResourceKind, f64)] =
     &[(ResourceKind::Wood, 10.0), (ResourceKind::Stone, 5.0)];
 pub const FIELD_FOOD: f64 = 120.0;
 pub const FIELD_WORK_SECONDS: f64 = 12.0;
+pub const GRANARY_FIELD_RADIUS: u16 = 6;
+pub const GRANARY_FIELD_YIELD_MULTIPLIER: f64 = 1.5;
 
 impl GameWorld {
     fn field_worker(&mut self, unit_id: &str) -> Result<usize, CommandError> {
@@ -133,6 +135,24 @@ impl GameWorld {
             return;
         }
         field.work = None;
+        // Fix this harvest's yield once; nearby granaries never refill a live field.
+        let footprint = self.resources[index].footprint();
+        let boosted = self.buildings.iter().any(|building| {
+            building.kind == BuildingKind::Granary
+                && building.is_complete()
+                && building.footprint().cells().any(|a| {
+                    footprint.cells().any(|b| {
+                        a.column.abs_diff(b.column).max(a.row.abs_diff(b.row))
+                            <= GRANARY_FIELD_RADIUS
+                    })
+                })
+        });
+        self.resources[index].capacity = FIELD_FOOD
+            * if boosted {
+                GRANARY_FIELD_YIELD_MULTIPLIER
+            } else {
+                1.0
+            };
         self.resources[index].amount = self.resources[index].capacity;
         for worker in &mut self.units {
             if matches!(&worker.action, UnitAction::Cultivate { resource_id: id } if id == resource_id)

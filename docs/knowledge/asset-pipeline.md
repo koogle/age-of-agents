@@ -52,7 +52,8 @@ historical. Do not assume a local login or provider access exists in a new sessi
 **Developer steering, 2026-10-05:** Jakob flagged visual style drift during the
 menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft
-refinement. Those new illustrations remain unshipped and require rework.
+refinement. Those initial illustrations were rejected; the corrected set was subsequently
+reviewed and merged individually in #112–#129, with runtime integration in #107.
 The [comparison](../verification/art-style/rejected-menu-drafts.png) records the
 approved kit on the left and rejected drafts on the right; rejected work is
 negative evidence, never a new style reference.
@@ -142,3 +143,22 @@ cell is 724×724 before packing down to 512×512. Manual structural deck corners
 register each construction stage, and the atlas manifest drives texture dimensions.
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
+
+## Road surface refinement (2026-10-06)
+
+Jakob requested closer style matching for both roads after PR #133. The initial
+clay-biome reuse reads too orange and building-plot paving reads too regular.
+Dedicated painted road swatches were refined against `diorama_primary.webp`,
+`terrain/meadow.webp` and the approved `terrain/cobblestone.png`: muted worn earth,
+irregular warm limestone, restrained shading and fine brown joints. Preserve
+building plots and biome textures. Acceptance requires normal/max-zoom desktop
+and DPR-2 phone evidence; both pass in the [material review](../verification/roads/style/README.md).
+Road materials occupy layers 11/12 of the existing texture array and use its
+mirrored, mip-clamped sampling; retain full-resolution originals and record exact
+prompts/reference hashes before integration.
+
+## Wildlife style correction (2026-10-05)
+
+Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.
+
+Follow-up direction: compare wildlife directly with existing NPCs, not only the world mood board. Attach `villager_idle_hd.png` and `hd_sources/units/guard_idle_front_cut.png` to refinement; judge the same sparse contours, broad quiet color areas and cel shadow treatment side by side at matched gameplay scale. First softer fur pass still has excessive faceted texture and is rejected as the final style.
