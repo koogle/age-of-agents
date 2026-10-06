@@ -70,3 +70,20 @@ is needed.
 ![Phone gameplay, DPR2](phone-stone-complete.png)
 
 ![Phone maximum zoom, DPR2](phone-maximum-zoom.png)
+
+## Authorized merge verification
+
+The user approved the result and authorized merge on 2026-10-06. PR #150
+integrates master `9919648`, preserving stationary status feedback, boars,
+gathering-safe building selection and connected road resumption. Combined checks
+pass: 299 workspace tests (one existing benchmark ignored), formatting, strict
+native/WASM lint, rebuilt web/server/fixture, 307-frame/field/transport/icon
+audits, six release-verifier tests, and desktop mouse/DPR2 phone touch road
+construction with 14 cells and exactly seven stone charged, without page errors.
+[Combined bundle/server and material hashes](merge-results.json) identify this
+replay; it repeats construction without new screenshots. The approved normal/
+maximum-zoom captures above retain their original bundle hashes. The dirt image
+is unchanged from user review, and the only runtime diff from master is that image.
+
+Merge/release state is tracked by [PR #150](https://github.com/koogle/age-of-agents/pull/150)
+and its merge-triggered production workflow.

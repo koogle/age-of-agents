@@ -1,7 +1,7 @@
-# Dirt road readability — 2026-10-06
+# Dirt road readability — [PR #150](https://github.com/koogle/age-of-agents/pull/150)
 
 - User requested recreation because the sandy dirt road is hard to see. Replaced only `assets/terrain/road_dirt.png` with generated deeper ochre-brown packed earth, retaining the original and exact reference/prompt provenance. [Comparison and review](docs/verification/roads/dirt-readability/README.md).
-- 294 workspace tests and formatting pass; 303-frame resolution audit passes. Native/WASM strict lint and web/server rebuild pass. Desktop mouse and DPR2 phone touch construction plus normal/maximum-zoom visibility pass with zero page errors. User approved the visual result and explicitly authorized merge on 2026-10-06. Merge/release verification is in progress; preserve previous unresolved items below.
+- 294 workspace tests and formatting pass; 303-frame resolution audit passes. Native/WASM strict lint and web/server rebuild pass. Desktop mouse and DPR2 phone touch construction plus normal/maximum-zoom visibility pass with zero page errors. User approved the visual result and explicitly authorized merge on 2026-10-06. Integrates master `9919648`; combined 299 tests, strict native/WASM lint, rebuilt client/server, 307-frame and other asset audits, six release-verifier tests, and desktop/DPR2 phone road replay pass with zero page errors. Merge/release status is tracked by PR #150 and the production workflow; preserve previous unresolved items below.
 
 # Road construction resumption — [PR #148](https://github.com/koogle/age-of-agents/pull/148)
 
