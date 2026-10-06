@@ -49,6 +49,14 @@ historical. Do not assume a local login or provider access exists in a new sessi
 
 ## Style acceptance is a merge gate
 
+**Developer correction, 2026-10-06:** Jakob identified the two-board Disembark
+refinement in #140 as a regression. Restore a recognizable joined wooden landing
+platform with several deck boards; simplification must preserve structural cues,
+not merely the boot and shoreline. Retain the restrained palette, simpler boot
+and sparse texture. The [platform correction](../../assets/ui/sources/menu_icons/disembark_platform/README.md)
+passes visual, alpha and fresh desktop/DPR-2 phone dispatch checks; the prior
+Disembark shape/detail pass is superseded by this user feedback.
+
 **Developer steering, 2026-10-06:** After comparing the rejected and merged
 menu icons, Jakob requested further refinement and slightly simpler icons.
 Keep the established thin brown ink and restrained watercolor family. Reduce
