@@ -1,0 +1,21 @@
+{
+  "name": "wolf_idle",
+  "family": "sprite",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    }
+  ],
+  "era_prompt": "era-prompt.txt",
+  "review_status": "UNAPPROVED: two-tone cel calibration",
+  "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. Exactly one alert grey wolf in slightly elevated three-quarter front view. Broad quiet muted blue-grey body, one simple darker grey cel shadow shape, pale cream muzzle/chest. Draw four coherent legs and characteristic pointed ears, slender muzzle and bushy tail with a simple silhouette. NO individual hairs, fur striations, realistic mane, dense tufts or modeling; at most three short interior fur marks. Keep simple friendly illustrated NPC treatment, not a detailed wildlife painting. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "unapproved candidate; no runtime replacement"
+}
