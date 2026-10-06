@@ -128,3 +128,14 @@ proof merely because it produced no browser errors.
 ## Build-feedback browser checks (2026-10-06)
 
 `docs/verification/check_build_feedback.py --output DIR` exercises the menu and overhead complaints on desktop and DPR-2 touch; `--mode desktop` or `--mode phone` isolates a viewport. It advances the game's presentation clock in steps below the 250ms client frame clamp and waits for HUD uploads. When throttling animation with timeout IDs, replace cancellation with `clearTimeout` too: winit cancels pending frames during input, and native cancellation cannot cancel a timeout. Pair browser creation with `finally` cleanup. See [the feedback evidence](../verification/build-feedback/README.md).
+## Task-selection fixtures (2026-10-06)
+
+The [building-selection replay](../verification/building_selection.py) sends
+three startup snapshots, then explicit updates for each controlled task phase.
+A continuous feed during SwiftShader startup left the test observing an earlier
+phase; task-only fixtures do not need a continuously advancing snapshot stream.
+Check projected tap coordinates against the viewport and use a positive command
+case to prove the intended target ID: an offscreen phone mill tap initially left
+the town center selected while selection counts still looked correct. The fixed
+fixture zooms out for setup, uses touch for selection, and verifies a stopped
+carrier's deposit names the mill before testing gathering exclusions.
