@@ -1,0 +1,28 @@
+{
+  "references": [
+    "assets/ui/icons/resource_wood.png"
+  ],
+  "runs": [
+    {
+      "render": "render_0.png",
+      "cutout": "cutout_0.png",
+      "edit_endpoint": "fal-ai/nano-banana/edit",
+      "cutout_endpoint": "fal-ai/birefnet/v2",
+      "edit_request_id": "01a111db-8ec0-72a0-a2ac-7ca3d2397b8f",
+      "cutout_request_id": "01a111db-b57a-7c51-b2bc-0f09ae8baf4b"
+    },
+    {
+      "render": "render_1.png",
+      "cutout": "cutout_1.png",
+      "edit_endpoint": "fal-ai/nano-banana/edit",
+      "cutout_endpoint": "fal-ai/birefnet/v2",
+      "edit_request_id": "01a111db-c312-7b10-b0e5-de367ffde0e5",
+      "cutout_request_id": "01a111db-e944-7b20-908f-9f6d0e8f48c3"
+    }
+  ],
+  "prompt": "prompt.txt",
+  "selected": "cutout_1.png",
+  "integration": "Selected cutout normalized to assets/ui/icons/goal_temple.png with scripts/normalize_icons.py --write; comparison.png shows the wood style reference beside both drafts.",
+  "estimated_usd": 0.0896,
+  "date": "2026-10-06"
+}

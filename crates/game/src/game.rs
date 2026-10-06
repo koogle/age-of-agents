@@ -28,6 +28,7 @@ pub use storage::{CargoDirection, SHIP_RESOURCE_CAPACITY, ShipConnection, island
 #[cfg(test)]
 mod islands_tests;
 use islands::starting_origins;
+pub use islands::{archipelago_plan, plan_extent};
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
@@ -143,6 +144,8 @@ pub struct WorldSnapshot {
     pub island_id: u64,
     pub island_count: usize,
     pub island_origins: Vec<CellCoordinate>,
+    /// Every planned island site of this run; the last holds the temple.
+    pub archipelago: Vec<CellCoordinate>,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -857,6 +860,7 @@ impl GameWorld {
             island_id: self.island_id,
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
+            archipelago: archipelago_plan(self.seed),
             available_buildings: self.available_buildings(),
             columns: self.columns(),
             rows: self.rows(),

@@ -450,10 +450,17 @@ impl WorldView {
         let (mut rgba, mut layers) = (vec![0u8; count * 4], vec![0u8; count * 2]);
         for cell in &snapshot.terrain {
             let index = cell.row as usize * snapshot.columns as usize + cell.column as usize;
-            let color = cell
-                .biome
-                .map(terrain::biome_color)
-                .unwrap_or(terrain::UNSEEN_COLOR);
+            // Unseen sea between charted islands is open ocean by construction.
+            let open_sea = aoa_game::island_at(
+                &snapshot.island_origins,
+                aoa_game::CellCoordinate::new(cell.column, cell.row),
+            )
+            .is_none();
+            let color = cell.biome.map(terrain::biome_color).unwrap_or(if open_sea {
+                terrain::biome_color(aoa_game::TerrainBiome::Water)
+            } else {
+                terrain::UNSEEN_COLOR
+            });
             let visibility = match cell.visibility {
                 CellVisibility::Visible => 255,
                 CellVisibility::Explored => 128,

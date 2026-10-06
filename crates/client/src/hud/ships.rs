@@ -43,29 +43,28 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
             x * x + y * y
         })
         .map_or(0, |(id, _)| id as u64);
+    let count = snapshot.island_count as u64;
     for id in [current.checked_sub(1), Some(current + 1)]
         .into_iter()
         .flatten()
+        .filter(|&id| id < count)
     {
-        let frontier = id >= snapshot.island_count as u64;
         commands.push(Command {
-            icon: if frontier {
-                "command_explore"
-            } else {
-                "command_sail"
-            },
-            label: if frontier {
-                "Explore beyond the coast".into()
-            } else {
-                format!("Sail to island {}", id + 1)
-            },
-            detail: if frontier {
-                "Sail to open water to discover the next island".into()
-            } else {
-                "Cross the ocean · all settlements keep working".into()
-            },
+            icon: "command_sail",
+            label: format!("Sail to island {}", id + 1),
+            detail: "Cross the ocean · all settlements keep working".into(),
             enabled: ship.stopped(),
             action: Action::Voyage(id),
+        });
+    }
+    let planned = snapshot.archipelago.len() as u64;
+    if count < planned {
+        commands.push(Command {
+            icon: "command_explore",
+            label: format!("Explore · {} of {planned} islands charted", count),
+            detail: "Sail to the nearest uncharted island on the globe".into(),
+            enabled: ship.stopped(),
+            action: Action::Voyage(count),
         });
     }
     if !ship.stopped() {
@@ -148,8 +147,17 @@ mod tests {
         assert_eq!(actions[0].icon, "command_disembark");
         assert_eq!(actions[1].icon, "command_explore");
         snapshot.island_count = 2;
-        snapshot.island_origins.push(CellCoordinate::new(184, 0));
+        snapshot.island_origins.push(snapshot.archipelago[1]);
         assert_eq!(commands(&snapshot)[1].icon, "command_sail");
+        assert_eq!(commands(&snapshot)[2].action, Action::Voyage(2));
+        // A fully charted run offers no further exploration.
+        snapshot.island_count = snapshot.archipelago.len();
+        snapshot.island_origins = snapshot.archipelago.clone();
+        assert!(
+            commands(&snapshot)
+                .iter()
+                .all(|c| c.icon != "command_explore")
+        );
         assert!(!actions[0].enabled);
         snapshot.ships[0]
             .passengers

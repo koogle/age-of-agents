@@ -1,12 +1,12 @@
 # Continuous archipelago
 
-Islands retain their 120×80 procedural layout. Discovery adds the next region in an expanding square spiral with 64 cells of open ocean between neighboring regions. The domain detects a ship within 12 cells of the next frontier and generates the adjacent island synchronously, before the vessel reaches that edge. The Explore shortcut sails toward that frontier; known-island shortcuts sail to a dock or clear coast. Manual sea commands use the same continuous movement. Camera position and entity identities survive discovery.
+Islands retain their 120×80 procedural layout. Each run plans 5–7 island sites from its seed on a staggered 3×3 grid of regions, at least 64 cells of open ocean apart; the farthest site holds the temple (see [archipelago guide](knowledge/archipelago-and-transport.md#planned-run-archipelago-2026-10-06)). Once a ship exists the ocean spans every planned site. A ship within 12 cells of an undiscovered site's region generates that island synchronously, before the vessel reaches it. The Explore shortcut sails to the nearest undiscovered site; known-island shortcuts sail to a dock or clear coast. Manual sea commands use the same continuous movement. Camera position and entity identities survive discovery.
 
 All discovered settlements run in the same simulation, with island-local inventories and shared research. Stopped shore ships supplement their island’s resources with their 50-resource holds. No distant-settlement pause or autonomous unit tasks are introduced. Incompatible hosted saves reset by store version; historical map translation and inventory pooling are removed.
 
 ## Memory and scaling
 
-One raw island layout contains 9,600 terrain cells at 12 bytes each: **115,200 bytes**, before resources and entities. Keeping these layouts in memory is reasonable for the current game. The current authoritative representation is a dense rectangle, including ocean; it is not a chunk-streaming implementation. Its rectangle grows proportionally to island count because placement fills square rings.
+One raw island layout contains 9,600 terrain cells at 12 bytes each: **115,200 bytes**, before resources and entities. Keeping these layouts in memory is reasonable for the current game. The current authoritative representation is a dense rectangle, including ocean; it is not a chunk-streaming implementation. Its rectangle covers the run's planned sites once a ship exists.
 
 Measured on this development host with `cargo test -p aoa-game --release archipelago_budget -- --ignored --nocapture`:
 
@@ -27,4 +27,4 @@ Current safeguards against unnecessary work:
 - Ground geometry covers a camera-sized region, with lower tessellation at distant zoom. It is rebuilt when that region changes or terrain/plots change, rather than allocating detailed geometry for the entire archipelago.
 - The minimap, map picking, camera bounds, fog textures and sea plane follow the growing map.
 
-There is no configured island-count limit, but memory is finite. Coordinates remain `u16`, and full-map GPU textures eventually encounter the adapter's maximum texture dimension. Large, heavily populated archipelagos will need chunked texture/snapshot updates and more local occupancy/path searches before approaching those limits. This change deliberately avoids adding a streaming engine before measured gameplay requires one.
+The measurements above predate the bounded run: a full plan is at most seven islands in about 560×440 cells (246k cells, under 3 MB of terrain), allocated once the first ship exists. Coordinates remain `u16`, and full-map GPU textures eventually encounter the adapter's maximum texture dimension. Large, heavily populated archipelagos will need chunked texture/snapshot updates and more local occupancy/path searches before approaching those limits. This change deliberately avoids adding a streaming engine before measured gameplay requires one.
