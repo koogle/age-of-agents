@@ -253,10 +253,11 @@ mod tests {
     }
 
     #[test]
-    fn fields_need_a_farm_and_both_materials() {
+    fn fields_need_a_farm_and_all_materials() {
         let mut stock = Stockpile {
             wood: 10.0,
             stone: 5.0,
+            water: 10.0,
             ..Default::default()
         };
         let field = |stock: &Stockpile, farm| {

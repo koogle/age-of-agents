@@ -265,6 +265,15 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 action: Action::Build,
             }],
         };
+        if workers && model.build == BuildUi::PlacingField {
+            return Some((
+                "field",
+                "Place field".into(),
+                commands[0].detail.clone(),
+                None,
+                commands,
+            ));
+        }
         if workers && matches!(model.build, BuildUi::Categories | BuildUi::Group(_)) {
             let (title, detail) = match model.build {
                 BuildUi::Group(group) => (
@@ -546,6 +555,7 @@ pub(super) fn queued_commands(snapshot: &WorldSnapshot, model: &Model) -> Vec<Co
 
 fn resource_name(kind: ResourceKind) -> &'static str {
     match kind {
+        ResourceKind::Water => "water",
         ResourceKind::Wood => "wood",
         ResourceKind::Food => "food",
         ResourceKind::Stone => "stone",
@@ -662,6 +672,26 @@ mod tests {
             camera: Vec2::ZERO,
         };
         selection_model(&snapshot, &model).unwrap().2
+    }
+
+    #[test]
+    fn field_placement_keeps_water_cost_visible_without_hover() {
+        let snapshot = GameWorld::default().snapshot();
+        let units = [snapshot.units[0].unit.id.clone()];
+        let model = Model {
+            resource_island: 0,
+            snapshot: Some(&snapshot),
+            units: &units,
+            building: None,
+            build: BuildUi::PlacingField,
+            ship: None,
+            show_grid: false,
+            toast: None,
+            camera: Vec2::ZERO,
+        };
+        let (_, title, detail, _, _) = selection_model(&snapshot, &model).unwrap();
+        assert_eq!(title, "Place field");
+        assert!(detail.contains("10 wood, 5 stone, 10 water"));
     }
 
     #[test]

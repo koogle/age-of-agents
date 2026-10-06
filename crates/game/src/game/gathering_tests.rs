@@ -2,6 +2,57 @@ use super::movement::interaction_cells;
 use super::tests::{cell, run};
 use super::*;
 
+#[test]
+fn water_collection_renews_delivers_resumes_and_stops() {
+    for speed in [1.0, 2.0] {
+        let mut w = fixture::fixture();
+        w.resources.clear();
+        w.units[0].cell = CellCoordinate::new(26, 22);
+        w.resources.push(ResourceNode {
+            id: "water-test".into(),
+            kind: ResourceKind::Water,
+            cell: CellCoordinate::new(25, 22),
+            amount: 120.0,
+            capacity: 120.0,
+            field: None,
+        });
+        w.refresh_exploration();
+        w.simulation_speed = speed;
+        w.apply_command(Command::Gather {
+            unit_id: "villager-1".into(),
+            resource_id: "water-test".into(),
+        })
+        .unwrap();
+        for _ in 0..2500 {
+            w.tick(0.1);
+            w.validate().unwrap();
+            assert_eq!(w.resources[0].amount, 120.0);
+            assert!(w.units[0].cargo.as_ref().is_none_or(
+                |c| c.kind == ResourceKind::Water && c.amount <= VILLAGER_CARRY_CAPACITY
+            ));
+            if w.inventories[0].water >= 60.0 {
+                break;
+            }
+        }
+        assert!(
+            w.inventories[0].water >= 60.0,
+            "three deliveries at {speed}x"
+        );
+        let loaded: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+        assert_eq!(loaded, w);
+        w.apply_command(Command::Stop {
+            unit_id: "villager-1".into(),
+        })
+        .unwrap();
+        let stored = w.inventories[0].water;
+        for _ in 0..100 {
+            w.tick(0.1);
+        }
+        assert_eq!(w.units[0].action, UnitAction::Idle);
+        assert_eq!(w.inventories[0].water, stored);
+    }
+}
+
 fn world() -> GameWorld {
     let mut world = fixture::fixture();
     world.resources.clear();
