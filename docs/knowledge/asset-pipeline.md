@@ -55,8 +55,9 @@ Keep the established thin brown ink and restrained watercolor family. Reduce
 secondary props, repeated texture strokes and tiny decoration where they compete
 with the primary silhouette at 24/32px; preserve each command's meaning. Start
 with a representative Cargo refinement, then review Gathering, Town and
-Disembark. This refinement is pending visual review and runtime integration;
-the previously merged set remains the current game art until that integration.
+Disembark. The four replacements now pass the style review, optical/alpha checks
+and six desktop/DPR-2 phone menu captures; their independent runtime replacements
+are tracked in the [refinement ledger](../../assets/ui/sources/menu_icons/simplification/README.md).
 Jakob subsequently authorized showing the four refinements and merging them.
 The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png)
 shows the normalized candidates against the previous art and approved references

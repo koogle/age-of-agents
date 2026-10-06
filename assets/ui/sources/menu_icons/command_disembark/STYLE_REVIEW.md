@@ -1,3 +1,8 @@
+> Refinement (2026-10-06): the simpler replacement is reviewed in
+> [the simplification review](../simplification/STYLE_REVIEW.md), with
+> [before/after evidence](../simplification/comparison.png). The review below
+> describes the retained first-release artwork.
+
 # command_disembark: style review
 
 Approved family references: original wood and masonry UI kit, retained in `../refinement/`; approved revision and exact prompts in provenance.
