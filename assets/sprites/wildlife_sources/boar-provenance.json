@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-06",
+  "model": "OpenAI image_gen",
+  "prompt": "boar-prompt.txt",
+  "references": {
+    "assets/sprites/wildlife_sources/draft.png": "a019d18ba82a7eacb78b5c0bddc9f63e15546bf5d778bea7b9ea6d6be285e904",
+    "assets/sprites/wildlife_sources/npc-style-refined.png": "3fee74707fefc4f3c502c58740c80ba27f731cbc6d6edcef9bc43eaf7a6be2ff"
+  },
+  "source_size": [
+    1254,
+    1254
+  ],
+  "notes": "Retained original boar concept refined into four transparent poses; each original cell is 627px, not the requested 768px. Packer downsamples to 589px without enlargement.",
+  "first_pass_output": "/workspace/generated_images/exec-2dcdb600-61ee-408b-88f5-9f6085aea9aa.png",
+  "first_pass_status": "rejected: too much fur texture beside approved animals",
+  "source_output": "/workspace/generated_images/exec-1ea8f926-a5df-4103-933f-6d42f7318c99.png",
+  "refinement_prompt": "boar-style-prompt.txt",
+  "refinement_references": {
+    "assets/sprites/wildlife_sources/boar-detailed-rejected.png": "ba1b1b045b2dd7575ce4b4d1b83b4b740939d99fe16ded6c7f341108852ba7e6",
+    "assets/sprites/wildlife_sources/npc-style-refined.png": "3fee74707fefc4f3c502c58740c80ba27f731cbc6d6edcef9bc43eaf7a6be2ff"
+  }
+}
