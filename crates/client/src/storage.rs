@@ -2,33 +2,39 @@
 use super::*;
 use aoa_game::{CargoDirection, ResourceKind, island_at};
 
-impl App {
-    /// Selected villagers carrying goods the complete building `id` accepts.
-    pub(crate) fn carriers_for(&self, id: &str) -> Vec<String> {
-        let Some(snapshot) = self.view.snapshot.as_ref() else {
-            return Vec::new();
-        };
-        let Some(building) = snapshot
-            .buildings
-            .iter()
-            .find(|b| b.building.id == id && b.building.construction.is_none())
-        else {
-            return Vec::new();
-        };
-        snapshot
-            .units
-            .iter()
-            .filter(|u| self.selection.units.contains(&u.unit.id))
-            .filter(|u| {
-                u.unit
-                    .cargo
-                    .as_ref()
-                    .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
-            })
-            .map(|u| u.unit.id.clone())
-            .collect()
-    }
+/// Selected carriers eligible for a manual unload when selecting a building.
+/// Gathering loops keep their existing automatic delivery and resumption.
+pub(super) fn carriers_for(
+    snapshot: Option<&aoa_game::WorldSnapshot>,
+    selected: &[String],
+    id: &str,
+) -> Vec<String> {
+    let Some(snapshot) = snapshot else {
+        return Vec::new();
+    };
+    let Some(building) = snapshot
+        .buildings
+        .iter()
+        .find(|b| b.building.id == id && b.building.construction.is_none())
+    else {
+        return Vec::new();
+    };
+    snapshot
+        .units
+        .iter()
+        .filter(|u| selected.contains(&u.unit.id))
+        .filter(|u| !matches!(u.unit.action, aoa_game::UnitAction::Gather { .. }))
+        .filter(|u| {
+            u.unit
+                .cargo
+                .as_ref()
+                .is_some_and(|cargo| building.building.kind.accepts(cargo.kind))
+        })
+        .map(|u| u.unit.id.clone())
+        .collect()
+}
 
+impl App {
     pub(crate) fn select_storage_ship(&mut self, id: String) {
         self.selection.units.clear();
         self.selection.building = None;
@@ -93,5 +99,66 @@ impl App {
                 }
             });
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aoa_game::{BuildingKind, CarriedResource, GameWorld, GatherPhase, UnitAction};
+
+    #[test]
+    fn building_selection_preserves_every_gathering_phase_in_mixed_groups() {
+        let mut snapshot = GameWorld::default().snapshot();
+        let building = &mut snapshot.buildings[0].building;
+        building.kind = BuildingKind::TownCenter;
+        building.construction = None;
+        let building_id = building.id.clone();
+        let mut carrier = snapshot.units[0].clone();
+        carrier.unit.action = UnitAction::Idle;
+        carrier.unit.cargo = Some(CarriedResource {
+            kind: ResourceKind::Wood,
+            amount: 7.0,
+        });
+        carrier.unit.id = "stopped-carrier".into();
+        snapshot.units = vec![carrier.clone()];
+        for (i, phase) in [
+            GatherPhase::ToResource,
+            GatherPhase::Gathering,
+            GatherPhase::Returning,
+            GatherPhase::Depositing,
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let mut gatherer = carrier.clone();
+            gatherer.unit.id = format!("gatherer-{i}");
+            gatherer.unit.action = UnitAction::Gather {
+                resource_id: "wood".into(),
+                phase,
+            };
+            snapshot.units.push(gatherer);
+        }
+        let selected = snapshot
+            .units
+            .iter()
+            .map(|u| u.unit.id.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            carriers_for(Some(&snapshot), &selected, &building_id),
+            vec![carrier.unit.id.clone()]
+        );
+        assert!(carriers_for(Some(&snapshot), &selected[1..], &building_id).is_empty());
+        assert!(carriers_for(Some(&snapshot), &[], &building_id).is_empty());
+        snapshot.buildings[0].building.kind = BuildingKind::Granary;
+        assert!(carriers_for(Some(&snapshot), &selected, &building_id).is_empty());
+        snapshot.buildings[0].building.kind = BuildingKind::LumberMill;
+        assert_eq!(
+            carriers_for(Some(&snapshot), &selected, &building_id),
+            vec![carrier.unit.id]
+        );
+        snapshot.units[0].unit.cargo = None;
+        assert!(carriers_for(Some(&snapshot), &selected, &building_id).is_empty());
+        assert!(carriers_for(None, &selected, &building_id).is_empty());
     }
 }
