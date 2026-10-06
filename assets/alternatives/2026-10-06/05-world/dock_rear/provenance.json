@@ -1,0 +1,23 @@
+{
+  "name": "dock_rear",
+  "prompt": "The first two images are STYLE references; the LAST image is the EXACT required dock geometry and orientation. Draw exactly ONE complete dock. Preserve the last image camera and all major structural positions, especially visible walls, roof direction and boat position. Show the BACK wall, rear roof and rear deck; do not invent a front door on the rear wall. Use the same fine thin dark-brown ink and broad quiet flat watercolor/cel masses as the villager. Both front and rear materials must be warm chestnut timber with cool shadows only, not grey weathered wall boards; white limestone supports, muted terracotta roof, one small royal-blue cloth accent. Sparse straight roof seams, no dense curved tile outlines. Same architecture, no extra props. Pure white background, no cast shadow, no text.",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/sprites/building_sources/directions/dock_north_complete.png",
+      "sha256": "14c0676324c6c04d2acc3a9266d395c6314f86991c28625c9bd6cf92f65f42d6"
+    }
+  ],
+  "family": "sprite",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "REJECTED: grey-green rear timber"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "command_explore",
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    }
+  ],
+  "era_prompt": "era-prompt.txt",
+  "review_status": "UNAPPROVED: celestial-star coastline map",
+  "prompt": "Use attached original villager and Greek diorama as STYLE authority. Draw one simple game UI icon: a small ancient parchment scroll map with a SINGLE island coastline in muted teal, and ONE tiny ordinary FIVE-POINT star floating just ABOVE the scroll in the sky, visibly separate from paper. The star has five equal points like a simple celestial star, NOT four/eight directional points and NOT a compass rose. No compass instrument, compass rose, needle, bearing lines, grid, arrows, telescope, sextant, modern pin, routes, lettering or legend. Compact silhouette legible24px, distinct from ship/cargo icon. Soft Ghibli TWO-TONE CEL shading, flat cream parchment plus one simple muted shadow, flat teal map mark, fine sparse brown ink, no gradients, gloss, realistic texture, mottling, heavy outlines or tattered-edge decoration. White background, no shadow or extra props. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "unapproved candidate; no runtime replacement"
+}

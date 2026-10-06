@@ -1,0 +1,31 @@
+{
+  "name": "command_explore",
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/hd_sources/spr/idle_front_cut.png",
+      "sha256": "5d9a7aa858299ffb117c870a1c6ce01c2be7493f959fb28afc465d2e091fcbaf"
+    },
+    {
+      "path": "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png",
+      "sha256": "e9494920568a493788896d8f1588232a7f50f16a2242992cf1c27d4b2fce5db2"
+    }
+  ],
+  "cel_prompt": "map-lines-only-prompt.txt",
+  "review_status": "UNAPPROVED MAP CORRECTION: one narrow retry",
+  "prompt": "IMAGE1 is STYLE reference ONLY for delicate thin brown pen strokes. IMAGE2 is the EXACT MAP TO EDIT. Do not copy or draw the people. Return IMAGE2 with only its BROWN INK LINES made approximately HALF AS THICK, centered on the existing exact paths. This is surgical stroke-weight correction, NOT a new illustration. Keep the tall vertical paper, four curled corners, top five-point teal star, one large lower teal island and one small bottom-left teal island EXACTLY in their existing positions/sizes/colors. Keep the exact cream parchment wash, tan edge shading, all existing texture and shadow unchanged. Both OUTSIDE CONTOUR and interior coastline/star/fold lines must visibly become thinner, approximately1-2px pen strokes instead of thick outlines. Same brown hue. Coastline remains continuous and readable24px. Do NOT rotate, widen, recolor, simplify shapes, add details, add islands, move star, draw compass rose or change composition. SAME source map framing on white; LINE THICKNESS ONLY. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date. This is a strictly LINE-WEIGHT-ONLY edit of the supplied map subject. Preserve exact composition, silhouettes, colors, shading, paper/islands/star placement, proportions and existing texture. Do not introduce any new shape, detail, texture or material rendering. Only reduce existing brown ink stroke thickness while retaining readable continuous coastline and star. User prefers current calibration direction; no other redesign.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "FAILED LINE CORRECTION: composition retained, no material thinning",
+  "prompt_templates": [
+    {
+      "path": "era-prompt.txt",
+      "sha256": "6fca6864831205e9e29cac3c592f410772ddd0017e90f079c8513f922b6763d1"
+    },
+    {
+      "path": "map-lines-only-prompt.txt",
+      "sha256": "781f6fe7bf7575ba2687d0ac21a188c4bcc1a6bc35266b1e720013b3095d62df"
+    }
+  ]
+}

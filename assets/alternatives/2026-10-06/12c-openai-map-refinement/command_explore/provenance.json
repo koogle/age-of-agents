@@ -1,0 +1,20 @@
+{
+  "name": "command_explore",
+  "family": "icon",
+  "model": "OpenAI image_gen",
+  "generation_id": "exec-219b5bfa-102b-45fb-8ea0-477804f3049d",
+  "prompt": "Make a precise restrained refinement of this EXACT supplied game UI icon. It is already approved in composition, shapes, colours and painted cel style. The ONLY requested change is noticeably FINER linework. Reduce the thickness of every dark-brown ink contour by roughly 50 percent: particularly the outer parchment outline, curled corner/fold lines, island/coastline contours and star ink lines. Keep each line on its EXISTING path. Fine delicate brown pen lines, not bold cartoon/sticker outlines. Do not redesign, reposition, recolor, rescale, rotate, simplify or add objects. Preserve exactly the vertical parchment silhouette with its four folded/curling corners, the separate five-point teal celestial star printed in the upper half, the one larger teal island shape and small teal island lower down, their exact relative placements and sizes, cream parchment colours, subtle painted two-tone shading, existing sparse texture, the white background and the generous existing white margins. No compass, compass needle, compass rose, labels, letters, new texture or additional embellishments. Do not thicken the contours with a second offset line. The resulting image must look like the SAME icon with visibly thinner and lighter-touch brown ink when scaled to128px and24/32px. Preserve the existing image dimensions/composition as closely as possible.",
+  "references": [
+    {
+      "path": "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png",
+      "sha256": "e9494920568a493788896d8f1588232a7f50f16a2242992cf1c27d4b2fce5db2"
+    }
+  ],
+  "transparent_background": false,
+  "source_revision": "f4b64acf5d8ee9a936bbd98d4577fe550eecc036",
+  "status": "UNAPPROVED MAP CORRECTION: preferred direction, visibly finer lines; candidate only",
+  "backend_version": null,
+  "generation_cost_usd": null,
+  "notes": "Root disclosed OpenAI refinement fallback after two failed original-model FAL edits. Base generation remains original FAL endpoint. Exactly one image directly attached to OpenAI: preferred11d map; villagers/UI were not direct OpenAI inputs. Their source chain remains in11d provenance. Word approved in exact prompt denotes liked visual direction, not runtime acceptance.1254px output versus1024px input; composition/palette close, not pixel-exact.",
+  "external_refinement": true
+}

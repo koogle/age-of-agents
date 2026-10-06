@@ -1,0 +1,35 @@
+{
+  "name": "resource_steel",
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/ui/sources/menu_icons/resource_steel/refined.png",
+      "sha256": "0a6f5f68622629870007434c4630be106497740a339b63f70e933442eef75693"
+    }
+  ],
+  "cel_prompt": "cel-painterly-prompt.txt",
+  "review_status": "UNAPPROVED: painted-cel refinement",
+  "prompt": "First references are approved STYLE: original villager and primary diorama. Last image is SUBJECT GEOMETRY only, never a style standard. Draw NEW original-resolution painted game art, fine thin dark-brown ink like the villager, two gentle cel tones with broad quiet areas and very restrained handmade wash variation. Preserve richer material hues without gloss. White background, no cast shadow, framing, lettering or extra props. Paint exactly TWO stacked FORGED steel ingots, same compact silhouette and three-quarter camera as last image. Cool blue-grey faces and slightly darker blue-grey side, gentle warm reflected edge color. Slight handmade irregularity in forged silhouette, sparse fine brown contours, perhaps two tiny quiet forging marks total. Preserve painted Ghibli cel character rather than perfectly uniform vector blocks. NO shiny white lines, no glossy bevels, no chrome reflections, no realistic scratches or mottled material study. Legible24/32px. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date. Style constraint: painted Studio Ghibli-leaning cel art matching the retained original villager. Two gentle tonal areas, broad quiet color, fine sparse brown ink, very restrained hand-painted variation and small soft highlights are allowed. Do not turn it into a sterile vector diagram. No glossy/PBR/specular material rendering, dense texture noise, fur strands or bevels. Preserve subject hue separation and readable silhouette; approved villager and primary diorama are style authority, subject references only lock geometry.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "UNAPPROVED OPTION A: richer painted planes; marks/heavy edge remain;313px subject",
+  "prompt_templates": [
+    {
+      "path": "era-prompt.txt",
+      "sha256": "6fca6864831205e9e29cac3c592f410772ddd0017e90f079c8513f922b6763d1"
+    },
+    {
+      "path": "cel-painterly-prompt.txt",
+      "sha256": "903e0f8f6f624d341da100fba93d606e2bcee6286d1f93ce3db029a4d47b0bcb"
+    }
+  ]
+}
