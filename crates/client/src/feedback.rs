@@ -71,7 +71,9 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
 }
 
 struct Label {
+    // Identifies feedback to replace; status labels keep their original anchor.
     entity_id: Option<String>,
+    follows_entity: bool,
     text: String,
     at: Vec3,
     born: f64,
@@ -96,7 +98,7 @@ impl Feedback {
             let p = animal.position();
             let at = terrain::world_of(p.x, p.y);
             for label in &mut self.labels {
-                if label.entity_id.as_deref() == Some(&label_id) {
+                if label.follows_entity && label.entity_id.as_deref() == Some(&label_id) {
                     label.at.x = at.x;
                     label.at.z = at.y;
                 }
@@ -108,6 +110,7 @@ impl Feedback {
                     .retain(|label| label.entity_id.as_deref() != Some(&label_id));
                 self.labels.push(Label {
                     entity_id: Some(label_id),
+                    follows_entity: true,
                     text: format!("{}: {:.0} HP", animal.kind.name(), animal.health),
                     at: Vec3::new(at.x, 0.8, at.y),
                     born: now,
@@ -124,7 +127,7 @@ impl Feedback {
             };
             let at = terrain::world_of(unit.position.x, unit.position.y);
             for label in &mut self.labels {
-                if label.entity_id.as_deref() == Some(&unit.unit.id) {
+                if label.follows_entity && label.entity_id.as_deref() == Some(&unit.unit.id) {
                     label.at.x = at.x;
                     label.at.z = at.y;
                 }
@@ -139,6 +142,7 @@ impl Feedback {
                     .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
                 self.labels.push(Label {
                     entity_id: Some(unit.unit.id.clone()),
+                    follows_entity: false,
                     text,
                     at: Vec3::new(at.x, 0.8, at.y),
                     born: now,
@@ -149,6 +153,7 @@ impl Feedback {
                     .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
                 self.labels.push(Label {
                     entity_id: Some(unit.unit.id.clone()),
+                    follows_entity: true,
                     text: format!("-{:.0} HP", before.unit.health - unit.unit.health),
                     at: Vec3::new(at.x, 1.1, at.y),
                     born: now,
@@ -162,6 +167,7 @@ impl Feedback {
             }
             self.labels.push(Label {
                 entity_id: None,
+                follows_entity: false,
                 text: format!(
                     "+{:.0} {}",
                     cargo.amount,
@@ -218,6 +224,13 @@ mod tests {
             feedback.observe(Some(&before), &next, f64::from(tick) * 0.1);
             assert_eq!(feedback.labels.len(), 1);
             assert_eq!(feedback.labels[0].text, "-8 HP");
+            let mut moving = next.clone();
+            moving.units[0].position.x += 1.0;
+            feedback.observe(Some(&next), &moving, f64::from(tick) * 0.1 + 0.01);
+            assert_eq!(
+                feedback.labels[0].at.x,
+                moving.units[0].position.x as f32 * terrain::CELL
+            );
             before = next;
         }
     }
@@ -521,7 +534,7 @@ mod tests {
     }
 
     #[test]
-    fn status_follows_the_unit_and_rapid_orders_replace_it() {
+    fn status_stays_at_its_origin_and_rapid_orders_replace_it() {
         let before = GameWorld::default().snapshot();
         let mut building = before.clone();
         building.units[0].unit.action = UnitAction::Build {
@@ -529,14 +542,13 @@ mod tests {
         };
         let mut feedback = Feedback::default();
         feedback.observe(Some(&before), &building, 1.0);
+        let origin = feedback.labels[0].at;
         let mut moving = building.clone();
         moving.units[0].position.x += 1.0;
+        moving.units[0].position.y += 1.0;
         feedback.observe(Some(&building), &moving, 1.1);
         assert_eq!(feedback.labels.len(), 1);
-        assert_eq!(
-            feedback.labels[0].at.x,
-            moving.units[0].position.x as f32 * terrain::CELL
-        );
+        assert_eq!(feedback.labels[0].at, origin);
         assert_eq!(feedback.labels[0].born, 1.0);
         let mut stopped = moving.clone();
         stopped.units[0].unit.action = UnitAction::Idle;
@@ -544,5 +556,7 @@ mod tests {
         assert_eq!(feedback.labels.len(), 1);
         assert_eq!(feedback.labels[0].text, "Idle");
         assert_eq!(feedback.labels[0].born, 1.2);
+        let at = terrain::world_of(stopped.units[0].position.x, stopped.units[0].position.y);
+        assert_eq!(feedback.labels[0].at, Vec3::new(at.x, 0.8, at.y));
     }
 }
