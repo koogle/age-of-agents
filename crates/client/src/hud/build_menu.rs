@@ -110,7 +110,7 @@ pub(super) fn commands(
             label: "Field".into(),
             detail: if has_farm {
                 format!(
-                    "{} · {} s work · {} food; tap depleted fields to replenish",
+                    "{} · {} s work · {} food (+50% near a granary); tap depleted fields to replenish",
                     cost_text(aoa_game::FIELD_COST),
                     aoa_game::FIELD_WORK_SECONDS,
                     aoa_game::FIELD_FOOD

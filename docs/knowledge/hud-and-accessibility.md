@@ -107,7 +107,7 @@ New keys must be added to `hud.rs::ICONS` and `assets/ui/manifest.json` together
 The [style gate](asset-pipeline.md#style-acceptance-is-a-merge-gate) applies before
 merging art; the first draft set was rejected and retained as negative evidence.
 The 18 individual art PRs are merged; runtime integration and final verification
-pass in #107 (274 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
+pass in #107 (276 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
 
 `docs/verification/menu_icon_batch.py` reuses separate desktop and DPR-2 phone WebGL contexts across
 controlled scenes and resets selection/build mode between captures. It records
@@ -116,3 +116,8 @@ rejects gameplay commands. This proves presentation and dispatch only; domain
 tests and release verification remain separate gates.
 
 The integration preview exposed a secondary reuse: command hover text kept the selection thumbnail, and a selected build group kept the generic Build thumbnail. The fix makes the info-panel icon follow the hovered command or active category, preserving actions, text and panel geometry. Verify both mouse hover and touch selection alongside the medallions.
+## Concise building descriptions
+
+User steering (2026-10-05): shorten the granary description and omit technical
+qualifiers such as “no stacking.” Keep its drop-off role and nearby yield benefit
+in the HUD; detailed range, timing and stacking rules belong in the system guide.

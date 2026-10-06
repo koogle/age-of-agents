@@ -77,10 +77,12 @@ hover/queue information-panel thumbnails follow the same art. Cancel/Close
 retains its X; Stop retains its authored hand. Actions, costs, unlocks, input
 geometry and persistence are unchanged.
 
-Current combined validation: 274 Rust tests (one existing manual benchmark
+Current combined validation: 276 Rust tests (one existing manual benchmark
 ignored), native/WASM strict lint, rebuilt web bundle, 298 world frames,
 normalization, exact reproduction of all 18 new icons from retained sources,
 and six release-verifier tests pass. Desktop and correctly sized DPR-2 phone scenes pass; evidence is in
 [the integration record](verification/menu-icons/integration/checks.json).
 
 The full icon suite has 40 captures on its recorded baseline bundle. After merging approved availability changes from #131, the final combined build passes 274 Rust tests and eight additional desktop/phone captures covering starter filtering, guard production/portrait and sailing. [Separate bundle hashes and evidence](verification/menu-icons/integration/checks.json).
+
+Final master integration also preserves #132’s granary bonus and description. The latest combined build passes 276 Rust tests and desktop/DPR-2 phone granary selection captures, with the final bundle hash recorded separately in the integration checks.
