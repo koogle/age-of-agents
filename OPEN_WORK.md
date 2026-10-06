@@ -1,3 +1,8 @@
+# Build subcategory card removal — 2026-10-06
+
+- User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
+- Formatting, 267 workspace tests (one existing ignored benchmark), strict native/WASM lint and the release WASM rebuild pass. Desktop mouse and emulated DPR-2 phone touch browser checks pass without page errors; [visual evidence](docs/verification/build-subcategories/README.md). Code-quality review: one direct layout branch, no dependency or new state. Not deployed; production uses the merge-triggered release workflow.
+
 # Terrain-first island generation — PR #111
 
 - [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.

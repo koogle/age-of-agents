@@ -1,0 +1,10 @@
+{
+  "scene": "after",
+  "wasm_sha256": "1dbfb972fcfd182301340e0a41b70607a4e118fcc0ceb5ca610411006f12ec54",
+  "viewports": [
+    "1280x800 DPR1 mouse",
+    "390x844 DPR2 touch"
+  ],
+  "errors": [],
+  "limitation": "Controlled snapshot presentation and wire dispatch; not an authoritative gameplay fixture."
+}
