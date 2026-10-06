@@ -202,6 +202,19 @@
    "unitsPerPixel": 0.00157,
    "worldSize": 0.7,
    "measured": "height"
+  },
+  "water": {
+   "stages": [
+    [
+     2560,
+     1024,
+     512,
+     512
+    ]
+   ],
+   "unitsPerPixel": 0.0018,
+   "worldSize": 0.84,
+   "measured": "height"
   }
  }
 }

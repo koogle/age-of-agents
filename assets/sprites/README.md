@@ -338,3 +338,10 @@ quarter-turn views, not rotated billboards. `scripts/pack_building_sprites.py`
 reproduces the atlas; structural deck corners in `building_sources/footprints.json`
 register the art to the same 4×4 plot. Sources and generation/refinement details
 are in [directions/provenance.json](building_sources/directions/provenance.json).
+
+### Riverbank water marker
+
+The `water` frame in `resources.json` uses the retained generated water jug at
+`assets/ui/sources/water/refined.png`; `scripts/pack_water.py` packs its 512px
+frame in the previously unused cell at (2560, 1024). Existing atlas frames stay
+pixel-identical. See [water verification](../../docs/verification/water/README.md).

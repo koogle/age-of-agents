@@ -21,11 +21,30 @@ Territorial wolves and bears are the first implemented danger, with explicit con
 
 The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
 
+## Fresh water
+
+Implemented and locally verified in the working tree: water is the
+fourteenth resource/product. Villagers collect renewable water at riverbank jug
+markers and deposit it at town centers, docks, or stopped shore ships. Sources
+use dry land, preserve walking routes and ford approaches, and are reachable on
+first and later islands.
+
+Planting and replenishing fields costs 10 wood, 5 stone, and 10 water, paid once
+when preparation starts. Joining or resuming paid work costs nothing extra;
+fields have no ongoing water drain, and exhausted fields still need explicit
+replenishment orders. Kitchen recipes, clay processing, and irrigation upgrades
+remain possible later uses, with no recipe changes in this slice.
+
+Jakob approved this first slice on 2026-10-05. Save version 16 adds required water
+inventories and resets incompatible hosted worlds under the existing policy.
+See [water integration notes](docs/knowledge/water-resource.md) for behavior,
+implementation, and verification.
+
 ## Resource-based island progression
 
-Implemented for fresh games: food/wood/stone nodes, timber and rations processing, ten starter buildings plus fields, and Forestry/Agriculture/Masonry research. Building availability requires discoverable construction inputs and, for production buildings, at least one usable recipe. Barracks and Smelter need iron and coal, Kiln needs clay, Weaver needs fiber, Workshop needs clay plus iron and coal, Infirmary needs fiber, and Monument needs clay/fiber/gold/iron/coal. Range remains available initially because archers use food and timber. Useful buildings remain visible when temporarily unaffordable. Discovery survives depletion and saving across islands; hidden deposits and injected stock do not bypass unlocks. Existing buildings and saves remain intact.
+Implemented for fresh games: food/wood/stone nodes and renewable water, timber and rations processing, ten starter buildings plus fields, and Forestry/Agriculture/Masonry research. Building availability requires discoverable construction inputs and, for production buildings, at least one usable recipe. Barracks and Smelter need iron and coal, Kiln needs clay, Weaver needs fiber, Workshop needs clay plus iron and coal, Infirmary needs fiber, and Monument needs clay/fiber/gold/iron/coal. Range remains available initially because archers use food and timber. Useful buildings remain visible when temporarily unaffordable. Discovery survives depletion and saving across islands; hidden deposits and injected stock do not bypass unlocks. Existing buildings and saves remain intact.
 
-The first transport is a playable dock recipe costing 60 wood + 20 timber, taking 20 seconds. It holds four passengers, sails on water, and lands passengers at clear shore. Each island has its own inventory; ships carry an additional 50 resources and share their cargo while stopped at shore. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields still consume wood, stone and labor for ordinary food.
+The first transport is a playable dock recipe costing 60 wood + 20 timber, taking 20 seconds. It holds four passengers, sails on water, and lands passengers at clear shore. Each island has its own inventory; ships carry an additional 50 resources and share their cargo while stopped at shore. Generation guarantees at least 600 reachable wood, 300 food and 120 stone, including wood to process timber and establish the settlement. Tests cover processing, starter construction costs, three research jobs and villager training within the base budget. Fields consume wood, stone, water and labor for ordinary food.
 
 Remaining acceptance criteria:
 
@@ -122,7 +141,7 @@ Gameplay acceptance:
 
 Status: planned.
 
-Target economy (13 total resources/products): wood, food, stone, gold, iron ore, coal, clay, fiber, timber, steel, bricks, cloth, and rations.
+Target economy (14 total resources/products): water, wood, food, stone, gold, iron ore, coal, clay, fiber, timber, steel, bricks, cloth, and rations.
 
 Gameplay acceptance:
 
