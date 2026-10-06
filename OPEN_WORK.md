@@ -1,4 +1,4 @@
-# Art alternatives — pending candidate review
+# Art alternatives — [draft PR #145](https://github.com/koogle/age-of-agents/pull/145)
 
 - Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
 - Completed 41 illustration attempts across calibration, three UI batches, world candidates and targeted repairs; 80 successful FAL calls, estimated $1.8268 plus one validation failure with unknown billing. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
