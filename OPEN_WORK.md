@@ -3,6 +3,15 @@
 - User requested that resuming an interrupted road automatically completes its unfinished pieces. Implemented in the shared domain: a single-cell resume includes unfinished edge-connected road cells across bends, completed pieces and material changes; separate/corner-touching roads stay separate. Clicked piece first, deterministic remaining order, no repeated cost or save-schema change.
 - Verification: 296 workspace tests pass (one existing ignored benchmark), formatting and strict native/WASM lint pass; server and browser bundle rebuilt. Isolated desktop mouse and DPR-2 phone touch both stop and resume dirt/stone roads through one piece, complete all 14 cells and spend exactly seven stone, with no page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06). User authorized PR creation and merge after passing checks on 2026-10-06. Preparing integration with current master and fresh combined verification; production release will use the merge-triggered workflow.
 
+
+# Boar danger (2026-10-06)
+
+- User approved merging the boar implementation and selected art. Integrating master `806512c`, preserving stronger wolves/bears, stationary status messages and current road/disembark art. Boars retain their reviewed 60 HP/10 damage; wolf/bear balance is unchanged. Combined verification passes: 295 workspace tests, native/WASM lint, rebuilt client/server, asset checks, six release-verifier tests and desktop mouse/DPR-2 touch boar hunting with no page errors. Ready for the authorized PR merge; production is tracked by the merge-triggered workflow.
+
+- User selected the first follow-up study (`boar-npc-study.png`). Its lighter taupe/cel style is integrated across all four poses, with safe cell margins and original-resolution packing. Fresh 307-frame audit, client pose test and native/WASM lint pass; fresh normal/max-zoom desktop and DPR-2 phone art captures pass with no browser errors. See `docs/verification/boars/approved/`. The second study is not selected.
+
+- Implemented locally: one starter boar, 2–3 later-island boars, preserving existing wolves/bears and safe placement. Shared combat/selection, authored four-pose art, no save reset.
+- 294 workspace tests (one manual benchmark ignored), strict native/WASM lint, rebuilt browser/server and 307-frame sprite audit pass. Desktop mouse and DPR-2 phone touch hunting/defeat pass, with normal/max-zoom art captures and no page errors. Additional pose replay passed desktop phases/pause/mirroring and reached phone close-ups after phase assertions; remaining duplicate close-ups were stopped due slow SwiftShader, so no full pose-replay completion is claimed. Evidence and review: [boars](docs/verification/boars/REVIEW.md). Not deployed.
 # Stationary NPC status feedback — [PR #146](https://github.com/koogle/age-of-agents/pull/146)
 
 - User requested status messages remain at their spawn position and rise/fade instead of following the NPC. Implemented in shared client feedback; existing timing, rapid-order replacement and damage tracking are preserved. No simulation/save change.
