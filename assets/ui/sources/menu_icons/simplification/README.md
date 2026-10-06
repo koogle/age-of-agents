@@ -18,7 +18,7 @@ are the original wood and masonry icons under `../refinement/`.
 | --- | --- |
 | Cargo | Refined runtime PNG in this revision |
 | Gathering | Refined runtime PNG in this revision |
-| Town | Verification in progress |
+| Town | Refined runtime PNG in this revision |
 | Disembark | Verification in progress |
 
 The earlier per-icon source folders describe the first dedicated-icon release.
