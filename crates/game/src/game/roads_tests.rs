@@ -121,7 +121,7 @@ fn completed_roads_are_fifty_percent_faster_for_all_friendly_units_only() {
     );
     w.travel(0, Goal::Cell(cell(14, 10)), 0.2);
     assert!((w.units[0].position().x - 11.1).abs() < 1e-9);
-    for kind in [AnimalKind::Wolf, AnimalKind::Bear] {
+    for kind in [AnimalKind::Wolf, AnimalKind::Bear, AnimalKind::Boar] {
         let mut plain = world();
         plain.animals.push(Animal {
             id: "beast".into(),

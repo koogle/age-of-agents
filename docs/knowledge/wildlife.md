@@ -6,13 +6,23 @@ Read before changing animal behavior, hunting, unit health or animal rendering.
 
 The user corrected the environmental-danger request: add wolves and dangerous
 animals instead of timed events, then suggested a bear. The drought in PR #98
-was withdrawn; wolves and bears replace it. Bears replace the initially proposed
-boars. Friendly units remain player-controlled; pursuit is for hostile animals.
+was withdrawn; wolves and bears replace it. Bears replaced the initially proposed boars in that first release. Friendly units remain player-controlled; pursuit is for hostile animals.
 
 The user subsequently requested one animal on the first island and more on the
-second, then requested some variation in later-island counts. Generation retains one
-starter wolf and chooses 2–4 animals per later island from the world seed and island
-index, with one bear and the remainder wolves, preserving safe-start placement.
+second, then requested some variation in later-island counts. That release retained one
+starter wolf and chose 2–4 animals per later island from the world seed and island
+index, with one bear and the remainder wolves. Boars now extend this roster below.
+
+## Boar addition (2026-10-06)
+
+Jakob requested integrating the retained boar concept as another danger, with a
+small first-island presence and more on the second. Implementation retains wolves/bears, adds one starter boar and 2–3 boars on later islands using
+the existing territorial combat and safe-start rules.
+
+The user explicitly clarified that the supplied concept requires refinement in
+the game style. Use it for identity only; the approved NPC-matched animal family
+owns rendering style. The first detailed-fur pass is rejected and retained; the
+second pass removes hatching in favor of broad cel-painted masses.
 
 ## Strength tuning (2026-10-06)
 
@@ -26,14 +36,15 @@ There is no schema change or world reset.
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
-attack orders, animal pursuit/damage and cleanup. The first island gets one wolf; the second and later
-islands get 2–4 animals (one bear and 1–3 wolves) where valid cells exist. Starting animals are at least 26
+attack orders, animal pursuit/damage and cleanup. The first island gets one wolf and one boar; the second and later
+islands get one bear, 1–3 wolves and 2–3 boars where valid cells exist. Starting animals are at least 26
 cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships.
 
 | Kind | Health | Damage / second in contact | Speed (cells/s) | Aggro / territory radius |
 | --- | --- | --- | --- | --- |
+| Boar | 60 | 10 | 2.2 | 4 / 8 |
 | Wolf | 300 | 35 | 2.5 | 6 / 10 |
 | Bear | 600 | 50 | 1.8 | 4 / 6 |
 
@@ -68,7 +79,7 @@ rings identify wildlife. Authored sprites are documented in
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
 Frames are authored and mirrored; reverse-facing poses remain future art work.
-Both animals now have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
+All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
 (including 12 and the earlier branch-only wildlife schema 13) reset under the existing
@@ -120,6 +131,34 @@ windup/strike/recovery and mirroring. It captures normal and maximum zoom on
 desktop/DPR-2 phone. This isolates visual acceptance; the real-server wildlife
 verifier and domain tests still establish combat behavior.
 
+Boars append a third 627px atlas row with idle, walk, windup and tusk-strike
+poses. Existing wolf/bear pixels are preserved. Existing saves load unchanged;
+new boars appear only when generating an island (reset for a new starter roster).
+Run the browser verifier with `--target boar --closeups` for boar mouse/touch
+hunting and maximum-zoom evidence.
+
+The pose replay observes all three species. On the 2026-10-06 managed cloud
+workspace, SwiftShader exceeded the old 30-second UV-update wait despite
+correct rendered frames; allow 120 seconds with UV/error/screenshot diagnostics.
+Run browser replays sequentially to avoid competing software renderers. This
+verification timeout is not a measurement of performance on physical devices.
+
+## Boar style review reopened (2026-10-06)
+
+Jakob rejected the integrated boar style as not there yet after viewing the
+gameplay preview. The previous style-pass assessment is superseded; gameplay
+verification remains valid. Re-evaluate against approved villager/guard originals
+and the primary diorama directly, with the supplied boar as identity reference.
+The selected replacement is described below; the prior assessment is superseded.
+
+## Boar direction selected (2026-10-06)
+
+Jakob explicitly selected the first of the two follow-up studies,
+`boar-npc-study.png` (lighter taupe coat and broad cel shading). This user choice
+supersedes the agent’s earlier negative assessment of that study. Preserve its
+identity, proportions, palette and fur shapes while extending walk and attack
+poses; do not substitute the second, more textured silhouette study. The selected family is packed into the third atlas row from
+`boar-approved-animation.png`; original 627px cells are never enlarged.
 Stronger-wolf browser fixtures start the attack target outside its six-cell aggro
 radius. Otherwise resuming simulation before clicking can move the wolf away
 from its captured screen position and dispatch a ground move instead of an attack.

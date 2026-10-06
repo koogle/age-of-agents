@@ -17,7 +17,7 @@ def main():
     attacks = Image.open(ATTACK_SOURCE).convert("RGBA")
     assert source.size == (CELL * 2, CELL * 2)
     assert attacks.size == source.size
-    atlas = Image.new("RGBA", (CELL * 4, CELL * 2))
+    atlas = Image.new("RGBA", (CELL * 4, CELL * 3))
     frames = {}
     # Planted rear-paw landmarks, measured in the original 627px cells.
     # A lifted/swiping front paw must not shift the whole animal's ground anchor.
@@ -46,6 +46,21 @@ def main():
             atlas.alpha_composite(frame, (col * CELL + offset[0], row * CELL + offset[1]))
             species = "wolf" if row == 0 else "bear"
             frames[f"{species}_{pose}"] = [col * CELL, row * CELL, CELL, CELL]
+    boars = Image.open(SOURCE.with_name("boar-approved-animation.png")).convert("RGBA")
+    assert boars.size == (CELL * 2, CELL * 2)
+    for col, pose in enumerate(["idle", "walk", "attack_windup", "attack_strike"]):
+        x, y = col % 2 * CELL, col // 2 * CELL
+        frame = boars.crop((x, y, x + CELL, y + CELL))
+        bounds = frame.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox()
+        assert bounds is not None
+        # Register planted rear hooves for attacks, retaining the forward head thrust.
+        rear_y = [491, 491, 451, 455][col]
+        dy = 491 - rear_y if col >= 2 else 0
+        idle_bottom = 521
+        offset = (-24, BASELINE - idle_bottom + dy)
+        assert bounds[3] + offset[1] < CELL
+        atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
+        frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
     atlas.save(ROOT / "assets/sprites/wildlife.png")
     (ROOT / "assets/sprites/wildlife.json").write_text(
         json.dumps({"size": list(atlas.size), "frames": frames}, indent=2) + "\n")
