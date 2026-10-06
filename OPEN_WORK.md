@@ -1,7 +1,12 @@
 # Stronger wildlife — 2026-10-06
 
 - Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
-- 290 workspace tests, formatting, native/WASM strict lint, rebuilt web/server and desktop/DPR2-phone real combat pass with zero page errors. [Evidence and review](docs/verification/stronger-wildlife/README.md). Branch `feat/stronger-wildlife` is ready for PR review; not merged or deployed.
+- 290 workspace tests, formatting, native/WASM strict lint, rebuilt web/server and desktop/DPR2-phone real combat pass with zero page errors. [Evidence and review](docs/verification/stronger-wildlife/README.md). User authorized merging [PR #135](https://github.com/koogle/age-of-agents/pull/135). Integrated master `b786f46`, preserving water and refined menus. Combined verification passes: 294 Rust tests, native/WASM strict lint, rebuilt browser/server, all asset checks, six release-verifier tests, and desktop/DPR2-phone combat with zero page errors. Merge and deployment status are tracked by the PR and production workflow.
+
+# Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
+
+- User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
+- Formatting, 289 combined workspace tests (one existing ignored benchmark), strict native/WASM lint and the release WASM rebuild pass. Desktop mouse and emulated DPR-2 phone touch browser checks pass without page errors; [visual evidence](docs/verification/build-subcategories/README.md). Code-quality review: one direct layout branch, no dependency or new state. User authorized PR creation and merge on 2026-10-06. Integrated master `f4d5b01`, preserving roads, wildlife, menu icons, building availability and granary yield. Combined checks and refreshed desktop/phone browser captures pass. Production uses the merge-triggered release workflow.
 
 # Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
 
@@ -64,6 +69,8 @@ User explicitly authorized merging PR #130. Integrating master `faa4b04`, preser
 
 # Menu icon audit: implemented and verified
 
+- Follow-up (2026-10-06): user authorized showing and sequentially merging four simpler icons. Disembark is verified and prepared in this branch; earlier refinement PRs: [Cargo #137](https://github.com/koogle/age-of-agents/pull/137), [Gathering #138](https://github.com/koogle/age-of-agents/pull/138), [Town #139](https://github.com/koogle/age-of-agents/pull/139). All 293 tests, strict native/WASM lint, rebuilt current-master client, asset checks and six desktop/DPR-2 phone captures pass. Combined-preview scope and individual runtime status are recorded in [the refinement evidence](docs/verification/menu-icons/simplification/README.md) and [art ledger](assets/ui/sources/menu_icons/simplification/README.md). Production is tracked separately by the merge-triggered workflow.
+
 - User authorized dedicated menu icons and sequential PR merges. Stop #104, style enforcement #110 and all 18 individual art PRs #112–#129 are merged. Original renders, rejected drafts, prompts, request IDs and per-icon style comparisons are retained. [Audit/PR ledger](docs/MENU_ICON_AUDIT.md).
 - Integration [#107](https://github.com/koogle/age-of-agents/pull/107) wires all 20 audited fixes across resources, production/queues, specialist portraits, ship commands, categories, Back and info thumbnails. Master through `5a28839` is integrated, preserving approved productive-building availability and the granary bonus/description. This PR adds no gameplay, cost, unlock or save-model change.
 - Final validation: 276 Rust tests, strict native/WASM lint, rebuilt bindings, 298-frame/icon checks, 18 exact source reproductions and six release-verifier tests pass. Full icon evidence has 40 desktop/phone captures; later combined replays add eight availability/guard/sailing captures and two granary captures. Separate bundle hashes and scope are in [the evidence](docs/verification/menu-icons/integration/checks.json). Screenshot pixel dimensions are asserted; physical phones/native-window appearance remain unverified.
@@ -79,6 +86,28 @@ User explicitly authorized merging PR #130. Integrating master `faa4b04`, preser
 - Historical direct release check (superseded by the Modal proxy/account findings below): Modal 1.5.3 status again reports "Could not connect to the Modal server" despite ready runtime bindings. No production state was changed.
 
 # Open work
+
+- Water resource (2026-10-05): Jakob approved the first slice and implementation.
+  Renewable riverbank sources, typed water inventory/cargo, and 10 water per
+  field planting/replenishment cycle are implemented locally. Generated/refined
+  jug art is integrated in the HUD and existing resource atlas. Save version 16
+  resets older hosted worlds; no production state has changed.
+  Combined verification: 293 workspace tests pass (one manual benchmark ignored);
+  all 96 client tests pass again after the final menu fix; 303 sprite frames,
+  new icon normalization, existing atlas pixel preservation and six production
+  verifier tests pass. Native/WASM strict lint, rebuilt WebGL, and final code/style review pass.
+  Desktop mouse (1100x750) and emulated DPR-2 phone touch (430x932) both
+  collect water, plant and replenish fields, spend exactly 20 water, and deliver
+  240 food without browser errors. Placement costs remain visible without hover.
+  Maximum-zoom captures pass after correcting transparent ground-anchor padding.
+  User rejected the initial water icon style on 2026-10-06; corrected the
+  heavy orange rendering to fine ink, pale clay and muted blue watercolor.
+  Original art is retained as rejected evidence.
+  User approved the corrected art and authorized merge on 2026-10-06.
+  Integrated master `79d5899`; final desktop and DPR-2 touch replays pass.
+  Review/authorized merge: [PR #136](https://github.com/koogle/age-of-agents/pull/136).
+  Production delivery follows the merge-triggered GitHub Actions workflow. See [water guide](docs/knowledge/water-resource.md)
+  and [verification](docs/verification/water/README.md).
 
 - [PR #108](https://github.com/koogle/age-of-agents/pull/108): resource icons retain quantities and show capitalized names on hover/tap; rows compact to 66px. User authorized merging into master. Integrated master `2bedc41`; all 264 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass. Rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors; [screenshots and review](docs/verification/resource-names/README.md). Generated-bundle conflicts resolved by rebuilding; replay fixture reader updated for island inventories. Ready for the authorized merge; production delivery follows the merge-triggered Actions workflow.
 

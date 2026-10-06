@@ -32,6 +32,10 @@ The [compact HUD review](../COMPACT_HUD_REVIEW.md) contains the viewport matrix.
 Accessible DOM controls and additive touch selection remain implementation gaps;
 verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
+## Build subcategory card
+
+User steering (2026-10-06): remove the top title/description card inside build subcategories. Keep the building buttons, labels and back navigation; show hover costs through the existing explanation toast. This is a presentation-only change with no save impact. [Desktop and phone verification](../verification/build-subcategories/README.md).
+
 ## Mobile time-control spacing
 
 User steering on 2026-10-05 requests a tighter mobile time-control row. The compact layout reduces center spacing from 44px to 36px for the existing 30px coins (6px visible gaps), with separate 36×44px hit regions. Keep the rightmost coin anchored and desktop positioning unchanged.
@@ -96,6 +100,13 @@ Production offers and queued jobs now share `selection.rs::product_icon`; add fu
 ## Text transparency
 
 User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.
+
+## Field placement costs (2026-10-05)
+
+With water added as a required field input, the placement information pill now
+shows the full shared cost continuously: 10 wood, 5 stone, 10 water, plus work
+time and food yield. Mouse and touch both get this without relying on hover.
+See [water verification](../verification/water/README.md).
 
 ## Dedicated icon integration (2026-10-05)
 

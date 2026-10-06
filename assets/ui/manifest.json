@@ -30,7 +30,8 @@
       "steel": "icons/resource_steel.png",
       "bricks": "icons/resource_bricks.png",
       "cloth": "icons/resource_cloth.png",
-      "rations": "icons/resource_rations.png"
+      "rations": "icons/resource_rations.png",
+      "water": "icons/resource_water.png"
     },
     "tech": {
       "agriculture": "icons/tech_agriculture.png",
