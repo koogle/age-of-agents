@@ -30,6 +30,25 @@ fn attack(world: &mut GameWorld) {
 }
 
 #[test]
+fn stationary_attack_faces_target_and_clears_phase_after_retreat() {
+    for kind in [AnimalKind::Wolf, AnimalKind::Bear] {
+        let mut world = wildlife(kind);
+        world.tick(0.3);
+        assert_eq!(world.animals[0].heading, [-1, 0]);
+        assert_eq!(world.animals[0].attack_seconds, 0.3);
+        world.simulation_speed = 0.0;
+        let paused = world.animals[0].clone();
+        world.tick(10.0);
+        assert_eq!(world.animals[0], paused);
+        world.simulation_speed = 1.0;
+        world.units[0].cell = CellCoordinate::new(80, 60);
+        world.tick(0.1);
+        assert_eq!(world.animals[0].attack_seconds, 0.0);
+        world.validate().unwrap();
+    }
+}
+
+#[test]
 fn one_wolf_spawns_deterministically_away_from_starter_units() {
     for seed in [1, 123, DEFAULT_SEED] {
         let world = GameWorld::generate(seed);

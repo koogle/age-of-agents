@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-05",
+  "base_revision": "079d34864c7acfcfca9cf5fd84f3469a076ea95d",
+  "model": "OpenAI image_gen",
+  "user_direction": "Animals feel too generic and do not fully match the style; compare directly to existing NPCs.",
+  "approved_references": [
+    "assets/reference/diorama_primary.webp",
+    "assets/sprites/villager_idle_hd.png",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png"
+  ],
+  "passes": [
+    {
+      "source": "style-pass-1-rejected.png",
+      "tool_output": "/workspace/generated_images/exec-d1cce0c5-51d1-47be-beb5-840aff9e5d64.png",
+      "references": [
+        "assets/sprites/wildlife.png at base_revision",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "edit": "Soften outlines and replace etched fur with painted masses; preserve four idle/walk cells and species identity.",
+      "review": "Rejected: still excessively faceted and textured beside the approved NPCs."
+    },
+    {
+      "source": "npc-style-refined.png",
+      "tool_output": "/workspace/generated_images/exec-ffe288ac-1e6f-4df3-95ab-b49d03c49b03.png",
+      "references": [
+        "style-pass-1-rejected.png",
+        "assets/sprites/villager_idle_hd.png",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "prompt_file": "npc-style-prompt.txt",
+      "review": "Fine brown contours, broad quiet cel color areas and simplified fur now match the NPC family; see retained comparison and integration review."
+    }
+  ],
+  "output": {
+    "size": [
+      1254,
+      1254
+    ],
+    "cell": [
+      627,
+      627
+    ],
+    "format": "RGBA PNG"
+  },
+  "packing": "python3 scripts/pack_wildlife.py: uniformly downsample each 627px source cell to 589px, center in original 627px cell, register alpha>128 paw baseline at y=590; no upscaling or palette edits.",
+  "limitations": "Original authored frame scope retained: idle/walk with mirrored facing; no new attack or reverse-facing poses. Image tool returned 1254px despite requesting 2048px; original 627px cells exceed minimum resolution.",
+  "sha256": {
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da",
+    "assets/sprites/villager_idle_hd.png": "4ffd31e2f1cfd0be413a7ae68bdd0414dd3ef230f1782fb1ea40f1d2b551c6ef",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5",
+    "assets/sprites/wildlife_sources/npc-style-refined.png": "3fee74707fefc4f3c502c58740c80ba27f731cbc6d6edcef9bc43eaf7a6be2ff",
+    "assets/sprites/wildlife.png": "bf4b5428f4c43ed1b1ce8897e5cdeb429b9e7ff8fe24ef4107c8c0f19ed8ee9f"
+  }
+}
