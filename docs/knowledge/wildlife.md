@@ -69,13 +69,22 @@ corners. Snapshot animals require current visibility at both step endpoints;
 remembered terrain does not expose live hostile positions. Hidden targets cancel
 hunting rather than enabling pursuit into fog using private coordinates.
 
+## Health display direction (2026-10-06)
+
+Jakob requested thin overhead health bars for villagers and animals, green at high
+health then orange and red as it falls, replacing numeric health text. Implemented in the shared client: a 24×3 logical-pixel fill with a dark one-pixel
+border follows each visible friendly unit and animal. Green is above 50%, orange
+is 25–50%, and red is at or below 25%; animal fractions use species maximums.
+Combat damage is shown by the shrinking bar instead of floating numbers;
+status and cargo feedback retain their existing rise/fade behavior.
+[Replay and review](../verification/health-bars/README.md) cover desktop and
+emulated DPR2 phone presentation.
+
 ## Presentation and persistence
 
 The shared mouse/touch path selects a friendly unit then taps an animal to attack;
-without units selected, tapping reports species, health and instructions.
-Selection details show friendly health, floating text keeps only the latest damage
-feedback per entity, and red
-rings identify wildlife. Authored sprites are documented in
+without units selected, tapping reports species and attack instructions.
+Overhead bars show health, and red rings identify wildlife. Authored sprites are documented in
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
 Frames are authored and mirrored; reverse-facing poses remain future art work.

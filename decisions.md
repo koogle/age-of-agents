@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Health display (2026-10-06):** Thin overhead bars replace numeric HP for villagers and animals, changing from green to orange to red as health falls; combat damage is visible through the shrinking bar ([details](docs/knowledge/wildlife.md#health-display-direction-2026-10-06)).
+
 - **Build hints and NPC feedback (2026-10-06):** Show build details and placement instructions in the building menu information area, replacing the top-middle bubble. NPC command/status messages and complaints fade over the addressed unit’s head, including blocked placement and delayed server rejections ([HUD guide](docs/knowledge/hud-and-accessibility.md)).
 - **Boars (2026-10-06):** Add the retained boar concept alongside wolves and bears: one boar on the first island, 2–3 on later islands, preserving territorial combat and safe starts. Existing saved populations stay intact; the roster applies to newly generated islands.
 
