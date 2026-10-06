@@ -63,6 +63,17 @@ pub(super) fn atlas(kind: BuildingKind) -> &'static str {
     }
 }
 
+pub(super) fn road_detail(kind: aoa_game::RoadKind) -> String {
+    format!(
+        "{} · 2 s work per cell · +50% movement · straight lines",
+        if kind == aoa_game::RoadKind::Dirt {
+            "Labour only"
+        } else {
+            "1 stone per cell"
+        }
+    )
+}
+
 pub(super) fn commands(
     build: BuildUi,
     stock: &Stockpile,
@@ -119,14 +130,7 @@ pub(super) fn commands(
                     "resource_stone"
                 },
                 label: kind.name().into(),
-                detail: format!(
-                    "{} · 2 s work per cell · +50% movement · straight lines",
-                    if kind == aoa_game::RoadKind::Dirt {
-                        "Labour only"
-                    } else {
-                        "1 stone per cell"
-                    }
-                ),
+                detail: road_detail(kind),
                 enabled: stock.stone >= kind.stone_per_cell(),
                 action: Action::PlaceRoad(kind),
             });

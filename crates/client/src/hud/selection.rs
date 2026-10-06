@@ -220,12 +220,15 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             BuildUi::PlacingRoad { kind, start } => vec![Command {
                 icon: "command_cancel",
                 label: kind.name().into(),
-                detail: if start.is_some() {
-                    "Tap the end · Snaps to a straight line · Esc to cancel"
-                } else {
-                    "Tap the start · Esc to cancel"
-                }
-                .into(),
+                detail: format!(
+                    "{} · {} · Esc to cancel",
+                    super::build_menu::road_detail(kind),
+                    if start.is_some() {
+                        "Tap the end"
+                    } else {
+                        "Tap the start"
+                    }
+                ),
                 enabled: true,
                 action: Action::Cancel,
             }],
@@ -244,7 +247,10 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             BuildUi::Placing(kind) => vec![Command {
                 icon: "command_cancel",
                 label: format!("Place the {}", building_info(kind).2.to_lowercase()),
-                detail: "Tap a clear site · Esc to cancel".into(),
+                detail: format!(
+                    "{} · Tap a clear site · Esc to cancel",
+                    cost_text(kind.cost())
+                ),
                 enabled: true,
                 action: Action::Cancel,
             }],
@@ -265,10 +271,19 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 action: Action::Build,
             }],
         };
-        if workers && model.build == BuildUi::PlacingField {
+        if workers
+            && matches!(
+                model.build,
+                BuildUi::PlacingField | BuildUi::Placing(_) | BuildUi::PlacingRoad { .. }
+            )
+        {
             return Some((
-                "field",
-                "Place field".into(),
+                match model.build {
+                    BuildUi::PlacingField => "field",
+                    BuildUi::Placing(kind) => building_info(kind).0,
+                    _ => "command_build",
+                },
+                commands[0].label.clone(),
                 commands[0].detail.clone(),
                 None,
                 commands,

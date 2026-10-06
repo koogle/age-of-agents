@@ -84,12 +84,6 @@ impl Hud {
             false,
         );
         let header_bottom = header_bottom + 18.0 * s;
-        let toast_top = header_bottom
-            + if snapshot.simulation_speed == 0.0 {
-                46.0 * s
-            } else {
-                4.0 * s
-            };
 
         // Globe minimap bottom-right, gold rim, speed coins on its shoulder.
         let r = if narrow { 40.0 } else { 68.0 } * s;
@@ -249,7 +243,7 @@ impl Hud {
                 model.toast.or(resource_hint.as_deref()),
                 width,
                 s,
-                toast_top,
+                gy - 56.0 * s,
             );
             return;
         };
@@ -354,22 +348,18 @@ impl Hud {
                     action: if command.enabled {
                         command.action.clone()
                     } else {
-                        Action::Explain(format!("{}: {}", command.label, command.detail))
+                        Action::CommandFeedback(match command.action {
+                            Action::Place(_) => "Not enough resources to build that.".into(),
+                            Action::PlaceRoad(_) => "Not enough stone for that road.".into(),
+                            Action::PlaceField => {
+                                "A field needs a farm and enough supplies.".into()
+                            }
+                            _ => format!("{}: {}", command.label, command.detail),
+                        })
                     },
                     enabled: true,
                 });
             }
-        }
-        if matches!(model.build, BuildUi::Group(_)) {
-            let hint = hover_text.map(|(_, title, detail)| format!("{title}: {detail}"));
-            self.toast(
-                atlas,
-                model.toast.or(resource_hint.as_deref()).or(hint.as_deref()),
-                width,
-                s,
-                toast_top,
-            );
-            return;
         }
         // A separate, ordered row of waiting tasks. Tapping any coin cancels
         // that task and refunds its paid inputs; the active task stays above.
@@ -454,6 +444,10 @@ impl Hud {
             (widest + 84.0 * s).max(200.0 * s).min(width - 2.0 * margin)
         };
         let (portrait, title, detail) = hover_text.unwrap_or((portrait, title, detail));
+        let detail = model
+            .toast
+            .or(resource_hint.as_deref())
+            .map_or(detail, str::to_owned);
         let text_offset = if narrow { 52.0 } else { 64.0 } * s;
         let text_room = info_width - text_offset - if narrow { 12.0 } else { 16.0 } * s;
         let title_size = if narrow { 14.0 } else { 15.0 } * s;
@@ -534,12 +528,5 @@ impl Hud {
                 1.5 * s,
             );
         }
-        self.toast(
-            atlas,
-            model.toast.or(resource_hint.as_deref()),
-            width,
-            s,
-            toast_top,
-        );
     }
 }
