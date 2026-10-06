@@ -113,3 +113,7 @@ used. This does not rewrite historical generation instructions or hashes.
 The era/cel follow-up adds six illustration attempts and twelve successful calls,
 estimated $0.2688. Only two Explore concepts and three cel calibration subjects
 were generated; broader expansion remains paused.
+
+Merge validation: current master `a8188f1` is integrated. The offline validator
+checks runtime isolation against that revision; generation-time reference hashes
+are checked against original base `1984e9b` when newer master art differs.

@@ -9,7 +9,12 @@ errors=[];outputs=[]
 for p in sorted(BASE.glob('*/*/provenance.json')):
  rec=json.loads(p.read_text())
  for r in rec['references']:
-  if digest(ROOT/r['path'])!=r['sha256']:errors.append('reference hash '+r['path'])
+  # References describe the generation-time tree; master can later replace art.
+  current=digest(ROOT/r['path'])
+  if current!=r['sha256']:
+   original=subprocess.check_output(['git','show','1984e9b:'+r['path']],cwd=ROOT)
+   if hashlib.sha256(original).hexdigest()!=r['sha256']:
+    errors.append('reference hash '+r['path'])
  for t in rec.get('prompt_templates',[]):
   if digest(BASE/t['path'])!=t['sha256']:errors.append('prompt template hash '+t['path'])
  for name in ['original.png','cutout.png']:
@@ -26,7 +31,7 @@ for p in sorted(BASE.glob('*/*/provenance.json')):
     if any(entry['corner_alpha']):errors.append('nontransparent corners '+str(f))
   outputs.append(entry)
 ledger=[json.loads(x) for x in (BASE/'ledger.jsonl').read_text().splitlines()]
-changed=subprocess.check_output(['git','diff','--name-only','1984e9b'],cwd=ROOT,text=True).splitlines()
+changed=subprocess.check_output(['git','diff','--name-only','a8188f1'],cwd=ROOT,text=True).splitlines()
 runtime=[x for x in changed if x.startswith(('crates/','web/','src/','assets/sprites/','assets/ui/','assets/terrain/'))]
 if runtime:errors.append('runtime changed '+repr(runtime))
 batches=json.loads((BASE/'batches.json').read_text());covered={x['name'] for group in batches.values() for x in group}
