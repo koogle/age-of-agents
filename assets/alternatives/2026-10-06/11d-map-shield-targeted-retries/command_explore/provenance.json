@@ -1,0 +1,31 @@
+{
+  "name": "command_explore",
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    }
+  ],
+  "cel_prompt": "cel-painterly-prompt.txt",
+  "review_status": "UNAPPROVED: one targeted retry",
+  "prompt": "Attached original villager and Greek diorama are STYLE only. Draw a NEW single game icon: one small rectangular parchment map with gently curled paper edges, not bulky scroll handles, showing a single simple muted-teal island coastline; one small ordinary five-point celestial star above it. NO compass rose/device, needle, grid, route, modern markings, text, pins. Delicate fine brown PEN hairlines matching villager: contours about1-2px at1024, NEVER thick marker/sticker outlines. Soft painted cream paper with one gentle cel shadow and sparse faint wash variation, muted teal island and star. Do not make a glossy beveled/vector sticker. Absolutely NO cast/drop shadow behind paper or star. No wood rollers. Icon readable24px and distinct from boat/cargo. White empty background. Preserve soft Ghibli painted-cel feeling. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date. Style constraint: painted Studio Ghibli-leaning cel art matching the retained original villager. Two gentle tonal areas, broad quiet color, fine sparse brown ink, very restrained hand-painted variation and small soft highlights are allowed. Do not turn it into a sterile vector diagram. No glossy/PBR/specular material rendering, dense texture noise, fur strands or bevels. Preserve subject hue separation and readable silhouette; approved villager and primary diorama are style authority, subject references only lock geometry.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "NEEDS REFINEMENT: simpler map but contour/drop shadow remain",
+  "prompt_templates": [
+    {
+      "path": "era-prompt.txt",
+      "sha256": "6fca6864831205e9e29cac3c592f410772ddd0017e90f079c8513f922b6763d1"
+    },
+    {
+      "path": "cel-painterly-prompt.txt",
+      "sha256": "903e0f8f6f624d341da100fba93d606e2bcee6286d1f93ce3db029a4d47b0bcb"
+    }
+  ]
+}

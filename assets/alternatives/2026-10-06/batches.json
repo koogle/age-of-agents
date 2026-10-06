@@ -1,0 +1,780 @@
+{
+  "01-calibration": [
+    {
+      "name": "resource_water",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a squat Greek water jug with one handle, clear open mouth with blue-teal water and one small droplet. Pale cool clay, restrained terracotta lip, readable teal water accent. Fine original UI object family, three-quarter upper viewpoint. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png",
+        "assets/ui/icons/resource_water.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: blurred copy on black"
+    },
+    {
+      "name": "wolf_idle",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw one grey wolf standing alert, three-quarter front facing viewer-left, slightly above RTS camera. Same species silhouette as last image but broad quiet slate-grey fur masses with cooler blue-grey shadow, cream muzzle, very sparse fur marks. Do not dress the animal. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/sprites/wildlife.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "NEEDS CEL CORRECTION: dense modeled fur"
+    },
+    {
+      "name": "dock_pair",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw exactly TWO views side by side of the same completed wooden Greek dock from last images: left south/front, right north/rear. Same footprint, camera elevation, geometry and scale. Mirroring these provides remaining directions. Match warm chestnut timber in both views, never darker or greyer rear wood. White limestone supports and restrained blue cloth accent. Clear gap between two views, no connecting water or landscape. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/sprites/building_sources/dock_complete.png",
+        "assets/sprites/building_sources/directions/dock_north_complete.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "16:9",
+      "review_status": "REJECTED: two front/side views; missing rear"
+    },
+    {
+      "name": "road_stone",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Paint irregular worn limestone paving closely preserving the last image stone scale, loose polygon layout and restrained thin joints. Cooler pearl-grey limestone with pale blue-grey shade and warm sunlit edges, no yellow overall tint, no dark thick gaps. Flat top-down swatch filling the entire square. No horizon, vignette, objects, border or text. Low contrast suitable for repeated ground sampling. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/terrain/road_stone.png"
+      ],
+      "family": "texture",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    }
+  ],
+  "01b-calibration-repair": [
+    {
+      "name": "resource_water",
+      "prompt": "Draw a NEW high-resolution illustration, not an enlargement of any reference. All attached images are STYLE only. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a squat Greek water jug with one handle, clear open mouth with blue-teal water and one small droplet. Pale cool clay, restrained terracotta lip, readable teal water accent. Fine original UI object family, three-quarter upper viewpoint. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    }
+  ],
+  "02-resources": [
+    {
+      "name": "resource_coal",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of three irregular charcoal chunks, cool slate blue-grey planes, tiny soft grey edge highlights. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "resource_steel",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of two neatly stacked forged steel ingots, cool blue-grey metal, matte soft highlights, no shine. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "STYLE REJECTED: glossy gradients/material realism"
+    },
+    {
+      "name": "resource_bricks",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of three simple terracotta fired bricks, richer muted red clay, sparse seams. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "resource_cloth",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of a folded length of royal-blue woven cloth, clear broad quiet planes like the villager scarf, a cream selvage. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "STYLE REJECTED: satin highlights"
+    },
+    {
+      "name": "resource_rations",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of a compact food ration of a bread loaf with red apple and green leaf, distinct simple silhouette, very few props. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "STYLE REJECTED: realistic specular bread/apple"
+    },
+    {
+      "name": "resource_timber",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of three squared wooden beams tied together, warm chestnut cut ends, distinguish sawn timber from raw logs. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "tech_agriculture",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of three short tilled rows with fresh green seedlings and one simple hoe, olive-green plants are the focal accent. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: seedlings too small"
+    }
+  ],
+  "03-menu": [
+    {
+      "name": "category_town",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one small Greek white limestone house with simple terracotta roof and royal-blue door, no surrounding props. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "category_gathering",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one simple woven basket of red berries with two olive-green leaves, no scattered tools or twigs. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "category_production",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one plain small Greek pottery kiln with muted red terracotta body and dark simple opening, one small steel tool only. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "category_military",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of a simple round royal-blue hoplite shield with bronze rim and one spear, no surrounding decoration. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "STYLE REJECTED: glossy domed shield"
+    },
+    {
+      "name": "command_cargo",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one sturdy rectangular cargo crate with blue fabric cover folded over its edge, sparse wooden slats, no pile of props. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "ERA REJECTED: invented medieval heraldic emblem"
+    },
+    {
+      "name": "command_disembark",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one brown boot stepping downward onto a clearly visible short wooden gangplank platform, no sand mound, blue trouser cuff, clear landing-passenger symbol. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "ERA REJECTED: modern lace-up boot/cuff"
+    },
+    {
+      "name": "command_sail",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one small Greek sailing ship with cream sail and small royal-blue sail stripe, warm timber hull, no ocean patch. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "command_explore",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one simple rolled map partially opened with a blue-teal route and one plain bronze compass, no lettering or tiny marks. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "ERA REJECTED: magnetic compass"
+    },
+    {
+      "name": "command_back",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one leftward curved arrow in matte muted teal, clear thin-brown ink contour, no extra objects. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: bevel/gradient"
+    }
+  ],
+  "04-units-seals": [
+    {
+      "name": "unit_guard",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one bust portrait of a Greek hoplite, bronze crested helmet, royal-blue cloak and shield edge, fine original villager face style. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: bust crop changes full-figure silhouette and identity"
+    },
+    {
+      "name": "unit_archer",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one bust portrait of a Greek archer with leather cap, bow and blue scarf, fine original villager face style. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: bust crop changes full-figure silhouette and identity"
+    },
+    {
+      "name": "unit_healer",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one bust portrait of an older Greek woman healer with a royal-blue mantle and small green herb sprig, fine original villager face style. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: bust crop changes full-figure silhouette and identity"
+    },
+    {
+      "name": "unit_siege_cart",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one small two-wheeled Greek wooden ballista cart with blue side panels and a small blue pennant, clean sparse mechanism. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "shield_up",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one upright antique bronze shield with a deep muted green enamel upward arrow, slender laurel leaves, preserve upright shield silhouette, no glossy bevel. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/buttons/coin_normal.png",
+        "assets/ui/icons/resource_wood.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "ERA REJECTED: medieval heater-shield silhouette"
+    },
+    {
+      "name": "shield_down",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one upright antique bronze shield with a deep muted green enamel downward arrow, slender laurel leaves, preserve upright shield silhouette, no glossy bevel. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/buttons/coin_normal.png",
+        "assets/ui/icons/resource_wood.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "ERA REJECTED: heraldic shield silhouette"
+    },
+    {
+      "name": "coin_researched",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one round antique bronze completion seal, thin double ink rim, sparse classical laurel wreath and deep muted green check, face is cool ivory, not all gold. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/buttons/coin_normal.png",
+        "assets/ui/icons/resource_wood.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    }
+  ],
+  "05-world": [
+    {
+      "name": "bear_idle",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw one brown bear standing alert, three-quarter front facing viewer-left, slightly above RTS camera. Broad quiet chestnut-brown fur areas, cool dark-brown shadow planes, cream muzzle. Very sparse fur strokes, clear massive bear shoulder and rounded ears, four coherent paws. Do not dress the animal. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/sprites/wildlife.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "road_dirt",
+      "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Paint softly worn compacted neutral umber earth with sparse tiny muted ochre pebbles and a few subtle olive-grey mineral tones, distinguish from pale beach sand. Even gentle brushwork, broad quiet areas, no rut lines or vegetation objects. Flat top-down swatch filling the entire square. No horizon, vignette, objects, border or text. Low contrast suitable for repeated ground sampling. ",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/terrain/road_dirt.png"
+      ],
+      "family": "texture",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "dock_front",
+      "prompt": "The first two images are STYLE references; the LAST image is the EXACT required dock geometry and orientation. Draw exactly ONE complete dock. Preserve the last image camera and all major structural positions, especially visible walls, roof direction and boat position. Use the same fine thin dark-brown ink and broad quiet flat watercolor/cel masses as the villager. Both front and rear materials must be warm chestnut timber with cool shadows only, not grey weathered wall boards; white limestone supports, muted terracotta roof, one small royal-blue cloth accent. Sparse straight roof seams, no dense curved tile outlines. Same architecture, no extra props. Pure white background, no cast shadow, no text.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/sprites/building_sources/dock_complete.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "dock_rear",
+      "prompt": "The first two images are STYLE references; the LAST image is the EXACT required dock geometry and orientation. Draw exactly ONE complete dock. Preserve the last image camera and all major structural positions, especially visible walls, roof direction and boat position. Show the BACK wall, rear roof and rear deck; do not invent a front door on the rear wall. Use the same fine thin dark-brown ink and broad quiet flat watercolor/cel masses as the villager. Both front and rear materials must be warm chestnut timber with cool shadows only, not grey weathered wall boards; white limestone supports, muted terracotta roof, one small royal-blue cloth accent. Sparse straight roof seams, no dense curved tile outlines. Same architecture, no extra props. Pure white background, no cast shadow, no text.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/sprites/building_sources/directions/dock_north_complete.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: grey-green rear timber"
+    }
+  ],
+  "06-dock-material-repair": [
+    {
+      "name": "dock_rear_matched_timber",
+      "prompt": "Image 1 and 2 are approved STYLE references. Image 3 is the new FRONT dock material target ONLY. Image 4 is the EXACT REAR dock geometry to preserve. Draw exactly ONE rear dock with the geometry/camera/roof/boat positions from image 4, but repaint ALL its wooden walls and deck with the SAME warm chestnut-brown material as image 3. Every wall board must be visibly BROWN wood, NOT green, NOT grey, NOT desaturated teal. Use subtle cooler BROWN shadows under the roof while preserving the same brown albedo across faces; the rear wall must not look like a different species of timber. Preserve the rear facade: NO doorway facing viewer. White limestone supports, muted terracotta roof, tiny blue cloth accent. Fine thin dark-brown pen lines and broad flat watercolor/cel areas matching image 1. No extra props, no ground, no shadow, no text. Pure white background.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/05-world/dock_front/original.png",
+        "assets/sprites/building_sources/directions/dock_north_complete.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: duplicate sail"
+    }
+  ],
+  "07-targeted-repairs": [
+    {
+      "name": "command_cargo",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one sturdy rectangular cargo crate with blue fabric cover folded over its edge, sparse wooden slats, no pile of props. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers.  Plain crate with folded blue cloth ONLY. Every wooden face is blank plain boards. Absolutely no emblems, coins, shields, symbols, crosses, badges or ornament.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "category_military",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of a simple round royal-blue hoplite shield with bronze rim and one spear, no surrounding decoration. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers.  Shield face is a flat matte royal-blue wash with one simple muted shadow plane. Absolutely no white specular highlight, no gradient, no gloss, no bevel.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "STYLE REJECTED: gradient-heavy shield"
+    },
+    {
+      "name": "command_back",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one leftward curved arrow in matte muted teal, clear thin-brown ink contour, no extra objects. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers.  Arrow is a FLAT two-dimensional painted teal arrow, matte uniform color, thin brown pen contour. No bevel, inner border, gradient or shiny highlight.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "tech_agriculture",
+      "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of three short tilled rows with fresh green seedlings and one simple hoe, olive-green plants are the focal accent. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers.  Compact square earth patch with three short rows and only THREE LARGE green seedlings whose leaves occupy about half the image area. One short hoe sits at the edge. Do not make thin long strips, tiny seedlings or minute tools.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    },
+    {
+      "name": "dock_rear_single_sail",
+      "prompt": "Edit the LAST image only; first two are approved style references. Remove the EXTRA small sail and mast peeking up behind the LEFT side of the roof. Keep the ONE large sail and ONE boat on the RIGHT exactly as they are. There must be exactly one mast, one sail, one boat total. Preserve every other shape and color: brown timber rear walls, roof, deck, supports and camera. Fine original villager ink/cel style, pure white background. No other additions or changes.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/06-dock-material-repair/dock_rear_matched_timber/original.png"
+      ],
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: direction candidate; see style review"
+    }
+  ],
+  "08-full-figure-unit-repair": [
+    {
+      "name": "unit_guard",
+      "prompt": "First two images are approved fine-line watercolor STYLE. LAST image is the approved guard IDENTITY and outfit reference (two poses of same person). Draw exactly ONE whole-body game UI figure of that SAME person, head to sandals entirely visible, same face/hair/age/costume colors/tools, same three-quarter viewpoint. Preserve royal-blue accents and original proportions. Do not crop to a portrait or bust, do not draw two people. Same fine thin dark-brown ink linework and broad quiet flat watercolour/cel planes as first villager reference, sparse facial detail, no extra ornament, no glossy metal or bright white highlights, no gradient-heavy shading. Plain pure white background, no ground, no cast shadow, no frame or text. Figure fits centrally with safe margin all round; legible at 24px.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: full-figure identity candidate"
+    },
+    {
+      "name": "unit_archer",
+      "prompt": "First two images are approved fine-line watercolor STYLE. LAST image is the approved archer IDENTITY and outfit reference (two poses of same person). Draw exactly ONE whole-body game UI figure of that SAME person, head to sandals entirely visible, same face/hair/age/costume colors/tools, same three-quarter viewpoint. Preserve royal-blue accents and original proportions. Do not crop to a portrait or bust, do not draw two people. Same fine thin dark-brown ink linework and broad quiet flat watercolour/cel planes as first villager reference, sparse facial detail, no extra ornament, no glossy metal or bright white highlights, no gradient-heavy shading. Plain pure white background, no ground, no cast shadow, no frame or text. Figure fits centrally with safe margin all round; legible at 24px.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/sprites/hd_sources/units/archer_idle_front_cut.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "REJECTED: missing bow in full-figure candidate"
+    },
+    {
+      "name": "unit_healer",
+      "prompt": "First two images are approved fine-line watercolor STYLE. LAST image is the approved healer IDENTITY and outfit reference (two poses of same person). Draw exactly ONE whole-body game UI figure of that SAME person, head to sandals entirely visible, same face/hair/age/costume colors/tools, same three-quarter viewpoint. Preserve royal-blue accents and original proportions. Do not crop to a portrait or bust, do not draw two people. Same fine thin dark-brown ink linework and broad quiet flat watercolour/cel planes as first villager reference, sparse facial detail, no extra ornament, no glossy metal or bright white highlights, no gradient-heavy shading. Plain pure white background, no ground, no cast shadow, no frame or text. Figure fits centrally with safe margin all round; legible at 24px.",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/sprites/hd_sources/units/healer_idle_front_cut.png"
+      ],
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "review_status": "UNAPPROVED: full-figure identity candidate"
+    }
+  ],
+  "09-era-corrections": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "ERA/READABILITY REJECTED: eight-point star resembles compass rose",
+      "prompt": "All attached images are approved STYLE only. Draw a NEW high-resolution game UI illustration with the original villager fine thin dark-brown pen contours, broad quiet flat watercolor/cel areas, sparse details, matte surfaces and controlled blue-teal accents. Centered isolated object on pure white, no cast shadow, border, letters or text. Readable at 24 and 32 pixels. One simple small ancient-style parchment map, only slightly curled at two corners, with a single broad dark-teal coastline enclosing one small island and a SINGLE prominent four-point celestial navigation star beside the island near the top. The star is a star in the sky, not an instrument or compass rose; no surrounding circle, bearings, axes, pointers or numbered marks. Sparse open parchment area, muted cream paper, map silhouette compact and distinct from boat or cargo crate. No compass, needle, telescope, sextant, navigation routes, dotted paths, modern pins, grid, scale bar, legend or lettering."
+    },
+    {
+      "name": "command_disembark",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: sandaled landing-foot candidate",
+      "prompt": "All attached images are approved STYLE only. Draw a NEW high-resolution game UI illustration with the original villager fine thin dark-brown pen contours, broad quiet flat watercolor/cel areas, sparse details, matte surfaces and controlled blue-teal accents. Centered isolated object on pure white, no cast shadow, border, letters or text. Readable at 24 and 32 pixels. One bare lower leg and foot wearing a SIMPLE ancient Greek brown leather sandal, with two plain straps and a thin flat sole, stepping down onto one short sturdy wooden pier plank platform. Open toes visible, no laces, boot, tall shaft, trouser cuff, rubber sole or metal eyelets. One foot only, simple clear downward landing action, no floating leg stump ornament. Preserve landing/disembark meaning, no waves, sand mound, boat or extra props."
+    }
+  ],
+  "10-cel-calibration": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "NEEDS STYLE CORRECTION: simplified but edge shine/gradients remain",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. Exactly two stacked rectangular forged steel ingots for an ancient Greek strategy-game resource icon, matte cool blue-grey flat top planes and a single darker slate shadow plane. Simple clear trapezoid profiles, no chrome reflections, scratches, mottling or white shine. Three-quarter view; clear at 24px."
+    },
+    {
+      "name": "resource_cloth",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: two-tone cel calibration",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. One simply folded rectangle of royal-blue linen cloth like the villager scarf, a broad muted blue face and ONE darker blue shadow shape along folds, one thin cream selvage. Flat matte cloth, no satin sheen, no undulating gradients, no decorative stitches. Three-quarter view; clear at 24px."
+    },
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: two-tone cel calibration",
+      "prompt": "The attached original villager and primary Greek island diorama are STYLE authority. Draw a NEW simple game illustration in their soft Studio Ghibli-leaning TWO-TONE CEL SHADING: broad quiet FLAT base color plus ONE simple shadow color per material; sparse fine brown pen contours; very sparse interior lines. Simplified painted forms, no continuous gradient, no gloss, no shiny highlight, no PBR, no specular reflection, no bevel shading, no microtexture or realistic material study. Pop comes only from distinct subject hues and silhouette. Do not render more realistically than the villager. White background, no ground, cast shadow, text, frame or extra props. Exactly one alert grey wolf in slightly elevated three-quarter front view. Broad quiet muted blue-grey body, one simple darker grey cel shadow shape, pale cream muzzle/chest. Draw four coherent legs and characteristic pointed ears, slender muzzle and bushy tail with a simple silhouette. NO individual hairs, fur striations, realistic mane, dense tufts or modeling; at most three short interior fur marks. Keep simple friendly illustrated NPC treatment, not a detailed wildlife painting."
+    }
+  ],
+  "09b-era-explore-calibration": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "era_prompt": "era-prompt.txt",
+      "review_status": "UNAPPROVED: celestial-star coastline map",
+      "prompt": "Use attached original villager and Greek diorama as STYLE authority. Draw one simple game UI icon: a small ancient parchment scroll map with a SINGLE island coastline in muted teal, and ONE tiny ordinary FIVE-POINT star floating just ABOVE the scroll in the sky, visibly separate from paper. The star has five equal points like a simple celestial star, NOT four/eight directional points and NOT a compass rose. No compass instrument, compass rose, needle, bearing lines, grid, arrows, telescope, sextant, modern pin, routes, lettering or legend. Compact silhouette legible24px, distinct from ship/cargo icon. Soft Ghibli TWO-TONE CEL shading, flat cream parchment plus one simple muted shadow, flat teal map mark, fine sparse brown ink, no gradients, gloss, realistic texture, mottling, heavy outlines or tattered-edge decoration. White background, no shadow or extra props."
+    }
+  ],
+  "11a-painted-cel-steel": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/resource_steel/refined.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED OPTION A: richer painted planes; marks/heavy edge remain;313px subject",
+      "prompt": "First references are approved STYLE: original villager and primary diorama. Last image is SUBJECT GEOMETRY only, never a style standard. Draw NEW original-resolution painted game art, fine thin dark-brown ink like the villager, two gentle cel tones with broad quiet areas and very restrained handmade wash variation. Preserve richer material hues without gloss. White background, no cast shadow, framing, lettering or extra props. Paint exactly TWO stacked FORGED steel ingots, same compact silhouette and three-quarter camera as last image. Cool blue-grey faces and slightly darker blue-grey side, gentle warm reflected edge color. Slight handmade irregularity in forged silhouette, sparse fine brown contours, perhaps two tiny quiet forging marks total. Preserve painted Ghibli cel character rather than perfectly uniform vector blocks. NO shiny white lines, no glossy bevels, no chrome reflections, no realistic scratches or mottled material study. Legible24/32px."
+    }
+  ],
+  "11b-painted-cel-subjects": [
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/wolf-current-crop.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "GEOMETRY RESTORED ONLY: essentially same tan coat as runtime",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Preserve EXACTLY the last image wolf pose, head/body proportions, leg placement, slightly elevated RTS camera and RIGHT-facing stance. Head faces screen-right, muzzle points right, tail on left. Do not turn head toward viewer or make it upright/dog-like. Simplify existing fur into a few broad muted slate-grey masses and one cool grey shadow tone; pale quiet muzzle/chest, same narrow pointed ears and threatening alert wildlife identity. Erase tiny fur marks and faceted modeling; at most a few short fine strokes. No individual hairs, mane detail or glossy eyes. Preserve current silhouette rather than inventing a new animal."
+    },
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/09b-era-explore-calibration/command_explore/original.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "NEEDS REFINEMENT: copied heavy contour and baked shadow",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Keep one small parchment coastline/island map and one simple FIVE-point celestial star separate just above paper. NO compass rose or instrument. Refine the last icon into finer delicate brown pen lines like the villager, replacing heavy sticker contour; parchment soft painted cream with one pale cel shadow, muted teal simple island mark and small blue-teal star. Remove baked drop shadow, bevels, black edges and excessive scroll-cylinder bulk. Sparse restrained painted paper variation only, no texture noise. Compact single symbol readable24/32px; no grid, route, pin, text, needle or navigation device."
+    },
+    {
+      "name": "category_military",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/category_military/generated.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "REJECTED: glossy face; spear shaft drawn across shield",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Preserve one ancient Greek ROUND hoplite shield with ONE simple spear behind it on same diagonal as reference. Replace glossy rendering with gently painted matte muted royal-blue shield face, one quiet darker-blue cel shadow, slender restrained bronze rim with fine brown contour. Shield is not a shiny hemisphere: NO bright hotspot, reflected white arc, continuous spherical gradient, bevel or specular shine. Allow subtle hand-painted irregularity so not vector diagram. No heraldry, symbols or extra weapons. Fine lines, sparse detail, readable24/32px."
+    }
+  ],
+  "11c-steel-targeted-retry": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/resource_steel/generated.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED OPTION B: pale, close to original HD source",
+      "prompt": "Images1/2 are approved STYLE authority: original painted villager and primary diorama. Image3 is original high-resolution steel SUBJECT geometry only. Redraw THREE stacked forged steel ingots in exactly that compact arrangement/camera. Use cool muted blue-grey steel, broad quiet faces with two gentle cel tones, and just a little handmade painted variation. Fine delicate dark-brown contour comparable to villager; remove almost all tiny etching/hatch/scratch marks from subject image. At most two short edge marks on the entire stack. Do NOT make a realistic metal study: no chrome, specular glints, shiny white bevels, mottled microtexture or gradient sheen. Also do NOT make perfectly uniform vector blocks: allow slight handmade contour irregularity and subtle soft painted tone variation. Shape must read as forged metal at24/32px. White background, no ground/shadow/text."
+    }
+  ],
+  "11d-map-shield-targeted-retries": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "NEEDS REFINEMENT: simpler map but contour/drop shadow remain",
+      "prompt": "Attached original villager and Greek diorama are STYLE only. Draw a NEW single game icon: one small rectangular parchment map with gently curled paper edges, not bulky scroll handles, showing a single simple muted-teal island coastline; one small ordinary five-point celestial star above it. NO compass rose/device, needle, grid, route, modern markings, text, pins. Delicate fine brown PEN hairlines matching villager: contours about1-2px at1024, NEVER thick marker/sticker outlines. Soft painted cream paper with one gentle cel shadow and sparse faint wash variation, muted teal island and star. Do not make a glossy beveled/vector sticker. Absolutely NO cast/drop shadow behind paper or star. No wood rollers. Icon readable24px and distinct from boat/cargo. White empty background. Preserve soft Ghibli painted-cel feeling."
+    },
+    {
+      "name": "category_military",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED PROMISING: quiet cel face; spear correctly behind",
+      "prompt": "Attached images are approved original villager/guard STYLE and MATERIAL references. Create one NEW small game UI icon of the guards ancient Greek ROUND shield, simple muted royal-blue PAINTED WOOD face with slender dull bronze rim, and one spear ENTIRELY BEHIND the shield diagonally. The central spear shaft is completely OCCLUDED by shield; only spearhead above upper-right and handle BELOW lower-left outer edge may show. NO shaft drawn on top of the blue face. Blue face uses two quiet PAINTED CEL tones like the guard shield/cloak: broad muted blue and one very restrained blue shadow shape. The blue is matte pigment on wood, NOT reflective metal, no hotspot, specular reflection, shiny rim, spherical gradient or bevel rendering. Small sparse handmade wash variation allowed, fine thin brown pen contours, no decorative marks, no individual planks, no heraldry. Clean readable24/32px isolated icon. White background, no shadow or text."
+    }
+  ],
+  "11e-wolf-cool-coat-retry": [
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/wolf-current-crop.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "FAILED COLOR CORRECTION: still tan; geometry retained, no improvement claimed",
+      "prompt": "Image1 original villager and image2 primary Greek diorama are approved STYLE only. Image3 is the exact wolf GEOMETRY to retain. Edit the WOLF COAT COLORS, keeping EXACT same RIGHT-facing muzzle, head/body silhouette, slightly elevated camera, paws/leg positions, tail position and animal scale as image3. Replace ALL tan/brown dorsal coat with unmistakably natural COOL SLATE GREY (roughly #7f8c92), one darker cool-grey cel shadow (roughly #616f79). Keep a restrained pale CREAM underside/muzzle. Brown/tan upper coat must be gone; do NOT simply copy original colors. Simplify interior fur into two broad quiet painted cel masses and fewer jagged fur cuts, no individual hair strokes, no texture noise, no dense mane. Match villagers gentle Ghibli painted-cel planes/fine brown pen; do not add realistic modeling or gradients. No new body parts/props, no pose change, no face turned toward camera. White background, no ground/shadow/text."
+    }
+  ],
+  "12-map-fine-lines": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png",
+        "assets/sprites/hd_sources/spr/idle_front_cut.png",
+        "assets/ui/icons/resource_wood.png",
+        "assets/ui/icons/resource_food.png",
+        "assets/ui/icons/tech_masonry.png"
+      ],
+      "cel_prompt": "map-lines-only-prompt.txt",
+      "review_status": "REJECTED: changed layout, colors, island count and star",
+      "prompt": "EDIT ONLY IMAGE1, the current map. Images2-5 are APPROVED STYLE references only for fine brown pen stroke weight (original retained villager HD strip and wood/food/masonry UI kit). Keep EXACT image1 composition and pixels of paper, paint, color, shadows and texture. Reduce the thickness of every existing brown ink stroke by about55 percent: outer parchment contour, curled folds, island coastlines, star outline and its interior seams. Replace thick marker/sticker lines with fine delicate brown PEN lines, centered on the same existing paths, same brown hue. Do not erase coastlines or make the star illegible; should read at24/32px. Do not move, reshape, resize or recolor the map, paper, islands or celestial star. Do not add/remove details, texture, islands, shadows, folds, devices, compass rose or lettering. Return the SAME map illustration with materially thinner linework only, same framing on white background. No other redesign."
+    }
+  ],
+  "12b-map-line-only-retry": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/hd_sources/spr/idle_front_cut.png",
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png"
+      ],
+      "cel_prompt": "map-lines-only-prompt.txt",
+      "review_status": "FAILED LINE CORRECTION: composition retained, no material thinning",
+      "prompt": "IMAGE1 is STYLE reference ONLY for delicate thin brown pen strokes. IMAGE2 is the EXACT MAP TO EDIT. Do not copy or draw the people. Return IMAGE2 with only its BROWN INK LINES made approximately HALF AS THICK, centered on the existing exact paths. This is surgical stroke-weight correction, NOT a new illustration. Keep the tall vertical paper, four curled corners, top five-point teal star, one large lower teal island and one small bottom-left teal island EXACTLY in their existing positions/sizes/colors. Keep the exact cream parchment wash, tan edge shading, all existing texture and shadow unchanged. Both OUTSIDE CONTOUR and interior coastline/star/fold lines must visibly become thinner, approximately1-2px pen strokes instead of thick outlines. Same brown hue. Coastline remains continuous and readable24px. Do NOT rotate, widen, recolor, simplify shapes, add details, add islands, move star, draw compass rose or change composition. SAME source map framing on white; LINE THICKNESS ONLY."
+    }
+  ],
+  "12c-openai-map-refinement": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/alternatives/2026-10-06/11d-map-shield-targeted-retries/command_explore/original.png"
+      ],
+      "prompt": "Make a precise restrained refinement of this EXACT supplied game UI icon. It is already approved in composition, shapes, colours and painted cel style. The ONLY requested change is noticeably FINER linework. Reduce the thickness of every dark-brown ink contour by roughly 50 percent: particularly the outer parchment outline, curled corner/fold lines, island/coastline contours and star ink lines. Keep each line on its EXISTING path. Fine delicate brown pen lines, not bold cartoon/sticker outlines. Do not redesign, reposition, recolor, rescale, rotate, simplify or add objects. Preserve exactly the vertical parchment silhouette with its four folded/curling corners, the separate five-point teal celestial star printed in the upper half, the one larger teal island shape and small teal island lower down, their exact relative placements and sizes, cream parchment colours, subtle painted two-tone shading, existing sparse texture, the white background and the generous existing white margins. No compass, compass needle, compass rose, labels, letters, new texture or additional embellishments. Do not thicken the contours with a second offset line. The resulting image must look like the SAME icon with visibly thinner and lighter-touch brown ink when scaled to128px and24/32px. Preserve the existing image dimensions/composition as closely as possible.",
+      "external_refinement": true,
+      "model": "OpenAI image_gen",
+      "review_status": "UNAPPROVED MAP CORRECTION: preferred direction, visibly finer lines; candidate only"
+    }
+  ]
+}

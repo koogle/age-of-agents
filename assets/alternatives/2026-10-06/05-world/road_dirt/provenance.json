@@ -1,0 +1,23 @@
+{
+  "name": "road_dirt",
+  "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Paint softly worn compacted neutral umber earth with sparse tiny muted ochre pebbles and a few subtle olive-grey mineral tones, distinguish from pale beach sand. Even gentle brushwork, broad quiet areas, no rut lines or vegetation objects. Flat top-down swatch filling the entire square. No horizon, vignette, objects, border or text. Low contrast suitable for repeated ground sampling. ",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/terrain/road_dirt.png",
+      "sha256": "c787edc155f9ca9598b31674e304a23dc50a92cd02851f1cdcc9f096116f8a1a"
+    }
+  ],
+  "family": "texture",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "UNAPPROVED: direction candidate; see style review"
+}

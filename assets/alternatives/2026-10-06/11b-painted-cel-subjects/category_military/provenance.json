@@ -1,0 +1,35 @@
+{
+  "name": "category_military",
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/ui/sources/menu_icons/category_military/generated.png",
+      "sha256": "b4113805971206571d659761db8979f7f2c2e9c39fbe6f1e9e37d0232d44ca15"
+    }
+  ],
+  "cel_prompt": "cel-painterly-prompt.txt",
+  "review_status": "UNAPPROVED: painted-cel refinement",
+  "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Preserve one ancient Greek ROUND hoplite shield with ONE simple spear behind it on same diagonal as reference. Replace glossy rendering with gently painted matte muted royal-blue shield face, one quiet darker-blue cel shadow, slender restrained bronze rim with fine brown contour. Shield is not a shiny hemisphere: NO bright hotspot, reflected white arc, continuous spherical gradient, bevel or specular shine. Allow subtle hand-painted irregularity so not vector diagram. No heraldry, symbols or extra weapons. Fine lines, sparse detail, readable24/32px. Era constraint: ancient Greek Mediterranean setting. Depict plausible ancient materials, clothing, tools, vessels and architecture. No magnetic compass, compass rose/needle, telescope, sextant, modern globe/cartographic markings, GPS routes, modern location pins, medieval heraldry, modern footwear construction or modern clothing cuffs. Do not invent writing. Abstract action arrows/checks are UI glyphs, not historical equipment. Preserve required gameplay meaning without inventing an exact date. Style constraint: painted Studio Ghibli-leaning cel art matching the retained original villager. Two gentle tonal areas, broad quiet color, fine sparse brown ink, very restrained hand-painted variation and small soft highlights are allowed. Do not turn it into a sterile vector diagram. No glossy/PBR/specular material rendering, dense texture noise, fur strands or bevels. Preserve subject hue separation and readable silhouette; approved villager and primary diorama are style authority, subject references only lock geometry.",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "REJECTED: glossy face; spear shaft drawn across shield",
+  "prompt_templates": [
+    {
+      "path": "era-prompt.txt",
+      "sha256": "6fca6864831205e9e29cac3c592f410772ddd0017e90f079c8513f922b6763d1"
+    },
+    {
+      "path": "cel-painterly-prompt.txt",
+      "sha256": "903e0f8f6f624d341da100fba93d606e2bcee6286d1f93ce3db029a4d47b0bcb"
+    }
+  ]
+}

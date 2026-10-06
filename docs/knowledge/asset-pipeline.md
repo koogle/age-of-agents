@@ -108,6 +108,7 @@ An art PR must include a completed style review with these acceptance criteria:
 | Light and material | Soft, restrained watercolor/cel shading consistent with the family | Glossy bevels, dramatic gradients, hard high-contrast bands |
 | Shape and detail | Clear silhouette, sparse hatching, coherent geometry at display size | Dense decoration, tiny scattered details, distorted anatomy or perspective |
 | Camera and scale | Existing family viewpoint, optical weight and safe bounds | A new camera, oversized art, inconsistent anchors or proportions |
+| Era fit | Ancient Greek Mediterranean subjects/material depiction; simple abstract UI glyphs | Magnetic compasses, modern navigation instruments, medieval heraldry or clearly modern equipment |
 | Integration | Clean alpha on dark green, parchment and blue; legible alongside siblings | White fringe, accidental shadow, frame or background, ambiguous meaning |
 
 Include reference/result comparisons at source size and **24/32px for icons**,
@@ -208,6 +209,89 @@ neutral limestone grey with modestly deeper fine joints and clearer soft face
 shading; retain the irregular layout and painted style. Dirt stays unchanged.
 Jakob preferred the revised neutral-limestone texture after seeing the comparison.
 Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
+
+## Alternative batches (2026-10-06, reviewed archive)
+
+Jakob requested alternatives for recently merged art using the original villager
+model and similar prompts, to restore consistency and controlled color accents.
+The retained originals use `fal-ai/nano-banana/edit` (see sprite README and
+`tools/strips.py`); preserve villagers and runtime assets. Candidates live under
+`assets/alternatives/2026-10-06/`, with exact references and request provenance.
+Newer assets supply subject geometry only; approved villagers, primary diorama
+and original UI kit supply style. Review a small calibration batch before
+scaling; rear dock timber should share the front material rather than turn grey.
+Jakob preferred the latest calibrations including the thin-line map and explicitly
+authorized merging the candidate archive in PR #145 on 2026-10-06. Rejected
+attempts remain rejected; these are not integration-ready animations.
+
+The first batches confirm that reusing the same model is insufficient: small
+128px subject references can be copied as blurred enlargements, explicit rear-view
+prompts can produce another front view, and palette corrections can invent props.
+Keep approved style references attached, use retained HD subject identity when
+needed, inspect each batch and retain failures. The candidate gallery and explicit
+[review](../../assets/alternatives/2026-10-06/STYLE_REVIEW.md) separate successful
+color directions from unfinished linework, material, silhouette and alpha work.
+
+## Era fit (developer steering, 2026-10-06)
+
+Jakob explicitly rejected anachronistic visuals, citing the compass. Review every
+subject for the broad ancient Greek Mediterranean setting, without inventing an
+exact year or banning plausible metallurgy/tools. The shipped Explore magnetic
+compass and map-plus-compass alternative are historically rejected; runtime
+replacement remains pending integration. Prefer simple coastline parchment with
+a celestial star, not a compass rose, magnetic needle or modern navigation marks.
+Check footwear, weapons, armor, heraldic ornament and material depiction as well
+as palette. Abstract directional/check UI glyphs are interface conventions, not
+claims of period artifacts. Record uncertain identifications as questions.
+See the [candidate era audit](../../assets/alternatives/2026-10-06/ERA_REVIEW.md).
+
+## Cel shading correction (developer steering, 2026-10-06)
+
+Jakob liked some alternatives but found others too realistic, losing the
+cel-shaded Studio Ghibli look. Stop broad expansion; calibrate at most three
+representative subjects before any further batch. Original villagers and primary
+diorama are visual authority. Restore soft two-tone cel shading, broad quiet flat
+colors, sparse brown ink, restrained highlights and simplified painted forms.
+Color pop comes from subject hue/value separation and silhouette, not gloss,
+specular gradients, PBR-like material modeling, microtexture or dense fur.
+Original UI wood/food may support readability but must not pull material rendering
+toward realism. Earlier glossy steel/cloth/shield, realistic bread and detailed
+wolf alternatives are not preferred defaults; label their review status visibly.
+
+## Bounded painted-cel refinement (2026-10-06)
+
+After seeing comparisons, Jakob asked to keep working on them. The next bounded
+review covers steel, wolf, Explore and military shield only; cloth and sandal
+remain tentative. Preserve hand-painted Ghibli cel character, not sterile flat
+vector diagrams. Restrained painted variation and a small soft highlight are
+allowed when consistent with the original villagers; avoid gloss/PBR and noise.
+Lock original wolf right-facing silhouette/camera with retained HD subject art,
+while simplifying fur. Keep map contours fine and its celestial star distinct
+from a compass rose. Inspect the representative before any targeted retries;
+maximum one retry per subject for a concrete defect, no broad regeneration.
+
+Check actual reference dimensions before submission: `refined.png` in the menu
+kit can be a 313px crop while `generated.png` retains 1024px. File names do not
+establish HD source quality. In this bounded follow-up, strong wolf geometry
+references were copied without requested recoloring; preserve that failure and
+stop at the retry bound rather than calling near-identical output an improvement.
+
+## Map line-weight correction (2026-10-06)
+
+Jakob likes the visible calibration direction, except the map linework remains
+too thick. Refine only the current Explore map contours: thinner outer edge,
+coastline, star and fold ink matching approved villagers/UI kit. Preserve layout,
+silhouette, palette, paper/islands/star and existing texture; no wider redraw.
+This initial preference did not approve runtime integration or accept the failed
+wolf recolor; later explicit archive merge authorization is recorded above. Keep originals and compare at 128/24/32px; at most one
+targeted retry after the initial map-only pass.
+
+Both original-model narrow map edits failed: one redesigned the image, one
+retained the thick stroke. Root then disclosed OpenAI image_gen refinement and
+used the preferred map as its sole direct image input. The resulting contour is
+visibly finer at 128/24/32px; retain the exact direct-input distinction, source
+chain and unknown OpenAI cost/backend. Never relabel an external refinement as
+a FAL illustration or infer runtime approval from the user liking a direction.
 
 ## Dirt road readability follow-up (2026-10-06)
 
