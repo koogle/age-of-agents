@@ -24,7 +24,7 @@ port 8000. It refuses to start when that port is occupied and never opens the
 configured or production database. It uses a flat, visible settlement from
 `crates/game/examples/roads_fixture.rs`, Chromium software WebGL, desktop mouse
 (1280×800 DPR1) and emulated phone touch (390×844 DPR2). Phone endpoints are
-shifted four cells east to keep the full lines inside its narrow viewport.
+shifted four cells east to keep endpoint taps inside its narrow viewport.
 
 It selects a villager, opens Build → Roads, places seven dirt cells and seven
 stone cells through real inputs, checks dominant-axis snapping, waits for
@@ -55,8 +55,8 @@ from those swatches; straight boundaries are deliberate grid edges. The existing
 Build and stone medallions retain the approved palette and scale, with explicit
 Dirt road / Stone road labels. Retained captures: [desktop before](desktop-before.png),
 [desktop line preview](desktop-dirt-preview.png), [phone menu](phone-dirt-menu.png),
-and the completed roads below. The phone captures are at maximum native camera
-scale for this scene; physical device rendering remains unverified.
+and the completed roads below. The phone captures use the default camera scale; physical device rendering
+and maximum-zoom appearance remain unverified.
 
 ![Completed roads on desktop](desktop-stone-complete.png)
 
