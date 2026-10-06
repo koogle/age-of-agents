@@ -1,3 +1,8 @@
+# Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
+
+- User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
+- Formatting, 289 combined workspace tests (one existing ignored benchmark), strict native/WASM lint and the release WASM rebuild pass. Desktop mouse and emulated DPR-2 phone touch browser checks pass without page errors; [visual evidence](docs/verification/build-subcategories/README.md). Code-quality review: one direct layout branch, no dependency or new state. User authorized PR creation and merge on 2026-10-06. Integrated master `f4d5b01`, preserving roads, wildlife, menu icons, building availability and granary yield. Combined checks and refreshed desktop/phone browser captures pass. Production uses the merge-triggered release workflow.
+
 # Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
 
 - User approved the refined road textures and authorized merging PR #133 on 2026-10-06. Branch `feat/basic-roads` integrates master `f985a92`, preserving dedicated menu icons, wildlife attack art, granary yield and building availability. Merge/release status is tracked by the linked PR and [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
