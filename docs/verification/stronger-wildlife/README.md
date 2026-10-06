@@ -40,3 +40,12 @@ Thermonuclear review: runtime changes are four domain balance constants; no new
 engine, dependency, protocol, save schema or client-side rules. The old lone-villager
 victory test is replaced with group outcome and order-cleanup coverage. Bounds
 validation and blocked-corner tests follow the new maximum. No art changes.
+
+## Authorized merge integration
+
+Integrated master `b786f46` (water and refined menus). All 294 workspace tests,
+strict native/WASM lint, formatting, asset checks, six release-verifier tests
+and rebuilt desktop/DPR2-phone combat pass. [Combined browser state](merged-results.json).
+No source conflicts; preserved both handoff sections and rebuilt the generated WASM.
+Thermonuclear review remains satisfied: balance stays in the shared domain.
+Combined WASM SHA256: `a1bc48266f7413b177a5883faf795b57f7923a5b964c5765961d73b542e4791c`.

@@ -2,8 +2,11 @@
 //! creates a harvest. Exhausted plots retain their footprint until replenished.
 use super::*;
 
-pub const FIELD_COST: &[(ResourceKind, f64)] =
-    &[(ResourceKind::Wood, 10.0), (ResourceKind::Stone, 5.0)];
+pub const FIELD_COST: &[(ResourceKind, f64)] = &[
+    (ResourceKind::Wood, 10.0),
+    (ResourceKind::Stone, 5.0),
+    (ResourceKind::Water, 10.0),
+];
 pub const FIELD_FOOD: f64 = 120.0;
 pub const FIELD_WORK_SECONDS: f64 = 12.0;
 pub const GRANARY_FIELD_RADIUS: u16 = 6;

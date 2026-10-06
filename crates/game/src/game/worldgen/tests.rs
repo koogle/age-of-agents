@@ -1,5 +1,40 @@
 use super::*;
 
+#[test]
+fn first_and_later_islands_have_reachable_renewable_riverbank_water() {
+    for seed in 0..24 {
+        for id in 0..4 {
+            let island = if id == 0 {
+                generate(seed)
+            } else {
+                destination(seed, id)
+            };
+            let sources: Vec<_> = island
+                .resources
+                .iter()
+                .filter(|r| r.kind == ResourceKind::Water)
+                .collect();
+            assert!(!sources.is_empty(), "seed {seed}, island {id}");
+            for r in sources {
+                let i = index(r.cell);
+                assert!(island.terrain[i].biome.is_walkable());
+                assert!(neighbours4(i).any(|n| island.terrain[n].biome == TerrainBiome::River));
+                assert_eq!(r.amount, r.capacity);
+            }
+            assert_eq!(
+                reachable_only(
+                    &island.terrain,
+                    island.resources.clone(),
+                    island.town_center,
+                    island.villagers[0]
+                )
+                .len(),
+                island.resources.len()
+            );
+        }
+    }
+}
+
 fn index(cell: CellCoordinate) -> usize {
     at(usize::from(cell.column), usize::from(cell.row))
 }
@@ -79,7 +114,10 @@ fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
             assert!(total >= cost * 1.5, "seed {seed}: only {total} {kind:?}");
         }
         for (number, resource) in world.resources.iter().enumerate() {
-            assert!(grows_in(resource.kind).contains(&world.terrain[index(resource.cell)].biome));
+            assert!(
+                resource.kind == ResourceKind::Water
+                    || grows_in(resource.kind).contains(&world.terrain[index(resource.cell)].biome)
+            );
             // Villager 1 can walk to every node (the real pathfinder, not the generator's check).
             assert!(
                 world.can_reach_beside(0, resource.footprint()),
@@ -109,7 +147,10 @@ fn every_island_holds_enough_reachable_resources_to_reach_a_boat() {
         }
         // Everything else has to be found by exploring.
         for resource in &world.resources {
-            if !matches!(resource.kind, ResourceKind::Wood | ResourceKind::Food) {
+            if !matches!(
+                resource.kind,
+                ResourceKind::Wood | ResourceKind::Food | ResourceKind::Water
+            ) {
                 assert!(
                     resource.cell.center().distance(base.center()) >= FAR_FROM_START - 2.0,
                     "seed {seed}: {} lies by the start",

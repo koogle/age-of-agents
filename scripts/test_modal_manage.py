@@ -22,7 +22,7 @@ class TerrainTests(unittest.TestCase):
 
 class InventoryTests(unittest.TestCase):
     def setUp(self):
-        stock = dict.fromkeys("wood food stone gold iron coal clay fiber timber steel bricks cloth rations".split(), 0.0)
+        stock = dict.fromkeys("water wood food stone gold iron coal clay fiber timber steel bricks cloth rations".split(), 0.0)
         self.state = {
             "island_origins": [{"column": 0, "row": 0}, {"column": 184, "row": 0}],
             "inventories": [dict(stock, wood=10.0), dict(stock, food=7.0)],

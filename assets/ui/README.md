@@ -97,6 +97,11 @@ Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipelin
 
 ## Dedicated menu icon additions
 
+The subsequent [four-icon simplification](sources/menu_icons/simplification/README.md)
+retains previous PNGs, exact refinement prompts, normalized before/after views
+and individual PR status for Cargo, Gathering, Town and Disembark. It reduces
+secondary props and repeated detail while preserving the established family.
+
 Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
 
 | Icon | Sources and visual review |
@@ -115,6 +120,16 @@ Integration PR #107 wires these files into the HUD with combined Rust, asset and
 | `command_explore` | [Review](sources/menu_icons/command_explore/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_explore/provenance.json) |
 | `command_cargo` | [Review](sources/menu_icons/command_cargo/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_cargo/provenance.json) |
 | `command_back` | [Review](sources/menu_icons/command_back/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_back/provenance.json) |
+
+## Water resource (2026-10-05)
+
+`icons/resource_water.png` is the generated/refined terracotta water jug added
+for freshwater collection and field preparation. The approved wood/food/masonry
+references, draft, refinement, and provenance are retained under `sources/water/`.
+`python3 scripts/pack_water.py` packs the normalized icon and the matching 512px
+riverbank marker into the existing resource atlas without modifying old frames.
+See [comparison and verification](../../docs/verification/water/README.md).
+
 | `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
 | `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
 | `category_production` | [Review](sources/menu_icons/category_production/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_production/provenance.json) |

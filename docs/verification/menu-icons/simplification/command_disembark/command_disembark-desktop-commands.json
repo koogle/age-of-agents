@@ -1,0 +1,10 @@
+[
+  {
+    "command": {
+      "ship_id": "menu-ship",
+      "type": "disembark"
+    },
+    "request_id": "r1",
+    "type": "command"
+  }
+]

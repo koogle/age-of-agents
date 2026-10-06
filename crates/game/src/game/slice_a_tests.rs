@@ -7,7 +7,7 @@ fn roadmap_catalog_has_exact_stable_wire_contract() {
         catalog_json,
         serde_json::json!({
             "resources": [
-                "wood", "food", "stone", "gold", "iron", "coal", "clay", "fiber",
+                "water", "wood", "food", "stone", "gold", "iron", "coal", "clay", "fiber",
                 "timber", "steel", "bricks", "cloth", "rations"
             ],
             "buildings": [

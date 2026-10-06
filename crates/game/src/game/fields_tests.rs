@@ -10,6 +10,7 @@ fn world() -> GameWorld {
         .push(building(BuildingKind::Farm, "farm", cell(14, 10), None));
     w.inventories[0].wood = 100.0;
     w.inventories[0].stone = 100.0;
+    w.inventories[0].water = 100.0;
     w
 }
 
@@ -29,7 +30,7 @@ fn cultivate(w: &mut GameWorld, number: u8) -> Result<(), CommandError> {
 
 #[test]
 fn fields_require_a_completed_farm_materials_and_free_land_atomically() {
-    for case in 0..4 {
+    for case in 0..5 {
         let mut w = world();
         w.units[0].action = UnitAction::Move { to: cell(8, 10) };
         match case {
@@ -38,6 +39,7 @@ fn fields_require_a_completed_farm_materials_and_free_land_atomically() {
             }
             1 => w.buildings.last_mut().unwrap().construction = Some(0.0),
             2 => w.inventories[0].stone = 4.0,
+            3 => w.inventories[0].water = 9.0,
             _ => w.units[1].cell = cell(12, 12),
         }
         let before = serde_json::to_string(&w).unwrap();
@@ -50,6 +52,7 @@ fn fields_require_a_completed_farm_materials_and_free_land_atomically() {
 fn preparation_pauses_persists_and_shared_work_never_charges_twice() {
     let mut w = world();
     plant(&mut w).unwrap();
+    assert_eq!(w.inventories[0].water, 90.0);
     assert_eq!(
         (w.inventories[0].wood, w.inventories[0].stone),
         (90.0, 95.0)
@@ -80,6 +83,7 @@ fn preparation_pauses_persists_and_shared_work_never_charges_twice() {
         (90.0, 95.0)
     );
     assert_eq!(cultivate(&mut w, 1), Err(CommandError::FieldNotDepleted));
+    assert_eq!(w.inventories[0].water, 90.0);
     w.validate().unwrap();
 }
 
@@ -106,7 +110,16 @@ fn harvesting_exhausts_fields_and_replenishment_requires_materials_and_labor() {
     );
     assert_eq!(before, serde_json::to_string(&w).unwrap());
     w.inventories[0].wood = 20.0;
+    w.inventories[0].water = 9.0;
+    let before = w.clone();
+    assert_eq!(
+        cultivate(&mut w, 1),
+        Err(CommandError::InsufficientResources(ResourceKind::Water))
+    );
+    assert_eq!(w, before);
+    w.inventories[0].water = 10.0;
     cultivate(&mut w, 1).unwrap();
+    assert_eq!(w.inventories[0].water, 0.0);
     assert_eq!(
         (w.inventories[0].wood, w.inventories[0].stone),
         (10.0, 90.0)

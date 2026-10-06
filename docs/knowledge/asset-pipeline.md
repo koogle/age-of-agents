@@ -49,6 +49,21 @@ historical. Do not assume a local login or provider access exists in a new sessi
 
 ## Style acceptance is a merge gate
 
+**Developer steering, 2026-10-06:** After comparing the rejected and merged
+menu icons, Jakob requested further refinement and slightly simpler icons.
+Keep the established thin brown ink and restrained watercolor family. Reduce
+secondary props, repeated texture strokes and tiny decoration where they compete
+with the primary silhouette at 24/32px; preserve each command's meaning. Start
+with a representative Cargo refinement, then review Gathering, Town and
+Disembark. The four replacements now pass the style review, optical/alpha checks
+and six desktop/DPR-2 phone menu captures; their independent runtime replacements
+are tracked in the [refinement ledger](../../assets/ui/sources/menu_icons/simplification/README.md).
+Jakob subsequently authorized showing the four refinements and merging them.
+The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png)
+shows the normalized candidates against the previous art and approved references
+at 128/24/32px on parchment, dark green and blue. Simplification removes props
+and repeated interior marks rather than increasing contour weight.
+
 **Developer steering, 2026-10-05:** Jakob flagged visual style drift during the
 menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft
@@ -144,6 +159,16 @@ register each construction stage, and the atlas manifest drives texture dimensio
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
 
+## Water icon correction (2026-10-06)
+
+User rejected the initial water icon as inconsistent with the established style.
+The earlier water review overstated the match: the jug has heavy contours,
+saturated orange shading and broad highlights beside the finer, restrained
+resource kit. That style pass is superseded. Use approved wood/food/masonry
+references directly for the correction; the rejected jug is subject reference
+only. Retain the rejected source and compare the replacement at 24/32px before
+integration. Technical validity does not establish visual consistency.
+
 ## Road surface refinement (2026-10-06)
 
 Jakob requested closer style matching for both roads after PR #133. The initial
@@ -162,3 +187,7 @@ prompts/reference hashes before integration.
 Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.
 
 Follow-up direction: compare wildlife directly with existing NPCs, not only the world mood board. Attach `villager_idle_hd.png` and `hd_sources/units/guard_idle_front_cut.png` to refinement; judge the same sparse contours, broad quiet color areas and cel shadow treatment side by side at matched gameplay scale. First softer fur pass still has excessive faceted texture and is rejected as the final style.
+
+The corrected water art was explicitly accepted by the user on 2026-10-06
+("Looks much better"). It uses pale clay, muted blue water and finer ink; the
+comparison and desktop/DPR-2 previews are in the water verification folder.
