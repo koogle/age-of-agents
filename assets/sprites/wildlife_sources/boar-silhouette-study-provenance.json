@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-06",
+  "model": "OpenAI image_gen",
+  "status": "draft study; not integrated",
+  "prompt": "boar-silhouette-study-prompt.txt",
+  "source_output": "/workspace/generated_images/exec-ba080c11-36a3-459a-a897-9df94509d22f.png",
+  "references": {
+    "assets/sprites/wildlife_sources/draft.png": "a019d18ba82a7eacb78b5c0bddc9f63e15546bf5d778bea7b9ea6d6be285e904",
+    "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5",
+    "assets/sprites/villager_idle_hd.png": "4ffd31e2f1cfd0be413a7ae68bdd0414dd3ef230f1782fb1ea40f1d2b551c6ef",
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+  },
+  "review": "More natural wedge snout, smaller dark hooves and muted color, but dense fur texture returned. Not accepted as a finished style match. User clarification on the mismatch remains pending."
+}
