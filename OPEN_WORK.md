@@ -1,8 +1,9 @@
 # Art alternatives — [draft PR #145](https://github.com/koogle/age-of-agents/pull/145)
 
 - Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
-- Completed 47 illustration attempts across calibration, three UI batches, world candidates and targeted repairs; 92 successful FAL calls, estimated $2.0956 plus one validation failure with unknown billing. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
+- Completed 55 illustration attempts across calibration, three UI batches, world candidates and targeted repairs; 108 successful FAL calls, estimated $2.4540 plus one validation failure with unknown billing. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
 - New user steering: era-fit audit rejects magnetic compass and modern-looking boot/heraldry; map/star and sandal candidates added. Broad regeneration paused after three-subject cel calibration; cloth/wolf improve flatness, steel still needs correction. Runtime compass replacement pending integration.
+- Authorized four-subject painted-cel follow-up is complete: steel A/B choices, promising matte shield/occluded spear; map still needs line/shadow cleanup and wolf recolor FAILED despite restored geometry. Exactly one retry per subject; no more generation. Cloth/sandal unchanged.
 - Candidate image/hash/alpha checks pass; runtime files unchanged. Rejected attempts and style gaps are explicit in `assets/alternatives/2026-10-06/STYLE_REVIEW.md`. No full animation/construction variants, runtime integration, gameplay approval, deployment or automatic merge.
 
 # Stone road contrast refinement — [PR #143](https://github.com/koogle/age-of-agents/pull/143)

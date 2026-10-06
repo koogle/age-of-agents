@@ -70,3 +70,21 @@ simpler but retains edge glints/gradients and is NOT a style pass. No further
 generation expanded from this calibration. Era map removes compass/rose but has
 a heavier contour and baked shadow requiring cleanup; sandal removes modern
 boot/cuff. All remain unapproved. See cel/era correction comparison sheets.
+
+## Four-subject painted-cel refinement (user requested continued work)
+
+Bounded to steel, wolf, Explore and military shield, with exactly one targeted
+retry each. Cloth/sandal were not regenerated. No further generation followed.
+
+| Subject | Concrete result | Remaining limit |
+| --- | --- | --- |
+| Steel A | Richer cool-grey painted planes and three-ingot silhouette. | Dense edge marks/strong contour; initial subject reference was 313px, discovered after submit. Not an HD recovery claim. |
+| Steel B | Retry uses actual 1024px original, quieter pale painted material. | Very close to original; not automatically better than darker A. Both shown as choices. |
+| Wolf | Original right-facing stance/camera/proportions restored. | Both geometry pass and explicit cool-coat retry retained tan colors. Requested recolor FAILED; no meaningful style/color improvement claimed. |
+| Explore | Simpler parchment instead of thick scroll rollers, no magnetic device. | Still has strong contour and drop shadow; no final style pass. |
+| Military shield | Final retry has quiet blue cel face and spear occluded behind shield. | Most promising concrete correction, but optical/alpha/gameplay normalization unverified. |
+
+No unlimited polishing: eight illustration attempts total (four initial, four
+targeted retries), estimated $0.3584 across sixteen successful FAL calls. Prior
+outputs/prompts retained. The lead comparison and separate steel A/B sheet show
+source-size and 24/32px evidence, not a claim that newest is best.

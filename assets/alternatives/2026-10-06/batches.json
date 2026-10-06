@@ -619,5 +619,117 @@
       "review_status": "UNAPPROVED: celestial-star coastline map",
       "prompt": "Use attached original villager and Greek diorama as STYLE authority. Draw one simple game UI icon: a small ancient parchment scroll map with a SINGLE island coastline in muted teal, and ONE tiny ordinary FIVE-POINT star floating just ABOVE the scroll in the sky, visibly separate from paper. The star has five equal points like a simple celestial star, NOT four/eight directional points and NOT a compass rose. No compass instrument, compass rose, needle, bearing lines, grid, arrows, telescope, sextant, modern pin, routes, lettering or legend. Compact silhouette legible24px, distinct from ship/cargo icon. Soft Ghibli TWO-TONE CEL shading, flat cream parchment plus one simple muted shadow, flat teal map mark, fine sparse brown ink, no gradients, gloss, realistic texture, mottling, heavy outlines or tattered-edge decoration. White background, no shadow or extra props."
     }
+  ],
+  "11a-painted-cel-steel": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/resource_steel/refined.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED OPTION A: richer painted planes; marks/heavy edge remain;313px subject",
+      "prompt": "First references are approved STYLE: original villager and primary diorama. Last image is SUBJECT GEOMETRY only, never a style standard. Draw NEW original-resolution painted game art, fine thin dark-brown ink like the villager, two gentle cel tones with broad quiet areas and very restrained handmade wash variation. Preserve richer material hues without gloss. White background, no cast shadow, framing, lettering or extra props. Paint exactly TWO stacked FORGED steel ingots, same compact silhouette and three-quarter camera as last image. Cool blue-grey faces and slightly darker blue-grey side, gentle warm reflected edge color. Slight handmade irregularity in forged silhouette, sparse fine brown contours, perhaps two tiny quiet forging marks total. Preserve painted Ghibli cel character rather than perfectly uniform vector blocks. NO shiny white lines, no glossy bevels, no chrome reflections, no realistic scratches or mottled material study. Legible24/32px."
+    }
+  ],
+  "11b-painted-cel-subjects": [
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/wolf-current-crop.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "GEOMETRY RESTORED ONLY: essentially same tan coat as runtime",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Preserve EXACTLY the last image wolf pose, head/body proportions, leg placement, slightly elevated RTS camera and RIGHT-facing stance. Head faces screen-right, muzzle points right, tail on left. Do not turn head toward viewer or make it upright/dog-like. Simplify existing fur into a few broad muted slate-grey masses and one cool grey shadow tone; pale quiet muzzle/chest, same narrow pointed ears and threatening alert wildlife identity. Erase tiny fur marks and faceted modeling; at most a few short fine strokes. No individual hairs, mane detail or glossy eyes. Preserve current silhouette rather than inventing a new animal."
+    },
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/09b-era-explore-calibration/command_explore/original.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "NEEDS REFINEMENT: copied heavy contour and baked shadow",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Keep one small parchment coastline/island map and one simple FIVE-point celestial star separate just above paper. NO compass rose or instrument. Refine the last icon into finer delicate brown pen lines like the villager, replacing heavy sticker contour; parchment soft painted cream with one pale cel shadow, muted teal simple island mark and small blue-teal star. Remove baked drop shadow, bevels, black edges and excessive scroll-cylinder bulk. Sparse restrained painted paper variation only, no texture noise. Compact single symbol readable24/32px; no grid, route, pin, text, needle or navigation device."
+    },
+    {
+      "name": "category_military",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/category_military/generated.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "REJECTED: glossy face; spear shaft drawn across shield",
+      "prompt": "First two images are approved original villager/Greek diorama STYLE. LAST image is SUBJECT geometry only. Draw NEW original-resolution painted art with fine thin dark-brown ink matching the villager and two gentle cel tones. Broad quiet color masses; very restrained handmade wash variation, not realistic material rendering and not sterile vector art. Preserve subject silhouette and camera exactly. Plain white background, no cast shadow, text or extra props. Preserve one ancient Greek ROUND hoplite shield with ONE simple spear behind it on same diagonal as reference. Replace glossy rendering with gently painted matte muted royal-blue shield face, one quiet darker-blue cel shadow, slender restrained bronze rim with fine brown contour. Shield is not a shiny hemisphere: NO bright hotspot, reflected white arc, continuous spherical gradient, bevel or specular shine. Allow subtle hand-painted irregularity so not vector diagram. No heraldry, symbols or extra weapons. Fine lines, sparse detail, readable24/32px."
+    }
+  ],
+  "11c-steel-targeted-retry": [
+    {
+      "name": "resource_steel",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/ui/sources/menu_icons/resource_steel/generated.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED OPTION B: pale, close to original HD source",
+      "prompt": "Images1/2 are approved STYLE authority: original painted villager and primary diorama. Image3 is original high-resolution steel SUBJECT geometry only. Redraw THREE stacked forged steel ingots in exactly that compact arrangement/camera. Use cool muted blue-grey steel, broad quiet faces with two gentle cel tones, and just a little handmade painted variation. Fine delicate dark-brown contour comparable to villager; remove almost all tiny etching/hatch/scratch marks from subject image. At most two short edge marks on the entire stack. Do NOT make a realistic metal study: no chrome, specular glints, shiny white bevels, mottled microtexture or gradient sheen. Also do NOT make perfectly uniform vector blocks: allow slight handmade contour irregularity and subtle soft painted tone variation. Shape must read as forged metal at24/32px. White background, no ground/shadow/text."
+    }
+  ],
+  "11d-map-shield-targeted-retries": [
+    {
+      "name": "command_explore",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "NEEDS REFINEMENT: simpler map but contour/drop shadow remain",
+      "prompt": "Attached original villager and Greek diorama are STYLE only. Draw a NEW single game icon: one small rectangular parchment map with gently curled paper edges, not bulky scroll handles, showing a single simple muted-teal island coastline; one small ordinary five-point celestial star above it. NO compass rose/device, needle, grid, route, modern markings, text, pins. Delicate fine brown PEN hairlines matching villager: contours about1-2px at1024, NEVER thick marker/sticker outlines. Soft painted cream paper with one gentle cel shadow and sparse faint wash variation, muted teal island and star. Do not make a glossy beveled/vector sticker. Absolutely NO cast/drop shadow behind paper or star. No wood rollers. Icon readable24px and distinct from boat/cargo. White empty background. Preserve soft Ghibli painted-cel feeling."
+    },
+    {
+      "name": "category_military",
+      "family": "icon",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "UNAPPROVED PROMISING: quiet cel face; spear correctly behind",
+      "prompt": "Attached images are approved original villager/guard STYLE and MATERIAL references. Create one NEW small game UI icon of the guards ancient Greek ROUND shield, simple muted royal-blue PAINTED WOOD face with slender dull bronze rim, and one spear ENTIRELY BEHIND the shield diagonally. The central spear shaft is completely OCCLUDED by shield; only spearhead above upper-right and handle BELOW lower-left outer edge may show. NO shaft drawn on top of the blue face. Blue face uses two quiet PAINTED CEL tones like the guard shield/cloak: broad muted blue and one very restrained blue shadow shape. The blue is matte pigment on wood, NOT reflective metal, no hotspot, specular reflection, shiny rim, spherical gradient or bevel rendering. Small sparse handmade wash variation allowed, fine thin brown pen contours, no decorative marks, no individual planks, no heraldry. Clean readable24/32px isolated icon. White background, no shadow or text."
+    }
+  ],
+  "11e-wolf-cool-coat-retry": [
+    {
+      "name": "wolf_idle",
+      "family": "sprite",
+      "aspect_ratio": "1:1",
+      "references": [
+        "assets/sprites/villager_master.jpg",
+        "assets/reference/diorama_primary.webp",
+        "assets/alternatives/2026-10-06/wolf-current-crop.png"
+      ],
+      "cel_prompt": "cel-painterly-prompt.txt",
+      "review_status": "FAILED COLOR CORRECTION: still tan; geometry retained, no improvement claimed",
+      "prompt": "Image1 original villager and image2 primary Greek diorama are approved STYLE only. Image3 is the exact wolf GEOMETRY to retain. Edit the WOLF COAT COLORS, keeping EXACT same RIGHT-facing muzzle, head/body silhouette, slightly elevated camera, paws/leg positions, tail position and animal scale as image3. Replace ALL tan/brown dorsal coat with unmistakably natural COOL SLATE GREY (roughly #7f8c92), one darker cool-grey cel shadow (roughly #616f79). Keep a restrained pale CREAM underside/muzzle. Brown/tan upper coat must be gone; do NOT simply copy original colors. Simplify interior fur into two broad quiet painted cel masses and fewer jagged fur cuts, no individual hair strokes, no texture noise, no dense mane. Match villagers gentle Ghibli painted-cel planes/fine brown pen; do not add realistic modeling or gradients. No new body parts/props, no pose change, no face turned toward camera. White background, no ground/shadow/text."
+    }
   ]
 }

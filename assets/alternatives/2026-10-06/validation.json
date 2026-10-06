@@ -1,7 +1,7 @@
 {
-  "illustration_count": 47,
-  "successful_requests": 92,
-  "estimated_usd": 2.0956,
+  "illustration_count": 55,
+  "successful_requests": 108,
+  "estimated_usd": 2.454,
   "excluded_failed_request": "01a1102b-18f2-7502-be2e-fdb5e85453cd: invalid aspect ratio; unknown billing",
   "runtime_paths_changed": [],
   "errors": [],
@@ -1273,6 +1273,230 @@
       ],
       "mode": "RGBA",
       "sha256": "405c0e4a03acdc9b58604868ad9a4d77c9b72df39c60f2022d0e8407a0272210",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11a-painted-cel-steel/resource_steel/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "754f062f8589c8298da6052d949616876febfeb6907e7cb9142f625c61aecb9e"
+    },
+    {
+      "path": "11a-painted-cel-steel/resource_steel/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "feb9f75b683fab8ed8ce18c8afe002a36334ca0b45fc24a7941df3cef97676ce",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11b-painted-cel-subjects/category_military/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "11e97f987e669ffd6ee4a3d2bd66e1a6cf02883cb76475b6c69cd36dd1143bed"
+    },
+    {
+      "path": "11b-painted-cel-subjects/category_military/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "c85db8183127426ed25bb1f3a8e073bf8d73dbc9dcf2a596dedaf133506d96b5",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11b-painted-cel-subjects/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "1ae31256991edeeb191ebbafc0e9bf9dffbbf788d18d364cdd342689ac48c869"
+    },
+    {
+      "path": "11b-painted-cel-subjects/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "9e1a162c7f1a469f609c32c68374f8112577297142486ac0b0a2dabd545281bf",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11b-painted-cel-subjects/wolf_idle/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "0aca982583a9f95e98f3213a4b59a5f5cc0c23c0fc91a992f9f797aa970e5103"
+    },
+    {
+      "path": "11b-painted-cel-subjects/wolf_idle/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "d97a627c30e26f78bbaa62ebf4668565edfbeb55a24be32a8331d6b5f5144bda",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11c-steel-targeted-retry/resource_steel/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "06c4702247bfb687fd24f46330da41e065f490fd7946910bee6b5a04c8c82bee"
+    },
+    {
+      "path": "11c-steel-targeted-retry/resource_steel/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "f95bcf334eccbe3af2cbf50fb6feadf27ff327f1e6f0e8b3a65f78a679ce5f92",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11d-map-shield-targeted-retries/category_military/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "8bee9248696b754804ded4ad103f4da9fc2328280708c0cb335b7ebb1a6f5260"
+    },
+    {
+      "path": "11d-map-shield-targeted-retries/category_military/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "43ae7ab8c8b7f060b11fe9f2d32310f9b141d11cce8317f0978edc93bcd89803",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11d-map-shield-targeted-retries/command_explore/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "e9494920568a493788896d8f1588232a7f50f16a2242992cf1c27d4b2fce5db2"
+    },
+    {
+      "path": "11d-map-shield-targeted-retries/command_explore/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "a3f2df927a01a8aaec4b5237fa237aad010868a138c3cce36df41a36a1bd7f99",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "path": "11e-wolf-cool-coat-retry/wolf_idle/original.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "08cab6160a772c862b1e31b126aa4369ff570a6a8658847bb4548c055c52a4d2"
+    },
+    {
+      "path": "11e-wolf-cool-coat-retry/wolf_idle/cutout.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "43d6930121376ab89455b7a66e9e22f4ef026a640c3a63d7542740278b7eb0de",
       "alpha_extrema": [
         0,
         255
