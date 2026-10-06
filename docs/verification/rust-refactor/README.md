@@ -1,7 +1,7 @@
 # Test/tooling subtraction — 2026-10-06
 
 Implemented on `codex/reduce-tests-tooling`, integrated with master `a8188f1`.
-[Draft PR #153](https://github.com/koogle/age-of-agents/pull/153) is pushed; not merged or deployed. Jakob requested substantial source reduction,
+[PR #153](https://github.com/koogle/age-of-agents/pull/153) merged as `5eb7bd4` after integrating the art-only archive `831bfcc`. Production [run 37484703194](https://github.com/koogle/age-of-agents/actions/runs/37484703194) completed successfully (confirmed 2026-10-06). Jakob requested substantial source reduction,
 including repetitive tests/fixtures and Python tooling.
 
 ## Measured savings
@@ -48,7 +48,7 @@ copy directly, including the new upstream unit-correlated overhead feedback.
   It checks two road orders, 14 completed cells and exactly seven stone charged.
   On this macOS host, only the Chromium launch is adapted to `channel='chrome'`.
 - The first Modal release attempt was interrupted during image build, before
-  activation. This integrated cleanup is not deployed. The available production
+  activation. The merged cleanup subsequently passed its production workflow. The available production
   profile is `koogle-frick`; the default `radiantai` must not be used.
 
 The temporary environment supplies aiohttp, Playwright, Pillow/numpy and Modal
