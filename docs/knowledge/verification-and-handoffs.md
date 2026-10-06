@@ -92,3 +92,28 @@ In this cloud executor, source `/workspace/.cloud-setup/activate.sh` when Rust i
 not on PATH; check/install the matching WASM target and wasm-bindgen version.
 Software WebGL can take roughly a minute for initial shaders; a real-time snapshot
 feed avoids clock instrumentation blocking first-frame initialization.
+
+For sequential icon verification, `menu_icon_batch.py --queue DIR` keeps Chromium
+alive and accepts a single `request.json` with `name` and `output`. It writes
+`done.json`, screenshots and a bundle hash; the source lists supported menu
+fixtures. It uses loopback :8012 and a fresh page for each rebuilt bundle, with
+verified desktop/phone metrics and actual mouse/touch events. Reusing the browser
+keeps shader initialization costs manageable; this remains presentation/wire
+verification rather than a persisted-world gameplay test.
+
+Menu command fixtures use simulation speed 1× after the pause-contract fix (#105); their mocked positions remain controlled. A paused fixture is appropriate for frozen-frame checks, but gameplay orders must respect the authoritative pause contract.
+
+## Phone screenshot dimensions (2026-10-05)
+
+The menu integration review caught a false phone capture: changing dimensions
+through CDP on a Playwright context with a fixed desktop viewport satisfied
+`innerWidth/innerHeight/devicePixelRatio` checks, but `page.screenshot()` still
+returned desktop-sized pixels. Use separate contexts configured with the actual
+viewport and `device_scale_factor`, and assert captured pixel dimensions as well
+as browser metrics. The pre-integration batch-driver phone captures are
+superseded by the corrected #107 suite; do not use metadata alone as visual
+proof. Run all desktop scenes then all phone scenes, closing the previous context so only one large software WebGL world stays active.
+
+Unit-training fixtures must provide housing for active and queued unit jobs, even when the visible unit list is empty. A barracks-only fixture correctly disables training and cannot prove enabled-command dispatch; the menu suite supplies a separate house.
+
+Canvas command medallions lift by 3 physical pixels on hover. When selecting them from captured quads, group nearby y-coordinates into a row before sorting left-to-right; a strict y-first sort moves the hovered command to index zero and can click the wrong category.

@@ -63,7 +63,7 @@ strikes at the true camera minimum distance. It does not establish combat rules.
 
 Limits: two attack poses plus existing idle recovery, mirrored for left/right;
 no authored reverse-facing set. Phone evidence is emulated, not a physical device.
-Not merged or deployed; same release limitation as the parent style change.
+Merge explicitly authorized on 2026-10-06; release uses the merge-triggered GitHub Actions workflow.
 
 The presentation fixture spaces NPCs behind the animals so their combat
 silhouette overlays cannot obscure the reviewed paws/jaws. Maximum-zoom framing
@@ -86,3 +86,14 @@ recovery/windup/strike durations; it is an asset preview, not a browser recordin
 
 Rendered instance records and the rebuilt WASM hash are in `results.json`;
 authoritative combat observations are in `live-combat-results.json`.
+
+## Authorized integration — 2026-10-06
+
+Integrated master `faa4b04`, preserving terrain generation, productive building
+availability, granary yield and menu icons. No source conflicts; handoff notes
+were combined and JS/WASM rebuilt from the merged source. All 278 tests pass
+(one existing benchmark ignored), formatting, strict native/WASM lint, 302-frame
+asset audit, field/transport/icon checks and six release-verifier tests pass.
+Real-server desktop mouse and DPR-2 phone touch hunting, mutual damage, defeat
+and cleanup pass with no page errors (`merged-combat-results.json`).
+Combined WASM SHA-256: `634a987735886a3f568d718bcf66749c02897c91280271ae8ce5b9beedb0da27`.

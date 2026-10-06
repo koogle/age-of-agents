@@ -1,0 +1,27 @@
+{
+  "source": "assets/sprites/units.png",
+  "manifest": "assets/sprites/units.json",
+  "frame": [
+    "units",
+    "siege_cart",
+    "animations",
+    "idle",
+    "front",
+    0
+  ],
+  "rectangle": [
+    2560,
+    2560,
+    512,
+    512
+  ],
+  "processing": "scripts/normalize_icons.py normalize, directly from authored 512x512 frame",
+  "output": "unit_siege_cart.png",
+  "size": [
+    128,
+    128
+  ],
+  "note": "Existing approved generated unit art; no regeneration or style change.",
+  "requests": [],
+  "style_review": "STYLE_REVIEW.md"
+}

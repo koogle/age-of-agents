@@ -92,6 +92,32 @@ in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
 Stop already had authored artwork but was omitted from that list and used Cancel;
 restore the hand for land units and ships, retaining the X for cancellation.
 
+Production offers and queued jobs now share `selection.rs::product_icon`; add future product artwork there so the two surfaces cannot silently diverge. The transport queue regression also preserves the existing timber artwork.
 ## Text transparency
 
 User feedback on 2026-10-05 identified colored rectangular backgrounds behind speed labels. The shared HUD atlas has only 2px packing gutters but a full mip chain; minified glyphs can sample neighboring content. Glyph quads now use shader mode 4 to sample the level-zero alpha mask with the requested text color, leaving sprite mip filtering unchanged. Verify small HUD labels and white selected-speed labels when changing atlas sampling.
+
+## Dedicated icon integration (2026-10-05)
+
+The [menu audit](../MENU_ICON_AUDIT.md) maps all 13 resources, produced goods,
+specialist unit portraits, ship commands, construction categories and Back to
+distinct artwork. Production offers and queue entries share the exhaustive
+`selection.rs::product_icon` mapping; selection uses authored unit portraits.
+New keys must be added to `hud.rs::ICONS` and `assets/ui/manifest.json` together.
+The [style gate](asset-pipeline.md#style-acceptance-is-a-merge-gate) applies before
+merging art; the first draft set was rejected and retained as negative evidence.
+The 18 individual art PRs are merged; runtime integration and final verification
+pass in #107 (276 Rust tests and desktop/DPR-2 phone scenes). No costs, unlocks, actions or save fields change.
+
+`docs/verification/menu_icon_batch.py` reuses separate desktop and DPR-2 phone WebGL contexts across
+controlled scenes and resets selection/build mode between captures. It records
+mouse/touch wire commands and bundle hashes. Fixtures run at 1× because 0× now
+rejects gameplay commands. This proves presentation and dispatch only; domain
+tests and release verification remain separate gates.
+
+The integration preview exposed a secondary reuse: command hover text kept the selection thumbnail, and a selected build group kept the generic Build thumbnail. The fix makes the info-panel icon follow the hovered command or active category, preserving actions, text and panel geometry. Verify both mouse hover and touch selection alongside the medallions.
+## Concise building descriptions
+
+User steering (2026-10-05): shorten the granary description and omit technical
+qualifiers such as “no stacking.” Keep its drop-off role and nearby yield benefit
+in the HUD; detailed range, timing and stacking rules belong in the system guide.

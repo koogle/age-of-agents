@@ -1,12 +1,12 @@
 # UI art kit
 
-Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The canvas HUD loads the icons (`frontend/hud-content.js` maps its keys to these files); `manifest.json` lists everything.
+Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The Rust canvas HUD loads the icons (`crates/client/src/hud.rs::ICONS` lists the files); `manifest.json` lists everything.
 
 ## Files
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `icons/<group>_<name>.png` | 128×128 RGBA | 18 icons: resource (wood, food, stone, gold, iron, clay, fiber), command (build, cancel, train), tech (forestry, agriculture, masonry, mining, textiles), portrait (villager, group, towncenter). Content fills the square with 6% padding. |
+| `icons/<group>_<name>.png` | 128×128 RGBA | 38 icons covering resources, commands, research, unit portraits and construction categories. Content fills the square with 6% padding. |
 | `paper_tile.png` | 512×512 RGB | Seamless cream paper with faint fibre. Use `repeat` wrapping. |
 | `border_strip.png` | 123×32 RGBA | One horizontal Greek-key band (8 meander periods); outer ink rule on top. Repeat along x; transpose for vertical edges. |
 | `border_frame.png` | 310×310 RGBA | 9-slice frame, inset 32 px on all sides, transparent inside and outside. Each edge holds exactly two strips, so tile edges (`repeat`/`round`); stretching distorts the meander. |
@@ -94,3 +94,28 @@ Packing restores original pixels inside any enclosed segmentation holes, removes
 ## Style review requirement
 
 Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipeline.md#style-acceptance-is-a-merge-gate) for every new or changed icon. Compare against the original wood/food/research kit, including 24px and 32px views. Attach approved references again during refinement; a batch of new drafts must not become its own style source. Normalization validates geometry, not appearance.
+
+## Dedicated menu icon additions
+
+Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
+
+| Icon | Sources and visual review |
+| --- | --- |
+| `resource_coal` | [Review](sources/menu_icons/resource_coal/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_coal/provenance.json) |
+| `resource_steel` | [Review](sources/menu_icons/resource_steel/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_steel/provenance.json) |
+| `resource_bricks` | [Review](sources/menu_icons/resource_bricks/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_bricks/provenance.json) |
+| `resource_cloth` | [Review](sources/menu_icons/resource_cloth/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_cloth/provenance.json) |
+| `resource_rations` | [Review](sources/menu_icons/resource_rations/STYLE_REVIEW.md), [provenance](sources/menu_icons/resource_rations/provenance.json) |
+| `unit_guard` | [Review](sources/menu_icons/unit_guard/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_guard/provenance.json) |
+| `unit_archer` | [Review](sources/menu_icons/unit_archer/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_archer/provenance.json) |
+| `unit_healer` | [Review](sources/menu_icons/unit_healer/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_healer/provenance.json) |
+| `unit_siege_cart` | [Review](sources/menu_icons/unit_siege_cart/STYLE_REVIEW.md), [provenance](sources/menu_icons/unit_siege_cart/provenance.json) |
+| `command_disembark` | [Review](sources/menu_icons/command_disembark/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_disembark/provenance.json) |
+| `command_sail` | [Review](sources/menu_icons/command_sail/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_sail/provenance.json) |
+| `command_explore` | [Review](sources/menu_icons/command_explore/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_explore/provenance.json) |
+| `command_cargo` | [Review](sources/menu_icons/command_cargo/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_cargo/provenance.json) |
+| `command_back` | [Review](sources/menu_icons/command_back/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_back/provenance.json) |
+| `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
+| `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |
+| `category_production` | [Review](sources/menu_icons/category_production/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_production/provenance.json) |
+| `category_military` | [Review](sources/menu_icons/category_military/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_military/provenance.json) |
