@@ -1,0 +1,27 @@
+{
+  "name": "dock_pair",
+  "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw exactly TWO views side by side of the same completed wooden Greek dock from last images: left south/front, right north/rear. Same footprint, camera elevation, geometry and scale. Mirroring these provides remaining directions. Match warm chestnut timber in both views, never darker or greyer rear wood. White limestone supports and restrained blue cloth accent. Clear gap between two views, no connecting water or landscape. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/sprites/building_sources/dock_complete.png",
+      "sha256": "e29797b9c768665c17a0e16ef3ca31f8704cc3d41db08f681e5ac40ab2c0e4c5"
+    },
+    {
+      "path": "assets/sprites/building_sources/directions/dock_north_complete.png",
+      "sha256": "14c0676324c6c04d2acc3a9266d395c6314f86991c28625c9bd6cf92f65f42d6"
+    }
+  ],
+  "family": "sprite",
+  "aspect_ratio": "16:9",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "REJECTED: two front/side views; missing rear"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "road_stone",
+  "prompt": "The first references are approved STYLE only. The last image is current SUBJECT/geometry only, not a style standard. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Paint irregular worn limestone paving closely preserving the last image stone scale, loose polygon layout and restrained thin joints. Cooler pearl-grey limestone with pale blue-grey shade and warm sunlit edges, no yellow overall tint, no dark thick gaps. Flat top-down swatch filling the entire square. No horizon, vignette, objects, border or text. Low contrast suitable for repeated ground sampling. ",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/terrain/road_stone.png",
+      "sha256": "8409efa2a26cd787343a71e8f21a089501efaecfe2a6bbcba0b9d49db9a552c9"
+    }
+  ],
+  "family": "texture",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "UNAPPROVED: direction candidate; see style review"
+}

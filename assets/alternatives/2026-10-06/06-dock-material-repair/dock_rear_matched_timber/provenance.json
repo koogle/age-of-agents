@@ -1,0 +1,27 @@
+{
+  "name": "dock_rear_matched_timber",
+  "prompt": "Image 1 and 2 are approved STYLE references. Image 3 is the new FRONT dock material target ONLY. Image 4 is the EXACT REAR dock geometry to preserve. Draw exactly ONE rear dock with the geometry/camera/roof/boat positions from image 4, but repaint ALL its wooden walls and deck with the SAME warm chestnut-brown material as image 3. Every wall board must be visibly BROWN wood, NOT green, NOT grey, NOT desaturated teal. Use subtle cooler BROWN shadows under the roof while preserving the same brown albedo across faces; the rear wall must not look like a different species of timber. Preserve the rear facade: NO doorway facing viewer. White limestone supports, muted terracotta roof, tiny blue cloth accent. Fine thin dark-brown pen lines and broad flat watercolor/cel areas matching image 1. No extra props, no ground, no shadow, no text. Pure white background.",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/alternatives/2026-10-06/05-world/dock_front/original.png",
+      "sha256": "26d9b7773c39a85076e54cb5f5ca02dea00332bc330f8e9e8638966fdb264983"
+    },
+    {
+      "path": "assets/sprites/building_sources/directions/dock_north_complete.png",
+      "sha256": "14c0676324c6c04d2acc3a9266d395c6314f86991c28625c9bd6cf92f65f42d6"
+    }
+  ],
+  "family": "sprite",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "REJECTED: duplicate sail"
+}

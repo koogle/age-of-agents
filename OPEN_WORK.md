@@ -1,3 +1,12 @@
+# Art alternatives — [PR #145](https://github.com/koogle/age-of-agents/pull/145)
+
+- Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
+- Completed 58 retained outputs (57 FAL illustration attempts + one disclosed OpenAI map refinement); 113 successful FAL calls have an estimated subtotal of $2.5486. OpenAI cost/backend and one FAL validation failure billing are unknown. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
+- New user steering: era-fit audit rejects magnetic compass and modern-looking boot/heraldry; map/star and sandal candidates added. Broad regeneration paused after three-subject cel calibration; cloth/wolf improve flatness, steel still needs correction. Runtime compass replacement pending integration.
+- Authorized four-subject painted-cel follow-up is complete: steel A/B choices, promising matte shield/occluded spear; map line cleanup is superseded by the latest refinement and wolf recolor FAILED despite restored geometry. Exactly one retry per subject; no more generation. Cloth/sandal unchanged.
+- User likes shown calibration direction, asks thinner map ink. Two FAL line-only attempts failed; disclosed OpenAI refinement succeeds visibly at 128/24/32px, composition/palette close rather than pixel-exact. Jakob preferred the latest versions, including the thinner map, and explicitly authorized merging PR #145 on 2026-10-06; other candidates unchanged.
+- Candidate image/hash/alpha checks pass; runtime files unchanged. Rejected attempts and style gaps are explicit in `assets/alternatives/2026-10-06/STYLE_REVIEW.md`. Archive merge authorized; full animation/construction variants, runtime integration and gameplay verification remain pending. Current master `a8188f1` is integrated without changes to its runtime assets.
+
 # Overhead health bars — [PR #152](https://github.com/koogle/age-of-agents/pull/152)
 
 - Implemented thin green/orange/red bars for villagers, other friendly land units and visible animals, replacing selected-status/inspection HP text and floating combat numbers. No simulation, balance or save changes.
