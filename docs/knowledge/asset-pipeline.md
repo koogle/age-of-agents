@@ -49,6 +49,20 @@ historical. Do not assume a local login or provider access exists in a new sessi
 
 ## Style acceptance is a merge gate
 
+**Developer steering, 2026-10-06:** After comparing the rejected and merged
+menu icons, Jakob requested further refinement and slightly simpler icons.
+Keep the established thin brown ink and restrained watercolor family. Reduce
+secondary props, repeated texture strokes and tiny decoration where they compete
+with the primary silhouette at 24/32px; preserve each command's meaning. Start
+with a representative Cargo refinement, then review Gathering, Town and
+Disembark. This refinement is pending visual review and runtime integration;
+the previously merged set remains the current game art until that integration.
+Jakob subsequently authorized showing the four refinements and merging them.
+The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png)
+shows the normalized candidates against the previous art and approved references
+at 128/24/32px on parchment, dark green and blue. Simplification removes props
+and repeated interior marks rather than increasing contour weight.
+
 **Developer steering, 2026-10-05:** Jakob flagged visual style drift during the
 menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft

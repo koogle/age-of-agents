@@ -97,6 +97,11 @@ Follow the [blocking style acceptance review](../../docs/knowledge/asset-pipelin
 
 ## Dedicated menu icon additions
 
+The subsequent [four-icon simplification](sources/menu_icons/simplification/README.md)
+retains previous PNGs, exact refinement prompts, normalized before/after views
+and individual PR status for Cargo, Gathering, Town and Disembark. It reduces
+secondary props and repeated detail while preserving the established family.
+
 Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
 
 | Icon | Sources and visual review |
