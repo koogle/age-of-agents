@@ -103,8 +103,14 @@ fn discovering_complementary_materials_unlocks_industries_and_persists_after_dep
     w.explored_cells.push(cell(2, 2));
     assert!(w.technology_available(TechnologyKind::Mining));
     assert!(!w.building_available(BuildingKind::Workshop));
+    assert!(!w.building_available(BuildingKind::Smelter));
+    assert!(!w.building_available(BuildingKind::Barracks));
     w.explored_cells.push(cell(4, 2));
-    assert!(w.building_available(BuildingKind::Workshop));
+    assert!(w.building_available(BuildingKind::Kiln));
+    assert!(
+        !w.building_available(BuildingKind::Workshop),
+        "siege carts still need steel"
+    );
     assert!(!w.building_available(BuildingKind::Infirmary));
     w.explored_cells.push(cell(5, 2));
     assert!(w.building_available(BuildingKind::Infirmary));
@@ -125,6 +131,8 @@ fn discovering_complementary_materials_unlocks_industries_and_persists_after_dep
     );
     w.explored_cells.push(cell(3, 2));
     w.explored_cells.sort_unstable();
+    assert!(w.building_available(BuildingKind::Smelter));
+    assert!(w.building_available(BuildingKind::Barracks));
     assert_eq!(w.available_buildings(), BUILDABLE);
     for r in &mut w.resources {
         r.amount = 0.0;
@@ -203,7 +211,7 @@ fn starter_materials_can_fund_settlement_processing_and_the_reserved_transport_b
 }
 
 #[test]
-fn every_building_funded_by_first_island_materials_accepts_construction() {
+fn productive_starter_buildings_accept_construction() {
     let expected = [
         BuildingKind::TownCenter,
         BuildingKind::House,
@@ -213,11 +221,7 @@ fn every_building_funded_by_first_island_materials_accepts_construction() {
         BuildingKind::Dock,
         BuildingKind::Watchtower,
         BuildingKind::MiningCamp,
-        BuildingKind::Smelter,
-        BuildingKind::Kiln,
-        BuildingKind::Weaver,
         BuildingKind::Kitchen,
-        BuildingKind::Barracks,
         BuildingKind::Range,
     ];
     for kind in expected {
@@ -251,4 +255,62 @@ fn every_building_funded_by_first_island_materials_accepts_construction() {
         );
         w.validate().unwrap();
     }
+}
+
+#[test]
+fn construction_materials_alone_do_not_unlock_unproductive_buildings() {
+    let mut w = fixture::fixture();
+    w.economy_rules = EconomyRules::IslandProgression;
+    w.resources.retain(|r| STARTER_RESOURCES.contains(&r.kind));
+    for kind in [
+        BuildingKind::Barracks,
+        BuildingKind::Smelter,
+        BuildingKind::Kiln,
+        BuildingKind::Weaver,
+        BuildingKind::Workshop,
+    ] {
+        for resource in ResourceKind::ALL {
+            w.inventories[0].add(resource, 1000.0);
+        }
+        assert!(!w.snapshot().available_buildings.contains(&kind));
+        let origin = free_site(&mut w, kind);
+        let before = w.clone();
+        assert_eq!(
+            w.apply_command(Command::Build {
+                unit_id: "villager-1".into(),
+                kind,
+                origin
+            }),
+            Err(CommandError::NotBuildable)
+        );
+        assert_eq!(w, before);
+    }
+    w.inventories[0] = Stockpile::default();
+    assert_eq!(w.available_buildings().len(), STARTER_BUILDINGS.len());
+    assert!(
+        STARTER_BUILDINGS
+            .iter()
+            .all(|&kind| w.building_available(kind))
+    );
+    w.economy_rules = EconomyRules::Unrestricted;
+    assert_eq!(w.available_buildings(), BUILDABLE);
+}
+
+#[test]
+fn second_island_metal_discovery_unlocks_barracks_and_smelter() {
+    let mut w = GameWorld::generate(17);
+    w.discover_island();
+    assert!(!w.building_available(BuildingKind::Barracks));
+    for resource in &w.resources {
+        if matches!(resource.kind, ResourceKind::Iron | ResourceKind::Coal) {
+            w.explored_cells.push(resource.cell);
+        }
+    }
+    w.explored_cells.sort_unstable();
+    w.explored_cells.dedup();
+    assert!(w.building_available(BuildingKind::Barracks));
+    assert!(w.building_available(BuildingKind::Smelter));
+    assert!(!w.building_available(BuildingKind::Kiln));
+    assert!(!w.building_available(BuildingKind::Weaver));
+    assert!(!w.building_available(BuildingKind::Workshop));
 }

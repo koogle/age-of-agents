@@ -21,7 +21,7 @@ live in `assets/ui/sources/menu_icons/` at the repository root.
   lines. New regression checks exercise atlas loading, distinct resource art,
   production/queue consistency, specialist selection, ship commands and category
   navigation/info thumbnails.
-- Final code validation: 272 Rust tests pass, one existing manual benchmark is
+- Final code validation: 274 Rust tests pass, one existing manual benchmark is
   ignored; strict native/WASM lint, formatting, rebuilt JS/WASM, 298-frame audit,
   normalization, exact reproduction of the 18 additions and six release-verifier
   unit tests pass. Logs are retained here.
@@ -72,3 +72,17 @@ Cases: `category_town`, `command_back`, `resource_coal`, `resource_steel`,
 `resource_bricks`, `resource_cloth`, `resource_rations`, `unit_guard`, `unit_archer`,
 `unit_healer`, `unit_siege_cart`, `transport_queue`, `command_disembark`,
 `command_sail`, `command_explore`, `command_cargo`.
+
+## Availability integration
+
+The complete 16-family / 40-capture icon suite ran on the bundle recorded in
+`before-availability/checks.json`. Master then advanced with the approved
+productive-building availability change (#131). The client change there only
+adjusts existing tests; icon-rendering code and accepted art are unchanged.
+Preserve that complete suite as baseline evidence. Final combined validation
+reruns the workspace suite, lint and web build, then exercises starter Production
+filtering, guard production/portrait and sailing on desktop and DPR-2 phone.
+The starter fixture retains the ten currently available buildings instead of
+forcing the full catalog; the Production menu must contain Lumber mill, Kitchen
+and Back. Final combined evidence is recorded separately so bundle hashes cannot
+be mistaken for the earlier complete suite.
