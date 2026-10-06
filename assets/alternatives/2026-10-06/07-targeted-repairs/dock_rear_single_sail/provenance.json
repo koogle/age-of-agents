@@ -1,0 +1,23 @@
+{
+  "name": "dock_rear_single_sail",
+  "prompt": "Edit the LAST image only; first two are approved style references. Remove the EXTRA small sail and mast peeking up behind the LEFT side of the roof. Keep the ONE large sail and ONE boat on the RIGHT exactly as they are. There must be exactly one mast, one sail, one boat total. Preserve every other shape and color: brown timber rear walls, roof, deck, supports and camera. Fine original villager ink/cel style, pure white background. No other additions or changes.",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/reference/diorama_primary.webp",
+      "sha256": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+    },
+    {
+      "path": "assets/alternatives/2026-10-06/06-dock-material-repair/dock_rear_matched_timber/original.png",
+      "sha256": "13c63396895e1191d3f3c310ba10ef4b0fa5735819da0a954370ceb0dbb0a4ff"
+    }
+  ],
+  "family": "sprite",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "UNAPPROVED: direction candidate; see style review"
+}

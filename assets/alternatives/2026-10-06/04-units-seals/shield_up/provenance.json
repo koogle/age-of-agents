@@ -1,0 +1,23 @@
+{
+  "name": "shield_up",
+  "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one upright antique bronze shield with a deep muted green enamel upward arrow, slender laurel leaves, preserve upright shield silhouette, no glossy bevel. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/ui/buttons/coin_normal.png",
+      "sha256": "edcc379851fbe2554ed08591aec47906816661b498f5f50905ae64241ddadd42"
+    },
+    {
+      "path": "assets/ui/icons/resource_wood.png",
+      "sha256": "9d0898417018dc3d5063ffd3e150486c1f794794e12a7750d688053d38eba630"
+    }
+  ],
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "NEEDS REFINEMENT: mismatched paired shield"
+}

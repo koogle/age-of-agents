@@ -1,0 +1,27 @@
+{
+  "name": "category_gathering",
+  "prompt": "All attached references are approved STYLE only. Draw new original pixels, do not enlarge a reference. Match the approved original villager reference: the same fine thin dark-brown ink linework and flat watercolour wash, broad quiet color areas, gentle two-tone cel shadows, sparse interior marks, warm upper-left light and subtle cool shadow color. Preserve refined small-scale readability. No heavy black outlines, glossy rendering, thick sticker edges, dense hatching or indiscriminate saturation. Restore controlled subject-specific color accents like the villager royal-blue scarf; do not wash every material in sandy beige. Draw a NEW high-resolution game UI icon of one simple woven basket of red berries with two olive-green leaves, no scattered tools or twigs. Same fine thin dark-brown ink, sparse hatching and restrained wash as original UI family. Three-quarter upper-left view except seals/shields which face straight forward. Clearly readable at 24 and 32 pixels. One isolated object centered on pure white, no ground, no cast shadow, no borders, text or numbers. ",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/ui/icons/resource_wood.png",
+      "sha256": "9d0898417018dc3d5063ffd3e150486c1f794794e12a7750d688053d38eba630"
+    },
+    {
+      "path": "assets/ui/icons/resource_food.png",
+      "sha256": "0065a636e7f2fa327bbe70c220937b787ead673b3f185cba9264152b9e0dcd81"
+    },
+    {
+      "path": "assets/ui/icons/tech_masonry.png",
+      "sha256": "30a7ea8e7de436db3b79d041958de067dd14dd7baa3fa2ee8601dc2e135e6b26"
+    }
+  ],
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "UNAPPROVED: direction candidate; see style review"
+}

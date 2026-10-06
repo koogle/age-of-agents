@@ -1,0 +1,24 @@
+{
+  "name": "unit_healer",
+  "prompt": "First two images are approved fine-line watercolor STYLE. LAST image is the approved healer IDENTITY and outfit reference (two poses of same person). Draw exactly ONE whole-body game UI figure of that SAME person, head to sandals entirely visible, same face/hair/age/costume colors/tools, same three-quarter viewpoint. Preserve royal-blue accents and original proportions. Do not crop to a portrait or bust, do not draw two people. Same fine thin dark-brown ink linework and broad quiet flat watercolour/cel planes as first villager reference, sparse facial detail, no extra ornament, no glossy metal or bright white highlights, no gradient-heavy shading. Plain pure white background, no ground, no cast shadow, no frame or text. Figure fits centrally with safe margin all round; legible at 24px.",
+  "references": [
+    {
+      "path": "assets/sprites/villager_master.jpg",
+      "sha256": "b6ca4e6c92a6a6397a2f3027d91550da95cd55283e11d63d7da59909fd9679d4"
+    },
+    {
+      "path": "assets/ui/icons/resource_wood.png",
+      "sha256": "9d0898417018dc3d5063ffd3e150486c1f794794e12a7750d688053d38eba630"
+    },
+    {
+      "path": "assets/sprites/hd_sources/units/healer_idle_front_cut.png",
+      "sha256": "af0c397604dcb856bade57f4e468b6bcb5867025e49eee259291a90790875223"
+    }
+  ],
+  "family": "icon",
+  "aspect_ratio": "1:1",
+  "review_status": "UNAPPROVED: full-figure identity candidate",
+  "model": "fal-ai/nano-banana/edit",
+  "reference_revision": "1984e9b",
+  "status": "unapproved candidate; no runtime replacement"
+}

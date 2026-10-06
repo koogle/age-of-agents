@@ -1,3 +1,9 @@
+# Art alternatives — pending candidate review
+
+- Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
+- Completed 41 illustration attempts across calibration, three UI batches, world candidates and targeted repairs; 80 successful FAL calls, estimated $1.8268 plus one validation failure with unknown billing. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
+- Candidate image/hash/alpha checks pass; runtime files unchanged. Rejected attempts and style gaps are explicit in `assets/alternatives/2026-10-06/STYLE_REVIEW.md`. No full animation/construction variants, runtime integration, gameplay approval, deployment or automatic merge.
+
 # Stone road contrast refinement — [PR #143](https://github.com/koogle/age-of-agents/pull/143)
 
 - User requested less sandy, slightly stronger stone paving after roads PR #133 merged. The revised neutral limestone and clearer joints preserve the painted style; user confirmed “yeah I prefer that” after viewing the comparison. Stone-only runtime asset change; 294 tests, formatting, strict native/WASM lint, asset checks and desktop/DPR2 phone construction plus normal/max-zoom review pass. [Before/after, provenance and evidence](docs/verification/roads/stone-contrast/README.md). User explicitly authorized merging PR #143 on 2026-10-06. Merge/release status is tracked by the linked PR and the [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).

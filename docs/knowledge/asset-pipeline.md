@@ -208,3 +208,23 @@ neutral limestone grey with modestly deeper fine joints and clearer soft face
 shading; retain the irregular layout and painted style. Dirt stays unchanged.
 Jakob preferred the revised neutral-limestone texture after seeing the comparison.
 Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
+
+## Alternative batches (2026-10-06, pending review)
+
+Jakob requested alternatives for recently merged art using the original villager
+model and similar prompts, to restore consistency and controlled color accents.
+The retained originals use `fal-ai/nano-banana/edit` (see sprite README and
+`tools/strips.py`); preserve villagers and runtime assets. Candidates live under
+`assets/alternatives/2026-10-06/`, with exact references and request provenance.
+Newer assets supply subject geometry only; approved villagers, primary diorama
+and original UI kit supply style. Review a small calibration batch before
+scaling; rear dock timber should share the front material rather than turn grey.
+These alternatives remain unapproved and are not integration-ready animations.
+
+The first batches confirm that reusing the same model is insufficient: small
+128px subject references can be copied as blurred enlargements, explicit rear-view
+prompts can produce another front view, and palette corrections can invent props.
+Keep approved style references attached, use retained HD subject identity when
+needed, inspect each batch and retain failures. The candidate gallery and explicit
+[review](../../assets/alternatives/2026-10-06/STYLE_REVIEW.md) separate successful
+color directions from unfinished linework, material, silhouette and alpha work.
