@@ -1,3 +1,8 @@
+# Dirt road readability — 2026-10-06
+
+- User requested recreation because the sandy dirt road is hard to see. Replaced only `assets/terrain/road_dirt.png` with generated deeper ochre-brown packed earth, retaining the original and exact reference/prompt provenance. [Comparison and review](docs/verification/roads/dirt-readability/README.md).
+- 294 workspace tests and formatting pass; 303-frame resolution audit passes. Native/WASM strict lint and web/server rebuild pass. Desktop mouse and DPR2 phone touch construction plus normal/maximum-zoom visibility pass with zero page errors. User approved the visual result and explicitly authorized merge on 2026-10-06. Merge/release verification is in progress; preserve previous unresolved items below.
+
 # Stone road contrast refinement — [PR #143](https://github.com/koogle/age-of-agents/pull/143)
 
 - User requested less sandy, slightly stronger stone paving after roads PR #133 merged. The revised neutral limestone and clearer joints preserve the painted style; user confirmed “yeah I prefer that” after viewing the comparison. Stone-only runtime asset change; 294 tests, formatting, strict native/WASM lint, asset checks and desktop/DPR2 phone construction plus normal/max-zoom review pass. [Before/after, provenance and evidence](docs/verification/roads/stone-contrast/README.md). User explicitly authorized merging PR #143 on 2026-10-06. Merge/release status is tracked by the linked PR and the [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
