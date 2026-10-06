@@ -98,7 +98,8 @@ User explicitly authorized merging PR #130. Integrating master `faa4b04`, preser
   Original art is retained as rejected evidence.
   User approved the corrected art and authorized merge on 2026-10-06.
   Integrated master `79d5899`; final desktop and DPR-2 touch replays pass.
-  Ready for authorized merge; production delivery follows GitHub Actions. See [water guide](docs/knowledge/water-resource.md)
+  Review/authorized merge: [PR #136](https://github.com/koogle/age-of-agents/pull/136).
+  Production delivery follows the merge-triggered GitHub Actions workflow. See [water guide](docs/knowledge/water-resource.md)
   and [verification](docs/verification/water/README.md).
 
 - [PR #108](https://github.com/koogle/age-of-agents/pull/108): resource icons retain quantities and show capitalized names on hover/tap; rows compact to 66px. User authorized merging into master. Integrated master `2bedc41`; all 264 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass. Rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors; [screenshots and review](docs/verification/resource-names/README.md). Generated-bundle conflicts resolved by rebuilding; replay fixture reader updated for island inventories. Ready for the authorized merge; production delivery follows the merge-triggered Actions workflow.
