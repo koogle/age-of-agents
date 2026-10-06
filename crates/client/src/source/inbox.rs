@@ -6,13 +6,27 @@ const MAX_PENDING_SNAPSHOTS: usize = 8;
 #[derive(Default)]
 pub(super) struct Inbox {
     snapshots: VecDeque<WorldSnapshot>,
+    pub(super) pending: std::collections::HashMap<String, Vec<String>>,
     pub(super) results: Vec<CommandResult>,
     last_sequence: Option<u64>,
     reset_playback: bool,
 }
 
 impl Inbox {
+    pub(super) fn command_result(&mut self, request_id: &str, ok: bool, error: Option<String>) {
+        let units = self.pending.remove(request_id).unwrap_or_default();
+        self.results.push(if ok {
+            Ok(())
+        } else {
+            Err(super::CommandFailure {
+                message: error.unwrap_or_else(|| "rejected".into()),
+                units,
+            })
+        });
+    }
+
     pub(super) fn reconnect(&mut self) {
+        self.pending.clear();
         self.snapshots.clear();
         self.last_sequence = None;
         self.reset_playback = false;
@@ -60,6 +74,18 @@ mod tests {
             "../../../../docs/verification/presentation-fixture.json"
         ))
         .expect("browser replay fixture must match the snapshot schema")
+    }
+
+    #[test]
+    fn replies_keep_their_units_when_arriving_out_of_order() {
+        let mut inbox = Inbox::default();
+        inbox.pending.insert("r1".into(), vec!["villager-1".into()]);
+        inbox.pending.insert("r2".into(), vec!["villager-2".into()]);
+        inbox.command_result("r2", false, Some("blocked".into()));
+        inbox.command_result("r1", true, None);
+        assert_eq!(inbox.results[0].as_ref().unwrap_err().units, ["villager-2"]);
+        assert!(inbox.results[1].is_ok());
+        assert!(inbox.pending.is_empty());
     }
 
     #[test]

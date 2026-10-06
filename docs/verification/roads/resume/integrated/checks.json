@@ -1,0 +1,16 @@
+{
+  "source_commit": "30e2b0738f78222b6b8ea2f92c55fad1bffa147b",
+  "integrated_master": "de49ab4dfa53978e3a57fa7149f366e69e61dfee",
+  "workspace_tests_passed": 298,
+  "ignored_benchmarks": 1,
+  "formatting": "pass",
+  "native_clippy": "pass",
+  "wasm_clippy": "pass",
+  "sprite_frames_checked": 307,
+  "asset_checks": "pass",
+  "release_verifier_tests_passed": 6,
+  "server_rebuilt": true,
+  "wasm_rebuilt": true,
+  "review": "pass",
+  "production_verification": "tracked separately by release workflow"
+}

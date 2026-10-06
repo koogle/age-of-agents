@@ -38,7 +38,7 @@ def button(width, height, count, index, labels=False):
     return left + padding + (index % per_row) * (size + gap) + size / 2, top + 6 + (index // per_row) * step + size / 2
 
 
-async def main(output, mode_filter, screenshots):
+async def main(output, mode_filter, screenshots, resume_only=False):
     with socket.socket() as probe:
         if probe.connect_ex(("127.0.0.1", 8000)) == 0:
             raise RuntimeError("Port 8000 is already in use; stop the task-owned server first")
@@ -51,11 +51,20 @@ async def main(output, mode_filter, screenshots):
         for mode, width, height, dpr in [('desktop',1280,800,1),('phone',390,844,2)]:
             if mode_filter != 'all' and mode != mode_filter: continue
             with tempfile.TemporaryDirectory(prefix='aoa-roads-') as temp:
+                fixture = json.loads(world)
+                if resume_only:
+                    start = 31 if mode == 'phone' else 27
+                    fixture['roads'] = [
+                        {'cell':{'column':start+n,'row':row}, 'kind':kind,
+                         'work':0.5 if n==0 else 0.0}
+                        for kind,row in [('dirt',24),('stone',26)] for n in range(7)
+                    ]
+                    fixture['inventories'][0]['stone'] -= 7
                 db=Path(temp)/'roads.db'
                 with sqlite3.connect(db) as conn:
                     conn.execute(f'PRAGMA user_version={version}')
                     conn.execute('CREATE TABLE world_state(id INTEGER PRIMARY KEY, world_json TEXT NOT NULL)')
-                    conn.execute('INSERT INTO world_state VALUES (1,?)',(world,))
+                    conn.execute('INSERT INTO world_state VALUES (1,?)',(json.dumps(fixture),))
                 with (output/f'{mode}-server.log').open('w') as log:
                     process=subprocess.Popen([ROOT/'target/debug/age-of-agents'],cwd=ROOT,env={**os.environ,'AGE_OF_AGENTS_DB':str(db)},stdout=log,stderr=log)
                     try:
@@ -93,16 +102,35 @@ async def main(output, mode_filter, screenshots):
                         await capture(f'{mode}-before.png')
                         start_column = 31 if mode == 'phone' else 27
                         for kind,row in [('dirt',24),('stone',26)]:
-                            await menu(1,0) # Build
-                            await menu(6,4,True) # Roads
-                            if kind == 'dirt': await capture(f'{mode}-{kind}-menu.png')
-                            await menu(3,0 if kind=='dirt' else 1,True)
-                            p=await ground(start_column,row);await tap(*p[:2]);await asyncio.sleep(.3)
-                            p=await ground(start_column+6,row+1) # dominant-axis snapping
-                            if mode=='desktop': await page.mouse.move(*p[:2])
+                            if not resume_only:
+                                await menu(1,0) # Build
+                                await menu(6,4,True) # Roads
+                                if kind == 'dirt': await capture(f'{mode}-{kind}-menu.png')
+                                await menu(3,0 if kind=='dirt' else 1,True)
+                                p=await ground(start_column,row);await tap(*p[:2]);await asyncio.sleep(.3)
+                                p=await ground(start_column+6,row+1) # dominant-axis snapping
+                                if mode=='desktop': await page.mouse.move(*p[:2])
+                                await asyncio.sleep(.3)
+                                if kind == 'dirt': await capture(f'{mode}-{kind}-preview.png')
+                                await tap(*p[:2])
+                            # Interrupt paid work, then resume by clicking one unfinished piece.
+                            async with client.ws_connect(URL+'/ws') as control:
+                                unit_id = (await state())['units'][0]['id']
+                                await control.send_json({'type':'command','request_id':'road-stop',
+                                    'command':{'type':'stop','unit_id':unit_id}})
+                                async for message in control:
+                                    reply=json.loads(message.data)
+                                    if reply.get('request_id')=='road-stop':
+                                        assert reply['ok'],reply
+                                        break
+                            stopped=await state()
+                            unfinished=[r for r in stopped['roads'] if r['kind']==kind and r['work'] is not None]
+                            assert len(unfinished)>1, stopped
                             await asyncio.sleep(.3)
-                            if kind == 'dirt': await capture(f'{mode}-{kind}-preview.png')
-                            await tap(*p[:2])
+                            assert (await state())['roads']==stopped['roads']
+                            await settle(6)
+                            target=unfinished[len(unfinished)//2]['cell']
+                            p=await ground(target['column'],target['row']);await tap(*p[:2])
                             for _ in range(350):
                                 s=await state()
                                 roads=[r for r in s['roads'] if r['kind']==kind]
@@ -110,7 +138,7 @@ async def main(output, mode_filter, screenshots):
                                 await asyncio.sleep(.1)
                             assert len(roads)==7 and all(r['work'] is None for r in roads), (mode,kind,s['units'],roads,commands)
                             assert {r['cell']['row'] for r in roads}=={row}
-                            assert s['inventories'][0]['stone']==(30 if kind=='dirt' else 23)
+                            assert s['inventories'][0]['stone']==(30 if kind=='dirt' and not resume_only else 23)
                             await settle(6)
                             if kind == 'stone': await capture(f'{mode}-{kind}-complete.png')
                         if screenshots:
@@ -121,9 +149,9 @@ async def main(output, mode_filter, screenshots):
                                 await page.mouse.wheel(0,-5000)
                                 await settle()
                             await capture(f'{mode}-maximum-zoom.png')
-                        assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==2,commands
+                        assert len([c for c in commands if c.get('command',{}).get('type')=='build_road'])==(2 if resume_only else 4),commands
                         assert not errors,errors
-                        results.append({'mode':mode,'viewport':[width,height,dpr],'road_cells':14,'stone_remaining':23,'errors':errors,'server_sha256':hashlib.sha256((ROOT/'target/debug/age-of-agents').read_bytes()).hexdigest()})
+                        results.append({'mode':mode,'viewport':[width,height,dpr],'road_cells':14,'resumed_by_single_cell':True,'resume_only':resume_only,'stone_remaining':23,'errors':errors,'server_sha256':hashlib.sha256((ROOT/'target/debug/age-of-agents').read_bytes()).hexdigest()})
                         (output/f'{mode}-state.json').write_text(json.dumps(await state()))
                         print(mode,'passed',flush=True)
                         await page.close()
@@ -136,5 +164,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--mode',choices=['all','desktop','phone'],default='all')
     parser.add_argument('--no-screenshots',action='store_true')
+    parser.add_argument('--resume-only',action='store_true',help='Resume already paid interrupted roads without replaying placement menus')
     args=parser.parse_args()
-    asyncio.run(main(args.output,args.mode,not args.no_screenshots))
+    asyncio.run(main(args.output,args.mode,not args.no_screenshots,args.resume_only))

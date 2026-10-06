@@ -1,4 +1,4 @@
-//! Short-lived action and resource labels from authoritative snapshots.
+//! Fading unit feedback from authoritative snapshots and command outcomes.
 use aoa_game::{GatherPhase, Unit, UnitAction, WorldSnapshot};
 use glam::Vec3;
 
@@ -41,7 +41,9 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
             ("Attacking wildlife".into(), animal_id.as_str())
         }
         UnitAction::Idle => ("Idle".into(), ""),
-        UnitAction::Move { .. } => return None,
+        UnitAction::Move { to } => {
+            return Some(("Moving".into(), format!("{},{}", to.column, to.row)));
+        }
         UnitAction::Board { ship_id } => ("Boarding transport".into(), ship_id.as_str()),
         UnitAction::ExploreBuild { origin, kind } => {
             return Some((
@@ -71,6 +73,7 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
 }
 
 struct Label {
+    // Identifies feedback to replace; status labels keep their original anchor.
     entity_id: Option<String>,
     text: String,
     at: Vec3,
@@ -83,6 +86,24 @@ pub struct Feedback {
 }
 
 impl Feedback {
+    /// Replace the unit's transient status, using the same spawn anchor and fade as activities.
+    pub fn message(&mut self, snapshot: &WorldSnapshot, units: &[String], text: &str, now: f64) {
+        for unit in snapshot.units.iter().filter(|u| units.contains(&u.unit.id)) {
+            let at = terrain::world_of(unit.position.x, unit.position.y);
+            self.labels
+                .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
+            self.labels.push(Label {
+                entity_id: Some(unit.unit.id.clone()),
+                text: text.into(),
+                at: Vec3::new(at.x, 0.8, at.y),
+                born: now,
+            });
+        }
+        if self.labels.len() > 64 {
+            self.labels.drain(..self.labels.len() - 64);
+        }
+    }
+
     pub fn observe(&mut self, previous: Option<&WorldSnapshot>, next: &WorldSnapshot, now: f64) {
         let Some(previous) = previous else {
             return;
@@ -90,29 +111,6 @@ impl Feedback {
         if next.tick < previous.tick || next.island_id != previous.island_id {
             self.labels.clear();
             return;
-        }
-        for animal in &next.animals {
-            let label_id = format!("animal:{}", animal.id);
-            let p = animal.position();
-            let at = terrain::world_of(p.x, p.y);
-            for label in &mut self.labels {
-                if label.entity_id.as_deref() == Some(&label_id) {
-                    label.at.x = at.x;
-                    label.at.z = at.y;
-                }
-            }
-            if let Some(before) = previous.animals.iter().find(|a| a.id == animal.id)
-                && animal.health < before.health
-            {
-                self.labels
-                    .retain(|label| label.entity_id.as_deref() != Some(&label_id));
-                self.labels.push(Label {
-                    entity_id: Some(label_id),
-                    text: format!("{}: {:.0} HP", animal.kind.name(), animal.health),
-                    at: Vec3::new(at.x, 0.8, at.y),
-                    born: now,
-                });
-            }
         }
         for unit in &next.units {
             let Some(before) = previous
@@ -123,12 +121,6 @@ impl Feedback {
                 continue;
             };
             let at = terrain::world_of(unit.position.x, unit.position.y);
-            for label in &mut self.labels {
-                if label.entity_id.as_deref() == Some(&unit.unit.id) {
-                    label.at.x = at.x;
-                    label.at.z = at.y;
-                }
-            }
             let status = action_status(&unit.unit, next);
             let changed = status != action_status(&before.unit, previous);
             if let Some((text, _)) = status
@@ -141,16 +133,6 @@ impl Feedback {
                     entity_id: Some(unit.unit.id.clone()),
                     text,
                     at: Vec3::new(at.x, 0.8, at.y),
-                    born: now,
-                });
-            }
-            if unit.unit.health < before.unit.health {
-                self.labels
-                    .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
-                self.labels.push(Label {
-                    entity_id: Some(unit.unit.id.clone()),
-                    text: format!("-{:.0} HP", before.unit.health - unit.unit.health),
-                    at: Vec3::new(at.x, 1.1, at.y),
                     born: now,
                 });
             }
@@ -208,18 +190,35 @@ mod tests {
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
 
     #[test]
-    fn repeated_damage_replaces_feedback_instead_of_stacking() {
-        let mut before = GameWorld::default().snapshot();
+    fn complaints_replace_status_and_stay_at_the_original_anchor() {
+        let before = GameWorld::default().snapshot();
+        let id = before.units[0].unit.id.clone();
         let mut feedback = Feedback::default();
-        for tick in 1..=4 {
-            let mut next = before.clone();
-            next.tick += 1;
-            next.units[0].unit.health -= 8.0;
-            feedback.observe(Some(&before), &next, f64::from(tick) * 0.1);
-            assert_eq!(feedback.labels.len(), 1);
-            assert_eq!(feedback.labels[0].text, "-8 HP");
-            before = next;
-        }
+        feedback.message(&before, std::slice::from_ref(&id), "Blocked", 1.0);
+        feedback.message(&before, std::slice::from_ref(&id), "Not enough stone", 1.2);
+        let mut next = before.clone();
+        next.units[0].position.x += 2.0;
+        feedback.observe(Some(&before), &next, 1.3);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].entity_id.as_deref(), Some(id.as_str()));
+        assert_eq!(feedback.labels[0].text, "Not enough stone");
+        assert_eq!(feedback.labels[0].born, 1.2);
+        assert_eq!(
+            feedback.labels[0].at.x,
+            before.units[0].position.x as f32 * terrain::CELL
+        );
+    }
+
+    #[test]
+    fn damage_does_not_replace_status_with_numbers() {
+        let before = GameWorld::default().snapshot();
+        let mut next = before.clone();
+        next.units[0].unit.health -= 35.0;
+        let mut feedback = Feedback::default();
+        feedback.message(&before, &[before.units[0].unit.id.clone()], "Moving", 0.0);
+        feedback.observe(Some(&before), &next, 0.1);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Moving");
     }
 
     #[test]
@@ -384,7 +383,7 @@ mod tests {
     }
 
     #[test]
-    fn assignments_flash_once_and_plain_walking_stays_quiet() {
+    fn assignments_and_movement_flash_once() {
         let before = GameWorld::default().snapshot();
         for (action, expected) in [
             (
@@ -433,7 +432,9 @@ mod tests {
         };
         let mut feedback = Feedback::default();
         feedback.observe(Some(&before), &walking, 1.0);
-        assert!(feedback.labels.is_empty());
+        feedback.observe(Some(&walking), &walking, 1.1);
+        assert_eq!(feedback.labels.len(), 1);
+        assert_eq!(feedback.labels[0].text, "Moving");
         feedback.observe(Some(&walking), &before, 2.0);
         assert_eq!(feedback.labels[0].text, "Idle");
     }
@@ -521,7 +522,7 @@ mod tests {
     }
 
     #[test]
-    fn status_follows_the_unit_and_rapid_orders_replace_it() {
+    fn status_stays_at_its_origin_and_rapid_orders_replace_it() {
         let before = GameWorld::default().snapshot();
         let mut building = before.clone();
         building.units[0].unit.action = UnitAction::Build {
@@ -529,14 +530,13 @@ mod tests {
         };
         let mut feedback = Feedback::default();
         feedback.observe(Some(&before), &building, 1.0);
+        let origin = feedback.labels[0].at;
         let mut moving = building.clone();
         moving.units[0].position.x += 1.0;
+        moving.units[0].position.y += 1.0;
         feedback.observe(Some(&building), &moving, 1.1);
         assert_eq!(feedback.labels.len(), 1);
-        assert_eq!(
-            feedback.labels[0].at.x,
-            moving.units[0].position.x as f32 * terrain::CELL
-        );
+        assert_eq!(feedback.labels[0].at, origin);
         assert_eq!(feedback.labels[0].born, 1.0);
         let mut stopped = moving.clone();
         stopped.units[0].unit.action = UnitAction::Idle;
@@ -544,5 +544,7 @@ mod tests {
         assert_eq!(feedback.labels.len(), 1);
         assert_eq!(feedback.labels[0].text, "Idle");
         assert_eq!(feedback.labels[0].born, 1.2);
+        let at = terrain::world_of(stopped.units[0].position.x, stopped.units[0].position.y);
+        assert_eq!(feedback.labels[0].at, Vec3::new(at.x, 0.8, at.y));
     }
 }

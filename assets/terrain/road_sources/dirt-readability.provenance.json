@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-06",
+  "tool": "OpenAI image_gen",
+  "model": "not exposed",
+  "reference_revision": "1984e9b865fde8f5ac03e86801f12636ad27232a",
+  "reference_order": [
+    "assets/terrain/road_sources/dirt-sandy-before.png",
+    "assets/terrain/meadow.webp",
+    "assets/reference/diorama_primary.webp"
+  ],
+  "reference_sha256": {
+    "assets/terrain/road_sources/dirt-sandy-before.png": "c787edc155f9ca9598b31674e304a23dc50a92cd02851f1cdcc9f096116f8a1a",
+    "assets/terrain/meadow.webp": "d675f5f889e00bc994e55e31ec09d7f02059db74fee08ae985ddd69181be4f0e",
+    "assets/reference/diorama_primary.webp": "a4b34fb8fca56d7479d875a5c1b9858fa019cbf105ce57f0982febf488d474da"
+  },
+  "prompt_file": "dirt-readability-prompt.txt",
+  "output": "../road_dirt.png",
+  "reason": "User requested recreation because the dirt road is visually hard to see. Deepen pale sandy ochre to muted warm packed-earth brown while preserving painted world style.",
+  "output_sha256": "7dbc41dca1e2a49376c4bfe411473cf3654b474078aaea71d4cce89f3265b7ff",
+  "size": [
+    1254,
+    1254
+  ],
+  "mode": "RGB",
+  "generated_source": "/workspace/generated_images/exec-2befd895-4206-4843-8163-28e263b1fef7.png",
+  "postprocessing": "None; full-resolution generated output copied unchanged. Existing 512px mirrored/mipmapped runtime sampling retained."
+}

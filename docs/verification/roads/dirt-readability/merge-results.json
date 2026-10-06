@@ -1,0 +1,45 @@
+{
+  "wasm_sha256": "57daccc87f98bf45b4204b5a44119513d10d22c7dc794f971c09254cd1579690",
+  "results": [
+    {
+      "mode": "desktop",
+      "viewport": [
+        1280,
+        800,
+        1
+      ],
+      "road_cells": 14,
+      "resumed_by_single_cell": true,
+      "resume_only": false,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "d4387f37ea54be393001002b54d45d87b3dc6d940fe351443551856968c0899f"
+    },
+    {
+      "mode": "phone",
+      "viewport": [
+        390,
+        844,
+        2
+      ],
+      "road_cells": 14,
+      "resumed_by_single_cell": true,
+      "resume_only": false,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "d4387f37ea54be393001002b54d45d87b3dc6d940fe351443551856968c0899f"
+    }
+  ],
+  "integration_base": "99196484b6e2c44f6b02a2606825cb7d126a208a",
+  "workspace_tests": 299,
+  "sprite_resolution_frames": 307,
+  "formatting": "pass",
+  "native_strict_lint": "pass",
+  "wasm_strict_lint": "pass",
+  "field_transport_icon_audits": "pass",
+  "release_verifier_tests": 6,
+  "road_assets_sha256": {
+    "road_dirt.png": "7dbc41dca1e2a49376c4bfe411473cf3654b474078aaea71d4cce89f3265b7ff",
+    "road_stone.png": "8409efa2a26cd787343a71e8f21a089501efaecfe2a6bbcba0b9d49db9a552c9"
+  }
+}

@@ -17,7 +17,7 @@ construction stages; placement previews use the same deterministic water-edge ch
 
 The implemented feature summary is in [README.md](README.md#implemented-roadmap). Starter-island resource generation and discovery-based unlocks are implemented. Dock-built local transport and passengers are implemented. Continuous sailing between persistent islands, progressive map expansion, a cumulative globe overview, simultaneous settlement simulation and island inventories supplemented by movable ship storage are implemented. Basic dirt/stone roads and travel-time routing are implemented locally, pending PR/release verification. Next: profile populated archipelagos and refine the economy. The long-term world keeps expanding through new discoveries without a fixed island limit. Build on that loop with wolves, pirates, mythical creatures, escalating calamities, and permanent upgrades across runs.
 
-Territorial wolves and bears are the first implemented danger, with explicit contact attack orders, health, pursuit and death cleanup. New games have one wolf on the first island and 2–4 animals (one bear and 1–3 wolves) on later islands. Broad combat, calamities, treasures, and permanent progression remain proposals. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
+Territorial wolves, bears and boars are the first implemented danger, with explicit contact attack orders, health, pursuit and death cleanup. New games have one wolf and one boar on the first island; later islands have one bear, 1–3 wolves and 2–3 boars where safe spawn cells exist. Broad combat, calamities, treasures, and permanent progression remain proposals. Balance should make eventual defeat and the next run interesting without tedious rebuilding; event timing and upgrade rules remain open.
 
 The slices below retain earlier acceptance criteria as implementation references. Their fixed-scenario goals and steel-first ordering are superseded by this direction; see [decisions.md](decisions.md).
 
@@ -220,7 +220,7 @@ Gameplay acceptance:
 - [x] Control/Command-click additive group selection and existing shared gather/construct commands.
 - [x] Globe minimap terrain, camera marker and click/touch navigation share the world view’s isometric orientation and fit the full current map.
 
-- [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief floating assignment, drop-off and idle announcements matching resource-gain feedback, with plain walking excluded.
+- [x] Centered time-control labels and italic resource-gain feedback for gathering, explicit unloading and pre-build drop-offs; brief assignment, drop-off and idle announcements rising/fading at their initial world positions like resource-gain feedback, with plain walking excluded.
 - [x] Full authored walking/carrying cycles paced by displayed travel, immediate motion detection and neutral idle.
 - [x] Preserve painted sprite colors while retaining current terrain depth, calibrated buildings and translucent ghosts.
 - [x] Keep partially visible buildings on screen when their ground anchors pass the near clipping plane at close zoom.

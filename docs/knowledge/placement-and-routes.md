@@ -116,5 +116,15 @@ cell-boundary speed changes, diagonals/corners, animals, atomic rejection,
 Stop/resume, saved progress, unloading first, shared work and mixed crossings.
 The full workspace passes 289 tests (one manual benchmark ignored). Browser
 procedure and visual evidence live in [road verification](../verification/roads/README.md).
-Resume one unfinished cell by clicking it with villagers selected, or reissue a
-line to resume its outstanding work; idle villagers never adopt road jobs.
+Clicking an unfinished cell with villagers selected resumes all unfinished pieces
+of its edge-connected road network (Jakob, 2026-10-06), including bends, mixed
+materials and completed connecting pieces. Corner-only contact and separate roads
+do not join the assignment. The clicked cell comes first, then cell-coordinate
+order; the clicked piece must be visible, and occupancy and reachability checks
+validate the whole assignment atomically. Existing connected work can extend
+beyond current sight; visibility still gates every newly placed cell. Reissuing a multi-cell line keeps its explicit scope.
+Costs and progress are retained; idle villagers never adopt road jobs.
+
+Road tasks now accept a nonempty list of distinct existing cells, rather than
+requiring a straight line. Placement still requires straight endpoints. The save
+shape and version are unchanged, and resumed network tasks survive reload.

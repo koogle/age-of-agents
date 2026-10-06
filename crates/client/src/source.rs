@@ -21,8 +21,42 @@ pub enum Source {
     Remote(remote::Remote),
 }
 
-/// Outcome of a command, for the toast line.
-pub type CommandResult = Result<(), String>;
+/// A rejection retains the addressed units even if selection changes before its reply.
+#[derive(Debug, PartialEq)]
+pub struct CommandFailure {
+    pub message: String,
+    pub units: Vec<String>,
+}
+
+impl From<&str> for CommandFailure {
+    fn from(message: &str) -> Self {
+        Self {
+            message: message.into(),
+            units: Vec::new(),
+        }
+    }
+}
+
+pub type CommandResult = Result<(), CommandFailure>;
+
+fn command_units(command: &Command) -> Vec<String> {
+    match command {
+        Command::BuildRoad { unit_id, .. }
+        | Command::Board { unit_id, .. }
+        | Command::Move { unit_id, .. }
+        | Command::Gather { unit_id, .. }
+        | Command::PlantField { unit_id, .. }
+        | Command::Cultivate { unit_id, .. }
+        | Command::Build { unit_id, .. }
+        | Command::Construct { unit_id, .. }
+        | Command::Deposit { unit_id, .. }
+        | Command::Stop { unit_id } => vec![unit_id.clone()],
+        Command::GroupMove { unit_ids, .. } | Command::AttackAnimal { unit_ids, .. } => {
+            unit_ids.clone()
+        }
+        _ => Vec::new(),
+    }
+}
 
 impl Source {
     /// The simulation in-process, on the island grown from `seed`.
@@ -114,10 +148,14 @@ impl Source {
                 results,
                 ..
             } => {
+                let units = command_units(&command);
                 results.push(
                     world
                         .apply_command(command)
-                        .map_err(|error| error.to_string()),
+                        .map_err(|error| CommandFailure {
+                            message: error.to_string(),
+                            units,
+                        }),
                 );
                 *fresh = true;
             }
@@ -148,6 +186,7 @@ pub mod remote {
             world: Box<WorldSnapshot>,
         },
         CommandResult {
+            request_id: String,
             ok: bool,
             #[serde(default)]
             error: Option<String>,
@@ -187,12 +226,12 @@ pub mod remote {
                         Ok(ServerMessage::Snapshot { sequence, world }) => {
                             inbox.snapshot(sequence, *world);
                         }
-                        Ok(ServerMessage::CommandResult { ok, error }) => {
-                            inbox.results.push(if ok {
-                                Ok(())
-                            } else {
-                                Err(error.unwrap_or_else(|| "rejected".into()))
-                            });
+                        Ok(ServerMessage::CommandResult {
+                            request_id,
+                            ok,
+                            error,
+                        }) => {
+                            inbox.command_result(&request_id, ok, error);
                         }
                         Err(error) => log::warn!("bad server message: {error}"),
                     }
@@ -270,12 +309,19 @@ pub mod remote {
 
         pub fn send(&mut self, command: &Command) {
             self.request += 1;
-            let message = serde_json::json!({ "type": "command", "request_id": format!("r{}", self.request), "command": command });
+            let request_id = format!("r{}", self.request);
+            let units = super::command_units(command);
+            let message = serde_json::json!({ "type": "command", "request_id": request_id, "command": command });
             if self.socket.send_with_str(&message.to_string()).is_err() {
                 self.inbox
                     .borrow_mut()
                     .results
-                    .push(Err("not connected".into()));
+                    .push(Err(super::CommandFailure {
+                        message: "not connected".into(),
+                        units,
+                    }));
+            } else {
+                self.inbox.borrow_mut().pending.insert(request_id, units);
             }
         }
     }
@@ -284,6 +330,19 @@ pub mod remote {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_orders_retain_the_addressed_unit() {
+        let mut source = Source::local(aoa_game::DEFAULT_SEED);
+        source.send(Command::Build {
+            unit_id: "villager-1".into(),
+            origin: aoa_game::CellCoordinate::new(u16::MAX, u16::MAX),
+            kind: aoa_game::BuildingKind::House,
+        });
+        let failure = source.take_results().pop().unwrap().unwrap_err();
+        assert_eq!(failure.units, ["villager-1"]);
+        assert!(!failure.message.is_empty());
+    }
 
     #[test]
     fn seeded_reset_restarts_the_world_and_discards_old_tick_and_command_state() {
