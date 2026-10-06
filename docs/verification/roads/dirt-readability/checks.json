@@ -1,0 +1,27 @@
+{
+  "road_dirt.png": {
+    "sha256": "7dbc41dca1e2a49376c4bfe411473cf3654b474078aaea71d4cce89f3265b7ff",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "format": "PNG"
+  },
+  "road_stone.png": {
+    "sha256": "8409efa2a26cd787343a71e8f21a089501efaecfe2a6bbcba0b9d49db9a552c9",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "format": "PNG"
+  },
+  "workspace_tests": 294,
+  "ignored_manual_benchmark": 1,
+  "sprite_resolution_frames": 303,
+  "formatting": "pass",
+  "native_strict_lint": "pass",
+  "wasm_strict_lint": "pass",
+  "browser_bundle_rebuilt": true
+}

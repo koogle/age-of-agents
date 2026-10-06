@@ -208,3 +208,13 @@ neutral limestone grey with modestly deeper fine joints and clearer soft face
 shading; retain the irregular layout and painted style. Dirt stays unchanged.
 Jakob preferred the revised neutral-limestone texture after seeing the comparison.
 Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
+
+## Dirt road readability follow-up (2026-10-06)
+
+Jakob reports the sandy dirt road is visually hard to see and requests recreation.
+The earlier dirt integration pass does not establish sufficient readability.
+The local replacement uses deeper ochre-brown packed earth with restrained painted
+variation, retaining the diorama/meadow family, fine pebble contours and mirrored
+sampling. Desktop and emulated DPR2 phone default/maximum zoom show clearer separation
+from meadow, retaining fine detail without visible repeat seams. Judge the result under actual terrain lighting;
+source contrast alone is insufficient. [Follow-up evidence](../verification/roads/dirt-readability/README.md).
