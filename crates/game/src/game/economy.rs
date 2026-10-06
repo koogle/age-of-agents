@@ -3,7 +3,8 @@
 use super::*;
 
 impl ResourceKind {
-    pub const ALL: [Self; 13] = [
+    pub const ALL: [Self; 14] = [
+        Self::Water,
         Self::Wood,
         Self::Food,
         Self::Stone,
@@ -20,6 +21,7 @@ impl ResourceKind {
     ];
     pub const fn name(self) -> &'static str {
         match self {
+            Self::Water => "water",
             Self::Wood => "wood",
             Self::Food => "food",
             Self::Stone => "stone",
