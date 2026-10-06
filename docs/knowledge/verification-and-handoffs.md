@@ -124,3 +124,13 @@ fixture. The 2026-10-06 icon refinement replay found center-screen selection
 unreliable when reusing a context across dock, land-unit and open-water scenes.
 Fresh contexts isolate the scenes; do not accept an empty-action screenshot as
 proof merely because it produced no browser errors.
+
+## Dock presentation replay (2026-10-06)
+
+`check_dock_facings.py` consumes the current island-inventory presentation fixture
+directly; the obsolete `stockpile` conversion failed after shared inventories
+were removed. Keep animals, roads, units and resources empty for this isolated
+shore fixture. It captures completed docks at normal and maximum zoom plus all
+construction stages, asserts desktop/DPR-2 image dimensions, checks mouse/touch
+selection for each facing, and records the tested WASM/atlas hashes. This remains
+presentation/picking evidence, not production or physical-phone verification.

@@ -1,0 +1,15 @@
+desktop connected
+warning [.WebGL-0x325c0237f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning [.WebGL-0x325c0237f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning [.WebGL-0x325c0237f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning [.WebGL-0x325c0237f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+desktop south captured
+desktop east captured
+desktop north captured
+desktop west captured
+phone connected
+phone south captured
+phone east captured
+phone north captured
+phone west captured
+{"browser_errors": [], "captures": 40, "wasm_sha256": "ee0bfd23d11432d0f9b9dcc75e241e4a691653f895a23f570f98ea916e7b73a2", "atlas_sha256": "12d029a6deb6e52be7193cc8e304b07839846b6b5bc6b5be07aaaa7a044b5776", "desktop": {"width": 1200, "height": 900, "dpr": 1}, "phone": {"width": 390, "height": 844, "dpr": 2}}

@@ -17,6 +17,7 @@ pub(super) struct Frame {
     pub atlas: [f32; 2],
     pub cell: [f32; 2],
     pub corners: Corners,
+    pub mirror: bool,
 }
 
 fn frame(
@@ -25,17 +26,18 @@ fn frame(
     construction: Option<f64>,
     working: bool,
     facing: DockFacing,
-) -> (usize, [f32; 4], [f32; 2], [f32; 2], Corners) {
+) -> Frame {
     if kind == BuildingKind::TownCenter {
         let tc = &sheets.town_center;
         let frame = town_center_frame(tc, construction, working);
-        return (
-            SHEET_TOWN_CENTER,
-            tc.frames[frame],
-            tc.size,
-            tc.cell,
-            tc.footprints[frame],
-        );
+        return Frame {
+            sheet: SHEET_TOWN_CENTER,
+            rect: tc.frames[frame],
+            atlas: tc.size,
+            cell: tc.cell,
+            corners: tc.footprints[frame],
+            mirror: false,
+        };
     }
     let (index, sheet, row) = match kind {
         BuildingKind::House => (SHEET_BUILDINGS, &sheets.buildings, "house"),
@@ -45,10 +47,8 @@ fn frame(
             SHEET_BUILDINGS,
             &sheets.buildings,
             match facing {
-                DockFacing::South => "dock",
-                DockFacing::East => "dock_east",
-                DockFacing::North => "dock_north",
-                DockFacing::West => "dock_west",
+                DockFacing::South | DockFacing::East => "dock",
+                DockFacing::North | DockFacing::West => "dock_north",
             },
         ),
         _ => sheets.catalog.building(kind),
@@ -56,13 +56,19 @@ fn frame(
     let stage = construction.map_or(3, |work| {
         ((work / kind.build_seconds() * 3.0) as usize).min(2)
     });
-    (
-        index,
-        sheet.frames[row][stage],
-        sheet.size,
-        sheet.cell,
-        sheet.footprints[row][stage],
-    )
+    let mirror =
+        kind == BuildingKind::Dock && matches!(facing, DockFacing::East | DockFacing::West);
+    // Reflect registration along with the pixels, before fitting to the plot.
+    let corners =
+        sheet.footprints[row][stage].map(|[x, y]| [if mirror { sheet.cell[0] - x } else { x }, y]);
+    Frame {
+        sheet: index,
+        rect: sheet.frames[row][stage],
+        atlas: sheet.size,
+        cell: sheet.cell,
+        corners,
+        mirror,
+    }
 }
 
 pub(crate) fn sprite(
@@ -74,7 +80,7 @@ pub(crate) fn sprite(
     working: bool,
     facing: DockFacing,
 ) -> (usize, Sprite) {
-    let (sheet, rect, atlas, cell, corners) = frame(sheets, kind, construction, working, facing);
+    let frame = frame(sheets, kind, construction, working, facing);
     let (columns, rows) = kind.size();
     let (width, depth) = (columns as f32 * CELL, rows as f32 * CELL);
     // Initial construction plots fill the claim, independently of the smaller
@@ -95,19 +101,7 @@ pub(crate) fn sprite(
     } else {
         0.94
     };
-    on_plot(
-        Frame {
-            sheet,
-            rect,
-            atlas,
-            cell,
-            corners,
-        },
-        heights,
-        center,
-        Vec2::new(width, depth),
-        plot_fill,
-    )
+    on_plot(frame, heights, center, Vec2::new(width, depth), plot_fill)
 }
 
 /// Fit authored ground corners uniformly; buildings and crop plots share depth/anchoring.
@@ -124,6 +118,7 @@ pub(super) fn on_plot(
         atlas,
         cell,
         corners,
+        mirror,
     } = frame;
     let (width, depth) = (extent.x, extent.y);
     let (right, up) = Rig::new().basis();
@@ -146,7 +141,7 @@ pub(super) fn on_plot(
             anchor: anchor.to_array(),
             size: [cell[0] * scale, cell[1] * scale],
             pivot: [pixel_anchor.x / cell[0], 1.0 + pixel_anchor.y / cell[1]],
-            uv: uv(rect, atlas, false),
+            uv: uv(rect, atlas, mirror),
             pull: 0.08 * width,
             tint: [1.0; 4],
             footprint: [width, depth],
@@ -208,7 +203,7 @@ mod tests {
                 (None, true),
             ] {
                 let art = sprite(&sheets, &heights, kind, center, work, working, facing).1;
-                let (_, _, _, cell, corners) = frame(&sheets, kind, work, working, facing);
+                let Frame { cell, corners, .. } = frame(&sheets, kind, work, working, facing);
                 assert!(
                     (art.size[0] / cell[0] - art.size[1] / cell[1]).abs() < 1e-6,
                     "{kind:?} must use the same scale on both image axes"
@@ -231,35 +226,59 @@ mod tests {
     }
 
     #[test]
-    fn dock_facings_have_distinct_registered_art_at_every_stage() {
+    fn dock_pairs_share_pixels_and_reflect_the_registered_base_at_every_stage() {
         let sheets = sheets();
-        let heights = Heights::unknown();
+        let mut heights = Heights::unknown();
+        heights.set_plots(vec![[11.0, 11.0, 2.0, 2.0]], false);
         let center = ground(&heights, 12.0, 12.0);
+        let (right, up) = Rig::new().basis();
+        let project = |p: Vec3| Vec2::new(p.dot(right), p.dot(up));
+        let inverse = Mat2::from_cols(project(Vec3::X), project(Vec3::Z)).inverse();
+        assert!(!sheets.buildings.frames.contains_key("dock_east"));
+        assert!(!sheets.buildings.frames.contains_key("dock_west"));
         for work in [Some(0.0), Some(3.0), Some(6.0), None] {
-            let mut rects = Vec::new();
-            for facing in [
-                DockFacing::South,
-                DockFacing::East,
-                DockFacing::North,
-                DockFacing::West,
+            for (original, reflected) in [
+                (DockFacing::South, DockFacing::East),
+                (DockFacing::North, DockFacing::West),
             ] {
-                let (sheet, art) = sprite(
+                let a = sprite(
                     &sheets,
                     &heights,
                     BuildingKind::Dock,
                     center,
                     work,
                     false,
-                    facing,
-                );
-                assert_eq!(sheet, SHEET_BUILDINGS);
-                assert!(art.size.into_iter().all(|v| v.is_finite() && v > 0.0));
-                assert_eq!(art.footprint, [2.0, 2.0]);
-                assert!(
-                    !rects.contains(&art.uv),
-                    "each facing needs its own authored view"
-                );
-                rects.push(art.uv);
+                    original,
+                )
+                .1;
+                let b = sprite(
+                    &sheets,
+                    &heights,
+                    BuildingKind::Dock,
+                    center,
+                    work,
+                    false,
+                    reflected,
+                )
+                .1;
+                assert_eq!(b.uv, [a.uv[2], a.uv[1], a.uv[0], a.uv[3]]);
+                assert_eq!(a.footprint, [2.0, 2.0]);
+                assert_eq!(a.anchor, b.anchor);
+                assert!(Vec2::from(a.size).abs_diff_eq(Vec2::from(b.size), 1e-5));
+                let source = frame(&sheets, BuildingKind::Dock, work, false, original);
+                let mirrored = frame(&sheets, BuildingKind::Dock, work, false, reflected);
+                for (left, right) in source.corners.into_iter().zip(mirrored.corners) {
+                    let offset = |art: &Sprite, [x, y]: [f32; 2]| {
+                        let q = Vec2::new(x / source.cell[0], 1.0 - y / source.cell[1])
+                            - Vec2::from(art.pivot);
+                        inverse
+                            * (project(Vec3::from(art.anchor) - center) + q * Vec2::from(art.size))
+                    };
+                    let before = offset(&a, left);
+                    let after = offset(&b, right);
+                    // A horizontal screen reflection swaps the two ground axes.
+                    assert!(after.abs_diff_eq(Vec2::new(before.y, before.x), 1e-5));
+                }
             }
         }
     }
@@ -347,7 +366,7 @@ mod tests {
                 DockFacing::South,
             )
             .1;
-            let (_, _, _, cell, corners) =
+            let Frame { cell, corners, .. } =
                 frame(&sheets, BuildingKind::House, work, false, DockFacing::South);
             let max_extent = corners
                 .into_iter()

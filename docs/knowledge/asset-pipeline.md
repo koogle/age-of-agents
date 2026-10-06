@@ -158,8 +158,9 @@ focused topic from the [knowledge index](INDEX.md).
 
 ## Directional dock integration (2026-10-05)
 
-The building packer appends three directional rows to the existing atlas, keeping
-all original pixels and UV rectangles. Use the retained 2172×724 strips in
+The original integration appended three directional rows to the building atlas.
+The 2026-10-06 two-view implementation below replaces that layout: retained
+pixels stay identical, but the north row moves and UVs use the smaller atlas. Use the retained 2172×724 strips in
 `assets/sprites/building_sources/directions`; the earlier 1254×1254 construction
 sheet was rejected because its cells were only 418px. Each integrated source
 cell is 724×724 before packing down to 512×512. Manual structural deck corners
@@ -199,6 +200,26 @@ Follow-up direction: compare wildlife directly with existing NPCs, not only the 
 The corrected water art was explicitly accepted by the user on 2026-10-06
 ("Looks much better"). It uses pale clay, muted blue water and finer ink; the
 comparison and desktop/DPR-2 previews are in the water verification folder.
+
+## Two-view dock reuse (2026-10-06)
+
+Jakob requested a first PR halving the dock artwork by mirroring two views.
+Keep the approved south/front and north/rear rows across foundation, walls, roof
+and completion; east mirrors south and west mirrors north. Mirror the registered
+ground corners with the UVs so plot fitting and placement previews remain aligned.
+Remove redundant east/west packed frames and derived cutouts; retain original
+generation strips and provenance as historical evidence. All four facings and construction stages pass desktop/DPR-2 phone presentation
+and picking checks; see [verification](../verification/dock-mirroring/README.md).
+The atlas saves 31.2% PNG bytes and 8 MiB of base-level RGBA texture storage.
+This change does not authorize a palette change, merge or deployment.
+
+**Developer visual review, 2026-10-06:** Jakob noted noticeably darker wood in
+the rear-facing dock sprites. The retained north/rear source has darker/greyer
+timber than the south/front source; horizontal mirroring preserves this existing
+material mismatch in west as well. The two-view reduction does not fix or approve
+that difference. A future art correction should match timber across both source
+views while preserving directional shading, geometry and construction stages.
+No recoloring is included in the mirroring PR.
 
 ## Stone road readability follow-up (2026-10-06)
 

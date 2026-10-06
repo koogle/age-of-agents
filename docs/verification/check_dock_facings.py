@@ -8,7 +8,10 @@ import argparse
 import asyncio
 import copy
 import json
+import hashlib
 from pathlib import Path
+
+from PIL import Image
 
 from aiohttp import web
 from playwright.async_api import async_playwright
@@ -18,9 +21,8 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def fixture(direction):
     state = json.loads((Path(__file__).parent / 'presentation-fixture.json').read_text())
-    stock = state.pop('stockpile')
     state.update(island_id=0, island_count=1, island_origins=[{'column': 0, 'row': 0}],
-                 inventories=[stock], stored_inventories=[stock], ship_connections=[], ships=[])
+                 ship_connections=[], ships=[], animals=[], roads=[])
     state['units'] = []
     state['resources'] = []
     state['buildings'] = [dict(id='dock-test', kind='dock', origin={'column': 28, 'row': 19},
@@ -87,17 +89,26 @@ async def main(output):
                     await asyncio.sleep(0.05)
                     await page.clock.run_for(17)
 
+            async def capture(filename):
+                path = output / filename
+                await page.screenshot(path=str(path))
+                with Image.open(path) as image:
+                    assert image.size == (viewport['width'] * dpr, viewport['height'] * dpr)
+
             for _ in range(2):
                 await send(fixture('south'))
             await page.clock.fast_forward(1000)
             await page.locator('#loading').wait_for(state='detached', timeout=90000)
+            for direction in ['south', 'east', 'north', 'west']:
+                await send(fixture(direction))
+                await capture(f'{name}-{direction}-normal.png')
             await page.mouse.move(viewport['width'] / 2, viewport['height'] / 2)
             await page.mouse.wheel(0, -1200)
             await page.clock.run_for(50)
             for direction in ['south', 'east', 'north', 'west']:
                 state = fixture(direction)
                 await send(state)
-                await page.screenshot(path=str(output / f'{name}-{direction}.png'))
+                await capture(f'{name}-{direction}.png')
                 print(name, direction, 'captured', flush=True)
                 # Exercise sprite picking with the same projected anchor on mouse/touch.
                 xy = await page.evaluate("""async () => {
@@ -115,12 +126,18 @@ async def main(output):
                     building = copy.deepcopy(state)
                     building['buildings'][0]['construction'] = work
                     await send(building)
-                    await page.screenshot(path=str(output / f'{name}-{direction}-{stage}.png'))
+                    await capture(f'{name}-{direction}-{stage}.png')
             await page.close()
         await browser.close()
     await runner.cleanup()
     assert not errors, errors
-    print(json.dumps({'browser_errors': errors, 'captures': 32}))
+    result = {'browser_errors': errors, 'captures': 40,
+              'wasm_sha256': hashlib.sha256((ROOT / 'web/pkg/aoa_client_bg.wasm').read_bytes()).hexdigest(),
+              'atlas_sha256': hashlib.sha256((ROOT / 'assets/sprites/buildings_hd.png').read_bytes()).hexdigest(),
+              'desktop': {'width': 1200, 'height': 900, 'dpr': 1},
+              'phone': {'width': 390, 'height': 844, 'dpr': 2}}
+    (output / 'checks.json').write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result))
 
 
 if __name__ == '__main__':
