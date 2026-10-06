@@ -1,0 +1,16 @@
+{
+  "wasm_sha256": "c55f484548e8c7e2fffdd52bdbe96dd67a89ae0fd44ece5c8addfd0af0e468a6",
+  "results": [
+    {
+      "viewport": "desktop",
+      "dpr": 1,
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "dpr": 2,
+      "errors": []
+    }
+  ],
+  "limitation": "Paused art preview; synthetic wheel input for zoom. Not a combat replay or physical-device test."
+}

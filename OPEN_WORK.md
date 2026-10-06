@@ -1,3 +1,10 @@
+# Boar danger (2026-10-06)
+
+- User selected the first follow-up study (`boar-npc-study.png`). Its lighter taupe/cel style is integrated across all four poses, with safe cell margins and original-resolution packing. Fresh 307-frame audit, client pose test and native/WASM lint pass; fresh normal/max-zoom desktop and DPR-2 phone art captures pass with no browser errors. See `docs/verification/boars/approved/`. The second study is not selected.
+
+- Implemented locally: one starter boar, 2–3 later-island boars, preserving existing wolves/bears and safe placement. Shared combat/selection, authored four-pose art, no save reset.
+- 294 workspace tests (one manual benchmark ignored), strict native/WASM lint, rebuilt browser/server and 307-frame sprite audit pass. Desktop mouse and DPR-2 phone touch hunting/defeat pass, with normal/max-zoom art captures and no page errors. Additional pose replay passed desktop phases/pause/mirroring and reached phone close-ups after phase assertions; remaining duplicate close-ups were stopped due slow SwiftShader, so no full pose-replay completion is claimed. Evidence and review: [boars](docs/verification/boars/REVIEW.md). Not deployed.
+
 # Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
 
 - User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.

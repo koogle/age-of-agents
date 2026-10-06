@@ -31,7 +31,7 @@ fn attack(world: &mut GameWorld) {
 
 #[test]
 fn stationary_attack_faces_target_and_clears_phase_after_retreat() {
-    for kind in [AnimalKind::Wolf, AnimalKind::Bear] {
+    for kind in [AnimalKind::Wolf, AnimalKind::Bear, AnimalKind::Boar] {
         let mut world = wildlife(kind);
         world.tick(0.3);
         assert_eq!(world.animals[0].heading, [-1, 0]);
@@ -49,11 +49,12 @@ fn stationary_attack_faces_target_and_clears_phase_after_retreat() {
 }
 
 #[test]
-fn one_wolf_spawns_deterministically_away_from_starter_units() {
+fn wolf_and_boar_spawn_deterministically_away_from_starter_units() {
     for seed in [1, 123, DEFAULT_SEED] {
         let world = GameWorld::generate(seed);
         assert_eq!(world.animals, GameWorld::generate(seed).animals);
-        assert_eq!(world.animals.len(), 1);
+        assert_eq!(world.animals.len(), 2);
+        assert_eq!(world.animals[1].kind, AnimalKind::Boar);
         assert_eq!(world.animals[0].kind, AnimalKind::Wolf);
         for a in &world.animals {
             assert!(
@@ -192,16 +193,18 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(world.animals, replay.animals);
             assert_eq!(&world.animals[..old.len()], old.as_slice());
             let added = &world.animals[old.len()..];
-            assert!((2..=4).contains(&added.len()));
+            let boars = added.iter().filter(|a| a.kind == AnimalKind::Boar).count();
+            assert!((2..=3).contains(&boars));
+            assert!((4..=7).contains(&added.len()));
             assert_eq!(
                 added.iter().filter(|a| a.kind == AnimalKind::Bear).count(),
                 1
             );
             assert_eq!(
                 added.iter().filter(|a| a.kind == AnimalKind::Wolf).count(),
-                added.len() - 1
+                added.len() - boars - 1
             );
-            counts.insert(added.len());
+            counts.insert(added.len() - boars);
             world.validate().unwrap();
         }
     }
@@ -261,4 +264,23 @@ fn missing_terrain_is_a_validation_error_not_a_panic() {
     let mut world = wildlife(AnimalKind::Bear);
     world.terrain.clear();
     assert!(world.validate().is_err());
+}
+
+#[test]
+fn boar_hunting_damage_and_save_roundtrip() {
+    let mut world = wildlife(AnimalKind::Boar);
+    attack(&mut world);
+    world.tick(1.0);
+    assert_eq!(world.animals[0].health, 50.0);
+    assert_eq!(world.units[0].health, 90.0);
+    let mut restored: GameWorld =
+        serde_json::from_str(&serde_json::to_string(&world).unwrap()).unwrap();
+    for _ in 0..5 {
+        world.tick(1.0);
+        restored.tick(1.0);
+    }
+    assert_eq!(world, restored);
+    assert!(world.animals.is_empty());
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    world.validate().unwrap();
 }

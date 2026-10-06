@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Boars (2026-10-06):** Add the retained boar concept alongside wolves and bears: one boar on the first island, 2–3 on later islands, preserving territorial combat and safe starts. Existing saved populations stay intact; the roster applies to newly generated islands.
+
 - **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).
 
 - **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
@@ -14,7 +16,7 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 - **Island terrain (2026-10-05):** Generate varied coastlines first, then relief, and derive mountains and downhill rivers from the same height field. Preserve open central bays, deterministic seeds and reachable settlement resources ([generation guide](docs/knowledge/archipelago-and-transport.md#terrain-first-generation-2026-10-05)).
 
-- **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. Subsequent direction sets one animal on the first island and more on the second: one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island ([wildlife](docs/knowledge/wildlife.md)).
+- **First environmental danger (2026-10-05):** Jakob redirected the initial danger work from timed events to wolves and dangerous animals, then requested a bear. Implement territorial wolves and bears with explicit player hunting orders; the drought proposal is withdrawn. The original roster was one starter wolf, then 2–4 animals (one bear and 1–3 wolves) per later island; the 2026-10-06 boar addition extends it ([wildlife](docs/knowledge/wildlife.md)).
 
 - **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.

@@ -17,7 +17,7 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 URL = 'http://127.0.0.1:8000'
 
-async def main(out, only, closeups=False):
+async def main(out, only, closeups=False, target='bear'):
     out.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as http:
         try:
@@ -57,7 +57,7 @@ async def main(out, only, closeups=False):
                 await start();await command({'type':'set_simulation_speed','multiplier':0.0});stop()
                 with sqlite3.connect(db) as con:
                     fixture=json.loads(con.execute('SELECT world_json FROM world_state WHERE id=1').fetchone()[0])
-                assert [a['kind'] for a in fixture['animals']] == ['wolf'], fixture['animals']
+                assert [a['kind'] for a in fixture['animals']] == ['wolf', 'boar'], fixture['animals']
                 x=fixture['units'][0]['cell']['column'];y=fixture['units'][0]['cell']['row']+3
                 fixture['resources']=[r for r in fixture['resources'] if not (x-9<=r['cell']['column']<=x+9 and y-2<=r['cell']['row']<=y+7)]
                 for t in fixture['terrain']:
@@ -66,7 +66,7 @@ async def main(out, only, closeups=False):
                 for i,u in enumerate(fixture['units']):
                     u.update(kind='guard',health=100.0,cell=cell(x-i,y),step=None,action={'type':'idle'},cargo=None)
                 fixture['animals']=[]
-                for name,kind,at,hp in [('bear','bear',cell(x+4,y+1),100.0),('wolf','wolf',cell(x-4,y+2),40.0)]:
+                for name,kind,at,hp in [(target,target,cell(x+4,y+1),60.0 if target == 'boar' else 100.0),('wolf','wolf',cell(x-4,y+2),40.0)]:
                     fixture['animals'].append({'id':name,'kind':kind,'home':at,'cell':at,'step':None,'health':hp,'attack_seconds':0.0,'heading':[1,0]})
                 async with async_playwright() as p:
                     browser=await p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--enable-unsafe-swiftshader'])
@@ -97,7 +97,7 @@ async def main(out, only, closeups=False):
                         click=page.touchscreen.tap if dpr==2 else page.mouse.click
                         await page.screenshot(path=str(out/(label+'-wildlife.png')))
                         if closeups:
-                            for kind, at in [('wolf', cell(x-4,y+2)), ('bear', cell(x+4,y+1))]:
+                            for kind, at in [('wolf', cell(x-4,y+2)), (target, cell(x+4,y+1))]:
                                 # Center each animal, then hit the camera's minimum distance.
                                 # This is visual evidence; mouse/touch command acceptance follows.
                                 point = await screen(at, .3)
@@ -131,14 +131,14 @@ async def main(out, only, closeups=False):
                             await asyncio.sleep(.15)
                             live=await state()
                             injured_units |= any(u['health']<100 for u in live['units']) or len(live['units']) < len(ordered['units'])
-                            bear=next((a for a in live['animals'] if a['id']=='bear'),None)
-                            if bear and bear['health']<100 and injured is None:
+                            animal=next((a for a in live['animals'] if a['id']==target),None)
+                            if animal and animal['health']<(60 if target == 'boar' else 100) and injured is None:
                                 injured=copy.deepcopy(live)
                                 await command({'type':'set_simulation_speed','multiplier':0.0})
                                 await page.screenshot(path=str(out/(label+'-combat.png')))
                                 await command({'type':'set_simulation_speed','multiplier':2.0})
-                            if not bear:break
-                        else:raise AssertionError('Bear was not defeated')
+                            if not animal:break
+                        else:raise AssertionError(f'{target} was not defeated')
                         assert injured is not None
                         assert injured_units, 'Animal must fight back'
                         await command({'type':'set_simulation_speed','multiplier':0.0})
@@ -158,5 +158,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--only',choices=['desktop','phone'])
     parser.add_argument('--closeups',action='store_true',help='Capture each animal at maximum zoom')
+    parser.add_argument('--target', choices=['bear', 'boar'], default='bear')
     args=parser.parse_args()
-    asyncio.run(main(args.output,args.only,args.closeups))
+    asyncio.run(main(args.output,args.only,args.closeups, args.target))
