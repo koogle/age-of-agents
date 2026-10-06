@@ -126,6 +126,10 @@ Integration PR #107 wires these files into the HUD with combined Rust, asset and
 | `command_cargo` | [Review](sources/menu_icons/command_cargo/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_cargo/provenance.json) |
 | `command_back` | [Review](sources/menu_icons/command_back/STYLE_REVIEW.md), [provenance](sources/menu_icons/command_back/provenance.json) |
 
+## Temple goal marker (2026-10-06)
+
+`icons/goal_temple.png` marks the run's temple island on the globe: a marble temple with a golden chest between its columns. Made with `fal-ai/nano-banana/edit` from the object-icon template with `resource_wood` as the style reference, cut out with `fal-ai/birefnet/v2`, then normalized from the 1024 px cutout with `scripts/normalize_icons.py --write`. Two drafts; the second was selected for its larger silhouette and readable chest. Prompt, renders, cutouts, request IDs and a reference comparison are in `sources/goal_temple/`. Estimated cost $0.0896. Style review is pending Jakob's acceptance.
+
 ## Water resource (2026-10-05)
 
 `icons/resource_water.png` is the generated/refined terracotta water jug added

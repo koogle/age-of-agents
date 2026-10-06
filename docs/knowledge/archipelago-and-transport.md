@@ -65,6 +65,40 @@ changes the procedure, contract, failure modes or verification limits. Record th
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
 
+## Planned run archipelago (2026-10-06)
+
+Jakob's direction: every run has 5–7 islands spread over a map rather than in a
+line, the layout is chosen first, the final island holds a temple with the
+Artifact of the Gods, and that goal is revealed at the start. Each island's
+terrain still generates as the player reaches it. Later work (temple building,
+artifact capture, escalating monsters) is not implemented yet.
+
+Implemented in `crates/game/src/game/islands.rs`:
+
+- `archipelago_plan(seed)` grows 5–7 sites outward from the start over a 3×3 grid
+  of regions with up to 24 cells of seeded offset, retrying until the farthest
+  site is at least three crossings away (32 attempts, best kept). Index 0 is the
+  start at the origin; the rest are ordered by crossings; the last is the temple.
+  The plan is derived from the persisted seed, so it adds no save field.
+- Island ids stay in discovery order (inventories, wildlife, resource tiers).
+  `validate_islands` requires distinct origins from the plan with the start first.
+- `expand_archipelago` resizes the ocean to `plan_extent` once any ship exists, then
+  discovers any site whose region a ship is within 12 cells of. Before the first
+  ship the world stays 120×80, which keeps early play and most tests unchanged.
+- `Voyage` with `island_id == island_count` (Explore) sails to open water 8 cells
+  outside the nearest undiscovered site; with every site charted it is rejected.
+- Snapshots carry `archipelago` (the plan). The globe fits `plan_extent`, draws
+  uncharted sites as parchment discs, the temple site with the generated
+  `goal_temple` icon, and unseen open sea between islands as sea (the client flags
+  those cells with the water colour; `island_at` decides). The resource label reads
+  "Island N of M"; the ship panel's Explore shows charted/planned counts.
+
+Store version 18 resets spiral-placed worlds. Tests: `islands_tests` cover plan
+bounds/separation/determinism over 200 seeds, approach discovery without ship
+jumps, Explore charting a whole run and its rejection afterwards.
+`cargo run -p aoa-game --example archipelago_preview -- <seed> <charted>` exports
+a paused snapshot after real Explore voyages; [capture and screenshots](../verification/archipelago-plan/README.md).
+
 ## Island storage and movable ship holds (PR #94)
 
 Each discovered island owns a stockpile. A stopped shore ship contributes its cargo to that island’s available resources and accepts villager deposits up to its remaining 50-resource capacity. Cargo stays aboard on arrival and leaves with the ship; passengers have four independent seats. Research and training still require buildings. Explicit load/unload commands transfer up to 10 per button tap at a completed dock, without NPC labor.

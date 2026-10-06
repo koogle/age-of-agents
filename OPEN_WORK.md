@@ -1,6 +1,7 @@
 # Bounded run plan — 2026-10-06
 
-- Jakob asked for a plan to close the loop on a single run: 5–7 scattered islands planned up front, the final island's temple and Artifact of the Gods revealed at the start, escalating monsters (barbarians, skeletons, cyclops, giant snakes, minotaur, centaur, lions, with variants and distinct behaviors). The ordered proposal with four decisions awaiting his confirmation is [docs/RUN_PLAN.md](docs/RUN_PLAN.md). Documentation only; no code or save changes. Next: Jakob confirms the decisions, then Phase 1 (archipelago plan and globe reveal) starts.
+- Jakob asked to close the loop on a single run (5–7 scattered islands, a temple with the Artifact of the Gods on the final island revealed at the start, escalating monsters), then redirected from a written plan to prototypes, one PR at a time. An earlier proposal remains at [docs/RUN_PLAN.md](docs/RUN_PLAN.md); Jakob did not want a plan, so treat it as superseded notes.
+- PR 1 on `claude/laughing-goodall-10lotl`: seeded 5–7 island plan, approach discovery, Explore to the nearest uncharted site, globe reveal with the generated temple marker, store version 18. Workspace tests, both clippy runs and icon checks pass; WebGL desktop/DPR-2 phone captures in [archipelago-plan](docs/verification/archipelago-plan/README.md). Not deployed. Next PR: the temple building and artifact on the final island.
 
 # Local branch integration — 2026-10-06
 
