@@ -194,6 +194,10 @@ async def coin(page, mode, index):
 
 async def run(browser, request):
     global state, persistent
+    if request.get("fresh_context"):
+        for context, _, _ in persistent.values():
+            await context.close()
+        persistent.clear()
     name = request["name"]
     out = Path(request["output"])
     out.mkdir(parents=True, exist_ok=True)

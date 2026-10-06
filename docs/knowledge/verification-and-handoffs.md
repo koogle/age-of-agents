@@ -117,3 +117,10 @@ proof. Run all desktop scenes then all phone scenes, closing the previous contex
 Unit-training fixtures must provide housing for active and queued unit jobs, even when the visible unit list is empty. A barracks-only fixture correctly disables training and cannot prove enabled-command dispatch; the menu suite supplies a separate house.
 
 Canvas command medallions lift by 3 physical pixels on hover. When selecting them from captured quads, group nearby y-coordinates into a row before sorting left-to-right; a strict y-first sort moves the hovered command to index zero and can click the wrong category.
+
+For unrelated menu fixtures, request `"fresh_context": true` in the batch worker
+to close the previous context and initialize the camera/selection from that
+fixture. The 2026-10-06 icon refinement replay found center-screen selection
+unreliable when reusing a context across dock, land-unit and open-water scenes.
+Fresh contexts isolate the scenes; do not accept an empty-action screenshot as
+proof merely because it produced no browser errors.

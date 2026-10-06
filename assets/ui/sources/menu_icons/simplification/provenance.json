@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-06",
+  "status": "Visual, packing and six desktop/DPR-2 phone menu checks passed; user authorized sequential PR merges",
+  "model": "OpenAI image_gen",
+  "base_revision": "792cb778feddce794e4ef2dae5cde856db8dce2b",
+  "approved_style_references": [
+    "../refinement/resource_wood.png",
+    "../refinement/tech_masonry.png"
+  ],
+  "passes": [
+    {
+      "output": "cargo-draft.png",
+      "source": "../command_cargo/refined.png",
+      "prompt": "Refine ONLY the cargo crate icon from image 1. Images 2 (wood) and 3 (masonry) are the authoritative style references: preserve their delicate fine dark-brown ink, muted warm watercolor washes, three-quarter view and gentle shading. User asks for a slightly simpler, more readable menu icon. Simplify image 1 into a single compact wooden shipping crate: REMOVE the small sack entirely; REMOVE the thick twisted rope around the crate; retain a closed wooden crate with clear corner battens and just two or three broad plank divisions per visible face. Omit nail dots, wood knots, dense grain, scratch marks and tiny hatch lines. Keep only a few subtle grain strokes. A calm warm oak wash, soft single shadow plane, fine brown silhouette and coherent perspective. Not a flat vector icon, not glossy, no thick outlines, no saturated orange. Same object identity and optical weight as image 1. Single isolated icon centered with generous transparent margin, no lettering, no floor, no cast shadow, no badge, no additional objects. Transparent background. This is an actual replacement-art draft, not a comparison sheet.",
+      "imagegen_output_file": "exec-7e66f49d-8af2-4c03-a72e-e3a17ad23b9a.png"
+    },
+    {
+      "output": "rejected-busy-three-icon-draft.png",
+      "sources": [
+        "../category_gathering/refined.png",
+        "../category_town/refined.png",
+        "../command_disembark/refined.png"
+      ],
+      "prompt": "Create a refinement study of THREE existing game menu icons, in one wide canvas with three equally sized, clearly separated cells, transparent background, NO labels or text. Image1 is current Gathering basket, image2 current Town pavilion, image3 current Disembark boot. Images4 wood and5 masonry are authoritative STYLE references. Preserve fine thin brown pen contours, muted ochre/terracotta/olive watercolor washes, gentle cel shading and three-quarter viewpoint. Simplify the three subjects for 24/32px readability while retaining hand-painted character. LEFT Gathering: a small harvest basket with ONE clearly visible red apple and TWO broad wheat heads rising at right; remove the extra produce and leaves; draw basket weave with only a few widely spaced curved bands, not dense crosshatching. Keep the recognizable handle arch, generous gaps around wheat, coherent basket silhouette. MIDDLE Town: a tiny classical Greek pavilion reduced to terracotta triangular pediment/roof, TWO cream columns, a dark recessed doorway and ONE plain stone base; remove scattered stones, greenery, tile grid, ornate column capitals and pediment emblem. It should still read as a civic town building, with fine outlines and restrained shading, not a flat logo. RIGHT Disembark: one simple tan boot stepping off a short wooden plank onto a small pale sand patch; preserve clear boot/landing action; only two broad plank divisions, one small muted teal water shape along the lower edge; remove shoreline pebbles, frothy ripples, grain hatching and lace eyelets. Avoid mini diorama clutter. All icons same optical weight, generous transparent padding, NO frames, no cast shadows, no glossy highlights, no heavy black outlines, no saturated orange, no wood-grain noise. Keep subjects discrete, never overlap cells. These are refined draft replacement illustrations, not screenshots.",
+      "assessment": "Simpler subjects, but excessive basket weave and heavier outlines; superseded.",
+      "imagegen_output_file": "exec-bad93b38-cbe8-44a1-ba64-ccddd75e4a9e.png"
+    },
+    {
+      "output": "simplified-three-icon-draft.png",
+      "source": "rejected-busy-three-icon-draft.png",
+      "prompt": "Refine the THREE icons in image1, preserving EXACTLY their subjects, arrangement and transparent background. Image2 and image3 (original wood and masonry icons) are the authoritative style sources. Image1 has drifted toward thick brown outlines and stronger saturated shading: correct this. Make the ink delicate and hairline, approximately HALF its current thickness relative to each subject. Muted quiet watercolor planes, lighter low-contrast shading. No bright edge highlights. Reduce texture contrast by half. LEFT basket: preserve apple, two wheat heads, handle and overall basket shape, but REDUCE woven body to ONLY THREE broad horizontal curved bands and TWO sparse vertical bindings; no alternating brick-like interlacing. Handle is a simple smooth curved cane handle with NO rope twist. Wheat has a few broad readable grains. Apple has no glossy white highlight. MIDDLE pavilion: retain two columns, roof, dark entrance and one base; remove remaining speckles and strong bright bevel edges, use fine pen edges and quiet terracotta/cream washes. RIGHT disembark: retain boot on two plank pieces and small sand/water patch; remove remaining wood grain, speckles and white foamy water stripe; water is a single muted pale teal curved shape. Boot seams simplified and fine. Important: simplicity through fewer internal lines and objects, NEVER by thickening silhouettes or changing to flat vector art. All three have calm airy delicate illustrated feeling matching approved wood/masonry references. No text, no frames, no added objects. Transparent background.",
+      "assessment": "Reduced weave, props and surface detail. Preview only: display-size, alpha and in-game acceptance still pending.",
+      "imagegen_output_file": "exec-09cfc349-211f-4b06-87bd-5858c8133f31.png"
+    }
+  ],
+  "packing": "pack.py: equal 724px source cells, existing scripts/normalize_icons.py optical normalization to 128px; no repainting",
+  "integration_base": "79d5899",
+  "source_sha256": {
+    "cargo-draft.png": "100a9e80a1ad19eb7d02f2d331eed3e34e23aa5bfebe2de48082d6dcdcee78c1",
+    "simplified-three-icon-draft.png": "c975d074ef492673b22d42be6f908cc8a7fafaea87b2da6cdc312a4592d2104f",
+    "rejected-busy-three-icon-draft.png": "32776f544b81d84413da59fe7bc2116648e4715dd913ccf30b69408e7442bd4f"
+  },
+  "packed_sha256": {
+    "category_gathering": "7033100d7d9e7505e8028e49fde07f6fbb1a3e5caebe647732e21440baaaaf36",
+    "command_disembark": "0f1e6b955237815a020fe8dfd4b683d2215c9efc7788f9d463417aae01508a6b",
+    "category_town": "f7cedbd063d94afd94a68edff861a087db9ebe5a8edaf914b53ea67379995ac8",
+    "command_cargo": "38b0c9a404912b880c8ae86afb344d0087e560b877b2945e12afa535da2bde2d"
+  }
+}
