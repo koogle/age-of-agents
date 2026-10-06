@@ -34,7 +34,7 @@
     }
   ],
   "packing": "pack.py: equal 724px source cells, existing scripts/normalize_icons.py optical normalization to 128px; no repainting",
-  "integration_base": "79d5899",
+  "integration_base": "1a45e0d",
   "source_sha256": {
     "cargo-draft.png": "100a9e80a1ad19eb7d02f2d331eed3e34e23aa5bfebe2de48082d6dcdcee78c1",
     "simplified-three-icon-draft.png": "c975d074ef492673b22d42be6f908cc8a7fafaea87b2da6cdc312a4592d2104f",
