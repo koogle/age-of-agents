@@ -49,3 +49,19 @@ to ranged attacks; rendering follows authoritative timers and cannot deal damage
 There is no new combat engine, idle retaliation, save model or command envelope.
 The shared view remains below 1,000 lines. Existing authored bow art is reused;
 this changes its firing distance and activation, not its style.
+
+## Recorded examples
+
+[Looping GIF](ranged-examples.gif) and [MP4](ranged-examples.mp4) show a lone
+archer losing, followed by four archers defeating a full-health wolf with three
+survivors. Actual local browser capture at normal simulation speed; the title
+labels identify examples. These are controlled encounters, not production footage.
+[Recording summary](recording-summary.json) records outcomes and capture settings.
+
+Reproduce clips with `python3 docs/verification/record_ranged_archers.py --output
+/tmp/ranged-clips` after building the server/client. Install Playwright's recording
+encoder with `python3 -m playwright install ffmpeg`; system ffmpeg handles export.
+The recorder pauses only after the outcome and allows the rendered snapshot to
+settle before closing. Concatenate the two MP4s with ffmpeg's concat filter; GIF
+export uses 10fps, width 800, a 128-color palette and Bayer dithering. No gameplay
+code changed for the recording.
