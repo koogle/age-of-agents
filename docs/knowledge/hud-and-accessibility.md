@@ -32,6 +32,10 @@ The [compact HUD review](../COMPACT_HUD_REVIEW.md) contains the viewport matrix.
 Accessible DOM controls and additive touch selection remain implementation gaps;
 verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
+## Build subcategory card
+
+User steering (2026-10-06): remove the top title/description card inside build subcategories. Keep the building buttons, labels and back navigation; show hover costs through the existing explanation toast. This is a presentation-only change with no save impact. [Desktop and phone verification](../verification/build-subcategories/README.md).
+
 ## Mobile time-control spacing
 
 User steering on 2026-10-05 requests a tighter mobile time-control row. The compact layout reduces center spacing from 44px to 36px for the existing 30px coins (6px visible gaps), with separate 36×44px hit regions. Keep the rightmost coin anchored and desktop positioning unchanged.
