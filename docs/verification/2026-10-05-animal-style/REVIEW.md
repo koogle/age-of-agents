@@ -57,7 +57,8 @@ uses emulated mouse pan/wheel on both viewports; phone hunting uses touch.
 
 ## Release status
 
-Not merged or deployed. Direct Modal profile selected `radiantai`, whereas the
+Initial branch verification did not deploy. Merge was authorized on 2026-10-06;
+release uses GitHub Actions. During initial verification, direct Modal profile selected `radiantai`, whereas the
 repository documents `koogle-frick` as production. Profile listing also failed
 to connect. No attempt was made to deploy to the differently selected account.
 

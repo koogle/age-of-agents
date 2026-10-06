@@ -28,6 +28,14 @@ impl BuildingGroup {
             Self::Military => "Military",
         }
     }
+    pub(super) fn icon(self) -> &'static str {
+        match self {
+            Self::Town => "category_town",
+            Self::Gathering => "category_gathering",
+            Self::Production => "category_production",
+            Self::Military => "category_military",
+        }
+    }
     fn buildings(self) -> &'static [BuildingKind] {
         use BuildingKind::*;
         match self {
@@ -82,7 +90,7 @@ pub(super) fn commands(
                     .any(|kind| available.contains(kind))
             })
             .map(|group| Command {
-                icon: building_info(group.buildings()[0]).0,
+                icon: group.icon(),
                 label: group.name().into(),
                 detail: group
                     .buildings()
@@ -102,7 +110,7 @@ pub(super) fn commands(
             label: "Field".into(),
             detail: if has_farm {
                 format!(
-                    "{} · {} s work · {} food; tap depleted fields to replenish",
+                    "{} · {} s work · {} food (+50% near a granary); tap depleted fields to replenish",
                     cost_text(aoa_game::FIELD_COST),
                     aoa_game::FIELD_WORK_SECONDS,
                     aoa_game::FIELD_FOOD
@@ -115,7 +123,11 @@ pub(super) fn commands(
         });
     }
     commands.push(Command {
-        icon: "command_cancel",
+        icon: if build == BuildUi::Categories {
+            "command_cancel"
+        } else {
+            "command_back"
+        },
         label: if build == BuildUi::Categories {
             "Close"
         } else {
@@ -166,19 +178,18 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![
                 Action::Place(BuildingKind::Watchtower),
-                Action::Place(BuildingKind::Barracks),
                 Action::Place(BuildingKind::Range),
                 Action::Build
             ]
         );
-        assert!(!military[1].enabled, "unaffordable barracks stays visible");
+        assert!(!military[1].enabled, "unaffordable range stays visible");
         let production = commands(
             BuildUi::Group(BuildingGroup::Production),
             &stock,
             false,
             &aoa_game::STARTER_BUILDINGS,
         );
-        assert_eq!(production.len(), 6);
+        assert_eq!(production.len(), 3);
         assert_eq!(
             production[0].action,
             Action::Place(BuildingKind::LumberMill)

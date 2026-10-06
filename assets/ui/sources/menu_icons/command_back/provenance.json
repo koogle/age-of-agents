@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of one broad smoothly curved left-pointing return arrow made of bronze with olive-green enamel face, single continuous shape, no enclosing coin. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3702/R3KJCOff_jsLcXsf5U2PZ_x5v3cQqv.png",
+        "content_type": "image/png",
+        "file_name": "R3KJCOff_jsLcXsf5U2PZ_x5v3cQqv.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      314,
+      627,
+      627,
+      940
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f8/kTtCjjaLoHstl3CmNdAoS_fw1cwoPw.png",
+        "content_type": "image/png",
+        "file_name": "kTtCjjaLoHstl3CmNdAoS_fw1cwoPw.png",
+        "file_size": null,
+        "width": 313,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242163.295052,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:command_back",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-4b47-7773-b8b3-21200eb548d6",
+        "seconds": 2.3
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "command_back.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239716.0348382,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "command_back",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-e2d7-73a0-b7a0-fc8e3e883cd1",
+      "seconds": 6.6
+    },
+    {
+      "t": 1791239851.7870877,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:command_back",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-05a4-7430-99d0-55133516f840",
+      "seconds": 2.4
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}

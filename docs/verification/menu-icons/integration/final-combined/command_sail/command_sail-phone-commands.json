@@ -1,0 +1,11 @@
+[
+  {
+    "command": {
+      "island_id": 1,
+      "ship_id": "menu-ship",
+      "type": "voyage"
+    },
+    "request_id": "r2",
+    "type": "command"
+  }
+]

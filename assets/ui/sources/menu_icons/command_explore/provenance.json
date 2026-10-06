@@ -1,0 +1,85 @@
+{
+  "model": "fal-ai/nano-banana/edit",
+  "reference": "assets/ui/icons/resource_wood.png",
+  "prompt": "The attached image is a STYLE REFERENCE only. Draw a NEW single game UI icon of a bronze-rimmed mariner compass with a bold red directional needle on cream, seen slightly from above, a simple discovery-navigation symbol, absolutely no letters. Match the reference: fine thin dark-brown ink contour lines, sparse hatching, restrained flat watercolor wash, warm Mediterranean ochre, terracotta, limestone cream and olive with muted turquoise accents, Moebius and Studio Ghibli style. Three-quarter viewpoint from above. Refined clear silhouette readable at 24 pixels, large simple shapes, no tiny scattered detail. One isolated object centered on pure white, no cast shadow, no landscape, no frame, no border, no text or letters.",
+  "response": {
+    "images": [
+      {
+        "url": "https://v3b.fal.media/files/b/0aad3702/zSUixZ883BAo8dDlImFQ5_1YZJCNhH.png",
+        "content_type": "image/png",
+        "file_name": "zSUixZ883BAo8dDlImFQ5_1YZJCNhH.png",
+        "file_size": null,
+        "width": null,
+        "height": null
+      }
+    ],
+    "description": ""
+  },
+  "refinement": {
+    "tool": "OpenAI image_gen",
+    "provenance": "../refinement/provenance.json",
+    "result": "../refinement/refined-sheet.png",
+    "crop": [
+      940,
+      314,
+      1254,
+      627
+    ],
+    "dimensions": [
+      1254,
+      1254
+    ]
+  },
+  "cutout": {
+    "model": "fal-ai/birefnet/v2",
+    "response": {
+      "image": {
+        "url": "https://v3b.fal.media/files/b/0aad37f7/3szYgJzftA9cLVDoHlb_O_DfyyXhvM.png",
+        "content_type": "image/png",
+        "file_name": "3szYgJzftA9cLVDoHlb_O_DfyyXhvM.png",
+        "file_size": null,
+        "width": 314,
+        "height": 313
+      },
+      "mask_image": null
+    },
+    "requests": [
+      {
+        "t": 1791242160.1315854,
+        "endpoint": "fal-ai/birefnet/v2",
+        "tag": "restyle:command_explore",
+        "est_usd": 0.005,
+        "request_id": "01a10e5a-3ea5-7370-896e-869f13d50738",
+        "seconds": 2.3
+      }
+    ]
+  },
+  "packing": {
+    "script": "scripts/normalize_icons.py",
+    "source": "cutout.png",
+    "output": "command_explore.png",
+    "dimensions": [
+      128,
+      128
+    ]
+  },
+  "requests": [
+    {
+      "t": 1791239708.2589154,
+      "endpoint": "fal-ai/nano-banana/edit",
+      "tag": "command_explore",
+      "est_usd": 0.0398,
+      "request_id": "01a10e34-c290-7311-9534-60f00aa5c93e",
+      "seconds": 7.1
+    },
+    {
+      "t": 1791239850.6619234,
+      "endpoint": "fal-ai/birefnet/v2",
+      "tag": "cut:command_explore",
+      "est_usd": 0.005,
+      "request_id": "01a10e37-017b-7d62-a544-6432075b15d5",
+      "seconds": 2.3
+    }
+  ],
+  "style_review": "STYLE_REVIEW.md"
+}
