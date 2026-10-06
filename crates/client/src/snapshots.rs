@@ -2,6 +2,15 @@
 use crate::{App, feedback, friendly};
 
 impl App {
+    pub(super) fn command_feedback(&mut self, text: &str) {
+        if self.selection.units.is_empty() {
+            self.toast = Some((text.into(), crate::now_seconds() + 3.0));
+        } else if let Some(snapshot) = &self.view.snapshot {
+            self.feedback
+                .message(snapshot, &self.selection.units, text, self.clock);
+        }
+    }
+
     pub(super) fn poll_world(&mut self, dt: f64, now: f64) {
         let reset_playback = self.source.poll(dt, &mut self.incoming);
         if reset_playback {
@@ -28,7 +37,13 @@ impl App {
         }
         for result in self.source.take_results() {
             if let Err(error) = result {
-                self.toast = Some((friendly(&error), now + 3.0));
+                let text = friendly(&error.message);
+                if error.units.is_empty() {
+                    self.toast = Some((text, now + 3.0));
+                } else if let Some(snapshot) = &self.view.snapshot {
+                    self.feedback
+                        .message(snapshot, &error.units, &text, self.clock);
+                }
             }
         }
         if self.toast.as_ref().is_some_and(|(_, until)| now > *until) {

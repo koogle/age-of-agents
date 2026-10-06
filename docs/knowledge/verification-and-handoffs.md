@@ -124,3 +124,7 @@ fixture. The 2026-10-06 icon refinement replay found center-screen selection
 unreliable when reusing a context across dock, land-unit and open-water scenes.
 Fresh contexts isolate the scenes; do not accept an empty-action screenshot as
 proof merely because it produced no browser errors.
+
+## Build-feedback browser checks (2026-10-06)
+
+`docs/verification/check_build_feedback.py --output DIR` exercises the menu and overhead complaints on desktop and DPR-2 touch; `--mode desktop` or `--mode phone` isolates a viewport. It advances the game's presentation clock in steps below the 250ms client frame clamp and waits for HUD uploads. When throttling animation with timeout IDs, replace cancellation with `clearTimeout` too: winit cancels pending frames during input, and native cancellation cannot cancel a timeout. Pair browser creation with `finally` cleanup. See [the feedback evidence](../verification/build-feedback/README.md).

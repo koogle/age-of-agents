@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Build hints and NPC feedback (2026-10-06):** Show build details and placement instructions in the building menu information area, replacing the top-middle bubble. NPC command/status messages and complaints fade over the addressed unit’s head, including blocked placement and delayed server rejections ([HUD guide](docs/knowledge/hud-and-accessibility.md)).
+
 - **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).
 
 - **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
