@@ -38,6 +38,9 @@ mod progression;
 mod progression_tests;
 #[cfg(test)]
 mod queue_tests;
+mod ranged;
+#[cfg(test)]
+mod ranged_tests;
 #[cfg(test)]
 mod ship_tests;
 mod ships;

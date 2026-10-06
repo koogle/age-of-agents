@@ -1,3 +1,8 @@
+# Ranged archers — 2026-10-06
+
+- Separate PR requested: archers now stop within four cells with clear sight and fire at moving wildlife; existing roads/traffic, explicit orders, damage cadence and save schema are preserved. Obstacles block arrows; water and units do not. Existing bow art follows authoritative windup.
+- 302 workspace tests, strict native/WASM lint, formatting, rebuilt server/WASM and desktop/DPR2-phone combat pass with zero page errors. Open-ground wolf fights still require 3–5 archers. [Review, reproduction and captures](docs/verification/ranged-archers/README.md). [PR #142](https://github.com/koogle/age-of-agents/pull/142) is open on `feat/ranged-archers`; not merged or deployed. Integrated master `0c7b649` afterward: only the approved Disembark icon/docs changed upstream, leaving tested runtime source and WASM unchanged.
+
 # Stronger wildlife — 2026-10-06
 
 - Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
