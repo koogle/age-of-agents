@@ -52,7 +52,8 @@ historical. Do not assume a local login or provider access exists in a new sessi
 **Developer steering, 2026-10-05:** Jakob flagged visual style drift during the
 menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft
-refinement. Those new illustrations remain unshipped and require rework.
+refinement. Those initial illustrations were rejected; the corrected set was subsequently
+reviewed and merged individually in #112–#129, with runtime integration in #107.
 The [comparison](../verification/art-style/rejected-menu-drafts.png) records the
 approved kit on the left and rejected drafts on the right; rejected work is
 negative evidence, never a new style reference.
