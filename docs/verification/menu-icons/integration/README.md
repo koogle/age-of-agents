@@ -21,7 +21,7 @@ live in `assets/ui/sources/menu_icons/` at the repository root.
   lines. New regression checks exercise atlas loading, distinct resource art,
   production/queue consistency, specialist selection, ship commands and category
   navigation/info thumbnails.
-- Final code validation: 274 Rust tests pass, one existing manual benchmark is
+- Final code validation: 276 Rust tests pass, one existing manual benchmark is
   ignored; strict native/WASM lint, formatting, rebuilt JS/WASM, 298-frame audit,
   normalization, exact reproduction of the 18 additions and six release-verifier
   unit tests pass. Logs are retained here.
@@ -86,3 +86,14 @@ The starter fixture retains the ten currently available buildings instead of
 forcing the full catalog; the Production menu must contain Lumber mill, Kitchen
 and Back. Final combined evidence is recorded separately so bundle hashes cannot
 be mistaken for the earlier complete suite.
+
+## Final granary integration (2026-10-06)
+
+Master advanced again with #132's granary field-yield bonus and concise HUD
+description. Preserve its behavior and verifier branch, while keeping Stop
+dispatch fixtures at 1×. Rebuilt the combined source, passed all 276 Rust tests
+and strict lint, then captured granary selection/description on desktop and
+DPR-2 phone; both pixel dimensions are asserted. `latest-combined/` and the
+final bundle hash in `checks.json` identify this last verification. The earlier
+40-capture suite and eight-capture availability replay retain their own hashes
+and evidence; the icon art and mapping code did not change between these builds.

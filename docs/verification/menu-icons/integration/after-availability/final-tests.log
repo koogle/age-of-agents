@@ -1,7 +1,7 @@
    Compiling aoa-game v0.1.0 (/workspace/age-of-agents/crates/game)
    Compiling aoa-client v0.1.0 (/workspace/age-of-agents/crates/client)
    Compiling age-of-agents v0.1.0 (/workspace/age-of-agents)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 32.46s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 35.85s
      Running unittests src/main.rs (target/debug/deps/age_of_agents-0bfc771e8faf4baf)
 
 running 13 tests
@@ -13,50 +13,50 @@ test store::tests::save_missing_a_field_is_an_explicit_load_error ... ok
 test tests::group_move_is_one_typed_command ... ok
 test store::tests::unknown_persisted_enum_value_is_an_explicit_load_error ... ok
 test tests::ship_cargo_commands_are_typed ... ok
-test store::tests::incompatible_store_versions_reset_before_deserialization ... ok
-test tests::typed_command_and_result_use_request_id ... ok
 test tests::snapshots_serialize_typed_visibility_without_unseen_entities ... ok
+test tests::typed_command_and_result_use_request_id ... ok
 test tests::reset_replaces_and_persists_a_world_on_the_requested_island ... ok
+test store::tests::incompatible_store_versions_reset_before_deserialization ... ok
 test store::tests::current_store_rejects_obsolete_fields_and_missing_required_fields ... ok
 
-test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
 
      Running unittests src/lib.rs (target/debug/deps/aoa_client-403c4e59b79770c3)
 
 running 93 tests
-test camera::tests::pan_and_zoom_keep_ground_geometry_aligned ... ok
-test camera::tests::navigation_preserves_heading ... ok
 test camera::tests::curve_transition_and_horizon_have_stable_picking ... ok
-test camera::tests::pointer_zoom_over_sky_and_at_pan_bounds_stays_finite_and_bounded ... ok
 test camera::tests::distant_view_preserves_ground_picking_on_desktop_and_phone ... ok
-test camera::tests::screen_pan_is_frame_rate_independent_and_bounded ... ok
+test camera::tests::navigation_preserves_heading ... ok
+test camera::tests::pan_and_zoom_keep_ground_geometry_aligned ... ok
+test camera::tests::pointer_zoom_over_sky_and_at_pan_bounds_stays_finite_and_bounded ... ok
 test camera::tests::pointer_zoom_preserves_raised_ground_at_all_distances_and_pixel_scales ... ok
+test camera::tests::screen_pan_is_frame_rate_independent_and_bounded ... ok
 test camera::tests::screen_pan_tracks_zoom_dpi_and_direction ... ok
 test feedback::tests::drop_off_status_tracks_cargo_and_current_orders ... ok
 test feedback::tests::assignments_flash_once_and_plain_walking_stays_quiet ... ok
 test feedback::tests::deposits_and_idle_show_once_and_reset_clears_labels ... ok
 test feedback::tests::gathering_phase_does_not_repeat_but_reassignment_does ... ok
-test feedback::tests::exploring_flashes_once_per_site_then_announces_construction ... ok
 test feedback::tests::initial_snapshot_new_units_and_island_switch_do_not_flash_idle ... ok
-test feedback::tests::status_follows_the_unit_and_rapid_orders_replace_it ... ok
+test feedback::tests::exploring_flashes_once_per_site_then_announces_construction ... ok
+test feedback::tests::repeated_damage_replaces_feedback_instead_of_stacking ... ok
 test gestures::tests::edge_speed_ramps_in_logical_pixels_and_stops_in_the_interior_or_outside ... ok
 test gestures::tests::edges_and_corners_pan_toward_the_pointer_without_diagonal_speedup ... ok
+test feedback::tests::every_unloading_task_emits_a_gain ... ok
 test gestures::tests::selection_adds_only_with_the_platform_primary_modifier ... ok
 test hud::build_menu::tests::categories_and_back_navigation_are_available_without_resources ... ok
-test feedback::tests::unloading_announces_once_using_the_gain_animation ... ok
 test hud::build_menu::tests::fields_need_a_farm_and_both_materials ... ok
 test hud::build_menu::tests::starter_menu_only_shows_relevant_groups_and_buildings ... ok
-test feedback::tests::repeated_damage_replaces_feedback_instead_of_stacking ... ok
+test feedback::tests::status_follows_the_unit_and_rapid_orders_replace_it ... ok
 test hud::cargo::tests::cargo_swipes_cancel_transfers_and_clamp_pages_at_both_dpis ... ok
-test feedback::tests::every_unloading_task_emits_a_gain ... ok
+test feedback::tests::unloading_announces_once_using_the_gain_animation ... ok
 test hud::cargo::tests::available_rows_keep_aboard_goods_and_bound_each_transfer ... ok
+test hud::layout_tests::completed_research_coin_explains_instead_of_dispatching_research ... ok
+test hud::layout_tests::busy_villager_stop_uses_loaded_hand_and_preserves_cancel ... ok
 test hud::build_menu::tests::every_building_has_a_distinct_authored_portrait_in_the_runtime_atlas ... ok
 test hud::cargo::tests::long_lists_expose_every_resource_without_overlapping_buttons ... ok
-test hud::layout_tests::busy_villager_stop_uses_loaded_hand_and_preserves_cancel ... ok
-test hud::layout_tests::completed_research_coin_explains_instead_of_dispatching_research ... ok
 test hud::menu_icon_tests::category_and_back_icons_preserve_navigation_actions ... ok
 test hud::layout_tests::full_mobile_queue_wraps_without_covering_navigation_or_commands ... ok
-test hud::layout_tests::minimap_clicks_and_camera_marker_share_the_displayed_projection ... ok
+test hud::layout_tests::mobile_controls_stay_separate_and_hit_the_actions_they_display ... ok
 test hud::menu_icon_tests::specialist_selection_uses_its_authored_unit_art ... ok
 test hud::minimap::tests::axes_match_the_world_view_and_corners_fit_the_globe ... ok
 test hud::selection::tests::build_menu_greys_out_what_the_stockpile_cannot_cover ... ok
@@ -77,7 +77,7 @@ test source::tests::the_local_source_ticks_ten_times_a_second_and_reports_reject
 test terrain::plots::tests::connected_plots_and_preview_share_one_level_without_changing_distant_land ... ok
 test terrain::tests::land_stands_above_the_sea_and_water_below_it ... ok
 test terrain::tests::peaks_tower_over_hills_and_rivers_sink_into_their_banks ... ok
-test hud::layout_tests::mobile_controls_stay_separate_and_hit_the_actions_they_display ... ok
+test hud::menu_icon_tests::every_resource_has_distinct_loaded_art ... ok
 test view::activity_tests::building_and_field_preparation_animate_after_unloading ... ok
 test view::activity_tests::cargo_keeps_the_carry_pose_outside_active_gathering ... ok
 test view::activity_tests::paused_gathering_holds_the_rendered_frame_and_resumes ... ok
@@ -93,13 +93,13 @@ test view::movement_tests::carrying_preserves_facing_and_anchor_when_the_authore
 test view::movement_tests::clear_turns_face_the_actual_motion_on_the_next_draw ... ok
 test view::movement_tests::late_batches_keep_the_unplayed_path_without_position_or_clock_jumps ... ok
 test view::movement_tests::native_accumulator_and_view_agree_at_every_frame_and_across_speed_changes ... ok
-test hud::menu_icon_tests::category_information_uses_the_same_icon_as_its_command ... ok
 test view::movement_tests::real_gather_order_walks_to_the_work_cell_before_showing_a_work_pose ... ok
 test view::movement_tests::reconnect_rebases_even_short_gaps_and_paused_worlds_without_animating_history ... ok
+test view::movement_tests::reconnect_restores_recency_in_one_frame_without_animating_the_correction ... ok
 test view::movement_tests::regular_remote_updates_do_not_modulate_walking_speed ... ok
 test view::movement_tests::starvation_rebuffers_and_pause_freezes_until_resume ... ok
+test hud::layout_tests::minimap_clicks_and_camera_marker_share_the_displayed_projection ... ok
 test view::movement_tests::work_waits_for_arrival_and_never_moves_the_sprite_off_its_claimed_cell ... ok
-test view::movement_tests::reconnect_restores_recency_in_one_frame_without_animating_the_correction ... ok
 test view::selection::tests::additive_selection_preserves_existing_units_and_empty_areas ... ok
 test view::selection::tests::box_uses_projected_feet_in_either_direction_and_excludes_offscreen_units ... ok
 test view::selection::tests::replacement_area_selects_only_enclosed_units_and_empty_area_clears ... ok
@@ -115,10 +115,10 @@ test view::tests::the_temple_rises_through_its_drawn_stages ... ok
 test view::tests::villagers_on_a_new_island_follow_its_snapshots ... ok
 test view::tests::walking_uses_every_authored_pose_in_distance_order ... ok
 test view::activity_tests::all_gathering_activities_keep_animating_with_partial_cargo ... ok
-test hud::menu_icon_tests::every_resource_has_distinct_loaded_art ... ok
+test hud::menu_icon_tests::category_information_uses_the_same_icon_as_its_command ... ok
 test view::scenario_tests::seeded_npc_routes_are_correct_on_every_rendered_frame ... ok
 
-test result: ok. 93 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 38.74s
+test result: ok. 93 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 31.24s
 
      Running unittests src/main.rs (target/debug/deps/age_of_agents_client-0e09512ab88c92ae)
 
@@ -128,21 +128,21 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
      Running unittests src/lib.rs (target/debug/deps/aoa_game-ff73e21085bc2459)
 
-running 171 tests
+running 169 tests
 test game::coast::tests::faces_each_water_edge_and_ignores_diagonals ... ok
 test game::coast::tests::prefers_broad_water_edge_with_stable_corner_ties ... ok
 test game::coast::tests::snapshot_ignores_unknown_water_and_clamps_map_edges ... ok
-test game::construction_tests::discovered_obstacles_or_spent_resources_cancel_without_a_foundation ... ok
-test game::construction_tests::exploring_builder_unloads_cargo_before_walking_to_site ... ok
 test game::construction_tests::partial_visibility_does_not_place_and_competing_orders_charge_only_once ... ok
+test game::construction_tests::exploring_builder_unloads_cargo_before_walking_to_site ... ok
 test game::construction_tests::unreachable_and_out_of_bounds_sites_do_not_spend_or_leave_stuck_orders ... ok
-test game::economy_tests::blocked_spawn_waits_without_recharging_then_completes_once ... ok
+test game::construction_tests::discovered_obstacles_or_spent_resources_cancel_without_a_foundation ... ok
 test game::construction_tests::exploration_survives_reload_and_stop_or_replacement_cancels_it ... ok
-test game::economy_tests::each_training_building_produces_its_unit_and_reserves_housing ... ok
+test game::economy_tests::blocked_spawn_waits_without_recharging_then_completes_once ... ok
 test game::economy_tests::extraction_bonus_is_local_non_stacking_and_requires_completion ... ok
-test game::economy_tests::processing_does_not_reserve_housing_but_parallel_training_does ... ok
 test game::construction_tests::unseen_and_remembered_sites_wait_for_full_visibility_then_build_once ... ok
 test game::economy_tests::farm_bonus_changes_gathering_and_camp_accepts_actual_deposits ... ok
+test game::economy_tests::processing_does_not_reserve_housing_but_parallel_training_does ... ok
+test game::economy_tests::each_training_building_produces_its_unit_and_reserves_housing ... ok
 test game::economy_tests::research_cannot_be_reserved_twice_at_different_buildings ... ok
 test game::economy_tests::unavailable_jobs_and_corrupt_job_capabilities_are_rejected ... ok
 test game::fields_tests::field_placement_cannot_cut_off_delivery_routes_for_any_worker ... ok
@@ -151,43 +151,41 @@ test game::fields_tests::field_with_an_exit_completes_repeated_deliveries_after_
 test game::economy_tests::processing_reserves_inputs_finishes_once_and_survives_mid_job_reload ... ok
 test game::fields_tests::fields_require_a_completed_farm_materials_and_free_land_atomically ... ok
 test game::fields_tests::finishing_preparation_preserves_stopped_workers_and_helpers_delivery ... ok
-test game::fields_tests::gatherers_continue_between_fields_and_wild_food_in_both_directions ... ok
 test game::fields_tests::harvesters_keep_preparing_fields_in_every_gather_phase_but_stop_still_cancels ... ok
-test game::fields_tests::granary_yield_is_recalculated_at_each_preparation_completion ... ok
 test game::fields_tests::non_field_nodes_round_trip_and_invalid_field_states_are_rejected ... ok
 test game::fields_tests::preparation_pauses_persists_and_shared_work_never_charges_twice ... ok
 test game::fields_tests::harvesting_exhausts_fields_and_replenishment_requires_materials_and_labor ... ok
+test game::fields_tests::gatherers_continue_between_fields_and_wild_food_in_both_directions ... ok
 test game::fields_tests::preparing_a_field_delivers_existing_cargo_first ... ok
 test game::fields_tests::returning_harvester_waits_for_replenishment_and_resumes_without_another_order ... ok
-test game::gathering_tests::a_blocked_nearby_drop_off_does_not_hide_an_accessible_one ... ok
 test game::gathering_tests::a_builder_waits_for_unloading_instead_of_starting_with_cargo ... ok
 test game::gathering_tests::a_busy_only_drop_site_keeps_cargo_and_retries ... ok
+test game::gathering_tests::a_blocked_nearby_drop_off_does_not_hide_an_accessible_one ... ok
 test game::gathering_tests::automatic_drop_off_uses_the_nearest_compatible_complete_building ... ok
 test game::gathering_tests::even_a_partial_same_kind_load_is_unloaded_before_the_new_assignment ... ok
-test game::fields_tests::replenishment_handoff_handles_worker_order_partial_cargo_and_reload ... ok
 test game::gathering_tests::generated_bush_gatherers_resume_after_delivery_at_double_speed ... ok
-test game::fields_tests::granary_yield_uses_completed_non_stacking_edge_to_edge_range ... ok
+test game::fields_tests::replenishment_handoff_handles_worker_order_partial_cargo_and_reload ... ok
 test game::gathering_tests::lumber_mill_deliveries_resume_and_credit_full_and_partial_wood_loads_once ... ok
 test game::gathering_tests::lumber_mill_requires_completion_and_wood_for_automatic_and_explicit_unloading ... ok
 test game::gathering_tests::mixed_cargo_group_reassignment_on_the_generated_island_keeps_gathering ... ok
-test game::gathering_tests::reassignment_unloads_the_old_kind_and_repeats_the_new_gathering_loop ... ok
+test game::economy_tests::all_catalog_buildings_construct_complete_and_charge_exactly_once ... ok
 test game::gathering_tests::repeated_granary_deliveries_resume_until_the_resource_is_exhausted ... ok
 test game::gathering_tests::reserved_resource_approach_waits_then_resumes_instead_of_idling ... ok
-test game::economy_tests::all_catalog_buildings_construct_complete_and_charge_exactly_once ... ok
+test game::gathering_tests::reassignment_unloads_the_old_kind_and_repeats_the_new_gathering_loop ... ok
 test game::group_move_tests::crossing_groups_never_share_a_cell ... ok
-test game::group_move_tests::group_move_assigns_distinct_deterministic_reachable_destinations ... ok
-test game::islands_tests::archipelago_budget ... ignored, manual release-mode memory and snapshot budget measurement
 test game::group_move_tests::group_move_is_atomic_when_any_member_is_invalid ... ok
-test game::islands_tests::destination_shortcut_sails_without_swapping_or_teleporting ... ok
+test game::islands_tests::archipelago_budget ... ignored, manual release-mode memory and snapshot budget measurement
 test game::islands_tests::both_settlements_keep_producing_from_local_resources ... ok
+test game::group_move_tests::group_move_assigns_distinct_deterministic_reachable_destinations ... ok
+test game::islands_tests::destination_shortcut_sails_without_swapping_or_teleporting ... ok
 test game::islands_tests::expanded_snapshot_terrain_round_trips_runtime_dimensions ... ok
 test game::islands_tests::frontier_discovery_preserves_ship_position_and_sailing_order ... ok
 test game::islands_tests::local_training_cannot_spend_other_islands_food_and_refunds_stay_local ... ok
-test game::islands_tests::discovery_keeps_home_and_places_deterministic_separated_islands ... ok
-test game::placement_tests::building_cannot_consume_all_of_a_villagers_remaining_walking_space ... ok
 test game::islands_tests::local_visibility_matches_the_reference_full_map_scan_after_expansion ... ok
+test game::placement_tests::building_cannot_consume_all_of_a_villagers_remaining_walking_space ... ok
 test game::placement_tests::building_cannot_seal_in_builder_or_another_villager ... ok
 test game::placement_tests::building_with_a_real_exit_completes_and_builder_can_leave ... ok
+test game::islands_tests::discovery_keeps_home_and_places_deterministic_separated_islands ... ok
 test game::placement_tests::diagonal_contact_is_not_an_escape_route ... ok
 test game::placement_tests::existing_disconnected_land_does_not_prevent_safe_building ... ok
 test game::placement_tests::moving_villager_is_protected_and_keeps_its_order ... ok
@@ -198,40 +196,40 @@ test game::placement_tests::houses_can_share_edges_on_both_axes_but_never_overla
 test game::progression_tests::new_games_offer_starter_economy_and_require_explicit_rules ... ok
 test game::progression_tests::second_island_metal_discovery_unlocks_barracks_and_smelter ... ok
 test game::progression_tests::productive_starter_buildings_accept_construction ... ok
-test game::progression_tests::starter_materials_can_fund_settlement_processing_and_the_reserved_transport_budget ... ok
 test game::queue_tests::cancellation_cannot_target_promoted_job_or_reuse_its_id ... ok
-test game::queue_tests::mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload ... ok
+test game::progression_tests::starter_materials_can_fund_settlement_processing_and_the_reserved_transport_budget ... ok
 test game::queue_tests::current_save_round_trips_queue_and_invalid_queues_are_rejected ... ok
 test game::queue_tests::processing_queue_limit_and_insufficient_inputs_reject_atomically ... ok
+test game::queue_tests::mixed_queue_pays_once_refunds_middle_task_and_finishes_in_order_after_reload ... ok
 test game::queue_tests::waiting_research_is_unique_across_buildings_and_prerequisites_still_apply ... ok
 test game::queue_tests::waiting_trainees_reserve_housing_and_cancellation_releases_it ... ok
+test game::ship_tests::blocked_home_dock_rejects_the_continuous_return_atomically ... ok
 test game::ship_tests::blocked_ship_production_waits_and_queue_cancellation_refunds ... ok
 test game::ship_tests::cargo_transfers_are_atomic_and_share_one_fifty_resource_hold ... ok
-test game::ship_tests::blocked_home_dock_rejects_the_continuous_return_atomically ... ok
 test game::ship_tests::departure_cancels_boarding_and_preserves_the_current_step ... ok
 test game::ship_tests::docking_selects_a_reachable_water_berth_and_rejects_other_buildings ... ok
 test game::ship_tests::continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing ... ok
 test game::ship_tests::explicit_ship_orders_cancel_pickup_and_keep_steps ... ok
-test game::ship_tests::four_passengers_wait_for_pickup_on_a_crowded_shore ... ok
 test game::ship_tests::missing_ships_and_corrupt_manifests_fail ... ok
+test game::ship_tests::four_passengers_wait_for_pickup_on_a_crowded_shore ... ok
+test game::gathering_tests::live_resource_assignment_survives_repeated_distant_deliveries ... ok
+test game::ship_tests::passenger_reservations_enforce_capacity_and_stop_releases_a_seat ... ok
 test game::ship_tests::offshore_pickup_meets_at_shore_and_reloads_mid_approach ... ok
 test game::ship_tests::passengers_keep_identity_cargo_housing_and_reload_then_land ... ok
-test game::ship_tests::passenger_reservations_enforce_capacity_and_stop_releases_a_seat ... ok
 test game::ship_tests::pickup_redirects_a_sailing_ship_without_interrupting_its_step ... ok
-test game::ship_tests::sailing_is_water_only_stoppable_and_blocked_landing_is_atomic ... ok
 test game::ship_tests::ships_reserve_destinations_and_reload_mid_sail_deterministically ... ok
+test game::ship_tests::sailing_is_water_only_stoppable_and_blocked_landing_is_atomic ... ok
 test game::ship_tests::transport_builds_once_with_exact_cost_and_no_housing ... ok
-test game::ship_tests::shore_ship_supplies_construction_and_accepts_partial_villager_deposits ... ok
 test game::ship_tests::unreachable_pickup_rejects_without_changing_unit_or_ship ... ok
-test game::slice_a_tests::roadmap_catalog_has_exact_stable_wire_contract ... ok
-test game::gathering_tests::live_resource_assignment_survives_repeated_distant_deliveries ... ok
 test game::slice_a_tests::paused_and_invalid_ticks_do_not_advance_the_scenario_limit ... ok
+test game::ship_tests::shore_ship_supplies_construction_and_accepts_partial_villager_deposits ... ok
 test game::slice_a_tests::scenario_reaches_loss_on_the_exact_authoritative_tick_boundary ... ok
+test game::slice_a_tests::roadmap_catalog_has_exact_stable_wire_contract ... ok
 test game::slice_a_tests::terminal_scenario_progress_freezes_while_gameplay_remains_deferred ... ok
 test game::terrain_codec::tests::runs_preserve_both_alphabets_and_reject_invalid_lengths ... ok
 test game::soundness_tests::validation_rejects_overlapping_or_inconsistent_worlds ... ok
-test game::tests::a_carrier_sent_to_the_town_center_unloads_and_idles ... ok
 test game::tests::a_builder_drops_off_carried_goods_before_building ... ok
+test game::tests::a_carrier_sent_to_the_town_center_unloads_and_idles ... ok
 test game::tests::a_cell_someone_is_walking_through_can_be_reserved_and_is_reached ... ok
 test game::tests::a_gatherer_idles_when_no_node_of_the_same_kind_is_near ... ok
 test game::tests::a_granary_takes_food_but_not_wood ... ok
@@ -239,69 +237,69 @@ test game::tests::a_new_order_replaces_a_busy_units_task ... ok
 test game::tests::a_rejected_order_keeps_the_busy_units_task ... ok
 test game::tests::a_second_villager_can_help_and_construction_completes_exactly_once ... ok
 test game::tests::a_unit_whose_order_ends_on_a_reserved_cell_makes_way ... ok
-test game::tests::build_places_one_foundation_immediately_and_charges_once ... ok
 test game::tests::a_dock_must_touch_the_sea ... ok
-test game::tests::construction_time_scales_with_cost ... ok
 test game::tests::build_rejects_blocked_or_unaffordable_sites_without_mutation ... ok
+test game::tests::construction_time_scales_with_cost ... ok
 test game::tests::default_world_is_valid_and_has_a_productive_base ... ok
-test game::tests::deposit_orders_are_rejected_untouched_when_they_cannot_work ... ok
+test game::tests::build_places_one_foundation_immediately_and_charges_once ... ok
 test game::tests::deleted_resource_returns_existing_cargo_and_then_finishes ... ok
+test game::tests::deposit_orders_are_rejected_untouched_when_they_cannot_work ... ok
 test game::tests::each_building_kind_charges_its_own_cost_and_rejects_shortfalls_untouched ... ok
 test game::tests::every_voronoi_biome_is_one_coherent_region ... ok
 test game::tests::deposits_route_each_resource_to_its_typed_stockpile ... ok
-test game::tests::full_loads_deposit_once_resume_and_finish_after_depletion ... ok
-test game::tests::gatherer_stays_beside_the_node_until_the_load_is_full ... ok
 test game::tests::exhausting_a_node_moves_on_to_the_nearest_of_the_same_kind ... ok
-test game::tests::goods_of_another_kind_are_dropped_off_before_gathering ... ok
-test game::tests::head_on_walkers_in_a_corridor_pass_each_other ... ok
-test game::tests::idle_world_is_invariant_except_tick ... ok
+test game::tests::full_loads_deposit_once_resume_and_finish_after_depletion ... ok
+test game::gathering_tests::exhausted_patch_continuation_survives_distant_deliveries ... ok
+test game::tests::gatherer_stays_beside_the_node_until_the_load_is_full ... ok
 test game::tests::houses_raise_the_population_cap ... ok
+test game::tests::idle_world_is_invariant_except_tick ... ok
+test game::tests::head_on_walkers_in_a_corridor_pass_each_other ... ok
 test game::tests::missing_town_center_retains_cargo_until_a_deposit_is_possible ... ok
+test game::tests::move_walks_cell_by_cell_to_the_exact_destination ... ok
+test game::tests::goods_of_another_kind_are_dropped_off_before_gathering ... ok
 test game::tests::move_rejects_invalid_destinations_without_mutation ... ok
 test game::tests::partial_last_load_is_carried_then_deposited_before_becoming_idle ... ok
-test game::tests::move_walks_cell_by_cell_to_the_exact_destination ... ok
 test game::tests::paused_orders_are_rejected_without_changing_tasks_or_spending_resources ... ok
 test game::tests::research_uses_the_slot_reserves_once_and_enforces_prerequisites ... ok
-test game::tests::resources_are_deterministic_clustered_and_biome_compatible ... ok
 test game::tests::simulation_speed_is_authoritative_validated_and_can_pause ... ok
 test game::tests::snapshots_round_trip_through_json_for_remote_clients ... ok
-test game::gathering_tests::exhausted_patch_continuation_survives_distant_deliveries ... ok
-test game::tests::researched_technologies_make_their_resources_twenty_percent_faster ... ok
 test game::tests::stop_ends_any_task_keeping_cargo_and_foundation_progress ... ok
+test game::tests::resources_are_deterministic_clustered_and_biome_compatible ... ok
 test game::tests::town_center_trains_one_villager_at_a_time_and_reserves_food_once ... ok
 test game::tests::trained_villager_waits_for_a_free_cell_beside_the_building ... ok
-test game::tests::walkers_route_around_buildings_and_never_enter_them ... ok
 test game::tests::unreachable_build_site_is_rejected_and_leaves_no_foundation ... ok
+test game::tests::walkers_route_around_buildings_and_never_enter_them ... ok
+test game::tests::voronoi_terrain_is_fixed_and_deterministic ... ok
+test game::tests::researched_technologies_make_their_resources_twenty_percent_faster ... ok
 test game::tests::walled_off_destination_is_unreachable ... ok
 test game::wildlife_tests::animal_attacks_hurt_and_kill_once_releasing_cells_and_cargo ... ok
-test game::tests::voronoi_terrain_is_fixed_and_deterministic ... ok
-test game::wildlife_tests::corrupt_health_cooldown_and_occupancy_are_rejected ... ok
 test game::wildlife_tests::animals_pursue_locally_and_retreat_to_their_territory ... ok
-test game::wildlife_tests::group_attack_rejection_is_atomic_and_hidden_animals_never_leak ... ok
 test game::wildlife_tests::explicit_hunting_kills_animal_and_clears_all_orders ... ok
+test game::wildlife_tests::corrupt_health_cooldown_and_occupancy_are_rejected ... ok
+test game::wildlife_tests::group_attack_rejection_is_atomic_and_hidden_animals_never_leak ... ok
 test game::wildlife_tests::melee_cannot_damage_through_blocked_diagonal_corners ... ok
 test game::wildlife_tests::missing_terrain_is_a_validation_error_not_a_panic ... ok
-test game::wildlife_tests::pause_reload_and_stop_preserve_health_cargo_and_determinism ... ok
 test game::wildlife_tests::one_wolf_spawns_deterministically_away_from_starter_units ... ok
+test game::wildlife_tests::pause_reload_and_stop_preserve_health_cargo_and_determinism ... ok
 test game::worldgen::tests::every_island_has_ranges_of_peaks_and_rivers_that_reach_the_water ... ok
-test game::wildlife_tests::discovery_adds_wildlife_without_replacing_existing_animals ... ok
 test game::worldgen::tests::every_island_is_one_landmass_ringed_by_sea_and_beach ... ok
-test game::worldgen::tests::generated_rivers_have_a_downhill_route_to_the_sea_including_fords ... ok
-test game::worldgen::tests::nobody_walks_or_builds_on_water ... ok
-test game::worldgen::tests::one_seed_always_grows_the_same_island_and_seeds_differ ... ok
-test game::worldgen::tests::relief_drains_without_uphill_steps_and_conserves_runoff ... ok
+test game::wildlife_tests::discovery_adds_wildlife_without_replacing_existing_animals ... ok
 test game::worldgen::tests::nobody_walks_or_builds_on_peaks_or_rivers ... ok
+test game::worldgen::tests::nobody_walks_or_builds_on_water ... ok
+test game::worldgen::tests::every_island_holds_enough_reachable_resources_to_reach_a_boat ... ok
+test game::worldgen::tests::relief_drains_without_uphill_steps_and_conserves_runoff ... ok
+test game::worldgen::tests::one_seed_always_grows_the_same_island_and_seeds_differ ... ok
 test navigation::route_tests::nearby_goal_does_not_search_the_whole_map ... ok
 test navigation::route_tests::nearest_routes_preserve_complete_search_paths_and_goal_ties ... ok
 test navigation::route_tests::targeted_routes_match_complete_search_costs_and_respect_obstacles ... ok
 test navigation::tests::diagonal_steps_never_cut_a_blocked_corner ... ok
 test navigation::tests::enclosed_goal_is_unreachable ... ok
 test navigation::tests::open_diagonal_is_preferred_and_deterministic ... ok
-test game::worldgen::tests::every_island_holds_enough_reachable_resources_to_reach_a_boat ... ok
+test game::worldgen::tests::generated_rivers_have_a_downhill_route_to_the_sea_including_fords ... ok
 test game::worldgen::tests::shape_families_survive_generation_and_bays_stay_open ... ok
 test game::soundness_tests::random_play_preserves_every_invariant ... ok
 
-test result: ok. 170 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 56.13s
+test result: ok. 168 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 53.82s
 
    Doc-tests aoa_client
 
