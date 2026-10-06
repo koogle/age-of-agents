@@ -96,7 +96,11 @@ impl GameWorld {
             * dt)
             .min(self.resources[resource_index].amount)
             .min(capacity_left);
-        self.resources[resource_index].amount -= gathered;
+        // Riverbank sources renew as water is drawn; stored and carried water
+        // remains finite and uses the normal inventory/capacity rules.
+        if kind != ResourceKind::Water {
+            self.resources[resource_index].amount -= gathered;
+        }
         if gathered > 0.0 {
             let cargo = self.units[unit_index]
                 .cargo

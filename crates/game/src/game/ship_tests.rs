@@ -24,6 +24,49 @@ fn harbor() -> GameWorld {
     assert_eq!(w.ships.len(), 1);
     w
 }
+
+#[test]
+fn water_uses_ship_capacity_and_only_supplies_the_connected_island() {
+    let mut w = harbor();
+    w.inventories[0].water = 60.0;
+    let ship_id = w.ships[0].id.clone();
+    w.apply_command(Command::TransferShipCargo {
+        ship_id: ship_id.clone(),
+        kind: ResourceKind::Water,
+        amount: 50.0,
+        direction: CargoDirection::Load,
+    })
+    .unwrap();
+    assert_eq!(w.ships[0].cargo.water, 50.0);
+    assert_eq!(w.inventories[0].water, 10.0);
+    let before = w.clone();
+    assert!(
+        w.apply_command(Command::TransferShipCargo {
+            ship_id,
+            kind: ResourceKind::Water,
+            amount: 1.0,
+            direction: CargoDirection::Load
+        })
+        .is_err()
+    );
+    assert_eq!(w, before);
+    w.spend_at(c(10, 10), &[(ResourceKind::Water, 20.0)])
+        .unwrap();
+    assert_eq!(w.inventories[0].water, 0.0);
+    assert_eq!(w.ships[0].cargo.water, 40.0);
+    w.discover_island();
+    let before = w.clone();
+    assert!(
+        w.spend_at(w.island_origins[1], &[(ResourceKind::Water, 1.0)])
+            .is_err()
+    );
+    assert_eq!(w, before);
+    w.ships[0].destination = Some(c(50, 40));
+    assert_eq!(w.available_on(0).water, 0.0);
+    let loaded: GameWorld = serde_json::from_str(&serde_json::to_string(&w).unwrap()).unwrap();
+    assert_eq!(loaded.ships[0].cargo.water, 40.0);
+    loaded.validate().unwrap();
+}
 fn order_board(w: &mut GameWorld, unit: usize) {
     w.apply_command(Command::Board {
         unit_id: w.units[unit].id.clone(),

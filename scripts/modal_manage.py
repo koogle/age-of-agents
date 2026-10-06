@@ -59,6 +59,7 @@ def unpack_terrain(encoded: str, limit: int) -> str:
 
 def verify_inventories(state: dict) -> None:
     expected_resources = {
+        "water",
         "wood",
         "food",
         "stone",
@@ -82,7 +83,7 @@ def verify_inventories(state: dict) -> None:
             raise RuntimeError(f"production {field} does not match discovered islands")
         for inventory in inventories:
             if not isinstance(inventory, dict) or set(inventory) != expected_resources:
-                raise RuntimeError(f"production {field} does not expose the explicit 13-resource catalog")
+                raise RuntimeError(f"production {field} does not expose the explicit 14-resource catalog")
             if any(type(value) not in (int, float) or not math.isfinite(value) or value < 0
                    for value in inventory.values()):
                 raise RuntimeError(f"production {field} contains an invalid resource balance")

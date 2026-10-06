@@ -6,6 +6,8 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 ## Current decisions
 
+- **Fresh water (2026-10-05):** Jakob approved renewable riverbank collection as a basic stored resource, with 10 water paid once per field planting/replenishment cycle. Reuse normal carrying and island/ship storage; additional consumers and continuous irrigation are deferred ([water guide](docs/knowledge/water-resource.md)).
+
 - **Roads (2026-10-05):** Dirt roads cost labour only, stone roads add stone, and both are placed as straight grid lines. Completed roads give friendly land units 50% more speed; animals receive no bonus, and routing accounts for travel time ([placement and routes](docs/knowledge/placement-and-routes.md#basic-roads-2026-10-05)).
 
 - **Granary yield (2026-10-05):** Granaries boost nearby field yields while retaining food/fiber storage. Initial balance is +50% within six cells edge to edge, non-stacking and evaluated at planting/replenishment completion; existing harvests are unchanged.
