@@ -33,8 +33,11 @@ python docs/verification/check_dock_facings.py --output /tmp/dock-mirroring
 
 ## Style and quality review
 
-- **Ink/color:** retained approved source pixels; fine contours and original
-  terracotta, pale wood and green-grey walls remain unchanged.
+- **Ink/color:** retained source pixels and fine contours. During this PR review,
+  Jakob flagged noticeably darker/greyer timber in the north/rear source. That
+  existing material mismatch is also mirrored into west; this reduction preserves
+  it and does not establish cross-view color consistency. Matching timber across
+  the two source views remains a separate art correction.
 - **Light/material:** unchanged painted shading; reflected views also reflect
   the baked highlights. No new world-lighting calculation is introduced.
 - **Shape/detail:** completed dock, pier, boat and construction silhouettes are

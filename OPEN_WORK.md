@@ -7,7 +7,9 @@
   original generation strips retained. All 294 workspace tests, strict native/WASM
   lint, formatting, rebuilt WebGL, 295-frame audit and retained-pixel checks pass.
   Browser replay passes 40 desktop/DPR-2 phone captures and all mouse/touch picking
-  checks with no JavaScript errors. Ready for PR review. See
+  checks with no JavaScript errors. Review: [PR #144](https://github.com/koogle/age-of-agents/pull/144).
+  Jakob noted darker rear-view timber; this pre-existing source-art mismatch is
+  recorded for a separate color-matching pass and remains unchanged here. See
   [evidence](docs/verification/dock-mirroring/README.md). No merge/deployment requested.
 
 # Stronger wildlife — 2026-10-06

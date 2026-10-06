@@ -212,3 +212,11 @@ generation strips and provenance as historical evidence. All four facings and co
 and picking checks; see [verification](../verification/dock-mirroring/README.md).
 The atlas saves 31.2% PNG bytes and 8 MiB of base-level RGBA texture storage.
 This change does not authorize a palette change, merge or deployment.
+
+**Developer visual review, 2026-10-06:** Jakob noted noticeably darker wood in
+the rear-facing dock sprites. The retained north/rear source has darker/greyer
+timber than the south/front source; horizontal mirroring preserves this existing
+material mismatch in west as well. The two-view reduction does not fix or approve
+that difference. A future art correction should match timber across both source
+views while preserving directional shading, geometry and construction stages.
+No recoloring is included in the mirroring PR.
