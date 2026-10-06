@@ -107,3 +107,71 @@ User approved the refined art and authorized merge on 2026-10-06.
 track merge/release state. Physical phones and native window appearance are not
 verified. Road speeds/routing are proven by domain tests; the browser driver
 verifies construction, charging, rendering and input.
+
+## Single-click resumption — 2026-10-06
+
+Clicking/tapping one unfinished piece with villagers selected now resumes the
+unfinished edge-connected road network, including bends, completed connecting
+pieces and mixed materials. A different road or corner-only contact is excluded.
+Known pieces beyond current sight remain in the assignment; the clicked piece
+must be visible. New placement stays axis-aligned and visible.
+
+Three domain regressions cover interruption, preserved partial labour and stone,
+completed bends, disconnected pieces, save/reload, work beyond sight and atomic
+rejection of a blocked network. The original one-cell implementation failed the
+connected-work test. The beyond-sight fixture moves its town center away so its
+vision cannot accidentally disclose the target.
+
+The browser driver now interrupts each dirt/stone order with an acknowledged Stop,
+checks that paid progress stays frozen, then uses a real mouse click/touch tap on
+one unfinished piece and waits for every piece to complete. It expects four
+build-road commands (two placements and two resumes), 14 completed cells and
+exactly seven stone spent. Run the reproduction commands above; use
+`--no-screenshots` when verifying behavior without new visual changes.
+
+Code-quality review: the shared road command derives the assignment once using
+a deterministic edge flood; the existing worker/cargo/travel loop performs it.
+No client rule, dependency, persistent field or save reset is added. Road task
+validation checks a nonempty list of distinct existing cells so bends can reload;
+placement validation still rejects diagonal/bent endpoints. Idle units stay idle,
+Stop/reassignment retain priority, costs are never reserved twice and rejection
+remains atomic.
+
+Validation: 296 workspace tests pass (one existing manual benchmark ignored),
+formatting and strict native/WASM lint pass, and the native server/WASM bundle
+are rebuilt. Desktop mouse (1280×800 DPR1) and emulated phone touch (390×844 DPR2)
+both complete the interrupted dirt/stone roads through single-piece resumption,
+retain costs and report no page errors. [Results and build hashes](resume/results.json),
+[desktop final state](resume/desktop-state.json) and
+[phone final state](resume/phone-state.json) retain the evidence. Physical phones,
+native-window input and production deployment remain unverified. These initial
+results precede integration with current master.
+
+Final integration with master `de49ab4` preserves boars, stronger wildlife,
+stationary NPC status messages and the refined stone-road/disembark assets.
+All 298 workspace tests, formatting, native/WASM strict lint, 307-frame/asset
+checks and six release-verifier tests pass; the current server/browser bundle is
+rebuilt. Desktop mouse and DPR-2 phone touch both pass the interrupted-road
+single-piece resume flow, with all 14 cells completed, exactly seven stone spent
+and no page errors. [Combined checks](resume/integrated/checks.json) and
+[browser results/hashes](resume/integrated/results.json) identify the tested build.
+The user authorized merging [PR #148](https://github.com/koogle/age-of-agents/pull/148)
+after passing checks. Production deployment is tracked separately by the
+[release workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
+
+Subsequent integration with master `50d02e1` preserves the building-selection
+change that keeps gatherers working. All 299 workspace tests, formatting and
+native/WASM strict lint pass, and the combined browser bundle is rebuilt.
+The final focused replay passes on desktop mouse and DPR-2 phone touch:
+14 interrupted pieces finish through single-piece resume, paid progress is retained,
+stone stays at 23 and no page errors occur. [Current checks](resume/current/checks.json)
+and [browser results/hashes](resume/current/results.json) identify that build.
+
+Use `python3 docs/verification/check_roads.py --resume-only --no-screenshots
+--output /tmp/road-resume-check` for this focused flow. It loads an isolated
+save with partially worked, already paid dirt/stone foundations, issues acknowledged
+Stop orders, checks frozen progress and uses actual clicks/taps to resume. It
+expects two single-piece road commands. This verifies resumption of existing
+work; use the default full replay to also verify placement menus and new-cell
+charging. The full replay above passed before this unrelated building-selection
+integration, which changes the building-target branch rather than ground orders.

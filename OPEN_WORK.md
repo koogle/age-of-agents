@@ -1,3 +1,9 @@
+# Road construction resumption — [PR #148](https://github.com/koogle/age-of-agents/pull/148)
+
+- User requested that resuming an interrupted road completes its unfinished pieces. Single-cell resume now assigns unfinished edge-connected road cells across bends, completed pieces and materials; separate/corner-touching roads remain separate. Costs and progress persist; no save-schema change.
+- Integrated master `50d02e1`, preserving uninterrupted gathering during building selection, boars, stronger wildlife, stationary NPC status feedback and refined stone-road/disembark artwork. All 299 workspace tests pass (one existing ignored benchmark), formatting/native/WASM lint, 307-frame/asset checks and six release-verifier tests pass. Full placement/Stop/resume checks pass on the boar integration; the latest rebuilt desktop mouse and DPR-2 phone touch checks resume paid dirt/stone foundations through one piece, complete all 14 cells and retain the seven-stone charge, without page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06).
+- User authorized PR creation and merge after checks pass on 2026-10-06. Merge status is tracked by PR #148; production release uses the merge-triggered [workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml). Deployment is verified separately.
+
 # Building selection preserves gathering — [PR #149](https://github.com/koogle/age-of-agents/pull/149)
 
 - User requested that selecting/switching buildings with a gathering villager selected must not force an early unload or replace its gathering loop. Building-click unload candidates now exclude every Gather phase; stopped/other compatible carriers still unload, including mixed selections. Hover preview uses the same candidate filter. No domain, protocol or save changes.

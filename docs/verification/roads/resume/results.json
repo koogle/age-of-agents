@@ -1,0 +1,31 @@
+{
+  "wasm_sha256": "1f341f398c13de2e641545e5c9450b44c11b9a68ce8d1ec084a16d419dfb048c",
+  "results": [
+    {
+      "mode": "desktop",
+      "viewport": [
+        1280,
+        800,
+        1
+      ],
+      "road_cells": 14,
+      "resumed_by_single_cell": true,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "5ae4dcee35f72fb11c36ef488660991c6dd918c3e5da576743815d8d07fd7f2c"
+    },
+    {
+      "mode": "phone",
+      "viewport": [
+        390,
+        844,
+        2
+      ],
+      "road_cells": 14,
+      "resumed_by_single_cell": true,
+      "stone_remaining": 23,
+      "errors": [],
+      "server_sha256": "5ae4dcee35f72fb11c36ef488660991c6dd918c3e5da576743815d8d07fd7f2c"
+    }
+  ]
+}
