@@ -29,41 +29,35 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         .ship_connections
         .iter()
         .find(|c| c.ship_id == ship.id);
-    let current = snapshot
-        .island_origins
-        .iter()
-        .enumerate()
-        .min_by_key(|(_, origin)| {
-            let x = i64::from(ship.cell.column)
-                - i64::from(origin.column)
-                - i64::from(aoa_game::WORLD_COLUMNS / 2);
-            let y = i64::from(ship.cell.row)
-                - i64::from(origin.row)
-                - i64::from(aoa_game::WORLD_ROWS / 2);
-            x * x + y * y
-        })
-        .map_or(0, |(id, _)| id as u64);
-    let count = snapshot.island_count as u64;
-    for id in [current.checked_sub(1), Some(current + 1)]
-        .into_iter()
-        .flatten()
-        .filter(|&id| id < count)
-    {
+    // Players steer by tapping the sea; shortcuts only return to discovered
+    // islands: home first, then the others, never the one the ship is at.
+    let origins = &snapshot.island_origins;
+    let here = aoa_game::island_at(origins, ship.cell);
+    let home = ship
+        .home_dock_id
+        .as_ref()
+        .and_then(|id| snapshot.buildings.iter().find(|b| &b.building.id == id))
+        .and_then(|dock| aoa_game::island_at(origins, dock.building.origin))
+        .unwrap_or(0);
+    let others = (0..origins.len()).filter(|&id| id != home);
+    for id in std::iter::once(home).chain(others) {
+        if Some(id) == here {
+            continue;
+        }
         commands.push(Command {
-            icon: "command_sail",
-            label: format!("Sail to island {}", id + 1),
+            icon: if id == home {
+                "portrait_towncenter"
+            } else {
+                "command_sail"
+            },
+            label: if id == home {
+                "Return home".into()
+            } else {
+                format!("Sail to island {}", id + 1)
+            },
             detail: "Cross the ocean · all settlements keep working".into(),
             enabled: ship.stopped(),
-            action: Action::Voyage(id),
-        });
-    }
-    if snapshot.uncharted_islands {
-        commands.push(Command {
-            icon: "command_explore",
-            label: "Explore beyond the coast".into(),
-            detail: "Sail into the fog toward the nearest uncharted island".into(),
-            enabled: ship.stopped(),
-            action: Action::Voyage(count),
+            action: Action::Voyage(id as u64),
         });
     }
     if !ship.stopped() {
@@ -85,14 +79,12 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         format!(
             "{}/{TRANSPORT_PASSENGERS} passengers · {}",
             ship.passengers.len(),
-            if ship.stopped() {
-                if connection.is_some() {
-                    "Storage available to nearby island"
-                } else {
-                    "Stop near shore to share cargo"
-                }
-            } else {
+            if !ship.stopped() {
                 "Sailing"
+            } else if connection.is_some() {
+                "Storage available to nearby island"
+            } else {
+                "Tap the sea to steer · near shore shares cargo"
             }
         ),
         None,
@@ -104,6 +96,11 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
 mod tests {
     use super::*;
     use aoa_game::{CellCoordinate, GameWorld, TransportShip};
+
+    fn snapshot_seed() -> u64 {
+        GameWorld::default().seed
+    }
+
     #[test]
     fn passenger_and_voyage_controls_follow_ship_state() {
         let mut snapshot = GameWorld::default().snapshot();
@@ -139,25 +136,44 @@ mod tests {
             .unwrap()
             .4
         };
+        // On the only discovered island there is nowhere to return: steer by hand.
         let actions = commands(&snapshot);
-        assert_eq!(actions.len(), 2);
-        assert_eq!(actions[1].action, Action::Voyage(1));
+        assert_eq!(actions.len(), 1);
         assert_eq!(actions[0].action, Action::Disembark);
         assert_eq!(actions[0].icon, "command_disembark");
-        assert_eq!(actions[1].icon, "command_explore");
-        snapshot.island_count = 2;
-        snapshot
-            .island_origins
-            .push(aoa_game::archipelago_plan(0)[1]);
-        assert_eq!(commands(&snapshot)[1].icon, "command_sail");
-        assert_eq!(commands(&snapshot)[2].action, Action::Voyage(2));
-        // A fully charted run offers no further exploration.
-        snapshot.uncharted_islands = false;
         assert!(
-            commands(&snapshot)
+            actions
                 .iter()
-                .all(|c| c.icon != "command_explore")
+                .all(|c| c.label != "Explore beyond the coast")
         );
+        let plan = aoa_game::archipelago_plan(snapshot_seed());
+        snapshot.island_count = 3;
+        snapshot.island_origins.extend([plan[1], plan[2]]);
+        let labels = |snapshot: &WorldSnapshot| {
+            commands(snapshot)
+                .into_iter()
+                .skip(1)
+                .map(|c| (c.label, c.action))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            labels(&snapshot),
+            vec![
+                ("Sail to island 2".into(), Action::Voyage(1)),
+                ("Sail to island 3".into(), Action::Voyage(2)),
+            ]
+        );
+        // Away from home, Return home comes first and the current island is omitted.
+        snapshot.ships[0].cell = CellCoordinate::new(plan[1].column + 2, plan[1].row + 2);
+        assert_eq!(
+            labels(&snapshot),
+            vec![
+                ("Return home".into(), Action::Voyage(0)),
+                ("Sail to island 3".into(), Action::Voyage(2)),
+            ]
+        );
+        assert_eq!(commands(&snapshot)[1].icon, "portrait_towncenter");
+        snapshot.ships[0].cell = cell;
         assert!(!actions[0].enabled);
         snapshot.ships[0]
             .passengers

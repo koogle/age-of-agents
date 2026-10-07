@@ -146,7 +146,6 @@ pub struct WorldSnapshot {
     pub island_origins: Vec<CellCoordinate>,
     /// The temple island's site, the only planned site revealed before discovery.
     pub temple_site: CellCoordinate,
-    pub uncharted_islands: bool,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -862,7 +861,6 @@ impl GameWorld {
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
             temple_site: *archipelago_plan(self.seed).last().expect("planned sites"),
-            uncharted_islands: !self.undiscovered_sites().is_empty(),
             available_buildings: self.available_buildings(),
             columns: self.columns(),
             rows: self.rows(),
