@@ -51,6 +51,9 @@
       "archer": "icons/unit_archer.png",
       "healer": "icons/unit_healer.png",
       "siege_cart": "icons/unit_siege_cart.png"
+    },
+    "goal": {
+      "temple": "icons/goal_temple.png"
     }
   },
   "textures": {

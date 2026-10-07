@@ -3,6 +3,11 @@ use super::*;
 use crate::navigation::offset;
 
 const OCEAN_GAP: u16 = 64;
+/// Extra seeded offset per island site, so the archipelago is not a lattice.
+const SITE_JITTER: u16 = 24;
+/// A ship this close to an undiscovered site's region discovers it.
+const DISCOVERY_REACH: u16 = 12;
+const SITE_SALT: u64 = 0x6172_6368_6970_656c;
 
 pub(super) fn starting_origins() -> Vec<CellCoordinate> {
     vec![CellCoordinate::new(0, 0)]
@@ -25,11 +30,24 @@ impl GameWorld {
         cell.column < self.columns() && cell.row < self.rows()
     }
 
+    /// Discover the next planned site in run order (tests).
+    #[cfg(test)]
     pub(super) fn discover_island(&mut self) {
+        if let Some(origin) = self.undiscovered_sites().first().copied() {
+            self.discover_site(origin);
+        }
+    }
+
+    /// The run's planned sites without generated terrain yet, in run order.
+    pub(super) fn undiscovered_sites(&self) -> Vec<CellCoordinate> {
+        archipelago_plan(self.seed)
+            .into_iter()
+            .filter(|site| !self.island_origins.contains(site))
+            .collect()
+    }
+
+    fn discover_site(&mut self, origin: CellCoordinate) {
         let id = self.island_origins.len() as u64;
-        let Some(origin) = island_origin(id) else {
-            return;
-        };
         let columns = self.columns().max(origin.column + WORLD_COLUMNS);
         let rows = self.rows().max(origin.row + WORLD_ROWS);
         let generated = worldgen::destination(worldgen::mix(self.seed, id), id);
@@ -47,6 +65,27 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
+        // A course steered into the fog may now end on land: continue to the
+        // reachable water nearest the tapped point, so the new coast comes into
+        // sight, or stop at sea when none is reachable.
+        for ship in 0..self.ships.len() {
+            let Some(to) = self.ships[ship].destination.filter(|&to| !self.water(to)) else {
+                continue;
+            };
+            let paths = self.sea_paths(ship, self.ships[ship].cell);
+            let coast = Footprint {
+                origin,
+                columns: WORLD_COLUMNS,
+                rows: WORLD_ROWS,
+            }
+            .cells()
+            .filter(|&c| self.water_free(c, Some(ship)) && paths.cost(c).is_some())
+            .min_by_key(|c| {
+                let (dx, dy) = (c.column.abs_diff(to.column), c.row.abs_diff(to.row));
+                (u32::from(dx).pow(2) + u32::from(dy).pow(2), c.row, c.column)
+            });
+            self.ships[ship].destination = coast;
+        }
         self.populate_wildlife(id as usize);
         self.inventories.push(Stockpile::default());
     }
@@ -70,56 +109,31 @@ impl GameWorld {
         self.terrain = terrain;
     }
 
-    /// Discovery follows the frontier vessel; old coastlines never regenerate.
+    /// Once a ship exists the ocean spans the whole planned archipelago; a ship
+    /// nearing an undiscovered site generates that island before it arrives.
+    /// Ticks run this after building jobs, so a newly launched ship never
+    /// waits a tick on the starting island's map.
     pub(super) fn expand_archipelago(&mut self) {
-        let id = self.island_origins.len() as u64;
-        let Some(next) = island_origin(id) else {
+        if self.ships.is_empty() {
             return;
-        };
-        let current = self.island_origins[id as usize - 1];
-        let departing = |cell: CellCoordinate| {
-            if next.column > current.column {
-                cell.column >= current.column + WORLD_COLUMNS - 12
-            } else if next.column < current.column {
-                cell.column <= current.column + 12
-            } else if next.row > current.row {
-                cell.row >= current.row + WORLD_ROWS - 12
-            } else {
-                cell.row <= current.row + 12
+        }
+        let (columns, rows) = plan_extent(&archipelago_plan(self.seed));
+        self.resize_ocean(columns.max(self.columns()), rows.max(self.rows()));
+        for site in self.undiscovered_sites() {
+            if self
+                .ships
+                .iter()
+                .any(|ship| site_distance(site, ship.cell) <= DISCOVERY_REACH)
+            {
+                self.discover_site(site);
             }
-        };
-        if self.ships.iter().any(|ship| {
-            ship.cell.column >= current.column
-                && ship.cell.column < current.column + WORLD_COLUMNS
-                && ship.cell.row >= current.row
-                && ship.cell.row < current.row + WORLD_ROWS
-                && departing(ship.cell)
-        }) {
-            self.discover_island();
         }
     }
 
-    /// Destination shortcuts issue real sailing orders.
+    /// Shortcuts back to discovered islands issue real sailing orders;
+    /// undiscovered islands are reached only by steering into the fog.
     pub(super) fn voyage(&mut self, ship_id: &str, id: u64) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
-        if id == self.island_origins.len() as u64 {
-            let next = island_origin(id).ok_or(CommandError::InvalidDestination)?;
-            let current = self.island_origins[id as usize - 1];
-            let mut frontier = CellCoordinate::new(
-                current.column + WORLD_COLUMNS / 2,
-                current.row + WORLD_ROWS / 2,
-            );
-            if next.column > current.column {
-                frontier.column = current.column + WORLD_COLUMNS - 1;
-            } else if next.column < current.column {
-                frontier.column = current.column;
-            } else if next.row > current.row {
-                frontier.row = current.row + WORLD_ROWS - 1;
-            } else {
-                frontier.row = current.row;
-            }
-            return self.sail(ship_id, frontier);
-        }
         let origin = *self
             .island_origins
             .get(id as usize)
@@ -183,10 +197,13 @@ impl GameWorld {
                 return Err(format!("duplicate entity across islands: {id}"));
             }
         }
+        let plan = archipelago_plan(self.seed);
+        let distinct: BTreeSet<_> = self.island_origins.iter().collect();
         if self.island_id != 0
-            || self.island_origins.is_empty()
-            || self.island_origins.iter().enumerate().any(|(id, origin)| {
-                island_origin(id as u64) != Some(*origin)
+            || self.island_origins.first() != plan.first()
+            || distinct.len() != self.island_origins.len()
+            || self.island_origins.iter().any(|origin| {
+                !plan.contains(origin)
                     || origin
                         .column
                         .checked_add(WORLD_COLUMNS)
@@ -203,27 +220,103 @@ impl GameWorld {
     }
 }
 
-/// An expanding square spiral in the positive quadrant. Consecutive sites share
-/// an ocean crossing, and the bounding rectangle stays proportional to island count.
-fn island_origin(id: u64) -> Option<CellCoordinate> {
-    let mut ring = 0_u64;
-    while (ring + 1).checked_mul(ring + 1)? <= id {
-        ring += 1;
+/// The run's island sites, chosen from the seed before any island beyond the
+/// first is generated. Sites occupy a 3×3 grid of regions with seeded offsets,
+/// grown outward from the start so the archipelago spreads in two directions.
+/// Index 0 is the start at the origin; the last site, the farthest by crossings,
+/// holds the temple. The rest are ordered by crossings from the start.
+pub fn archipelago_plan(seed: u64) -> Vec<CellCoordinate> {
+    const GRID: u64 = 3;
+    let hash = |salt: u64, value: u64| worldgen::mix(seed ^ SITE_SALT ^ salt, value);
+    let count = 5 + (hash(0, 0) % 3) as usize;
+    let neighbors = |slot: u64| {
+        let (x, y) = (slot % GRID, slot / GRID);
+        [
+            (x > 0).then(|| slot - 1),
+            (x + 1 < GRID).then(|| slot + 1),
+            (y > 0).then(|| slot - GRID),
+            (y + 1 < GRID).then(|| slot + GRID),
+        ]
+        .into_iter()
+        .flatten()
+    };
+    let mut best: Option<(Vec<u64>, Vec<u32>)> = None;
+    for attempt in 1..=32_u64 {
+        let mut slots = vec![0_u64];
+        while slots.len() < count {
+            let next = slots
+                .iter()
+                .flat_map(|&slot| neighbors(slot))
+                .filter(|slot| !slots.contains(slot))
+                .min_by_key(|&slot| hash(attempt, slot))
+                .expect("a 3×3 grid holds seven sites");
+            slots.push(next);
+        }
+        // Crossings from the start through chosen sites (breadth-first).
+        let mut crossings = vec![u32::MAX; slots.len()];
+        crossings[0] = 0;
+        let mut frontier = vec![0_usize];
+        while let Some(at) = frontier.pop() {
+            for (index, slot) in slots.iter().enumerate() {
+                if neighbors(slots[at]).any(|n| n == *slot) && crossings[index] > crossings[at] + 1
+                {
+                    crossings[index] = crossings[at] + 1;
+                    frontier.push(index);
+                }
+            }
+        }
+        let farthest = crossings.iter().max().copied().unwrap_or(0);
+        if best
+            .as_ref()
+            .is_none_or(|(_, c)| farthest > c.iter().max().copied().unwrap_or(0))
+        {
+            best = Some((slots, crossings));
+        }
+        if farthest >= 3 {
+            break;
+        }
     }
-    let step = id - ring * ring;
-    let (a, b) = if step <= ring {
-        (step, ring)
-    } else {
-        (ring, 2 * ring - step)
+    let (slots, crossings) = best.expect("at least one attempt");
+    let mut order: Vec<usize> = (0..slots.len()).collect();
+    order.sort_by_key(|&i| (crossings[i], hash(1 << 32, slots[i])));
+    order
+        .into_iter()
+        .map(|i| {
+            let slot = slots[i];
+            let jitter = |axis: u64| {
+                if slot == 0 {
+                    0
+                } else {
+                    (hash(axis << 40, slot) % u64::from(SITE_JITTER + 1)) as u16
+                }
+            };
+            CellCoordinate::new(
+                (slot % GRID) as u16 * (WORLD_COLUMNS + OCEAN_GAP + SITE_JITTER) + jitter(1),
+                (slot / GRID) as u16 * (WORLD_ROWS + OCEAN_GAP + SITE_JITTER) + jitter(2),
+            )
+        })
+        .collect()
+}
+
+/// The map size that contains every planned site.
+pub fn plan_extent(plan: &[CellCoordinate]) -> (u16, u16) {
+    plan.iter()
+        .fold((WORLD_COLUMNS, WORLD_ROWS), |(c, r), site| {
+            (
+                c.max(site.column + WORLD_COLUMNS),
+                r.max(site.row + WORLD_ROWS),
+            )
+        })
+}
+
+/// Chebyshev distance from a cell to a site's region (0 inside it).
+pub(super) fn site_distance(site: CellCoordinate, cell: CellCoordinate) -> u16 {
+    let gap = |value: u16, start: u16, length: u16| {
+        if value < start {
+            start - value
+        } else {
+            value.saturating_sub(start + length - 1)
+        }
     };
-    let (x, y) = if ring.is_multiple_of(2) {
-        (a, b)
-    } else {
-        (b, a)
-    };
-    let column = u16::try_from(x * u64::from(WORLD_COLUMNS + OCEAN_GAP)).ok()?;
-    let row = u16::try_from(y * u64::from(WORLD_ROWS + OCEAN_GAP)).ok()?;
-    column.checked_add(WORLD_COLUMNS)?;
-    row.checked_add(WORLD_ROWS)?;
-    Some(CellCoordinate::new(column, row))
+    gap(cell.column, site.column, WORLD_COLUMNS).max(gap(cell.row, site.row, WORLD_ROWS))
 }

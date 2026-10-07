@@ -76,13 +76,16 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
         let d = abs(length(p) - (in.size.x * 0.5 - in.params.y * 0.5)) - in.params.y * 0.5;
         color.a *= clamp(0.5 - d, 0.0, 1.0);
     } else {
-        // Globe minimap: known biome colours, unexplored as parchment.
+        // Globe minimap: known biome colours; everything unexplored, including
+        // the run's map beyond the received cells (extent in color.xy), is
+        // parchment fog; only beyond the map is open sea.
         let d = length(p) - in.size.x * 0.5;
         let cell = textureSampleLevel(cells, atlas_sampler, in.uv, 0.0);
-        let parchment = vec3<f32>(0.93, 0.88, 0.76);
-        let land = mix(parchment, cell.rgb, smoothstep(0.05, 0.4, cell.a));
-        let inside = all(in.uv >= vec2<f32>(0.0)) && all(in.uv <= vec2<f32>(1.0));
         let sea = vec3<f32>(0.55, 0.78, 0.86);
+        let parchment = vec3<f32>(0.93, 0.88, 0.76);
+        let received = all(in.uv >= vec2<f32>(0.0)) && all(in.uv <= vec2<f32>(1.0));
+        let land = select(parchment, mix(parchment, cell.rgb, smoothstep(0.05, 0.4, cell.a)), received);
+        let inside = all(in.uv >= vec2<f32>(0.0)) && all(in.uv <= in.color.xy);
         color = vec4<f32>(to_linear(select(sea, land, inside)), clamp(0.5 - d, 0.0, 1.0));
     }
     if hud.encode_srgb > 0.5 {

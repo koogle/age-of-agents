@@ -28,6 +28,7 @@ pub use storage::{CargoDirection, SHIP_RESOURCE_CAPACITY, ShipConnection, island
 #[cfg(test)]
 mod islands_tests;
 use islands::starting_origins;
+pub use islands::{archipelago_plan, plan_extent};
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
@@ -143,6 +144,8 @@ pub struct WorldSnapshot {
     pub island_id: u64,
     pub island_count: usize,
     pub island_origins: Vec<CellCoordinate>,
+    /// The temple island's site, the only planned site revealed before discovery.
+    pub temple_site: CellCoordinate,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -800,7 +803,6 @@ impl GameWorld {
         }
         self.tick_wildlife(dt);
         self.tick_ships(dt);
-        self.expand_archipelago();
         for index in (0..self.units.len()).rev() {
             if let UnitAction::Board { ship_id } = self.units[index].action.clone() {
                 self.tick_board(index, &ship_id, dt);
@@ -809,6 +811,7 @@ impl GameWorld {
         for index in 0..self.buildings.len() {
             self.tick_building_job(index, dt);
         }
+        self.expand_archipelago();
         self.refresh_exploration();
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
@@ -857,6 +860,7 @@ impl GameWorld {
             island_id: self.island_id,
             island_count: self.island_origins.len(),
             island_origins: self.island_origins.clone(),
+            temple_site: *archipelago_plan(self.seed).last().expect("planned sites"),
             available_buildings: self.available_buildings(),
             columns: self.columns(),
             rows: self.rows(),

@@ -20,7 +20,7 @@ commands. Start in [islands.rs](../../crates/game/src/game/islands.rs),
    position. Discovery adds land; destination shortcuts are sailing orders.
 3. For save changes, use the [server and saves guide](server-and-saves.md).
    For new extents, consult [rendering/input](rendering-and-input.md).
-4. Run the affected island/ship regressions, then exercise the actual Explore,
+4. Run the affected island/ship regressions, then exercise the actual steering,
    crossing, landing and return flow on an isolated save.
 
 ```bash
@@ -64,6 +64,66 @@ Update this file when developer steering, implementation changes or investigatio
 changes the procedure, contract, failure modes or verification limits. Record the
 source and distinguish intended changes from implemented behavior; link any new
 focused topic from the [knowledge index](INDEX.md).
+
+## Planned run archipelago (2026-10-06)
+
+Jakob's direction: every run has 5–7 islands spread over a map rather than in a
+line, the layout is chosen first, the final island holds a temple with the
+Artifact of the Gods, and that goal is revealed at the start. Each island's
+terrain still generates as the player reaches it. Later work (temple building,
+artifact capture, escalating monsters) is not implemented yet.
+
+Implemented in `crates/game/src/game/islands.rs`:
+
+- `archipelago_plan(seed)` grows 5–7 sites outward from the start over a 3×3 grid
+  of regions with up to 24 cells of seeded offset, retrying until the farthest
+  site is at least three crossings away (32 attempts, best kept). Index 0 is the
+  start at the origin; the rest are ordered by crossings; the last is the temple.
+  The plan is derived from the persisted seed, so it adds no save field.
+- Island ids stay in discovery order (inventories, wildlife, resource tiers).
+  `validate_islands` requires distinct origins from the plan with the start first.
+- `expand_archipelago` resizes the ocean to `plan_extent` once any ship exists, then
+  discovers any site whose region a ship is within 12 cells of. Before the first
+  ship the world stays 120×80, which keeps early play and most tests unchanged.
+  Ticks run it after building jobs: run earlier, a dock-launched ship spent one
+  tick on the 120×80 map and could not steer beyond it
+  (`ship_tests::a_newly_launched_ship_can_steer_into_the_fog_at_once`). Tests that
+  index terrain must use `columns()` as the stride once a ship exists.
+  A course steered into the fog may end inside a site that discovery turns into
+  land. Discovery then redirects that ship to the reachable water in the new
+  island's region nearest the tapped point, so the coast comes into its 8-cell
+  sight; with none reachable it stops at sea. A land destination would otherwise
+  fail validation (`islands_tests::steering_into_an_uncharted_site_discovers_it_and_sails_on_to_its_coast`).
+- Snapshots list only `temple_site`, never the other planned sites or their
+  count. The map size grows to the plan's extent once a ship exists. The globe
+  reaches at least the temple region and draws the generated `goal_temple` icon
+  there. Everything unexplored, including sea beyond the received map, is
+  parchment fog (the shader receives the fitted extent in the globe quad's
+  `color.xy`); only beyond the map is open sea.
+
+## Player-steered voyages (2026-10-07)
+
+Jakob's direction: ships no longer go to the next island by themselves. The
+player steers by tapping the sea (including fog). Once an island is discovered,
+one tap returns there or to the home island. Implemented: `voyage` accepts only
+discovered island ids (the Explore auto-voyage and the snapshot's
+`uncharted_islands` flag are removed). The ship panel (`crates/client/src/hud/ships.rs`)
+lists **Return home** first (the home dock's island, else island 1, with the town
+center portrait), then **Sail to island N** for every other discovered island,
+omitting the island the ship is in. A stopped ship away from a shore reads "Tap the
+sea to steer". `islands_tests::only_steering_reaches_uncharted_islands_and_shortcuts_return_to_charted_ones`
+charts a whole run by steering and returns home in one order.
+
+**Steering (Jakob, 2026-10-06):** the first version drew every uncharted island
+on the globe and showed open sea between islands. Jakob rejected that: the world
+stays shrouded in fog and only the treasure's location is shown. Do not reveal
+other planned sites, their count ("Island N of M"), or uncharted sea.
+
+Store version 18 resets spiral-placed worlds. Tests: `islands_tests` cover plan
+bounds/separation/determinism over 200 seeds, approach discovery without ship
+jumps, and that snapshots omit uncharted non-temple sites.
+`cargo run -p aoa-game --example archipelago_preview -- <seed> <charted>` exports
+a paused snapshot after steering into the fog toward each site; [capture and screenshots](../verification/archipelago-plan/README.md).
 
 ## Island storage and movable ship holds (PR #94)
 

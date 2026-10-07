@@ -283,3 +283,7 @@
 {"t": 1791212244.6243057, "endpoint": "fal-ai/birefnet/v2", "tag": "cargo-shield-classical:cut:down", "est_usd": 0.005, "request_id": "01a10c91-b93d-77a1-a2ba-de1e38f77a6c", "seconds": 5.3}
 {"t": 1791243476.0872636, "endpoint": "fal-ai/nano-banana/edit", "tag": "water:icon", "est_usd": 0.0398, "request_id": "01a10e6e-30c3-76e0-b325-ebf09664b608", "seconds": 11.2}
 {"t": 1791243479.2245765, "endpoint": "fal-ai/birefnet/v2", "tag": "water:cut", "est_usd": 0.005, "request_id": "01a10e6e-6004-75e1-8e68-85ca4b27d6f5", "seconds": 2.2}
+{"t": 1791300973.2287335, "endpoint": "fal-ai/nano-banana/edit", "tag": "goal_temple_0", "est_usd": 0.039, "request_id": "01a111db-8ec0-72a0-a2ac-7ca3d2397b8f", "seconds": 9.2}
+{"t": 1791300976.7730584, "endpoint": "fal-ai/birefnet/v2", "tag": "goal_temple_cut_0", "est_usd": 0.0058, "request_id": "01a111db-b57a-7c51-b2bc-0f09ae8baf4b", "seconds": 2.8}
+{"t": 1791300986.4963803, "endpoint": "fal-ai/nano-banana/edit", "tag": "goal_temple_1", "est_usd": 0.039, "request_id": "01a111db-c312-7b10-b0e5-de367ffde0e5", "seconds": 9.1}
+{"t": 1791300991.9524446, "endpoint": "fal-ai/birefnet/v2", "tag": "goal_temple_cut_1", "est_usd": 0.0058, "request_id": "01a111db-e944-7b20-908f-9f6d0e8f48c3", "seconds": 4.7}

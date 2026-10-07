@@ -14,6 +14,7 @@ defines the consultation and upkeep loop.
 | System knowledge and procedures, with reading triggers | [knowledge/INDEX.md](knowledge/INDEX.md) |
 | Accepted choices and superseded designs | [decisions.md](../decisions.md) |
 | Proposed work and acceptance criteria | [ROADMAP.md](../ROADMAP.md) |
+| Bounded run plan: archipelago, artifact, monsters (proposal) | [RUN_PLAN.md](RUN_PLAN.md) |
 | Current work, blockers and next steps | [OPEN_WORK.md](../OPEN_WORK.md) |
 | Quality review | [THERMONUCLEAR_REVIEW.md](THERMONUCLEAR_REVIEW.md) |
 | PR-history coverage and attribution | [REWORK_LESSONS.md](REWORK_LESSONS.md) |

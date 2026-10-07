@@ -60,6 +60,9 @@ Current choices are below; superseded designs are isolated at the end. [Rework l
 
 - **Wildlife strength (2026-10-06):** Wolves require roughly 3–5 archers (300 HP, 35 damage per contact hit); bears are tougher (600 HP, 50 damage). Existing saved health remains intact; new spawns use the higher maximum.
 
+- **Bounded run (2026-10-06, Jakob):** each run plans 5–7 scattered islands from its seed and marks only the farthest, the temple island, on the globe; the rest stays under fog and islands generate on approach ([archipelago guide](docs/knowledge/archipelago-and-transport.md#planned-run-archipelago-2026-10-06)). This replaces the unbounded spiral.
+- **Player-steered voyages (2026-10-07, Jakob):** ships reach new islands only by player steering; one-tap shortcuts return to discovered islands, home first. The Explore auto-voyage is removed at Jakob's request.
+
 ## Superseded designs
 
 These explain the path to the current design, not requirements to restore.

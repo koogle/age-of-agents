@@ -32,6 +32,7 @@ const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
 const ICONS: [&str; 39] = [
+    "goal_temple",
     "resource_water",
     "resource_wood",
     "resource_timber",
@@ -51,7 +52,6 @@ const ICONS: [&str; 39] = [
     "resource_rations",
     "command_disembark",
     "command_sail",
-    "command_explore",
     "command_cargo",
     "command_back",
     "category_town",
