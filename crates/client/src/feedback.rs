@@ -1,10 +1,12 @@
 //! Fading unit feedback from authoritative snapshots and command outcomes.
-use aoa_game::{GatherPhase, Unit, UnitAction, WorldSnapshot};
+use aoa_game::{GatherPhase, ScenarioOutcome, Unit, UnitAction, WorldSnapshot};
 use glam::Vec3;
 
 use crate::{camera::Rig, hud, terrain};
 
 const LIFETIME: f64 = 1.4;
+/// The run's milestones linger above the bearer; ordinary statuses do not.
+const MILESTONE_LIFETIME: f64 = 8.0;
 
 fn drop_off_status(unit: &Unit) -> Option<String> {
     let cargo = unit.cargo.as_ref()?;
@@ -81,6 +83,7 @@ struct Label {
     text: String,
     at: Vec3,
     born: f64,
+    lifetime: f64,
 }
 
 #[derive(Default)]
@@ -100,6 +103,7 @@ impl Feedback {
                 text: text.into(),
                 at: Vec3::new(at.x, 0.8, at.y),
                 born: now,
+                lifetime: LIFETIME,
             });
         }
         if self.labels.len() > 64 {
@@ -137,6 +141,7 @@ impl Feedback {
                     text,
                     at: Vec3::new(at.x, 0.8, at.y),
                     born: now,
+                    lifetime: LIFETIME,
                 });
             }
             let Some(cargo) = &before.unit.cargo else {
@@ -154,6 +159,32 @@ impl Feedback {
                 ),
                 at: Vec3::new(at.x, if changed { 1.15 } else { 0.8 }, at.y),
                 born: now,
+                lifetime: LIFETIME,
+            });
+        }
+        // The artifact's claim and homecoming speak from above its bearer.
+        let claimed = previous.artifact_bearer.is_none() && next.artifact_bearer.is_some();
+        let won = previous.scenario.outcome != ScenarioOutcome::Won
+            && next.scenario.outcome == ScenarioOutcome::Won;
+        if let Some(bearer) = next
+            .units
+            .iter()
+            .find(|u| Some(&u.unit.id) == next.artifact_bearer.as_ref())
+            && (claimed || won)
+        {
+            let at = terrain::world_of(bearer.position.x, bearer.position.y);
+            self.labels
+                .retain(|label| label.entity_id.as_deref() != Some(&bearer.unit.id));
+            self.labels.push(Label {
+                entity_id: Some(bearer.unit.id.clone()),
+                text: if won {
+                    "Victory · the Artifact of the Gods is home".into()
+                } else {
+                    "Claimed the Artifact of the Gods".into()
+                },
+                at: Vec3::new(at.x, 0.8, at.y),
+                born: now,
+                lifetime: MILESTONE_LIFETIME,
             });
         }
         // Presentation stays bounded even after a burst of network snapshots.
@@ -170,17 +201,21 @@ impl Feedback {
         heights: &terrain::Heights,
         now: f64,
     ) {
-        self.labels.retain(|label| now - label.born < LIFETIME);
+        self.labels
+            .retain(|label| now - label.born < label.lifetime);
         for label in &self.labels {
             let age = (now - label.born) as f32;
-            let position = label.at + Vec3::Y * (heights.at(label.at.x, label.at.z) + age * 0.45);
+            // Ordinary statuses end before the rise cap; milestones then hold still.
+            let rise = age.min(LIFETIME as f32) * 0.45;
+            let position = label.at + Vec3::Y * (heights.at(label.at.x, label.at.z) + rise);
             if let Some(at) = rig.screen_of(position) {
                 let (_, up) = rig.basis();
                 let Some(top) = rig.screen_offset(position, up) else {
                     continue;
                 };
                 let pixels_per_world = at.distance(top);
-                let alpha = (age * 6.0).min(1.0) * (1.0 - ((age - 0.9) / 0.5).max(0.0));
+                let fade_from = label.lifetime as f32 - 0.5;
+                let alpha = (age * 6.0).min(1.0) * (1.0 - ((age - fade_from) / 0.5).max(0.0));
                 hud.gain_label(atlas, &label.text, at, pixels_per_world, alpha, rig.width);
             }
         }
@@ -191,6 +226,33 @@ impl Feedback {
 mod tests {
     use super::*;
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
+
+    #[test]
+    fn claiming_and_bringing_home_the_artifact_speak_above_the_bearer() {
+        let before = GameWorld::default().snapshot();
+        let mut claimed = before.clone();
+        claimed.tick += 1;
+        claimed.artifact_bearer = Some(before.units[0].unit.id.clone());
+        let mut feedback = Feedback::default();
+        feedback.observe(Some(&before), &claimed, 0.0);
+        let label = feedback.labels.last().unwrap();
+        assert_eq!(label.text, "Claimed the Artifact of the Gods");
+        assert_eq!(label.entity_id, claimed.artifact_bearer);
+        let mut won = claimed.clone();
+        won.tick += 1;
+        won.scenario.outcome = aoa_game::ScenarioOutcome::Won;
+        feedback.observe(Some(&claimed), &won, 1.0);
+        let texts: Vec<_> = feedback.labels.iter().map(|l| l.text.as_str()).collect();
+        assert_eq!(texts, ["Victory · the Artifact of the Gods is home"]);
+        // Unlike an ordinary status, the victory line is still there seconds later.
+        feedback.labels.retain(|l| 6.0 - l.born < l.lifetime);
+        assert_eq!(feedback.labels.len(), 1);
+        // A later snapshot without a change says nothing new.
+        let mut later = won.clone();
+        later.tick += 1;
+        feedback.observe(Some(&won), &later, 2.0);
+        assert_eq!(feedback.labels.len(), 1);
+    }
 
     #[test]
     fn complaints_replace_status_and_stay_at_the_original_anchor() {

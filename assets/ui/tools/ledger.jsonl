@@ -301,3 +301,13 @@
 {"t": 1791381622.5355206, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_empty_cut_0", "est_usd": 0.0058, "request_id": "01a116aa-3bec-7661-8c5c-9d9bd7d70e42", "seconds": 4.9}
 {"t": 1791381632.4948545, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_empty_1", "est_usd": 0.039, "request_id": "01a116aa-520e-7310-ad4b-af0c648a4b99", "seconds": 9.2}
 {"t": 1791381638.1071894, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_empty_cut_1", "est_usd": 0.0058, "request_id": "01a116aa-812f-70d2-80a4-9d4522b04ddb", "seconds": 2.7}
+{"t": 1791392522.2408488, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_0", "est_usd": 0.039, "request_id": "01a11750-72f1-7bc2-adad-e8b2fe5068c9", "seconds": 11.5}
+{"t": 1791392525.456897, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_cut_0", "est_usd": 0.0058, "request_id": "01a11750-a2ad-7ca2-a870-72bd69a236a2", "seconds": 2.5}
+{"t": 1791392540.860872, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_1", "est_usd": 0.039, "request_id": "01a11750-af28-7112-9456-ad2cd1682bd8", "seconds": 14.7}
+{"t": 1791392545.8741977, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_cut_1", "est_usd": 0.0058, "request_id": "01a11750-ef74-7811-a274-4c89bea6b878", "seconds": 3.3}
+{"t": 1791392562.2531745, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_2", "est_usd": 0.039, "request_id": "01a11751-04b4-78e2-9af1-d10180edb324", "seconds": 14.2}
+{"t": 1791392567.4124575, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_cut_2", "est_usd": 0.0058, "request_id": "01a11751-4419-74e1-898b-ef98cc4cbad5", "seconds": 3.1}
+{"t": 1791392664.1517189, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_empty_0", "est_usd": 0.039, "request_id": "01a11752-a5ca-7962-baf1-6d3b74d562f2", "seconds": 9.4}
+{"t": 1791392667.603015, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_empty_cut_0", "est_usd": 0.0058, "request_id": "01a11752-cde7-7081-8682-493da3f1dfc6", "seconds": 2.5}
+{"t": 1791392678.2264812, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_empty_1", "est_usd": 0.039, "request_id": "01a11752-da93-7ad0-8067-813873fd56a4", "seconds": 9.9}
+{"t": 1791392682.9246054, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_empty_cut_1", "est_usd": 0.0058, "request_id": "01a11753-0548-7093-bbfa-72583224e6a7", "seconds": 3.7}
