@@ -65,6 +65,16 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
+        // A course steered into the fog may now end on land: stop at sea instead.
+        let stride = usize::from(self.columns());
+        for ship in &mut self.ships {
+            if ship.destination.is_some_and(|to| {
+                self.terrain[usize::from(to.row) * stride + usize::from(to.column)].biome
+                    != TerrainBiome::Water
+            }) {
+                ship.destination = None;
+            }
+        }
         self.populate_wildlife(id as usize);
         self.inventories.push(Stockpile::default());
     }

@@ -89,6 +89,9 @@ Implemented in `crates/game/src/game/islands.rs`:
   tick on the 120×80 map and an immediate Explore aimed at its edge
   (`ship_tests::a_newly_launched_ship_can_explore_at_once`). Tests that index
   terrain must use `columns()` as the stride once a ship exists.
+  Discovery clears any ship destination that the new island turned into land, so
+  a course steered into the fog stops at sea instead of failing validation
+  (`islands_tests::steering_into_an_uncharted_site_discovers_it_and_stops_at_sea`).
 - `Voyage` with `island_id == island_count` (Explore) sails to open water 8 cells
   outside the nearest undiscovered site; with every site charted it is rejected.
 - Snapshots list only `temple_site` and whether `uncharted_islands` remain, never

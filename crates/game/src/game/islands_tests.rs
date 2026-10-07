@@ -367,3 +367,30 @@ fn local_training_cannot_spend_other_islands_food_and_refunds_stay_local() {
     assert_eq!(world.inventories[1].food, 100.0 - VILLAGER_FOOD_COST);
     assert_eq!(world.inventories[0].food, 100.0);
 }
+
+#[test]
+fn steering_into_an_uncharted_site_discovers_it_and_stops_at_sea() {
+    let mut world = GameWorld::default();
+    world.ships.push(vessel(CellCoordinate::new(0, 0)));
+    world.expand_archipelago();
+    let site = archipelago_plan(world.seed)[1];
+    world.ships[0].cell = open_water_beside(site, 30);
+    // Aim at the middle of the fogged site: open sea now, land once discovered.
+    let heart = CellCoordinate::new(site.column + WORLD_COLUMNS / 2, site.row + WORLD_ROWS / 2);
+    world.sail("transport-test", heart).unwrap();
+    for _ in 0..600 {
+        world.tick(0.1);
+        world.validate().unwrap();
+    }
+    assert_eq!(world.island_origins.last(), Some(&site));
+    assert!(
+        world.ships[0].stopped(),
+        "the ship must not chase a destination that became land"
+    );
+    let at = world.ships[0].cell;
+    let stride = usize::from(world.columns());
+    assert_eq!(
+        world.terrain[usize::from(at.row) * stride + usize::from(at.column)].biome,
+        TerrainBiome::Water
+    );
+}
