@@ -85,10 +85,16 @@ Implemented in `crates/game/src/game/islands.rs`:
 - `expand_archipelago` resizes the ocean to `plan_extent` once any ship exists, then
   discovers any site whose region a ship is within 12 cells of. Before the first
   ship the world stays 120×80, which keeps early play and most tests unchanged.
+  Ticks run it after building jobs: run earlier, a dock-launched ship spent one
+  tick on the 120×80 map and an immediate Explore aimed at its edge
+  (`ship_tests::a_newly_launched_ship_can_explore_at_once`). Tests that index
+  terrain must use `columns()` as the stride once a ship exists.
 - `Voyage` with `island_id == island_count` (Explore) sails to open water 8 cells
   outside the nearest undiscovered site; with every site charted it is rejected.
-- Snapshots reveal only `temple_site` and whether `uncharted_islands` remain; the
-  other planned sites, their count and positions never leave the server. The globe
+- Snapshots list only `temple_site` and whether `uncharted_islands` remain, never
+  the other planned sites or their count. Known limits: after an Explore order the
+  ship's destination (open water 8 cells outside the nearest uncharted site) is in
+  snapshots, and the map size grows to the plan's extent once a ship exists. The globe
   reaches at least the temple region and draws the generated `goal_temple` icon
   there. Everything unexplored, including sea beyond the received map, is
   parchment fog (the shader receives the fitted extent in the globe quad's

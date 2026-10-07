@@ -258,7 +258,8 @@ fn blocked_ship_production_waits_and_queue_cancellation_refunds() {
     let mut w = harbor();
     let dock = w.buildings.last().unwrap().footprint();
     for cell in movement::interaction_cells(dock) {
-        if w.terrain[usize::from(cell.row * WORLD_COLUMNS + cell.column)].biome
+        if w.terrain[usize::from(cell.row) * usize::from(w.columns()) + usize::from(cell.column)]
+            .biome
             != TerrainBiome::Water
             || w.ships.iter().any(|s| s.cell == cell)
         {
@@ -538,9 +539,12 @@ fn offshore_pickup_meets_at_shore_and_reloads_mid_approach() {
 fn unreachable_pickup_rejects_without_changing_unit_or_ship() {
     let mut w = harbor();
     w.ships[0].cell = c(40, 45);
-    // An unbroken water strip separates the units from every shore.
+    // An unbroken water strip separates the units from every shore. Seal the
+    // run's open ocean beyond the start island so it cannot bridge the strip.
     for tile in &mut w.terrain {
-        if tile.row == 25 {
+        if tile.column >= WORLD_COLUMNS || tile.row >= WORLD_ROWS {
+            tile.biome = TerrainBiome::Mountain;
+        } else if tile.row == 25 {
             tile.biome = TerrainBiome::Water;
         }
     }
@@ -623,5 +627,29 @@ fn four_passengers_wait_for_pickup_on_a_crowded_shore() {
         w.tick(0.1);
     }
     assert_eq!(w.ships[0].passengers.len(), 4, "remaining: {:?}", w.units);
+    w.validate().unwrap();
+}
+
+#[test]
+fn a_newly_launched_ship_can_explore_at_once() {
+    let mut w = harbor();
+    assert_eq!(
+        (w.columns(), w.rows()),
+        plan_extent(&archipelago_plan(w.seed)),
+        "the ocean must span the run as soon as a dock launches a ship"
+    );
+    let id = w.ships[0].id.clone();
+    w.apply_command(Command::Voyage {
+        ship_id: id,
+        island_id: 1,
+    })
+    .unwrap();
+    for _ in 0..20_000 {
+        if w.ships[0].stopped() {
+            break;
+        }
+        w.tick(0.1);
+    }
+    assert_eq!(w.island_origins.len(), 2);
     w.validate().unwrap();
 }
