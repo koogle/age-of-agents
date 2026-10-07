@@ -34,8 +34,17 @@ The client sends `ClaimArtifact` when units are selected and the temple is
 tapped (`lib.rs`). The temple sheet `assets/sprites/buildings_sanctuary.*` has
 the emptied temple in its first three stage slots and the full temple last;
 `view.rs` passes "artifact still inside" as the temple's `working` flag and
-`view/buildings.rs` picks the frame. `hud/run.rs` draws the globe marker, a
-28 px artifact icon above the bearer's health bar, and the victory pill.
+`view/buildings.rs` picks the frame. `hud/run.rs` draws the globe marker and a
+28 px artifact icon above the bearer's health bar.
+
+**Steering (Jakob, 2026-10-07):** after the first temple, Jakob asked for a more
+run-down building whose linework matches the existing buildings, and for victory
+to appear like the status messages above NPC heads instead of a HUD pill. His
+note about the dome was cut off; the dome is now cracked and partly collapsed
+verdigris, pending his confirmation. Claim and victory now use unit status
+feedback (`feedback.rs`): "Claimed the Artifact of the Gods" and "Victory · the
+Artifact of the Gods is home" rise above the bearer and, unlike ordinary
+statuses, linger for eight seconds. Do not reintroduce a victory pill.
 
 ## Learnings and failure modes
 
@@ -55,7 +64,8 @@ the emptied temple in its first three stage slots and the full temple last;
   island only, no fog lifted, hidden until explored, claim/reject atomicity,
   passenger bearer, fallen bearer, home reach and save round trip, and temple
   placement plus on-foot reachability from the sea for 24 seeds.
-- `hud::run::tests` covers the victory pill and marker on desktop and DPR-2 phone.
+- `hud::run::tests` covers the marker; `feedback::tests` covers the claim and
+  lingering victory status.
 - [Browser evidence](../verification/temple-artifact/README.md) uses staged
   snapshots from `archipelago_preview <seed> 1 found|carried|won`, which place a
   villager by the temple as a fixture; a full live run to the temple is not yet

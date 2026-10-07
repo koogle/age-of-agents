@@ -1,9 +1,10 @@
 //! Export a paused run snapshot for archipelago review:
 //! cargo run -p aoa-game --example archipelago_preview -- <seed> <charted islands>
 //! With more than one charted island, a ship steers into the fog from the start island.
-//! An optional third argument (`found`, `carried` or `won`) charts the whole run,
-//! then stages the artifact: as a review fixture it places villager-1 beside the
-//! temple, claims the artifact, and for `won` places the bearer beside home.
+//! An optional third argument (`found`, `carried`, `home` or `won`) charts the whole
+//! run, then stages the artifact: as a review fixture it places villager-1 beside
+//! the temple, claims the artifact, and for `home`/`won` places the bearer four or
+//! three cells from the home town center (only three wins).
 use aoa_game::{CellCoordinate, Command, GameWorld, TerrainBiome, TransportShip};
 
 fn main() {
@@ -77,9 +78,11 @@ fn main() {
                 .expect("the artifact waits in the temple");
             world.tick(0.1);
         }
-        if stage == "won" {
+        if stage == "home" || stage == "won" {
+            // Four cells from the home town center is not yet home; three wins.
+            let reach = if stage == "won" { 3 } else { 4 };
             let home = world.buildings[0].origin;
-            world.units[0].cell = CellCoordinate::new(home.column - 1, home.row + 2);
+            world.units[0].cell = CellCoordinate::new(home.column - reach, home.row + 2);
             world.tick(0.1);
         }
         world.validate().expect("a valid staged run");
