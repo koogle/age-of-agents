@@ -131,45 +131,63 @@ fn approaching_a_planned_site_discovers_it_without_moving_the_ship() {
     world.validate().unwrap();
 }
 
+/// Steer toward the heart of a fogged site, as a player tapping the sea would.
+pub(super) fn steer_toward(world: &mut GameWorld, ship_id: &str, site: CellCoordinate) {
+    let heart = CellCoordinate::new(site.column + WORLD_COLUMNS / 2, site.row + WORLD_ROWS / 2);
+    world
+        .apply_command(Command::Sail {
+            ship_id: ship_id.into(),
+            to: heart,
+        })
+        .unwrap();
+    for _ in 0..20_000 {
+        if world.ships[0].stopped() {
+            break;
+        }
+        world.tick(0.1);
+    }
+}
+
 #[test]
-fn explore_sails_to_the_nearest_unknown_site_until_the_run_is_charted() {
+fn only_steering_reaches_uncharted_islands_and_shortcuts_return_to_charted_ones() {
     let mut world = GameWorld::default();
     world.ships.push(vessel(CellCoordinate::new(0, 0)));
     world.expand_archipelago();
     let plan = archipelago_plan(world.seed);
-    for _ in 1..plan.len() {
-        let count = world.island_origins.len() as u64;
-        world
-            .apply_command(Command::Voyage {
-                ship_id: "transport-test".into(),
-                island_id: count,
-            })
-            .unwrap();
-        for _ in 0..20_000 {
-            if world.ships[0].stopped() {
-                break;
-            }
-            world.tick(0.1);
-        }
-        assert_eq!(world.island_origins.len() as u64, count + 1);
-        world.validate().unwrap();
-    }
-    let mut charted = world.island_origins.clone();
-    charted.sort_by_key(|c| (c.row, c.column));
-    let mut expected = plan.clone();
-    expected.sort_by_key(|c| (c.row, c.column));
-    assert_eq!(charted, expected);
+    // No shortcut targets an undiscovered island.
     let before = world.clone();
-    let count = world.island_origins.len() as u64;
-    assert!(
-        world
-            .apply_command(Command::Voyage {
-                ship_id: "transport-test".into(),
-                island_id: count,
-            })
-            .is_err()
+    assert_eq!(
+        world.apply_command(Command::Voyage {
+            ship_id: "transport-test".into(),
+            island_id: 1,
+        }),
+        Err(CommandError::InvalidDestination)
     );
     assert_eq!(world, before);
+    for &site in &plan[1..] {
+        if world.island_origins.contains(&site) {
+            continue; // discovered on the way to an earlier site
+        }
+        steer_toward(&mut world, "transport-test", site);
+        assert!(world.island_origins.contains(&site), "{site:?}");
+        world.validate().unwrap();
+    }
+    assert_eq!(world.island_origins.len(), plan.len());
+    // Once discovered, one order returns to any island, home included.
+    world
+        .apply_command(Command::Voyage {
+            ship_id: "transport-test".into(),
+            island_id: 0,
+        })
+        .unwrap();
+    for _ in 0..20_000 {
+        if world.ships[0].stopped() {
+            break;
+        }
+        world.tick(0.1);
+    }
+    assert_eq!(world.island_at(world.ships[0].cell), Some(0));
+    world.validate().unwrap();
 }
 
 #[test]
@@ -268,7 +286,6 @@ fn expanded_snapshot_terrain_round_trips_runtime_dimensions() {
         Some(&loaded.temple_site),
         archipelago_plan(world.seed).last()
     );
-    assert!(loaded.uncharted_islands);
     let json = serde_json::to_string(&snapshot).unwrap();
     for site in &archipelago_plan(world.seed)[3..] {
         let hidden = serde_json::to_string(site).unwrap();
@@ -369,7 +386,7 @@ fn local_training_cannot_spend_other_islands_food_and_refunds_stay_local() {
 }
 
 #[test]
-fn steering_into_an_uncharted_site_discovers_it_and_stops_at_sea() {
+fn steering_into_an_uncharted_site_discovers_it_and_sails_on_to_its_coast() {
     let mut world = GameWorld::default();
     world.ships.push(vessel(CellCoordinate::new(0, 0)));
     world.expand_archipelago();
@@ -386,6 +403,18 @@ fn steering_into_an_uncharted_site_discovers_it_and_stops_at_sea() {
     assert!(
         world.ships[0].stopped(),
         "the ship must not chase a destination that became land"
+    );
+    // It sailed on into the island's waters, close enough to see the new coast.
+    assert_eq!(islands::site_distance(site, world.ships[0].cell), 0);
+    let shore = world
+        .terrain
+        .iter()
+        .filter(|c| c.biome != TerrainBiome::Water)
+        .map(|c| c.coordinate().center().distance(world.ships[0].position()))
+        .fold(f64::MAX, f64::min);
+    assert!(
+        shore <= UNIT_SIGHT_RADIUS,
+        "nearest land {shore} cells away"
     );
     let at = world.ships[0].cell;
     let stride = usize::from(world.columns());
