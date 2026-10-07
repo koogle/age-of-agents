@@ -45,6 +45,9 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
             return Some(("Moving".into(), format!("{},{}", to.column, to.row)));
         }
         UnitAction::Board { ship_id } => ("Boarding transport".into(), ship_id.as_str()),
+        UnitAction::ClaimArtifact { building_id } => {
+            ("Seeking the artifact".into(), building_id.as_str())
+        }
         UnitAction::ExploreBuild { origin, kind } => {
             return Some((
                 drop_off_status(unit).unwrap_or_else(|| "Exploring build site".into()),

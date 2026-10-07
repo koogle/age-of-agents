@@ -164,6 +164,7 @@ impl App {
                 "buildings_economy",
                 "buildings_crafts",
                 "buildings_civic",
+                "buildings_sanctuary",
                 "units",
             ]
             .map(|name| assets.bytes(&format!("sprites/{name}.json"))),
@@ -504,6 +505,12 @@ impl App {
                     });
                 }
             }
+            Target::Building(building_id) if building_id == aoa_game::TEMPLE_ID => {
+                self.send(Command::ClaimArtifact {
+                    unit_ids: units,
+                    building_id,
+                });
+            }
             Target::Building(building_id) => {
                 let carriers =
                     storage::carriers_for(self.view.snapshot.as_ref(), &units, &building_id);
@@ -760,7 +767,8 @@ impl App {
         {
             self.hud.selection_box(pointer.down_at, self.cursor, scale);
         }
-        self.view.draw_health(&mut self.hud, &self.rig, scale);
+        self.view
+            .draw_health(&mut self.hud, &self.atlas, &self.rig, scale);
         self.feedback.draw(
             &mut self.hud,
             &self.atlas,
@@ -809,6 +817,7 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/transport.png"),
         assets.image("sprites/villager_field_preparation.png"),
         assets.image("sprites/wildlife.png"),
+        assets.image("sprites/buildings_sanctuary.png"),
     ]
 }
 

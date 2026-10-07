@@ -32,6 +32,7 @@ pub fn manifest() -> Vec<String> {
         "buildings_economy",
         "buildings_crafts",
         "buildings_civic",
+        "buildings_sanctuary",
         "units",
     ] {
         files.push(format!("sprites/{sheet}.png"));

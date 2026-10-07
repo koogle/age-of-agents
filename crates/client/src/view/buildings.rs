@@ -53,9 +53,18 @@ fn frame(
         ),
         _ => sheets.catalog.building(kind),
     };
-    let stage = construction.map_or(3, |work| {
-        ((work / kind.build_seconds() * 3.0) as usize).min(2)
-    });
+    let stage = match (kind, construction) {
+        // Never built: the full sanctuary while the artifact rests inside, else emptied.
+        (BuildingKind::Temple, _) => {
+            if working {
+                3
+            } else {
+                0
+            }
+        }
+        (_, Some(work)) => ((work / kind.build_seconds() * 3.0) as usize).min(2),
+        (_, None) => 3,
+    };
     (
         index,
         sheet.frames[row][stage],
@@ -171,6 +180,7 @@ mod tests {
                 include_bytes!("../../../../assets/sprites/buildings_economy.json"),
                 include_bytes!("../../../../assets/sprites/buildings_crafts.json"),
                 include_bytes!("../../../../assets/sprites/buildings_civic.json"),
+                include_bytes!("../../../../assets/sprites/buildings_sanctuary.json"),
                 include_bytes!("../../../../assets/sprites/units.json"),
             ],
             include_bytes!("../../../../assets/sprites/villager_field_preparation.json"),

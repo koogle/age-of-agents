@@ -132,3 +132,20 @@ impl GameWorld {
         }
     }
 }
+
+pub(super) fn building(
+    kind: BuildingKind,
+    id: &str,
+    origin: CellCoordinate,
+    construction: Option<f64>,
+) -> Building {
+    Building {
+        id: id.into(),
+        kind,
+        origin,
+        construction,
+        job: None,
+        queue: Vec::new(),
+        next_queue_id: 0,
+    }
+}

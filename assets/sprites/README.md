@@ -350,3 +350,7 @@ The `water` frame in `resources.json` uses the retained generated water jug at
 `assets/ui/sources/water/refined.png`; `scripts/pack_water.py` packs its 512px
 frame in the previously unused cell at (2560, 1024). Existing atlas frames stay
 pixel-identical. See [water verification](../../docs/verification/water/README.md).
+
+## Sanctuary of the Gods: `buildings_sanctuary.{png,json}` (2026-10-07)
+
+One-row sheet in the catalog building format (512 px cells, `anchor [256, 496]`). The temple is never constructed, so the first three stage slots hold the emptied temple (artifact taken) and `complete` holds the temple with the glowing chest. Generated with `fal-ai/nano-banana/edit` from the approved house, monument and town-center art (three drafts; the second selected for its clean ink and visible chest), then an edit of the selected render removing the chest (two drafts; the first selected), BiRefNet cutouts and `tools/cat_pack.py` (one scale and baseline; both frames register identically). Prompts, renders, cutouts, comparisons and request IDs are in `temple_sources/`. Estimated cost $0.2240. Style review pending Jakob's acceptance.

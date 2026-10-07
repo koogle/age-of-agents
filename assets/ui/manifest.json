@@ -53,7 +53,8 @@
       "siege_cart": "icons/unit_siege_cart.png"
     },
     "goal": {
-      "temple": "icons/goal_temple.png"
+      "temple": "icons/goal_temple.png",
+      "artifact": "icons/artifact.png"
     }
   },
   "textures": {
