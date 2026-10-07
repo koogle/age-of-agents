@@ -1,6 +1,6 @@
 //! Export a paused run snapshot for archipelago review:
 //! cargo run -p aoa-game --example archipelago_preview -- <seed> <charted islands>
-//! With more than one charted island, a ship explores from the start island.
+//! With more than one charted island, a ship steers into the fog from the start island.
 use aoa_game::{CellCoordinate, Command, GameWorld, TerrainBiome, TransportShip};
 
 fn main() {
@@ -28,14 +28,25 @@ fn main() {
             cargo: Default::default(),
             home_dock_id: None,
         });
-        while world.island_origins.len() < charted {
-            let island_id = world.island_origins.len() as u64;
+        world.tick(0.1); // the ocean opens to the whole run once a ship exists
+        // Steer into the fog toward each planned site in run order, as a player would.
+        for site in aoa_game::archipelago_plan(seed).into_iter().skip(1) {
+            if world.island_origins.len() >= charted {
+                break;
+            }
+            if world.island_origins.contains(&site) {
+                continue; // discovered on the way to an earlier site
+            }
+            let to = CellCoordinate::new(
+                site.column + aoa_game::WORLD_COLUMNS / 2,
+                site.row + aoa_game::WORLD_ROWS / 2,
+            );
             world
-                .apply_command(Command::Voyage {
+                .apply_command(Command::Sail {
                     ship_id: "transport-preview".into(),
-                    island_id,
+                    to,
                 })
-                .expect("an uncharted island remains");
+                .expect("open sea before discovery");
             while !world.ships[0].stopped() {
                 world.tick(0.1);
             }

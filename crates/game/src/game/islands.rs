@@ -65,15 +65,26 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
-        // A course steered into the fog may now end on land: stop at sea instead.
-        let stride = usize::from(self.columns());
-        for ship in &mut self.ships {
-            if ship.destination.is_some_and(|to| {
-                self.terrain[usize::from(to.row) * stride + usize::from(to.column)].biome
-                    != TerrainBiome::Water
-            }) {
-                ship.destination = None;
+        // A course steered into the fog may now end on land: continue to the
+        // reachable water nearest the tapped point, so the new coast comes into
+        // sight, or stop at sea when none is reachable.
+        for ship in 0..self.ships.len() {
+            let Some(to) = self.ships[ship].destination.filter(|&to| !self.water(to)) else {
+                continue;
+            };
+            let paths = self.sea_paths(ship, self.ships[ship].cell);
+            let coast = Footprint {
+                origin,
+                columns: WORLD_COLUMNS,
+                rows: WORLD_ROWS,
             }
+            .cells()
+            .filter(|&c| self.water_free(c, Some(ship)) && paths.cost(c).is_some())
+            .min_by_key(|c| {
+                let (dx, dy) = (c.column.abs_diff(to.column), c.row.abs_diff(to.row));
+                (u32::from(dx).pow(2) + u32::from(dy).pow(2), c.row, c.column)
+            });
+            self.ships[ship].destination = coast;
         }
         self.populate_wildlife(id as usize);
         self.inventories.push(Stockpile::default());
@@ -119,29 +130,10 @@ impl GameWorld {
         }
     }
 
-    /// Destination shortcuts issue real sailing orders.
+    /// Shortcuts back to discovered islands issue real sailing orders;
+    /// undiscovered islands are reached only by steering into the fog.
     pub(super) fn voyage(&mut self, ship_id: &str, id: u64) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
-        if id == self.island_origins.len() as u64 {
-            // Explore: the nearest open water 8 cells outside the nearest
-            // undiscovered site. The ship is beyond discovery reach (12), so
-            // clamping its cell to that band lands on the band's edge, at sea.
-            let from = self.ships[ship].cell;
-            let site = self
-                .undiscovered_sites()
-                .into_iter()
-                .min_by_key(|&site| site_distance(site, from))
-                .ok_or(CommandError::InvalidDestination)?;
-            let reach = DISCOVERY_REACH - 4;
-            let clamp = |value: u16, start: u16, length: u16| {
-                value.clamp(start.saturating_sub(reach), start + length - 1 + reach)
-            };
-            let target = CellCoordinate::new(
-                clamp(from.column, site.column, WORLD_COLUMNS),
-                clamp(from.row, site.row, WORLD_ROWS),
-            );
-            return self.sail(ship_id, target);
-        }
         let origin = *self
             .island_origins
             .get(id as usize)

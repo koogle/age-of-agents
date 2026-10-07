@@ -631,7 +631,7 @@ fn four_passengers_wait_for_pickup_on_a_crowded_shore() {
 }
 
 #[test]
-fn a_newly_launched_ship_can_explore_at_once() {
+fn a_newly_launched_ship_can_steer_into_the_fog_at_once() {
     let mut w = harbor();
     assert_eq!(
         (w.columns(), w.rows()),
@@ -639,17 +639,8 @@ fn a_newly_launched_ship_can_explore_at_once() {
         "the ocean must span the run as soon as a dock launches a ship"
     );
     let id = w.ships[0].id.clone();
-    w.apply_command(Command::Voyage {
-        ship_id: id,
-        island_id: 1,
-    })
-    .unwrap();
-    for _ in 0..20_000 {
-        if w.ships[0].stopped() {
-            break;
-        }
-        w.tick(0.1);
-    }
-    assert_eq!(w.island_origins.len(), 2);
+    let site = archipelago_plan(w.seed)[1];
+    super::islands_tests::steer_toward(&mut w, &id, site);
+    assert_eq!(w.island_origins[1], site);
     w.validate().unwrap();
 }

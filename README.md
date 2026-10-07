@@ -66,7 +66,7 @@ Open <http://localhost:8000>, or <http://localhost:8000/?local> for an in-page s
 
 Hosted saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB`. Incompatible save versions reset during development. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use Reset game.
 
-Select a unit, then click/tap ground to move or a resource to gather. Use Build for construction and select completed buildings for production/research. Drag to pan, wheel/pinch to zoom, X to stop, G for the grid and Escape to cancel placement.
+Select a unit, then click/tap ground to move or a resource to gather. Select a ship and tap the sea, fog included, to steer it; discovered islands, home first, are one tap away. Use Build for construction and select completed buildings for production/research. Drag to pan, wheel/pinch to zoom, X to stop, G for the grid and Escape to cancel placement.
 
 ## Contributing
 

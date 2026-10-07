@@ -50,7 +50,7 @@ impl GameWorld {
             .position(|s| s.id == id)
             .ok_or(CommandError::ShipNotFound)
     }
-    fn water(&self, cell: CellCoordinate) -> bool {
+    pub(super) fn water(&self, cell: CellCoordinate) -> bool {
         self.in_bounds(cell)
             && self.terrain
                 [usize::from(cell.row) * usize::from(self.columns()) + usize::from(cell.column)]
