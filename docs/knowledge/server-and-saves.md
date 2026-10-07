@@ -68,7 +68,7 @@ blindly after reconnecting.
 - Hosted saves contain authoritative `GameWorld` JSON in SQLite. Jakob explicitly
   waived backward compatibility on 2026-10-05 until he requests it again. There
   are no old inventory/island migrations or historical required-field defaults.
-- `STORE_VERSION` in `src/store.rs` is 18 (version 18: island origins must belong to the seed's planned archipelago, so spiral-placed version-17 worlds reset; building production/research capabilities are derived from kind rather than persisted). Bump it for incompatible persisted-model
+- `STORE_VERSION` in `src/store.rs` is 19 (version 19: the temple building kind and `artifact_bearer`; version 18: island origins must belong to the seed's planned archipelago, so spiral-placed version-17 worlds reset; building production/research capabilities are derived from kind rather than persisted). Bump it for incompatible persisted-model
   changes; initialization atomically drops/recreates `world_state` when SQLite
   `user_version` differs, then normal startup generates a fresh world. The reset
   also applies to higher versions. Matching-version saves survive initialization.

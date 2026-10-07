@@ -19,6 +19,7 @@ mod layout_tests;
 #[cfg(test)]
 mod menu_icon_tests;
 mod minimap;
+mod run;
 pub use build_menu::BuildingGroup;
 mod cargo;
 mod selection;
@@ -31,8 +32,9 @@ const INK: [f32; 4] = [0.24, 0.2, 0.157, 1.0];
 const MUTED: [f32; 4] = [0.45, 0.4, 0.34, 1.0];
 const GLASS: [f32; 4] = [0.98, 0.96, 0.92, 0.86];
 const ACCENT: [f32; 4] = [0.784, 0.333, 0.227, 1.0];
-const ICONS: [&str; 39] = [
+const ICONS: [&str; 40] = [
     "goal_temple",
+    "artifact",
     "resource_water",
     "resource_wood",
     "resource_timber",

@@ -1,0 +1,105 @@
+{
+  "references": [
+    "assets/sprites/building_sources/clean_roofs/house_complete.png",
+    "assets/sprites/temple_sources/ref_monument_complete.png",
+    "assets/sprites/temple_sources/ref_towncenter_complete.png"
+  ],
+  "prompt": "prompt.txt",
+  "runs": [
+    {
+      "render": "render_0.png",
+      "cutout": "cutout_0.png",
+      "edit_request_id": "01a1169e-a43b-7691-8e1f-1e292e7a0c4d",
+      "cutout_request_id": "01a1169e-d483-76b0-b350-b3bf86d241b4"
+    },
+    {
+      "render": "render_1.png",
+      "cutout": "cutout_1.png",
+      "edit_request_id": "01a1169e-e211-7820-8022-134f8500365c",
+      "cutout_request_id": "01a1169f-1bce-7b82-ae5e-3c25b5d35b64"
+    },
+    {
+      "render": "render_2.png",
+      "cutout": "cutout_2.png",
+      "edit_request_id": "01a1169f-2859-7890-9a8e-fb5c82424b6b",
+      "cutout_request_id": "01a1169f-58ca-7360-995b-d08d7f4950df"
+    }
+  ],
+  "selected": "cutout_1.png",
+  "date": "2026-10-07",
+  "endpoint": "fal-ai/nano-banana/edit",
+  "cutout_endpoint": "fal-ai/birefnet/v2",
+  "estimated_usd": 0.448,
+  "integration": "Packed into assets/sprites/buildings_sanctuary.{png,json} with assets/sprites/tools/cat_pack.py: run-down emptied temple in foundation/walls/roof, run-down temple with chest in complete.",
+  "empty_variant": {
+    "prompt": "empty_prompt.txt",
+    "source": "render_1.png",
+    "selected": "empty_cutout_0.png",
+    "comparison": "empty_comparison.png",
+    "runs": [
+      {
+        "render": "empty_render_0.png",
+        "cutout": "empty_cutout_0.png",
+        "edit_request_id": "01a116aa-146f-7072-b7d4-3587dfdbd758",
+        "cutout_request_id": "01a116aa-3bec-7661-8c5c-9d9bd7d70e42"
+      },
+      {
+        "render": "empty_render_1.png",
+        "cutout": "empty_cutout_1.png",
+        "edit_request_id": "01a116aa-520e-7310-ad4b-af0c648a4b99",
+        "cutout_request_id": "01a116aa-812f-70d2-80a4-9d4522b04ddb"
+      }
+    ]
+  },
+  "superseded": "First intact gilded tholos (runs, selected, empty_variant). Replaced by the run-down pass at Jakob's request on 2026-10-07.",
+  "run_down": {
+    "prompt": "ruined_prompt.txt",
+    "references": [
+      "assets/sprites/building_sources/clean_roofs/house_complete.png",
+      "assets/sprites/temple_sources/ref_towncenter_complete.png",
+      "assets/sprites/temple_sources/cutout_1.png"
+    ],
+    "comparison": "ruined_comparison.png",
+    "selected": "ruined_cutout_2.png",
+    "runs": [
+      {
+        "render": "ruined_render_0.png",
+        "cutout": "ruined_cutout_0.png",
+        "edit_request_id": "01a11750-72f1-7bc2-adad-e8b2fe5068c9",
+        "cutout_request_id": "01a11750-a2ad-7ca2-a870-72bd69a236a2"
+      },
+      {
+        "render": "ruined_render_1.png",
+        "cutout": "ruined_cutout_1.png",
+        "edit_request_id": "01a11750-af28-7112-9456-ad2cd1682bd8",
+        "cutout_request_id": "01a11750-ef74-7811-a274-4c89bea6b878"
+      },
+      {
+        "render": "ruined_render_2.png",
+        "cutout": "ruined_cutout_2.png",
+        "edit_request_id": "01a11751-04b4-78e2-9af1-d10180edb324",
+        "cutout_request_id": "01a11751-4419-74e1-898b-ef98cc4cbad5"
+      }
+    ],
+    "empty_variant": {
+      "prompt": "empty_prompt.txt",
+      "source": "ruined_render_2.png",
+      "selected": "ruined_empty_cutout_0.png",
+      "comparison": "ruined_empty_comparison.png",
+      "runs": [
+        {
+          "render": "ruined_empty_render_0.png",
+          "cutout": "ruined_empty_cutout_0.png",
+          "edit_request_id": "01a11752-a5ca-7962-baf1-6d3b74d562f2",
+          "cutout_request_id": "01a11752-cde7-7081-8682-493da3f1dfc6"
+        },
+        {
+          "render": "ruined_empty_render_1.png",
+          "cutout": "ruined_empty_cutout_1.png",
+          "edit_request_id": "01a11752-da93-7ad0-8067-813873fd56a4",
+          "cutout_request_id": "01a11753-0548-7093-bbfa-72583224e6a7"
+        }
+      ]
+    }
+  }
+}

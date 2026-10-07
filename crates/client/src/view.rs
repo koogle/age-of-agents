@@ -139,7 +139,7 @@ impl Sheets {
         resources: &[u8],
         town_center: &[u8],
         buildings: &[u8],
-        catalog: [&[u8]; 4],
+        catalog: [&[u8]; 5],
         field_preparation: &[u8],
     ) -> Self {
         Self {
@@ -592,7 +592,10 @@ impl WorldView {
                 building.building.kind,
                 center,
                 building.building.construction,
-                building.building.job.is_some(),
+                // The temple has no jobs; its "working" frame holds the artifact.
+                building.building.job.is_some()
+                    || (building.building.kind == aoa_game::BuildingKind::Temple
+                        && snapshot.artifact_bearer.is_none()),
                 snapshot
                     .dock_facing(building.building.origin)
                     .unwrap_or_default(),

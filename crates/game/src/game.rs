@@ -4,7 +4,14 @@ use serde::{Deserialize, Serialize};
 
 mod coast;
 mod construction;
+use construction::building;
+mod errors;
 mod roads;
+mod temple;
+pub use temple::TEMPLE_ID;
+#[cfg(test)]
+mod temple_tests;
+pub use errors::CommandError;
 pub use roads::{ROAD_WORK_SECONDS, Road, RoadKind, road_line};
 #[cfg(test)]
 mod roads_tests;
@@ -116,6 +123,8 @@ pub struct GameWorld {
     pub inventories: Vec<Stockpile>,
     pub researched_technologies: Vec<TechnologyKind>,
     pub scenario: ScenarioState,
+    /// The unit carrying the Artifact of the Gods, if it has left the temple.
+    pub artifact_bearer: Option<String>,
     next_building_id: u64,
     next_unit_id: u64,
 }
@@ -168,6 +177,7 @@ pub struct WorldSnapshot {
     #[serde(skip_deserializing, default = "DomainCatalog::roadmap")]
     pub catalog: DomainCatalog,
     pub scenario: ScenarioState,
+    pub artifact_bearer: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -182,6 +192,11 @@ pub enum Command {
     AttackAnimal {
         unit_ids: Vec<String>,
         animal_id: String,
+    },
+    /// Send units to the temple; the first to arrive takes the artifact.
+    ClaimArtifact {
+        unit_ids: Vec<String>,
+        building_id: String,
     },
     TransferShipCargo {
         ship_id: String,
@@ -273,124 +288,6 @@ pub enum Command {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CommandError {
-    AnimalNotVisible,
-    CannotAttack,
-    ShipStorageUnavailable,
-    StorageUnavailable,
-    InvalidCargoAmount,
-    ShipHoldFull,
-    ShipNotFound,
-    ShipMustBeStopped,
-    ShipFull,
-    ShoreBlocked,
-    DockRequired,
-    UnitNotFound,
-    EmptyUnitGroup,
-    DuplicateUnit,
-    ResourceNotFound,
-    ResourceDepleted,
-    FarmRequired,
-    FieldNotDepleted,
-    InvalidDestination,
-    DestinationOccupied,
-    TargetUnreachable,
-    InvalidBuildSite,
-    InsufficientWood,
-    InsufficientStone,
-    NotBuildable,
-    NeedsCoast,
-    PopulationCapReached,
-    NothingToDeposit,
-    BuildingRefusesCargo,
-    BuildingNotFound,
-    BuildingQueueFull,
-    QueuedJobNotFound,
-    BuildingUnderConstruction,
-    BuildingAlreadyComplete,
-    ProductUnavailable,
-    InsufficientFood,
-    InsufficientResources(ResourceKind),
-    InsufficientProductionResources,
-    VillagerRequired,
-    TechnologyUnavailable,
-    TechnologyAlreadyResearched,
-    TechnologyInProgress,
-    MissingTechnologyPrerequisite,
-    InsufficientResearchResources,
-    InvalidSimulationSpeed,
-    GamePaused,
-}
-
-impl std::fmt::Display for CommandError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Self::StorageUnavailable => "storage is unavailable, unreachable from shore, or full",
-            Self::ShipStorageUnavailable => {
-                "ship must be stopped beside a completed dock to transfer island storage"
-            }
-            Self::InvalidCargoAmount => "cargo amount must be finite and positive",
-            Self::ShipHoldFull => {
-                return write!(
-                    f,
-                    "ship can carry {SHIP_RESOURCE_CAPACITY} resources in total"
-                );
-            }
-            Self::ShipNotFound => "transport ship not found",
-            Self::ShipMustBeStopped => "stop the ship before boarding or unloading",
-            Self::ShipFull => "transport passenger capacity is full",
-            Self::ShoreBlocked => "no safe landing cells beside the ship or dock",
-            Self::DockRequired => "select a completed dock",
-            Self::AnimalNotVisible => "animal is not currently visible",
-            Self::CannotAttack => "healers cannot attack",
-            Self::UnitNotFound => "unit not found",
-            Self::EmptyUnitGroup => "unit group is empty",
-            Self::DuplicateUnit => "unit group contains a duplicate member",
-            Self::ResourceNotFound => "resource not found",
-            Self::ResourceDepleted => "resource is depleted",
-            Self::FarmRequired => "a completed farm is required for fields",
-            Self::FieldNotDepleted => "harvest the field before replenishing it",
-            Self::InvalidDestination => "destination is outside the world",
-            Self::DestinationOccupied => "Something already stands there.",
-            Self::TargetUnreachable => "No path leads there.",
-            Self::InvalidBuildSite => "That spot is not clear for building.",
-            Self::InsufficientWood => "Not enough wood for that building.",
-            Self::InsufficientStone => "Not enough stone for that building.",
-            Self::NotBuildable => "villagers cannot build that",
-            Self::NeedsCoast => "A dock must be built along the shore.",
-            Self::PopulationCapReached => "Build a house to make room for more villagers.",
-            Self::NothingToDeposit => "That villager has nothing to unload.",
-            Self::BuildingRefusesCargo => "That building does not take those goods.",
-            Self::BuildingNotFound => "building not found",
-            Self::BuildingQueueFull => "building queue is full",
-            Self::QueuedJobNotFound => "queued task is no longer waiting",
-            Self::BuildingUnderConstruction => "building is still under construction",
-            Self::BuildingAlreadyComplete => "building is already complete",
-            Self::ProductUnavailable => "building cannot produce that item",
-            Self::InsufficientFood => {
-                return write!(f, "You need {VILLAGER_FOOD_COST} food to train a villager.");
-            }
-            Self::InsufficientResources(kind) => return write!(f, "insufficient {}", kind.name()),
-            Self::InsufficientProductionResources => "insufficient resources for production",
-            Self::VillagerRequired => "only villagers can gather or build",
-            Self::TechnologyUnavailable => "building cannot research that technology",
-            Self::TechnologyAlreadyResearched => "technology is already researched",
-            Self::TechnologyInProgress => "technology is already being researched",
-            Self::MissingTechnologyPrerequisite => "technology prerequisite is not researched",
-            Self::InsufficientResearchResources => {
-                return write!(
-                    f,
-                    "research requires {RESEARCH_FOOD_COST} food and {RESEARCH_WOOD_COST} wood"
-                );
-            }
-            Self::GamePaused => "game is paused; resume to give orders",
-            Self::InvalidSimulationSpeed => "simulation speed must be 0, 1, or 2",
-        };
-        f.write_str(message)
-    }
-}
-
 impl Default for GameWorld {
     fn default() -> Self {
         Self::generate(DEFAULT_SEED)
@@ -431,6 +328,7 @@ impl GameWorld {
             inventories: vec![Stockpile::default()],
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
+            artifact_bearer: None,
             next_building_id: 2,
             next_unit_id: 3,
         };
@@ -446,23 +344,6 @@ fn town_center_kind() -> BuildingKind {
 
 fn town_center(id: &str, origin: CellCoordinate, construction: Option<f64>) -> Building {
     building(BuildingKind::TownCenter, id, origin, construction)
-}
-
-fn building(
-    kind: BuildingKind,
-    id: &str,
-    origin: CellCoordinate,
-    construction: Option<f64>,
-) -> Building {
-    Building {
-        id: id.into(),
-        kind,
-        origin,
-        construction,
-        job: None,
-        queue: Vec::new(),
-        next_queue_id: 0,
-    }
 }
 
 impl GameWorld {
@@ -497,6 +378,10 @@ impl GameWorld {
                 unit_ids,
                 animal_id,
             } => self.attack_animal(&unit_ids, &animal_id)?,
+            Command::ClaimArtifact {
+                unit_ids,
+                building_id,
+            } => self.claim_artifact(&unit_ids, &building_id)?,
             Command::TransferShipCargo {
                 ship_id,
                 kind,
@@ -799,8 +684,12 @@ impl GameWorld {
                     self.tick_cultivate(index, &resource_id, dt)
                 }
                 UnitAction::Deposit { storage_id } => self.tick_deposit(index, &storage_id, dt),
+                UnitAction::ClaimArtifact { building_id } => {
+                    self.tick_claim_artifact(index, &building_id, dt)
+                }
             }
         }
+        self.tick_artifact();
         self.tick_wildlife(dt);
         self.tick_ships(dt);
         for index in (0..self.units.len()).rev() {
@@ -935,6 +824,7 @@ impl GameWorld {
             researched_technologies: self.researched_technologies.clone(),
             catalog: DomainCatalog::roadmap(),
             scenario: self.scenario.clone(),
+            artifact_bearer: self.artifact_bearer.clone(),
         }
     }
 
@@ -957,7 +847,7 @@ impl GameWorld {
             .chain(
                 self.buildings
                     .iter()
-                    .filter(|building| building.is_complete())
+                    .filter(|b| b.is_complete() && b.kind != BuildingKind::Temple)
                     .map(|building| (building.footprint().center(), building.kind.sight_radius())),
             )
             .collect();
