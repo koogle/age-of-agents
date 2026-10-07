@@ -90,6 +90,8 @@ impl GameWorld {
 
     /// Once a ship exists the ocean spans the whole planned archipelago; a ship
     /// nearing an undiscovered site generates that island before it arrives.
+    /// Ticks run this after building jobs, so a newly launched ship never
+    /// waits a tick on the starting island's map.
     pub(super) fn expand_archipelago(&mut self) {
         if self.ships.is_empty() {
             return;
@@ -111,7 +113,9 @@ impl GameWorld {
     pub(super) fn voyage(&mut self, ship_id: &str, id: u64) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
         if id == self.island_origins.len() as u64 {
-            // Explore: sail to open water beside the nearest undiscovered site.
+            // Explore: the nearest open water 8 cells outside the nearest
+            // undiscovered site. The ship is beyond discovery reach (12), so
+            // clamping its cell to that band lands on the band's edge, at sea.
             let from = self.ships[ship].cell;
             let site = self
                 .undiscovered_sites()
@@ -119,25 +123,13 @@ impl GameWorld {
                 .min_by_key(|&site| site_distance(site, from))
                 .ok_or(CommandError::InvalidDestination)?;
             let reach = DISCOVERY_REACH - 4;
-            let clamp = |value: u16, start: u16, length: u16, limit: u16| {
-                value
-                    .clamp(start.saturating_sub(reach), start + length - 1 + reach)
-                    .min(limit - 1)
+            let clamp = |value: u16, start: u16, length: u16| {
+                value.clamp(start.saturating_sub(reach), start + length - 1 + reach)
             };
-            let mut target = CellCoordinate::new(
-                clamp(from.column, site.column, WORLD_COLUMNS, self.columns()),
-                clamp(from.row, site.row, WORLD_ROWS, self.rows()),
+            let target = CellCoordinate::new(
+                clamp(from.column, site.column, WORLD_COLUMNS),
+                clamp(from.row, site.row, WORLD_ROWS),
             );
-            // Stop outside the site's region: push the target onto its nearest edge band.
-            if site_distance(site, target) == 0 {
-                let to_left = target.column - site.column.saturating_sub(reach);
-                let to_top = target.row - site.row.saturating_sub(reach);
-                if to_left <= to_top {
-                    target.column = site.column.saturating_sub(reach);
-                } else {
-                    target.row = site.row.saturating_sub(reach);
-                }
-            }
             return self.sail(ship_id, target);
         }
         let origin = *self

@@ -804,7 +804,6 @@ impl GameWorld {
         }
         self.tick_wildlife(dt);
         self.tick_ships(dt);
-        self.expand_archipelago();
         for index in (0..self.units.len()).rev() {
             if let UnitAction::Board { ship_id } = self.units[index].action.clone() {
                 self.tick_board(index, &ship_id, dt);
@@ -813,6 +812,7 @@ impl GameWorld {
         for index in 0..self.buildings.len() {
             self.tick_building_job(index, dt);
         }
+        self.expand_archipelago();
         self.refresh_exploration();
         #[cfg(debug_assertions)]
         if let Err(error) = self.validate() {
