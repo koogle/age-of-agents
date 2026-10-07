@@ -1,12 +1,19 @@
 //! Export a paused run snapshot for archipelago review:
 //! cargo run -p aoa-game --example archipelago_preview -- <seed> <charted islands>
 //! With more than one charted island, a ship steers into the fog from the start island.
+//! An optional third argument (`found`, `carried` or `won`) charts the whole run,
+//! then stages the artifact: as a review fixture it places villager-1 beside the
+//! temple, claims the artifact, and for `won` places the bearer beside home.
 use aoa_game::{CellCoordinate, Command, GameWorld, TerrainBiome, TransportShip};
 
 fn main() {
     let mut args = std::env::args().skip(1);
     let seed = args.next().map_or(7, |s| s.parse().expect("integer seed"));
-    let charted: usize = args.next().map_or(1, |s| s.parse().expect("island count"));
+    let mut charted: usize = args.next().map_or(1, |s| s.parse().expect("island count"));
+    let stage = args.next();
+    if stage.is_some() {
+        charted = aoa_game::archipelago_plan(seed).len();
+    }
     let mut world = GameWorld::generate(seed);
     world.tick(0.1);
     if charted > 1 {
@@ -51,6 +58,31 @@ fn main() {
                 world.tick(0.1);
             }
         }
+    }
+    if let Some(stage) = stage.as_deref() {
+        let temple = world
+            .buildings
+            .iter()
+            .find(|b| b.id == aoa_game::TEMPLE_ID)
+            .expect("the charted run has a temple")
+            .origin;
+        world.units[0].cell = CellCoordinate::new(temple.column - 1, temple.row + 2);
+        world.tick(0.1);
+        if stage != "found" {
+            world
+                .apply_command(Command::ClaimArtifact {
+                    unit_ids: vec!["villager-1".into()],
+                    building_id: aoa_game::TEMPLE_ID.into(),
+                })
+                .expect("the artifact waits in the temple");
+            world.tick(0.1);
+        }
+        if stage == "won" {
+            let home = world.buildings[0].origin;
+            world.units[0].cell = CellCoordinate::new(home.column - 1, home.row + 2);
+            world.tick(0.1);
+        }
+        world.validate().expect("a valid staged run");
     }
     world.simulation_speed = 0.0;
     println!("{}", serde_json::to_string(&world.snapshot()).unwrap());

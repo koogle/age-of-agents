@@ -84,6 +84,12 @@ pub(super) fn building_info(
             "Monument",
             "A landmark with sight radius 24",
         ),
+        BuildingKind::Temple => (
+            "building_temple",
+            "temple",
+            "Sanctuary of the Gods",
+            "Holds the Artifact of the Gods · bring it home to win",
+        ),
         BuildingKind::House => ("building_house", "house", "House", "Room for 5 villagers"),
         BuildingKind::Granary => (
             "building_granary",
@@ -344,6 +350,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             .into(),
             UnitAction::AttackAnimal { .. } => "Attacking wildlife".into(),
             UnitAction::Board { .. } => "Walking to board transport".into(),
+            UnitAction::ClaimArtifact { .. } => "Walking to the sanctuary".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),
             UnitAction::Move { .. } => "Walking".into(),
             UnitAction::Build { .. } | UnitAction::ExploreBuild { .. }

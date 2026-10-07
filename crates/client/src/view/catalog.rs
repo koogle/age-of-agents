@@ -7,6 +7,8 @@ use serde::Deserialize;
 use super::{BuildingSheet, VillagerSheet};
 
 pub(super) const SHEET_UNITS: usize = 10;
+/// The run's temple sheet, appended after the wildlife sheet.
+const SHEET_SANCTUARY: usize = 14;
 
 #[derive(Deserialize)]
 pub(super) struct UnitSheet {
@@ -20,11 +22,12 @@ pub(super) struct Catalog {
     economy: BuildingSheet,
     crafts: BuildingSheet,
     civic: BuildingSheet,
+    sanctuary: BuildingSheet,
     pub units: UnitSheet,
 }
 
 impl Catalog {
-    pub fn parse([economy, crafts, civic, units]: [&[u8]; 4]) -> Self {
+    pub fn parse([economy, crafts, civic, sanctuary, units]: [&[u8]; 5]) -> Self {
         let mut units: UnitSheet = serde_json::from_slice(units).expect("units.json");
         for art in units.units.values_mut() {
             art.size = units.size;
@@ -35,6 +38,7 @@ impl Catalog {
             economy: serde_json::from_slice(economy).expect("buildings_economy.json"),
             crafts: serde_json::from_slice(crafts).expect("buildings_crafts.json"),
             civic: serde_json::from_slice(civic).expect("buildings_civic.json"),
+            sanctuary: serde_json::from_slice(sanctuary).expect("buildings_sanctuary.json"),
             units,
         }
     }
@@ -68,6 +72,7 @@ impl Catalog {
             BuildingKind::Workshop => (9, &self.civic, "workshop"),
             BuildingKind::Infirmary => (9, &self.civic, "infirmary"),
             BuildingKind::Monument => (8, &self.crafts, "monument"),
+            BuildingKind::Temple => (SHEET_SANCTUARY, &self.sanctuary, "temple"),
             _ => unreachable!("base building uses its original sheet"),
         }
     }
@@ -83,6 +88,7 @@ mod tests {
             include_bytes!("../../../../assets/sprites/buildings_economy.json"),
             include_bytes!("../../../../assets/sprites/buildings_crafts.json"),
             include_bytes!("../../../../assets/sprites/buildings_civic.json"),
+            include_bytes!("../../../../assets/sprites/buildings_sanctuary.json"),
             include_bytes!("../../../../assets/sprites/units.json"),
         ]);
         for kind in [

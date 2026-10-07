@@ -239,6 +239,14 @@ impl Hud {
                 enabled: true,
             });
         }
+        if snapshot.scenario.outcome == aoa_game::ScenarioOutcome::Won {
+            let paused = if snapshot.simulation_speed == 0.0 {
+                42.0 * s
+            } else {
+                0.0
+            };
+            self.victory(atlas, width, header_bottom + paused, s);
+        }
 
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
