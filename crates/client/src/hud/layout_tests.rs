@@ -25,12 +25,18 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
         toast: None,
         camera,
     };
-    let map = minimap::Minimap::new(
-        Vec2::new(snapshot.columns as f32, snapshot.rows as f32) * crate::terrain::CELL,
-    );
+    // The globe reaches the temple island, not only the charted islands.
+    let (columns, rows) = aoa_game::plan_extent(&[snapshot.temple_site]);
+    assert!(columns > snapshot.columns && rows > snapshot.rows);
+    let map = minimap::Minimap::new(Vec2::new(columns as f32, rows as f32) * crate::terrain::CELL);
     for (width, height, scale) in [(1280.0, 800.0, 1.0), (390.0, 844.0, 2.0)] {
         let mut hud = Hud::new();
         hud.layout(&atlas, &model, width * scale, height * scale, scale);
+        assert!(
+            hud.quads
+                .iter()
+                .any(|q| q.uv == atlas.sprites["goal_temple"])
+        );
         let globe = hud.quads.iter().find(|q| q.params[0] == 3.0).unwrap().rect;
         let screen_of = |world| {
             Vec2::new(globe[0], globe[1]) + map.local_of(world) * Vec2::new(globe[2], globe[3])
@@ -49,7 +55,7 @@ fn minimap_clicks_and_camera_marker_share_the_displayed_projection() {
             let Some(Action::LookAt(actual)) = hud.release() else {
                 panic!("minimap press must navigate");
             };
-            assert!(actual.abs_diff_eq(point, 1e-4));
+            assert!(actual.abs_diff_eq(point, 1e-3), "{actual} != {point}");
         }
     }
 }
@@ -137,14 +143,7 @@ fn mobile_controls_stay_separate_and_hit_the_actions_they_display() {
                     let center = Vec2::new(rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0);
                     assert!(hud.press(center));
                     if matches!(action, Action::LookAt(_)) {
-                        assert_eq!(
-                            hud.release(),
-                            Some(Action::LookAt(
-                                Vec2::new(snapshot.columns as f32, snapshot.rows as f32)
-                                    * crate::terrain::CELL
-                                    / 2.0
-                            ))
-                        );
+                        assert_eq!(hud.release(), Some(Action::LookAt(hud.map_size / 2.0)));
                     } else {
                         assert_eq!(hud.release(), Some(action.clone()));
                     }

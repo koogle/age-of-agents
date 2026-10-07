@@ -258,7 +258,8 @@ fn blocked_ship_production_waits_and_queue_cancellation_refunds() {
     let mut w = harbor();
     let dock = w.buildings.last().unwrap().footprint();
     for cell in movement::interaction_cells(dock) {
-        if w.terrain[usize::from(cell.row * WORLD_COLUMNS + cell.column)].biome
+        if w.terrain[usize::from(cell.row) * usize::from(w.columns()) + usize::from(cell.column)]
+            .biome
             != TerrainBiome::Water
             || w.ships.iter().any(|s| s.cell == cell)
         {
@@ -368,7 +369,8 @@ fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing(
         building(BuildingKind::Dock, "other-dock", c(50, 26), None),
     );
     world.discover_island();
-    world.ships[0].cell = c(184, 0);
+    let at_sea = super::islands_tests::open_water_beside(world.island_origins[1], 20);
+    world.ships[0].cell = at_sea;
     let id = world.ships[0].id.clone();
     world
         .apply_command(Command::Voyage {
@@ -377,7 +379,7 @@ fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing(
         })
         .unwrap();
     assert_eq!(world.ships[0].home_dock_id.as_deref(), Some("dock"));
-    assert_eq!(world.ships[0].cell, c(184, 0));
+    assert_eq!(world.ships[0].cell, at_sea);
     let target = world.ships[0].destination.unwrap();
     assert!((20..24).contains(&target.column));
     assert_eq!(target.row, 30);
@@ -392,7 +394,7 @@ fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing(
 fn blocked_home_dock_rejects_the_continuous_return_atomically() {
     let mut world = harbor();
     world.discover_island();
-    world.ships[0].cell = c(184, 0);
+    world.ships[0].cell = super::islands_tests::open_water_beside(world.island_origins[1], 20);
     for column in 20..24 {
         let mut blocker = world.ships[0].clone();
         blocker.id = format!("berth-{column}");
@@ -537,9 +539,12 @@ fn offshore_pickup_meets_at_shore_and_reloads_mid_approach() {
 fn unreachable_pickup_rejects_without_changing_unit_or_ship() {
     let mut w = harbor();
     w.ships[0].cell = c(40, 45);
-    // An unbroken water strip separates the units from every shore.
+    // An unbroken water strip separates the units from every shore. Seal the
+    // run's open ocean beyond the start island so it cannot bridge the strip.
     for tile in &mut w.terrain {
-        if tile.row == 25 {
+        if tile.column >= WORLD_COLUMNS || tile.row >= WORLD_ROWS {
+            tile.biome = TerrainBiome::Mountain;
+        } else if tile.row == 25 {
             tile.biome = TerrainBiome::Water;
         }
     }
@@ -622,5 +627,20 @@ fn four_passengers_wait_for_pickup_on_a_crowded_shore() {
         w.tick(0.1);
     }
     assert_eq!(w.ships[0].passengers.len(), 4, "remaining: {:?}", w.units);
+    w.validate().unwrap();
+}
+
+#[test]
+fn a_newly_launched_ship_can_steer_into_the_fog_at_once() {
+    let mut w = harbor();
+    assert_eq!(
+        (w.columns(), w.rows()),
+        plan_extent(&archipelago_plan(w.seed)),
+        "the ocean must span the run as soon as a dock launches a ship"
+    );
+    let id = w.ships[0].id.clone();
+    let site = archipelago_plan(w.seed)[1];
+    super::islands_tests::steer_toward(&mut w, &id, site);
+    assert_eq!(w.island_origins[1], site);
     w.validate().unwrap();
 }
