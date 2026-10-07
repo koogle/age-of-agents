@@ -174,6 +174,7 @@ impl GameWorld {
     pub fn validate(&self) -> Result<(), String> {
         self.validate_wildlife()?;
         self.validate_islands()?;
+        self.validate_artifact()?;
         self.validate_local()
     }
 

@@ -195,6 +195,10 @@ pub enum UnitAction {
     Deposit {
         storage_id: String,
     },
+    /// Walk beside the temple and take the artifact if it is still there.
+    ClaimArtifact {
+        building_id: String,
+    },
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -363,6 +367,8 @@ pub enum BuildingKind {
     House,
     Granary,
     Dock,
+    /// The Sanctuary of the Gods on the run's final island. Generated, never built.
+    Temple,
 }
 
 /// What villagers can construct, in build-menu order.
@@ -395,7 +401,7 @@ impl BuildingKind {
             Self::Dock => (4, 4),
             Self::House | Self::Granary => (3, 3),
             Self::Watchtower => (2, 2),
-            Self::Monument => (5, 5),
+            Self::Monument | Self::Temple => (5, 5),
             Self::MiningCamp
             | Self::Farm
             | Self::Kiln
@@ -434,6 +440,7 @@ impl BuildingKind {
                 (ResourceKind::Gold, 20.0),
                 (ResourceKind::Steel, 15.0),
             ],
+            Self::Temple => &[],
         }
     }
 

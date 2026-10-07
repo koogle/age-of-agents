@@ -1,7 +1,13 @@
 use super::*;
 
 impl WorldView {
-    pub fn draw_health(&self, hud: &mut crate::hud::Hud, rig: &Rig, scale: f32) {
+    pub fn draw_health(
+        &self,
+        hud: &mut crate::hud::Hud,
+        atlas: &crate::hud::Atlas,
+        rig: &Rig,
+        scale: f32,
+    ) {
         let Some(snapshot) = &self.snapshot else {
             return;
         };
@@ -13,6 +19,9 @@ impl WorldView {
             let anchor = ground(&self.heights, entry.position.x, entry.position.z);
             if let Some(top) = rig.screen_offset(anchor, up * VILLAGER_HEIGHT) {
                 hud.health_bar(top, (unit.unit.health / 100.0) as f32, scale);
+                if snapshot.artifact_bearer.as_ref() == Some(&unit.unit.id) {
+                    hud.artifact_marker(atlas, top, scale);
+                }
             }
         }
         for pick in &self.pickables {

@@ -60,6 +60,7 @@ pub(super) fn atlas(kind: BuildingKind) -> &'static str {
         MiningCamp | Farm | LumberMill | Smelter => "buildings_economy",
         Kiln | Weaver | Kitchen | Monument => "buildings_crafts",
         Barracks | Range | Workshop | Infirmary => "buildings_civic",
+        Temple => "buildings_sanctuary",
     }
 }
 

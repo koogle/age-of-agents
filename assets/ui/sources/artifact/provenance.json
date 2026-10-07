@@ -1,0 +1,28 @@
+{
+  "references": [
+    "assets/ui/icons/resource_wood.png"
+  ],
+  "runs": [
+    {
+      "render": "render_0.png",
+      "cutout": "cutout_0.png",
+      "edit_endpoint": "fal-ai/nano-banana/edit",
+      "cutout_endpoint": "fal-ai/birefnet/v2",
+      "edit_request_id": "01a116a5-1f80-7332-b2f9-e23b22945f8a",
+      "cutout_request_id": "01a116a5-46ae-7443-8899-f22c707e91bd"
+    },
+    {
+      "render": "render_1.png",
+      "cutout": "cutout_1.png",
+      "edit_endpoint": "fal-ai/nano-banana/edit",
+      "cutout_endpoint": "fal-ai/birefnet/v2",
+      "edit_request_id": "01a116a5-53c7-7262-ba15-d7ce76af81e0",
+      "cutout_request_id": "01a116a5-7ac8-7502-b83b-b4c91d9c1149"
+    }
+  ],
+  "prompt": "prompt.txt",
+  "selected": "cutout_0.png",
+  "date": "2026-10-07",
+  "estimated_usd": 0.0896,
+  "integration": "Normalized to assets/ui/icons/artifact.png with scripts/normalize_icons.py --write; comparison.png shows the wood reference and both drafts."
+}

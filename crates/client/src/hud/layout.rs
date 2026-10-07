@@ -239,7 +239,6 @@ impl Hud {
                 enabled: true,
             });
         }
-
         // Selection: info pill plus a glass bar of command coins.
         let Some((portrait, title, detail, progress, commands)) = selection_model(snapshot, model)
         else {

@@ -21,7 +21,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - 17 buildings, 14 resources/products, farming with granary yield bonuses, processing, research and production queues.
 - Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
-- A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe; the temple, artifact and run victory are not implemented yet.
+- A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe. The Sanctuary of the Gods holds the Artifact of the Gods; carrying it home to a town center wins the run.
 - Territorial wolves, bears and boars, unit health and hunting orders.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
@@ -66,7 +66,7 @@ Open <http://localhost:8000>, or <http://localhost:8000/?local> for an in-page s
 
 Hosted saves default to `age_of_agents.db`; override with `AGE_OF_AGENTS_DB`. Incompatible save versions reset during development. Set `AGE_OF_AGENTS_SEED` for a new world's seed, or use Reset game.
 
-Select a unit, then click/tap ground to move or a resource to gather. Select a ship and tap the sea, fog included, to steer it; discovered islands, home first, are one tap away. Use Build for construction and select completed buildings for production/research. Drag to pan, wheel/pinch to zoom, X to stop, G for the grid and Escape to cancel placement.
+Select a unit, then click/tap ground to move or a resource to gather. Select a ship and tap the sea, fog included, to steer it; discovered islands, home first, are one tap away. Tap the sanctuary with units selected to claim the artifact, then bring the bearer near a home town center. Use Build for construction and select completed buildings for production/research. Drag to pan, wheel/pinch to zoom, X to stop, G for the grid and Escape to cancel placement.
 
 ## Contributing
 

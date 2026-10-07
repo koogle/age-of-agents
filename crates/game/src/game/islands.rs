@@ -65,6 +65,9 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.island_origins.push(origin);
+        if archipelago_plan(self.seed).last() == Some(&origin) {
+            self.place_temple(origin);
+        }
         // A course steered into the fog may now end on land: continue to the
         // reachable water nearest the tapped point, so the new coast comes into
         // sight, or stop at sea when none is reachable.
