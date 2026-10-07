@@ -66,12 +66,19 @@ statuses, linger for eight seconds. Do not reintroduce a victory pill.
   placement plus on-foot reachability from the sea for 24 seeds.
 - `hud::run::tests` covers the marker; `feedback::tests` covers the claim and
   lingering victory status.
+- `cargo test -p aoa-game --locked --test full_run` plays seed 7 to victory using
+  only player commands (about 24 s in a debug build). Set `AOA_RUN_SNAPSHOTS=<dir>`
+  to keep each milestone's snapshot for browser replay. It found no wildlife on
+  the route and a five-second walk from landing to the temple: the run is easy
+  until return-trip escalation and monsters exist.
 - [Browser evidence](../verification/temple-artifact/README.md) uses staged
   snapshots from `archipelago_preview <seed> 1 found|carried|won`, which place a
   villager by the temple as a fixture; a full live run to the temple is not yet
   verified.
-- Open: guardians around the temple, loss rules, and what happens after victory
-  (the game keeps simulating; Reset game starts a new run).
+- Open: return-trip escalation once the artifact is claimed (Jakob, 2026-10-07:
+  difficulty rises and new monsters spawn on the way home), guardians around the
+  temple, loss rules, and what happens after victory (the game keeps simulating;
+  Reset game starts a new run).
 
 ## Keep this document current
 

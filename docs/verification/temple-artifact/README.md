@@ -38,3 +38,29 @@ time. Use 1× snapshots and a paused, stepped page clock, as
 
 Desktop 1280×800 and emulated phone 390×844 at DPR 2; no page errors. Not checked:
 a live run sailing to the temple, physical devices.
+
+## Full run
+
+`crates/game/tests/full_run.rs` plays seed 7 from a fresh world to victory using
+only typed player commands and ticks, without editing state: gather stone and
+wood, build a lumber mill, make 20 timber, scout the open-sea coast, build a dock,
+launch a ship, board, steer into the fog toward the temple's site, land, claim the
+artifact, board again, take the one-tap return home, land, and walk the party
+beside the town center. It is won after 456 simulated seconds.
+
+```bash
+AOA_RUN_SNAPSHOTS=/tmp/run cargo test --release -p aoa-game --locked --test full_run -- --nocapture
+python3 docs/verification/temple-artifact/capture_sequence.py /tmp/claim /tmp/run/0299-landed.json /tmp/run/0304-artifact_claimed.json
+python3 docs/verification/temple-artifact/capture_sequence.py /tmp/win /tmp/run/0446-landed_home.json /tmp/run/0456-victory.json
+```
+
+| File | Shows |
+| --- | --- |
+| `full-run-claim-desktop.png` | Real run: the claim line appears at the sanctuary (top right). The party is still drawn at the ship because the replay jumps five seconds of walking in one step. |
+| `full-run-victory-desktop.png` | Real run: the victory line above the bearer beside the home town center. |
+
+Findings: no wildlife met the party, and the ship's landing spot was a five-second
+walk from the temple. A single Move order for the bearer waited forever behind
+the idle second villager in a one-cell corridor beside the dock, a documented
+movement limit ([roadmap](../../ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05));
+the playthrough walks both villagers home with one group move instead.
