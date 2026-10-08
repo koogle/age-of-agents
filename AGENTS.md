@@ -6,7 +6,7 @@ Read [README.md](README.md), especially **Proposed gameplay loop**, at the start
 
 Age of Empires informs the RTS controls; Anno informs the settlement economy.
 
-Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle friendly units remain idle until the player commands them; hostile wildlife can pursue nearby units within its territory.
+Despite the project name, the initial game contains **no LLM-controlled or autonomous AI agents**. In code and product language, use **villager**, **unit**, or **NPC** for game entities. Idle friendly units remain idle until the player commands them, except for one short step aside when they stand on another unit's reserved destination or block a stalled unit's route; hostile wildlife can pursue nearby units within its territory.
 
 ## Milestone 1
 

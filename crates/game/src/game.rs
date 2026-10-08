@@ -665,6 +665,8 @@ impl GameWorld {
                     if let Some(step) = self.units[index].step {
                         self.travel(index, Goal::Cell(step.to), dt);
                         self.make_way(index);
+                    } else {
+                        self.let_through(index);
                     }
                 }
                 UnitAction::AttackAnimal {

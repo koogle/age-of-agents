@@ -269,21 +269,21 @@ fn a_run_is_won_through_player_commands_alone() {
     run.sail_until_stopped("home");
     run.command(Command::Disembark { ship_id: ship });
     run.tick_until("landed home", 60.0, |w| w.units.len() == 2);
-    // Walk both home together, as a player would: a lone order can wait
-    // behind an idle unit in a one-cell passage (a documented movement limit).
+    // Only the bearer walks home. The other villager idles where it landed,
+    // possibly in the one-cell corridor beside the dock, and must make way.
     let home = run.home();
     let target = (0..8)
         .map(|d| CellCoordinate::new(home.column + 5 + d % 2, home.row + d / 2))
         .find(|&to| {
             run.world
-                .apply_command(Command::GroupMove {
-                    unit_ids: run.villagers(),
+                .apply_command(Command::Move {
+                    unit_id: bearer.clone(),
                     to,
                 })
                 .is_ok()
         })
         .expect("ground beside the town center");
-    eprintln!("party walks to {target:?}");
+    eprintln!("bearer walks to {target:?}");
     run.tick_until("victory", 600.0, |w| {
         w.scenario.outcome == ScenarioOutcome::Won
     });

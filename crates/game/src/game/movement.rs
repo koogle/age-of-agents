@@ -445,16 +445,67 @@ impl GameWorld {
         if self.units[unit].step.is_some() || !occupancy.reserved_by_other(here, Some(unit)) {
             return;
         }
-        let paths = self.static_paths(unit, &occupancy);
+        self.step_aside(unit, &occupancy, &[]);
+    }
+
+    /// An idle unit standing where a stalled neighbour must pass (a one-cell gap,
+    /// say) steps aside, preferring a cell off that neighbour's route. It takes
+    /// no task: it walks one short Move and is idle again.
+    pub(super) fn let_through(&mut self, unit: usize) {
+        let here = self.units[unit].cell;
+        // Cheap filter first: only a stepless neighbour still on its way somewhere
+        // can be stalled by us; one already at its work site is not.
+        let candidates: Vec<usize> = (0..self.units.len())
+            .filter(|&other| {
+                let body = &self.units[other];
+                other != unit
+                    && body.step.is_none()
+                    && body.cell.touches(here)
+                    && match self.walking_goal(other) {
+                        Some(Goal::Cell(to)) => body.cell != to,
+                        Some(Goal::Beside(site)) => {
+                            !interaction_cells(site).any(|c| c == body.cell)
+                        }
+                        None => false,
+                    }
+            })
+            .collect();
+        if candidates.is_empty() {
+            return;
+        }
+        let occupancy = self.occupancy();
+        for other in candidates {
+            let Some(goal) = self.walking_goal(other) else {
+                continue;
+            };
+            if !matches!(self.next_step(other, goal, &occupancy), NextStep::Wait) {
+                continue;
+            }
+            let paths = self.static_paths(other, &occupancy);
+            let Some(target) = paths.nearest(self.goal_cells(other, goal, &occupancy)) else {
+                continue;
+            };
+            let route = paths.path_to(target);
+            if route.first() == Some(&here) {
+                self.step_aside(unit, &occupancy, &route);
+                return;
+            }
+        }
+    }
+
+    /// Walk to the nearest fully free cell, preferring cells outside `avoid`.
+    fn step_aside(&mut self, unit: usize, occupancy: &Occupancy, avoid: &[CellCoordinate]) {
+        let here = self.units[unit].cell;
+        let paths = self.static_paths(unit, occupancy);
         let spot = self
             .terrain
             .iter()
             .map(|cell| cell.coordinate())
             // Only fully free cells: yielding into someone's path could swap-deadlock.
             .filter(|cell| *cell != here && occupancy.is_free_for(*cell, None))
-            .filter_map(|cell| Some((paths.cost(cell)?, cell)))
+            .filter_map(|cell| Some((avoid.contains(&cell), paths.cost(cell)?, cell)))
             .min();
-        if let Some((_, to)) = spot {
+        if let Some((_, _, to)) = spot {
             self.units[unit].action = UnitAction::Move { to };
         }
     }
