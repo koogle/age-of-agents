@@ -85,12 +85,21 @@ impl GameWorld {
                 origin,
                 kind,
             };
-            if self.apply_command(command).is_err() {
-                self.units[unit].action = UnitAction::Idle;
+            if let Err(error) = self.apply_command(command) {
+                self.give_up(unit, &error.to_string());
             }
         } else if self.travel(unit, Goal::Beside(footprint), dt) == Travel::Unreachable {
-            self.units[unit].action = UnitAction::Idle;
+            self.give_up(unit, &CommandError::TargetUnreachable.to_string());
         }
+    }
+
+    /// Abandon an order the world no longer allows, saying why.
+    fn give_up(&mut self, unit: usize, reason: &str) {
+        self.units[unit].action = UnitAction::Idle;
+        self.units[unit].notice = Some(UnitNotice {
+            message: format!("Cannot build here. {reason}"),
+            tick: self.tick,
+        });
     }
 
     pub(super) fn tick_build(&mut self, unit: usize, building_id: &str, dt: f64) {

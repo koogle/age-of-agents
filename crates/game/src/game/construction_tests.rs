@@ -82,6 +82,19 @@ fn discovered_obstacles_or_spent_resources_cancel_without_a_foundation() {
             world.tick(0.1);
         }
         assert_eq!(world.units[0].action, UnitAction::Idle);
+        // The villager says why it gave up, for its status label.
+        let notice = world.units[0].notice.clone().expect("a reason");
+        assert_eq!(
+            notice.message,
+            if obstacle {
+                "Cannot build here. That spot is not clear for building."
+            } else {
+                "Cannot build here. Not enough wood for that building."
+            }
+        );
+        let saved: GameWorld =
+            serde_json::from_str(&serde_json::to_string(&world).unwrap()).unwrap();
+        assert_eq!(saved, world);
         assert_eq!(world.buildings.len(), 1);
         assert_eq!(
             world.inventories[0].wood,
@@ -180,6 +193,10 @@ fn unreachable_and_out_of_bounds_sites_do_not_spend_or_leave_stuck_orders() {
     order(&mut world);
     world.tick(0.1);
     assert_eq!(world.units[0].action, UnitAction::Idle);
+    assert_eq!(
+        world.units[0].notice.as_ref().map(|n| n.message.as_str()),
+        Some("Cannot build here. No path leads there.")
+    );
     assert_eq!(world.inventories[0].wood, 100.0);
     let before = world.clone();
     assert_eq!(

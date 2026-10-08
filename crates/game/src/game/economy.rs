@@ -169,6 +169,7 @@ impl GameWorld {
                         step: None,
                         action: UnitAction::Idle,
                         cargo: None,
+                        notice: None,
                     });
                     self.next_unit_id += 1;
                 } else if let Some((kind, amount)) = product.output() {
