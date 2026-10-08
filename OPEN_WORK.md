@@ -1,8 +1,24 @@
-# Bounded run — 2026-10-07
+# Open work — 2026-10-08
 
-- Merged and deployed: planned 5–7 island archipelago under fog with only the temple marked ([#154](https://github.com/koogle/age-of-agents/pull/154)), player-steered ships with one-tap returns ([#155](https://github.com/koogle/age-of-agents/pull/155)), and the run-down Sanctuary of the Gods with artifact capture and return-home victory ([#156](https://github.com/koogle/age-of-agents/pull/156)). Store version 19.
-- End-to-end check (Jakob's request): `crates/game/tests/full_run.rs` wins seed 7 through player commands alone (gather, lumber mill, dock, ship, steer into fog, land, claim, one-tap home, walk to the town center) in about 455 simulated seconds; real-run snapshots replay cleanly in WebGL ([evidence](docs/verification/temple-artifact/README.md#full-run)). Findings: no wildlife interfered and landing put the party five seconds from the temple, so the run is far too easy. A lone Move order waited forever behind an idle villager in a one-cell corridor; fixed in [#158](https://github.com/koogle/age-of-agents/pull/158) (idle units step aside; the playthrough walks the bearer home alone).
-- Build-order feedback ([#159](https://github.com/koogle/age-of-agents/pull/159), Jakob 2026-10-08): a fogged build site that turns out invalid shows "Cannot build here." and the reason above the villager.
+Compact handoff: current state, what comes next, and what is still unresolved.
+Finished work lives in merged PRs, `README.md` and the
+[knowledge guides](docs/knowledge/INDEX.md), not here.
+
+## Current state
+
+- Master is deployed through the merge-triggered
+  [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml);
+  the latest release includes [#159](https://github.com/koogle/age-of-agents/pull/159).
+  Store version 19.
+- A run is playable end to end: a seeded 5–7 island archipelago under fog with only
+  the temple island marked, player-steered ships with one-tap returns, the run-down
+  Sanctuary of the Gods, artifact capture and return-home victory.
+  `crates/game/tests/full_run.rs` wins seed 7 through player commands alone in about
+  455 simulated seconds. Guides: [archipelago](docs/knowledge/archipelago-and-transport.md),
+  [temple and artifact](docs/knowledge/temple-and-artifact.md).
+- The run is still far too easy: no wildlife on the route and a short walk from the
+  landing to the temple.
+
 ## Next steps to finish the capture-the-flag loop
 
 Proposed order, one PR each unless noted; nothing below is implemented. Each step
@@ -37,228 +53,24 @@ Moved here by Jakob on 2026-10-08.
 Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 `Lost` stays a recorded value only and does not block victory.
 
-Earlier notes: `docs/RUN_PLAN.md` is a first written plan Jakob did not want; this
-list supersedes it.
-
-# Local branch integration — 2026-10-06
-
-- Jakob requested rebasing and merging the current checkout’s local changes into the main branch, named `master` in this repository. Fetch confirmed the checkout already matched `origin/master` at `5eb7bd4`; remaining changes are release-status documentation and the existing `.pi` Taskplane configuration/template. No runtime or asset changes. JSON parsing, relative file links and `git diff --check` pass; documentation/scope review found no blockers. Other feature branches/worktrees remain independent.
-
-# Test/tooling subtraction — [PR #153](https://github.com/koogle/age-of-agents/pull/153)
-
-- Jakob explicitly requested cutting repetitive tests/fixtures and substantially reducing Python. On `codex/reduce-tests-tooling`, integrated with master `a8188f1`: 1,843 Python lines removed (32.2%; 74 → 42 files), plus 216 Rust lines. Retired historical scripts remain recoverable through [the retirement record](docs/verification/RETIRED_TOOLS.md); active checks, packers, original art and provenance remain.
-- Mechanics fixtures use flat terrain/fixed patches; three fixture-generator self-tests are removed, while real gameplay/world-generation coverage remains. Earlier shared-domain/renderer cleanup and one-clone command handling are retained. Save version 17 resets older hosted development saves. All 301 integrated Rust tests, strict native/WASM lint, builds, asset checks and rebuilt desktop/phone acceptance pass. Jakob explicitly authorized merging PR #153 on 2026-10-06. Integrated art-archive master `831bfcc`; only handoff prose conflicted and both entries are preserved. Runtime and active assets are unchanged by that integration; prior runtime verification remains applicable. PR #153 merged as `5eb7bd4`; [production run 37484703194](https://github.com/koogle/age-of-agents/actions/runs/37484703194) completed successfully (confirmed 2026-10-06). [Audit](docs/knowledge/rust-simplification-audit.md), [verification](docs/verification/rust-refactor/README.md).
-
-# Art alternatives — [PR #145](https://github.com/koogle/age-of-agents/pull/145)
-
-- Isolated candidate batches on `art/consistent-alternatives`, based on `1984e9b` including road refinement #143. Original villagers and runtime art remain unchanged.
-- Completed 58 retained outputs (57 FAL illustration attempts + one disclosed OpenAI map refinement); 113 successful FAL calls have an estimated subtotal of $2.5486. OpenAI cost/backend and one FAL validation failure billing are unknown. Exact original model confirmed as nano-banana/edit; original master exact prompt unavailable, retained action prompt adapted.
-- New user steering: era-fit audit rejects magnetic compass and modern-looking boot/heraldry; map/star and sandal candidates added. Broad regeneration paused after three-subject cel calibration; cloth/wolf improve flatness, steel still needs correction. Runtime compass replacement pending integration.
-- Authorized four-subject painted-cel follow-up is complete: steel A/B choices, promising matte shield/occluded spear; map line cleanup is superseded by the latest refinement and wolf recolor FAILED despite restored geometry. Exactly one retry per subject; no more generation. Cloth/sandal unchanged.
-- User likes shown calibration direction, asks thinner map ink. Two FAL line-only attempts failed; disclosed OpenAI refinement succeeds visibly at 128/24/32px, composition/palette close rather than pixel-exact. Jakob preferred the latest versions, including the thinner map, and explicitly authorized merging PR #145 on 2026-10-06; other candidates unchanged.
-- Candidate image/hash/alpha checks pass; runtime files unchanged. Rejected attempts and style gaps are explicit in `assets/alternatives/2026-10-06/STYLE_REVIEW.md`. Archive merge authorized; full animation/construction variants, runtime integration and gameplay verification remain pending. Current master `a8188f1` is integrated without changes to its runtime assets.
-
-# Overhead health bars — [PR #152](https://github.com/koogle/age-of-agents/pull/152)
-
-- Implemented thin green/orange/red bars for villagers, other friendly land units and visible animals, replacing selected-status/inspection HP text and floating combat numbers. No simulation, balance or save changes.
-- Validation: 303 workspace tests pass (one existing ignored benchmark); refreshed 101 client tests pass after the visual adjustment. Formatting, native/WASM strict lint and rebuilt WebGL pass. Desktop and emulated DPR2 phone verify all three colors/widths on villagers, guards and all animal species, with zero page errors and correct capture dimensions. [Evidence and review](docs/verification/health-bars/README.md). User authorized PR creation and merge on 2026-10-06. Based on current master `581bbaa`; no integration changes needed. Production release is tracked by the merge-triggered workflow.
-
-# Build hints and NPC feedback — [PR #151](https://github.com/koogle/age-of-agents/pull/151)
-
-- User requested removing the top-middle build bubble, placing its text in the build menu information area, and showing NPC commands/complaints as fading overhead status. Implemented menu/placement details, local blocked-site feedback, movement status and request-ID-correlated server rejections. No simulation, protocol shape or save change.
-- All 302 combined workspace tests (one existing ignored benchmark), formatting, strict native/WASM lint and the release web rebuild pass. Desktop mouse and DPR2-phone touch checks pass with no browser errors: menu/placement details, blocked-site status, fade expiry and delayed rejections retaining their original unit after selection changes. [Previews, results and code-quality review](docs/verification/build-feedback/README.md). User authorized merge on 2026-10-06. Integrating master `9919648`, preserving stationary status anchors, building-selection gathering and road resumption. Combined Rust/lint/asset checks and six release-verifier tests pass; refreshed desktop/phone acceptance passes with zero page errors. Merge/deployment status is tracked by the pull request and production workflow; physical phones/native-window appearance remain unverified. Preserve prior handoffs below.
-# Dirt road readability — [PR #150](https://github.com/koogle/age-of-agents/pull/150)
-
-- User requested recreation because the sandy dirt road is hard to see. Replaced only `assets/terrain/road_dirt.png` with generated deeper ochre-brown packed earth, retaining the original and exact reference/prompt provenance. [Comparison and review](docs/verification/roads/dirt-readability/README.md).
-- 294 workspace tests and formatting pass; 303-frame resolution audit passes. Native/WASM strict lint and web/server rebuild pass. Desktop mouse and DPR2 phone touch construction plus normal/maximum-zoom visibility pass with zero page errors. User approved the visual result and explicitly authorized merge on 2026-10-06. Integrates master `9919648`; combined 299 tests, strict native/WASM lint, rebuilt client/server, 307-frame and other asset audits, six release-verifier tests, and desktop/DPR2 phone road replay pass with zero page errors. Merge/release status is tracked by PR #150 and the production workflow; preserve previous unresolved items below.
-
-# Road construction resumption — [PR #148](https://github.com/koogle/age-of-agents/pull/148)
-
-- User requested that resuming an interrupted road completes its unfinished pieces. Single-cell resume now assigns unfinished edge-connected road cells across bends, completed pieces and materials; separate/corner-touching roads remain separate. Costs and progress persist; no save-schema change.
-- Integrated master `50d02e1`, preserving uninterrupted gathering during building selection, boars, stronger wildlife, stationary NPC status feedback and refined stone-road/disembark artwork. All 299 workspace tests pass (one existing ignored benchmark), formatting/native/WASM lint, 307-frame/asset checks and six release-verifier tests pass. Full placement/Stop/resume checks pass on the boar integration; the latest rebuilt desktop mouse and DPR-2 phone touch checks resume paid dirt/stone foundations through one piece, complete all 14 cells and retain the seven-stone charge, without page errors. [Evidence and review](docs/verification/roads/README.md#single-click-resumption--2026-10-06).
-- User authorized PR creation and merge after checks pass on 2026-10-06. Merge status is tracked by PR #148; production release uses the merge-triggered [workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml). Deployment is verified separately.
-
-# Building selection preserves gathering — [PR #149](https://github.com/koogle/age-of-agents/pull/149)
-
-- User requested that selecting/switching buildings with a gathering villager selected must not force an early unload or replace its gathering loop. Building-click unload candidates now exclude every Gather phase; stopped/other compatible carriers still unload, including mixed selections. Hover preview uses the same candidate filter. No domain, protocol or save changes.
-- Validation passes: 296 workspace tests (one existing ignored benchmark), formatting, strict native/WASM lint, rebuilt web client, desktop mouse and emulated DPR2 phone touch across all four gathering phases and stopped-carrier controls. [Evidence and review](docs/verification/building-selection/README.md). No page errors; phone targets are verified inside the viewport. User authorized PR creation and merge on 2026-10-06. Integrated master `de49ab4`, preserving boars and stationary NPC feedback. Combined verification passes: tests, strict native/WASM lint, rebuilt web client, 307-frame/field/transport/icon audits, six release-verifier tests, desktop mouse and DPR2 touch across all phases with no page errors. Merge/release status is tracked by PR #149 and the production workflow. Production release will use the merge-triggered workflow. Preserve previous unresolved work below.
-
-
-# Boar danger (2026-10-06)
-
-- User approved merging the boar implementation and selected art. Integrating master `806512c`, preserving stronger wolves/bears, stationary status messages and current road/disembark art. Boars retain their reviewed 60 HP/10 damage; wolf/bear balance is unchanged. Combined verification passes: 295 workspace tests, native/WASM lint, rebuilt client/server, asset checks, six release-verifier tests and desktop mouse/DPR-2 touch boar hunting with no page errors. Ready for the authorized PR merge; production is tracked by the merge-triggered workflow.
-
-- User selected the first follow-up study (`boar-npc-study.png`). Its lighter taupe/cel style is integrated across all four poses, with safe cell margins and original-resolution packing. Fresh 307-frame audit, client pose test and native/WASM lint pass; fresh normal/max-zoom desktop and DPR-2 phone art captures pass with no browser errors. See `docs/verification/boars/approved/`. The second study is not selected.
-
-- Implemented locally: one starter boar, 2–3 later-island boars, preserving existing wolves/bears and safe placement. Shared combat/selection, authored four-pose art, no save reset.
-- 294 workspace tests (one manual benchmark ignored), strict native/WASM lint, rebuilt browser/server and 307-frame sprite audit pass. Desktop mouse and DPR-2 phone touch hunting/defeat pass, with normal/max-zoom art captures and no page errors. Additional pose replay passed desktop phases/pause/mirroring and reached phone close-ups after phase assertions; remaining duplicate close-ups were stopped due slow SwiftShader, so no full pose-replay completion is claimed. Evidence and review: [boars](docs/verification/boars/REVIEW.md). Not deployed.
-
-# Stationary NPC status feedback — [PR #146](https://github.com/koogle/age-of-agents/pull/146)
-
-- User requested status messages remain at their spawn position and rise/fade instead of following the NPC. Implemented in shared client feedback; existing timing, rapid-order replacement and damage tracking are preserved. No simulation/save change.
-- All 294 combined workspace tests pass (one existing ignored benchmark), along with formatting, strict native/WASM lint, rebuilt release WebGL and desktop/DPR-2 phone animation replay. Fixed horizontal position, rise, fade and expiry pass with no page errors; [evidence](docs/verification/status-feedback/README.md). Code-quality review passes. User authorized PR creation and merge on 2026-10-06. Integrating master `1984e9b`, preserving stronger wildlife and refined stone-road/disembark artwork; Combined workspace/lint/asset checks, six release-verifier tests and rebuilt desktop/DPR-2 phone status replay pass without page errors. PR #146 is tested and authorized for merge. Merge/release status is tracked by the linked PR and [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml). Modal selects `radiantai`; profile listing fails to connect, so the production target is not verified and no deployment was attempted.
-
-# Stone road contrast refinement — [PR #143](https://github.com/koogle/age-of-agents/pull/143)
-
-- User requested less sandy, slightly stronger stone paving after roads PR #133 merged. The revised neutral limestone and clearer joints preserve the painted style; user confirmed “yeah I prefer that” after viewing the comparison. Stone-only runtime asset change; 294 tests, formatting, strict native/WASM lint, asset checks and desktop/DPR2 phone construction plus normal/max-zoom review pass. [Before/after, provenance and evidence](docs/verification/roads/stone-contrast/README.md). User explicitly authorized merging PR #143 on 2026-10-06. Merge/release status is tracked by the linked PR and the [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
-
-# Stronger wildlife — 2026-10-06
-
-- Wolves now have 300 HP/35 contact damage; bears 600 HP/50 damage. Full-health contact tests: 1–2 archers lose, 3 win with one survivor, 4–5 win with one casualty. Existing saved current health persists; new spawns use the higher HP.
-- 290 workspace tests, formatting, native/WASM strict lint, rebuilt web/server and desktop/DPR2-phone real combat pass with zero page errors. [Evidence and review](docs/verification/stronger-wildlife/README.md). User authorized merging [PR #135](https://github.com/koogle/age-of-agents/pull/135). Integrated master `b786f46`, preserving water and refined menus. Combined verification passes: 294 Rust tests, native/WASM strict lint, rebuilt browser/server, all asset checks, six release-verifier tests, and desktop/DPR2-phone combat with zero page errors. Merge and deployment status are tracked by the PR and production workflow.
-
-# Build subcategory card removal — [PR #134](https://github.com/koogle/age-of-agents/pull/134)
-
-- User requested removal of the top title/description card inside build subcategories. Implemented in the shared HUD layout; building buttons, labels and back navigation remain. Hover costs use the explanation toast. No simulation or save changes.
-- Formatting, 289 combined workspace tests (one existing ignored benchmark), strict native/WASM lint and the release WASM rebuild pass. Desktop mouse and emulated DPR-2 phone touch browser checks pass without page errors; [visual evidence](docs/verification/build-subcategories/README.md). Code-quality review: one direct layout branch, no dependency or new state. User authorized PR creation and merge on 2026-10-06. Integrated master `f4d5b01`, preserving roads, wildlife, menu icons, building availability and granary yield. Combined checks and refreshed desktop/phone browser captures pass. Production uses the merge-triggered release workflow.
-
-# Basic roads — [PR #133](https://github.com/koogle/age-of-agents/pull/133)
-
-- User approved the refined road textures and authorized merging PR #133 on 2026-10-06. Branch `feat/basic-roads` integrates master `f985a92`, preserving dedicated menu icons, wildlife attack art, granary yield and building availability. Merge/release status is tracked by the linked PR and [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
-- Straight dirt/stone roads take two worker-seconds per cell; dirt costs labour only and stone adds one stone per new cell. Completed roads give friendly land units +50% speed with travel-time routing; animals remain unboosted. Stop/resume, shared labour, unloading first and mixed crossings preserve paid progress. Save version 15 resets incompatible development saves.
-- Final combined validation: 289 Rust tests pass (one existing manual benchmark ignored), native/WASM strict lint, formatting, asset audits, six release-verifier tests and rebuilt browser/server pass. Desktop mouse and DPR2 touch construction both pass with 14 completed road cells, exactly seven stone charged and no browser errors; [reproduction/results](docs/verification/roads/README.md).
-- User-approved dedicated sandy dirt and irregular warm limestone retain original plots/biomes. Normal/max-zoom desktop and DPR2 phone style review passes; [art provenance and evidence](docs/verification/roads/style/README.md). Final integration changes menu/wildlife code, not road texture bytes. Physical phones and native-window appearance remain unverified. Preserve previous unresolved work below.
-
-## Authorized animal PR merge — 2026-10-06
-
-User explicitly authorized merging PR #130. Integrating master `faa4b04`, preserving terrain, productive building availability, granary yield and menu artwork. Source merges cleanly; generated web files are rebuilt. Combined verification passes: 278 tests, formatting, native/WASM lint, all asset checks, six release-verifier tests and rebuilt desktop/DPR-2 phone combat acceptance without page errors. Evidence: `docs/verification/2026-10-05-animal-attacks/merged-combat-results.json`. Merge/release status: https://github.com/koogle/age-of-agents/pull/130 and the master deployment workflow.
-
-## Animal attack frames — 2026-10-05
-
-- Extending PR #130 at the user's request with two authored attack poses per species, preserving the NPC-matched style. Eight-frame atlas; idle/walk cells preserved, attacks registered by planted rear paws. `attack_seconds` selects windup/strike, pause freezes poses, and animals face their contacted target. No balance/save changes.
-- 266 Rust tests, native/WASM lint, rebuilt web/server and 302-frame resolution audit pass. Browser pose replay passes on desktop/DPR-2 phone, including rendered UVs, pause, mirroring and reviewed normal/maximum-zoom captures. Real-server desktop mouse and DPR-2 phone touch hunting, mutual damage, defeat/cleanup and zero page errors pass. Sources/provenance and review: `docs/verification/2026-10-05-animal-attacks/`. Merge authorized on 2026-10-06; see integration note above.
-
-## Animal style refinement — 2026-10-05
-
-- PR #130: https://github.com/koogle/age-of-agents/pull/130 (`fix/animal-art-style`, from master `079d348`), tested and pushed; merge authorized on 2026-10-06 (see integration note above). User requested less generic animals and explicit comparison to existing NPCs. New wolf/bear idle/walk art uses the shipped villager and guard references; a textured first pass was rejected and retained. NPC contact sheet and review: `docs/verification/2026-10-05-animal-style/`.
-- Registered all four paw baselines with `scripts/pack_wildlife.py`; no animal behavior or save changes. 264 Rust tests (one existing ignored benchmark), strict native/WASM lint, 298-frame resolution audit, four common paw baseline/bounds checks and six release-verifier tests pass. Rebuilt desktop/DPR-2 phone hunting checks pass with no page errors; gameplay and true maximum-zoom screenshots reviewed against guards/buildings and the NPC contact sheet. Corrected capture driver sends repeated wheel events because individual zoom factors clamp. Direct Modal profile is `radiantai`, not the documented production target; profile listing also failed to connect. Do not deploy to a different account.
-# Granary field yield — 2026-10-05
-
-- User requested shorter copy: “Food/fiber drop-off · +50% nearby field yield.” Browser bundle rebuilt; strict native/WASM lint and refreshed desktop/phone selection checks pass with no browser errors.
-
-- Implemented +50% field yield within six cells of a completed granary, edge to edge, non-stacking. Evaluated at planting/replenishment completion; each boosted harvest has 180 food. Existing crops and food/fiber drop-offs are preserved; no save schema change.
-- 271 combined workspace tests pass (one existing benchmark ignored), strict native/WASM lint and rebuilt browser selection pass on desktop and DPR2 phone with no page errors. [Evidence and reproduction](docs/verification/granary/README.md). User authorized creating/merging the granary PR. [PR #132](https://github.com/koogle/age-of-agents/pull/132) integrates master `8bf00b4` (productive building availability) on `feat/granary-field-yield`; release will use the merge-triggered GitHub Actions workflow. Direct Modal access remains unavailable.
-
-# Productive building availability — 2026-10-05
-
-- User explicitly requested hiding advanced buildings such as Barracks until resources support construction and productive use, superseding construction-only visibility. Implemented shared domain gate; Barracks/Smelter require iron + coal, Kiln clay, Weaver fiber, Workshop clay + steel inputs. Ten starter buildings remain; Range is productive with food/timber. Temporary shortages still grey out choices.
-- No persistence/schema change or deletion of existing buildings/jobs. Discovery remains global and survives depletion. All 269 workspace tests pass (one existing manual benchmark ignored), including seven progression checks and the filtered HUD menu. Formatting, native/WASM strict lint and the rebuilt release browser bundle pass. Final desktop mouse and DPR2-phone touch Military/Production menu captures pass without page errors; [evidence and review](docs/verification/building-progression/README.md). User explicitly authorized PR creation and merge on 2026-10-05 after reviewing the result. [PR #131](https://github.com/koogle/age-of-agents/pull/131) is ready for the authorized merge, based on master `92aaf7e`; upstream additions are unwired menu art, and the rebuilt bundle is byte-identical. Production uses the master release workflow; release status is tracked separately.
-
-# Terrain-first island generation — PR #111
-
-- [PR #111](https://github.com/koogle/age-of-agents/pull/111), branch `feat/terrain-first-islands`, integrates master `079d348`. User explicitly authorized merging. Five coastline families and shared downhill relief/drainage preserve reachable, visible starter resources and fords.
-- Combined verification: 267 tests pass (one manual benchmark ignored), strict native/WASM lint and formatting, rebuilt browser bundle, six release-verifier tests and all 298 sprite/field/transport/icon checks. Browser verification and reproducible evidence: [terrain verification](docs/verification/island-generation/README.md).
-- Preserves wildlife, shore pickup, pause/reconnect, gathering continuation and current UI. No save-model change beyond current master’s version 14; saved terrain remains intact. New games and discoveries use the generator. Release uses the merge-triggered [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml); verify its result separately from PR merge status.
-
-## Mobile time controls — 2026-10-05
-
-- User authorized PR creation and merge after grid verification. Integrated master `28a09a2`, preserving current gameplay, Stop/cargo controls and pause/reconnect fixes. Mobile time buttons use 36px center spacing and separate 36×44px targets; glyphs use the original alpha mask to remove rectangular tint. All 264 Rust tests pass (one manual benchmark ignored), formatting, native/WASM lint, rebuilt web/server, 298-frame asset/icon audits and six verifier tests pass. Browser grid/speed checks and screenshots are in `docs/verification/2026-10-05/time-merged-*`. Production release uses the merge-triggered GitHub Actions workflow.
-
-# Current handoff: pause and reconnect integration (2026-10-05)
-
-- Branch `fix/pause-reconnect` integrates master `8f91557`, preserving island-local inventories, ship cargo and water-facing docks and transport shore pickup and territorial wildlife and mobile cargo swipe controls, Stop icons, concise README and resource-patch continuation. Jakob explicitly requested a PR, validation and merge to master on 2026-10-05.
-- At 0×, the shared domain rejects gameplay orders (including cargo transfers) without changing tasks/resources. Speed, camera and selection controls remain available. NPC movement/work frames freeze and resume with existing tasks intact.
-- Reconnect establishes the newest snapshot without replaying old movement or activity feedback, even while paused. The remote inbox coalesces same-tick updates and bounds pending history to eight distinct ticks. Commands are never replayed; same-world camera and selection survive. Snapshot application lives in `crates/client/src/snapshots.rs` to keep the main client below the 1,000-line limit.
-- Validation: 264 combined Rust tests pass (one existing manual benchmark ignored); formatting, strict native/WASM lint and release WASM/server rebuild. Six verifier tests and all 298 sprite frames, field/transport checks and icon normalization passed. Desktop and DPR-2 phone pause/resume and reconnect checks pass, including rejected orders, unchanged paused state, resumed ticks, sequence-zero reconnect and a 40-snapshot backlog. Browser logs: `/tmp/aoa-pr-release-pause.log`, `/tmp/aoa-pr-release-reconnect.log`. Browser checks used the current client code before the final resource-patch domain integration, which is covered by the full Rust rerun. Wildlife combat reached both viewports, but its final phone screenshot timed out under software rendering. Animal stride freeze and paused attack rejection also have focused Rust coverage.
-- Thermonuclear review passed: one authoritative pause guard, bounded remote delivery, position corrections never advance gait, ordinary short-delay interpolation retained, no new dependencies/protocol/save-model changes. Current store version 14 and cargo/dock behavior are preserved.
-- Reproducible browser driver: `docs/verification/replay_reconnect.py`; its fixture parses in Rust tests and now uses the current island-inventory snapshot schema. Native-window appearance and physical phones remain unverified. Follow [reconnect recovery](docs/knowledge/runtime-debugging.md#reconnect-recovery) and [pause contract](docs/knowledge/runtime-debugging.md#pause-contract).
-- Release uses the production GitHub Actions workflow after the authorized merge; do not use the local Modal workspace for production. Review and merge: [PR #105](https://github.com/koogle/age-of-agents/pull/105); release status: [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml).
-
-# Current fix: automatic resource gathering continuation (2026-10-05)
-
-- Branch `fix/food-gathering-continuation`, PR [#100](https://github.com/koogle/age-of-agents/pull/100), integrated master `e50ad7b` including docks, shore pickup, wildlife, mobile cargo paging and the Stop hand; preserved the concise README cleanup. The 10-cell continuation search used only the last exhausted node, so harvesting order could strand nearby resources after delivery. It now measures from the connected exhausted wild-resource patch, preserving same-kind/reachable candidates, deterministic ordering, field behavior and Stop.
-- Regression reproduced before the fix; food/wood/stone patch continuation passes at 1×/2× with nearby and distant storage. A separate test completes three distant deliveries while the original node remains live; distance alone did not reproduce abandonment. Seven generated seeds cover two bush gatherers at 2×. No new schema/state/inventory changes; already-idle workers need a new order. Integrated upstream wildlife uses store version 14.
-- Latest combined workspace: 256 tests passed, one existing benchmark ignored. Strict native/WASM lint, formatting, rebuilt web/server, generated-JS syntax, six release-verifier tests and the 298-frame sprite audit pass. Final combined browser replay passes. Isolated Chromium comparison at 2×, one Gather and no later input: baseline deposits 20 then idles with 40 nearby food; fix deposits all 60 and leaves 30 distant food. [Evidence](docs/verification/2026-10-05/bush-delivery-2x.json). Production-layout reconstruction supports diagnosis but is not an exact save; production was only read, never reset or commanded.
-- Thermonuclear review: one domain search change, no dependencies or persistent state, bounded same-kind reachability, no idle recruitment. User authorized merging PR #100. Combined tests, native/WASM lint, formatting and rebuilt bindings pass; final no-input 2× browser replay passes with all 60 food delivered and no page errors. Initial release 37383382481 passed quality but was cancelled before publishing as master advanced; combined release [37385130862](https://github.com/koogle/age-of-agents/actions/runs/37385130862) at `5a88a83` was superseded in the production queue by the Stop-icon master release. The authorized merge of this PR will trigger a new combined release. Deployment is not yet verified.
-
-# Menu icon audit: implemented and verified
-
-- Disembark follow-up (2026-10-06): user identified the two-board version in #140 as a regression. A joined multi-board landing platform restores the structural cue while retaining the simpler boot and palette. Source, rejected runtime PNG, prompt and size comparisons are retained in `assets/ui/sources/menu_icons/disembark_platform/`; 293 tests, strict native/WASM lint, rebuilt identical client, 303-frame/icon checks and fresh desktop/DPR-2 phone Disembark captures/dispatch pass. [Evidence](docs/verification/menu-icons/disembark-platform/README.md). The focused correction will follow the authorized PR merge workflow.
-
-- Follow-up (2026-10-06): user authorized showing and sequentially merging four simpler icons. Disembark is verified and prepared in this branch; earlier refinement PRs: [Cargo #137](https://github.com/koogle/age-of-agents/pull/137), [Gathering #138](https://github.com/koogle/age-of-agents/pull/138), [Town #139](https://github.com/koogle/age-of-agents/pull/139). All 293 tests, strict native/WASM lint, rebuilt current-master client, asset checks and six desktop/DPR-2 phone captures pass. Combined-preview scope and individual runtime status are recorded in [the refinement evidence](docs/verification/menu-icons/simplification/README.md) and [art ledger](assets/ui/sources/menu_icons/simplification/README.md). Production is tracked separately by the merge-triggered workflow.
-
-- User authorized dedicated menu icons and sequential PR merges. Stop #104, style enforcement #110 and all 18 individual art PRs #112–#129 are merged. Original renders, rejected drafts, prompts, request IDs and per-icon style comparisons are retained. [Audit/PR ledger](docs/MENU_ICON_AUDIT.md).
-- Integration [#107](https://github.com/koogle/age-of-agents/pull/107) wires all 20 audited fixes across resources, production/queues, specialist portraits, ship commands, categories, Back and info thumbnails. Master through `5a28839` is integrated, preserving approved productive-building availability and the granary bonus/description. This PR adds no gameplay, cost, unlock or save-model change.
-- Final validation: 276 Rust tests, strict native/WASM lint, rebuilt bindings, 298-frame/icon checks, 18 exact source reproductions and six release-verifier tests pass. Full icon evidence has 40 desktop/phone captures; later combined replays add eight availability/guard/sailing captures and two granary captures. Separate bundle hashes and scope are in [the evidence](docs/verification/menu-icons/integration/checks.json). Screenshot pixel dimensions are asserted; physical phones/native-window appearance remain unverified.
-- Production delivery is tracked separately by the [release workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml); inspect its result before claiming deployment. Preserve unrelated handoff sections.
-
-# Wildlife integration (2026-10-05)
-
-- PR #98 merged into master as `0b5ce8b`, including `ba51a51` (island inventories, ship holds, shore-facing docks and automatic shore pickup). Final desktop mouse and DPR2-phone touch combat pass without page errors. Final integration suite: 251 tests pass (13 server, 79 client, 159 domain; one manual benchmark ignored); native/WASM strict lint and 298-frame asset audit pass. Combined save schema is version 14; release through GitHub Actions with production credentials.
-- Review: [PR #98](https://github.com/koogle/age-of-agents/pull/98), **Add territorial wolves and bears**. Wildlife implementation `2d275e5`, followed by damage-feedback cleanup; merged, with production release tracked separately in GitHub Actions.
-- Latest population tuning: one wolf on newly generated first islands; 2–4 animals (one bear and 1–3 wolves) on the second and later islands. Existing saved animals are preserved. Seeded variation verified across five seeds and three discoveries each; all 237 tests, strict native/WASM lint, rebuilt WASM and fresh desktop browser combat pass.
-- User correction: wolves and other dangerous animals, instead of timed events. Drought changes in PR #98 have been reverted on its branch; replacing them with wolves and bears. See [wildlife](docs/knowledge/wildlife.md).
-- Wildlife implemented with generated/refined wolf and bear art. All 237 Rust tests pass (one manual benchmark ignored), native/WASM strict lint and all 286 sprite-frame audits pass. Real desktop mouse and DPR2-phone pinch/touch hunting verify attack orders, two-way damage and bear defeat without page errors; final frame-anchor screenshots pass too. See [review/evidence](docs/verification/2026-10-05-wildlife/REVIEW.md). Store version 14 resets incompatible saves under existing policy. PR #98 is merged; confirm deployment through the release workflow.
-- Historical direct release check (superseded by the Modal proxy/account findings below): Modal 1.5.3 status again reports "Could not connect to the Modal server" despite ready runtime bindings. No production state was changed.
-
-# Open work
-
-- Water resource (2026-10-05): Jakob approved the first slice and implementation.
-  Renewable riverbank sources, typed water inventory/cargo, and 10 water per
-  field planting/replenishment cycle are implemented locally. Generated/refined
-  jug art is integrated in the HUD and existing resource atlas. Save version 16
-  resets older hosted worlds; no production state has changed.
-  Combined verification: 293 workspace tests pass (one manual benchmark ignored);
-  all 96 client tests pass again after the final menu fix; 303 sprite frames,
-  new icon normalization, existing atlas pixel preservation and six production
-  verifier tests pass. Native/WASM strict lint, rebuilt WebGL, and final code/style review pass.
-  Desktop mouse (1100x750) and emulated DPR-2 phone touch (430x932) both
-  collect water, plant and replenish fields, spend exactly 20 water, and deliver
-  240 food without browser errors. Placement costs remain visible without hover.
-  Maximum-zoom captures pass after correcting transparent ground-anchor padding.
-  User rejected the initial water icon style on 2026-10-06; corrected the
-  heavy orange rendering to fine ink, pale clay and muted blue watercolor.
-  Original art is retained as rejected evidence.
-  User approved the corrected art and authorized merge on 2026-10-06.
-  Integrated master `79d5899`; final desktop and DPR-2 touch replays pass.
-  Review/authorized merge: [PR #136](https://github.com/koogle/age-of-agents/pull/136).
-  Production delivery follows the merge-triggered GitHub Actions workflow. See [water guide](docs/knowledge/water-resource.md)
-  and [verification](docs/verification/water/README.md).
-
-- [PR #108](https://github.com/koogle/age-of-agents/pull/108): resource icons retain quantities and show capitalized names on hover/tap; rows compact to 66px. User authorized merging into master. Integrated master `2bedc41`; all 264 workspace tests pass (one manual benchmark ignored), formatting and strict native/WASM lint pass. Rebuilt WebGL passes desktop hover/leave and DPR-2 tap/expiry without game commands or browser errors; [screenshots and review](docs/verification/resource-names/README.md). Generated-bundle conflicts resolved by rebuilding; replay fixture reader updated for island inventories. Ready for the authorized merge; production delivery follows the merge-triggered Actions workflow.
-
-- README cleanup: restored the concise scope of `9ce5f17`, retaining current features and setup, including merged wildlife combat. Detailed implementation notes stay in existing guides. Documentation-only; links and whitespace checked. User authorized PR creation and merge.
-
-- Branch `fix/mobile-cargo-chevron-swipe`: mobile boat cargo now uses inline chevrons in a single 78px row, including 320px portrait and short landscape. Shared mouse/touch swipe paging cancels underlying transfers. Verified 252 combined workspace tests (one manual benchmark ignored), final cargo regressions, formatting, strict native/WASM lint, rebuilt browser bundle, DPR-2 touch paging and DPR-1 mouse paging/dragging. [Replay and visual evidence](docs/knowledge/hud-and-accessibility.md#ship-cargo-controls). Thermonuclear review completed: shared input path, unchanged authoritative cargo commands/save model, no added runtime dependency, all changed client files below 1,000 lines. User authorized merging [PR #101](https://github.com/koogle/age-of-agents/pull/101). Integrated master `0b5ce8b` (water-facing docks, shore pickup and wildlife), rebuilt the combined browser bundle, and passed the full suite, strict native/WASM lint and combined DPR-2 cargo replay. Production delivery follows the GitHub Actions release workflow after the authorized merge; see the Modal workspace guidance below.
-
-- Automatic transport shore pickup: [PR #102](https://github.com/koogle/age-of-agents/pull/102), `feat/transport-shore-pickup`; user authorized PR creation and merge to master. Board orders choose a mutually reachable berth, preserve group reservations, and wait for the ship to stop. Explicit ship orders cancel pickup; no save schema changes. Integrated master `e7c8cb6` (shore-facing docks). Combined verification: 240 Rust tests passed (one manual benchmark ignored), strict native/WASM lint, formatting, 294-frame asset audit, transport/verifier checks and web/server rebuild. Isolated Chromium desktop mouse (1100×750) and DPR-2 phone touch (430×932) both issued Board, moved the ship to shore and boarded only once stopped, with no browser errors. Thermonuclear review passed for atomicity, deterministic routes, seat ownership, cancellation and crowded-shore waiting. QA server stopped. The PR tracks merge status; production release uses the merge-triggered GitHub Actions workflow, whose result must be checked separately.
-
-## Shore-facing docks (current workspace, 2026-10-05)
-
-- Implemented automatic water-edge facing shared by domain coast validation,
-  placement ghosts and placed docks. Added east/north/west sprites, all four
-  construction stages, retained source/provenance and a reproducible packer.
-  Original building atlas rows are pixel-identical; no save-model change.
-- Verification: full workspace 235 tests passed (one manual benchmark ignored),
-  including snapshot edge/fog regression; all five
-  building geometry tests pass across every facing/stage. Native/WASM lint,
-  294-frame sprite audit and rebuilt WebGL passed. Desktop four-shore captures
-  and selection pass; DPR-2 phone replay also passes all four directions and
-  construction stages (32 captures, no browser errors). Evidence and review:
-  [dock-facing verification](docs/verification/dock-facing/README.md).
-- User authorized merging the dock changes on 2026-10-05: [PR #99](https://github.com/koogle/age-of-agents/pull/99),
-  branch `feat/water-facing-docks`. Production checks use the GitHub Actions
-  release workflow after merge; inspect its result before claiming deployment.
-  Modal 1.6.1 needed its API proxy extra;
-  installing `modal[api-proxy-support]` fixed connectivity. The configured
-  workspace is `radiantai`, not the repository's production `koogle-frick`, and
-  no local profiles exist. Direct deployment was not attempted; the existing
-  GitHub release workflow uses the production credentials.
-
-## Earlier release follow-up
-
-- Branch `feat/island-storage-ships`, PR #94: https://github.com/koogle/age-of-agents/pull/94. Integrating master through `58813c1`. Implements island-local inventories and 50-resource ship holds in addition to four passengers. Cargo stays aboard on arrival; stopped shore ships supply local construction/production/research and accept partial villager deposits. Training/research still require buildings.
-- Storage sites unify completed compatible buildings and available ship holds. Costs reserve once from shore stores then connected ships; outputs/refunds go to the job’s island. Explicit load/unload transfers require a completed dock, reject atomically, and do not require NPC labor. Storage targets use `storage_id`; incompatible stores reset rather than migrate.
-- Top resources follow pointer/touch island inspection, including minimap hover. Selected building costs use its own island. Ship cargo is now a single horizontal strip with one column per resource, resource icons without name labels, onboard counts and Load/Unload shields at each icon’s lower corners (24px art, generous tap targets); cargo-only types remain visible and additional columns paginate on compact screens. Dock selection also exposes moored ship cargo when artwork obscures the vessel.
-- User authorized merging PR #94. Integrating master `58813c1` before release: preserve construction unlocks, movement recovery, bounded route searches and removal of save backward compatibility. Store version 12 resets incompatible saves; no inventory migrations or legacy aliases. Integrated verification: 231 Rust tests pass (13 server, 77 client, 141 domain; one manual benchmark ignored), strict native/WASM lint, rebuilt web/server, verifier/asset checks and documentation links. Combined desktop mouse and DPR-2 phone touch load/unload acceptance passed without browser errors. Task-owned QA server stopped. Captures/logs: `/workspace/scratch/island-storage/merge-browser.log`, `desktop-cargo-merged.png`, `phone-cargo-merged.png`. PR #94 merged as `330803f`. Its first release run was cancelled before deployment because the verifier still read the removed shared-stockpile field. Verifier repair `75e7540` is now deployed and verified: [production run 37379045726](https://github.com/koogle/age-of-agents/actions/runs/37379045726) succeeded.
-
-## Remaining work and open PRs
-
-- Other module-extraction proposals remain independent work; consult live PR metadata before integration. Island inventories are delivered by PR #94. Construction-material unlocks and the knowledge folder are already in this PR’s master base.
-- Profile populated archipelagos and refine the economy per [ROADMAP.md](ROADMAP.md); starter-only budget measurements do not establish busy-world capacity. Combat, calamities and permanent progression remain proposals.
-- Preserve [acceptance gaps](ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05): accessible DOM controls, additive touch selection, native macOS/Windows appearance and physical-phone safe-area verification, and documented narrow-passage/existing-blocked-field limits. Native/browser-local games remain in-memory.
-- The production verifier still requires land units and unseen terrain; distinguish those fixture assumptions from actual deployment failures. Its old fixed-map/terrain-run bug is resolved.
-
-## Verification and release
-
-Local integration verification is recorded above. All 74 relative links in the eight changed Markdown files resolve; final formatting and whitespace checks pass. PR #94 is merged; the subsequent verifier repair released successfully in the workflow linked above. Dock merge/release status is tracked at the top.
+## Still unresolved
+
+- **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
+  candidate archive is merged, but nothing is wired into the game: the chosen icons
+  (including replacing the era-inappropriate compass), animation and construction
+  variants, and gameplay verification remain. Review notes:
+  `assets/alternatives/2026-10-06/STYLE_REVIEW.md`.
+- **Performance and economy.** Populated archipelagos are unprofiled; starter-only
+  measurements in [the map budget](docs/CONTINUOUS_MAP.md) do not certify busy
+  worlds. The economy still needs refinement per [the roadmap](ROADMAP.md).
+- **Known gaps** ([roadmap](ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05)):
+  accessible DOM equivalents for canvas buttons, additive touch selection,
+  macOS/Windows native-window and physical-phone safe-area verification, and route-
+  blocking fields in old saves. Native and browser-local games are in-memory only.
+- **Production verifier.** `scripts/modal_manage.py` expects a land unit and unseen
+  terrain; a valid world without them would fail the check. See
+  [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
+- **Local Modal account.** The development machine's Modal profile is `radiantai`,
+  not production. Release only through the GitHub Actions workflow.
+- `docs/RUN_PLAN.md` is an earlier written plan Jakob did not want; the lists above
+  supersede it.
