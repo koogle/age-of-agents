@@ -306,6 +306,7 @@ impl GameWorld {
             step: None,
             action: UnitAction::Idle,
             cargo: None,
+            notice: None,
         };
         let mut world = Self {
             island_id: 0,

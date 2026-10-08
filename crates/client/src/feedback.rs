@@ -7,6 +7,8 @@ use crate::{camera::Rig, hud, terrain};
 const LIFETIME: f64 = 1.4;
 /// The run's milestones linger above the bearer; ordinary statuses do not.
 const MILESTONE_LIFETIME: f64 = 8.0;
+/// A reason a unit gave up an order is a sentence: long enough to read.
+const NOTICE_LIFETIME: f64 = 3.0;
 
 fn drop_off_status(unit: &Unit) -> Option<String> {
     let cargo = unit.cargo.as_ref()?;
@@ -144,6 +146,20 @@ impl Feedback {
                     lifetime: LIFETIME,
                 });
             }
+            // Why it gave up an order replaces the plain "Idle" status.
+            if unit.unit.notice != before.unit.notice
+                && let Some(notice) = &unit.unit.notice
+            {
+                self.labels
+                    .retain(|label| label.entity_id.as_deref() != Some(&unit.unit.id));
+                self.labels.push(Label {
+                    entity_id: Some(unit.unit.id.clone()),
+                    text: notice.message.clone(),
+                    at: Vec3::new(at.x, 0.8, at.y),
+                    born: now,
+                    lifetime: NOTICE_LIFETIME,
+                });
+            }
             let Some(cargo) = &before.unit.cargo else {
                 continue;
             };
@@ -226,6 +242,35 @@ impl Feedback {
 mod tests {
     use super::*;
     use aoa_game::{CarriedResource, GameWorld, GatherPhase, ResourceKind, UnitAction};
+
+    #[test]
+    fn a_rejected_build_site_says_why_instead_of_idle() {
+        let mut before = GameWorld::default().snapshot();
+        before.units[0].unit.action = UnitAction::ExploreBuild {
+            origin: aoa_game::CellCoordinate::new(10, 10),
+            kind: aoa_game::BuildingKind::House,
+        };
+        let mut next = before.clone();
+        next.tick += 1;
+        next.units[0].unit.action = UnitAction::Idle;
+        next.units[0].unit.notice = Some(aoa_game::UnitNotice {
+            message: "Cannot build here. That spot is not clear for building.".into(),
+            tick: next.tick,
+        });
+        let mut feedback = Feedback::default();
+        feedback.observe(Some(&before), &next, 0.0);
+        let texts: Vec<_> = feedback.labels.iter().map(|l| l.text.as_str()).collect();
+        assert_eq!(
+            texts,
+            ["Cannot build here. That spot is not clear for building."]
+        );
+        assert_eq!(feedback.labels[0].lifetime, NOTICE_LIFETIME);
+        // The same notice in a later snapshot is not repeated.
+        let mut later = next.clone();
+        later.tick += 1;
+        feedback.observe(Some(&next), &later, 1.0);
+        assert_eq!(feedback.labels.len(), 1);
+    }
 
     #[test]
     fn claiming_and_bringing_home_the_artifact_speak_above_the_bearer() {

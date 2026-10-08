@@ -229,6 +229,16 @@ pub struct Unit {
     pub step: Option<Step>,
     pub action: UnitAction,
     pub cargo: Option<CarriedResource>,
+    /// Why the unit last gave up an order on its own, for its status label.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notice: Option<UnitNotice>,
+}
+
+/// A reason shown above a unit; `tick` makes a repeated reason a new notice.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UnitNotice {
+    pub message: String,
+    pub tick: u64,
 }
 
 impl Unit {
