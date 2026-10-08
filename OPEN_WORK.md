@@ -3,10 +3,42 @@
 - Merged and deployed: planned 5–7 island archipelago under fog with only the temple marked ([#154](https://github.com/koogle/age-of-agents/pull/154)), player-steered ships with one-tap returns ([#155](https://github.com/koogle/age-of-agents/pull/155)), and the run-down Sanctuary of the Gods with artifact capture and return-home victory ([#156](https://github.com/koogle/age-of-agents/pull/156)). Store version 19.
 - End-to-end check (Jakob's request): `crates/game/tests/full_run.rs` wins seed 7 through player commands alone (gather, lumber mill, dock, ship, steer into fog, land, claim, one-tap home, walk to the town center) in about 455 simulated seconds; real-run snapshots replay cleanly in WebGL ([evidence](docs/verification/temple-artifact/README.md#full-run)). Findings: no wildlife interfered and landing put the party five seconds from the temple, so the run is far too easy. A lone Move order waited forever behind an idle villager in a one-cell corridor; fixed in [#158](https://github.com/koogle/age-of-agents/pull/158) (idle units step aside; the playthrough walks the bearer home alone).
 - Build-order feedback ([#159](https://github.com/koogle/age-of-agents/pull/159), Jakob 2026-10-08): a fogged build site that turns out invalid shows "Cannot build here." and the reason above the villager.
-- Agenda (Jakob, 2026-10-08, proposed, not implemented):
-  - **Hero unit:** a special unit the player must build, unlocked only with the right resources; only a hero can pick up the Artifact of the Gods (today any unit can claim it).
-  - **Island types:** different kinds of islands across the archipelago, beyond today's shared generator with resource tiers.
-- Next (Jakob, 2026-10-07): once the artifact is claimed, difficulty rises on the way home and new monsters spawn. Then the monster classes (lions, giant snakes, skeletons, barbarians, centaurs, cyclops, minotaur), one PR each, with art previews first. `docs/RUN_PLAN.md` is an earlier written plan Jakob did not want; treat it as superseded notes.
+## Next steps to finish the capture-the-flag loop
+
+Proposed order, one PR each unless noted; nothing below is implemented. Each step
+keeps `tests/full_run.rs` passing and extends it once the step changes the run.
+
+1. **Hero unit (Jakob, 2026-10-08).** A special unit the player must build,
+   unlocked only once the right resources are discovered and paid. Only a hero
+   can claim the Artifact of the Gods (`ClaimArtifact` rejects other units). Needs
+   generated hero art and a training building. Open: which building trains it and
+   which resources unlock it (proposal: later-island materials such as gold and
+   steel, so the hero requires exploring).
+2. **Run end and loss.** Replace the one-hour placeholder `Lost` with real rules:
+   the run is lost when the hero dies and no new hero can be trained, or when no
+   units remain. Victory and defeat both offer a new run via the existing reset.
+3. **Return-trip escalation (Jakob, 2026-10-07).** Claiming the artifact raises
+   difficulty: new monsters spawn on the temple island and along the way home,
+   and later islands grow more dangerous. Needs a seeded, deterministic spawn rule.
+4. **Combat foundations the monsters need.** Ranged attacks for archers, healing,
+   and building health so raiders can threaten settlements. Test against today's
+   wolves, bears and boars first.
+5. **Per-island difficulty.** Monster counts and strength scale with each island's
+   distance from home; the temple island gets guardians, so landing beside the
+   temple is no longer a free win.
+6. **Island types (Jakob, 2026-10-08).** Distinct kinds of islands (for example
+   volcanic, forested, ruined, barbarian-held), each with its own terrain look,
+   resources and monster mix, chosen per planned site from the seed.
+7. **Monster classes, one PR each with art previews first:** lions (packs), giant
+   snakes (ambush), skeletons (barrow spawns), barbarians (camp raiders with a
+   chieftain), centaurs (ranged kiting), cyclops (boss, with a cyclops general),
+   minotaur (temple guardian).
+8. **Balance and release.** Play several seeds end to end, tune so a run needs a
+   real expedition and a defended return, then refresh README, ROADMAP and the
+   guides.
+
+Earlier notes: `docs/RUN_PLAN.md` is a first written plan Jakob did not want; this
+list supersedes it.
 
 # Local branch integration — 2026-10-06
 
