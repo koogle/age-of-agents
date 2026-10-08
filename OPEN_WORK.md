@@ -26,10 +26,11 @@ keeps `tests/full_run.rs` passing and extends it once the step changes the run.
 5. **Island types (Jakob, 2026-10-08).** Distinct kinds of islands (for example
    volcanic, forested, ruined, barbarian-held), each with its own terrain look,
    resources and monster mix, chosen per planned site from the seed.
-6. **Monster classes, one PR each with art previews first:** lions (packs), giant
-   snakes (ambush), skeletons (barrow spawns), barbarians (camp raiders with a
-   chieftain), centaurs (ranged kiting), cyclops (boss, with a cyclops general),
-   minotaur (temple guardian).
+6. **Monster classes, one PR each with art previews first:** lions, giant snakes,
+   skeletons, barbarians, centaurs, cyclops and minotaur, each with its own
+   behavior. Every class can come in several forms (Jakob, 2026-10-08: for
+   example a cyclops general or a barbarian chieftain); these are illustrations
+   of the idea, not a fixed list of variants.
 7. **Balance and release.** Play several seeds end to end, tune so a run needs a
    real expedition and a defended return, then refresh README, ROADMAP and the
    guides.
