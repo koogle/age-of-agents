@@ -29,8 +29,27 @@ cargo test -p aoa-game --locked fields_tests
 ```
 
 See [the field audit limits](../FIELD_GATHERING_REVIEW.md#limits) before diagnosing
-an old save. Prevention does not relocate already-blocking plots, and an idle
-unit in a narrow passage is a separate traffic problem.
+an old save. Prevention does not relocate already-blocking plots.
+
+## Idle units make way (2026-10-08)
+
+Jakob asked to fix a deadlock the end-to-end run found: after landing home, the
+bearer's lone Move order waited forever behind the idle second villager standing
+in a one-cell corridor beside the dock. Idle units used to move only when standing
+on another unit's reserved destination (`make_way`, checked as an idle unit
+finishes a step).
+
+`movement.rs::let_through` now runs for every stepless idle unit each tick. A cheap
+filter keeps only touching neighbours that have no step, still have a walking goal
+and are not yet at it. For those it asks the neighbour's own `next_step`. If that
+returns `Wait` and the neighbour's static route starts on the idle unit's cell, the
+idle unit takes one short `Move` to the nearest fully free cell, preferring cells
+off that route (`step_aside`, shared with `make_way`). It takes no task and is idle
+again on arrival. Workers already at their site never trigger it.
+
+Tests: `group_move_tests::an_idle_unit_in_a_one_cell_gap_steps_aside_for_a_stalled_mover`
+(mountain wall with one gap), `an_idle_unit_beside_a_working_builder_stays_put`,
+and `tests/full_run.rs`, which now walks the bearer home alone.
 
 ## Rejected fogged build orders say why (2026-10-08)
 
