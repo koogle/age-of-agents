@@ -63,10 +63,6 @@ Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 - **Performance and economy.** Populated archipelagos are unprofiled; starter-only
   measurements in [the map budget](docs/CONTINUOUS_MAP.md) do not certify busy
   worlds. The economy still needs refinement per [the roadmap](ROADMAP.md).
-- **Known gaps** ([roadmap](ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05)):
-  accessible DOM equivalents for canvas buttons, additive touch selection,
-  macOS/Windows native-window and physical-phone safe-area verification, and route-
-  blocking fields in old saves. Native and browser-local games are in-memory only.
 - **Production verifier.** `scripts/modal_manage.py` expects a land unit and unseen
   terrain; a valid world without them would fail the check. See
   [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
