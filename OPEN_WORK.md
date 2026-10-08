@@ -8,32 +8,31 @@
 Proposed order, one PR each unless noted; nothing below is implemented. Each step
 keeps `tests/full_run.rs` passing and extends it once the step changes the run.
 
-1. **Hero unit (Jakob, 2026-10-08).** A special unit the player must build,
-   unlocked only once the right resources are discovered and paid. Only a hero
-   can claim the Artifact of the Gods (`ClaimArtifact` rejects other units). Needs
-   generated hero art and a training building. Open: which building trains it and
-   which resources unlock it (proposal: later-island materials such as gold and
-   steel, so the hero requires exploring).
-2. **Return-trip escalation (Jakob, 2026-10-07).** Claiming the artifact raises
-   difficulty: new monsters spawn on the temple island and along the way home,
-   and later islands grow more dangerous. Needs a seeded, deterministic spawn rule.
-3. **Combat foundations the monsters need.** Ranged attacks for archers, healing,
+1. **Combat foundations the monsters need.** Ranged attacks for archers, healing,
    and building health so raiders can threaten settlements. Test against today's
    wolves, bears and boars first.
-4. **Per-island difficulty.** Monster counts and strength scale with each island's
+2. **Per-island difficulty.** Monster counts and strength scale with each island's
    distance from home; the temple island gets guardians, so landing beside the
    temple is no longer a free win.
-5. **Island types (Jakob, 2026-10-08).** Distinct kinds of islands (for example
-   volcanic, forested, ruined, barbarian-held), each with its own terrain look,
-   resources and monster mix, chosen per planned site from the seed.
-6. **Monster classes, one PR each with art previews first:** lions, giant snakes,
+3. **Monster classes, one PR each with art previews first:** lions, giant snakes,
    skeletons, barbarians, centaurs, cyclops and minotaur, each with its own
    behavior. Every class can come in several forms (Jakob, 2026-10-08: for
    example a cyclops general or a barbarian chieftain); these are illustrations
    of the idea, not a fixed list of variants.
-7. **Balance and release.** Play several seeds end to end, tune so a run needs a
-   real expedition and a defended return, then refresh README, ROADMAP and the
-   guides.
+
+## Future work (not needed to finish the loop)
+
+Moved here by Jakob on 2026-10-08.
+
+- **Hero unit.** A special unit the player must build, unlocked only once the
+  right resources are discovered and paid; only a hero could claim the Artifact
+  of the Gods (today any unit can). Open: which building trains it and which
+  resources unlock it.
+- **Return-trip escalation.** Claiming the artifact raises difficulty: new
+  monsters spawn on the temple island and along the way home.
+- **Island types.** Distinct kinds of islands (for example volcanic, forested,
+  ruined, barbarian-held), each with its own terrain look, resources and monster
+  mix, chosen per planned site from the seed.
 
 Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 `Lost` stays a recorded value only and does not block victory.
