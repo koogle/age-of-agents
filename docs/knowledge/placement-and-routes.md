@@ -32,6 +32,19 @@ See [the field audit limits](../FIELD_GATHERING_REVIEW.md#limits) before diagnos
 an old save. Prevention does not relocate already-blocking plots, and an idle
 unit in a narrow passage is a separate traffic problem.
 
+## Rejected fogged build orders say why (2026-10-08)
+
+A build order on fogged ground explores first, then re-runs the Build command.
+If the site turns out invalid (blocked, no coast, unaffordable, unreachable), the
+villager goes idle. Jakob asked for a status above the villager instead of silence.
+`construction.rs::give_up` now also sets `Unit::notice` (`UnitNotice { message,
+tick }`) to "Cannot build here." plus the command error's player text; the client
+(`feedback.rs`) shows a changed notice as a three-second status label in place of
+"Idle". The field is optional with a serde default, so existing saves load
+unchanged and no store-version bump is needed. Tests: `construction_tests` (blocked,
+unaffordable, unreachable) and `feedback::tests::a_rejected_build_site_says_why_instead_of_idle`;
+[captures](../verification/build-notice/README.md).
+
 ## Destination searches and deterministic routes
 
 `PathTree::route_to_nearest` stops Dijkstra when the cheapest requested goal is

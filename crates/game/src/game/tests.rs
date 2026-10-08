@@ -396,6 +396,7 @@ fn trained_villager_waits_for_a_free_cell_beside_the_building() {
             step: None,
             action: UnitAction::Idle,
             cargo: None,
+            notice: None,
         })
         .collect();
     house(&mut world, ring.len() + 1);
@@ -1118,6 +1119,7 @@ fn houses_raise_the_population_cap() {
             step: None,
             action: UnitAction::Idle,
             cargo: None,
+            notice: None,
         });
     }
     let produce = Command::Produce {

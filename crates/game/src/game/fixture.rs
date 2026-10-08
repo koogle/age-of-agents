@@ -21,6 +21,7 @@ pub(super) fn fixture() -> GameWorld {
             step: None,
             action: UnitAction::Idle,
             cargo: None,
+            notice: None,
         })
         .collect();
     world.buildings = vec![town_center("base-1", CellCoordinate::new(28, 17), None)];
