@@ -137,3 +137,84 @@ fn crossing_groups_never_share_a_cell() {
             .all(|unit| unit.action == UnitAction::Idle)
     );
 }
+
+/// A mountain wall across the map with a single one-cell gap at `(gap, row)`.
+fn walled_with_gap(gap: u16, row: u16) -> GameWorld {
+    let mut world = fixture::fixture();
+    let stride = usize::from(world.columns());
+    for column in 0..world.columns() {
+        if column != gap {
+            world.terrain[usize::from(row) * stride + usize::from(column)].biome =
+                TerrainBiome::Mountain;
+        }
+    }
+    world
+}
+
+#[test]
+fn an_idle_unit_in_a_one_cell_gap_steps_aside_for_a_stalled_mover() {
+    let (gap, wall) = (90, 45);
+    let mut world = walled_with_gap(gap, wall);
+    // villager-2 idles in the gap; villager-1 must pass through it.
+    world.units[1].cell = cell(gap, wall);
+    world.units[0].cell = cell(gap, wall + 4);
+    world.validate().unwrap();
+    let to = cell(gap, wall - 6);
+    world
+        .apply_command(Command::Move {
+            unit_id: "villager-1".into(),
+            to,
+        })
+        .unwrap();
+    for _ in 0..200 {
+        world.tick(0.1);
+        world.validate().unwrap();
+    }
+    assert_eq!(world.units[0].cell, to, "the mover got through the gap");
+    // The bystander only made way: it is idle again, near where it stood, and off
+    // the gap so it no longer blocks the passage.
+    assert_eq!(world.units[1].action, UnitAction::Idle);
+    assert_ne!(world.units[1].cell, cell(gap, wall));
+    assert!(world.units[1].cell.column.abs_diff(gap) <= 2);
+    assert!(world.units[1].cell.row.abs_diff(wall) <= 2);
+}
+
+#[test]
+fn an_idle_unit_beside_a_working_builder_stays_put() {
+    let mut world = fixture::fixture();
+    world.inventories[0].wood = 100.0;
+    let origin = super::tests::free_site(&mut world, BuildingKind::House);
+    world
+        .apply_command(Command::Build {
+            unit_id: "villager-1".into(),
+            origin,
+            kind: BuildingKind::House,
+        })
+        .unwrap();
+    // Let the builder arrive and start working, then park villager-2 beside it.
+    for _ in 0..100 {
+        world.tick(0.1);
+        if world.units[0].step.is_none()
+            && world.buildings.last().unwrap().construction.unwrap_or(0.0) > 0.0
+        {
+            break;
+        }
+    }
+    let builder = world.units[0].cell;
+    let occupancy = world.occupancy();
+    let beside = [(-1i32, 0i32), (1, 0), (0, -1), (0, 1)]
+        .into_iter()
+        .filter_map(|(dx, dy)| {
+            crate::navigation::offset(builder, dx, dy, world.columns(), world.rows())
+        })
+        .find(|&c| occupancy.is_free_for(c, None))
+        .expect("room beside the builder");
+    world.units[1].cell = beside;
+    world.units[1].action = UnitAction::Idle;
+    world.validate().unwrap();
+    for _ in 0..30 {
+        world.tick(0.1);
+        assert_eq!(world.units[1].cell, beside);
+        assert_eq!(world.units[1].action, UnitAction::Idle);
+    }
+}

@@ -45,8 +45,8 @@ a live run sailing to the temple, physical devices.
 only typed player commands and ticks, without editing state: gather stone and
 wood, build a lumber mill, make 20 timber, scout the open-sea coast, build a dock,
 launch a ship, board, steer into the fog toward the temple's site, land, claim the
-artifact, board again, take the one-tap return home, land, and walk the party
-beside the town center. It is won after 456 simulated seconds.
+artifact, board again, take the one-tap return home, land, and walk the bearer
+home. It is won after about 455 simulated seconds.
 
 ```bash
 AOA_RUN_SNAPSHOTS=/tmp/run cargo test --release -p aoa-game --locked --test full_run -- --nocapture
@@ -61,6 +61,7 @@ python3 docs/verification/temple-artifact/capture_sequence.py /tmp/win /tmp/run/
 
 Findings: no wildlife met the party, and the ship's landing spot was a five-second
 walk from the temple. A single Move order for the bearer waited forever behind
-the idle second villager in a one-cell corridor beside the dock, a documented
-movement limit ([roadmap](../../ROADMAP.md#recovered-acceptance-gaps--reviewed-2026-10-05));
-the playthrough walks both villagers home with one group move instead.
+the idle second villager in a one-cell corridor beside the dock. That is fixed
+([idle units make way](../../knowledge/placement-and-routes.md#idle-units-make-way-2026-10-08)),
+and the playthrough now walks the bearer home alone (won after 455 simulated
+seconds).
