@@ -56,10 +56,10 @@ Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 ## Still unresolved
 
 - **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
-  candidate archive is merged, but nothing is wired into the game: the chosen icons
-  (including replacing the era-inappropriate compass), animation and construction
-  variants, and gameplay verification remain. Review notes:
-  `assets/alternatives/2026-10-06/STYLE_REVIEW.md`.
+  map, military shield, steel and cloth calibrations are wired in
+  ([evidence](docs/verification/alternatives-integration/README.md)). Not wired: the
+  wolf (recolor failed), the sandal Disembark (the joined platform is approved) and
+  the earlier batches the archive review marks not ready.
 - **Performance and economy.** Populated archipelagos are unprofiled; starter-only
   measurements in [the map budget](docs/CONTINUOUS_MAP.md) do not certify busy
   worlds. The economy still needs refinement per [the roadmap](ROADMAP.md).
