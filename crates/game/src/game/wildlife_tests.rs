@@ -31,7 +31,13 @@ fn attack(world: &mut GameWorld) {
 
 #[test]
 fn stationary_attack_faces_target_and_clears_phase_after_retreat() {
-    for kind in [AnimalKind::Wolf, AnimalKind::Bear, AnimalKind::Boar] {
+    for kind in [
+        AnimalKind::Wolf,
+        AnimalKind::Bear,
+        AnimalKind::Boar,
+        AnimalKind::Lioness,
+        AnimalKind::Lion,
+    ] {
         let mut world = wildlife(kind);
         world.tick(0.3);
         assert_eq!(world.animals[0].heading, [-1, 0]);
@@ -235,6 +241,12 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             let added = &world.animals[old.len()..];
             let boars = added.iter().filter(|a| a.kind == AnimalKind::Boar).count();
             assert!((2..=3).contains(&boars));
+            let lions: Vec<_> = added.iter().filter(|a| a.kind.is_lion()).collect();
+            assert!((3..=4).contains(&lions.len()));
+            assert_eq!(lions[0].kind, AnimalKind::Lion);
+            assert!(lions[1..].iter().all(|a| a.kind == AnimalKind::Lioness
+                && a.home.center().distance(lions[0].home.center()) <= 3.0));
+            let added: Vec<_> = added.iter().filter(|a| !a.kind.is_lion()).collect();
             assert!((4..=7).contains(&added.len()));
             assert_eq!(
                 added.iter().filter(|a| a.kind == AnimalKind::Bear).count(),
@@ -325,4 +337,85 @@ fn boar_hunting_damage_and_save_roundtrip() {
     assert!(world.animals.is_empty());
     assert_eq!(world.units[0].action, UnitAction::Idle);
     world.validate().unwrap();
+}
+
+fn pride() -> GameWorld {
+    let mut world = wildlife(AnimalKind::Lion);
+    world.units[0].cell = CellCoordinate::new(60, 60);
+    world.units[1].cell = CellCoordinate::new(5, 5);
+    world.units.truncate(2);
+    let template = world.animals[0].clone();
+    world.animals = [
+        (20, 40, AnimalKind::Lion),
+        (22, 41, AnimalKind::Lioness),
+        (24, 40, AnimalKind::Lioness),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(i, (x, y, kind))| Animal {
+        id: format!("lion-{i}"),
+        kind,
+        home: CellCoordinate::new(x, y),
+        cell: CellCoordinate::new(x, y),
+        health: kind.max_health(),
+        ..template.clone()
+    })
+    .collect();
+    world.refresh_exploration();
+    world.validate().unwrap();
+    world
+}
+
+#[test]
+fn one_lion_sighting_alerts_the_whole_pride() {
+    let mut world = pride();
+    let intruder = world.units[0].id.clone();
+    world.tick(0.1);
+    assert!(
+        world.animals.iter().all(|a| a.step.is_none()),
+        "nobody in reach yet"
+    );
+    // Within the far lioness's aggro but beyond the leader's.
+    world.units[0].cell = CellCoordinate::new(29, 40);
+    world.tick(0.1);
+    assert!(
+        world.animals.iter().all(|a| a.step.is_some()),
+        "the pride hunts together"
+    );
+    for _ in 0..80 {
+        world.tick(0.1);
+        world.validate().unwrap();
+    }
+    assert!(
+        !world.units.iter().any(|u| u.id == intruder),
+        "the pride brought the intruder down"
+    );
+    // A lone wolf beside the pride stays home: pride alerts are lions only.
+    let mut world = pride();
+    world.animals[2].kind = AnimalKind::Wolf;
+    world.animals[2].health = AnimalKind::Wolf.max_health();
+    world.units[0].cell = CellCoordinate::new(17, 40);
+    world.tick(0.1);
+    assert!(world.animals[1].step.is_some());
+    assert!(world.animals[2].step.is_none());
+}
+
+#[test]
+fn prides_do_not_chase_beyond_their_territory() {
+    let mut world = pride();
+    world.units[0].cell = CellCoordinate::new(29, 40);
+    for _ in 0..5 {
+        world.tick(0.1);
+    }
+    world.units[0].cell = CellCoordinate::new(70, 40);
+    for _ in 0..200 {
+        world.tick(0.1);
+        world.validate().unwrap();
+    }
+    assert!(
+        world
+            .animals
+            .iter()
+            .all(|a| a.cell == a.home && a.step.is_none())
+    );
 }

@@ -17,7 +17,7 @@ def main():
     attacks = Image.open(ATTACK_SOURCE).convert("RGBA")
     assert source.size == (CELL * 2, CELL * 2)
     assert attacks.size == source.size
-    atlas = Image.new("RGBA", (CELL * 4, CELL * 3))
+    atlas = Image.new("RGBA", (CELL * 4, CELL * 5))
     frames = {}
     # Planted rear-paw landmarks, measured in the original 627px cells.
     # A lifted/swiping front paw must not shift the whole animal's ground anchor.
@@ -61,6 +61,20 @@ def main():
         assert bounds[3] + offset[1] < CELL
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
+    # Lions: 512px source cells placed unenlarged; the lowest (planted) paws of
+    # every pose sit on the shared baseline so attacks stay grounded.
+    for row, name in [(3, "lioness"), (4, "lion")]:
+        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{name}_cutout_0.png").convert("RGBA")
+        assert sheet.size == (1024, 1024)
+        for col, pose in enumerate(["idle", "walk", "attack_windup", "attack_strike"]):
+            x, y = col % 2 * 512, col // 2 * 512
+            frame = sheet.crop((x, y, x + 512, y + 512))
+            bounds = frame.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox()
+            assert bounds is not None
+            offset = ((CELL - 512) // 2, BASELINE - bounds[3])
+            assert 0 <= bounds[1] + offset[1] and bounds[2] + offset[0] < CELL
+            atlas.alpha_composite(frame, (col * CELL + offset[0], row * CELL + offset[1]))
+            frames[f"{name}_{pose}"] = [col * CELL, row * CELL, CELL, CELL]
     atlas.save(ROOT / "assets/sprites/wildlife.png")
     (ROOT / "assets/sprites/wildlife.json").write_text(
         json.dumps({"size": list(atlas.size), "frames": frames}, indent=2) + "\n")
