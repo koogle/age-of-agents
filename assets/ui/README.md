@@ -134,6 +134,10 @@ Integration PR #107 wires these files into the HUD with combined Rust, asset and
 
 `icons/artifact.png` is the Artifact of the Gods: a small golden chest with a laurel lid, drawn above its bearer and in the victory pill. Made like the temple marker (`fal-ai/nano-banana/edit` with `resource_wood` as the style reference, `fal-ai/birefnet/v2`, `scripts/normalize_icons.py`). The first of two drafts was selected; the second had heavier contours. Sources, request IDs and comparison are in `sources/artifact/`. Estimated cost $0.0896. Style review pending Jakob's acceptance.
 
+## #145 alternatives wired in (2026-10-09)
+
+`command_explore`, `category_military`, `resource_steel` and `resource_cloth` now use the latest #145 calibrations Jakob preferred (thin-line map, blue cel shield, painted steel A, matte cloth), normalized from their cutouts with `scripts/normalize_icons.py --write`. Sources, prompts and request IDs stay in `assets/alternatives/2026-10-06/`; the replaced icons and a 128/32/24 px comparison are in `sources/alternatives-integration/`. [Evidence](../../docs/verification/alternatives-integration/README.md).
+
 ## Water resource (2026-10-05)
 
 `icons/resource_water.png` is the generated/refined terracotta water jug added
