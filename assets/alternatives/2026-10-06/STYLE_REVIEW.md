@@ -1,5 +1,11 @@
 # Candidate style review — not approved for runtime
 
+**Update 2026-10-09:** at Jakob's request four candidates are now wired into the
+game: the 12c map (`command_explore`), the 11d shield (`category_military`), steel A
+from 11a (`resource_steel`) and the 10 cel cloth (`resource_cloth`). See
+[integration evidence](../../../docs/verification/alternatives-integration/README.md).
+Everything else below remains candidate-only.
+
 Current decision (2026-10-06): Jakob preferred the latest calibrations, including
 the thin-line map, and explicitly authorized merging PR #145 as a candidate
 archive. Earlier rejection findings remain valid; this does not establish runtime
