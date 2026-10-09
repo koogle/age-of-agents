@@ -33,11 +33,32 @@ arrival can change casualties. Existing saved current health is preserved; incre
 damage applies immediately, and new animals spawn at the increased maximum.
 There is no schema change or world reset.
 
+## Lion prides (2026-10-09)
+
+Jakob asked for more monsters, one class per PR with art previews first; lions
+are the first class from the [open work](../../OPEN_WORK.md) list. Every island
+after the first gets one pride: a maned **Lion** (the leader form) and 2–3
+**Lionesses**, homes within 3 cells of the leader, placed with the same safe-start
+rules as other wildlife. Pride ids continue the island's `animal-{island}-{n}` numbering.
+
+Pride rule, implemented in `tick_wildlife`: lions whose homes lie within
+`PRIDE_RADIUS` (5 cells) form one pride. When any member has a living unit inside
+its own aggro radius and territory, every member targets the nearest unit inside
+its own territory, so the pride converges together. Each lion still never leaves
+its territory, and other species never join a pride alert. Both kinds stay slower
+than villagers (3 cells/s off-road), so retreat still works. No schema change: old
+saves load; only islands discovered after the update gain prides.
+
+Art: `assets/sprites/lion_sources/` (prompts, renders, cutouts, provenance) packed
+as atlas rows 3–4 by `scripts/pack_wildlife.py`. The sources are 512px cells,
+placed unenlarged in 627px frames and drawn with a larger quad. Draft status and
+style review: [lion review](../verification/lions/README.md).
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
 attack orders, animal pursuit/damage and cleanup. The first island gets one wolf and one boar; the second and later
-islands get one bear, 1–3 wolves and 2–3 boars where valid cells exist. Starting animals are at least 26
+islands get one bear, 1–3 wolves, 2–3 boars and one lion pride where valid cells exist. Starting animals are at least 26
 cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships.
@@ -47,6 +68,8 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 | Boar | 60 | 10 | 2.2 | 4 / 8 |
 | Wolf | 300 | 35 | 2.5 | 6 / 10 |
 | Bear | 600 | 50 | 1.8 | 4 / 6 |
+| Lioness | 250 | 30 | 2.8 | 6 / 12 |
+| Lion | 500 | 45 | 2.4 | 6 / 12 |
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.

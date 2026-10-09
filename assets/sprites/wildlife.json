@@ -1,7 +1,7 @@
 {
   "size": [
     2508,
-    1881
+    3135
   ],
   "frames": {
     "wolf_idle": [
@@ -73,6 +73,54 @@
     "boar_attack_strike": [
       1881,
       1254,
+      627,
+      627
+    ],
+    "lioness_idle": [
+      0,
+      1881,
+      627,
+      627
+    ],
+    "lioness_walk": [
+      627,
+      1881,
+      627,
+      627
+    ],
+    "lioness_attack_windup": [
+      1254,
+      1881,
+      627,
+      627
+    ],
+    "lioness_attack_strike": [
+      1881,
+      1881,
+      627,
+      627
+    ],
+    "lion_idle": [
+      0,
+      2508,
+      627,
+      627
+    ],
+    "lion_walk": [
+      627,
+      2508,
+      627,
+      627
+    ],
+    "lion_attack_windup": [
+      1254,
+      2508,
+      627,
+      627
+    ],
+    "lion_attack_strike": [
+      1881,
+      2508,
       627,
       627
     ]

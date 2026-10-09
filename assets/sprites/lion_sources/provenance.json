@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-09",
+  "status": "Draft 1: FAL generation and birefnet cutout only; no OpenAI image_gen refinement pass yet.",
+  "lioness": {
+    "model": "fal-ai/nano-banana/edit",
+    "prompt": "lioness_prompt.txt",
+    "references": {
+      "assets/sprites/wildlife_sources/boar-approved-animation.png": "7d6fa600703b2b58f056b24860b6bda837eb03e4bdb4201b155e9106c2a2a2b3",
+      "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8",
+      "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+    },
+    "renders": {
+      "lioness_render_0.png": "01a11fa1-9c8c-76c1-b7a4-1a5e894db5ce (selected)",
+      "lioness_render_1.png": "01a11fa1-da37-7c83-91f1-426329406b84 (rejected: black cell backgrounds)",
+      "lioness_render_2.png": "01a11fa2-1819-7093-a586-d8d7e7e7e0ad (rejected: checkerboard, non-square)"
+    },
+    "cutout": {"lioness_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa1-cc60-7702-8cea-60a61020e2ac"}
+  },
+  "lion": {
+    "model": "fal-ai/nano-banana/edit",
+    "first_round": "Three requests (01a11fa2-8dc6-7c61-b906-f43e47250f80, 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62, 01a11fa3-0a72-7370-bfbd-c3dcf1c78214) referenced lioness_render_0.png and drew maneless lionesses in some cells; outputs were overwritten except the identity crop lion_identity_ref.png (top-left cell of the second request).",
+    "prompt": "lion_prompt.txt (second round)",
+    "references": {
+      "assets/sprites/lion_sources/lion_identity_ref.png": "top-left 512px cell of first-round request 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62",
+      "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8"
+    },
+    "renders": {
+      "lion_render_0.png": "01a11fa3-774a-7262-808f-ad11bc29a639 (selected: clearest swipe strike)",
+      "lion_render_1.png": "01a11fa3-b3ab-7c71-895f-1db7275ce251 (alternative)",
+      "lion_render_2.png": "01a11fa3-f8bf-71d0-81a3-a6b3cebbcc51 (alternative: lower windup crouch)"
+    },
+    "cutout": {"lion_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa3-a71c-7531-a066-73f6f0aae9c3"}
+  },
+  "packing": "scripts/pack_wildlife.py: 1024x1024 sheets, 512px cells placed unenlarged in 627px atlas frames (rows 3 and 4), lowest paws on the shared y=590 baseline."
+}

@@ -8,7 +8,7 @@ Finished work lives in merged PRs, `README.md` and the
 
 - Master is deployed through the merge-triggered
   [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml);
-  the latest release includes [#159](https://github.com/koogle/age-of-agents/pull/159).
+  the latest release includes [#161](https://github.com/koogle/age-of-agents/pull/161).
   Store version 19.
 - A run is playable end to end: a seeded 5–7 island archipelago under fog with only
   the temple island marked, player-steered ships with one-tap returns, the run-down
@@ -16,12 +16,15 @@ Finished work lives in merged PRs, `README.md` and the
   `crates/game/tests/full_run.rs` wins seed 7 through player commands alone in about
   455 simulated seconds. Guides: [archipelago](docs/knowledge/archipelago-and-transport.md),
   [temple and artifact](docs/knowledge/temple-and-artifact.md).
-- The run is still far too easy: no wildlife on the route and a short walk from the
-  landing to the temple.
+- The run is still far too easy: a short walk from the landing to the temple, and
+  wildlife strength does not yet scale with distance.
+- Lions are in review on `claude/laughing-goodall-10lotl`: one pride (maned lion
+  plus 2–3 lionesses) per later island that hunts together. Art is draft 1 and
+  waits on Jakob's style call ([evidence](docs/verification/lions/README.md)).
 
 ## Next steps to finish the capture-the-flag loop
 
-Proposed order, one PR each unless noted; nothing below is implemented. Each step
+Proposed order, one PR each unless noted; only the lions in step 3 are started. Each step
 keeps `tests/full_run.rs` passing and extends it once the step changes the run.
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers, healing,
@@ -30,7 +33,7 @@ keeps `tests/full_run.rs` passing and extends it once the step changes the run.
 2. **Per-island difficulty.** Monster counts and strength scale with each island's
    distance from home; the temple island gets guardians, so landing beside the
    temple is no longer a free win.
-3. **Monster classes, one PR each with art previews first:** lions, giant snakes,
+3. **Monster classes, one PR each with art previews first:** lions (in review), giant snakes,
    skeletons, barbarians, centaurs, cyclops and minotaur, each with its own
    behavior. Every class can come in several forms (Jakob, 2026-10-08: for
    example a cyclops general or a barbarian chieftain); these are illustrations
