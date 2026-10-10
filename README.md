@@ -22,7 +22,7 @@ Wildlife combat is implemented; broader combat, calamities and permanent progres
 - Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
 - A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe. The Sanctuary of the Gods holds the Artifact of the Gods; carrying it home to a town center wins the run.
-- Territorial wolves, bears and boars, lion prides that hunt together, ambushing giant snakes, unit health and hunting orders.
+- Territorial wolves, bears and boars, lion prides that hunt together, unit health and hunting orders.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
 - SQLite saves for hosted games; native and browser-local games are in-memory.

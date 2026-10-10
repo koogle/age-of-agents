@@ -745,9 +745,7 @@ impl GameWorld {
                 .animals
                 .iter()
                 .filter(|a| {
-                    !a.concealed(&self.units)
-                        && visible.contains(&a.cell)
-                        && a.step.is_none_or(|s| visible.contains(&s.to))
+                    visible.contains(&a.cell) && a.step.is_none_or(|s| visible.contains(&s.to))
                 })
                 .cloned()
                 .collect(),
