@@ -34,13 +34,15 @@ packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-fro
   faded outlines (value 0.87, 3.6% dark pixels); the regenerated one (bottom) is
   anchored to the lion (S0.57, 11% dark pixels in the packed frame).
 - `reink-before-after.png` and `reink-zoom.png`: a packer re-ink step that matched
-  the wolf's numbers (ink 0.24/0.20 against 0.21) and was removed the same day:
-  Jakob ruled that line work goes through an image model. They remain as the
-  measured target for the pending model pass.
+  the wolf's numbers and was removed the same day: Jakob ruled that line work
+  goes through an image model. Kept as the measured target.
+- `ink-before-after.png` and `ink-zoom.png`: the model ink pass that replaced it
+  (`nano-banana-pro/edit`, wolf sheet attached). Packed frames: ink luminance
+  0.16–0.18 against the wolf's 0.18–0.21, line coverage 2.7–3.9% against 2.5–3.0%,
+  silhouette edge 0.98–1.25 against 0.80–0.87, with no packer processing.
 
-Matches: flat cel colour areas with one soft-edged shadow tone, the wolf's stroke width, consistent identity and colour across
-poses, crouched windups, open-jaw strikes. Still open: ink is lighter and redder than the wolf's and the lion's silhouette
-softer (a model pass is pending on FAL balance); both lions are slightly more
+Matches: flat cel colour areas with one soft-edged shadow tone, the wolf's ink colour, stroke width and continuous hard-edged contour, consistent identity and colour across
+poses, crouched windups, open-jaw strikes. Still open: both lions are slightly more
 realistic than the wolf; no OpenAI image_gen cleanup pass yet.
 
 ## Behavior checks run

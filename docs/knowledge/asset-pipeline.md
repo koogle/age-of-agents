@@ -233,7 +233,12 @@ colour, continuous crisp outlines and short interior lines. Jakob (2026-10-10):
 line work and shading fixes go through an image model, per the asset workflow;
 a packer re-ink step (snap strokes to the wolf's ink, harden alpha, sharpen) and
 a 2K stroke-shave were built, matched the numbers, and were then removed for
-that reason. Pixel code in the packer is for registration and packing only. Provenance:
+that reason. Pixel code in the packer is for registration and packing only. The model pass
+that replaced them (`lion_sources/ink_prompt.txt`: keep everything, redraw the
+outlines in the wolf's deep brown-black ink, continuous and crisp, with his short
+interior lines) landed on the wolf's numbers in one round when the ask named
+ink colour and continuity rather than "thinner"; an earlier "thinner lines"
+prompt had barely moved line weight. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)

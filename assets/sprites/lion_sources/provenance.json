@@ -1,7 +1,7 @@
 {
   "date": "2026-10-09",
   "status": "Integrated 2026-10-10: cel-shaded naturalistic island huntress (lioness) and Nemean lion (leader), with packer line thinning.",
-  "packing": "scripts/pack_wildlife.py: huntress_cel/nemean_cel cutouts, thin_lines() (1px shave, no lightening), a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames, then reink() per frame, on atlas rows 3-4 with the lowest paws on y=590.",
+  "packing": "scripts/pack_wildlife.py: huntress_ink/nemean_ink cutouts; a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames on atlas rows 3-4 with the lowest paws on y=590. No pixel processing beyond registration and downsampling.",
   "draft_1_2026-10-09": {
     "lioness": {
       "model": "fal-ai/nano-banana/edit",
@@ -314,20 +314,39 @@
     "superseded": "Jakob (2026-10-10): use an image model per the asset rules. reink() and thin_lines() removed from the packer; the atlas is repacked from the same cel cutouts without them."
   },
   "ink_pass_2026-10-10": {
-    "status": "blocked",
+    "status": "integrated",
+    "direction": "Jakob: use an image model per the asset rules for the line work (not packer pixel code); match the wolf's clear, sharp line work.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
     "prompt": "ink_prompt.txt",
-    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
-    "references": {
-      "lion": [
+    "blocked_first": "FAL balance exhausted; pre-lock lion request 01a12776-0d11-7293-9e6b-24ee9fa67583 completed but stayed locked (TOP_UP) after the top-up and was never retrieved. Jakob repurchased credits; new requests went through after about 30 s.",
+    "lioness": {
+      "references": [
+        "huntress_cel3_render_1.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a12781-de82-7321-a2b1-a2aa41510f1c",
+      "renders": {
+        "huntress_ink_render_0.png": "ink lum 0.24, coverage 3.1%: heavier interior crease lines",
+        "huntress_ink_render_1.png": "selected: ink lum 0.20, coverage 2.9%, continuous dark contour"
+      },
+      "cutout": {
+        "huntress_ink_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12783-7a92-7240-893f-04592e9485c8"
+      }
+    },
+    "lion": {
+      "references": [
         "nemean_cel_render_0.png",
         "wildlife_sources/npc-style-refined.png"
       ],
-      "lioness": [
-        "huntress_cel3_render_1.png",
-        "wildlife_sources/npc-style-refined.png"
-      ]
+      "request_id": "01a12782-9407-7ea0-9c48-fe042149fa47",
+      "renders": {
+        "nemean_ink_render_0.png": "ink lum 0.25, coverage 3.8%",
+        "nemean_ink_render_1.png": "selected: ink lum 0.20, coverage 4.2% (mane-strand strokes), darkest continuous contour"
+      },
+      "cutout": {
+        "nemean_ink_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12783-b7c6-79e3-aa6e-18df313485e3"
+      }
     },
-    "lion_request_id": "01a12776-0d11-7293-9e6b-24ee9fa67583 (accepted; the account locked before the result could be fetched: 'User is locked. Reason: TOP_UP')",
-    "lioness_request": "rejected at submit: 'Exhausted balance. Top up your balance at fal.ai/dashboard/billing'"
+    "measurement_note": "Render-stage stats key the white background with a hard threshold, which inflates the edge-gradient column; compare ink luminance and coverage only at render stage, all three on packed frames."
   }
 }
