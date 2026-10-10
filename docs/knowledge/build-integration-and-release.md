@@ -97,7 +97,7 @@ real browser acceptance. Preserve this distinction in release reports.
 including [queue/HD integration](https://github.com/koogle/age-of-agents/commit/380c1b8),
 [shared resources/research](https://github.com/koogle/age-of-agents/commit/ccb0c25)
 and [minimap/archipelago](https://github.com/koogle/age-of-agents/commit/0ccf681).
-[Native fixes](../NATIVE_FIXES_REVIEW.md) deliberately excluded obsolete camera/depth
+Native fixes deliberately excluded obsolete camera/depth
 alternatives rather than replacing newer whole files.
 
 **Lesson:** Before integrating, inspect current base and overlapping changes,
@@ -160,5 +160,5 @@ On the macOS host, Modal 1.5.3 reports default `radiantai` and also has the
 `koogle-frick` profile configured. Explicit `MODAL_PROFILE=koogle-frick` status
 successfully lists the production app. This supersedes historical unavailable
 profile findings for this host/session only; always inspect current profiles.
-The Rust subtraction pass uses the existing manual deploy-and-verify command;
-its outcome is recorded in [refactor evidence](../verification/rust-refactor/README.md).
+The Rust subtraction pass (#153) used the existing manual deploy-and-verify command
+and passed its production workflow.

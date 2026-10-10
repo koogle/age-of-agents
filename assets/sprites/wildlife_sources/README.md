@@ -46,9 +46,6 @@ inside the existing 627px frame layout, with the opaque paw baseline at y=590.
 The renderer uses that common baseline. Sources are never enlarged. Existing
 world sprite sizes, simulation behavior, manifests and facing scope are retained.
 
-[NPC comparison and review](../../../docs/verification/2026-10-05-animal-style/REVIEW.md)
-contains the actual shipped villager/woman/elder/guard alongside old and new animals.
-
 ## Authored attacks, 2026-10-05
 
 `npc-attack-refined.png` adds a wolf braced windup / open-jaw bite and a bear
@@ -63,9 +60,6 @@ planted rear-paw landmarks to idle, preserving body position when the front paw
 lifts. The moving front paw does not determine whole-body registration.
 The packer writes both PNG and JSON; all eight frames exceed the 512px minimum.
 
-[Attack comparison and integration review](../../../docs/verification/2026-10-05-animal-attacks/REVIEW.md)
-records style, grounded registration and desktop/phone evidence.
-
 ## Boars, 2026-10-06
 
 Jakob requested the earlier `draft.png` boar (removed) as an additional danger.
@@ -77,9 +71,6 @@ strokes; the final pass matches the approved family’s broad cel masses.
 Four 627px source cells hold idle, walk, lowered-head windup and tusk strike.
 The packer appends them as a third atlas row (2508×1881), preserving all eight
 wolf/bear frames byte-for-byte. No original source pixels are enlarged.
-
-[Boar style and integration evidence](../../../docs/verification/boars/REVIEW.md)
-records the final comparison, desktop and phone hunting, and verification scope.
 
 ## Reopened style review
 

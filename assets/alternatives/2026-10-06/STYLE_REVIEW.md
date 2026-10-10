@@ -2,8 +2,7 @@
 
 **Update 2026-10-09:** at Jakob's request four candidates are now wired into the
 game: the 12c map (`command_explore`), the 11d shield (`category_military`), steel A
-from 11a (`resource_steel`) and the 10 cel cloth (`resource_cloth`). See
-[integration evidence](../../../docs/verification/alternatives-integration/README.md).
+from 11a (`resource_steel`) and the 10 cel cloth (`resource_cloth`).
 Everything else below remains candidate-only.
 
 Current decision (2026-10-06): Jakob preferred the latest calibrations, including

@@ -30,9 +30,7 @@ This explicitly authorizes hiding Barracks, Smelter, Kiln and Weaver on island o
 
 Transport must remain affordable before later-island materials are available. Verify the whole budget, including raw wood consumed to make timber, rather than only the final recipe price.
 
-Read [current decisions](../../decisions.md) and the
-[starter economy review](../STARTER_ECONOMY_REVIEW.md) for rationale; the review's
-old transport deferrals are explicitly historical. Deposited stocks belong to individual islands, supplemented by stopped shore ships; costs reserve once from shore then ship cargo, while outputs/refunds remain on the job’s island. Research remains shared. Personal cargo is covered by [tasks and cargo](tasks-and-cargo.md).
+Read [current decisions](../../decisions.md) for rationale. Deposited stocks belong to individual islands, supplemented by stopped shore ships; costs reserve once from shore then ship cargo, while outputs/refunds remain on the job’s island. Research remains shared. Personal cargo is covered by [tasks and cargo](tasks-and-cargo.md).
 
 ## Water and fields (2026-10-05)
 
@@ -52,8 +50,7 @@ cargo test -p aoa-game --locked progression_tests
 Cover a full queue, exact costs/refunds, stale cancellation, blocked spawning,
 duplicate research across buildings, insufficient inputs, housing release and
 reload. On desktop and phone, use actual controls to fill and cancel a queue and
-observe authoritative resource totals. [Queue review](../BUILDING_QUEUES_REVIEW.md)
-records the implementation evidence; [#64](https://github.com/koogle/age-of-agents/pull/64)
+observe authoritative resource totals. [#64](https://github.com/koogle/age-of-agents/pull/64)
 and [#77](https://github.com/koogle/age-of-agents/pull/77) explain why queue identity
 and researched-state clarity are separate concerns.
 
@@ -62,7 +59,6 @@ discovered failure case. Mark balance proposals as proposed until implemented;
 write the useful procedure or invariant here and only its short accepted rationale
 in `decisions.md`.
 
-Verification and reproducible menu captures: [productive building visibility](../verification/building-progression/README.md).
 
 ## Shared rule ownership (2026-10-06)
 

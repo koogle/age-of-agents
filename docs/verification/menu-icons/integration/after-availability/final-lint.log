@@ -1,7 +1,0 @@
-    Checking aoa-game v0.1.0 (/workspace/age-of-agents/crates/game)
-    Checking aoa-client v0.1.0 (/workspace/age-of-agents/crates/client)
-    Checking age-of-agents v0.1.0 (/workspace/age-of-agents)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.80s
-    Checking aoa-game v0.1.0 (/workspace/age-of-agents/crates/game)
-    Checking aoa-client v0.1.0 (/workspace/age-of-agents/crates/client)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.80s

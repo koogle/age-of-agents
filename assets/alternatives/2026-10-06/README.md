@@ -49,7 +49,6 @@ and was removed from subsequent icon requests.
 The retained base villager identity and action strips were generated with
 **`fal-ai/nano-banana/edit`**, confirmed by
 [the sprite README](../../sprites/README.md),
-[original strip prompts](../../sprites/tools/strips.py) and
 [the original ledger](../../sprites/tools/ledger.jsonl). The ledger includes
 `spr:master1`, request `01a0fa27-a532-78f1-9984-90f5057e46c7`, alongside the two
 other master candidates; the strip script selects `spr/master_1.png`.

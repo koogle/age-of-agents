@@ -22,4 +22,3 @@ grey, then off in line work and colour. Their images were removed on 2026-10-10
 under Jakob's rule; `provenance.json` keeps every request ID and review.
 Prompts, references, request IDs and reviews are in `provenance.json`. Run
 `python3 scripts/pack_wildlife.py` to repack. No OpenAI image_gen cleanup pass.
-[Review](../../../docs/verification/lions/README.md).

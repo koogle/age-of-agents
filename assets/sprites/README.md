@@ -2,8 +2,8 @@
 
 Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
 their references below describe provenance, not current reproduction commands.
-Active offline packers and original art are retained. See
-[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+Active offline packers and original art are retained; retired scripts are
+recoverable from git at `1984e9b`.
 
 Three villagers in the illustrated ink-and-wash style of the UI icon kit, rendered as camera-facing billboards in the shared Rust client. All villager actions, military actions/facings and base resource stages now use lossless 512×512 cells.
 
@@ -349,7 +349,7 @@ are in [directions/provenance.json](building_sources/directions/provenance.json)
 The `water` frame in `resources.json` uses the retained generated water jug at
 `assets/ui/sources/water/refined.png`; `scripts/pack_water.py` packs its 512px
 frame in the previously unused cell at (2560, 1024). Existing atlas frames stay
-pixel-identical. See [water verification](../../docs/verification/water/README.md).
+pixel-identical.
 
 ## Sanctuary of the Gods: `buildings_sanctuary.{png,json}` (2026-10-07)
 

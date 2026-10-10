@@ -2,8 +2,8 @@
 
 Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
 their references below describe provenance, not current reproduction commands.
-Active offline packers and original art are retained. See
-[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+Active offline packers and original art are retained; retired scripts are
+recoverable from git at `1984e9b`.
 
 One seamless, top-down painted texture per biome, sampled by `frontend/ground-paint.js` from `/assets/terrain/<name>.webp`. One repeat covers 4×4 cells, and the shader blends biome borders itself.
 
@@ -75,8 +75,7 @@ The Rust asset manifest loads these after the unchanged plot material (array
 layers 11 and 12). Sources remain at full resolution; upload resamples to 512×512
 with mipmaps, using the same mirrored/clamped sampling as plots. This guarantees
 continuous repeat edges even though the generated source is not assumed to wrap.
-No biome or building-plot pixels were changed. See the
-[style comparison and gameplay review](../../docs/verification/roads/style/README.md).
+No biome or building-plot pixels were changed.
 
 ### Stone readability correction
 
@@ -84,8 +83,7 @@ The stone material was subsequently cooled toward neutral limestone and given
 slightly stronger joints and soft face shading after Jakob found it too sandy.
 The layout, scale and sampling are unchanged. The initial sandy output is retained
 in `road_sources/stone-sandy-before.png`; [follow-up provenance](road_sources/stone-contrast.provenance.json)
-records the exact prompt and reference hashes. See the
-[before/after and gameplay review](../../docs/verification/roads/stone-contrast/README.md).
+records the exact prompt and reference hashes.
 
 ### Dirt readability correction
 
@@ -94,4 +92,4 @@ Jakob reported it was hard to see. The previous source is retained in
 `road_sources/dirt-sandy-before.png`; [follow-up provenance](road_sources/dirt-readability.provenance.json)
 records approved references and the exact prompt. The generated full-resolution
 PNG replaces only the dirt material; sampling and stone/biome/plot assets remain
-unchanged. See the [comparison and verification](../../docs/verification/roads/dirt-readability/README.md).
+unchanged.

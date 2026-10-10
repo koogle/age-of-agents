@@ -27,8 +27,6 @@ python assets/ui/sources/menu_icons/disembark_platform/pack.py
 python scripts/normalize_icons.py --check assets/ui/sources/menu_icons/disembark_platform/command_disembark.png
 ```
 
-[Runtime evidence](../../../../../docs/verification/menu-icons/disembark-platform/README.md).
-
 `before.png` preserves the rejected two-board runtime icon. `refined.png` is the
 unchanged image-tool output. Packing only applies the existing optical normalizer.
 This correction supersedes the earlier simplification review's Disembark

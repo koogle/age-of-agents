@@ -71,7 +71,7 @@ statuses, linger for eight seconds. Do not reintroduce a victory pill.
   to keep each milestone's snapshot for browser replay. It found no wildlife on
   the route and a five-second walk from landing to the temple: the run is easy
   until return-trip escalation and monsters exist.
-- [Browser evidence](../verification/temple-artifact/README.md) uses staged
+- Browser evidence uses staged
   snapshots from `archipelago_preview <seed> 1 found|carried|won`, which place a
   villager by the temple as a fixture; a full live run to the temple is not yet
   verified.

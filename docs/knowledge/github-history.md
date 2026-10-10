@@ -37,7 +37,6 @@ unavailable sources; do not infer that the user gave no feedback.
 PR bodies can summarize requests but are not full transcripts. Linked Claude
 sessions and other ChatGPT conversations were unavailable in this review. Separate
 direct user words, author summaries, source observations and inferred recommendations.
-The [audit source record](../REWORK_LESSONS.md) preserves the coverage and attribution.
 
 ## Turning findings into usable knowledge
 

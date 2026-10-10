@@ -123,7 +123,7 @@ Store version 18 resets spiral-placed worlds. Tests: `islands_tests` cover plan
 bounds/separation/determinism over 200 seeds, approach discovery without ship
 jumps, and that snapshots omit uncharted non-temple sites.
 `cargo run -p aoa-game --example archipelago_preview -- <seed> <charted>` exports
-a paused snapshot after steering into the fog toward each site; [capture and screenshots](../verification/archipelago-plan/README.md).
+a paused snapshot after steering into the fog toward each site; capture and screenshots.
 
 ## Island storage and movable ship holds (PR #94)
 
@@ -181,4 +181,4 @@ Run `cargo test -p aoa-game --locked worldgen` for shape, runoff, downhill-route
 resource and settlement checks. Near-start wood and food must be within town-center
 sight, not merely within the wider resource-placement radius: the latter can leave
 a fresh settlement with no visible gather targets. The `island_preview` example exports fully explored
-snapshots; `docs/verification/island-generation/preview.py` renders relief comparisons.
+snapshots.

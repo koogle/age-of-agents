@@ -17,7 +17,7 @@ provenance. Start from approved art and retained originals.
    Check whether existing high-resolution sources solve the problem first.
 2. For FAL generation, inspect the approved reference files and retained provenance.
    Historical batch generators are retired; recover an old recipe only when
-   needed through [the retirement record](../verification/RETIRED_TOOLS.md).
+   needed through the retirement record.
    Do not launch an old paid batch to repair one frame. The existing
    [falcall.py](../../assets/ui/tools/falcall.py) uses `FAL_KEY`, submits to the
    queue, polls and records request/cost provenance. Check current credentials
@@ -77,8 +77,7 @@ menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft
 refinement. Those initial illustrations were rejected; the corrected set was subsequently
 reviewed and merged individually in #112–#129, with runtime integration in #107.
-The [comparison](../verification/art-style/rejected-menu-drafts.png) (removed 2026-10-10: iteration evidence; final state kept) records the
-approved kit on the left and rejected drafts on the right; rejected work is
+Approved kit and rejected drafts were compared side by side; rejected work is
 negative evidence, never a new style reference.
 
 The existing art direction remains authoritative: use
@@ -186,7 +185,7 @@ Dedicated painted road swatches were refined against `diorama_primary.webp`,
 `terrain/meadow.webp` and the approved `terrain/cobblestone.png`: muted worn earth,
 irregular warm limestone, restrained shading and fine brown joints. Preserve
 building plots and biome textures. Acceptance requires normal/max-zoom desktop
-and DPR-2 phone evidence; both pass in the [material review](../verification/roads/style/README.md).
+and DPR-2 phone checks; both passed.
 Road materials occupy layers 11/12 of the existing texture array and use its
 mirrored, mip-clamped sampling; retain full-resolution originals and record exact
 prompts/reference hashes before integration.
@@ -262,7 +261,7 @@ and requested slightly stronger material definition. Refine only stone toward
 neutral limestone grey with modestly deeper fine joints and clearer soft face
 shading; retain the irregular layout and painted style. Dirt stays unchanged.
 Jakob preferred the revised neutral-limestone texture after seeing the comparison.
-Desktop and DPR2 phone normal/max-zoom review passes; see the [follow-up review](../verification/roads/stone-contrast/README.md).
+Desktop and DPR2 phone normal/max-zoom review passed.
 
 ## Alternative batches (2026-10-06, reviewed archive)
 
@@ -355,4 +354,4 @@ The local replacement uses deeper ochre-brown packed earth with restrained paint
 variation, retaining the diorama/meadow family, fine pebble contours and mirrored
 sampling. Desktop and emulated DPR2 phone default/maximum zoom show clearer separation
 from meadow, retaining fine detail without visible repeat seams. Judge the result under actual terrain lighting;
-source contrast alone is insufficient. [Follow-up evidence](../verification/roads/dirt-readability/README.md).
+source contrast alone is insufficient.

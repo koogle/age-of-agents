@@ -58,7 +58,6 @@ the wolf's outlines. Line work is the image model's job: Jakob removed the
 packer's thinning and re-ink steps on 2026-10-10 under the asset rules. Sources are 1024px cells downsampled
 into 627px frames; quads are 0.95 and 1.0, so the leader stands about a fifth
 taller ([asset lesson](asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
-Style review: [lion review](../verification/lions/README.md).
 
 ## Giant snakes (2026-10-10)
 
@@ -127,8 +126,8 @@ border follows each visible friendly unit and animal. Green is above 50%, orange
 is 25–50%, and red is at or below 25%; animal fractions use species maximums.
 Combat damage is shown by the shrinking bar instead of floating numbers;
 status and cargo feedback retain their existing rise/fade behavior.
-[Replay and review](../verification/health-bars/README.md) cover desktop and
-emulated DPR2 phone presentation.
+`docs/verification/replay_health.py` covers desktop and emulated DPR2 phone
+presentation.
 
 ## Presentation and persistence
 
@@ -160,7 +159,6 @@ phone touch to select an archer and attack a wolf. A subsequent explicit WebSock
 group order recruits the squad (additive touch selection is not implemented). It verifies damage both ways,
 defeat and cleanup, captures screenshots and checks page errors. The controlled
 fixture is not evidence of natural spawn placement (domain tests cover that).
-See [review/evidence](../verification/2026-10-05-wildlife/REVIEW.md).
 
 Browser-verifier timing: software-rendered screenshot capture can take enough
 wall time for combat and subsequent attacks to finish. Pause authoritative
@@ -221,4 +219,3 @@ poses; do not substitute the second, more textured silhouette study. The selecte
 Stronger-wolf browser fixtures start the attack target outside its six-cell aggro
 radius. Otherwise resuming simulation before clicking can move the wolf away
 from its captured screen position and dispatch a ground move instead of an attack.
-Balance evidence and reproduction: [stronger wildlife](../verification/stronger-wildlife/README.md).

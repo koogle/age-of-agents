@@ -1,9 +1,0 @@
-{
-  "name": "unit_guard",
-  "wasm_sha256": "501ae3b24b5731ad2e3098001d591235421f8ada260bcd05554c5c280d485093",
-  "errors": [],
-  "viewports": [
-    "390x844 DPR2 phone"
-  ],
-  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
-}

@@ -133,8 +133,7 @@ recommendations; product evolution is not automatically a mistake.
 
 For each useful finding, update the relevant system/procedure document with what
 future work needs, including evidence and verification limits. Create new topic
-files where needed. Keep only coverage/attribution in an audit such as
-`docs/REWORK_LESSONS.md`; do not collect all learnings there. Open PRs do not
+files where needed. Do not collect all learnings in one audit file. Open PRs do not
 establish shipped behavior and this workflow does not authorize remote comments
 or changes to PR state.
 

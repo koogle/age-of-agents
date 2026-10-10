@@ -21,9 +21,10 @@ and its assumptions, then run from the repository root with Python `aiohttp`,
 python docs/verification/replay_presentation.py --output /tmp/aoa-presentation-check
 ```
 
-The driver uses loopback port 8001, a retained fixture and controlled time. See
-[presentation verification](../PRESENTATION_VERIFICATION.md) for its atlas decoder
-and interpretation limits. Its assertions are not an end-to-end gameplay proof;
+The driver uses loopback port 8001, a retained fixture and Playwright's paused
+clock (software rendering cannot resolve a 100 ms pause in wall time). It records
+sprite anchors/UVs through a read-only `bufferSubData` wrapper; atlas or layout
+changes require revisiting that decoder. Its assertions are not an end-to-end gameplay proof;
 UI commands against an isolated hosted save answer a different question.
 
 `python3 docs/verification/replay_reconnect.py --output /tmp/aoa-reconnect-check`
@@ -39,8 +40,12 @@ suite. Advancing a synthetic clock through every expensive WebGL frame made this
 reconnect test impractically slow, so it does not use the presentation driver's
 blanket clock control.
 
-Store reusable fixtures/drivers and selected evidence under `docs/verification/`
-when they support a lasting claim. A result should identify revision/bundle,
+`docs/verification/` holds only the maintained drivers and their fixtures (plus
+comparison sheets for a style call still pending with Jakob). Jakob (2026-10-10):
+do not commit captures of final states; the sprites, textures and code are the
+source of truth. Show screenshots in chat or the PR instead. Commit intermediate
+work only when it is critical for future learning, and prefer writing the lesson
+into the relevant guide. A reported result should still identify revision/bundle,
 mode, fixture/seed, viewport/DPI/platform, procedure, observed state and remaining
 limits. Label emulated phones, native appearance and production checks separately.
 
@@ -70,9 +75,8 @@ physical device answer different questions.
 **Recovered gaps:** Live open PRs are recorded in the handoff; the four from the original history review are a dated snapshot. The current code
 still lacks accessible DOM controls and additive touch selection. Native
 macOS/Windows reset appearance and physical-phone safe areas remain unverified
-in reviewed evidence. These are not reopened completed fixes. Store useful
-replay scripts/screenshots in the repository; temporary paths and old test
-counts alone are insufficient future evidence.
+in reviewed evidence. These are not reopened completed fixes. Keep useful
+replay drivers in the repository; record lessons in guides rather than screenshots.
 
 ## Keep this guide current
 
@@ -85,7 +89,7 @@ focused topic from the [knowledge index](INDEX.md).
 
 Use the maintained batch driver below for menu presentation and pointer/touch
 dispatch. The former single-icon driver and dated feature-specific captures are
-retired; see [the retirement record](../verification/RETIRED_TOOLS.md). Domain
+retired (recoverable from git history at `1984e9b`). Domain
 tests remain the authority for gameplay, and real-server road/wildlife drivers
 exercise acceptance against an isolated save.
 
@@ -123,7 +127,8 @@ proof merely because it produced no browser errors.
 
 ## Build-feedback browser checks (2026-10-06)
 
-`docs/verification/check_build_feedback.py --output DIR` exercises the menu and overhead complaints on desktop and DPR-2 touch; `--mode desktop` or `--mode phone` isolates a viewport. It advances the game's presentation clock in steps below the 250ms client frame clamp and waits for HUD uploads. When throttling animation with timeout IDs, replace cancellation with `clearTimeout` too: winit cancels pending frames during input, and native cancellation cannot cancel a timeout. Pair browser creation with `finally` cleanup. See [the feedback evidence](../verification/build-feedback/README.md).
+`docs/verification/check_build_feedback.py --output DIR` exercises the menu and overhead complaints on desktop and DPR-2 touch; `--mode desktop` or `--mode phone` isolates a viewport. It advances the game's presentation clock in steps below the 250ms client frame clamp and waits for HUD uploads. When throttling animation with timeout IDs, replace cancellation with `clearTimeout` too: winit cancels pending frames during input, and native cancellation cannot cancel a timeout. Pair browser creation with `finally` cleanup.
+
 ## Task-selection fixtures (2026-10-06)
 
 The [building-selection replay](../verification/building_selection.py) sends
@@ -136,6 +141,28 @@ the town center selected while selection counts still looked correct. The fixed
 fixture zooms out for setup, uses touch for selection, and verifies a stopped
 carrier's deposit names the mill before testing gathering exclusions.
 
+## Browser replay pitfalls (recovered from retired evidence, 2026-10-10)
+
+- Feedback labels age on simulation time and appear only when consecutive
+  snapshots differ. Streaming snapshots in real time under software WebGL lets
+  playback fall more than eight ticks behind; the client resynchronizes and
+  clears feedback, so no label appears. Send 1× snapshots once each while
+  stepping a paused page clock, as `replay_status.py` does.
+- After an authoritative state change, wait for rendered frames before clicking
+  controls whose layout changes with it: a wall-clock sleep under software WebGL
+  left the old Build/Stop layout on screen and clicked Stop.
+- Drivers that batch ticks between inputs must wait for the final snapshot and
+  a few rendered frames before the next input, or they click a stale view.
+- Slow screenshots let combat continue; pause the simulation for combat
+  screenshots so later health assertions are not invalidated.
+- Maximum zoom: eight wheel events reach the minimum camera distance from the
+  full range. Drag beyond the input threshold before zooming, or a near-center
+  NPC gets selected instead of panning.
+- The HUD rounded-rectangle shader leaves a zero-radius interior at half
+  opacity; thin bars need at least a one-pixel radius to keep full colour.
+- Worldgen must keep starter wood and food inside town-center sight; the old
+  16-cell "near start" radius could leave both under fog.
+
 ## Subtraction policy (2026-10-06)
 
 Jakob explicitly requested cutting repetitive tests/fixtures and substantially
@@ -144,5 +171,4 @@ results and provenance are already retained; keep current acceptance drivers,
 release checks and offline rebuild paths. Preserve useful behavioral regressions;
 fixture-generator self-tests and duplicated setup are candidates for removal.
 This does not authorize removing gameplay, art sources, provenance or save safety.
-Retired tools and their replacement/recovery paths are listed in
-[the retirement record](../verification/RETIRED_TOOLS.md).
+Retired tools are recoverable with `git show 1984e9b865fde8f5ac03e86801f12636ad27232a:PATH`.

@@ -28,8 +28,7 @@ cargo test -p aoa-game --locked construction_tests
 cargo test -p aoa-game --locked fields_tests
 ```
 
-See [the field audit limits](../FIELD_GATHERING_REVIEW.md#limits) before diagnosing
-an old save. Prevention does not relocate already-blocking plots.
+Prevention does not relocate already-blocking plots.
 
 ## Idle units make way (2026-10-08)
 
@@ -61,8 +60,7 @@ tick }`) to "Cannot build here." plus the command error's player text; the clien
 (`feedback.rs`) shows a changed notice as a three-second status label in place of
 "Idle". The field is optional with a serde default, so existing saves load
 unchanged and no store-version bump is needed. Tests: `construction_tests` (blocked,
-unaffordable, unreachable) and `feedback::tests::a_rejected_build_site_says_why_instead_of_idle`;
-[captures](../verification/build-notice/README.md).
+unaffordable, unreachable) and `feedback::tests::a_rejected_build_site_says_why_instead_of_idle`.
 
 ## Destination searches and deterministic routes
 
@@ -122,8 +120,6 @@ make facing derived data, so no new persisted field or save reset is needed.
 All four views have foundation, wall, roof and complete frames; see the
 [directional provenance](../../assets/sprites/building_sources/directions/provenance.json).
 
-Reproduce the visual check with `docs/verification/check_dock_facings.py`; see
-[verification and review](../verification/dock-facing/README.md) for scope and release limits.
 
 ## Basic roads (2026-10-05)
 
@@ -137,7 +133,7 @@ land on one island, reserve new-cell costs once, and can resume existing
 work. Crossing segments retain existing material and charge only for new cells. Buildings may still cover road cells; their ordinary occupancy takes priority.
 
 The client Roads group uses two taps/clicks and snaps the endpoint to the dominant
-axis. Roads use dedicated painted earth and irregular limestone swatches; building plots retain their original cobblestone. See the [road material review](../verification/roads/style/README.md).
+axis. Roads use dedicated painted earth and irregular limestone swatches; building plots retain their original cobblestone.
 Weighted Dijkstra minimizes travel time for friendly movement and drop-site
 selection. Each edge averages endpoint traversal time, matching the movement
 speed on transitions; diagonal costs approximate Euclidean distance at milliscale.
@@ -147,7 +143,7 @@ The ten focused road tests cover detours, travel-time storage selection, exact
 cell-boundary speed changes, diagonals/corners, animals, atomic rejection,
 Stop/resume, saved progress, unloading first, shared work and mixed crossings.
 The full workspace passes 289 tests (one manual benchmark ignored). Browser
-procedure and visual evidence live in [road verification](../verification/roads/README.md).
+acceptance: `docs/verification/check_roads.py`.
 Clicking an unfinished cell with villagers selected resumes all unfinished pieces
 of its edge-connected road network (Jakob, 2026-10-06), including bends, mixed
 materials and completed connecting pieces. Corner-only contact and separate roads

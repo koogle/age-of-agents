@@ -12,7 +12,7 @@ Approved family references: original wood and masonry UI kit, retained in `../re
 | Shape/detail | Pass: Matte charcoal lumps remain dark, with fine grey-brown facets; distinct from rusty iron ore and pale steel bars. |
 | Camera/scale | Pass: existing three-quarter family view; normalized optical weight and safe circle |
 | Alpha/background | Pass: silhouette inspected on three backgrounds, transparent corners, no visible white matte |
-| Runtime integration | Pass in [#107](https://github.com/koogle/age-of-agents/pull/107): [desktop/phone evidence](../../../../../docs/verification/menu-icons/resource_coal/result.json) |
+| Runtime integration | Pass in [#107](https://github.com/koogle/age-of-agents/pull/107): desktop/phone evidence |
 
 The larger source is retained alongside provenance. Rejected earlier refinement and full sheet are retained as negative evidence, not approved references.
 

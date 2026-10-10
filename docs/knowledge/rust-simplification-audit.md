@@ -3,7 +3,7 @@
 Read before refactoring shared command rules, test fixtures or Python tooling.
 Reviewed 2026-10-06 against master `a8188f1`; implementation is on
 `codex/reduce-tests-tooling`. Release/verification status lives in
-[OPEN_WORK](../../OPEN_WORK.md) and [the verification record](../verification/rust-refactor/README.md).
+[OPEN_WORK](../../OPEN_WORK.md).
 
 ## Scope and developer steering
 
@@ -50,9 +50,8 @@ save-before-commit and publication behavior.
 
 32 historical Python generation/contact/capture scripts are retired. Active
 packers, release checks and current acceptance drivers remain, including the
-newly updated boar-pose replay. Original art, provenance and recorded evidence
-are retained. [The retirement record](../verification/RETIRED_TOOLS.md) lists every
-path and immutable Git recovery; retired commands are not current procedures.
+newly updated boar-pose replay. Original art and provenance are retained. Retired scripts are recoverable
+from `1984e9b`; retired commands are not current procedures.
 
 The cleanup integrates newer boars, connected-road resume, menu/error feedback,
 stationary status and health bars. Source savings, test results, browser hashes

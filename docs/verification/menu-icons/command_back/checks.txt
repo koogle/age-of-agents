@@ -1,5 +1,0 @@
-Combined integration: 272 Rust tests, formatting, strict native/WASM lint and rebuilt bundle pass.
-Desktop and DPR2 phone rendering/input pass; screenshot pixel dimensions asserted.
-All 298 sprite frames, icon normalization and 18 exact source reproductions pass.
-Six release-verifier unit tests pass.
-Controlled fixture evidence only; physical phones and native-window appearance remain unverified.

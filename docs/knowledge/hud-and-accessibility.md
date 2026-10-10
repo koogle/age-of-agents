@@ -28,17 +28,17 @@ snapshot to HUD state to hit dispatch to typed command; the domain revalidates.
 cargo test -p aoa-client --locked hud::layout_tests
 ```
 
-The [compact HUD review](../COMPACT_HUD_REVIEW.md) contains the viewport matrix.
+The `hud::layout_tests` matrix covers the viewports.
 Accessible DOM controls and additive touch selection remain implementation gaps;
 verify [current open work](../../OPEN_WORK.md) before reporting them complete.
 
 ## Build subcategory card
 
-User steering (2026-10-06, updated): remove the top-middle build hint bubble; show hovered build details in the menu's existing information area. Placement instructions remain in that area on mouse and touch. Commands and complaints from NPCs, including blocked placement and server rejection, belong in the fading overhead status. This supersedes the earlier subcategory-card removal/toast routing. Implemented in the shared HUD: build groups reuse the info panel, placement keeps costs/instructions visible, and local failures use `Feedback::message`. Server failures retain the command’s unit IDs and correlate replies by request ID, independently of current selection. Movement also flashes its status. Resource/system information uses the selection detail area or a lower hint when nothing is selected. Desktop mouse and DPR2-phone touch checks, 302 combined workspace tests and strict native/WASM lint pass; [evidence and reproduction](../verification/build-feedback/README.md). No simulation or save changes.
+User steering (2026-10-06, updated): remove the top-middle build hint bubble; show hovered build details in the menu's existing information area. Placement instructions remain in that area on mouse and touch. Commands and complaints from NPCs, including blocked placement and server rejection, belong in the fading overhead status. This supersedes the earlier subcategory-card removal/toast routing. Implemented in the shared HUD: build groups reuse the info panel, placement keeps costs/instructions visible, and local failures use `Feedback::message`. Server failures retain the command’s unit IDs and correlate replies by request ID, independently of current selection. Movement also flashes its status. Resource/system information uses the selection detail area or a lower hint when nothing is selected. Desktop mouse and DPR2-phone touch checks, 302 combined workspace tests and strict native/WASM lint pass; evidence and reproduction. No simulation or save changes.
 
 ## NPC status feedback
 
-User steering (2026-10-06): status messages should remain at the world position where they appeared, rising and fading out instead of following the NPC. Implemented in `feedback.rs`: status labels retain their initial anchor while the existing 1.4-second rise/fade runs. Entity IDs still replace feedback on rapid orders; health now follows units through persistent bars instead of damage labels (see [wildlife health display](wildlife.md#health-display-direction-2026-10-06)). The regression test moves the NPC on both axes and checks replacement at its new position. Desktop and emulated DPR-2 phone WebGL replay checks fixed horizontal position, upward motion, fade and expiry without page errors; [evidence and reproduction](../verification/status-feedback/README.md).
+User steering (2026-10-06): status messages should remain at the world position where they appeared, rising and fading out instead of following the NPC. Implemented in `feedback.rs`: status labels retain their initial anchor while the existing 1.4-second rise/fade runs. Entity IDs still replace feedback on rapid orders; health now follows units through persistent bars instead of damage labels (see [wildlife health display](wildlife.md#health-display-direction-2026-10-06)). The regression test moves the NPC on both axes and checks replacement at its new position. Desktop and emulated DPR-2 phone WebGL replay checks fixed horizontal position, upward motion, fade and expiry without page errors; evidence and reproduction.
 
 ## Mobile time-control spacing
 
@@ -63,7 +63,7 @@ work, and disabled actions explain why on tap. Use distinct art for distinct
 meanings. Rendering and hit testing share layout geometry; a pretty default
 screen does not prove full queues, submenus and placement fit.
 
-**Check:** Use the [compact HUD matrix](../COMPACT_HUD_REVIEW.md): narrow portrait,
+**Check:** Use the compact HUD matrix: narrow portrait,
 short landscape, DPR1/DPR2, full queues, research completion and actual hit dispatch.
 Canvas hit targets are not accessible DOM buttons. The DOM mirror and additive
 touch selection remain open in [ROADMAP.md](../../ROADMAP.md#integrated-native-presentation-fixes).
@@ -83,18 +83,18 @@ Top resources follow the pointer/touch island, including minimap inspection. Bui
 
 Mobile refinement (Jakob, 2026-10-05): in the compact HUD (width below 600 or height below 500 logical pixels), cargo paging uses 44px-wide chevron targets beside the resource columns, keeping the strip 78px tall. Desktop keeps labeled paging. Mouse/touch drags starting in cargo cancel the pressed action after 8 logical pixels; a predominantly horizontal swipe of at least 32px snaps one page on release, clamped to the available pages. This is swipe paging, without continuous or inertial scrolling. Drawing and hit testing share the strip bounds; reset those bounds every layout to avoid stale gesture capture.
 
-Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonoverlapping transfer/chevron targets, compact row height, DPI-scaled swipe thresholds and cancelled transfers. [Cargo browser replay](../verification/replay_cargo.py) exercises DPR-2 touch swipes/chevrons and DPR-1 desktop clicks/drags; it inspects outgoing commands against a presentation fixture rather than applying transfers to a save. Run with `--output DIR`, then separately with `--output DIR --desktop`. [Mobile row capture](../verification/2026-10-05/mobile-cargo-row.png). The all-13-resource stress fixture still crowds top-resource labels in short landscape; this change only adjusts cargo layout.
+Verification (2026-10-05): `hud::cargo::tests` checks every resource page, nonoverlapping transfer/chevron targets, compact row height, DPI-scaled swipe thresholds and cancelled transfers. [Cargo browser replay](../verification/replay_cargo.py) exercises DPR-2 touch swipes/chevrons and DPR-1 desktop clicks/drags; it inspects outgoing commands against a presentation fixture rather than applying transfers to a save. Run with `--output DIR`, then separately with `--output DIR --desktop`. The all-13-resource stress fixture still crowds top-resource labels in short landscape; this change only adjusts cargo layout.
 
 ## Resource names on demand
 
 Requested by Jakob (2026-10-05): top-bar resources show icons and quantities without persistent name labels. Resource hints use an initial capital (Jakob’s follow-up, 2026-10-05). Hovering an icon or its count shows its name in the selection detail area (or a lower hint when nothing is selected); tapping shows the same name for three seconds. Existing action/error messages take priority. Resource rows are 66px tall instead of 82px. The icons/counts share one hit area so inspection consumes the input instead of issuing a world order. The mobile-layout matrix includes these top-bar regions in its bounds, overlap and hit-dispatch checks, but excludes them from the bottom-action-band assertion.
 
-Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors; see [resource-name verification](../verification/resource-names/README.md).
+Desktop hover/leave and DPR-2 phone tap/expiry were checked without game commands or browser errors.
 
 ## Dedicated menu icons (2026-10-05 audit)
 
 Jakob requested a complete missing-icon audit, creation, and sequential PR merges.
-Track coverage in [the menu icon audit](../MENU_ICON_AUDIT.md). Inspect both command
+Inspect both command
 and queued-job mappings: a manifest entry alone does not make an icon available
 in the Rust HUD. `hud.rs::ICONS` must load it into the shared runtime atlas.
 Stop already had authored artwork but was omitted from that list and used Cancel;
@@ -110,11 +110,10 @@ User feedback on 2026-10-05 identified colored rectangular backgrounds behind sp
 With water added as a required field input, the placement information area now
 shows the full shared cost continuously: 10 wood, 5 stone, 10 water, plus work
 time and food yield. Mouse and touch both get this without relying on hover.
-See [water verification](../verification/water/README.md).
 
 ## Dedicated icon integration (2026-10-05)
 
-The [menu audit](../MENU_ICON_AUDIT.md) maps all 13 resources, produced goods,
+The menu icons cover all 13 resources, produced goods,
 specialist unit portraits, ship commands, construction categories and Back to
 distinct artwork. Production offers and queue entries share the exhaustive
 `selection.rs::product_icon` mapping; selection uses authored unit portraits.

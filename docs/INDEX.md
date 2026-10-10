@@ -17,9 +17,7 @@ defines the consultation and upkeep loop.
 | Bounded run plan: archipelago, artifact, monsters (proposal) | [RUN_PLAN.md](RUN_PLAN.md) |
 | Current work, blockers and next steps | [OPEN_WORK.md](../OPEN_WORK.md) |
 | Quality review | [THERMONUCLEAR_REVIEW.md](THERMONUCLEAR_REVIEW.md) |
-| PR-history coverage and attribution | [REWORK_LESSONS.md](REWORK_LESSONS.md) |
 
-Detailed feature reviews, benchmarks, verification fixtures and asset provenance
-remain in their existing locations and are linked from the relevant knowledge
-guide. Historical reviews describe their original revision; they do not certify
-the current checkout or supersede current developer requirements.
+Asset provenance lives beside each asset; maintained browser drivers and their
+fixtures live in `verification/`. Historical feature reviews and screenshots were
+removed on 2026-10-10 (recoverable from git); their lessons are in the guides.

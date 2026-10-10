@@ -46,5 +46,4 @@ conversation history. Keep this index a route map, not the accumulated knowledge
 Stable behavior, how-to instructions and research conclusions belong in guides;
 task status belongs in [OPEN_WORK.md](../../OPEN_WORK.md), concise accepted choices
 in [decisions.md](../../decisions.md), and proposed product scope in
-[ROADMAP.md](../../ROADMAP.md). The [PR audit](../REWORK_LESSONS.md) records historical
-coverage and attribution, not the live system instructions.
+[ROADMAP.md](../../ROADMAP.md).

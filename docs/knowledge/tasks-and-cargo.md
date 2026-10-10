@@ -42,7 +42,7 @@ to unload before a new assignment, including partial same-kind loads.
 [#44](https://github.com/koogle/age-of-agents/pull/44) fixed a blocked nearby
 drop-off hiding a reachable alternative;
 [#85](https://github.com/koogle/age-of-agents/pull/85) added wood delivery to mills.
-[The activity regression](../ACTIVITY_SPRITES_REVIEW.md) shows why “has cargo” cannot
+The activity regression shows why “has cargo” cannot
 alone decide whether a villager is working or carrying.
 
 **Lesson:** Distinguish continuing an existing gather order from issuing a new
@@ -86,8 +86,8 @@ checks three full deliveries while the original node remains live at 1×/2×;
 drop-off distance alone did not reproduce abandonment. Generated-world coverage uses two workers across
 seven seeds at 2×. The production-layout replay reconstructs only known terrain
 (unseen becomes water), so it is supporting evidence rather than an exact save.
-The [isolated browser comparison](../verification/2026-10-05/bush-delivery-2x.json)
-uses one gather command at 2× and no later input: old code delivers 20 then idles
+An isolated browser comparison
+used one gather command at 2× and no later input: old code delivers 20 then idles
 with 40 nearby food left; fixed code delivers 60 and leaves distant food untouched.
 Both runs have no page errors. Modal's API was unreachable during diagnosis despite configured credentials;
 production was only read through `/state` and was never reset or commanded.
@@ -127,9 +127,6 @@ wild resource nodes or multiply gathering speed. No persisted fields change.
 boundary, opposite footprint edges, unfinished buildings, no stacking, save
 round-trip, full delivery and capacity recalculation on the next paid harvest.
 
-[Granary verification](../verification/granary/README.md) records the domain checks,
-desktop/phone description captures, reproduction and release limitation.
-
 ## Building selection during gathering (2026-10-06)
 
 User steering: selecting or switching buildings must not issue an early deposit
@@ -139,8 +136,7 @@ villagers from the building-click deposit candidates and hover order preview;
 it retains manual unloading for other carriers and normal automatic delivery/resumption.
 
 Verification: `storage::tests::building_selection_preserves_every_gathering_phase_in_mixed_groups`
-checks mixed gathering/stopped selections; [browser replay and review](../verification/building-selection/README.md)
-exercise real desktop mouse and emulated DPR2 touch selection and command dispatch.
+checks mixed gathering/stopped selections; `docs/verification/building_selection.py` exercises real desktop mouse and emulated DPR2 touch selection and command dispatch.
 
 ## Worker validation (2026-10-06)
 

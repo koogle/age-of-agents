@@ -2,8 +2,8 @@
 
 Historical generation/contact scripts were retired in the 2026-10-06 cleanup;
 their references below describe provenance, not current reproduction commands.
-Active offline packers and original art are retained. See
-[retired tools and recovery](../../docs/verification/RETIRED_TOOLS.md).
+Active offline packers and original art are retained; retired scripts are
+recoverable from git at `1984e9b`.
 
 Generated with fal.ai on 2026-10-01 for the canvas-drawn HUD. Direction: `assets/reference/mediterranean_4.webp` — thin-line European comic (Moebius) crossed with Ghibli, cream paper UI, fine brown ink rules, small illustrated icons, coin medallion portraits. The Rust canvas HUD loads the icons (`crates/client/src/hud.rs::ICONS` lists the files); `manifest.json` lists everything.
 
@@ -107,7 +107,7 @@ retains previous PNGs, exact refinement prompts, normalized before/after views
 and individual PR status for Cargo, Gathering, Town and Disembark. It reduces
 secondary props and repeated detail while preserving the established family.
 
-Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR; see the [audit](../../docs/MENU_ICON_AUDIT.md#individual-art-prs).
+Integration PR #107 wires these files into the HUD with combined Rust, asset and desktop/DPR-2 phone verification. Each asset has a separate art PR (#112–#129).
 
 | Icon | Sources and visual review |
 | --- | --- |
@@ -136,7 +136,7 @@ Integration PR #107 wires these files into the HUD with combined Rust, asset and
 
 ## #145 alternatives wired in (2026-10-09)
 
-`command_explore`, `category_military`, `resource_steel` and `resource_cloth` now use the latest #145 calibrations Jakob preferred (thin-line map, blue cel shield, painted steel A, matte cloth), normalized from their cutouts with `scripts/normalize_icons.py --write`. Sources, prompts and request IDs stay in `assets/alternatives/2026-10-06/`; the replaced icons and a 128/32/24 px comparison are in `sources/alternatives-integration/`. [Evidence](../../docs/verification/alternatives-integration/README.md).
+`command_explore`, `category_military`, `resource_steel` and `resource_cloth` now use the latest #145 calibrations Jakob preferred (thin-line map, blue cel shield, painted steel A, matte cloth), normalized from their cutouts with `scripts/normalize_icons.py --write`. Sources, prompts and request IDs stay in `assets/alternatives/2026-10-06/`; the replaced icons and a 128/32/24 px comparison are in `sources/alternatives-integration/`. Evidence.
 
 ## Water resource (2026-10-05)
 
@@ -145,7 +145,6 @@ for freshwater collection and field preparation. The approved wood/food/masonry
 references, draft, refinement, and provenance are retained under `sources/water/`.
 `python3 scripts/pack_water.py` packs the normalized icon and the matching 512px
 riverbank marker into the existing resource atlas without modifying old frames.
-See [comparison and verification](../../docs/verification/water/README.md).
 
 | `category_town` | [Review](sources/menu_icons/category_town/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_town/provenance.json) |
 | `category_gathering` | [Review](sources/menu_icons/category_gathering/STYLE_REVIEW.md), [provenance](sources/menu_icons/category_gathering/provenance.json) |

@@ -8,14 +8,10 @@ Jakob from six concepts and adapted to the wolf/bear family sheet.
   windup, strike) of each, atlas rows 5–7.
 - `style-compare.png`: wolf and bear beside the three snakes at true in-game
   relative scale (idle, then the three strikes).
-- `serpent-real-spawn-*.png`: `cargo run -p aoa-game --example archipelago_preview
-  -- 7 2 snakes` sails from the home island into the fog, discovers island 2,
-  steers to the water nearest the sea serpent the simulation spawned there
-  (`animal-1-9`) and lands villager-1 two cells away, inside the reveal radius.
-  The serpent appears beside the ship; it was hidden from the snapshot before the
-  landing. Nothing animal is placed by hand; `GameWorld::validate` passes.
-- `viper-real-spawn-*.png`: the same with the `vipers` stage on the temple island
-  (`animal-5-12`), the view panned inland from the ship as a player would drag.
+- Spawn check: `cargo run -p aoa-game --example archipelago_preview -- 7 2 snakes`
+  (or the `vipers` stage) sails into the fog and lands beside a snake the
+  simulation spawned; it stays hidden until the landing reveals it. Captures were
+  shown in the PR, not committed.
 
 ## Style acceptance (pending Jakob)
 

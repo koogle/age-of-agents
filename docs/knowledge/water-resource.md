@@ -46,8 +46,7 @@ The retained generation/refinement and packing provenance is in
 [`assets/ui/sources/water/provenance.json`](../../assets/ui/sources/water/provenance.json).
 Repack with `python3 scripts/pack_water.py`. Crop to alpha > 40 before fitting
 the world frame: faint refinement fringe otherwise shifts the visible ground
-contact above the shared anchor. Approved family references accompany
-the generated icon in [the comparison](../verification/water/icon-comparison.png).
+contact above the shared anchor. Approved family references accompanied the generation.
 Consult [assets](asset-pipeline.md) before revising it.
 
 ## Persistence and verification
@@ -66,6 +65,6 @@ for isolated browser acceptance; `--serve` accepts typed commands and advances
 validated fixed ticks for the WebGL driver. It is not a production seed or migration.
 
 Verification results and release status belong in
-[the handoff](../../OPEN_WORK.md) and [water evidence](../verification/water/README.md).
+[the handoff](../../OPEN_WORK.md).
 Update this guide when source renewal, deposit compatibility, field costs,
 additional water consumers, or saved representations change.

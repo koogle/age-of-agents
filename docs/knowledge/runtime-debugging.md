@@ -102,7 +102,7 @@ and [#80](https://github.com/koogle/age-of-agents/pull/80) were actual routing f
 Never reset or resume a shared production world merely to investigate. Native
 and browser-local `Source::Local` are in-memory simulations; hosted SQLite saves
 are a separate path. Sources: `src/main.rs`, `crates/client/src/source.rs`,
-[field audit limits](../FIELD_GATHERING_REVIEW.md#limits).
+field audit limits.
 
 ## Keep this guide current
 

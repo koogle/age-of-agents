@@ -1,9 +1,0 @@
-{
-  "name": "command_disembark",
-  "wasm_sha256": "e616e706c88a492dc9d97d5968b59f213cd38ae7ef17533f350fb34d7481e728",
-  "errors": [],
-  "viewports": [
-    "390x844 DPR2 phone"
-  ],
-  "limitation": "Controlled snapshot rendering and wire dispatch, not domain acceptance or physical-phone evidence."
-}

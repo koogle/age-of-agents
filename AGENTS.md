@@ -87,7 +87,7 @@ Provenance: [sprites](assets/sprites/README.md), [building refinements](assets/s
 
 Read [docs/knowledge/INDEX.md](docs/knowledge/INDEX.md) and open the guides relevant to the task **before editing code, choosing an implementation approach, or interacting with that system**. Reading the index alone is not sufficient. Consult additional guides when work crosses into another subsystem, such as saves, assets, GitHub or Modal.
 
-The folder holds individual system guides, procedures, research and reusable learnings. Detailed PR evidence lives with the relevant topic; [the audit record](docs/REWORK_LESSONS.md) preserves coverage and attribution. Do not recreate one large lessons file.
+The folder holds individual system guides, procedures, research and reusable learnings. Write lessons into the relevant topic; PR history lives in git and GitHub. Do not recreate one large lessons file, and do not commit captures of final states (sprites are the source of truth).
 
 ## Workflow
 

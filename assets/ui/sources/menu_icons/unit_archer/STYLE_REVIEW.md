@@ -12,7 +12,7 @@ Approved family references: existing units atlas and retained `source.png`; no n
 | Shape/detail | Pass: Approved archer frame retains the bow and quiver silhouette. |
 | Camera/scale | Pass: original front idle frame; normalized optical weight and safe circle |
 | Alpha/background | Pass: silhouette inspected on three backgrounds, transparent corners, no visible white matte |
-| Runtime integration | Pass in [#107](https://github.com/koogle/age-of-agents/pull/107): [desktop/phone evidence](../../../../../docs/verification/menu-icons/unit_archer/result.json) |
+| Runtime integration | Pass in [#107](https://github.com/koogle/age-of-agents/pull/107): desktop/phone evidence |
 
 The larger source is retained alongside provenance. No model calls; extracted directly from the approved 512px atlas frame.
 

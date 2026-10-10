@@ -18,12 +18,10 @@ Finished work lives in merged PRs, `README.md` and the
   [temple and artifact](docs/knowledge/temple-and-artifact.md).
 - The run is still far too easy: a short walk from the landing to the temple, and
   wildlife strength does not yet scale with distance.
-- Lions are merged and deployed ([#162](https://github.com/koogle/age-of-agents/pull/162));
-  a real-run capture shows the island-2 pride from the ship
-  ([evidence](docs/verification/lions/README.md)).
+- Lions are merged and deployed ([#162](https://github.com/koogle/age-of-agents/pull/162)).
 - Giant snakes are in review ([#164](https://github.com/koogle/age-of-agents/pull/164)): rock python,
   sea serpent and marble viper (Jakob's picks), ambush rule, habitat spawns, atlas
-  rows 5–7, real-run captures; waits on Jakob's style call ([evidence](docs/verification/snakes/README.md)).
+  rows 5–7; waits on Jakob's style call ([comparison sheets](docs/verification/snakes/README.md)).
 
 ## Next steps to finish the capture-the-flag loop
 
@@ -61,15 +59,14 @@ Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 
 ## Still unresolved
 
-- **Repository weight.** On 2026-10-10 rejected and intermediate art was removed
-  from the lion, snake, wildlife, temple and menu-icon source folders and the lion
-  evidence folder (about 130 MB of files). Two heavier items need Jakob's call:
-  `docs/verification/` still holds about 280 MB of older evidence screenshots, and
-  the git history (about 1 GB packed) keeps every deleted image; shrinking it means
-  rewriting `master` history, which touches every clone.
+- **Repository weight.** On 2026-10-10 rejected and intermediate art left the
+  asset source folders, and Jakob's rule removed all historical evidence
+  captures and reviews from `docs/` (225 MB to 3 MB): final states are not
+  captured, since sprites are the source of truth. The git history (about 1 GB
+  packed) still keeps every deleted image; shrinking it means rewriting `master`
+  history, which touches every clone and needs Jakob's call.
 - **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
-  map, military shield, steel and cloth calibrations are wired in
-  ([evidence](docs/verification/alternatives-integration/README.md)). Not wired: the
+  map, military shield, steel and cloth calibrations are wired in. Not wired: the
   wolf (recolor failed), the sandal Disembark (the joined platform is approved) and
   the earlier batches the archive review marks not ready.
 - **Performance and economy.** Populated archipelagos are unprofiled; starter-only
