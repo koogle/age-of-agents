@@ -1,7 +1,7 @@
 {
   "date": "2026-10-09",
-  "status": "Integrated: family pass (2026-10-10). FAL generation and birefnet cutout; no OpenAI image_gen pass.",
-  "packing": "scripts/pack_wildlife.py: *_family_cutout.png, a pose is every opaque shape centered in its 512px quadrant (tails may cross the edge), placed unenlarged in 627px frames on atlas rows 3-4 with the lowest paws on y=590.",
+  "status": "Integrated 2026-10-10: island huntress (lioness) and Nemean lion (leader), adapted from Jakob-selected concepts. Superseded passes are kept below as evidence; their cutouts were removed.",
+  "packing": "scripts/pack_wildlife.py: huntress/nemean cutouts, a pose is every opaque shape centered in its 1024px quadrant (tails may cross the edge), downsampled by one common factor 589/1024 into 627px frames on atlas rows 3-4, lowest paws on y=590.",
   "draft_1_2026-10-09": {
     "lioness": {
       "model": "fal-ai/nano-banana/edit",
@@ -113,7 +113,8 @@
         "lion_family_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12656-e70a-7c33-9107-1e72fb3792f2"
       },
       "measured": "every cell: saturation median 0.45, value p10/median/p90 0.22-0.23/0.52-0.53/0.70"
-    }
+    },
+    "review": "Integrated briefly, then rejected by Jakob: it made the lions grey. Cutouts removed."
   },
   "exploration_2026-10-10": {
     "status": "Not integrated. After Jakob said the family pass made the lions grey, liked the earlier designs, and found them too generic (Disney-like) without sparkle, these were explored; he then asked for more interesting lion designs to adapt to the house style.",
@@ -176,6 +177,41 @@
         "red_figure": "01a12666-28c4-71b2-a173-6fb93e9b7679"
       },
       "review": "Design exploration awaiting Jakob's pick; to be adapted to the wolf/bear style before integration."
+    }
+  },
+  "integrated_2026-10-10": {
+    "selection": "Jakob kept the suggested pairing from concepts/: Nemean lion as pride leader, island huntress as lioness.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 1024px cells",
+    "lioness": {
+      "prompt": "huntress_adapt_prompt.txt",
+      "references": [
+        "wildlife_sources/npc-style-refined.png (style)",
+        "concepts/huntress.png (design and colour)"
+      ],
+      "request_id": "01a1266c-e379-7f30-9e21-3d1fce3968c9",
+      "renders": {
+        "huntress_render_0.png": "selected",
+        "huntress_render_1.png": "alternative"
+      },
+      "cutout": {
+        "huntress_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1266f-8b32-7481-9390-441618fdb9ec"
+      }
+    },
+    "lion": {
+      "prompt": "nemean_adapt_prompt.txt (final wording; the first request lacked the facing/colour/size line)",
+      "references": [
+        "wildlife_sources/npc-style-refined.png (style)",
+        "huntress_render_0.png (pride rendering)",
+        "concepts/nemean.png (design and colour)"
+      ],
+      "requests": {
+        "01a1266d-951a-7480-994c-1a7a0230a390": "nemean_render_0..1.png, rejected: left-facing idle filling the cell; colour shift between cells",
+        "01a1266e-ab28-7551-8624-4ea8b427d59d": "nemean_render_2..4.png; render 3 selected (scars, bronze sheen)"
+      },
+      "edit": "nemean_render_3_clean.png: the generated black 2x2 cell divider lines (8px at x/y 1020-1027) painted white where line-dark, before cutout.",
+      "cutout": {
+        "nemean_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1266f-982f-7420-a591-b8e582bb321b"
+      }
     }
   }
 }
