@@ -21,7 +21,7 @@ Finished work lives in merged PRs, `README.md` and the
 - Lions are merged and deployed ([#162](https://github.com/koogle/age-of-agents/pull/162));
   a real-run capture shows the island-2 pride from the ship
   ([evidence](docs/verification/lions/README.md)).
-- Giant snakes are in review ([#163](https://github.com/koogle/age-of-agents/pull/163)): rock python,
+- Giant snakes are in review ([#164](https://github.com/koogle/age-of-agents/pull/164)): rock python,
   sea serpent and marble viper (Jakob's picks), ambush rule, habitat spawns, atlas
   rows 5–7, real-run captures; waits on Jakob's style call ([evidence](docs/verification/snakes/README.md)).
 
