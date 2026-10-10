@@ -310,6 +310,24 @@
     "measured_before": "At atlas scale all strokes are 2px like the wolf, but lion ink luminance 0.29 and lioness 0.25 against the wolf's 0.21 (ink redder: lion rgb 99,64,44 vs wolf 67,52,41), lion line coverage 1.5% vs 2.5%, lion silhouette edge gradient 0.60 vs 0.80.",
     "rejected": "Median filter (3 and 5) before re-inking: ate thin lines (lion 1.3% coverage) and softened silhouettes (edge 0.26-0.66); mane went mushy.",
     "integrated": "scripts/pack_wildlife.py reink(): thin dark strokes snap toward the wolf's ink (67,52,41), mid-dark pixels touching a stroke join it as a crease, the alpha fringe narrows to about one pixel, then an unsharp mask (radius 1.2, 80%). thin_lines() no longer lightens ink.",
-    "measured_after": "lioness ink 0.20-0.21, coverage 3.2-3.8%, edge 0.71-0.73; lion ink 0.24-0.25, coverage 2.6-2.9%, edge 1.1-1.4; wolf 0.18-0.21, 2.5-3.0%, 0.80-0.87. No new generation requests."
+    "measured_after": "lioness ink 0.20-0.21, coverage 3.2-3.8%, edge 0.71-0.73; lion ink 0.24-0.25, coverage 2.6-2.9%, edge 1.1-1.4; wolf 0.18-0.21, 2.5-3.0%, 0.80-0.87. No new generation requests.",
+    "superseded": "Jakob (2026-10-10): use an image model per the asset rules. reink() and thin_lines() removed from the packer; the atlas is repacked from the same cel cutouts without them."
+  },
+  "ink_pass_2026-10-10": {
+    "status": "blocked",
+    "prompt": "ink_prompt.txt",
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+    "references": {
+      "lion": [
+        "nemean_cel_render_0.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "lioness": [
+        "huntress_cel3_render_1.png",
+        "wildlife_sources/npc-style-refined.png"
+      ]
+    },
+    "lion_request_id": "01a12776-0d11-7293-9e6b-24ee9fa67583 (accepted; the account locked before the result could be fetched: 'User is locked. Reason: TOP_UP')",
+    "lioness_request": "rejected at submit: 'Exhausted balance. Top up your balance at fal.ai/dashboard/billing'"
   }
 }

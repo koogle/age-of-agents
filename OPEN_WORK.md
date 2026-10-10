@@ -19,9 +19,13 @@ Finished work lives in merged PRs, `README.md` and the
 - The run is still far too easy: a short walk from the landing to the temple, and
   wildlife strength does not yet scale with distance.
 - Lions are in review on `claude/laughing-goodall-10lotl`: one pride (maned lion
-  plus 2–3 lionesses) per later island that hunts together. Art: the Nemean lion
-  leader and island huntress lionesses Jakob picked from the concepts, adapted to
-  the wolf/bear style; waits on his style call ([evidence](docs/verification/lions/README.md)).
+  plus 2–3 lionesses) per later island that hunts together. Art: Nemean lion and
+  island huntress, naturalistic and cel-shaded, waiting on one more model pass to
+  match the wolf's ink (crisper, darker outlines). **Blocked: the FAL account is out
+  of balance** (`fal.ai/dashboard/billing`); the prompt is ready in
+  `assets/sprites/lion_sources/ink_prompt.txt`. Jakob's rule (2026-10-10): art fixes
+  go through an image model, never packer pixel code
+  ([evidence](docs/verification/lions/README.md)).
 
 ## Next steps to finish the capture-the-flag loop
 
