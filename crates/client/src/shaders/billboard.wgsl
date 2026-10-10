@@ -17,6 +17,7 @@ struct Instance {
     @location(4) pull: f32,
     @location(5) tint: vec4<f32>,
     @location(6) footprint: vec2<f32>,
+    @location(7) base: vec2<f32>,
 };
 
 struct VOut {
@@ -107,7 +108,7 @@ fn fs_silhouette(in: VOut) -> @location(0) vec4<f32> {
 // left (the painted sprites are lit from the front left). A unit's painted
 // card is a real occluder: every point is projected along the sun onto the
 // ground and draped over the drawn terrain. A building is its footprint box,
-// swept along the sun on the level plot plane. Each instance draws three
+// swept along the sun and draped over the terrain. Each instance draws three
 // quads; units collapse the two they do not use. The pass writes depth at the ground, so overlapping
 // shadows on one level fail the depth test instead of darkening twice.
 struct ShadowOut {
@@ -121,8 +122,9 @@ struct ShadowOut {
 // Sun offset from the camera direction: up (shorter shadows) and left (shadows
 // swing to the right). The painted sprites are lit from the front left, with
 // their right faces in shade, so the cast shadow falls right and behind.
-const SUN_UP: f32 = 0.7;
-const SUN_LEFT: f32 = 1.1;
+const SHADOW_GRID: u32 = 4u;
+const SUN_UP: f32 = 0.5;
+const SUN_LEFT: f32 = 1.5;
 
 // Ground offset of a point `height` above the plot under the sun.
 fn shadow_vector(sun: vec3<f32>, height: f32) -> vec3<f32> {
@@ -132,8 +134,15 @@ fn shadow_vector(sun: vec3<f32>, height: f32) -> vec3<f32> {
 @vertex
 fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
     let corners = array<vec2<f32>, 6>(vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(1.0, 1.0));
-    let q = corners[index % 6u];
-    let quad = index / 6u;
+    // Buildings subdivide each quad into a SHADOW_GRID² grid so the swept
+    // box can drape over the terrain; units draw the first six vertices.
+    let per_quad = SHADOW_GRID * SHADOW_GRID * 6u;
+    let quad = index / per_quad;
+    let tile = (index % per_quad) / 6u;
+    var q = corners[index % 6u];
+    if inst.footprint.x > 0.0 {
+        q = (vec2<f32>(f32(tile % SHADOW_GRID), f32(tile / SHADOW_GRID)) + q) / f32(SHADOW_GRID);
+    }
     let local = q - inst.pivot;
     let right = g.camera_right.xyz;
     let toward_camera = normalize(cross(right, g.camera_up.xyz));
@@ -154,17 +163,20 @@ fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
         let far = -dot(vec3<f32>(inst.footprint.x, 0.0, inst.footprint.y), g.camera_up.xyz);
         let height = clamp((rise - far) / g.camera_up.y * 0.8, 0.0, 6.0);
         let v = shadow_vector(sun, height);
-        let w = inst.footprint.x;
-        let d = inst.footprint.y;
+        // The painted base, centred on the plot, is what casts.
+        let w = inst.base.x;
+        let d = inst.base.y;
+        let corner = inst.anchor - vec3<f32>(inst.footprint.x - w, 0.0, inst.footprint.y - d) * 0.5;
         if quad == 0u {
-            world = inst.anchor + vec3<f32>(-q.x * w, 0.0, -q.y * d) + v;
+            world = corner + vec3<f32>(-q.x * w, 0.0, -q.y * d) + v;
         } else if quad == 1u {
-            let x = select(inst.anchor.x, inst.anchor.x - w, v.x > 0.0);
-            world = vec3<f32>(x, inst.anchor.y, inst.anchor.z - q.x * d) + q.y * v;
+            let x = select(corner.x, corner.x - w, v.x > 0.0);
+            world = vec3<f32>(x, corner.y, corner.z - q.x * d) + q.y * v;
         } else {
-            let z = select(inst.anchor.z, inst.anchor.z - d, v.z > 0.0);
-            world = vec3<f32>(inst.anchor.x - q.x * w, inst.anchor.y, z) + q.y * v;
+            let z = select(corner.z, corner.z - d, v.z > 0.0);
+            world = vec3<f32>(corner.x - q.x * w, corner.y, z) + q.y * v;
         }
+        world.y = ground_height(world.xz);
     } else {
         // The card as drawn, slid along the sun down to the anchor's ground
         // level, then draped on the drawn terrain.

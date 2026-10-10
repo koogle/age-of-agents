@@ -159,6 +159,7 @@ pub(super) fn on_plot(
             pull: 0.08 * width,
             tint: [1.0; 4],
             footprint: [width, depth],
+            base: ((high - low) * scale).to_array(),
         },
     )
 }

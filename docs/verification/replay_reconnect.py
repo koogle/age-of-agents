@@ -30,8 +30,8 @@ const original = WebGL2RenderingContext.prototype.bufferSubData;
 WebGL2RenderingContext.prototype.bufferSubData = function(target, offset, data, src=0, length) {
   if (data && data.buffer) {
     const n = length === undefined ? data.length - src : length;
-    if (n * data.BYTES_PER_ELEMENT === 72) {
-      const a = Array.from(new Float32Array(data.buffer, data.byteOffset + src * data.BYTES_PER_ELEMENT, 18));
+    if (n * data.BYTES_PER_ELEMENT === 80) {
+      const a = Array.from(new Float32Array(data.buffer, data.byteOffset + src * data.BYTES_PER_ELEMENT, 20));
       if (a[3] > 0.5 && a[3] < 5 && a[12] === 1 && a[16] === 0 && a[17] === 0)
         window.spriteSamples.push(a);
     }

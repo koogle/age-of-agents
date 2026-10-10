@@ -35,6 +35,7 @@ pub(super) fn draw(
             pull: 0.3 * 1.6,
             tint: [1.0; 4],
             footprint: [0.0; 2],
+            base: [0.0; 2],
         };
         picks.push(Pickable {
             pick: Pick::Ship(ship.id.clone()),

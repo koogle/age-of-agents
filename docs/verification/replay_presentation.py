@@ -41,7 +41,7 @@ async def file(request):
     if not any((candidate.is_relative_to(ROOT / folder) for folder in ['web', 'assets'])):
         raise web.HTTPNotFound()
     return web.FileResponse(candidate)
-# Sprite is 18 f32 values; one villager means one 72-byte instance upload.
+# Sprite is 20 f32 values; one villager means one 80-byte instance upload.
 # Read the rendered UV/anchor, without adding an application debug API.
 HOOK = """
 window.spriteSamples=[];
@@ -50,8 +50,8 @@ proto.bufferSubData=function(target,offset,data,src=0,length){
  if(data && data.buffer){
  const n=length===undefined?data.length-src:length;
  const bytes=n*data.BYTES_PER_ELEMENT;
- if(bytes===72){
- const a=Array.from(new Float32Array(data.buffer,data.byteOffset+src*data.BYTES_PER_ELEMENT,18));
+ if(bytes===80){
+ const a=Array.from(new Float32Array(data.buffer,data.byteOffset+src*data.BYTES_PER_ELEMENT,20));
  if(a[3]>0.5 && a[3]<5 && a[12]===1 && a[16]===0 && a[17]===0)
  window.spriteSamples.push({t:performance.now(),a});
  }

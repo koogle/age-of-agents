@@ -19,13 +19,13 @@ const proto=WebGL2RenderingContext.prototype, original=proto.bufferSubData;
 proto.bufferSubData=function(target,offset,data,src=0,length){
  if(data && data.buffer){
  const bytes=(length===undefined?data.length-src:length)*data.BYTES_PER_ELEMENT;
- if(bytes%72===0 && bytes>0 && bytes<100000){
+ if(bytes%80===0 && bytes>0 && bytes<100000){
  const a=new Float32Array(data.buffer,data.byteOffset+src*data.BYTES_PER_ELEMENT,bytes/4);
  const animals=[];
- for(let i=0;i<a.length;i+=18){
+ for(let i=0;i<a.length;i+=20){
   if((Math.abs(a[i+3]-.95)<.001 || Math.abs(a[i+3]-1.3)<.001) &&
      Math.abs(a[i+6]-(1-590/627))<.001 && a[i+12]===1)
-   animals.push(Array.from(a.slice(i,i+18)));
+   animals.push(Array.from(a.slice(i,i+20)));
  }
  if(animals.length===3)window.animalSprites=animals;
 

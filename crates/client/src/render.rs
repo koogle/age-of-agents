@@ -16,6 +16,8 @@ use crate::terrain::{self, GroundVertex};
 mod map;
 
 const GROUND_SIZE: u32 = 512;
+/// Subdivisions per side of each building shadow quad (matches the shader).
+const SHADOW_GRID: u32 = 4;
 
 fn globals_bind_group(
     device: &wgpu::Device,
@@ -81,6 +83,9 @@ pub struct Sprite {
     /// of a wall draw over it and those behind it are hidden (and silhouetted).
     /// Zero for everything else.
     pub footprint: [f32; 2],
+    /// For buildings: the painted base's world width and depth, centred on
+    /// the footprint, which casts the shadow.
+    pub base: [f32; 2],
 }
 
 /// A flat mark on the ground: a soft shadow or a selection ring.
@@ -400,7 +405,7 @@ impl Renderer {
             })
             .collect();
         let sprite_module = shader(device, "billboard", include_str!("shaders/billboard.wgsl"));
-        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4, 6 => Float32x2];
+        let sprite_attributes = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 2 => Float32x2, 3 => Float32x4, 4 => Float32, 5 => Float32x4, 6 => Float32x2, 7 => Float32x2];
         let make_sprite_pipeline = |ghost: bool| {
             pipeline(
                 device,
@@ -889,8 +894,13 @@ impl Renderer {
                         })
                         .count();
                 pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
-                // Buildings sweep three box quads; units project one card.
-                pass.draw(0..if building { 18 } else { 6 }, start as u32..end as u32);
+                // Buildings sweep three draped box quads; units project one card.
+                let vertices = if building {
+                    3 * SHADOW_GRID * SHADOW_GRID * 6
+                } else {
+                    6
+                };
+                pass.draw(0..vertices, start as u32..end as u32);
                 start = end;
             }
             let mut start = 0;

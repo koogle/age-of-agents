@@ -45,6 +45,7 @@ pub(super) fn draw(
             pull: 0.3 * size,
             tint: [1.0; 4],
             footprint: [0.0; 2],
+            base: [0.0; 2],
         };
         sprites.push((13, sprite));
         picks.push(Pickable {

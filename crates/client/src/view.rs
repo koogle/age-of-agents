@@ -524,6 +524,7 @@ impl WorldView {
                 pull: 0.3 * size,
                 tint: [1.0; 4],
                 footprint: [0.0; 2],
+                base: [0.0; 2],
             }
         };
         for resource in &snapshot.resources {
@@ -744,6 +745,7 @@ impl WorldView {
                     pull: 0.3 * cell_size,
                     tint: [1.0; 4],
                     footprint: [0.0; 2],
+                    base: [0.0; 2],
                 },
             ));
             if selection.units.contains(&unit.unit.id) {
