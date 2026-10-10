@@ -212,7 +212,11 @@ Jakob pick, then adapt each with `fal-ai/nano-banana-pro/edit` using the approve
 family sheet as style reference and the concept as design and colour reference;
 generate the second form with the first as its sibling reference. Ask for the
 facing, identical colours in every cell and two-thirds cell width explicitly,
-and check for generated cell divider lines before cutout. Provenance:
+and check for generated cell divider lines before cutout.
+Prompting for thinner lines barely changes line weight; `thin_lines()` in
+`scripts/pack_wildlife.py` thins strokes deterministically instead (1px shave at
+2K; 2px broke silhouettes). Ask for realism as a "naturalistic wildlife
+field-guide illustration" with concrete anatomy; that removed the fantasy look. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)

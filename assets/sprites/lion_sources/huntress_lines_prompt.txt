@@ -1,0 +1,3 @@
+Edit this lioness sprite sheet (reference 1). Keep the exact layout, four poses, positions, scale, facing, design and colours (faint rosettes, black-backed ears, white throat, black tail tuft).
+Make every outline and interior line much thinner and lighter, a fine hairline of warm dark brown like the wolf in reference 2, with no heavy black or thick contours anywhere. Make her anatomy and head look like a real lioness, as in a careful wildlife illustration, still painted with soft cel shading and readable at small size.
+Identical colours and lighting in all four cells. No text, borders, divider lines, ground shadows or scenery. Plain flat white background.

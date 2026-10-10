@@ -15,6 +15,27 @@ BASELINE = 590
 
 
 
+def thin_lines(image, shave=1, lighten=0.35):
+    """Shave generated ink strokes to the family's fine line and lift them toward warm brown.
+
+    Thin dark strokes vanish under a morphological opening while broad dark areas
+    (tail tufts, ear backs, mouths) survive it and stay untouched. Shaved pixels
+    take the colour of the nearest opaque non-line pixel.
+    """
+    px = np.asarray(image).astype(float)
+    opaque = px[..., 3] > 128
+    dark = opaque & (px[..., :3] @ [0.299, 0.587, 0.114] / 255 < 0.42)
+    broad = ndimage.binary_opening(dark, iterations=5)
+    line = dark & ~ndimage.binary_dilation(broad, iterations=2)
+    core = ndimage.binary_erosion(line, iterations=shave)
+    removed = line & ~core
+    _, (iy, ix) = ndimage.distance_transform_edt(~(opaque & ~line), return_indices=True)
+    out = px.copy()
+    out[removed, :3] = px[iy[removed], ix[removed], :3]
+    out[core, :3] = out[core, :3] * (1 - lighten) + np.array([96.0, 62.0, 40.0]) * lighten
+    return Image.fromarray(out.clip(0, 255).astype(np.uint8), "RGBA")
+
+
 def main():
     source = Image.open(SOURCE).convert("RGBA")
     attacks = Image.open(ATTACK_SOURCE).convert("RGBA")
@@ -69,9 +90,10 @@ def main():
     # so a tail crossing the quadrant edge stays with its body. The lowest
     # (planted) paws sit on the shared baseline.
     half, scale = 1024, 589 / 1024
-    for row, name, source in [(3, "lioness", "huntress"), (4, "lion", "nemean")]:
+    for row, name, source in [(3, "lioness", "huntress_natural"), (4, "lion", "nemean_natural")]:
         sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{source}_cutout.png").convert("RGBA")
         assert sheet.size == (2 * half, 2 * half)
+        sheet = thin_lines(sheet)
         alpha = np.asarray(sheet.getchannel("A")) > 128
         labels, count = ndimage.label(alpha)
         centers = ndimage.center_of_mass(alpha, labels, range(1, count + 1))

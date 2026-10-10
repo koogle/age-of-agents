@@ -18,16 +18,19 @@ The injected scene is for rendering only and was not validated by the simulation
 Rejected along the way (2026-10-10): draft 1 (generic, Disney-like), the family
 pass (grey), and a warm painterly redraw (line work and colours off). Jakob then
 picked the suggested concepts: the Nemean lion as leader and the island huntress
-as lioness ([lesson](../../knowledge/asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
+as lioness, then asked for thinner line work and a more real lion, so both are
+now naturalistic with packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
 
 - `concept-to-sprite.png`: both concepts and the four packed poses of each.
 - `style-compare.png` now shows wolf, bear, boar, lioness and lion idle, then both
   strikes, at their true in-game relative scale.
 
-Matches: thin warm brown contours, cel colour areas with one painted shadow tone,
-dark grey claws, consistent identity and colour across poses, crouched windups,
-open-jaw strikes. Still open: the Nemean hide keeps a slight sheen and both are a
-touch more detailed than the wolf; no OpenAI image_gen cleanup pass yet.
+- `thin-before-after.png`: wolf for reference; the previous packed rows (top)
+  against the naturalistic, thinned rows (bottom).
+
+Matches: fine light warm-brown contours, consistent identity and colour across
+poses, crouched windups, open-jaw strikes. Still open: both lions are more
+detailed and realistic than the wolf; no OpenAI image_gen cleanup pass yet.
 
 ## Behavior checks run
 
