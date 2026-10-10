@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-10",
+  "status": "Integrated: rock python (regular), sea serpent (shoreline), marble viper (temple island). Chosen by Jakob from six concepts (1, 4, 3).",
+  "rule": "Only the integrated render and cutout, the picked concepts and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
+  "concepts": {
+    "model": "fal-ai/nano-banana-pro (text to image, 1K)",
+    "prompts": "concepts/concepts.json plus a shared framing sentence (single creature facing right, elevated three-quarter camera, painterly concept art, white background)",
+    "request_ids": {
+      "rock_python": "01a1278c-e09e-7982-9c24-65cc579e2129",
+      "hydra_scaled": "01a1278d-21db-7720-860c-d6228e37a908",
+      "marble_viper": "01a1278d-6aec-7872-b816-85918bda792c",
+      "sea_serpent": "01a1278d-abb2-75e0-baa0-be444c82e3e7",
+      "bronze_adder": "01a1278d-eaeb-76d0-8f7a-2e982b3cd87f",
+      "shadow_asp": "01a1278e-29e7-7e51-a6cc-f7980c024dbb"
+    },
+    "kept": [
+      "concepts/rock_python.png",
+      "concepts/sea_serpent.png",
+      "concepts/marble_viper.png"
+    ],
+    "removed": [
+      "hydra_scaled",
+      "bronze_adder",
+      "shadow_asp"
+    ]
+  },
+  "adaptation": {
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+    "prompt": "adapt_prompt.txt",
+    "references": [
+      "wildlife_sources/npc-style-refined.png (style)",
+      "concepts/<name>.png (design and colour)"
+    ],
+    "request_ids": {
+      "rock_python": "01a12795-c5fb-77b1-bb5b-7b433e681075",
+      "sea_serpent": "01a12796-2e4e-7cd1-98a5-581dee8c56bc",
+      "marble_viper": "01a12796-abc1-7bf0-9141-6edb6d59af1f"
+    },
+    "review": "Render 0 selected for each; the sea serpent's render 1 had generated cell divider lines. Adapt renders removed; the ink pass below is the integrated source."
+  },
+  "ink_pass": {
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+    "prompt": "ink_prompt.txt (the lion ink prompt reworded for coils and scale rows)",
+    "references": [
+      "<name>_adapt_render_0.png",
+      "wildlife_sources/npc-style-refined.png"
+    ],
+    "request_ids": {
+      "rock_python": "01a12799-4b70-71d0-9392-a204aacae903",
+      "sea_serpent": "01a12799-b387-7390-a128-60ca45a81b21",
+      "marble_viper": "01a1279a-1979-7153-b328-c6ca707de385"
+    },
+    "measured": "At atlas scale the adaptations already sat on the wolf's ink (luminance 0.22-0.25; the sea serpent's dark body reads 0.17); the ink pass changed little. Render 0 of each is integrated as <name>_ink_render_0.png; render 1 removed.",
+    "cutouts": {
+      "rock_python": [
+        "rock_python_ink_cutout.png",
+        "01a1279d-11d0-7f10-9c90-184cdb48af6d"
+      ],
+      "sea_serpent": [
+        "sea_serpent_ink_cutout.png",
+        "01a1279d-204a-7562-8db1-a852bde233cf"
+      ],
+      "marble_viper": [
+        "marble_viper_ink_cutout.png",
+        "01a1279d-2de8-7f81-85ce-d4ceb453d835"
+      ]
+    }
+  },
+  "packing": "scripts/pack_wildlife.py rows 5 (python), 6 (sea_serpent), 7 (viper): a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames, lowest coil on y=590. Atlas is now 2508x5016."
+}
