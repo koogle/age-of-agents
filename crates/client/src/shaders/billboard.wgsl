@@ -118,9 +118,9 @@ struct ShadowOut {
     @location(2) @interpolate(flat) strength: f32,
 };
 
-// Unit ground offset per unit of painted height: screen-right and toward the camera.
+// Unit ground offset per unit of painted height: screen-right and away from the camera.
 const SHADOW_RIGHT: f32 = 0.55;
-const SHADOW_DOWN: f32 = 0.4;
+const SHADOW_DOWN: f32 = -0.45;
 // Building nudge, as a fraction of the sprite's width (screen-right) and
 // height (screen-down).
 const DROP_RIGHT: f32 = 0.05;
