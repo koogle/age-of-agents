@@ -225,7 +225,12 @@ fade outlines (the lioness went from value 0.75 to 0.87 and from 10% to 4% dark
 pixels; Jakob: beige, lost linework). Measure saturation, value and the share of
 pixels under luminance 0.3 against the sibling and the wolf before packing, and
 anchor the weaker sheet to the stronger sibling's render with "as deep as", "as
-crisp and dark as" wording naming the reference. Provenance:
+crisp and dark as" wording naming the reference. When frames still read muddled
+beside the wolf, measure line work at atlas scale (stroke width, ink luminance
+and colour, line coverage, silhouette edge gradient) and fix it deterministically
+in the packer: `reink()` in `scripts/pack_wildlife.py` snaps strokes to the wolf's
+ink, hardens the alpha fringe and sharpens. A median filter before re-inking is
+the wrong tool: it eats thin lines and softens silhouettes. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)
