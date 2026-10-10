@@ -39,6 +39,9 @@ impl WorldView {
                 aoa_game::AnimalKind::Boar => 0.55,
                 aoa_game::AnimalKind::Lioness => 0.75,
                 aoa_game::AnimalKind::Lion => 0.84,
+                aoa_game::AnimalKind::Python => 0.76,
+                aoa_game::AnimalKind::SeaSerpent => 0.48,
+                aoa_game::AnimalKind::Viper => 0.43,
             };
             let height = sprite.size[1] * (top - sprite.pivot[1]);
             if let Some(top) = rig.screen_offset(Vec3::from(sprite.anchor), up * height) {

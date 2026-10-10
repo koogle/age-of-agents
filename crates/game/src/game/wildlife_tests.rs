@@ -37,6 +37,9 @@ fn stationary_attack_faces_target_and_clears_phase_after_retreat() {
         AnimalKind::Boar,
         AnimalKind::Lioness,
         AnimalKind::Lion,
+        AnimalKind::Python,
+        AnimalKind::SeaSerpent,
+        AnimalKind::Viper,
     ] {
         let mut world = wildlife(kind);
         world.tick(0.3);
@@ -246,7 +249,42 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(lions[0].kind, AnimalKind::Lion);
             assert!(lions[1..].iter().all(|a| a.kind == AnimalKind::Lioness
                 && a.home.center().distance(lions[0].home.center()) <= 3.0));
-            let added: Vec<_> = added.iter().filter(|a| !a.kind.is_lion()).collect();
+            let snakes: Vec<_> = added.iter().filter(|a| a.kind.ambushes()).collect();
+            let pythons = snakes
+                .iter()
+                .filter(|a| a.kind == AnimalKind::Python)
+                .count();
+            assert!((1..=2).contains(&pythons));
+            assert_eq!(
+                snakes
+                    .iter()
+                    .filter(|a| a.kind == AnimalKind::SeaSerpent)
+                    .count(),
+                1
+            );
+            let temple_island = world.buildings.iter().any(|b| {
+                b.id == TEMPLE_ID
+                    && snakes
+                        .iter()
+                        .any(|s| s.home.center().distance(b.origin.center()) < 40.0)
+            });
+            assert_eq!(
+                snakes
+                    .iter()
+                    .filter(|a| a.kind == AnimalKind::Viper)
+                    .count(),
+                if temple_island { 2 } else { 0 }
+            );
+            for s in &snakes {
+                if s.kind == AnimalKind::SeaSerpent {
+                    assert!(world.terrain.iter().any(|c| c.biome == TerrainBiome::Water
+                        && c.coordinate().center().distance(s.home.center()) <= 4.0));
+                }
+            }
+            let added: Vec<_> = added
+                .iter()
+                .filter(|a| !a.kind.is_lion() && !a.kind.ambushes())
+                .collect();
             assert!((4..=7).contains(&added.len()));
             assert_eq!(
                 added.iter().filter(|a| a.kind == AnimalKind::Bear).count(),
@@ -418,4 +456,60 @@ fn prides_do_not_chase_beyond_their_territory() {
             .iter()
             .all(|a| a.cell == a.home && a.step.is_none())
     );
+}
+
+#[test]
+fn ambushers_stay_hidden_until_a_unit_comes_close() {
+    let mut world = wildlife(AnimalKind::Viper);
+    world.units[0].cell = CellCoordinate::new(20, 10);
+    world.refresh_exploration();
+    world.tick(0.1);
+    assert!(world.animals[0].concealed(&world.units));
+    assert!(
+        world.snapshot().animals.is_empty(),
+        "a hidden viper is not in the snapshot"
+    );
+    assert_eq!(
+        world.apply_command(Command::AttackAnimal {
+            unit_ids: vec![world.units[0].id.clone()],
+            animal_id: "beast".into(),
+        }),
+        Err(CommandError::AnimalNotVisible)
+    );
+    world.units[0].cell = CellCoordinate::new(13, 10);
+    world.tick(0.1);
+    assert!(!world.animals[0].concealed(&world.units));
+    assert_eq!(world.snapshot().animals.len(), 1);
+    attack(&mut world);
+    for _ in 0..30 {
+        world.tick(0.1);
+        world.validate().unwrap();
+    }
+    assert!(world.animals[0].health < AnimalKind::Viper.max_health());
+    assert!(world.units[0].health < 100.0, "the viper strikes back hard");
+    // A revealed snake that bit stays visible while its strike timer runs.
+    assert!(!world.animals[0].concealed(&world.units));
+}
+
+#[test]
+fn snakes_strike_hard_but_never_leave_their_lair() {
+    let mut world = wildlife(AnimalKind::Python);
+    world.units[0].cell = CellCoordinate::new(13, 10);
+    for _ in 0..50 {
+        world.tick(0.1);
+        world.validate().unwrap();
+        assert!(
+            world.animals[0]
+                .cell
+                .center()
+                .distance(world.animals[0].home.center())
+                <= 3.0
+        );
+    }
+    world.units[0].cell = CellCoordinate::new(40, 40);
+    for _ in 0..100 {
+        world.tick(0.1);
+    }
+    assert_eq!(world.animals[0].cell, world.animals[0].home);
+    assert!(world.animals[0].concealed(&world.units));
 }
