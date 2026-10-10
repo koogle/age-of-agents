@@ -3,7 +3,9 @@
 from pathlib import Path
 import json
 
+import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets/sprites/wildlife_sources/npc-style-refined.png"
@@ -12,12 +14,14 @@ CELL = 627
 BASELINE = 590
 
 
+
+
 def main():
     source = Image.open(SOURCE).convert("RGBA")
     attacks = Image.open(ATTACK_SOURCE).convert("RGBA")
     assert source.size == (CELL * 2, CELL * 2)
     assert attacks.size == source.size
-    atlas = Image.new("RGBA", (CELL * 4, CELL * 3))
+    atlas = Image.new("RGBA", (CELL * 4, CELL * 5))
     frames = {}
     # Planted rear-paw landmarks, measured in the original 627px cells.
     # A lifted/swiping front paw must not shift the whole animal's ground anchor.
@@ -61,6 +65,38 @@ def main():
         assert bounds[3] + offset[1] < CELL
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
+    # Lions: 1024px source quadrants, downsampled by one common factor (never
+    # enlarged) and otherwise untouched: line work and shading are the image
+    # model's job, per Jakob (2026-10-10), not pixel processing here. A pose is every opaque shape whose center lies in its quadrant,
+    # so a tail crossing the quadrant edge stays with its body. The lowest
+    # (planted) paws sit on the shared baseline.
+    half, scale = 1024, 589 / 1024
+    for row, name, source in [(3, "lioness", "huntress_ink"), (4, "lion", "nemean_ink")]:
+        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{source}_cutout.png").convert("RGBA")
+        assert sheet.size == (2 * half, 2 * half)
+        alpha = np.asarray(sheet.getchannel("A")) > 128
+        labels, count = ndimage.label(alpha)
+        centers = ndimage.center_of_mass(alpha, labels, range(1, count + 1))
+        pixels = np.asarray(sheet)
+        for col, pose in enumerate(["idle", "walk", "attack_windup", "attack_strike"]):
+            x, y = col % 2 * half, col // 2 * half
+            shapes = [i + 1 for i, (cy, cx) in enumerate(centers)
+                      if x <= cx < x + half and y <= cy < y + half]
+            # Keep soft edge pixels of the pose's own shapes only.
+            mask = ndimage.binary_dilation(np.isin(labels, shapes), iterations=4)
+            frame = Image.fromarray(np.where(mask[..., None], pixels, 0).astype(np.uint8), "RGBA")
+            frame = frame.crop((x - half // 4, y, x + half + half // 4, y + half))
+            frame = frame.resize((round(frame.width * scale), round(frame.height * scale)),
+                                 Image.Resampling.LANCZOS)
+            bounds = frame.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox()
+            assert bounds is not None
+            offset = ((CELL - round(half * scale)) // 2 - round(half // 4 * scale), BASELINE - bounds[3])
+            assert 0 <= bounds[0] + offset[0] and bounds[2] + offset[0] < CELL
+            assert 0 <= bounds[1] + offset[1]
+            cell = Image.new("RGBA", (CELL, CELL))
+            cell.alpha_composite(frame.crop(bounds), (bounds[0] + offset[0], bounds[1] + offset[1]))
+            atlas.alpha_composite(cell, (col * CELL, row * CELL))
+            frames[f"{name}_{pose}"] = [col * CELL, row * CELL, CELL, CELL]
     atlas.save(ROOT / "assets/sprites/wildlife.png")
     (ROOT / "assets/sprites/wildlife.json").write_text(
         json.dumps({"size": list(atlas.size), "frames": frames}, indent=2) + "\n")

@@ -1,0 +1,352 @@
+{
+  "date": "2026-10-09",
+  "status": "Integrated 2026-10-10: cel-shaded naturalistic island huntress (lioness) and Nemean lion (leader), with packer line thinning.",
+  "packing": "scripts/pack_wildlife.py: huntress_ink/nemean_ink cutouts; a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames on atlas rows 3-4 with the lowest paws on y=590. No pixel processing beyond registration and downsampling.",
+  "draft_1_2026-10-09": {
+    "lioness": {
+      "model": "fal-ai/nano-banana/edit",
+      "prompt": "lioness_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/boar-approved-animation.png": "7d6fa600703b2b58f056b24860b6bda837eb03e4bdb4201b155e9106c2a2a2b3",
+        "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+      },
+      "renders": {
+        "lioness_render_0.png": "01a11fa1-9c8c-76c1-b7a4-1a5e894db5ce (selected)",
+        "lioness_render_1.png": "01a11fa1-da37-7c83-91f1-426329406b84 (rejected: black cell backgrounds)",
+        "lioness_render_2.png": "01a11fa2-1819-7093-a586-d8d7e7e7e0ad (rejected: checkerboard, non-square)"
+      },
+      "cutout": {
+        "lioness_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa1-cc60-7702-8cea-60a61020e2ac"
+      }
+    },
+    "lion": {
+      "model": "fal-ai/nano-banana/edit",
+      "first_round": "Three requests (01a11fa2-8dc6-7c61-b906-f43e47250f80, 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62, 01a11fa3-0a72-7370-bfbd-c3dcf1c78214) referenced lioness_render_0.png and drew maneless lionesses in some cells; outputs were overwritten except the identity crop lion_identity_ref.png (top-left cell of the second request).",
+      "prompt": "lion_prompt.txt (second round)",
+      "references": {
+        "assets/sprites/lion_sources/lion_identity_ref.png": "top-left 512px cell of first-round request 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62",
+        "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8"
+      },
+      "renders": {
+        "lion_render_0.png": "01a11fa3-774a-7262-808f-ad11bc29a639 (selected: clearest swipe strike)",
+        "lion_render_1.png": "01a11fa3-b3ab-7c71-895f-1db7275ce251 (alternative)",
+        "lion_render_2.png": "01a11fa3-f8bf-71d0-81a3-a6b3cebbcc51 (alternative: lower windup crouch)"
+      },
+      "cutout": {
+        "lion_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa3-a71c-7531-a066-73f6f0aae9c3"
+      }
+    },
+    "review": "Rejected by Jakob 2026-10-10: colour and shading not consistent with the game. Measured: lioness coat value 0.54-0.77 (flat, airbrushed) against wolf 0.44-0.87 and bear 0.35-0.64; lion brighter and more saturated than the lioness."
+  },
+  "redraw_2026-10-10": {
+    "model": "fal-ai/nano-banana/edit",
+    "prompts": [
+      "lioness_refine_prompt.txt",
+      "lion_refine_prompt.txt"
+    ],
+    "renders": {
+      "lioness_refined_render_0..2.png": [
+        "01a1264b-a51f-7bb3-ac85-e2bedff1cb11",
+        "01a1264b-d48f-7e93-acc2-6b418b644689",
+        "01a1264c-04c4-7cc1-a150-03c1c9ec76fb"
+      ],
+      "lion_refined_render_0..2.png": [
+        "01a1264c-769a-7632-ad27-df4a268f976f",
+        "01a1264c-aefa-7bb1-9d64-e0d7b34bc055",
+        "01a1264c-e752-7030-934f-50ce51107711"
+      ]
+    },
+    "review": "Rejected: muted somewhat, but still smooth airbrushed fills starting from the draft-1 sheets."
+  },
+  "rejected_repaints_2026-10-10": {
+    "note": "Outputs deleted. Shading repaints (wolf/bear sheet + redraw): colour drifted between top and bottom cells. Fur-texture repaints: barely changed texture and lost poses. A wolf/bear 2:1 reference produced 1472x704 sheets below the 512px cell minimum.",
+    "request_ids": [
+      "01a12650-f2fb-7ba0-b52a-85bf81657e16",
+      "01a12651-21ed-71e3-b85c-879ae0c6c7f0",
+      "01a12651-4a69-7282-8426-17f42b384354",
+      "01a12651-7a2b-7c90-b565-4457f099c31e",
+      "01a12651-aa8f-7680-98e7-08fc0c0e6228",
+      "01a12651-da31-7711-a5c9-bdc5b9b5c57f",
+      "01a12652-c56d-7880-b685-2396955ea7ff",
+      "01a12652-f4c8-7b80-a33b-bc2c0abfa6d0",
+      "01a12653-239d-7693-9849-2686c9d55dd4",
+      "01a12653-541e-7c72-82fe-8a37e86e5cb8",
+      "01a12653-83ce-7310-8ddb-d2cc9034e315",
+      "01a12653-b338-7732-b183-1c73adb39788",
+      "01a12654-27d7-7632-bd0f-125fabb3fdd7",
+      "01a12654-4e65-7652-a1ad-8da18882d808",
+      "01a12654-7568-7b60-989b-ab73ba4cab0e"
+    ]
+  },
+  "family_pass_2026-10-10": {
+    "lesson": "Generate new species fresh from the approved square wolf/bear sheet alone; edits of an off-style sheet keep its rendering.",
+    "lioness": {
+      "prompt": "lioness_family_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/npc-style-refined.png": "shipped wolf/bear NPC-style sheet (1254x1254)"
+      },
+      "renders": {
+        "lioness_family_render_0.png": "01a12655-0d06-7733-995d-ada2f7eb936c (selected: wolf-like two-tone underside, crouched windup, open-jaw strike)",
+        "lioness_family_render_1.png": "01a12655-3439-72a3-987b-67e75fa0ae34",
+        "lioness_family_render_2.png": "01a12655-5a6b-7b82-b07b-48dcfc900d85 (ground shadows)",
+        "lioness_family_render_3.png": "01a12655-809a-7721-867b-2088e45683d8"
+      },
+      "cutout": {
+        "lioness_family_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12656-d9df-70d2-8dfc-aef2b8709535"
+      },
+      "measured": "every cell: saturation median 0.42, value p10/median/p90 0.45/0.69/0.71-0.75"
+    },
+    "lion": {
+      "prompt": "lion_family_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/npc-style-refined.png": "shipped wolf/bear sheet",
+        "assets/sprites/lion_sources/lioness_family_render_0.png": "pride identity and palette"
+      },
+      "renders": {
+        "lion_family_render_0.png": "01a12655-ef2a-7ef3-b75a-6653083cd697 (rejected: maneless strike cell)",
+        "lion_family_render_1.png": "01a12656-1ea7-7013-b5d0-5791d8ea14a4",
+        "lion_family_render_2.png": "01a12656-4db7-7b51-aea1-ad28eb1a7ab7 (selected: mane in every cell, roar with raised paw)",
+        "lion_family_render_3.png": "01a12656-7d0b-7c51-a0cf-1c0a7d7e1f8d"
+      },
+      "cutout": {
+        "lion_family_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12656-e70a-7c33-9107-1e72fb3792f2"
+      },
+      "measured": "every cell: saturation median 0.45, value p10/median/p90 0.22-0.23/0.52-0.53/0.70"
+    },
+    "review": "Integrated briefly, then rejected by Jakob: it made the lions grey. Cutouts removed."
+  },
+  "exploration_2026-10-10": {
+    "status": "Not integrated. After Jakob said the family pass made the lions grey, liked the earlier designs, and found them too generic (Disney-like) without sparkle, these were explored; he then asked for more interesting lion designs to adapt to the house style.",
+    "nano_banana_warm_repaint": {
+      "prompt": "lioness_sparkle_prompt.txt",
+      "refs": [
+        "wildlife_sources/npc-style-refined.png",
+        "lioness_render_0.png"
+      ],
+      "request_ids": [
+        "01a1265f-f45c-7841-8029-bff27723496c",
+        "01a12660-1fd2-7590-a0c3-826f44f3cb91",
+        "01a12660-4fb2-7753-8993-8973107df3b3",
+        "01a12660-80d4-7e03-9bc6-875318e0bc48"
+      ],
+      "review": "Rejected: warm colours kept but flat generic cartoon rendering; outputs deleted."
+    },
+    "nano_banana_pro": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+      "lioness": {
+        "prompt": "lioness_sparkle_prompt.txt",
+        "request_id": "01a12660-f1a3-70b0-9ebb-5880c4d083f3",
+        "renders": [
+          "lioness_pro_render_0.png",
+          "lioness_pro_render_1.png"
+        ],
+        "cutout": [
+          "lioness_pro_cutout.png (render 0)",
+          "01a12662-545e-78b3-af66-7249186fe93b"
+        ]
+      },
+      "lion": {
+        "prompt": "lion_sparkle_prompt.txt",
+        "refs": [
+          "wildlife_sources/npc-style-refined.png",
+          "lioness_pro_render_0.png",
+          "lion_render_0.png"
+        ],
+        "request_id": "01a12661-b455-76f2-ad72-59e5d5303c19",
+        "renders": [
+          "lion_pro_render_0.png",
+          "lion_pro_render_1.png"
+        ],
+        "cutout": [
+          "lion_pro_cutout.png (render 1)",
+          "01a12662-621b-7713-b79d-1135266466da"
+        ]
+      },
+      "review": "Painted fur and 1024px cells, but Jakob: line work and colours look wrong. Not integrated."
+    },
+    "concepts": {
+      "model": "fal-ai/nano-banana-pro (text to image, 1K)",
+      "prompts": "concepts/concepts.json plus a shared framing sentence (single full-body animal facing right, elevated three-quarter camera, painterly concept art, white background)",
+      "request_ids": {
+        "nemean": "01a12664-e4d2-7323-8a15-3a7ef555a994",
+        "lion_gate": "01a12665-26d8-78c1-b0db-62b0dba61850",
+        "old_king": "01a12665-6815-78e2-8814-91f6d860e605",
+        "black_mane": "01a12665-a840-7220-9ff2-730e5816fb66",
+        "huntress": "01a12665-e882-7051-8710-22c17305eaf8",
+        "red_figure": "01a12666-28c4-71b2-a173-6fb93e9b7679"
+      },
+      "review": "Design exploration awaiting Jakob's pick; to be adapted to the wolf/bear style before integration."
+    }
+  },
+  "integrated_2026-10-10": {
+    "selection": "Jakob kept the suggested pairing from concepts/: Nemean lion as pride leader, island huntress as lioness.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 1024px cells",
+    "lioness": {
+      "prompt": "huntress_adapt_prompt.txt",
+      "references": [
+        "wildlife_sources/npc-style-refined.png (style)",
+        "concepts/huntress.png (design and colour)"
+      ],
+      "request_id": "01a1266c-e379-7f30-9e21-3d1fce3968c9",
+      "renders": {
+        "huntress_render_0.png": "selected",
+        "huntress_render_1.png": "alternative"
+      },
+      "cutout": {
+        "huntress_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1266f-8b32-7481-9390-441618fdb9ec"
+      }
+    },
+    "lion": {
+      "prompt": "nemean_adapt_prompt.txt (final wording; the first request lacked the facing/colour/size line)",
+      "references": [
+        "wildlife_sources/npc-style-refined.png (style)",
+        "huntress_render_0.png (pride rendering)",
+        "concepts/nemean.png (design and colour)"
+      ],
+      "requests": {
+        "01a1266d-951a-7480-994c-1a7a0230a390": "nemean_render_0..1.png, rejected: left-facing idle filling the cell; colour shift between cells",
+        "01a1266e-ab28-7551-8624-4ea8b427d59d": "nemean_render_2..4.png; render 3 selected (scars, bronze sheen)"
+      },
+      "edit": "nemean_render_3_clean.png: the generated black 2x2 cell divider lines (8px at x/y 1020-1027) painted white where line-dark, before cutout.",
+      "cutout": {
+        "nemean_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1266f-982f-7420-a591-b8e582bb321b"
+      }
+    },
+    "review": "Superseded: Jakob asked for thinner line work and a more real-looking lion. Cutouts removed; renders kept."
+  },
+  "naturalistic_2026-10-10": {
+    "direction": "Jakob: line work thinner, lion should look more real.",
+    "rejected_prompt_edits": {
+      "nemean_real_prompt.txt": "01a1269c-46b1-7d41-8a85-da9a0f999b08",
+      "huntress_lines_prompt.txt": "01a1269c-ad07-73e0-9461-bf2be2313a2c",
+      "review": "Prompted thinner lines barely changed line weight; outputs deleted."
+    },
+    "lion": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K",
+      "prompt": "nemean_natural_prompt.txt",
+      "references": [
+        "nemean_render_3_clean.png"
+      ],
+      "request_id": "01a1269d-b076-74b3-8a21-c49e131dfbd0",
+      "renders": {
+        "nemean_natural_render_0.png": "selected: real lion skull and muzzle, shaggy mane lighter at the face and darker toward the chest, scars removed",
+        "nemean_natural_render_1.png": "alternative"
+      },
+      "cutout": {
+        "nemean_natural_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1269f-3770-7350-a198-ba53e9e07094"
+      }
+    },
+    "lioness": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K",
+      "prompt": "huntress_natural_prompt.txt",
+      "references": [
+        "huntress_render_0.png",
+        "nemean_natural_render_0.png"
+      ],
+      "request_id": "01a1269e-4d25-76e2-ac23-693c5ff6bb42",
+      "renders": {
+        "huntress_natural_render_0.png": "selected",
+        "huntress_natural_render_1.png": "alternative"
+      },
+      "cutout": {
+        "huntress_natural_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1269f-2a39-7b03-8d79-93553a499513"
+      }
+    },
+    "line_thinning": "scripts/pack_wildlife.py thin_lines(): strokes darker than luminance 0.42 that vanish under a 5-iteration opening are eroded by 1px per side at 2K; shaved pixels take the nearest opaque non-line colour; remaining strokes blend 35% toward warm brown (96,62,40). Broad dark areas (tail tufts, ear backs, mouths) are untouched. A 2px shave broke silhouettes.",
+    "review": "Jakob: getting close; asked for more cel shading. Cutouts removed; renders kept."
+  },
+  "cel_2026-10-10": {
+    "direction": "Jakob: a bit more cel shading; a fine balance between too much and not enough detail.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K",
+    "lion": {
+      "prompt": "cel_prompt.txt",
+      "references": [
+        "nemean_natural_render_0.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a126c8-b7b9-7a31-9597-68eaef74b903",
+      "renders": {
+        "nemean_cel_render_0.png": "selected: flat base plus one shadow tone, mane keeps tuft notches",
+        "nemean_cel_render_1.png": "alternative, more saturated"
+      },
+      "cutout": {
+        "nemean_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126ca-999e-7303-a0b5-6a5c1ee1f8da"
+      }
+    },
+    "lioness": {
+      "rejected": {
+        "request_id": "01a126c9-29cd-7ba1-aaa3-38730c27af4e",
+        "prompt": "cel_prompt.txt",
+        "review": "Too little detail: lost the black ear backs and rosettes; outputs deleted."
+      },
+      "prompt": "huntress_cel3_prompt.txt",
+      "references": [
+        "huntress_natural_render_0.png",
+        "nemean_cel_render_0.png (colour depth and line anchor)"
+      ],
+      "request_id": "01a126d2-0fbb-75e3-8c22-1e4d0d0b0c15",
+      "renders": {
+        "huntress_cel3_render_0.png": "S0.47 V0.85, dark 8.7%",
+        "huntress_cel3_render_1.png": "selected: S0.57 V0.85, dark 13.7%, richest coat and strongest outlines, keeps ear backs, rosettes, white throat",
+        "huntress_cel3_render_2.png": "S0.49 V0.87, dark 9.2%"
+      },
+      "cutout": {
+        "huntress_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126d3-1b10-7160-a60e-37bc67df50b8"
+      },
+      "superseded": {
+        "request_id": "01a126c9-e982-7f32-a878-e07f92c433a1",
+        "renders": [
+          "huntress_cel2_render_0.png",
+          "huntress_cel2_render_1.png"
+        ],
+        "review": "Jakob: lost the clear linework and drifted into beige. Measured on render 0: value 0.87 (naturalistic pass 0.75), dark-line share 3.6% (naturalistic 9.8%). The lion's numbers had not moved, so this was the lioness only."
+      },
+      "packer_check": "thin_lines() lightening sweep (0.35/0.15/0) moved the lion's dark-line share only 10.9% to 10.7%, so the packer was not the cause; left unchanged."
+    }
+  },
+  "reink_2026-10-10": {
+    "direction": "Jakob: likes the cel rows but they are a bit muddled; make the line work clear and match the wolf's sharpness.",
+    "measured_before": "At atlas scale all strokes are 2px like the wolf, but lion ink luminance 0.29 and lioness 0.25 against the wolf's 0.21 (ink redder: lion rgb 99,64,44 vs wolf 67,52,41), lion line coverage 1.5% vs 2.5%, lion silhouette edge gradient 0.60 vs 0.80.",
+    "rejected": "Median filter (3 and 5) before re-inking: ate thin lines (lion 1.3% coverage) and softened silhouettes (edge 0.26-0.66); mane went mushy.",
+    "integrated": "scripts/pack_wildlife.py reink(): thin dark strokes snap toward the wolf's ink (67,52,41), mid-dark pixels touching a stroke join it as a crease, the alpha fringe narrows to about one pixel, then an unsharp mask (radius 1.2, 80%). thin_lines() no longer lightens ink.",
+    "measured_after": "lioness ink 0.20-0.21, coverage 3.2-3.8%, edge 0.71-0.73; lion ink 0.24-0.25, coverage 2.6-2.9%, edge 1.1-1.4; wolf 0.18-0.21, 2.5-3.0%, 0.80-0.87. No new generation requests.",
+    "superseded": "Jakob (2026-10-10): use an image model per the asset rules. reink() and thin_lines() removed from the packer; the atlas is repacked from the same cel cutouts without them."
+  },
+  "ink_pass_2026-10-10": {
+    "status": "integrated",
+    "direction": "Jakob: use an image model per the asset rules for the line work (not packer pixel code); match the wolf's clear, sharp line work.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+    "prompt": "ink_prompt.txt",
+    "blocked_first": "FAL balance exhausted; pre-lock lion request 01a12776-0d11-7293-9e6b-24ee9fa67583 completed but stayed locked (TOP_UP) after the top-up and was never retrieved. Jakob repurchased credits; new requests went through after about 30 s.",
+    "lioness": {
+      "references": [
+        "huntress_cel3_render_1.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a12781-de82-7321-a2b1-a2aa41510f1c",
+      "renders": {
+        "huntress_ink_render_0.png": "ink lum 0.24, coverage 3.1%: heavier interior crease lines",
+        "huntress_ink_render_1.png": "selected: ink lum 0.20, coverage 2.9%, continuous dark contour"
+      },
+      "cutout": {
+        "huntress_ink_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12783-7a92-7240-893f-04592e9485c8"
+      }
+    },
+    "lion": {
+      "references": [
+        "nemean_cel_render_0.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a12782-9407-7ea0-9c48-fe042149fa47",
+      "renders": {
+        "nemean_ink_render_0.png": "ink lum 0.25, coverage 3.8%",
+        "nemean_ink_render_1.png": "selected: ink lum 0.20, coverage 4.2% (mane-strand strokes), darkest continuous contour"
+      },
+      "cutout": {
+        "nemean_ink_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12783-b7c6-79e3-aa6e-18df313485e3"
+      }
+    },
+    "measurement_note": "Render-stage stats key the white background with a hard threshold, which inflates the edge-gradient column; compare ink luminance and coverage only at render stage, all three on packed frames."
+  }
+}
