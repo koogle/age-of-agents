@@ -53,8 +53,8 @@ Art: `assets/sprites/lion_sources/` (prompts, renders, cutouts, provenance) pack
 as atlas rows 3–4 by `scripts/pack_wildlife.py`. Designs (Jakob, 2026-10-10): the
 lioness is an island huntress (faint rosettes, black-backed ears, white throat),
 the leader a Nemean lion; at Jakob's request both are naturalistic and
-cel-shaded at a medium detail level, with line work thinned and re-inked by the
-packer to the wolf's measured ink and sharpness. Sources are 1024px cells downsampled
+cel-shaded at a medium detail level. Line work is the image model's job: Jakob
+removed the packer's thinning and re-ink steps on 2026-10-10 under the asset rules. Sources are 1024px cells downsampled
 into 627px frames; quads are 0.95 and 1.0, so the leader stands about a fifth
 taller ([asset lesson](asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
 Style review: [lion review](../verification/lions/README.md).

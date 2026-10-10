@@ -33,13 +33,14 @@ packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-fro
 - `cel-fix-before-after.png`: that first cel lioness (top) had drifted beige with
   faded outlines (value 0.87, 3.6% dark pixels); the regenerated one (bottom) is
   anchored to the lion (S0.57, 11% dark pixels in the packed frame).
-- `reink-before-after.png` and `reink-zoom.png`: the packer's re-ink step. Before,
-  lion ink luminance 0.29 and lioness 0.25 against the wolf's 0.21; after, 0.24
-  and 0.20, with line coverage and the lioness's edge hardness on the wolf's
-  numbers. The zoom is nearest-neighbour 2x from the atlas.
+- `reink-before-after.png` and `reink-zoom.png`: a packer re-ink step that matched
+  the wolf's numbers (ink 0.24/0.20 against 0.21) and was removed the same day:
+  Jakob ruled that line work goes through an image model. They remain as the
+  measured target for the pending model pass.
 
-Matches: flat cel colour areas with one soft-edged shadow tone, the wolf's ink colour, stroke width and silhouette hardness, consistent identity and colour across
-poses, crouched windups, open-jaw strikes. Still open: both lions are slightly more
+Matches: flat cel colour areas with one soft-edged shadow tone, the wolf's stroke width, consistent identity and colour across
+poses, crouched windups, open-jaw strikes. Still open: ink is lighter and redder than the wolf's and the lion's silhouette
+softer (a model pass is pending on FAL balance); both lions are slightly more
 realistic than the wolf; no OpenAI image_gen cleanup pass yet.
 
 ## Behavior checks run

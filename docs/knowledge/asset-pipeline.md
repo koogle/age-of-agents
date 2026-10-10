@@ -227,10 +227,13 @@ pixels under luminance 0.3 against the sibling and the wolf before packing, and
 anchor the weaker sheet to the stronger sibling's render with "as deep as", "as
 crisp and dark as" wording naming the reference. When frames still read muddled
 beside the wolf, measure line work at atlas scale (stroke width, ink luminance
-and colour, line coverage, silhouette edge gradient) and fix it deterministically
-in the packer: `reink()` in `scripts/pack_wildlife.py` snaps strokes to the wolf's
-ink, hardens the alpha fringe and sharpens. A median filter before re-inking is
-the wrong tool: it eats thin lines and softens silhouettes. Provenance:
+and colour, line coverage, silhouette edge gradient) to name the gap, then close
+it with an image model edit that attaches the wolf sheet and asks for its ink
+colour, continuous crisp outlines and short interior lines. Jakob (2026-10-10):
+line work and shading fixes go through an image model, per the asset workflow;
+a packer re-ink step (snap strokes to the wolf's ink, harden alpha, sharpen) and
+a 2K stroke-shave were built, matched the numbers, and were then removed for
+that reason. Pixel code in the packer is for registration and packing only. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)

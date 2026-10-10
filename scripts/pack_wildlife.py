@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 from scipy import ndimage
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,56 +14,6 @@ CELL = 627
 BASELINE = 590
 
 
-
-def thin_lines(image, shave=1, lighten=0.0):
-    """Shave generated ink strokes to the family's fine line, optionally lifting them.
-
-    Thin dark strokes vanish under a morphological opening while broad dark areas
-    (tail tufts, ear backs, mouths) survive it and stay untouched. Shaved pixels
-    take the colour of the nearest opaque non-line pixel.
-    """
-    px = np.asarray(image).astype(float)
-    opaque = px[..., 3] > 128
-    dark = opaque & (px[..., :3] @ [0.299, 0.587, 0.114] / 255 < 0.42)
-    broad = ndimage.binary_opening(dark, iterations=5)
-    line = dark & ~ndimage.binary_dilation(broad, iterations=2)
-    core = ndimage.binary_erosion(line, iterations=shave)
-    removed = line & ~core
-    _, (iy, ix) = ndimage.distance_transform_edt(~(opaque & ~line), return_indices=True)
-    out = px.copy()
-    out[removed, :3] = px[iy[removed], ix[removed], :3]
-    out[core, :3] = out[core, :3] * (1 - lighten) + np.array([96.0, 62.0, 40.0]) * lighten
-    return Image.fromarray(out.clip(0, 255).astype(np.uint8), "RGBA")
-
-
-# The wolf's measured ink colour; the lions' generated ink was lighter and redder.
-WOLF_INK = np.array([67.0, 52.0, 41.0])
-
-
-def reink(cell, ink_lum=0.42, crease_lum=0.50):
-    """Match a packed frame's line work to the wolf: ink colour, hard silhouette, sharpness.
-
-    Thin dark strokes snap toward the wolf's ink (broad dark areas such as the
-    mane stay), mid-dark pixels touching a stroke join it as a crease, the
-    semi-transparent fringe narrows to about one pixel, and an unsharp mask
-    restores the edge contrast the 2K downsample blurred.
-    """
-    a = np.asarray(cell).astype(float)
-    opaque = a[..., 3] > 128
-    lum = (a[..., :3] @ [0.299, 0.587, 0.114]) / 255
-    dark = opaque & (lum < ink_lum)
-    broad = ndimage.binary_dilation(ndimage.binary_opening(dark, iterations=4), iterations=2)
-    line = dark & ~broad
-    crease = opaque & (lum < crease_lum) & ~broad & ndimage.binary_dilation(line, iterations=1) & ~line
-    out = a.copy()
-    weight = (0.6 + 0.4 * np.clip((ink_lum - lum) / ink_lum, 0.0, 1.0))[..., None]
-    out[line, :3] = a[line, :3] * (1 - weight[line]) + WOLF_INK * weight[line]
-    out[crease, :3] = a[crease, :3] * 0.5 + WOLF_INK * 0.5
-    out[..., 3] = np.clip((a[..., 3] / 255 - 0.35) / 0.3, 0, 1) * 255
-    image = Image.fromarray(out.clip(0, 255).astype(np.uint8), "RGBA")
-    rgb = image.convert("RGB").filter(ImageFilter.UnsharpMask(radius=1.2, percent=80, threshold=2))
-    rgb.putalpha(image.getchannel("A"))
-    return rgb
 
 
 def main():
@@ -116,14 +66,14 @@ def main():
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
     # Lions: 1024px source quadrants, downsampled by one common factor (never
-    # enlarged). A pose is every opaque shape whose center lies in its quadrant,
+    # enlarged) and otherwise untouched: line work and shading are the image
+    # model's job, per Jakob (2026-10-10), not pixel processing here. A pose is every opaque shape whose center lies in its quadrant,
     # so a tail crossing the quadrant edge stays with its body. The lowest
     # (planted) paws sit on the shared baseline.
     half, scale = 1024, 589 / 1024
     for row, name, source in [(3, "lioness", "huntress_cel"), (4, "lion", "nemean_cel")]:
         sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{source}_cutout.png").convert("RGBA")
         assert sheet.size == (2 * half, 2 * half)
-        sheet = thin_lines(sheet)
         alpha = np.asarray(sheet.getchannel("A")) > 128
         labels, count = ndimage.label(alpha)
         centers = ndimage.center_of_mass(alpha, labels, range(1, count + 1))
@@ -145,7 +95,7 @@ def main():
             assert 0 <= bounds[1] + offset[1]
             cell = Image.new("RGBA", (CELL, CELL))
             cell.alpha_composite(frame.crop(bounds), (bounds[0] + offset[0], bounds[1] + offset[1]))
-            atlas.alpha_composite(reink(cell), (col * CELL, row * CELL))
+            atlas.alpha_composite(cell, (col * CELL, row * CELL))
             frames[f"{name}_{pose}"] = [col * CELL, row * CELL, CELL, CELL]
     atlas.save(ROOT / "assets/sprites/wildlife.png")
     (ROOT / "assets/sprites/wildlife.json").write_text(
