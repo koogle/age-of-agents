@@ -280,20 +280,29 @@
         "prompt": "cel_prompt.txt",
         "review": "Too little detail: lost the black ear backs and rosettes; outputs deleted."
       },
-      "prompt": "huntress_cel_prompt.txt",
+      "prompt": "huntress_cel3_prompt.txt",
       "references": [
         "huntress_natural_render_0.png",
-        "nemean_cel_render_0.png",
-        "wildlife_sources/npc-style-refined.png"
+        "nemean_cel_render_0.png (colour depth and line anchor)"
       ],
-      "request_id": "01a126c9-e982-7f32-a878-e07f92c433a1",
+      "request_id": "01a126d2-0fbb-75e3-8c22-1e4d0d0b0c15",
       "renders": {
-        "huntress_cel2_render_0.png": "selected: cel-shaded, keeps black ear backs, rosettes, white throat, a few fur notches",
-        "huntress_cel2_render_1.png": "alternative"
+        "huntress_cel3_render_0.png": "S0.47 V0.85, dark 8.7%",
+        "huntress_cel3_render_1.png": "selected: S0.57 V0.85, dark 13.7%, richest coat and strongest outlines, keeps ear backs, rosettes, white throat",
+        "huntress_cel3_render_2.png": "S0.49 V0.87, dark 9.2%"
       },
       "cutout": {
-        "huntress_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126ca-8af0-7821-872a-21895809ca38"
-      }
+        "huntress_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126d3-1b10-7160-a60e-37bc67df50b8"
+      },
+      "superseded": {
+        "request_id": "01a126c9-e982-7f32-a878-e07f92c433a1",
+        "renders": [
+          "huntress_cel2_render_0.png",
+          "huntress_cel2_render_1.png"
+        ],
+        "review": "Jakob: lost the clear linework and drifted into beige. Measured on render 0: value 0.87 (naturalistic pass 0.75), dark-line share 3.6% (naturalistic 9.8%). The lion's numbers had not moved, so this was the lioness only."
+      },
+      "packer_check": "thin_lines() lightening sweep (0.35/0.15/0) moved the lion's dark-line share only 10.9% to 10.7%, so the packer was not the cause; left unchanged."
     }
   }
 }
