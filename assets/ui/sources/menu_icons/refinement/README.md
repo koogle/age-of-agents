@@ -12,7 +12,7 @@ off-style refinement. Historical `../refinement/refined-sheet.png` references
 inside each `rejected/provenance.json` refer to that rejected bold sheet, not the
 accepted sheet now at that name. Historical `draft-sheet.png` refers to the FAL
 draft sheet here. The first brick calibration is retained as
-`rejected-brick-texture.png`; its mottling was rejected. The second is
+`rejected-brick-texture.png` (removed 2026-10-10); its mottling was rejected. The second is
 `brick-calibration.png`. Rejected files are never approved style references.
 
 Final icon files normalize directly from each retained `cutout.png` through

@@ -14,5 +14,18 @@
       }
     ],
     "description": ""
+  },
+  "removed_images": {
+    "note": "Removed 2026-10-10 under Jakob's rule: rejected and intermediate images are not kept in the repository; their request IDs and reviews stay here.",
+    "files": [
+      "boar-approved-animation-edge-draft.png",
+      "boar-detailed-rejected.png",
+      "boar-refined.png",
+      "boar-silhouette-study.png",
+      "draft.png",
+      "refined.png",
+      "style-pass-1-rejected.png",
+      "wolf-bear-draft.png"
+    ]
   }
 }

@@ -1,6 +1,14 @@
 # Wolf and bear sprites
 
-The original four-frame atlas is retained in `refined.png`. The integrated
+Superseded and rejected images named below (`refined.png`, `draft.png`,
+`wolf-bear-draft.png`, `style-pass-1-rejected.png`, `boar-refined.png`,
+`boar-detailed-rejected.png`, `boar-approved-animation-edge-draft.png`,
+`boar-silhouette-study.png`) were removed on 2026-10-10 under Jakob's rule against
+keeping intermediate art; their request IDs stay in the provenance files. The
+packer reads `npc-style-refined.png`, `npc-attack-refined.png` and
+`boar-approved-animation.png`; `boar-npc-study.png` is the approved identity.
+
+The original four-frame atlas (`refined.png`, removed) was superseded. The integrated
 `../wildlife.png` / `../wildlife.json` now have eight 627px frames; see the
 NPC-style refinement and authored attack sections below. Mirrored to face
 left; reverse-facing poses are not authored. The attack extension below adds windup/strike frames.
@@ -11,7 +19,7 @@ left; reverse-facing poses are not authored. The attack extension below adds win
 The earlier wolf/boar draft is retained as an unused source: the user requested a
 bear before integration, replacing the proposed boar.
 
-`refined.png` is the unmodified OpenAI image_gen refinement of that draft,
+`refined.png` (removed) was the unmodified OpenAI image_gen refinement of that draft,
 generated 2026-10-05: four square cells, consistent wolf/bear identities,
 standing and walking poses, corrected anatomy, no text or numbers, transparent
 background, painted cel shading and fine ink outlines. Original tool output:
@@ -26,7 +34,7 @@ RGBA format, transparency and original cell sizes.
 
 The integrated atlas now uses `npc-style-refined.png`, generated with OpenAI
 image_gen with the shipped villagers and original guard art attached alongside
-the world reference. `style-pass-1-rejected.png` remains as evidence: softer
+the world reference. `style-pass-1-rejected.png` (removed) showed that softer
 painted fur alone still looked too textured beside the NPCs. The final pass
 uses broad cel color regions, restrained warm brown contours and sparse fur
 tufts. Exact final prompt, reference revision and outputs are recorded in
@@ -60,11 +68,11 @@ records style, grounded registration and desktop/phone evidence.
 
 ## Boars, 2026-10-06
 
-Jakob requested the retained `draft.png` boar as an additional danger.
-`boar-refined.png` is the unmodified transparent second OpenAI image_gen result,
+Jakob requested the earlier `draft.png` boar (removed) as an additional danger.
+`boar-refined.png` (removed) was the unmodified transparent second OpenAI image_gen result,
 refined against that original and the approved NPC-matched wildlife sheet.
 Exact prompts, source outputs and reference hashes are in `boar-provenance.json`.
-`boar-detailed-rejected.png` preserves the first pass, rejected for dense fur
+`boar-detailed-rejected.png` (removed) was the first pass, rejected for dense fur
 strokes; the final pass matches the approved family’s broad cel masses.
 Four 627px source cells hold idle, walk, lowered-head windup and tusk strike.
 The packer appends them as a third atlas row (2508×1881), preserving all eight
@@ -89,6 +97,6 @@ agent’s earlier assessment. `boar-approved-animation.png` extends that exact
 light taupe design to idle, walk, windup and strike, with a second tool pass
 restoring safe transparent margins around the snouts. The edge draft and both
 exact prompts are retained; see `boar-approved-animation-provenance.json`.
-This is now the packed third atlas row. The prior `boar-refined.png` is retained
+This is now the packed third atlas row. The prior `boar-refined.png` was removed
 as rejected history. Wolf and bear pixels, frame dimensions and gameplay rules
 are unchanged.

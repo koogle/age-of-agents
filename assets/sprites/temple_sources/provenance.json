@@ -101,5 +101,30 @@
         }
       ]
     }
+  },
+  "removed_images": {
+    "note": "Removed 2026-10-10 under Jakob's rule: rejected and intermediate images are not kept in the repository; their request IDs and reviews stay here.",
+    "files": [
+      "comparison.png",
+      "cutout_0.png",
+      "cutout_2.png",
+      "empty_comparison.png",
+      "empty_cutout_1.png",
+      "empty_render_0.png",
+      "empty_render_1.png",
+      "render_0.png",
+      "render_1.png",
+      "render_2.png",
+      "ruined_comparison.png",
+      "ruined_cutout_0.png",
+      "ruined_cutout_1.png",
+      "ruined_empty_comparison.png",
+      "ruined_empty_cutout_1.png",
+      "ruined_empty_render_0.png",
+      "ruined_empty_render_1.png",
+      "ruined_render_0.png",
+      "ruined_render_1.png",
+      "ruined_render_2.png"
+    ]
   }
 }

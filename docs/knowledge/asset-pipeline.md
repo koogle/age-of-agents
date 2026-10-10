@@ -233,7 +233,11 @@ colour, continuous crisp outlines and short interior lines. Jakob (2026-10-10):
 line work and shading fixes go through an image model, per the asset workflow;
 a packer re-ink step (snap strokes to the wolf's ink, harden alpha, sharpen) and
 a 2K stroke-shave were built, matched the numbers, and were then removed for
-that reason. Pixel code in the packer is for registration and packing only. The model pass
+that reason. Pixel code in the packer is for registration and packing only. Jakob (2026-10-10,
+after the lion folder reached 117 MB): do not commit rejected or intermediate
+renders. Keep the integrated source, cutout, approved references and prompts;
+record every other pass as request IDs and a one-line review in `provenance.json`
+and delete its images before merging. Evidence folders keep final comparisons. The model pass
 that replaced them (`lion_sources/ink_prompt.txt`: keep everything, redraw the
 outlines in the wolf's deep brown-black ink, continuous and crisp, with his short
 interior lines) landed on the wolf's numbers in one round when the ask named
