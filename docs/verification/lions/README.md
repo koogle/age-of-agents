@@ -1,10 +1,17 @@
 # Lion prides — review evidence (2026-10-09, art updated 2026-10-10)
 
-Art and behavior for the first monster class. Captures come from the
-current web build rendering a temple-island snapshot from `tests/full_run.rs`
-(seed 7) with a pride injected beside the landed villager: the leader idle,
-one lioness striking (the villager's bar is at 55%), one winding up, one walking.
-The injected scene is for rendering only and was not validated by the simulation.
+Art and behavior for the first monster class. Two kinds of capture:
+
+- **Real spawn** (`real-spawn-*.png`): `cargo run -p aoa-game --example
+  archipelago_preview -- 7 2 pride` sails a ship from the home island into the fog,
+  discovers island 2, steers to the water nearest the pride the simulation spawned
+  there (lion `animal-1-4` and two lionesses), lands villager-1 four cells from the
+  leader, and exports the snapshot; the ship's vision shows the pride on the shore.
+  Nothing animal is placed by hand; `GameWorld::validate` passes.
+- **Posed** (`desktop*.png`, `phone.png`): a temple-island snapshot from
+  `tests/full_run.rs` (seed 7) with a pride injected beside the landed villager to
+  show every pose at once (leader idle, one lioness striking, one winding up, one
+  walking). For rendering review only; not validated by the simulation.
 
 - `style-compare.png`: shipped wolf, bear and boar beside the lioness and lion
   (idle, idle, strike, strike). Not to game scale.
