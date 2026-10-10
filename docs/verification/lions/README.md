@@ -7,7 +7,6 @@ Art and behavior for the first monster class. Captures:
 - `style-compare.png`: shipped wolf, bear and boar beside the lioness and lion
   (idle, idle, strike, strike). Not to game scale.
 - `poses.png`: all four poses of each, on flat grass.
-- `desktop.png` , `desktop-zoom.png` : 1280×800, DPR 1.
 
 ## Style acceptance (pending Jakob)
 
