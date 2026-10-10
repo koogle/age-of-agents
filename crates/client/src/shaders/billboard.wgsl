@@ -181,10 +181,14 @@ fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
         }
         world.y = ground_height(world.xz);
     } else {
-        // The card as drawn, slid along the sun down to the anchor's ground
-        // level, then draped on the drawn terrain.
-        let card = inst.anchor + local.x * inst.size.x * right + local.y * inst.size.y * g.camera_up.xyz;
-        world = card - sun * ((card.y - inst.anchor.y) / sun.y);
+        // The card as drawn, slid along the sun down to the ground, then
+        // draped on the drawn terrain. A tower's anchor is its plot's front
+        // corner, so heights are measured from the footprint centre, where
+        // the painted base stands.
+        let centre = inst.anchor - vec3<f32>(inst.footprint.x, 0.0, inst.footprint.y) * 0.5;
+        let rise = dot(centre - inst.anchor, g.camera_up.xyz);
+        let card = centre + local.x * inst.size.x * right + (local.y * inst.size.y - rise) * g.camera_up.xyz;
+        world = card - sun * ((card.y - centre.y) / sun.y);
         world.y = ground_height(world.xz);
         uv = vec2<f32>(mix(inst.uv.x, inst.uv.z, q.x), mix(inst.uv.w, inst.uv.y, q.y));
     }
