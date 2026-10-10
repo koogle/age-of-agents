@@ -657,8 +657,12 @@ impl App {
         {
             self.view.heights_dirty = false;
             self.ground_rebuilt_at = now;
-            game.renderer
-                .update_ground(&game.gpu.device, &self.view.heights, region);
+            game.renderer.update_ground(
+                &game.gpu.device,
+                &game.gpu.queue,
+                &self.view.heights,
+                region,
+            );
             #[cfg(target_arch = "wasm32")]
             LAST_HEIGHTS.with(|heights| *heights.borrow_mut() = Some(self.view.heights.clone()));
         }
@@ -671,6 +675,7 @@ impl App {
             camera_up: up.extend(0.0).to_array(),
             camera_pos: eye.extend(1.0).to_array(),
             sun_dir: sun.extend(0.0).to_array(),
+            ground: [0.0; 4],
             map_size: self.rig.map_size.to_array(),
             time: self.clock as f32,
             curve: self.rig.curve(),

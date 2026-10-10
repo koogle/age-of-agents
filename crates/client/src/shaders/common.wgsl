@@ -15,12 +15,30 @@ struct Globals {
     placement: vec4<f32>,
     placement_color: vec4<f32>,
     grid: vec4<f32>,
+    ground: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> g: Globals;
 // rgb = known biome colour (sRGB bytes), a = visibility (0 unseen, 0.5 explored, 1 visible).
 @group(0) @binding(1) var cells: texture_2d<f32>;
 @group(0) @binding(2) var linear_clamp: sampler;
+// Ground heights across g.ground, one texel per visible-mesh vertex.
+@group(0) @binding(3) var heights: texture_2d<f32>;
+
+// The rendered ground's height at a world point: the mesh vertices read back
+// bilinearly, so draped marks follow the drawn terrain, not the simulation grid.
+fn ground_height(xz: vec2<f32>) -> f32 {
+    let size = vec2<f32>(textureDimensions(heights)) - 1.0;
+    let p = clamp((xz - g.ground.xy) / (g.ground.zw - g.ground.xy), vec2<f32>(0.0), vec2<f32>(1.0)) * size;
+    let i = vec2<i32>(floor(p));
+    let f = p - floor(p);
+    let limit = vec2<i32>(size);
+    let a = textureLoad(heights, min(i, limit), 0).r;
+    let b = textureLoad(heights, min(i + vec2<i32>(1, 0), limit), 0).r;
+    let c = textureLoad(heights, min(i + vec2<i32>(0, 1), limit), 0).r;
+    let d = textureLoad(heights, min(i + vec2<i32>(1, 1), limit), 0).r;
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
 
 fn hash2(p: vec2<f32>) -> f32 {
     return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453);

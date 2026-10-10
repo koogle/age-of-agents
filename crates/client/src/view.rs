@@ -746,12 +746,6 @@ impl WorldView {
                     footprint: [0.0; 2],
                 },
             ));
-            decals.push(Decal {
-                center: (position + Vec3::Y * 0.015).to_array(),
-                radius: 0.2,
-                color: [0.165, 0.165, 0.118, 0.28],
-                ring: 0.0,
-            });
             if selection.units.contains(&unit.unit.id) {
                 decals.push(Decal {
                     center: (position + Vec3::Y * 0.02).to_array(),

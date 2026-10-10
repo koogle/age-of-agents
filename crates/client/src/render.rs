@@ -17,6 +17,27 @@ mod map;
 
 const GROUND_SIZE: u32 = 512;
 
+fn globals_bind_group(
+    device: &wgpu::Device,
+    layout: &wgpu::BindGroupLayout,
+    globals: &wgpu::Buffer,
+    cells: &wgpu::Texture,
+    linear: &wgpu::Sampler,
+    heights: &wgpu::Texture,
+) -> wgpu::BindGroup {
+    bind_group(
+        device,
+        "globals",
+        layout,
+        &[
+            globals.as_entire_binding(),
+            wgpu::BindingResource::TextureView(&cells.create_view(&Default::default())),
+            wgpu::BindingResource::Sampler(linear),
+            wgpu::BindingResource::TextureView(&heights.create_view(&Default::default())),
+        ],
+    )
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable, Default)]
 pub struct Globals {
@@ -34,6 +55,8 @@ pub struct Globals {
     pub placement: [f32; 4],
     pub placement_color: [f32; 4],
     pub grid: [f32; 4],
+    /// World x/z bounds of the visible ground and its height texture.
+    pub ground: [f32; 4],
 }
 
 /// One painted sprite standing on the ground.
@@ -100,6 +123,9 @@ pub struct Renderer {
     globals: wgpu::Buffer,
     globals_group: wgpu::BindGroup,
     cells: wgpu::Texture,
+    /// Ground heights of the visible region, one texel per mesh vertex, so
+    /// cast shadows can drape over the terrain.
+    heights: wgpu::Texture,
     globals_layout: wgpu::BindGroupLayout,
     terrain_layout: wgpu::BindGroupLayout,
     hud_layout: wgpu::BindGroupLayout,
@@ -122,6 +148,8 @@ pub struct Renderer {
     /// depth write, drawn after every sprite.
     silhouette_pipeline: wgpu::RenderPipeline,
     ghost_pipeline: wgpu::RenderPipeline,
+    /// Cast shadows on the ground, drawn after the sea and before sprites.
+    shadow_pipeline: wgpu::RenderPipeline,
     sheets: Vec<Sheet>,
     sprite_buffer: wgpu::Buffer,
     decal_pipeline: wgpu::RenderPipeline,
@@ -172,18 +200,16 @@ impl Renderer {
                     wgpu::TextureSampleType::Float { filterable: true },
                 ),
                 sampler_entry(2, wgpu::SamplerBindingType::Filtering),
+                texture_entry(
+                    3,
+                    wgpu::TextureViewDimension::D2,
+                    wgpu::TextureSampleType::Float { filterable: false },
+                ),
             ],
         });
-        let globals_group = bind_group(
-            device,
-            "globals",
-            &globals_layout,
-            &[
-                globals.as_entire_binding(),
-                wgpu::BindingResource::TextureView(&cells.create_view(&Default::default())),
-                wgpu::BindingResource::Sampler(&linear),
-            ],
-        );
+        let heights = data_texture(device, wgpu::TextureFormat::R32Float, "heights", 1, 1);
+        let globals_group =
+            globals_bind_group(device, &globals_layout, &globals, &cells, &linear, &heights);
 
         // Ground: painted biome textures as one mipmapped array.
         let mut layers: Vec<Rgba> = terrain::GROUND_LAYERS
@@ -417,6 +443,36 @@ impl Renderer {
         };
         let sprite_pipeline = make_sprite_pipeline(false);
         let ghost_pipeline = make_sprite_pipeline(true);
+        let shadow_pipeline = pipeline(
+            device,
+            PipelineSpec {
+                label: "shadow",
+                module: &sprite_module,
+                layouts: &[Some(&globals_layout), Some(&sheet_layout)],
+                buffers: &[Some(wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Sprite>() as u64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &sprite_attributes,
+                })],
+                format: SCENE_FORMAT,
+                // Multiply the ground colour; scene alpha (grading weight) stays.
+                blend: Some(wgpu::BlendState {
+                    color: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::Dst,
+                        dst_factor: wgpu::BlendFactor::Zero,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                    alpha: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::Zero,
+                        dst_factor: wgpu::BlendFactor::One,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                }),
+                depth: Some((true, wgpu::CompareFunction::Less)),
+                vs: "vs_shadow",
+                fs: "fs_shadow",
+            },
+        );
         let silhouette_pipeline = pipeline(
             device,
             PipelineSpec {
@@ -608,6 +664,7 @@ impl Renderer {
             globals,
             globals_group,
             cells,
+            heights,
             ground_index,
             terrain_pipeline,
             terrain_group,
@@ -618,6 +675,7 @@ impl Renderer {
             sprite_pipeline,
             silhouette_pipeline,
             ghost_pipeline,
+            shadow_pipeline,
             sheets,
             sprite_buffer,
             decal_pipeline,
@@ -706,8 +764,19 @@ impl Renderer {
             }
         };
         let (width, height) = (gpu.config.width as f32, gpu.config.height as f32);
-        gpu.queue
-            .write_buffer(&self.globals, 0, bytemuck::bytes_of(globals));
+        gpu.queue.write_buffer(
+            &self.globals,
+            0,
+            bytemuck::bytes_of(&Globals {
+                ground: [
+                    self.ground_bounds[0],
+                    self.ground_bounds[1],
+                    self.ground_bounds[2],
+                    self.ground_bounds[3],
+                ],
+                ..*globals
+            }),
+        );
         let post = |step: [f32; 2], final_pass: bool| PostUniform {
             texel: [1.0 / width, 1.0 / height],
             near: near_far.0,
@@ -806,8 +875,20 @@ impl Renderer {
             pass.set_vertex_buffer(0, self.sea.0.slice(..));
             pass.set_index_buffer(self.sea.1.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..self.sea.2, 0, 0..1);
-            pass.set_pipeline(&self.sprite_pipeline);
             pass.set_vertex_buffer(0, self.sprite_buffer.slice(..));
+            pass.set_pipeline(&self.shadow_pipeline);
+            let mut start = 0;
+            while start < sprites.len() {
+                let sheet = sprites[start].0;
+                let end = start
+                    + sprites[start..]
+                        .iter()
+                        .take_while(|(s, _)| *s == sheet)
+                        .count();
+                pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
+                pass.draw(0..6, start as u32..end as u32);
+                start = end;
+            }
             let mut start = 0;
             while start < sprites.len() {
                 let sheet = sprites[start].0;

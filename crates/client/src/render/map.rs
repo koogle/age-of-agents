@@ -22,6 +22,7 @@ impl Renderer {
     pub fn update_ground(
         &mut self,
         device: &wgpu::Device,
+        queue: &wgpu::Queue,
         heights: &terrain::Heights,
         region: [f32; 5],
     ) {
@@ -29,6 +30,39 @@ impl Renderer {
             heights,
             [region[0], region[1], region[2], region[3]],
             region[4] as u32,
+        );
+        let steps = mesh.indices.len();
+        let (width, depth) = (region[2] - region[0], region[3] - region[1]);
+        let columns = (width as u32 * region[4] as u32) + 1;
+        let rows = (depth as u32 * region[4] as u32) + 1;
+        debug_assert_eq!(mesh.vertices.len(), (columns * rows) as usize, "{steps}");
+        let heights: Vec<f32> = mesh.vertices.iter().map(|v| v.position[1]).collect();
+        self.heights = device.create_texture_with_data(
+            queue,
+            &wgpu::TextureDescriptor {
+                label: Some("heights"),
+                size: wgpu::Extent3d {
+                    width: columns,
+                    height: rows,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::R32Float,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                view_formats: &[],
+            },
+            wgpu::util::TextureDataOrder::LayerMajor,
+            bytemuck::cast_slice(&heights),
+        );
+        self.globals_group = globals_bind_group(
+            device,
+            &self.globals_layout,
+            &self.globals,
+            &self.cells,
+            &self.linear,
+            &self.heights,
         );
         self.ground = (
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -64,15 +98,13 @@ impl Renderer {
             width,
             height,
         );
-        self.globals_group = bind_group(
+        self.globals_group = globals_bind_group(
             device,
-            "map globals",
             &self.globals_layout,
-            &[
-                self.globals.as_entire_binding(),
-                wgpu::BindingResource::TextureView(&self.cells.create_view(&Default::default())),
-                wgpu::BindingResource::Sampler(&self.linear),
-            ],
+            &self.globals,
+            &self.cells,
+            &self.linear,
+            &self.heights,
         );
         self.terrain_group = bind_group(
             device,
