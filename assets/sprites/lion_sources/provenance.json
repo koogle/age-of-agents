@@ -114,5 +114,68 @@
       },
       "measured": "every cell: saturation median 0.45, value p10/median/p90 0.22-0.23/0.52-0.53/0.70"
     }
+  },
+  "exploration_2026-10-10": {
+    "status": "Not integrated. After Jakob said the family pass made the lions grey, liked the earlier designs, and found them too generic (Disney-like) without sparkle, these were explored; he then asked for more interesting lion designs to adapt to the house style.",
+    "nano_banana_warm_repaint": {
+      "prompt": "lioness_sparkle_prompt.txt",
+      "refs": [
+        "wildlife_sources/npc-style-refined.png",
+        "lioness_render_0.png"
+      ],
+      "request_ids": [
+        "01a1265f-f45c-7841-8029-bff27723496c",
+        "01a12660-1fd2-7590-a0c3-826f44f3cb91",
+        "01a12660-4fb2-7753-8993-8973107df3b3",
+        "01a12660-80d4-7e03-9bc6-875318e0bc48"
+      ],
+      "review": "Rejected: warm colours kept but flat generic cartoon rendering; outputs deleted."
+    },
+    "nano_banana_pro": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+      "lioness": {
+        "prompt": "lioness_sparkle_prompt.txt",
+        "request_id": "01a12660-f1a3-70b0-9ebb-5880c4d083f3",
+        "renders": [
+          "lioness_pro_render_0.png",
+          "lioness_pro_render_1.png"
+        ],
+        "cutout": [
+          "lioness_pro_cutout.png (render 0)",
+          "01a12662-545e-78b3-af66-7249186fe93b"
+        ]
+      },
+      "lion": {
+        "prompt": "lion_sparkle_prompt.txt",
+        "refs": [
+          "wildlife_sources/npc-style-refined.png",
+          "lioness_pro_render_0.png",
+          "lion_render_0.png"
+        ],
+        "request_id": "01a12661-b455-76f2-ad72-59e5d5303c19",
+        "renders": [
+          "lion_pro_render_0.png",
+          "lion_pro_render_1.png"
+        ],
+        "cutout": [
+          "lion_pro_cutout.png (render 1)",
+          "01a12662-621b-7713-b79d-1135266466da"
+        ]
+      },
+      "review": "Painted fur and 1024px cells, but Jakob: line work and colours look wrong. Not integrated."
+    },
+    "concepts": {
+      "model": "fal-ai/nano-banana-pro (text to image, 1K)",
+      "prompts": "concepts/concepts.json plus a shared framing sentence (single full-body animal facing right, elevated three-quarter camera, painterly concept art, white background)",
+      "request_ids": {
+        "nemean": "01a12664-e4d2-7323-8a15-3a7ef555a994",
+        "lion_gate": "01a12665-26d8-78c1-b0db-62b0dba61850",
+        "old_king": "01a12665-6815-78e2-8814-91f6d860e605",
+        "black_mane": "01a12665-a840-7220-9ff2-730e5816fb66",
+        "huntress": "01a12665-e882-7051-8710-22c17305eaf8",
+        "red_figure": "01a12666-28c4-71b2-a173-6fb93e9b7679"
+      },
+      "review": "Design exploration awaiting Jakob's pick; to be adapted to the wolf/bear style before integration."
+    }
   }
 }

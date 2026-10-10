@@ -19,9 +19,11 @@ Finished work lives in merged PRs, `README.md` and the
 - The run is still far too easy: a short walk from the landing to the temple, and
   wildlife strength does not yet scale with distance.
 - Lions are in review on `claude/laughing-goodall-10lotl`: one pride (maned lion
-  plus 2–3 lionesses) per later island that hunts together. Art was regenerated
-  from the wolf/bear sheet after Jakob's 2026-10-10 colour/shading feedback and
-  waits on his style call ([evidence](docs/verification/lions/README.md)).
+  plus 2–3 lionesses) per later island that hunts together. Behavior is done; the
+  art is not approved. Jakob rejected the first drafts (generic, Disney-like) and
+  the grey family pass, and asked for more interesting designs first: six concepts
+  in `assets/sprites/lion_sources/concepts/` await his pick, then get adapted to the
+  wolf/bear style ([evidence](docs/verification/lions/README.md)).
 
 ## Next steps to finish the capture-the-flag loop
 
