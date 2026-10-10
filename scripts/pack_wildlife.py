@@ -64,26 +64,31 @@ def main():
         assert bounds[3] + offset[1] < CELL
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
-    # Lions: 512px source quadrants placed unenlarged. A pose is every opaque shape
-    # whose center lies in its quadrant, so a tail crossing the quadrant edge
-    # stays with its body. The lowest (planted) paws sit on the shared baseline.
-    for row, name in [(3, "lioness"), (4, "lion")]:
-        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{name}_family_cutout.png").convert("RGBA")
-        assert sheet.size == (1024, 1024)
+    # Lions: 1024px source quadrants, downsampled by one common factor (never
+    # enlarged). A pose is every opaque shape whose center lies in its quadrant,
+    # so a tail crossing the quadrant edge stays with its body. The lowest
+    # (planted) paws sit on the shared baseline.
+    half, scale = 1024, 589 / 1024
+    for row, name, source in [(3, "lioness", "huntress"), (4, "lion", "nemean")]:
+        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{source}_cutout.png").convert("RGBA")
+        assert sheet.size == (2 * half, 2 * half)
         alpha = np.asarray(sheet.getchannel("A")) > 128
         labels, count = ndimage.label(alpha)
         centers = ndimage.center_of_mass(alpha, labels, range(1, count + 1))
         pixels = np.asarray(sheet)
         for col, pose in enumerate(["idle", "walk", "attack_windup", "attack_strike"]):
-            x, y = col % 2 * 512, col // 2 * 512
+            x, y = col % 2 * half, col // 2 * half
             shapes = [i + 1 for i, (cy, cx) in enumerate(centers)
-                      if x <= cx < x + 512 and y <= cy < y + 512]
+                      if x <= cx < x + half and y <= cy < y + half]
             # Keep soft edge pixels of the pose's own shapes only.
-            mask = ndimage.binary_dilation(np.isin(labels, shapes), iterations=3)
+            mask = ndimage.binary_dilation(np.isin(labels, shapes), iterations=4)
             frame = Image.fromarray(np.where(mask[..., None], pixels, 0).astype(np.uint8), "RGBA")
+            frame = frame.crop((x - half // 4, y, x + half + half // 4, y + half))
+            frame = frame.resize((round(frame.width * scale), round(frame.height * scale)),
+                                 Image.Resampling.LANCZOS)
             bounds = frame.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox()
             assert bounds is not None
-            offset = ((CELL - 512) // 2 - x, BASELINE - bounds[3])
+            offset = ((CELL - round(half * scale)) // 2 - round(half // 4 * scale), BASELINE - bounds[3])
             assert 0 <= bounds[0] + offset[0] and bounds[2] + offset[0] < CELL
             assert 0 <= bounds[1] + offset[1]
             cell = Image.new("RGBA", (CELL, CELL))

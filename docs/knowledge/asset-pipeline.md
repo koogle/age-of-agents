@@ -203,7 +203,16 @@ cells. Generating fresh from the square shipped sheet
 the identity reference for its sibling form, matched palette and shading with one
 colour across all cells. Keep references square: a 2:1 reference produced
 1472×704 sheets with cells below the 512px minimum. Check per-cell saturation and
-value percentiles before packing. Provenance:
+value percentiles before packing.
+
+That family pass was itself rejected: copying the wolf made the lions grey, and
+the earlier drafts looked like generic animated-movie lions. What worked: first
+explore distinctive concepts with `fal-ai/nano-banana-pro` (text to image), let
+Jakob pick, then adapt each with `fal-ai/nano-banana-pro/edit` using the approved
+family sheet as style reference and the concept as design and colour reference;
+generate the second form with the first as its sibling reference. Ask for the
+facing, identical colours in every cell and two-thirds cell width explicitly,
+and check for generated cell divider lines before cutout. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)

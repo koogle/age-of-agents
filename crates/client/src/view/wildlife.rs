@@ -20,9 +20,8 @@ pub(super) fn draw(
             aoa_game::AnimalKind::Wolf => (0, 0.95, 0.25),
             aoa_game::AnimalKind::Bear => (1, 1.3, 0.35),
             aoa_game::AnimalKind::Boar => (2, 0.95, 0.25),
-            // Lion cells come from smaller 512px sources, hence the larger quad.
-            aoa_game::AnimalKind::Lioness => (3, 1.25, 0.3),
-            aoa_game::AnimalKind::Lion => (4, 1.45, 0.35),
+            aoa_game::AnimalKind::Lioness => (3, 0.95, 0.3),
+            aoa_game::AnimalKind::Lion => (4, 1.0, 0.35),
         };
         let moving = animal.step.is_some();
         let stride = moving && (time * 5.0) as u32 % 2 == 1;

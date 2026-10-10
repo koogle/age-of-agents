@@ -376,3 +376,8 @@
 {"t": 1791645574.595608, "endpoint": "fal-ai/nano-banana-pro", "tag": "lion_concept_black_mane", "est_usd": 0.15, "request_id": "01a12665-a840-7220-9ff2-730e5816fb66", "seconds": 15.8}
 {"t": 1791645591.0018156, "endpoint": "fal-ai/nano-banana-pro", "tag": "lion_concept_huntress", "est_usd": 0.15, "request_id": "01a12665-e882-7051-8710-22c17305eaf8", "seconds": 15.7}
 {"t": 1791645607.5236197, "endpoint": "fal-ai/nano-banana-pro", "tag": "lion_concept_red_figure", "est_usd": 0.15, "request_id": "01a12666-28c4-71b2-a173-6fb93e9b7679", "seconds": 15.8}
+{"t": 1791646057.1048245, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress", "est_usd": 0.3, "request_id": "01a1266c-e379-7f30-9e21-3d1fce3968c9", "seconds": 24.3}
+{"t": 1791646131.4310558, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean", "est_usd": 0.3, "request_id": "01a1266d-951a-7480-994c-1a7a0230a390", "seconds": 53.2}
+{"t": 1791646176.467223, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean", "est_usd": 0.44999999999999996, "request_id": "01a1266e-ab28-7551-8624-4ea8b427d59d", "seconds": 27.0}
+{"t": 1791646209.350025, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_cut", "est_usd": 0.0058, "request_id": "01a1266f-8b32-7481-9390-441618fdb9ec", "seconds": 2.6}
+{"t": 1791646212.6701987, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_cut", "est_usd": 0.0058, "request_id": "01a1266f-982f-7420-a591-b8e582bb321b", "seconds": 2.5}
