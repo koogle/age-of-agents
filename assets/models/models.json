@@ -8,6 +8,7 @@
   "vertices": 24118,
   "triangles": 34352,
   "azimuth_fit": 130,
+  "texture": "sprite frame projected at the game view",
   "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
  },
  "house": {
@@ -19,6 +20,7 @@
   "vertices": 52994,
   "triangles": 80102,
   "azimuth_fit": 320,
+  "texture": "sprite frame projected at the game view",
   "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
  },
  "watchtower": {
@@ -30,17 +32,19 @@
   "vertices": 14847,
   "triangles": 19930,
   "azimuth_fit": 40,
+  "texture": "sprite frame projected at the game view",
   "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
  },
  "monument": {
   "extent": [
-   0.8166,
+   0.8246,
    0.989,
-   0.8246
+   0.8166
   ],
   "vertices": 22092,
   "triangles": 32440,
-  "azimuth_fit": 120,
+  "azimuth_fit": 30,
+  "texture": "sprite frame projected at the game view",
   "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
  }
 }

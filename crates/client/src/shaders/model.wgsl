@@ -1,5 +1,5 @@
-// Generated 3D building models: textured meshes placed on their plots, lit
-// with the shared toon ramp and fog of war. A second entry flattens the same
+// Generated 3D building models: meshes placed on their plots, textured with
+// their own painted sprite projected at the fixed camera view. A second entry flattens the same
 // mesh along the shadow sun onto the plot plane for its cast shadow.
 @group(1) @binding(0) var albedo: texture_2d<f32>;
 @group(1) @binding(1) var albedo_sampler: sampler;
@@ -31,10 +31,13 @@ fn vs(in: VIn) -> VOut {
 
 @fragment
 fn fs(in: VOut) -> @location(0) vec4<f32> {
+    // The texture is the painted sprite projected onto the mesh, already lit
+    // by the painter, so only the world light applies (as for billboards).
     let texel = textureSample(albedo, albedo_sampler, in.uv);
-    // Generated albedos are muted next to the painted sprites; lift them.
-    var color = srgb_to_linear(min(texel.rgb * 1.45, vec3<f32>(1.0))) * cel_light(normalize(in.normal));
-    color = world_light(color, in.world.xz);
+    if texel.a < 0.5 {
+        discard;
+    }
+    let color = world_light(texel.rgb, in.world.xz);
     return vec4<f32>(distance_fog(color, in.world), 0.0);
 }
 

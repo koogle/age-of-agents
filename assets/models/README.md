@@ -4,13 +4,13 @@
 from the painted sprite frames (request ids and the fit procedure are in
 [the shadow spike](../../docs/verification/shadow-spike/README.md)). Each `.bin`
 holds `u32 vertex_count, u32 index_count`, then interleaved `f32` position,
-normal and uv per vertex, then `u32` indices; `.png` is the Trellis albedo with
-V flipped to top-left origin; `models.json` records extents and the azimuth that
-matched the sprite. The client draws them on the plot in place of the completed
+normal and uv per vertex, then `u32` indices; `.png` is the building's own sprite
+frame, and each vertex's UV is where it lands in that frame at the game view, so
+the visible surfaces show the painting exactly (`tools/convert_trellis.py`);
+`models.json` records extents and the mesh azimuth that matches the sprite. The client draws them on the plot in place of the completed
 building's sprite (`crates/client/src/render/models.rs`), with the mesh also
 flattened along the shadow sun for its cast shadow. Meshes are unsimplified
-(15k to 80k triangles) and the albedo is lifted by 1.45 in the shader because
-Trellis textures are muted next to the painted sprites. This is a spike for
+(15k to 80k triangles). This is a spike for
 review, not an accepted direction.
 
 # Archived 3D model experiments
