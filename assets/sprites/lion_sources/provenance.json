@@ -1,35 +1,118 @@
 {
   "date": "2026-10-09",
-  "status": "Draft 1: FAL generation and birefnet cutout only; no OpenAI image_gen refinement pass yet.",
-  "lioness": {
-    "model": "fal-ai/nano-banana/edit",
-    "prompt": "lioness_prompt.txt",
-    "references": {
-      "assets/sprites/wildlife_sources/boar-approved-animation.png": "7d6fa600703b2b58f056b24860b6bda837eb03e4bdb4201b155e9106c2a2a2b3",
-      "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8",
-      "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+  "status": "Integrated: family pass (2026-10-10). FAL generation and birefnet cutout; no OpenAI image_gen pass.",
+  "packing": "scripts/pack_wildlife.py: *_family_cutout.png, a pose is every opaque shape centered in its 512px quadrant (tails may cross the edge), placed unenlarged in 627px frames on atlas rows 3-4 with the lowest paws on y=590.",
+  "draft_1_2026-10-09": {
+    "lioness": {
+      "model": "fal-ai/nano-banana/edit",
+      "prompt": "lioness_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/boar-approved-animation.png": "7d6fa600703b2b58f056b24860b6bda837eb03e4bdb4201b155e9106c2a2a2b3",
+        "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8",
+        "assets/sprites/hd_sources/units/guard_idle_front_cut.png": "5b6feb55869badbeba4e430a2ade6e49e419d1f0ea16f06f1da0242d5f62e5a5"
+      },
+      "renders": {
+        "lioness_render_0.png": "01a11fa1-9c8c-76c1-b7a4-1a5e894db5ce (selected)",
+        "lioness_render_1.png": "01a11fa1-da37-7c83-91f1-426329406b84 (rejected: black cell backgrounds)",
+        "lioness_render_2.png": "01a11fa2-1819-7093-a586-d8d7e7e7e0ad (rejected: checkerboard, non-square)"
+      },
+      "cutout": {
+        "lioness_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa1-cc60-7702-8cea-60a61020e2ac"
+      }
     },
-    "renders": {
-      "lioness_render_0.png": "01a11fa1-9c8c-76c1-b7a4-1a5e894db5ce (selected)",
-      "lioness_render_1.png": "01a11fa1-da37-7c83-91f1-426329406b84 (rejected: black cell backgrounds)",
-      "lioness_render_2.png": "01a11fa2-1819-7093-a586-d8d7e7e7e0ad (rejected: checkerboard, non-square)"
+    "lion": {
+      "model": "fal-ai/nano-banana/edit",
+      "first_round": "Three requests (01a11fa2-8dc6-7c61-b906-f43e47250f80, 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62, 01a11fa3-0a72-7370-bfbd-c3dcf1c78214) referenced lioness_render_0.png and drew maneless lionesses in some cells; outputs were overwritten except the identity crop lion_identity_ref.png (top-left cell of the second request).",
+      "prompt": "lion_prompt.txt (second round)",
+      "references": {
+        "assets/sprites/lion_sources/lion_identity_ref.png": "top-left 512px cell of first-round request 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62",
+        "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8"
+      },
+      "renders": {
+        "lion_render_0.png": "01a11fa3-774a-7262-808f-ad11bc29a639 (selected: clearest swipe strike)",
+        "lion_render_1.png": "01a11fa3-b3ab-7c71-895f-1db7275ce251 (alternative)",
+        "lion_render_2.png": "01a11fa3-f8bf-71d0-81a3-a6b3cebbcc51 (alternative: lower windup crouch)"
+      },
+      "cutout": {
+        "lion_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa3-a71c-7531-a066-73f6f0aae9c3"
+      }
     },
-    "cutout": {"lioness_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa1-cc60-7702-8cea-60a61020e2ac"}
+    "review": "Rejected by Jakob 2026-10-10: colour and shading not consistent with the game. Measured: lioness coat value 0.54-0.77 (flat, airbrushed) against wolf 0.44-0.87 and bear 0.35-0.64; lion brighter and more saturated than the lioness."
   },
-  "lion": {
+  "redraw_2026-10-10": {
     "model": "fal-ai/nano-banana/edit",
-    "first_round": "Three requests (01a11fa2-8dc6-7c61-b906-f43e47250f80, 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62, 01a11fa3-0a72-7370-bfbd-c3dcf1c78214) referenced lioness_render_0.png and drew maneless lionesses in some cells; outputs were overwritten except the identity crop lion_identity_ref.png (top-left cell of the second request).",
-    "prompt": "lion_prompt.txt (second round)",
-    "references": {
-      "assets/sprites/lion_sources/lion_identity_ref.png": "top-left 512px cell of first-round request 01a11fa2-c9c7-7022-a2ab-17fe6ec5cb62",
-      "assets/sprites/wildlife_sources/npc-attack-refined.png": "6ee85de7893e472a3edd191bd9a066e829cf8e27094b2625205eac382d2b91d8"
-    },
+    "prompts": [
+      "lioness_refine_prompt.txt",
+      "lion_refine_prompt.txt"
+    ],
     "renders": {
-      "lion_render_0.png": "01a11fa3-774a-7262-808f-ad11bc29a639 (selected: clearest swipe strike)",
-      "lion_render_1.png": "01a11fa3-b3ab-7c71-895f-1db7275ce251 (alternative)",
-      "lion_render_2.png": "01a11fa3-f8bf-71d0-81a3-a6b3cebbcc51 (alternative: lower windup crouch)"
+      "lioness_refined_render_0..2.png": [
+        "01a1264b-a51f-7bb3-ac85-e2bedff1cb11",
+        "01a1264b-d48f-7e93-acc2-6b418b644689",
+        "01a1264c-04c4-7cc1-a150-03c1c9ec76fb"
+      ],
+      "lion_refined_render_0..2.png": [
+        "01a1264c-769a-7632-ad27-df4a268f976f",
+        "01a1264c-aefa-7bb1-9d64-e0d7b34bc055",
+        "01a1264c-e752-7030-934f-50ce51107711"
+      ]
     },
-    "cutout": {"lion_cutout_0.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a11fa3-a71c-7531-a066-73f6f0aae9c3"}
+    "review": "Rejected: muted somewhat, but still smooth airbrushed fills starting from the draft-1 sheets."
   },
-  "packing": "scripts/pack_wildlife.py: 1024x1024 sheets, 512px cells placed unenlarged in 627px atlas frames (rows 3 and 4), lowest paws on the shared y=590 baseline."
+  "rejected_repaints_2026-10-10": {
+    "note": "Outputs deleted. Shading repaints (wolf/bear sheet + redraw): colour drifted between top and bottom cells. Fur-texture repaints: barely changed texture and lost poses. A wolf/bear 2:1 reference produced 1472x704 sheets below the 512px cell minimum.",
+    "request_ids": [
+      "01a12650-f2fb-7ba0-b52a-85bf81657e16",
+      "01a12651-21ed-71e3-b85c-879ae0c6c7f0",
+      "01a12651-4a69-7282-8426-17f42b384354",
+      "01a12651-7a2b-7c90-b565-4457f099c31e",
+      "01a12651-aa8f-7680-98e7-08fc0c0e6228",
+      "01a12651-da31-7711-a5c9-bdc5b9b5c57f",
+      "01a12652-c56d-7880-b685-2396955ea7ff",
+      "01a12652-f4c8-7b80-a33b-bc2c0abfa6d0",
+      "01a12653-239d-7693-9849-2686c9d55dd4",
+      "01a12653-541e-7c72-82fe-8a37e86e5cb8",
+      "01a12653-83ce-7310-8ddb-d2cc9034e315",
+      "01a12653-b338-7732-b183-1c73adb39788",
+      "01a12654-27d7-7632-bd0f-125fabb3fdd7",
+      "01a12654-4e65-7652-a1ad-8da18882d808",
+      "01a12654-7568-7b60-989b-ab73ba4cab0e"
+    ]
+  },
+  "family_pass_2026-10-10": {
+    "lesson": "Generate new species fresh from the approved square wolf/bear sheet alone; edits of an off-style sheet keep its rendering.",
+    "lioness": {
+      "prompt": "lioness_family_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/npc-style-refined.png": "shipped wolf/bear NPC-style sheet (1254x1254)"
+      },
+      "renders": {
+        "lioness_family_render_0.png": "01a12655-0d06-7733-995d-ada2f7eb936c (selected: wolf-like two-tone underside, crouched windup, open-jaw strike)",
+        "lioness_family_render_1.png": "01a12655-3439-72a3-987b-67e75fa0ae34",
+        "lioness_family_render_2.png": "01a12655-5a6b-7b82-b07b-48dcfc900d85 (ground shadows)",
+        "lioness_family_render_3.png": "01a12655-809a-7721-867b-2088e45683d8"
+      },
+      "cutout": {
+        "lioness_family_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12656-d9df-70d2-8dfc-aef2b8709535"
+      },
+      "measured": "every cell: saturation median 0.42, value p10/median/p90 0.45/0.69/0.71-0.75"
+    },
+    "lion": {
+      "prompt": "lion_family_prompt.txt",
+      "references": {
+        "assets/sprites/wildlife_sources/npc-style-refined.png": "shipped wolf/bear sheet",
+        "assets/sprites/lion_sources/lioness_family_render_0.png": "pride identity and palette"
+      },
+      "renders": {
+        "lion_family_render_0.png": "01a12655-ef2a-7ef3-b75a-6653083cd697 (rejected: maneless strike cell)",
+        "lion_family_render_1.png": "01a12656-1ea7-7013-b5d0-5791d8ea14a4",
+        "lion_family_render_2.png": "01a12656-4db7-7b51-aea1-ad28eb1a7ab7 (selected: mane in every cell, roar with raised paw)",
+        "lion_family_render_3.png": "01a12656-7d0b-7c51-a0cf-1c0a7d7e1f8d"
+      },
+      "cutout": {
+        "lion_family_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a12656-e70a-7c33-9107-1e72fb3792f2"
+      },
+      "measured": "every cell: saturation median 0.45, value p10/median/p90 0.22-0.23/0.52-0.53/0.70"
+    }
+  }
 }

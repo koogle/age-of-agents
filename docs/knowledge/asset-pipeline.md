@@ -191,6 +191,21 @@ Road materials occupy layers 11/12 of the existing texture array and use its
 mirrored, mip-clamped sampling; retain full-resolution originals and record exact
 prompts/reference hashes before integration.
 
+## New species from the family sheet (2026-10-10)
+
+Jakob rejected the first lion drafts: colour and shading did not match the game.
+Measured on opaque pixels, the lioness coat sat at value 0.54–0.77 (flat,
+airbrushed), while the wolf spans 0.44–0.87 and the bear 0.35–0.64 with painted
+light and shadow sides. Editing the off-style sheet with the wolf attached barely
+changed its rendering, and repaints drifted in colour between top and bottom
+cells. Generating fresh from the square shipped sheet
+`wildlife_sources/npc-style-refined.png` alone, then using the chosen new animal as
+the identity reference for its sibling form, matched palette and shading with one
+colour across all cells. Keep references square: a 2:1 reference produced
+1472×704 sheets with cells below the 512px minimum. Check per-cell saturation and
+value percentiles before packing. Provenance:
+[lion sources](../../assets/sprites/lion_sources/provenance.json).
+
 ## Wildlife style correction (2026-10-05)
 
 Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.

@@ -51,8 +51,12 @@ saves load; only islands discovered after the update gain prides.
 
 Art: `assets/sprites/lion_sources/` (prompts, renders, cutouts, provenance) packed
 as atlas rows 3–4 by `scripts/pack_wildlife.py`. The sources are 512px cells,
-placed unenlarged in 627px frames and drawn with a larger quad. Draft status and
-style review: [lion review](../verification/lions/README.md).
+placed unenlarged in 627px frames and drawn with a larger quad (lioness 1.25,
+lion 1.45, so the leader stands about a fifth taller). On 2026-10-10 Jakob found
+the first drafts' colour and shading inconsistent with the game; the integrated
+sheets were regenerated from the shipped wolf/bear sheet alone
+([asset lesson](asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
+Style review: [lion review](../verification/lions/README.md).
 
 ## Implemented rules
 
