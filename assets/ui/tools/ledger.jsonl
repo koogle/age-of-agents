@@ -311,3 +311,15 @@
 {"t": 1791392667.603015, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_empty_cut_0", "est_usd": 0.0058, "request_id": "01a11752-cde7-7081-8682-493da3f1dfc6", "seconds": 2.5}
 {"t": 1791392678.2264812, "endpoint": "fal-ai/nano-banana/edit", "tag": "sanctuary_ruined_empty_1", "est_usd": 0.039, "request_id": "01a11752-da93-7ad0-8067-813873fd56a4", "seconds": 9.9}
 {"t": 1791392682.9246054, "endpoint": "fal-ai/birefnet/v2", "tag": "sanctuary_ruined_empty_cut_1", "est_usd": 0.0058, "request_id": "01a11753-0548-7093-bbfa-72583224e6a7", "seconds": 3.7}
+{"t": 1791664385.8386502, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-towncenter", "est_usd": 0.04, "request_id": "01a12784-d4c8-7843-83d9-bf923695a434", "seconds": 6.8}
+{"t": 1791664386.4230664, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-watchtower", "est_usd": 0.04, "request_id": "01a12784-d58b-72f1-9bd8-5a9ccc8fe499", "seconds": 7.2}
+{"t": 1791664386.517256, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-monument", "est_usd": 0.04, "request_id": "01a12784-d574-7af2-966a-d9d22c357367", "seconds": 7.3}
+{"t": 1791664388.2746663, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-house", "est_usd": 0.04, "request_id": "01a12784-d540-7bc1-bcc8-3f6861f02bcf", "seconds": 9.1}
+{"t": 1791664429.5058138, "endpoint": "fal-ai/trellis", "tag": "shadow-spike-3d-monument", "est_usd": 0.35, "request_id": "01a12784-d523-7b73-ac29-fd571940349c", "seconds": 50.3}
+{"t": 1791664433.799871, "endpoint": "fal-ai/trellis", "tag": "shadow-spike-3d-watchtower", "est_usd": 0.35, "request_id": "01a12784-d53a-7152-979f-f40ae2c2dc8e", "seconds": 54.6}
+{"t": 1791664451.4169533, "endpoint": "fal-ai/trellis", "tag": "shadow-spike-3d-towncenter", "est_usd": 0.35, "request_id": "01a12784-d55e-7622-98e2-8c7bbee0699c", "seconds": 72.2}
+{"t": 1791664473.6077373, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-house", "est_usd": 0.04, "request_id": "01a12786-2b98-7a82-8ba5-456ce7b99770", "seconds": 6.8}
+{"t": 1791664473.6302805, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-monument", "est_usd": 0.04, "request_id": "01a12786-2b63-77d0-9911-ed456546af39", "seconds": 6.8}
+{"t": 1791664475.5768254, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-watchtower", "est_usd": 0.04, "request_id": "01a12786-2a5e-7910-9629-dca67873d7ec", "seconds": 9.0}
+{"t": 1791664475.8837235, "endpoint": "fal-ai/nano-banana/edit", "tag": "shadow-spike-img-towncenter", "est_usd": 0.04, "request_id": "01a12786-2b96-7fc3-8dba-437790ea2087", "seconds": 9.0}
+{"t": 1791664508.4061754, "endpoint": "fal-ai/trellis", "tag": "shadow-spike-3d-house", "est_usd": 0.35, "request_id": "01a12784-d610-7500-986f-c3d26e6a83cc", "seconds": 129.0}
