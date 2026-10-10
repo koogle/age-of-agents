@@ -16,9 +16,9 @@ is retained at `assets/terrain/road_sources/stone-sandy-before.png`.
 identify the single unmodified 1254×1254 PNG refinement. Runtime sampling remains
 512px with mipmaps and the existing mirrored edge clamping.
 
-![Before, preferred refinement and approved references](comparison.png)
+![Before, preferred refinement and approved references](comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-[Comparison source](comparison.html) includes a mirrored repeat preview. Mirrored
+[Comparison source](comparison.html) (removed 2026-10-10: iteration evidence; final state kept) includes a mirrored repeat preview. Mirrored
 stone shapes remain an accepted small-scale repetition; no new seam strategy or
 shader changes were introduced.
 
@@ -67,10 +67,10 @@ Documentation links and historical comparison sources now point to the retained
 old material, so prior evidence remains reproducible. Physical phones and native
 window rendering remain unverified; phone captures emulate DPR2.
 
-![Desktop gameplay](desktop-stone-complete.png)
+![Desktop gameplay](desktop-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Desktop maximum zoom](desktop-maximum-zoom.png)
+![Desktop maximum zoom](desktop-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone gameplay](phone-stone-complete.png)
+![Phone gameplay](phone-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone maximum zoom](phone-maximum-zoom.png)
+![Phone maximum zoom](phone-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)

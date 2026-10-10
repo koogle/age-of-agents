@@ -6,7 +6,7 @@ Verification uses the controlled `menu-icon-fixture.json` snapshot at active sim
 
 Capture inputs: desktop select (640, 380), Build (609, 750), Town (485, 724); phone select (195, 402), Build (42, 804), Town (42, 700). Move the mouse away before capture. Software rendering is throttled to approximately 10 FPS.
 
-- [Desktop](desktop.png)
-- [Phone](phone.png)
+- [Desktop](desktop.png) (removed 2026-10-10: iteration evidence; final state kept)
+- [Phone](phone.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 Formatting, 289 workspace tests (one existing ignored benchmark), strict native/WASM lint and release WASM build passed. Code-quality review: one direct layout branch, shared mouse/touch behavior, no new dependency or persistent state. Integrated master `f4d5b01`, preserving roads, dedicated menu art, wildlife and granary changes. User authorized PR creation and merge on 2026-10-06; production delivery follows the master release workflow.

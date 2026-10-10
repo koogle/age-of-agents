@@ -23,10 +23,10 @@ The second pass removes it, using broad muted brown cel shapes instead.
   four consistent poses, authored rear-hoof registration and no source enlargement.
 - Alpha: pass in light/green/blue comparison; clean silhouette, no white matte.
 
-See `species-comparison.png`; the final runtime checks are recorded below.
+See `species-comparison.png` (removed 2026-10-10: iteration evidence; final state kept); the final runtime checks are recorded below.
 The packer preserves the eight existing wolf/bear cells byte-for-byte.
 Desktop maximum zoom confirms the boar sits on its ground ring and matches the
-guard family’s thin brown contours and cel shading (`hunting/desktop-boar-maxzoom.png`).
+guard family’s thin brown contours and cel shading (`hunting/desktop-boar-maxzoom.png` (removed 2026-10-10: iteration evidence; final state kept)).
 
 ## Code review
 
@@ -67,7 +67,7 @@ Jakob chose the first follow-up study (`boar-npc-study.png`), overriding the
 agent’s earlier reservations. The new four-pose family preserves its lighter
 taupe coat, broad shading, face, hoof shapes and fine brown lines. A padding
 repair keeps every snout inside its cell; the rejected edge draft is retained.
-`approved-comparison.png` compares the final packed idle pose with unchanged
+`approved-comparison.png` (removed 2026-10-10: iteration evidence; final state kept) compares the final packed idle pose with unchanged
 wolf/bear sprites at source and small sizes on three backgrounds.
 
 Style review against the selected reference: fine brown ink, muted taupe color,

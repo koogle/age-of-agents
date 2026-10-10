@@ -8,7 +8,7 @@ User direction, 2026-10-06: refine selected icons and make them slightly simpler
 subsequently show the results and merge. This is the follow-up to PR #107, with
 four independent runtime replacements: Cargo, Gathering, Town and Disembark.
 
-[Before/after and 24/32px review](comparison.png). Original wood and masonry
+[Before/after and 24/32px review](comparison.png) (removed 2026-10-10: iteration evidence; final state kept). Original wood and masonry
 references were attached to every image refinement; food is also shown as an
 unchanged sibling. The approved sources are retained in `../refinement/`.
 Exact prompts, inputs and rejected pass are in [provenance](provenance.json).

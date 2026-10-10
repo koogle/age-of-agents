@@ -15,7 +15,7 @@ is copied unchanged into the runtime path, also 1254×1254 opaque RGB PNG.
 The primary diorama and meadow are the approved world references; the previous
 dirt is the edit target.
 
-![Before/after with mirrored repeats beside meadow](comparison.png)
+![Before/after with mirrored repeats beside meadow](comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 ## Review
 
@@ -63,13 +63,13 @@ is needed.
 
 ## Gameplay captures
 
-![Desktop gameplay](desktop-stone-complete.png)
+![Desktop gameplay](desktop-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Desktop maximum zoom](desktop-maximum-zoom.png)
+![Desktop maximum zoom](desktop-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone gameplay, DPR2](phone-stone-complete.png)
+![Phone gameplay, DPR2](phone-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone maximum zoom, DPR2](phone-maximum-zoom.png)
+![Phone maximum zoom, DPR2](phone-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 ## Authorized merge verification
 
