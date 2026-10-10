@@ -77,9 +77,9 @@ Dirt road / Stone road labels. Retained captures: [desktop before](desktop-befor
 and the completed roads below. The phone captures use the default camera scale; physical device rendering
 and maximum-zoom appearance remain unverified.
 
-![Completed roads on desktop](desktop-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Completed roads on desktop](desktop-stone-complete.png)
 
-![Completed roads on emulated phone](phone-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Completed roads on emulated phone](phone-stone-complete.png)
 
 ## Thermonuclear review
 

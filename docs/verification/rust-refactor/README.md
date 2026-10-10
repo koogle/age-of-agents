@@ -73,6 +73,6 @@ Save version 17 resets earlier hosted development saves because authoritative
 building capability vectors were removed. Snapshot offers retain their shape.
 Matching-version saves persist and current corruption remains an error.
 
-![Desktop verification](desktop-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Desktop verification](desktop-stone-complete.png)
 
-![Phone verification](phone-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Phone verification](phone-stone-complete.png)

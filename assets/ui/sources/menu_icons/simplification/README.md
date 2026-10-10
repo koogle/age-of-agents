@@ -4,7 +4,7 @@ Requested and authorized for sequential PR merges on 2026-10-06. The four
 refinements preserve icon keys, meaning, camera and the approved illustrated
 family while removing secondary props and repeated fine detail.
 
-- [Before/after at 128/24/32px on three backgrounds](comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
+- [Before/after at 128/24/32px on three backgrounds](comparison.png)
 - [Style findings and reproducible packing](STYLE_REVIEW.md)
 - [Exact prompts, sources and hashes](provenance.json)
 - [Combined runtime verification](../../../../../docs/verification/menu-icons/simplification/README.md)

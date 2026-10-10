@@ -5,7 +5,7 @@ Jakob identified the two-board simplification in PR #140 as a regression on
 several narrow deck boards, a continuous front support and corner timber ends.
 The simpler boot, sparse texture and restrained palette remain.
 
-[Before/after at 24/32/48px](comparison.png) (removed 2026-10-10: iteration evidence; final state kept). The retained earlier platform
+[Before/after at 24/32/48px](comparison.png). The retained earlier platform
 (`../command_disembark/refined.png`) provided construction cues; original wood
 and masonry icons (`../refinement/`) remained the attached style references.
 Exact prompt and tool output identifier: [provenance](provenance.json).

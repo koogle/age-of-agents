@@ -6,7 +6,7 @@ The animal atlas now includes wolf bite and bear swipe windup/strike poses.
 The original four idle/walk cells are preserved pixel-for-pixel in columns 0/1;
 new columns 2/3 are authored attack poses. Atlas: 2508×1254, eight 627px cells.
 
-![Idle, windup, strike beside existing NPCs](attack-comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Idle, windup, strike beside existing NPCs](attack-comparison.png)
 
 ## Art and registration review
 
