@@ -404,3 +404,12 @@
 {"t": 1791664974.0949323, "endpoint": "fal-ai/nano-banana-pro", "tag": "snake_concept_sea_serpent", "est_usd": 0.15, "request_id": "01a1278d-abb2-75e0-baa0-be444c82e3e7", "seconds": 15.7}
 {"t": 1791664990.2147899, "endpoint": "fal-ai/nano-banana-pro", "tag": "snake_concept_bronze_adder", "est_usd": 0.15, "request_id": "01a1278d-eaeb-76d0-8f7a-2e982b3cd87f", "seconds": 15.6}
 {"t": 1791665006.4171667, "endpoint": "fal-ai/nano-banana-pro", "tag": "snake_concept_shadow_asp", "est_usd": 0.15, "request_id": "01a1278e-29e7-7e51-a6cc-f7980c024dbb", "seconds": 15.7}
+{"t": 1791665513.6302617, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "rock_python_adapt", "est_usd": 0.3, "request_id": "01a12795-c5fb-77b1-bb5b-7b433e681075", "seconds": 24.2}
+{"t": 1791665547.0338838, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "sea_serpent_adapt", "est_usd": 0.3, "request_id": "01a12796-2e4e-7cd1-98a5-581dee8c56bc", "seconds": 30.9}
+{"t": 1791665572.6294558, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "marble_viper_adapt", "est_usd": 0.3, "request_id": "01a12796-abc1-7bf0-9141-6edb6d59af1f", "seconds": 24.4}
+{"t": 1791665744.6242373, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "rock_python_ink", "est_usd": 0.3, "request_id": "01a12799-4b70-71d0-9392-a204aacae903", "seconds": 24.4}
+{"t": 1791665771.304654, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "sea_serpent_ink", "est_usd": 0.3, "request_id": "01a12799-b387-7390-a128-60ca45a81b21", "seconds": 24.4}
+{"t": 1791665797.4777238, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "marble_viper_ink", "est_usd": 0.3, "request_id": "01a1279a-1979-7153-b328-c6ca707de385", "seconds": 24.5}
+{"t": 1791665970.1472843, "endpoint": "fal-ai/birefnet/v2", "tag": "rock_python_ink_cut", "est_usd": 0.0058, "request_id": "01a1279d-11d0-7f10-9c90-184cdb48af6d", "seconds": 2.5}
+{"t": 1791665973.8181689, "endpoint": "fal-ai/birefnet/v2", "tag": "sea_serpent_ink_cut", "est_usd": 0.0058, "request_id": "01a1279d-204a-7562-8db1-a852bde233cf", "seconds": 2.5}
+{"t": 1791665977.367438, "endpoint": "fal-ai/birefnet/v2", "tag": "marble_viper_ink_cut", "est_usd": 0.0058, "request_id": "01a1279d-2de8-7f81-85ce-d4ceb453d835", "seconds": 2.6}

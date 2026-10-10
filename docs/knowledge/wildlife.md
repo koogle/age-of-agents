@@ -60,11 +60,29 @@ into 627px frames; quads are 0.95 and 1.0, so the leader stands about a fifth
 taller ([asset lesson](asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
 Style review: [lion review](../verification/lions/README.md).
 
+## Giant snakes (2026-10-10)
+
+The second monster class, picked by Jakob from six concepts (rock python, sea
+serpent, marble viper). Every island after the first gets 1–2 **rock pythons**
+lying up within 4 cells of a wild resource node and one **sea serpent** within 4
+cells of water; the temple island adds two **marble vipers** within 6 cells of the
+temple (the temple is exempt from the 26-cell building clearance, as a lair).
+Spacing from other animal homes stays 18 cells.
+
+Ambush rule, `Animal::concealed`: an idle snake at home with no land unit within
+`REVEAL_RADIUS` (3 cells) is left out of snapshots and rejects attack orders with
+`AnimalNotVisible`; it is derived, so saves carry no extra state. Once a unit is
+close it appears, strikes with high contact damage and pursues only inside its
+3-cell territory, so retreating one step ends the fight. Vision rules still apply.
+
+Art: `assets/sprites/snake_sources/` packed as atlas rows 5–7; frames are drawn at
+quad 0.9 (python) and 0.85 (serpent, viper). Review: [snake evidence](../verification/snakes/README.md).
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
 attack orders, animal pursuit/damage and cleanup. The first island gets one wolf and one boar; the second and later
-islands get one bear, 1–3 wolves, 2–3 boars and one lion pride where valid cells exist. Starting animals are at least 26
+islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist; the temple island adds two marble vipers. Starting animals are at least 26
 cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships.
@@ -76,6 +94,9 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 | Bear | 600 | 50 | 1.8 | 4 / 6 |
 | Lioness | 250 | 30 | 2.8 | 6 / 12 |
 | Lion | 500 | 45 | 2.4 | 6 / 12 |
+| Rock python | 400 | 45 | 1.2 | 2.5 / 3 |
+| Sea serpent | 350 | 35 | 1.6 | 2.5 / 3 |
+| Marble viper | 250 | 60 | 1.4 | 2.5 / 3 |
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
