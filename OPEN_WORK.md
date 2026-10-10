@@ -61,6 +61,12 @@ Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 
 ## Still unresolved
 
+- **Repository weight.** On 2026-10-10 rejected and intermediate art was removed
+  from the lion, snake, wildlife, temple and menu-icon source folders and the lion
+  evidence folder (about 130 MB of files). Two heavier items need Jakob's call:
+  `docs/verification/` still holds about 280 MB of older evidence screenshots, and
+  the git history (about 1 GB packed) keeps every deleted image; shrinking it means
+  rewriting `master` history, which touches every clone.
 - **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
   map, military shield, steel and cloth calibrations are wired in
   ([evidence](docs/verification/alternatives-integration/README.md)). Not wired: the

@@ -8,7 +8,6 @@ The injected scene is for rendering only and was not validated by the simulation
 
 - `style-compare.png`: shipped wolf, bear and boar beside the lioness and lion
   (idle, idle, strike, strike). Not to game scale.
-- `before-after.png`: rejected draft 1 (top) against the rejected grey family pass.
 - `poses.png`: all four poses of each, on flat grass.
 - `desktop.png`, `desktop-zoom.png`: 1280×800, DPR 1.
 - `phone.png`: 390×844, DPR 2.
@@ -26,17 +25,7 @@ packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-fro
 - `style-compare.png` now shows wolf, bear, boar, lioness and lion idle, then both
   strikes, at their true in-game relative scale.
 
-- `thin-before-after.png`: wolf for reference; Nemean/huntress adaptation (top)
-  against the naturalistic, thinned rows (bottom).
-- `cel-before-after.png`: wolf for reference; naturalistic rows (top) against the
-  first cel-shaded rows (bottom).
-- `cel-fix-before-after.png`: that first cel lioness (top) had drifted beige with
-  faded outlines (value 0.87, 3.6% dark pixels); the regenerated one (bottom) is
-  anchored to the lion (S0.57, 11% dark pixels in the packed frame).
-- `reink-before-after.png` and `reink-zoom.png`: a packer re-ink step that matched
-  the wolf's numbers and was removed the same day: Jakob ruled that line work
-  goes through an image model. Kept as the measured target.
-- `ink-before-after.png` and `ink-zoom.png`: the model ink pass that replaced it
+- `ink-before-after.png` and `ink-zoom.png`: the model ink pass
   (`nano-banana-pro/edit`, wolf sheet attached). Packed frames: ink luminance
   0.16–0.18 against the wolf's 0.18–0.21, line coverage 2.7–3.9% against 2.5–3.0%,
   silhouette edge 0.98–1.25 against 0.80–0.87, with no packer processing.
