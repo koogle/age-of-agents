@@ -3,13 +3,16 @@
 from pathlib import Path
 import json
 
+import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets/sprites/wildlife_sources/npc-style-refined.png"
 ATTACK_SOURCE = SOURCE.with_name("npc-attack-refined.png")
 CELL = 627
 BASELINE = 590
+
 
 
 def main():
@@ -61,19 +64,31 @@ def main():
         assert bounds[3] + offset[1] < CELL
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
-    # Lions: 512px source cells placed unenlarged; the lowest (planted) paws of
-    # every pose sit on the shared baseline so attacks stay grounded.
+    # Lions: 512px source quadrants placed unenlarged. A pose is every opaque shape
+    # whose center lies in its quadrant, so a tail crossing the quadrant edge
+    # stays with its body. The lowest (planted) paws sit on the shared baseline.
     for row, name in [(3, "lioness"), (4, "lion")]:
-        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{name}_cutout_0.png").convert("RGBA")
+        sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{name}_family_cutout.png").convert("RGBA")
         assert sheet.size == (1024, 1024)
+        alpha = np.asarray(sheet.getchannel("A")) > 128
+        labels, count = ndimage.label(alpha)
+        centers = ndimage.center_of_mass(alpha, labels, range(1, count + 1))
+        pixels = np.asarray(sheet)
         for col, pose in enumerate(["idle", "walk", "attack_windup", "attack_strike"]):
             x, y = col % 2 * 512, col // 2 * 512
-            frame = sheet.crop((x, y, x + 512, y + 512))
+            shapes = [i + 1 for i, (cy, cx) in enumerate(centers)
+                      if x <= cx < x + 512 and y <= cy < y + 512]
+            # Keep soft edge pixels of the pose's own shapes only.
+            mask = ndimage.binary_dilation(np.isin(labels, shapes), iterations=3)
+            frame = Image.fromarray(np.where(mask[..., None], pixels, 0).astype(np.uint8), "RGBA")
             bounds = frame.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox()
             assert bounds is not None
-            offset = ((CELL - 512) // 2, BASELINE - bounds[3])
-            assert 0 <= bounds[1] + offset[1] and bounds[2] + offset[0] < CELL
-            atlas.alpha_composite(frame, (col * CELL + offset[0], row * CELL + offset[1]))
+            offset = ((CELL - 512) // 2 - x, BASELINE - bounds[3])
+            assert 0 <= bounds[0] + offset[0] and bounds[2] + offset[0] < CELL
+            assert 0 <= bounds[1] + offset[1]
+            cell = Image.new("RGBA", (CELL, CELL))
+            cell.alpha_composite(frame.crop(bounds), (bounds[0] + offset[0], bounds[1] + offset[1]))
+            atlas.alpha_composite(cell, (col * CELL, row * CELL))
             frames[f"{name}_{pose}"] = [col * CELL, row * CELL, CELL, CELL]
     atlas.save(ROOT / "assets/sprites/wildlife.png")
     (ROOT / "assets/sprites/wildlife.json").write_text(
