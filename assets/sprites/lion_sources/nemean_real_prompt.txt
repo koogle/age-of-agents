@@ -1,0 +1,4 @@
+Edit this lion sprite sheet (reference 1). Keep the exact layout, four poses, positions, scale, facing, and his colours (warm golden-tawny coat, dark-gold mane, scarred muzzle).
+1. Line work: make every outline and interior line much thinner and lighter, a fine hairline of warm dark brown like the wolf in reference 2, with no heavy black or thick contours anywhere.
+2. Make him look like a real lion: true African lion anatomy and proportions, a realistic lion head and muzzle with natural small eyes, a natural shaggy mane of soft hair rather than sculpted helmet-like locks, a realistic tawny hide with no metallic sheen, natural muscle and fur shading as in a careful wildlife illustration, still painted with soft cel shading and readable at small size.
+Identical colours and lighting in all four cells. No text, borders, divider lines, ground shadows or scenery. Plain flat white background.

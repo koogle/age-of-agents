@@ -8,7 +8,14 @@ pub enum AnimalKind {
     Wolf,
     Bear,
     Boar,
+    /// A pride hunter; pride members share one alert.
+    Lioness,
+    /// The maned pride leader: the lioness's heavier form.
+    Lion,
 }
+
+/// Lions whose homes lie this close belong to one pride.
+const PRIDE_RADIUS: f64 = 5.0;
 
 impl AnimalKind {
     pub fn name(self) -> &'static str {
@@ -16,6 +23,8 @@ impl AnimalKind {
             Self::Wolf => "Wolf",
             Self::Bear => "Bear",
             Self::Boar => "Boar",
+            Self::Lioness => "Lioness",
+            Self::Lion => "Lion",
         }
     }
     pub fn max_health(self) -> f64 {
@@ -23,6 +32,8 @@ impl AnimalKind {
             Self::Wolf => 300.0,
             Self::Bear => 600.0,
             Self::Boar => 60.0,
+            Self::Lioness => 250.0,
+            Self::Lion => 500.0,
         }
     }
     fn aggro(self) -> f64 {
@@ -30,6 +41,7 @@ impl AnimalKind {
             Self::Wolf => 6.0,
             Self::Bear => 4.0,
             Self::Boar => 4.0,
+            Self::Lioness | Self::Lion => 6.0,
         }
     }
     fn territory(self) -> f64 {
@@ -37,6 +49,7 @@ impl AnimalKind {
             Self::Wolf => 10.0,
             Self::Bear => 6.0,
             Self::Boar => 8.0,
+            Self::Lioness | Self::Lion => 12.0,
         }
     }
     fn speed(self) -> f64 {
@@ -44,13 +57,20 @@ impl AnimalKind {
             Self::Wolf => 2.5,
             Self::Bear => 1.8,
             Self::Boar => 2.2,
+            Self::Lioness => 2.8,
+            Self::Lion => 2.4,
         }
+    }
+    pub(super) fn is_lion(self) -> bool {
+        matches!(self, Self::Lioness | Self::Lion)
     }
     fn damage(self) -> f64 {
         match self {
             Self::Wolf => 35.0,
             Self::Bear => 50.0,
             Self::Boar => 10.0,
+            Self::Lioness => 30.0,
+            Self::Lion => 45.0,
         }
     }
 }
@@ -81,7 +101,6 @@ impl Animal {
 
 impl GameWorld {
     pub(super) fn populate_wildlife(&mut self, island: usize) {
-        let origin = self.island_origins[island];
         let count = if island == 0 {
             1
         } else {
@@ -92,47 +111,28 @@ impl GameWorld {
         } else {
             2 + (worldgen::mix(self.seed ^ 0x626f_6172, island as u64) % 2) as usize
         };
-        for number in 0..count + boars {
-            let kind = if number >= count {
+        let pride = if island == 0 {
+            0
+        } else {
+            3 + (worldgen::mix(self.seed ^ 0x6c69_6f6e, island as u64) % 2) as usize
+        };
+        let mut leader = None;
+        for number in 0..count + boars + pride {
+            let kind = if number == count + boars {
+                AnimalKind::Lion
+            } else if number > count + boars {
+                AnimalKind::Lioness
+            } else if number >= count {
                 AnimalKind::Boar
             } else if island > 0 && number == count - 1 {
                 AnimalKind::Bear
             } else {
                 AnimalKind::Wolf
             };
-            let occupancy = self.occupancy();
-            let cell = self
-                .terrain
-                .iter()
-                .filter_map(|t| {
-                    let c = t.coordinate();
-                    (c.column >= origin.column
-                        && c.column < origin.column + WORLD_COLUMNS
-                        && c.row >= origin.row
-                        && c.row < origin.row + WORLD_ROWS
-                        && t.biome.is_walkable()
-                        && occupancy.is_free_for(c, None)
-                        && self
-                            .buildings
-                            .iter()
-                            .all(|b| b.footprint().center().distance(c.center()) >= 26.0)
-                        && self
-                            .units
-                            .iter()
-                            .all(|u| u.cell.center().distance(c.center()) >= 26.0)
-                        && self
-                            .animals
-                            .iter()
-                            .all(|a| a.home.center().distance(c.center()) >= 18.0))
-                    .then_some(c)
-                })
-                .min_by_key(|c| {
-                    worldgen::mix(
-                        self.seed ^ island as u64,
-                        u64::from(c.row) * 65536 + u64::from(c.column),
-                    )
-                });
-            if let Some(cell) = cell {
+            if let Some(cell) = self.wildlife_cell(island, leader) {
+                if kind == AnimalKind::Lion {
+                    leader = Some(cell);
+                }
                 self.animals.push(Animal {
                     id: format!("animal-{island}-{number}"),
                     kind,
@@ -143,8 +143,58 @@ impl GameWorld {
                     attack_seconds: 0.0,
                     heading: [1, 0],
                 });
+            } else if kind == AnimalKind::Lion {
+                // Without a leader there is no pride to join.
+                break;
             }
         }
+    }
+
+    /// A free starting cell on the island well away from the settlement: apart from
+    /// other territories, or beside `pride` for a pride member.
+    fn wildlife_cell(
+        &self,
+        island: usize,
+        pride: Option<CellCoordinate>,
+    ) -> Option<CellCoordinate> {
+        let origin = self.island_origins[island];
+        let occupancy = self.occupancy();
+        self.terrain
+            .iter()
+            .filter_map(|t| {
+                let c = t.coordinate();
+                (c.column >= origin.column
+                    && c.column < origin.column + WORLD_COLUMNS
+                    && c.row >= origin.row
+                    && c.row < origin.row + WORLD_ROWS
+                    && t.biome.is_walkable()
+                    && occupancy.is_free_for(c, None)
+                    && self
+                        .buildings
+                        .iter()
+                        .all(|b| b.footprint().center().distance(c.center()) >= 26.0)
+                    && self
+                        .units
+                        .iter()
+                        .all(|u| u.cell.center().distance(c.center()) >= 26.0)
+                    && match pride {
+                        Some(leader) => {
+                            leader.center().distance(c.center()) <= 3.0
+                                && self.animals.iter().all(|a| a.home != c)
+                        }
+                        None => self
+                            .animals
+                            .iter()
+                            .all(|a| a.home.center().distance(c.center()) >= 18.0),
+                    })
+                .then_some(c)
+            })
+            .min_by_key(|c| {
+                worldgen::mix(
+                    self.seed ^ island as u64,
+                    u64::from(c.row) * 65536 + u64::from(c.column),
+                )
+            })
     }
 
     pub(super) fn attack_animal(
@@ -280,6 +330,20 @@ impl GameWorld {
             let home = animal.home;
             let cell = animal.cell;
             let territory = animal.kind.territory();
+            let sighted = |a: &Animal| {
+                self.units.iter().any(|u| {
+                    u.health > 0.0
+                        && u.cell.center().distance(a.home.center()) <= a.kind.territory()
+                        && u.cell.center().distance(a.cell.center()) <= a.kind.aggro()
+                })
+            };
+            // One lion's sighting sends its whole pride after intruders in reach.
+            let alerted = animal.kind.is_lion()
+                && self.animals.iter().any(|a| {
+                    a.kind.is_lion()
+                        && a.home.center().distance(home.center()) <= PRIDE_RADIUS
+                        && sighted(a)
+                });
             let target = self
                 .units
                 .iter()
@@ -287,7 +351,8 @@ impl GameWorld {
                 .filter(|(_, u)| {
                     u.health > 0.0
                         && u.cell.center().distance(home.center()) <= territory
-                        && u.cell.center().distance(cell.center()) <= animal.kind.aggro()
+                        && (alerted
+                            || u.cell.center().distance(cell.center()) <= animal.kind.aggro())
                 })
                 .min_by(|(_, a), (_, b)| {
                     a.cell

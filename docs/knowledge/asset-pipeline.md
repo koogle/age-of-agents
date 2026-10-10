@@ -191,6 +191,56 @@ Road materials occupy layers 11/12 of the existing texture array and use its
 mirrored, mip-clamped sampling; retain full-resolution originals and record exact
 prompts/reference hashes before integration.
 
+## New species from the family sheet (2026-10-10)
+
+Jakob rejected the first lion drafts: colour and shading did not match the game.
+Measured on opaque pixels, the lioness coat sat at value 0.54–0.77 (flat,
+airbrushed), while the wolf spans 0.44–0.87 and the bear 0.35–0.64 with painted
+light and shadow sides. Editing the off-style sheet with the wolf attached barely
+changed its rendering, and repaints drifted in colour between top and bottom
+cells. Generating fresh from the square shipped sheet
+`wildlife_sources/npc-style-refined.png` alone, then using the chosen new animal as
+the identity reference for its sibling form, matched palette and shading with one
+colour across all cells. Keep references square: a 2:1 reference produced
+1472×704 sheets with cells below the 512px minimum. Check per-cell saturation and
+value percentiles before packing.
+
+That family pass was itself rejected: copying the wolf made the lions grey, and
+the earlier drafts looked like generic animated-movie lions. What worked: first
+explore distinctive concepts with `fal-ai/nano-banana-pro` (text to image), let
+Jakob pick, then adapt each with `fal-ai/nano-banana-pro/edit` using the approved
+family sheet as style reference and the concept as design and colour reference;
+generate the second form with the first as its sibling reference. Ask for the
+facing, identical colours in every cell and two-thirds cell width explicitly,
+and check for generated cell divider lines before cutout.
+Prompting for thinner lines barely changes line weight; `thin_lines()` in
+`scripts/pack_wildlife.py` thins strokes deterministically instead (1px shave at
+2K; 2px broke silhouettes). Ask for realism as a "naturalistic wildlife
+field-guide illustration" with concrete anatomy; that removed the fantasy look.
+Then ask for cel shading as "flat base colour plus one shadow tone of the same hue
+per colour region", and name the distinguishing markings to keep: a plain cel
+request stripped the lioness's ear backs and rosettes (Jakob: a fine balance
+between too much and not enough detail). A cel pass can also bleach colour and
+fade outlines (the lioness went from value 0.75 to 0.87 and from 10% to 4% dark
+pixels; Jakob: beige, lost linework). Measure saturation, value and the share of
+pixels under luminance 0.3 against the sibling and the wolf before packing, and
+anchor the weaker sheet to the stronger sibling's render with "as deep as", "as
+crisp and dark as" wording naming the reference. When frames still read muddled
+beside the wolf, measure line work at atlas scale (stroke width, ink luminance
+and colour, line coverage, silhouette edge gradient) to name the gap, then close
+it with an image model edit that attaches the wolf sheet and asks for its ink
+colour, continuous crisp outlines and short interior lines. Jakob (2026-10-10):
+line work and shading fixes go through an image model, per the asset workflow;
+a packer re-ink step (snap strokes to the wolf's ink, harden alpha, sharpen) and
+a 2K stroke-shave were built, matched the numbers, and were then removed for
+that reason. Pixel code in the packer is for registration and packing only. The model pass
+that replaced them (`lion_sources/ink_prompt.txt`: keep everything, redraw the
+outlines in the wolf's deep brown-black ink, continuous and crisp, with his short
+interior lines) landed on the wolf's numbers in one round when the ask named
+ink colour and continuity rather than "thinner"; an earlier "thinner lines"
+prompt had barely moved line weight. Provenance:
+[lion sources](../../assets/sprites/lion_sources/provenance.json).
+
 ## Wildlife style correction (2026-10-05)
 
 Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.
