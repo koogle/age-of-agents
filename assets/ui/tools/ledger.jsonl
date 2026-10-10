@@ -381,3 +381,9 @@
 {"t": 1791646176.467223, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean", "est_usd": 0.44999999999999996, "request_id": "01a1266e-ab28-7551-8624-4ea8b427d59d", "seconds": 27.0}
 {"t": 1791646209.350025, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_cut", "est_usd": 0.0058, "request_id": "01a1266f-8b32-7481-9390-441618fdb9ec", "seconds": 2.6}
 {"t": 1791646212.6701987, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_cut", "est_usd": 0.0058, "request_id": "01a1266f-982f-7420-a591-b8e582bb321b", "seconds": 2.5}
+{"t": 1791649162.8516998, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean_real", "est_usd": 0.3, "request_id": "01a1269c-46b1-7d41-8a85-da9a0f999b08", "seconds": 24.5}
+{"t": 1791649191.303891, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_lines", "est_usd": 0.3, "request_id": "01a1269c-ad07-73e0-9461-bf2be2313a2c", "seconds": 26.7}
+{"t": 1791649253.2283258, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean_natural", "est_usd": 0.3, "request_id": "01a1269d-b076-74b3-8a21-c49e131dfbd0", "seconds": 22.2}
+{"t": 1791649297.6565201, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_natural", "est_usd": 0.3, "request_id": "01a1269e-4d25-76e2-ac23-693c5ff6bb42", "seconds": 26.5}
+{"t": 1791649330.2237475, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_natural_cut", "est_usd": 0.0058, "request_id": "01a1269f-2a39-7b03-8d79-93553a499513", "seconds": 2.5}
+{"t": 1791649333.6315446, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_natural_cut", "est_usd": 0.0058, "request_id": "01a1269f-3770-7350-a198-ba53e9e07094", "seconds": 2.5}
