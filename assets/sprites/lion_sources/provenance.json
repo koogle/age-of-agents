@@ -1,7 +1,7 @@
 {
   "date": "2026-10-09",
   "status": "Integrated 2026-10-10: cel-shaded naturalistic island huntress (lioness) and Nemean lion (leader), with packer line thinning.",
-  "packing": "scripts/pack_wildlife.py: huntress_cel/nemean_cel cutouts, thin_lines(), then a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames on atlas rows 3-4, lowest paws on y=590.",
+  "packing": "scripts/pack_wildlife.py: huntress_cel/nemean_cel cutouts, thin_lines() (1px shave, no lightening), a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames, then reink() per frame, on atlas rows 3-4 with the lowest paws on y=590.",
   "draft_1_2026-10-09": {
     "lioness": {
       "model": "fal-ai/nano-banana/edit",
@@ -304,5 +304,12 @@
       },
       "packer_check": "thin_lines() lightening sweep (0.35/0.15/0) moved the lion's dark-line share only 10.9% to 10.7%, so the packer was not the cause; left unchanged."
     }
+  },
+  "reink_2026-10-10": {
+    "direction": "Jakob: likes the cel rows but they are a bit muddled; make the line work clear and match the wolf's sharpness.",
+    "measured_before": "At atlas scale all strokes are 2px like the wolf, but lion ink luminance 0.29 and lioness 0.25 against the wolf's 0.21 (ink redder: lion rgb 99,64,44 vs wolf 67,52,41), lion line coverage 1.5% vs 2.5%, lion silhouette edge gradient 0.60 vs 0.80.",
+    "rejected": "Median filter (3 and 5) before re-inking: ate thin lines (lion 1.3% coverage) and softened silhouettes (edge 0.26-0.66); mane went mushy.",
+    "integrated": "scripts/pack_wildlife.py reink(): thin dark strokes snap toward the wolf's ink (67,52,41), mid-dark pixels touching a stroke join it as a crease, the alpha fringe narrows to about one pixel, then an unsharp mask (radius 1.2, 80%). thin_lines() no longer lightens ink.",
+    "measured_after": "lioness ink 0.20-0.21, coverage 3.2-3.8%, edge 0.71-0.73; lion ink 0.24-0.25, coverage 2.6-2.9%, edge 1.1-1.4; wolf 0.18-0.21, 2.5-3.0%, 0.80-0.87. No new generation requests."
   }
 }

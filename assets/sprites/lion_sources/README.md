@@ -12,7 +12,8 @@ cell dividers painted out). Jakob then asked for thinner line work and a more
 real lion, so both were repainted as naturalistic wildlife illustrations
 (`*_natural_render_0.png`), then given cel shading at a medium detail level
 (`nemean_cel_render_0.png`, `huntress_cel3_render_1.png`, cut out as
-`*_cel_cutout.png`). The packer's `thin_lines()` shaves and lightens every ink stroke.
+`*_cel_cutout.png`). The packer's `thin_lines()` shaves every ink stroke and `reink()`
+matches each packed frame's ink colour, silhouette hardness and sharpness to the wolf.
 
 Earlier passes (`lion*_render_*`, `*_refined_*`, `*_family_*`, `*_pro_*`) were
 rejected: generic Disney-like, then grey, then off in line work and colour.
