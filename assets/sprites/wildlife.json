@@ -1,7 +1,7 @@
 {
   "size": [
     2508,
-    5016
+    3135
   ],
   "frames": {
     "wolf_idle": [
@@ -121,78 +121,6 @@
     "lion_attack_strike": [
       1881,
       2508,
-      627,
-      627
-    ],
-    "python_idle": [
-      0,
-      3135,
-      627,
-      627
-    ],
-    "python_walk": [
-      627,
-      3135,
-      627,
-      627
-    ],
-    "python_attack_windup": [
-      1254,
-      3135,
-      627,
-      627
-    ],
-    "python_attack_strike": [
-      1881,
-      3135,
-      627,
-      627
-    ],
-    "sea_serpent_idle": [
-      0,
-      3762,
-      627,
-      627
-    ],
-    "sea_serpent_walk": [
-      627,
-      3762,
-      627,
-      627
-    ],
-    "sea_serpent_attack_windup": [
-      1254,
-      3762,
-      627,
-      627
-    ],
-    "sea_serpent_attack_strike": [
-      1881,
-      3762,
-      627,
-      627
-    ],
-    "viper_idle": [
-      0,
-      4389,
-      627,
-      627
-    ],
-    "viper_walk": [
-      627,
-      4389,
-      627,
-      627
-    ],
-    "viper_attack_windup": [
-      1254,
-      4389,
-      627,
-      627
-    ],
-    "viper_attack_strike": [
-      1881,
-      4389,
       627,
       627
     ]

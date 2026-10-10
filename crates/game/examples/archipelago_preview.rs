@@ -1,11 +1,8 @@
 //! Export a paused run snapshot for archipelago review:
 //! cargo run -p aoa-game --example archipelago_preview -- <seed> <charted islands>
 //! With more than one charted island, a ship steers into the fog from the start island.
-//! An optional third argument (`pride`, `snakes`, `vipers`, `found`, `carried`,
-//! `home` or `won`) stages a review snapshot. `pride` and `snakes` chart two islands
-//! and land villager-1 beside the second island's worldgen lion pride or sea
-//! serpent; `vipers` charts the whole run and lands him beside a temple viper, so
-//! those snapshots show real spawns. The others stage the artifact: as a review fixture it places villager-1 beside
+//! An optional third argument (`found`, `carried`, `home` or `won`) charts the whole
+//! run, then stages the artifact: as a review fixture it places villager-1 beside
 //! the temple, claims the artifact, and for `home`/`won` places the bearer four or
 //! three cells from the home town center (only three wins).
 use aoa_game::{CellCoordinate, Command, GameWorld, TerrainBiome, TransportShip};
@@ -15,9 +12,7 @@ fn main() {
     let seed = args.next().map_or(7, |s| s.parse().expect("integer seed"));
     let mut charted: usize = args.next().map_or(1, |s| s.parse().expect("island count"));
     let stage = args.next();
-    if matches!(stage.as_deref(), Some("pride" | "snakes")) {
-        charted = 2; // the ship stops at the second island, so the camera opens there
-    } else if stage.is_some() {
+    if stage.is_some() {
         charted = aoa_game::archipelago_plan(seed).len();
     }
     let mut world = GameWorld::generate(seed);
@@ -65,50 +60,7 @@ fn main() {
             }
         }
     }
-    if let Some(kind) = match stage.as_deref() {
-        Some("pride") => Some(aoa_game::AnimalKind::Lion),
-        Some("snakes") => Some(aoa_game::AnimalKind::SeaSerpent),
-        Some("vipers") => Some(aoa_game::AnimalKind::Viper),
-        _ => None,
-    } {
-        let island = world.island_origins.len() - 1;
-        let lair = world
-            .animals
-            .iter()
-            .find(|a| a.id.starts_with(&format!("animal-{island}-")) && a.kind == kind)
-            .unwrap_or_else(|| panic!("island {island} spawns a {}", kind.name()))
-            .home;
-        // Sail to the water nearest the animal so the opening camera frames it,
-        // then land the observer: placing him first would let the animal hunt him
-        // during the crossing. Two cells is inside an ambusher's reveal radius.
-        let shore = world
-            .terrain
-            .iter()
-            .filter(|c| c.biome == TerrainBiome::Water)
-            .min_by_key(|c| c.column.abs_diff(lair.column) + c.row.abs_diff(lair.row))
-            .map(|c| CellCoordinate::new(c.column, c.row))
-            .expect("the island has a coast");
-        world
-            .apply_command(Command::Sail {
-                ship_id: "transport-preview".into(),
-                to: shore,
-            })
-            .expect("open sea to the lair's coast");
-        while !world.ships[0].stopped() {
-            world.tick(0.1);
-        }
-        let (dx, dy) = if kind == aoa_game::AnimalKind::Lion {
-            (-4, 3)
-        } else {
-            (-2, 0)
-        };
-        world.units[0].cell = CellCoordinate::new(
-            (i32::from(lair.column) + dx) as u16,
-            (i32::from(lair.row) + dy) as u16,
-        );
-        world.tick(0.1);
-        world.validate().expect("a valid wildlife fixture");
-    } else if let Some(stage) = stage.as_deref() {
+    if let Some(stage) = stage.as_deref() {
         let temple = world
             .buildings
             .iter()
