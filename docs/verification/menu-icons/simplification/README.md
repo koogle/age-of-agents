@@ -16,7 +16,7 @@ from the upstream artifact (the Rust source itself is unchanged by this PR). Ass
 frames, field/transport checks, icon normalization, four RGBA PNG signatures,
 transparent corners and six release-verifier tests. [Checks/hashes](checks.json).
 
-The [before/after comparison](../../../../assets/ui/sources/menu_icons/simplification/comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
+The [before/after comparison](../../../../assets/ui/sources/menu_icons/simplification/comparison.png)
 shows original references plus each pair at 128/24/32px on parchment, dark green
 and blue. All four retain the fine brown ink/quiet watercolor family, coherent
 perspective and distinct silhouettes; unnecessary props and marks are removed.

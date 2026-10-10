@@ -67,7 +67,7 @@ Disembark. The four replacements now pass the style review, optical/alpha checks
 and six desktop/DPR-2 phone menu captures; their independent runtime replacements
 are tracked in the [refinement ledger](../../assets/ui/sources/menu_icons/simplification/README.md).
 Jakob subsequently authorized showing the four refinements and merging them.
-The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
+The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png)
 shows the normalized candidates against the previous art and approved references
 at 128/24/32px on parchment, dark green and blue. Simplification removes props
 and repeated interior marks rather than increasing contour weight.

@@ -56,8 +56,8 @@ python3 docs/verification/temple-artifact/capture_sequence.py /tmp/win /tmp/run/
 
 | File | Shows |
 | --- | --- |
-| `full-run-claim-desktop.png` (removed 2026-10-10: iteration evidence; final state kept) | Real run: the claim line appears at the sanctuary (top right). The party is still drawn at the ship because the replay jumps five seconds of walking in one step. |
-| `full-run-victory-desktop.png` (removed 2026-10-10: iteration evidence; final state kept) | Real run: the victory line above the bearer beside the home town center. |
+| `full-run-claim-desktop.png` | Real run: the claim line appears at the sanctuary (top right). The party is still drawn at the ship because the replay jumps five seconds of walking in one step. |
+| `full-run-victory-desktop.png` | Real run: the victory line above the bearer beside the home town center. |
 
 Findings: no wildlife met the party, and the ship's landing spot was a five-second
 walk from the temple. A single Move order for the bearer waited forever behind

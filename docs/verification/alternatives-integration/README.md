@@ -3,7 +3,7 @@
 Jakob asked to wire in the [#145](https://github.com/koogle/age-of-agents/pull/145)
 alternatives. Following his preference for the latest calibrations, four HUD icons
 now use them; the previous icons are kept in `assets/ui/sources/alternatives-integration/previous/`
-and compared at 128/32/24 px in `assets/ui/sources/alternatives-integration/comparison.png` (removed 2026-10-10: iteration evidence; final state kept).
+and compared at 128/32/24 px in `assets/ui/sources/alternatives-integration/comparison.png`.
 
 | Icon | Source in `assets/alternatives/2026-10-06/` | Where it shows |
 | --- | --- | --- |
