@@ -216,7 +216,11 @@ and check for generated cell divider lines before cutout.
 Prompting for thinner lines barely changes line weight; `thin_lines()` in
 `scripts/pack_wildlife.py` thins strokes deterministically instead (1px shave at
 2K; 2px broke silhouettes). Ask for realism as a "naturalistic wildlife
-field-guide illustration" with concrete anatomy; that removed the fantasy look. Provenance:
+field-guide illustration" with concrete anatomy; that removed the fantasy look.
+Then ask for cel shading as "flat base colour plus one shadow tone of the same hue
+per colour region", and name the distinguishing markings to keep: a plain cel
+request stripped the lioness's ear backs and rosettes (Jakob: a fine balance
+between too much and not enough detail). Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)

@@ -18,19 +18,22 @@ The injected scene is for rendering only and was not validated by the simulation
 Rejected along the way (2026-10-10): draft 1 (generic, Disney-like), the family
 pass (grey), and a warm painterly redraw (line work and colours off). Jakob then
 picked the suggested concepts: the Nemean lion as leader and the island huntress
-as lioness, then asked for thinner line work and a more real lion, so both are
-now naturalistic with packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
+as lioness, then asked for thinner line work and a more real lion, then for more
+cel shading; both are now naturalistic, cel-shaded at a medium detail level, with
+packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
 
 - `concept-to-sprite.png`: both concepts and the four packed poses of each.
 - `style-compare.png` now shows wolf, bear, boar, lioness and lion idle, then both
   strikes, at their true in-game relative scale.
 
-- `thin-before-after.png`: wolf for reference; the previous packed rows (top)
+- `thin-before-after.png`: wolf for reference; Nemean/huntress adaptation (top)
   against the naturalistic, thinned rows (bottom).
+- `cel-before-after.png`: wolf for reference; naturalistic rows (top) against the
+  cel-shaded rows now in the atlas (bottom).
 
-Matches: fine light warm-brown contours, consistent identity and colour across
-poses, crouched windups, open-jaw strikes. Still open: both lions are more
-detailed and realistic than the wolf; no OpenAI image_gen cleanup pass yet.
+Matches: flat cel colour areas with one soft-edged shadow tone, fine light warm-brown contours, consistent identity and colour across
+poses, crouched windups, open-jaw strikes. Still open: both lions are slightly more
+realistic than the wolf; no OpenAI image_gen cleanup pass yet.
 
 ## Behavior checks run
 
