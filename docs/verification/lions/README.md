@@ -2,6 +2,12 @@
 
 Art and behavior for the first monster class. Captures:
 
+- **Real spawn** (`real-spawn-*.png`): `cargo run -p aoa-game --example
+  archipelago_preview -- 7 2 pride` sails a ship from the home island into the fog,
+  discovers island 2, steers to the water nearest the pride the simulation spawned
+  there (lion `animal-1-4` and two lionesses), lands villager-1 four cells from the
+  leader, and exports the snapshot; the ship's vision shows the pride on the shore.
+  Nothing animal is placed by hand; `GameWorld::validate` passes.
 - **Posed** shots were removed on 2026-10-10; `poses.png` shows every frame.
 
 - `style-compare.png`: shipped wolf, bear and boar beside the lioness and lion

@@ -12,10 +12,19 @@ pub enum AnimalKind {
     Lioness,
     /// The maned pride leader: the lioness's heavier form.
     Lion,
+    /// Ambushers: concealed until a unit comes close, then a heavy strike.
+    /// A rock python lies up near wild resources.
+    Python,
+    /// A sea serpent waits on the shoreline.
+    SeaSerpent,
+    /// A marble viper guards the temple island.
+    Viper,
 }
 
 /// Lions whose homes lie this close belong to one pride.
 const PRIDE_RADIUS: f64 = 5.0;
+/// An ambusher stays out of snapshots until a land unit is this close.
+const REVEAL_RADIUS: f64 = 3.0;
 
 impl AnimalKind {
     pub fn name(self) -> &'static str {
@@ -25,6 +34,9 @@ impl AnimalKind {
             Self::Boar => "Boar",
             Self::Lioness => "Lioness",
             Self::Lion => "Lion",
+            Self::Python => "Rock python",
+            Self::SeaSerpent => "Sea serpent",
+            Self::Viper => "Marble viper",
         }
     }
     pub fn max_health(self) -> f64 {
@@ -34,6 +46,9 @@ impl AnimalKind {
             Self::Boar => 60.0,
             Self::Lioness => 250.0,
             Self::Lion => 500.0,
+            Self::Python => 400.0,
+            Self::SeaSerpent => 350.0,
+            Self::Viper => 250.0,
         }
     }
     fn aggro(self) -> f64 {
@@ -42,6 +57,7 @@ impl AnimalKind {
             Self::Bear => 4.0,
             Self::Boar => 4.0,
             Self::Lioness | Self::Lion => 6.0,
+            Self::Python | Self::SeaSerpent | Self::Viper => 2.5,
         }
     }
     fn territory(self) -> f64 {
@@ -50,6 +66,7 @@ impl AnimalKind {
             Self::Bear => 6.0,
             Self::Boar => 8.0,
             Self::Lioness | Self::Lion => 12.0,
+            Self::Python | Self::SeaSerpent | Self::Viper => 3.0,
         }
     }
     fn speed(self) -> f64 {
@@ -59,10 +76,16 @@ impl AnimalKind {
             Self::Boar => 2.2,
             Self::Lioness => 2.8,
             Self::Lion => 2.4,
+            Self::Python => 1.2,
+            Self::SeaSerpent => 1.6,
+            Self::Viper => 1.4,
         }
     }
     pub(super) fn is_lion(self) -> bool {
         matches!(self, Self::Lioness | Self::Lion)
+    }
+    pub fn ambushes(self) -> bool {
+        matches!(self, Self::Python | Self::SeaSerpent | Self::Viper)
     }
     fn damage(self) -> f64 {
         match self {
@@ -71,6 +94,9 @@ impl AnimalKind {
             Self::Boar => 10.0,
             Self::Lioness => 30.0,
             Self::Lion => 45.0,
+            Self::Python => 45.0,
+            Self::SeaSerpent => 35.0,
+            Self::Viper => 60.0,
         }
     }
 }
@@ -89,6 +115,16 @@ pub struct Animal {
 impl Animal {
     pub fn position(&self) -> Position {
         Position::on_step(self.cell, self.step)
+    }
+    /// An idle ambusher at home with no land unit within reach stays hidden:
+    /// out of snapshots and untargetable. Derived, so saves carry no extra state.
+    pub fn concealed(&self, units: &[Unit]) -> bool {
+        self.kind.ambushes()
+            && self.step.is_none()
+            && self.attack_seconds == 0.0
+            && !units
+                .iter()
+                .any(|u| u.cell.center().distance(self.cell.center()) <= REVEAL_RADIUS)
     }
     fn footprint(&self) -> Footprint {
         Footprint {
@@ -116,9 +152,25 @@ impl GameWorld {
         } else {
             3 + (worldgen::mix(self.seed ^ 0x6c69_6f6e, island as u64) % 2) as usize
         };
+        let temple_island = self.island_origins[island]
+            == *archipelago_plan(self.seed).last().expect("planned sites");
+        let snakes: Vec<AnimalKind> = if island == 0 {
+            Vec::new()
+        } else {
+            let pythons =
+                1 + (worldgen::mix(self.seed ^ 0x7079_7468_6f6e, island as u64) % 2) as usize;
+            let mut kinds = vec![AnimalKind::Python; pythons];
+            kinds.push(AnimalKind::SeaSerpent);
+            if temple_island {
+                kinds.extend([AnimalKind::Viper, AnimalKind::Viper]);
+            }
+            kinds
+        };
         let mut leader = None;
-        for number in 0..count + boars + pride {
-            let kind = if number == count + boars {
+        for number in 0..count + boars + pride + snakes.len() {
+            let kind = if number >= count + boars + pride {
+                snakes[number - count - boars - pride]
+            } else if number == count + boars {
                 AnimalKind::Lion
             } else if number > count + boars {
                 AnimalKind::Lioness
@@ -129,7 +181,9 @@ impl GameWorld {
             } else {
                 AnimalKind::Wolf
             };
-            if let Some(cell) = self.wildlife_cell(island, leader) {
+            // Only lionesses join the leader; everything else keeps its own spacing.
+            let beside = (kind == AnimalKind::Lioness).then_some(leader).flatten();
+            if let Some(cell) = self.wildlife_cell(island, beside, kind) {
                 if kind == AnimalKind::Lion {
                     leader = Some(cell);
                 }
@@ -152,10 +206,42 @@ impl GameWorld {
 
     /// A free starting cell on the island well away from the settlement: apart from
     /// other territories, or beside `pride` for a pride member.
+    /// Whether an ambusher may lie up at `cell`: pythons near wild resources, sea
+    /// serpents on the shoreline, vipers around the temple. Other kinds lie anywhere.
+    pub(super) fn habitat(&self, kind: AnimalKind, cell: CellCoordinate) -> bool {
+        const REACH: f64 = 4.0;
+        match kind {
+            AnimalKind::Python => self
+                .resources
+                .iter()
+                .any(|r| r.field.is_none() && r.cell.center().distance(cell.center()) <= REACH),
+            AnimalKind::SeaSerpent => {
+                let columns = self.columns();
+                let rows = self.rows();
+                (-4..=4).any(|dy| {
+                    (-4..=4).any(|dx| {
+                        offset(cell, dx, dy, columns, rows).is_some_and(|c| {
+                            c.center().distance(cell.center()) <= REACH
+                                && self.terrain[usize::from(c.row) * usize::from(columns)
+                                    + usize::from(c.column)]
+                                .biome
+                                    == TerrainBiome::Water
+                        })
+                    })
+                })
+            }
+            AnimalKind::Viper => self.buildings.iter().any(|b| {
+                b.id == TEMPLE_ID && b.origin.center().distance(cell.center()) <= REACH + 2.0
+            }),
+            _ => true,
+        }
+    }
+
     fn wildlife_cell(
         &self,
         island: usize,
         pride: Option<CellCoordinate>,
+        kind: AnimalKind,
     ) -> Option<CellCoordinate> {
         let origin = self.island_origins[island];
         let occupancy = self.occupancy();
@@ -172,11 +258,14 @@ impl GameWorld {
                     && self
                         .buildings
                         .iter()
+                        // The temple is a lair, not a settlement to keep clear of.
+                        .filter(|b| b.id != TEMPLE_ID)
                         .all(|b| b.footprint().center().distance(c.center()) >= 26.0)
                     && self
                         .units
                         .iter()
                         .all(|u| u.cell.center().distance(c.center()) >= 26.0)
+                    && self.habitat(kind, c)
                     && match pride {
                         Some(leader) => {
                             leader.center().distance(c.center()) <= 3.0
@@ -214,6 +303,7 @@ impl GameWorld {
             .iter()
             .find(|a| {
                 a.id == animal_id
+                    && !a.concealed(&self.units)
                     && visible.contains(&a.cell)
                     && a.step.is_none_or(|s| visible.contains(&s.to))
             })
@@ -246,6 +336,7 @@ impl GameWorld {
         let visible = self.visible_cells();
         let Some(animal) = self.animals.iter().position(|a| {
             a.id == id
+                && !a.concealed(&self.units)
                 && visible.contains(&a.cell)
                 && a.step.is_none_or(|s| visible.contains(&s.to))
         }) else {

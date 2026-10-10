@@ -18,12 +18,12 @@ Finished work lives in merged PRs, `README.md` and the
   [temple and artifact](docs/knowledge/temple-and-artifact.md).
 - The run is still far too easy: a short walk from the landing to the temple, and
   wildlife strength does not yet scale with distance.
-- Lions are in review on `claude/laughing-goodall-10lotl`: one pride (maned lion
-  plus 2–3 lionesses) per later island that hunts together. Art: Nemean lion and
-  island huntress, naturalistic, cel-shaded, outlines redrawn by a model ink pass
-  to the wolf's measured numbers; waits on Jakob's style call. Jakob's rule
-  (2026-10-10): art fixes go through an image model, never packer pixel code
+- Lions are merged and deployed ([#162](https://github.com/koogle/age-of-agents/pull/162));
+  a real-run capture shows the island-2 pride from the ship
   ([evidence](docs/verification/lions/README.md)).
+- Giant snakes are in review ([#164](https://github.com/koogle/age-of-agents/pull/164)): rock python,
+  sea serpent and marble viper (Jakob's picks), ambush rule, habitat spawns, atlas
+  rows 5–7, real-run captures; waits on Jakob's style call ([evidence](docs/verification/snakes/README.md)).
 
 ## Next steps to finish the capture-the-flag loop
 
@@ -36,7 +36,7 @@ keeps `tests/full_run.rs` passing and extends it once the step changes the run.
 2. **Per-island difficulty.** Monster counts and strength scale with each island's
    distance from home; the temple island gets guardians, so landing beside the
    temple is no longer a free win.
-3. **Monster classes, one PR each with art previews first:** lions (in review), giant snakes,
+3. **Monster classes, one PR each with art previews first:** lions (merged), giant snakes (in progress),
    skeletons, barbarians, centaurs, cyclops and minotaur, each with its own
    behavior. Every class can come in several forms (Jakob, 2026-10-08: for
    example a cyclops general or a barbarian chieftain); these are illustrations
