@@ -394,3 +394,7 @@
 {"t": 1791652176.8211923, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_cel_cut", "est_usd": 0.0058, "request_id": "01a126ca-999e-7303-a0b5-6a5c1ee1f8da", "seconds": 2.6}
 {"t": 1791652692.2789536, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_cel3", "est_usd": 0.44999999999999996, "request_id": "01a126d2-0fbb-75e3-8c22-1e4d0d0b0c15", "seconds": 29.0}
 {"t": 1791652734.253407, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_cel3_cut", "est_usd": 0.0058, "request_id": "01a126d3-1b10-7160-a60e-37bc67df50b8", "seconds": 2.6}
+{"t": 1791664211.4443371, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_ink", "est_usd": 0.3, "request_id": "01a12781-de82-7321-a2b1-a2aa41510f1c", "seconds": 26.4}
+{"t": 1791664257.997868, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "nemean_ink", "est_usd": 0.3, "request_id": "01a12782-9407-7ea0-9c48-fe042149fa47", "seconds": 26.5}
+{"t": 1791664293.0240993, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_ink_cut", "est_usd": 0.0058, "request_id": "01a12783-7a92-7240-893f-04592e9485c8", "seconds": 2.5}
+{"t": 1791664308.675474, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_ink_cut", "est_usd": 0.0058, "request_id": "01a12783-b7c6-79e3-aa6e-18df313485e3", "seconds": 2.5}

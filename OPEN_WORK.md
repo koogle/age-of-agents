@@ -20,11 +20,9 @@ Finished work lives in merged PRs, `README.md` and the
   wildlife strength does not yet scale with distance.
 - Lions are in review on `claude/laughing-goodall-10lotl`: one pride (maned lion
   plus 2–3 lionesses) per later island that hunts together. Art: Nemean lion and
-  island huntress, naturalistic and cel-shaded, waiting on one more model pass to
-  match the wolf's ink (crisper, darker outlines). **Blocked: the FAL account is out
-  of balance** (`fal.ai/dashboard/billing`); the prompt is ready in
-  `assets/sprites/lion_sources/ink_prompt.txt`. Jakob's rule (2026-10-10): art fixes
-  go through an image model, never packer pixel code
+  island huntress, naturalistic, cel-shaded, outlines redrawn by a model ink pass
+  to the wolf's measured numbers; waits on Jakob's style call. Jakob's rule
+  (2026-10-10): art fixes go through an image model, never packer pixel code
   ([evidence](docs/verification/lions/README.md)).
 
 ## Next steps to finish the capture-the-flag loop

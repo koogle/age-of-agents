@@ -11,9 +11,10 @@ concept (`huntress_render_0.png`, `nemean_render_3_clean.png`, with generated
 cell dividers painted out). Jakob then asked for thinner line work and a more
 real lion, so both were repainted as naturalistic wildlife illustrations
 (`*_natural_render_0.png`), then given cel shading at a medium detail level
-(`nemean_cel_render_0.png`, `huntress_cel3_render_1.png`, cut out as
-`*_cel_cutout.png`). The packer only registers and downsamples; a model pass to
-match the wolf's ink is pending (`ink_prompt.txt`), blocked on FAL balance.
+(`nemean_cel_render_0.png`, `huntress_cel3_render_1.png`), and finally an ink
+pass with the wolf sheet attached that redraws the outlines in his ink
+(`ink_prompt.txt`; `nemean_ink_render_1.png`, `huntress_ink_render_1.png`, cut
+out as `*_ink_cutout.png`). The packer only registers and downsamples.
 
 Earlier passes (`lion*_render_*`, `*_refined_*`, `*_family_*`, `*_pro_*`) were
 rejected: generic Disney-like, then grey, then off in line work and colour.
