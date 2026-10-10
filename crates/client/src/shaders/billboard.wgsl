@@ -103,14 +103,13 @@ fn fs_silhouette(in: VOut) -> @location(0) vec4<f32> {
     return vec4<f32>(0.16, 0.36, 0.78, 0.7);
 }
 
-// Cast shadows on the ground, as in Age of Empires II: the painted figure
-// itself is the shadow, with the sun high at the screen's top left. A unit's
-// painted points slide down-right on the ground by a short fraction of their
-// painted height, draped over the drawn terrain. A building's picture is laid
-// on its plot and nudged down-right, so the shadow peeks out along its right
-// and bottom edges; the building covers the rest. The pass writes depth at
-// the ground, so overlapping shadows on one level fail the depth test
-// instead of darkening twice.
+// Cast shadows on the ground: the painted card is a real occluder in the 3D
+// scene. The sun sits near the camera, a little above and to its left, and
+// every point of the camera-facing card is projected along that sun onto the
+// ground, so the shadow lies behind the figure and peeks out to its right.
+// Unit shadows drape over the drawn terrain; building shadows stay on the
+// level plot plane. The pass writes depth at the ground, so overlapping
+// shadows on one level fail the depth test instead of darkening twice.
 struct ShadowOut {
     @builtin(position) clip: vec4<f32>,
     @location(0) uv: vec2<f32>,
@@ -118,36 +117,26 @@ struct ShadowOut {
     @location(2) @interpolate(flat) strength: f32,
 };
 
-// Unit ground offset per unit of painted height: screen-right and away from the camera.
-const SHADOW_RIGHT: f32 = 0.55;
-const SHADOW_DOWN: f32 = -0.45;
-// Building nudge, as a fraction of the sprite's width (screen-right) and
-// height (screen-down).
-const DROP_RIGHT: f32 = 0.05;
-const DROP_DOWN: f32 = 0.04;
+// Sun offset from the camera direction: up (shorter shadows) and left (shadows
+// swing to the right).
+const SUN_UP: f32 = 0.5;
+const SUN_LEFT: f32 = 0.4;
 
 @vertex
 fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
     let corners = array<vec2<f32>, 6>(vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(1.0, 1.0));
     let q = corners[index];
-    let building = inst.footprint.x > 0.0;
     let local = q - inst.pivot;
     let right = g.camera_right.xyz;
     let toward_camera = normalize(cross(right, g.camera_up.xyz));
-    let down = normalize(vec3<f32>(toward_camera.x, 0.0, toward_camera.z));
-    var world: vec3<f32>;
+    let sun = normalize(toward_camera + vec3<f32>(0.0, SUN_UP, 0.0) - SUN_LEFT * right);
+    // The card as drawn, then slid along the sun down to the anchor's ground level.
+    let card = inst.anchor + local.x * inst.size.x * right + local.y * inst.size.y * g.camera_up.xyz;
+    var world = card - sun * ((card.y - inst.anchor.y) / sun.y);
     if inst.tint.a < 1.0 {
         // Placement ghosts cast nothing.
         world = inst.anchor;
-    } else if building {
-        // Screen-up on a flat plot is ground away from the camera, foreshortened.
-        let foreshorten = length(toward_camera.xz);
-        world = inst.anchor + (local.x * inst.size.x + DROP_RIGHT * inst.size.x) * right
-            - ((local.y - DROP_DOWN) * inst.size.y / foreshorten) * down;
-    } else {
-        world = inst.anchor + local.x * inst.size.x * right
-            + local.y * inst.size.y * (SHADOW_RIGHT * right + SHADOW_DOWN * down);
-        // Drape on the drawn ground.
+    } else if inst.footprint.x <= 0.0 {
         world.y = ground_height(world.xz);
     }
     // Lifted just clear of the ground's depth (under the ink pass threshold)
