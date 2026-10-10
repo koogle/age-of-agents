@@ -41,7 +41,7 @@ The user rejected the initial icon on 2026-10-06. The earlier style pass is
 superseded: orange shading and contour weight were too strong. That artwork and
 comparison are preserved under `assets/ui/sources/water/rejected/`.
 
-[Corrected comparison at 128px and 24/32px](icon-comparison.png):
+[Corrected comparison at 128px and 24/32px](icon-comparison.png) (removed 2026-10-10: iteration evidence; final state kept):
 
 - Ink: finer brown contours and sparse material marks now align with siblings.
 - Color: pale buff clay and muted blue water replace the saturated orange body.
@@ -90,9 +90,9 @@ across two field cycles, and deliver 240 food. The source retains its 120-unit
 renewable bookkeeping balance. No browser errors occurred. See [results](results.json).
 
 - [Desktop field](desktop-field.png), [visible placement cost](desktop-field-cost.png),
-  [maximum zoom](desktop-maximum-zoom.png).
+  [maximum zoom](desktop-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept).
 - [Phone field](phone-field.png), [visible placement cost](phone-field-cost.png),
-  [maximum zoom](phone-maximum-zoom.png).
+  [maximum zoom](phone-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept).
 
 The field-placement pill was changed during visual review so water costs stay
 visible on touch; its new regression and the complete suite passed afterward.

@@ -19,9 +19,9 @@ painted meadow and their respective original clay/paving image. The unmodified
 [stone](../../../../assets/terrain/road_sources/stone-sandy-before.png). This records the first material pass. Dirt was subsequently replaced after the user reported poor readability; see the [dirt follow-up](../dirt-readability/README.md). A later user-requested
 [stone contrast correction](../stone-contrast/README.md) supersedes its sandy stone palette.
 
-![Approved references above, refined materials repeated below](comparison.png)
+![Approved references above, refined materials repeated below](comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-[Comparison source](comparison.html) uses the renderer's mirrored 2×2 arrangement.
+[Comparison source](comparison.html) (removed 2026-10-10: iteration evidence; final state kept) uses the renderer's mirrored 2×2 arrangement.
 The source images are not assumed seamless. Mirroring makes every repeat meet at
 identical texels; mip-level clamping prevents opposite-edge filtering. Small
 symmetric pebble/stone details at reflection lines are an accepted limitation.
@@ -71,10 +71,10 @@ indices and plot layer 10 remain stable. The renderer remains under 1,000 lines.
 
 ## Gameplay captures
 
-![Desktop gameplay](desktop-stone-complete.png)
+![Desktop gameplay](desktop-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Desktop maximum zoom](desktop-maximum-zoom.png)
+![Desktop maximum zoom](desktop-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone gameplay, DPR2](phone-stone-complete.png)
+![Phone gameplay, DPR2](phone-stone-complete.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone maximum zoom, DPR2](phone-maximum-zoom.png)
+![Phone maximum zoom, DPR2](phone-maximum-zoom.png) (removed 2026-10-10: iteration evidence; final state kept)

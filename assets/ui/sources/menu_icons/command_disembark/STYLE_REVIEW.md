@@ -3,7 +3,7 @@
 
 > Refinement (2026-10-06): the simpler replacement is reviewed in
 > [the simplification review](../simplification/STYLE_REVIEW.md), with
-> [before/after evidence](../simplification/comparison.png). The review below
+> [before/after evidence](../simplification/comparison.png) (removed 2026-10-10: iteration evidence; final state kept). The review below
 > describes the retained first-release artwork.
 
 # command_disembark: style review

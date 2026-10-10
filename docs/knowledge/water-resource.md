@@ -47,7 +47,7 @@ The retained generation/refinement and packing provenance is in
 Repack with `python3 scripts/pack_water.py`. Crop to alpha > 40 before fitting
 the world frame: faint refinement fringe otherwise shifts the visible ground
 contact above the shared anchor. Approved family references accompany
-the generated icon in [the comparison](../verification/water/icon-comparison.png).
+the generated icon in [the comparison](../verification/water/icon-comparison.png) (removed 2026-10-10: iteration evidence; final state kept).
 Consult [assets](asset-pipeline.md) before revising it.
 
 ## Persistence and verification

@@ -6,7 +6,7 @@ The animal atlas now includes wolf bite and bear swipe windup/strike poses.
 The original four idle/walk cells are preserved pixel-for-pixel in columns 0/1;
 new columns 2/3 are authored attack poses. Atlas: 2508×1254, eight 627px cells.
 
-![Idle, windup, strike beside existing NPCs](attack-comparison.png)
+![Idle, windup, strike beside existing NPCs](attack-comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 ## Art and registration review
 
@@ -70,19 +70,19 @@ silhouette overlays cannot obscure the reviewed paws/jaws. Maximum-zoom framing
 uses a deliberate drag beyond the input threshold before zooming, preventing a
 near-center subject from accidentally selecting an NPC instead of panning.
 
-![Alpha checks](attack-alpha.png)
+![Alpha checks](attack-alpha.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 [Timing preview](attack-cycle.gif) assembles authored cells with the runtime
 recovery/windup/strike durations; it is an asset preview, not a browser recording.
 
-![Desktop strike beside NPCs](desktop-strike.png)
-![Phone strike beside NPCs](phone-strike.png)
+![Desktop strike beside NPCs](desktop-strike.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Phone strike beside NPCs](phone-strike.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Phone wolf strike at maximum zoom](phone-wolf-strike-maxzoom.png)
-![Phone bear strike at maximum zoom](phone-bear-strike-maxzoom.png)
+![Phone wolf strike at maximum zoom](phone-wolf-strike-maxzoom.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Phone bear strike at maximum zoom](phone-bear-strike-maxzoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
-![Live desktop combat](live-combat-desktop.png)
-![Live phone combat](live-combat-phone.png)
+![Live desktop combat](live-combat-desktop.png) (removed 2026-10-10: iteration evidence; final state kept)
+![Live phone combat](live-combat-phone.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 Rendered instance records and the rebuilt WASM hash are in `results.json`;
 authoritative combat observations are in `live-combat-results.json`.

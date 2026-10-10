@@ -8,16 +8,12 @@ Art and behavior for the first monster class. Two kinds of capture:
   there (lion `animal-1-4` and two lionesses), lands villager-1 four cells from the
   leader, and exports the snapshot; the ship's vision shows the pride on the shore.
   Nothing animal is placed by hand; `GameWorld::validate` passes.
-- **Posed** (`desktop*.png`, `phone.png`): a temple-island snapshot from
-  `tests/full_run.rs` (seed 7) with a pride injected beside the landed villager to
-  show every pose at once (leader idle, one lioness striking, one winding up, one
-  walking). For rendering review only; not validated by the simulation.
+- **Posed** shots were removed on 2026-10-10; `poses.png` shows every frame.
 
 - `style-compare.png`: shipped wolf, bear and boar beside the lioness and lion
   (idle, idle, strike, strike). Not to game scale.
 - `poses.png`: all four poses of each, on flat grass.
-- `desktop.png`, `desktop-zoom.png`: 1280×800, DPR 1.
-- `phone.png`: 390×844, DPR 2.
+- `desktop.png` , `desktop-zoom.png` : 1280×800, DPR 1.
 
 ## Style acceptance (pending Jakob)
 
@@ -32,7 +28,7 @@ packer-thinned lines ([lesson](../../knowledge/asset-pipeline.md#new-species-fro
 - `style-compare.png` now shows wolf, bear, boar, lioness and lion idle, then both
   strikes, at their true in-game relative scale.
 
-- `ink-before-after.png` and `ink-zoom.png`: the model ink pass
+- `ink-before-after.png`  and `ink-zoom.png` : the model ink pass
   (`nano-banana-pro/edit`, wolf sheet attached). Packed frames: ink luminance
   0.16–0.18 against the wolf's 0.18–0.21, line coverage 2.7–3.9% against 2.5–3.0%,
   silhouette edge 0.98–1.25 against 0.80–0.87, with no packer processing.

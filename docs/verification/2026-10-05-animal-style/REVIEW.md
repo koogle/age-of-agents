@@ -11,7 +11,7 @@ Approved sources: `assets/reference/diorama_primary.webp`, shipped
 `assets/sprites/hd_sources/units/guard_idle_front_cut.png`. The comparison uses
 the actual shipped guard atlas cell as well as all three villager identities.
 
-![NPC and animal comparison](npc-comparison.png)
+![NPC and animal comparison](npc-comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 `python3 docs/verification/2026-10-05-animal-style/comparison.py` reproduces the
 comparison from retained files, with the renderer's sprite-to-world ratios at
@@ -52,7 +52,7 @@ distance views, then orders hunting with actual mouse/touch input and checks
 mutual damage, bear defeat, cleanup and browser errors. Maximum-zoom framing
 uses emulated mouse pan/wheel on both viewports; phone hunting uses touch.
 
-![Desktop wildlife beside guards](desktop-wildlife.png)
+![Desktop wildlife beside guards](desktop-wildlife.png) (removed 2026-10-10: iteration evidence; final state kept)
 ![Maximum zoom beside guards and town center](desktop-bear-maxzoom.png)
 
 ## Release status
@@ -62,7 +62,7 @@ release uses GitHub Actions. During initial verification, direct Modal profile s
 repository documents `koogle-frick` as production. Profile listing also failed
 to connect. No attempt was made to deploy to the differently selected account.
 
-![Phone maximum-zoom wolf](phone-wolf-maxzoom.png)
+![Phone maximum-zoom wolf](phone-wolf-maxzoom.png) (removed 2026-10-10: iteration evidence; final state kept)
 
 ![Phone maximum-zoom bear](phone-bear-maxzoom.png)
 

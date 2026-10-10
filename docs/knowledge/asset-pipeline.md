@@ -67,7 +67,7 @@ Disembark. The four replacements now pass the style review, optical/alpha checks
 and six desktop/DPR-2 phone menu captures; their independent runtime replacements
 are tracked in the [refinement ledger](../../assets/ui/sources/menu_icons/simplification/README.md).
 Jakob subsequently authorized showing the four refinements and merging them.
-The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png)
+The retained [comparison](../../assets/ui/sources/menu_icons/simplification/comparison.png) (removed 2026-10-10: iteration evidence; final state kept)
 shows the normalized candidates against the previous art and approved references
 at 128/24/32px on parchment, dark green and blue. Simplification removes props
 and repeated interior marks rather than increasing contour weight.
@@ -77,7 +77,7 @@ menu-icon audit and asked for clearer enforcement. Technical image checks did
 not catch heavier contours, brighter washes and stronger shading in the draft
 refinement. Those initial illustrations were rejected; the corrected set was subsequently
 reviewed and merged individually in #112–#129, with runtime integration in #107.
-The [comparison](../verification/art-style/rejected-menu-drafts.png) records the
+The [comparison](../verification/art-style/rejected-menu-drafts.png) (removed 2026-10-10: iteration evidence; final state kept) records the
 approved kit on the left and rejected drafts on the right; rejected work is
 negative evidence, never a new style reference.
 
