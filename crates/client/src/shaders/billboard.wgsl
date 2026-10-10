@@ -104,8 +104,7 @@ fn fs_silhouette(in: VOut) -> @location(0) vec4<f32> {
     return vec4<f32>(0.16, 0.36, 0.78, 0.7);
 }
 
-// Cast shadows on the ground. The sun sits near the camera, above and to its
-// left (the painted sprites are lit from the front left). A unit's painted
+// Cast shadows on the ground under a sun high to the screen's left. A unit's painted
 // card is a real occluder: every point is projected along the sun onto the
 // ground and draped over the drawn terrain. A building is its footprint box,
 // swept along the sun and draped over the terrain. Each instance draws three
@@ -119,12 +118,14 @@ struct ShadowOut {
     @location(3) @interpolate(flat) textured: f32,
 };
 
-// Sun offset from the camera direction: up (shorter shadows) and left (shadows
-// swing to the right). The painted sprites are lit from the front left, with
-// their right faces in shade, so the cast shadow falls right and behind.
+// The sun stands high to the screen's left, only a little in front of the
+// scene (the painted sprites are lit from the front left). Shadows then run
+// nearly horizontally to the right on screen, which reads as lying flat on
+// the ground; a sun further in front would sweep them up along the walls.
+const SUN_UP: f32 = 0.9;
+const SUN_LEFT: f32 = 1.0;
+const SUN_FRONT: f32 = 0.15;
 const SHADOW_GRID: u32 = 4u;
-const SUN_UP: f32 = 0.5;
-const SUN_LEFT: f32 = 1.5;
 
 // Ground offset of a point `height` above the plot under the sun.
 fn shadow_vector(sun: vec3<f32>, height: f32) -> vec3<f32> {
@@ -146,7 +147,7 @@ fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
     let local = q - inst.pivot;
     let right = g.camera_right.xyz;
     let toward_camera = normalize(cross(right, g.camera_up.xyz));
-    let sun = normalize(toward_camera + vec3<f32>(0.0, SUN_UP, 0.0) - SUN_LEFT * right);
+    let sun = normalize(SUN_FRONT * toward_camera + vec3<f32>(0.0, SUN_UP, 0.0) - SUN_LEFT * right);
     let building = inst.footprint.x > 0.0;
     var world = inst.anchor;
     var uv = vec2<f32>(0.0);
