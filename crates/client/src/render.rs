@@ -880,13 +880,17 @@ impl Renderer {
             let mut start = 0;
             while start < sprites.len() {
                 let sheet = sprites[start].0;
+                let building = sprites[start].1.footprint[0] > 0.0;
                 let end = start
                     + sprites[start..]
                         .iter()
-                        .take_while(|(s, _)| *s == sheet)
+                        .take_while(|(s, sprite)| {
+                            *s == sheet && (sprite.footprint[0] > 0.0) == building
+                        })
                         .count();
                 pass.set_bind_group(1, &self.sheets[sheet].bind_group, &[]);
-                pass.draw(0..6, start as u32..end as u32);
+                // Buildings sweep three box quads; units project one card.
+                pass.draw(0..if building { 18 } else { 6 }, start as u32..end as u32);
                 start = end;
             }
             let mut start = 0;
