@@ -1,7 +1,7 @@
 {
   "date": "2026-10-09",
-  "status": "Integrated 2026-10-10: naturalistic island huntress (lioness) and naturalistic Nemean lion (leader), with deterministic line thinning in the packer.",
-  "packing": "scripts/pack_wildlife.py: huntress_natural/nemean_natural cutouts, thin_lines(), then a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames on atlas rows 3-4, lowest paws on y=590.",
+  "status": "Integrated 2026-10-10: cel-shaded naturalistic island huntress (lioness) and Nemean lion (leader), with packer line thinning.",
+  "packing": "scripts/pack_wildlife.py: huntress_cel/nemean_cel cutouts, thin_lines(), then a pose is every opaque shape centered in its 1024px quadrant, downsampled by 589/1024 into 627px frames on atlas rows 3-4, lowest paws on y=590.",
   "draft_1_2026-10-09": {
     "lioness": {
       "model": "fal-ai/nano-banana/edit",
@@ -253,6 +253,47 @@
         "huntress_natural_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a1269f-2a39-7b03-8d79-93553a499513"
       }
     },
-    "line_thinning": "scripts/pack_wildlife.py thin_lines(): strokes darker than luminance 0.42 that vanish under a 5-iteration opening are eroded by 1px per side at 2K; shaved pixels take the nearest opaque non-line colour; remaining strokes blend 35% toward warm brown (96,62,40). Broad dark areas (tail tufts, ear backs, mouths) are untouched. A 2px shave broke silhouettes."
+    "line_thinning": "scripts/pack_wildlife.py thin_lines(): strokes darker than luminance 0.42 that vanish under a 5-iteration opening are eroded by 1px per side at 2K; shaved pixels take the nearest opaque non-line colour; remaining strokes blend 35% toward warm brown (96,62,40). Broad dark areas (tail tufts, ear backs, mouths) are untouched. A 2px shave broke silhouettes.",
+    "review": "Jakob: getting close; asked for more cel shading. Cutouts removed; renders kept."
+  },
+  "cel_2026-10-10": {
+    "direction": "Jakob: a bit more cel shading; a fine balance between too much and not enough detail.",
+    "model": "fal-ai/nano-banana-pro/edit, 2K",
+    "lion": {
+      "prompt": "cel_prompt.txt",
+      "references": [
+        "nemean_natural_render_0.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a126c8-b7b9-7a31-9597-68eaef74b903",
+      "renders": {
+        "nemean_cel_render_0.png": "selected: flat base plus one shadow tone, mane keeps tuft notches",
+        "nemean_cel_render_1.png": "alternative, more saturated"
+      },
+      "cutout": {
+        "nemean_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126ca-999e-7303-a0b5-6a5c1ee1f8da"
+      }
+    },
+    "lioness": {
+      "rejected": {
+        "request_id": "01a126c9-29cd-7ba1-aaa3-38730c27af4e",
+        "prompt": "cel_prompt.txt",
+        "review": "Too little detail: lost the black ear backs and rosettes; outputs deleted."
+      },
+      "prompt": "huntress_cel_prompt.txt",
+      "references": [
+        "huntress_natural_render_0.png",
+        "nemean_cel_render_0.png",
+        "wildlife_sources/npc-style-refined.png"
+      ],
+      "request_id": "01a126c9-e982-7f32-a878-e07f92c433a1",
+      "renders": {
+        "huntress_cel2_render_0.png": "selected: cel-shaded, keeps black ear backs, rosettes, white throat, a few fur notches",
+        "huntress_cel2_render_1.png": "alternative"
+      },
+      "cutout": {
+        "huntress_cel_cutout.png": "fal-ai/birefnet/v2 General Use (Heavy), 01a126ca-8af0-7821-872a-21895809ca38"
+      }
+    }
   }
 }

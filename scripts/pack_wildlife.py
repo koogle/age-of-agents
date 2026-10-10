@@ -90,7 +90,7 @@ def main():
     # so a tail crossing the quadrant edge stays with its body. The lowest
     # (planted) paws sit on the shared baseline.
     half, scale = 1024, 589 / 1024
-    for row, name, source in [(3, "lioness", "huntress_natural"), (4, "lion", "nemean_natural")]:
+    for row, name, source in [(3, "lioness", "huntress_cel"), (4, "lion", "nemean_cel")]:
         sheet = Image.open(ROOT / f"assets/sprites/lion_sources/{source}_cutout.png").convert("RGBA")
         assert sheet.size == (2 * half, 2 * half)
         sheet = thin_lines(sheet)

@@ -52,8 +52,8 @@ saves load; only islands discovered after the update gain prides.
 Art: `assets/sprites/lion_sources/` (prompts, renders, cutouts, provenance) packed
 as atlas rows 3–4 by `scripts/pack_wildlife.py`. Designs (Jakob, 2026-10-10): the
 lioness is an island huntress (faint rosettes, black-backed ears, white throat),
-the leader a Nemean lion; at Jakob's request both are naturalistic, with
-packer-thinned line work. Sources are 1024px cells downsampled
+the leader a Nemean lion; at Jakob's request both are naturalistic and
+cel-shaded at a medium detail level, with packer-thinned line work. Sources are 1024px cells downsampled
 into 627px frames; quads are 0.95 and 1.0, so the leader stands about a fifth
 taller ([asset lesson](asset-pipeline.md#new-species-from-the-family-sheet-2026-10-10)).
 Style review: [lion review](../verification/lions/README.md).
