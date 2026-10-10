@@ -118,9 +118,10 @@ struct ShadowOut {
 };
 
 // Sun offset from the camera direction: up (shorter shadows) and left (shadows
-// swing to the right).
-const SUN_UP: f32 = 0.5;
-const SUN_LEFT: f32 = 0.4;
+// swing to the right). The painted sprites are lit from the front left, with
+// their right faces in shade, so the cast shadow falls right and behind.
+const SUN_UP: f32 = 0.7;
+const SUN_LEFT: f32 = 1.1;
 
 @vertex
 fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
