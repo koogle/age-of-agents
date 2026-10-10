@@ -74,6 +74,21 @@ fn frame(
     )
 }
 
+/// The generated 3D model drawn in place of a completed building's sprite
+/// (index into `render::MODEL_NAMES`) and how much of the plot it fills.
+pub(crate) fn model(kind: BuildingKind, construction: Option<f64>) -> Option<(usize, f32)> {
+    if construction.is_some() {
+        return None;
+    }
+    match kind {
+        BuildingKind::TownCenter => Some((0, 0.94)),
+        BuildingKind::House => Some((1, 0.95)),
+        BuildingKind::Watchtower => Some((2, 0.94)),
+        BuildingKind::Monument => Some((3, 0.94)),
+        _ => None,
+    }
+}
+
 pub(crate) fn sprite(
     sheets: &Sheets,
     heights: &Heights,

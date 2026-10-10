@@ -118,13 +118,6 @@ struct ShadowOut {
     @location(3) @interpolate(flat) textured: f32,
 };
 
-// The sun stands high to the screen's left, only a little in front of the
-// scene (the painted sprites are lit from the front left). Shadows then run
-// nearly horizontally to the right on screen, which reads as lying flat on
-// the ground; a sun further in front would sweep them up along the walls.
-const SUN_UP: f32 = 0.9;
-const SUN_LEFT: f32 = 1.0;
-const SUN_FRONT: f32 = 0.15;
 const SHADOW_GRID: u32 = 4u;
 
 // Ground offset of a point `height` above the plot under the sun.
@@ -147,7 +140,7 @@ fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
     let local = q - inst.pivot;
     let right = g.camera_right.xyz;
     let toward_camera = normalize(cross(right, g.camera_up.xyz));
-    let sun = normalize(SUN_FRONT * toward_camera + vec3<f32>(0.0, SUN_UP, 0.0) - SUN_LEFT * right);
+    let sun = shadow_sun();
     // Buildings with a painted base cast their box; units and tall towers
     // cast their painted card.
     let building = inst.footprint.x > 0.0 && inst.base.x > 0.0;

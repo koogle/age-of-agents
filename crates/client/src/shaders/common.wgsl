@@ -90,6 +90,15 @@ fn world_light(color_in: vec3<f32>, xz: vec2<f32>) -> vec3<f32> {
     return mix(srgb_to_linear(unknown), color, seen);
 }
 
+// The shadow sun stands high to the screen's left, only a little in front of
+// the scene (the painted sprites are lit from the front left). Shadows then run
+// nearly horizontally to the right on screen, which reads as lying flat.
+fn shadow_sun() -> vec3<f32> {
+    let right = g.camera_right.xyz;
+    let toward_camera = normalize(cross(right, g.camera_up.xyz));
+    return normalize(0.15 * toward_camera + vec3<f32>(0.0, 0.9, 0.0) - 1.0 * right);
+}
+
 fn distance_fog(color: vec3<f32>, world: vec3<f32>) -> vec3<f32> {
     let d = distance(world, g.camera_pos.xyz);
     return mix(color, srgb_to_linear(vec3<f32>(0.812, 0.898, 0.949)), smoothstep(g.fog_near, g.fog_far, d));

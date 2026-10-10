@@ -26,7 +26,7 @@ pub(crate) use fields::preview as field_preview;
 pub use selection::Selection;
 
 use crate::camera::Rig;
-use crate::render::{Decal, Sprite};
+use crate::render::{Decal, ModelInstance, Sprite};
 use crate::terrain::{self, Heights, random};
 
 const VILLAGER_HEIGHT: f32 = 0.78;
@@ -212,6 +212,8 @@ pub struct WorldView {
     pub snapshot: Option<WorldSnapshot>,
     /// Last frame's resource and building pictures, for tap picking.
     pickables: Vec<Pickable>,
+    /// Completed buildings drawn as generated 3D models this frame.
+    pub models: Vec<ModelInstance>,
     units: HashMap<String, UnitEntry>,
     render_tick: Option<f64>,
     latest_tick: f64,
@@ -278,6 +280,7 @@ impl WorldView {
         Self {
             snapshot: None,
             pickables: Vec::new(),
+            models: Vec::new(),
             units: HashMap::new(),
             render_tick: None,
             latest_tick: 0.0,
@@ -505,6 +508,7 @@ impl WorldView {
         let mut sprites = Vec::new();
         let mut decals = Vec::new();
         let mut picks = Vec::new();
+        self.models.clear();
         let heights = &self.heights;
         let Some(snapshot) = self.snapshot.as_ref() else {
             return (sprites, decals);
@@ -605,7 +609,17 @@ impl WorldView {
                 pick: Pick::Building(building.building.id.clone()),
                 sprite,
             });
-            sprites.push((sheet, sprite));
+            match buildings::model(building.building.kind, building.building.construction) {
+                Some((model, fill)) => self.models.push(ModelInstance {
+                    model,
+                    translation: center.to_array(),
+                    footprint: [
+                        building.columns as f32 * terrain::CELL * fill,
+                        building.rows as f32 * terrain::CELL * fill,
+                    ],
+                }),
+                None => sprites.push((sheet, sprite)),
+            }
             if selection.building.as_deref() == Some(building.building.id.as_str()) {
                 decals.push(Decal {
                     center: (center + Vec3::Y * 0.03).to_array(),

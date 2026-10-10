@@ -40,6 +40,10 @@ pub fn manifest() -> Vec<String> {
     }
     files.push("sprites/villager_field_preparation.png".into());
     files.push("sprites/villager_field_preparation.json".into());
+    for name in crate::render::MODEL_NAMES {
+        files.push(format!("models/{name}.bin"));
+        files.push(format!("models/{name}.png"));
+    }
     files.extend(crate::hud::files());
     files
 }

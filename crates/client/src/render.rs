@@ -14,6 +14,8 @@ use crate::hud::Quad;
 use crate::terrain::{self, GroundVertex};
 
 mod map;
+mod models;
+pub use models::{MODEL_NAMES, ModelInstance};
 
 const GROUND_SIZE: u32 = 512;
 /// Subdivisions per side of each building shadow quad (matches the shader).
@@ -159,6 +161,7 @@ pub struct Renderer {
     sprite_buffer: wgpu::Buffer,
     decal_pipeline: wgpu::RenderPipeline,
     decal_buffer: wgpu::Buffer,
+    models: models::Models,
     post_layout: wgpu::BindGroupLayout,
     post_sampler: wgpu::Sampler,
     post_uniforms: [wgpu::Buffer; 3],
@@ -527,6 +530,8 @@ impl Renderer {
         );
         let sprite_buffer = instance_buffer(device, 64 * 1024);
         let decal_buffer = instance_buffer(device, 16 * 1024);
+        let models =
+            models::Models::new(gpu, assets, &globals_layout, &sheet_layout, &sprite_sampler);
 
         // Finish passes.
         let post_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -685,6 +690,7 @@ impl Renderer {
             sprite_buffer,
             decal_pipeline,
             decal_buffer,
+            models,
             post_layout,
             post_sampler,
             post_uniforms,
@@ -751,6 +757,7 @@ impl Renderer {
     }
 
     /// Draws one frame. `sprites` holds (sheet index, sprite) pairs.
+    #[allow(clippy::too_many_arguments)]
     pub fn render(
         &mut self,
         gpu: &Gpu,
@@ -758,6 +765,7 @@ impl Renderer {
         near_far: (f32, f32),
         sprites: &mut [(usize, Sprite)],
         decals: &[Decal],
+        models: &mut [ModelInstance],
         hud: &[Quad],
     ) {
         let frame = match gpu.surface.get_current_texture() {
@@ -822,6 +830,7 @@ impl Renderer {
         );
         gpu.queue
             .write_buffer(&self.decal_buffer, 0, bytemuck::cast_slice(decals));
+        let model_ranges = self.models.upload(gpu, models);
         ensure_capacity(
             &gpu.device,
             &mut self.hud_buffer,
@@ -880,6 +889,7 @@ impl Renderer {
             pass.set_vertex_buffer(0, self.sea.0.slice(..));
             pass.set_index_buffer(self.sea.1.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..self.sea.2, 0, 0..1);
+            self.models.draw(&mut pass, &model_ranges, true);
             pass.set_vertex_buffer(0, self.sprite_buffer.slice(..));
             pass.set_pipeline(&self.shadow_pipeline);
             let mut start = 0;
@@ -903,6 +913,8 @@ impl Renderer {
                 pass.draw(0..vertices, start as u32..end as u32);
                 start = end;
             }
+            self.models.draw(&mut pass, &model_ranges, false);
+            pass.set_vertex_buffer(0, self.sprite_buffer.slice(..));
             let mut start = 0;
             while start < sprites.len() {
                 let sheet = sprites[start].0;

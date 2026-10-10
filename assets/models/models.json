@@ -1,0 +1,46 @@
+{
+ "towncenter": {
+  "extent": [
+   0.7029,
+   0.6078,
+   0.776
+  ],
+  "vertices": 24118,
+  "triangles": 34352,
+  "azimuth_fit": 130,
+  "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
+ },
+ "house": {
+  "extent": [
+   1.0279,
+   0.8081,
+   0.8937
+  ],
+  "vertices": 52994,
+  "triangles": 80102,
+  "azimuth_fit": 320,
+  "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
+ },
+ "watchtower": {
+  "extent": [
+   0.3319,
+   1.0004,
+   0.3617
+  ],
+  "vertices": 14847,
+  "triangles": 19930,
+  "azimuth_fit": 40,
+  "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
+ },
+ "monument": {
+  "extent": [
+   0.8166,
+   0.989,
+   0.8246
+  ],
+  "vertices": 22092,
+  "triangles": 32440,
+  "azimuth_fit": 120,
+  "source": "fal-ai/trellis, see docs/verification/shadow-spike/README.md"
+ }
+}

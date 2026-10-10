@@ -787,6 +787,7 @@ impl App {
             (camera::NEAR, camera::FAR),
             &mut sprites,
             &decals,
+            &mut self.view.models,
             &self.hud.quads,
         );
         if !self.revealed && self.view.snapshot.is_some() {

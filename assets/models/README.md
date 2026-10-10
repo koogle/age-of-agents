@@ -1,3 +1,18 @@
+# Generated 3D building models (2026-10-10 spike)
+
+`towncenter`, `house`, `watchtower` and `monument` are `fal-ai/trellis` meshes made
+from the painted sprite frames (request ids and the fit procedure are in
+[the shadow spike](../../docs/verification/shadow-spike/README.md)). Each `.bin`
+holds `u32 vertex_count, u32 index_count`, then interleaved `f32` position,
+normal and uv per vertex, then `u32` indices; `.png` is the Trellis albedo with
+V flipped to top-left origin; `models.json` records extents and the azimuth that
+matched the sprite. The client draws them on the plot in place of the completed
+building's sprite (`crates/client/src/render/models.rs`), with the mesh also
+flattened along the shadow sun for its cast shadow. Meshes are unsimplified
+(15k to 80k triangles) and the albedo is lifted by 1.45 in the shader because
+Trellis textures are muted next to the painted sprites. This is a spike for
+review, not an accepted direction.
+
 # Archived 3D model experiments
 
 The Three.js client, runtime GLBs, and their optimization scripts were retired on 2026-10-03. The current Rust renderer uses painted sprite sheets under `assets/sprites/`. Concept images, the generation ledger, and the historical notes below are retained as provenance; commands and client references below describe the retired implementation.
