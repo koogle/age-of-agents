@@ -392,3 +392,5 @@
 {"t": 1791652153.5609572, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_cel2", "est_usd": 0.3, "request_id": "01a126c9-e982-7f32-a878-e07f92c433a1", "seconds": 24.3}
 {"t": 1791652173.1342723, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_cel_cut", "est_usd": 0.0058, "request_id": "01a126ca-8af0-7821-872a-21895809ca38", "seconds": 2.6}
 {"t": 1791652176.8211923, "endpoint": "fal-ai/birefnet/v2", "tag": "nemean_cel_cut", "est_usd": 0.0058, "request_id": "01a126ca-999e-7303-a0b5-6a5c1ee1f8da", "seconds": 2.6}
+{"t": 1791652692.2789536, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "huntress_cel3", "est_usd": 0.44999999999999996, "request_id": "01a126d2-0fbb-75e3-8c22-1e4d0d0b0c15", "seconds": 29.0}
+{"t": 1791652734.253407, "endpoint": "fal-ai/birefnet/v2", "tag": "huntress_cel3_cut", "est_usd": 0.0058, "request_id": "01a126d3-1b10-7160-a60e-37bc67df50b8", "seconds": 2.6}

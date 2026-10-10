@@ -220,7 +220,12 @@ field-guide illustration" with concrete anatomy; that removed the fantasy look.
 Then ask for cel shading as "flat base colour plus one shadow tone of the same hue
 per colour region", and name the distinguishing markings to keep: a plain cel
 request stripped the lioness's ear backs and rosettes (Jakob: a fine balance
-between too much and not enough detail). Provenance:
+between too much and not enough detail). A cel pass can also bleach colour and
+fade outlines (the lioness went from value 0.75 to 0.87 and from 10% to 4% dark
+pixels; Jakob: beige, lost linework). Measure saturation, value and the share of
+pixels under luminance 0.3 against the sibling and the wolf before packing, and
+anchor the weaker sheet to the stronger sibling's render with "as deep as", "as
+crisp and dark as" wording naming the reference. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
 ## Wildlife style correction (2026-10-05)
