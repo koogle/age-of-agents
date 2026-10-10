@@ -55,5 +55,6 @@ fn plot(sheets: &Sheets, heights: &Heights, center: Vec3, stage: usize) -> (usiz
         center,
         Vec2::splat(3.0 * CELL),
         0.94,
+        false,
     )
 }

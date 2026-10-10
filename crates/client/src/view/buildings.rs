@@ -116,6 +116,7 @@ pub(crate) fn sprite(
         center,
         Vec2::new(width, depth),
         plot_fill,
+        kind == BuildingKind::Watchtower,
     )
 }
 
@@ -126,6 +127,7 @@ pub(super) fn on_plot(
     center: Vec3,
     extent: Vec2,
     plot_fill: f32,
+    tower: bool,
 ) -> (usize, Sprite) {
     let Frame {
         sheet,
@@ -159,7 +161,13 @@ pub(super) fn on_plot(
             pull: 0.08 * width,
             tint: [1.0; 4],
             footprint: [width, depth],
-            base: ((high - low) * scale).to_array(),
+            // A tall, narrow tower casts its painted silhouette like a unit
+            // does; a zero base tells the shadow pass to skip the box.
+            base: if tower {
+                [0.0; 2]
+            } else {
+                ((high - low) * scale).to_array()
+            },
         },
     )
 }

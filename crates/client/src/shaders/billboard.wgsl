@@ -148,11 +148,13 @@ fn vs_shadow(@builtin(vertex_index) index: u32, inst: Instance) -> ShadowOut {
     let right = g.camera_right.xyz;
     let toward_camera = normalize(cross(right, g.camera_up.xyz));
     let sun = normalize(SUN_FRONT * toward_camera + vec3<f32>(0.0, SUN_UP, 0.0) - SUN_LEFT * right);
-    let building = inst.footprint.x > 0.0;
+    // Buildings with a painted base cast their box; units and tall towers
+    // cast their painted card.
+    let building = inst.footprint.x > 0.0 && inst.base.x > 0.0;
     var world = inst.anchor;
     var uv = vec2<f32>(0.0);
     if inst.tint.a < 1.0 || (quad > 0u && !building) {
-        // Placement ghosts cast nothing; units use the first quad only.
+        // Placement ghosts cast nothing; cards use the first quad only.
         world = inst.anchor;
     } else if building {
         // A building is a box on its plot, not a card: the shadow is its
