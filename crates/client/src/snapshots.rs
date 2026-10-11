@@ -20,6 +20,14 @@ impl App {
             if !reset_playback {
                 self.feedback
                     .observe(self.view.snapshot.as_ref(), &snapshot, self.clock);
+                if snapshot.raid_landed
+                    && self.view.snapshot.as_ref().is_some_and(|s| !s.raid_landed)
+                {
+                    self.toast = Some((
+                        "Barbarian raiders have landed on the second island".into(),
+                        now + 8.0,
+                    ));
+                }
             }
             // The hosted server resets after a delay, so the view may have
             // framed the old island meanwhile: look again at the new one.

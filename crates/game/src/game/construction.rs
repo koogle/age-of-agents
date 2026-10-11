@@ -156,5 +156,6 @@ pub(super) fn building(
         job: None,
         queue: Vec::new(),
         next_queue_id: 0,
+        damage: 0.0,
     }
 }

@@ -355,3 +355,15 @@ variation, retaining the diorama/meadow family, fine pebble contours and mirrore
 sampling. Desktop and emulated DPR2 phone default/maximum zoom show clearer separation
 from meadow, retaining fine detail without visible repeat seams. Judge the result under actual terrain lighting;
 source contrast alone is insufficient.
+
+## Humanoid enemies from the guard family (2026-10-11)
+
+Barbarians are people, so their style reference is the shipped guard (idle and
+action cutouts flattened on white into one square), not the animal family sheet.
+The concept pass then the `nano-banana-pro/edit` adaptation landed on the guard's
+contour weight in one round, so no ink pass was run. Two failure modes: the model
+copies the reference subject into the sheet (a stray guard, a floating spear) and
+its colours (the chieftain took the guard's blue shield, the player team colour).
+Generating the second form with the accepted first form as its only style
+reference fixed both; ask for "no blue anywhere" and "no extra figures" explicitly.
+Provenance: [barbarian sources](../../assets/sprites/barbarian_sources/provenance.json).

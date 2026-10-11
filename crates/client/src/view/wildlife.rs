@@ -1,4 +1,4 @@
-//! Authored wolf, bear, boar, lion and snake frames; snapshots already exclude hidden animals.
+//! Authored wolf, bear, boar, lion, snake and barbarian frames; snapshots already exclude hidden animals.
 use super::*;
 
 pub(super) fn draw(
@@ -25,6 +25,8 @@ pub(super) fn draw(
             aoa_game::AnimalKind::Python => (5, 0.9, 0.3),
             aoa_game::AnimalKind::SeaSerpent => (6, 0.85, 0.3),
             aoa_game::AnimalKind::Viper => (7, 0.85, 0.3),
+            aoa_game::AnimalKind::Barbarian => (8, 0.97, 0.22),
+            aoa_game::AnimalKind::Chieftain => (9, 1.1, 0.28),
         };
         let moving = animal.step.is_some();
         let stride = moving && (time * 5.0) as u32 % 2 == 1;
@@ -44,7 +46,7 @@ pub(super) fn draw(
             pivot: [0.5, 1.0 - foot / 627.0],
             uv: uv(
                 [frame as f32 * 627.0, row as f32 * 627.0, 627.0, 627.0],
-                [2508.0, 5016.0],
+                [2508.0, 6270.0],
                 mirror,
             ),
             pull: 0.3 * size,
@@ -87,6 +89,8 @@ mod tests {
             (AnimalKind::Python, "python"),
             (AnimalKind::SeaSerpent, "sea_serpent"),
             (AnimalKind::Viper, "viper"),
+            (AnimalKind::Barbarian, "barbarian"),
+            (AnimalKind::Chieftain, "chieftain"),
         ] {
             for heading in [[1, 0], [-1, 0]] {
                 for (phase, pose) in [
@@ -136,7 +140,7 @@ mod tests {
             &mut Vec::new(),
             &mut Vec::new(),
         );
-        // The loop above leaves the viper, the bottom atlas row.
-        assert_eq!(sprites[0].1.uv, [0.25, 4389.0 / 5016.0, 0.5, 1.0]);
+        // The loop above leaves the chieftain, the bottom atlas row.
+        assert_eq!(sprites[0].1.uv, [0.25, 5643.0 / 6270.0, 0.5, 1.0]);
     }
 }

@@ -47,6 +47,9 @@ mod progression;
 mod progression_tests;
 #[cfg(test)]
 mod queue_tests;
+mod raid;
+#[cfg(test)]
+mod raid_tests;
 #[cfg(test)]
 mod ship_tests;
 mod ships;
@@ -65,6 +68,7 @@ pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_SIZE, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
+pub use raid::Raid;
 pub use ships::*;
 pub use wildlife::*;
 
@@ -125,6 +129,8 @@ pub struct GameWorld {
     pub scenario: ScenarioState,
     /// The unit carrying the Artifact of the Gods, if it has left the temple.
     pub artifact_bearer: Option<String>,
+    /// The barbarian raid on the second island.
+    pub raid: Raid,
     next_building_id: u64,
     next_unit_id: u64,
 }
@@ -178,6 +184,8 @@ pub struct WorldSnapshot {
     pub catalog: DomainCatalog,
     pub scenario: ScenarioState,
     pub artifact_bearer: Option<String>,
+    /// Barbarians have landed on the second island.
+    pub raid_landed: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -330,6 +338,7 @@ impl GameWorld {
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
             artifact_bearer: None,
+            raid: Raid::Waiting,
             next_building_id: 2,
             next_unit_id: 3,
         };
@@ -693,6 +702,7 @@ impl GameWorld {
             }
         }
         self.tick_artifact();
+        self.tick_raid(dt);
         self.tick_wildlife(dt);
         self.tick_ships(dt);
         for index in (0..self.units.len()).rev() {
@@ -830,6 +840,7 @@ impl GameWorld {
             catalog: DomainCatalog::roadmap(),
             scenario: self.scenario.clone(),
             artifact_bearer: self.artifact_bearer.clone(),
+            raid_landed: self.raid == Raid::Landed,
         }
     }
 

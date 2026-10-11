@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-11",
+  "status": "Integrated: barbarian raider (atlas row 8) and barbarian chieftain (row 9). Thracian pair picked by the agent from eight concepts; awaiting Jakob's style call.",
+  "rule": "Only the integrated renders and cutouts, the picked concepts, the style reference and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
+  "concepts": {
+    "model": "fal-ai/nano-banana-pro (text to image, 1K)",
+    "prompts": "concepts/concepts.json plus a shared framing sentence: 'A single full-body figure standing, facing right, at an elevated three-quarter camera looking down slightly, ancient Mediterranean era (around 400 BC), no horned helmets, painterly concept art, plain white background, no text.'",
+    "request_ids": {
+      "thracian_raider": "01a12838-ac47-7fc1-af25-e828206b9d32",
+      "thracian_chieftain": "01a12838-ac6b-7d73-a75f-f481d5515d23",
+      "gaulish_raider": "01a12838-acff-7621-8ecb-26e6eb889b1e",
+      "gaulish_chieftain": "01a12838-acc4-7811-afa6-4d8ab98663cb",
+      "scythian_raider": "01a12838-ac5a-7251-8b28-fc9f4f2fb334",
+      "scythian_chieftain": "01a12838-ac0b-7371-a063-c50c4b0299eb",
+      "illyrian_sea_raider": "01a12838-ac67-7aa3-b0d2-421b3cf72ae8",
+      "illyrian_chieftain": "01a12838-ac8b-77b3-b1ed-aa3671ba37a4"
+    },
+    "kept": ["concepts/thracian_raider.png", "concepts/thracian_chieftain.png"],
+    "removed": ["gaulish_raider", "gaulish_chieftain", "scythian_raider", "scythian_chieftain", "illyrian_sea_raider", "illyrian_chieftain"],
+    "pick": "Thracian pair: one war band, clearly non-Greek, rust and ochre that read hostile against the blue player units."
+  },
+  "style_reference": "guard_style_reference.png: hd_sources/units/guard_idle_front_cut.png (left figure) above guard_action_cut.png, flattened on white into one 2048px square.",
+  "raider": {
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+    "prompt": "adapt_prompt.txt",
+    "references": ["guard_style_reference.png (style)", "concepts/thracian_raider.png (design and colour)"],
+    "request_id": "01a1283a-219b-7530-b889-cb6c6f5f78f7",
+    "review": "Render 1 integrated as raider_render.png. Render 0 removed: it drew a stray guard and ground lines into the sheet.",
+    "cutout": ["raider_cutout.png", "fal-ai/birefnet/v2", "01a1283b-a6ef-7183-b422-b5e507c5435f"]
+  },
+  "chieftain": {
+    "rejected_adapt": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+      "prompt": "adapt_prompt.txt with the chieftain concept",
+      "request_id": "01a1283a-21c7-7f23-bbdb-f8f629bc9659",
+      "review": "Both removed: render 0 had cell divider lines and a floating spear; render 1 copied the guard's blue shield (the player team colour) and lost the bear pelt."
+    },
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+    "prompt": "chieftain_sibling_prompt.txt",
+    "references": ["raider_render.png (sibling: style, camera, layout)", "concepts/thracian_chieftain.png (design)"],
+    "request_id": "01a1283b-0f52-78d2-a057-baca6dbaab90",
+    "review": "Render 0 integrated as chieftain_render.png (bear pelt in every cell, raider's zigzag trim, no blue). Render 1 removed: near-identical with a smaller windup.",
+    "cutout": ["chieftain_cutout.png", "fal-ai/birefnet/v2", "01a1283b-b4c9-7a02-85cd-eb7d0bb3c952"]
+  },
+  "ink_pass": "Not run: unlike the animals, these were adapted directly from the human guard family and already share its contour weight (see docs/verification/barbarians/style-compare.png).",
+  "cleanup": "No OpenAI image_gen cleanup pass yet.",
+  "packing": "scripts/pack_wildlife.py rows 8 (barbarian) and 9 (chieftain): 1024px quadrants downsampled to 589/1024, feet on y=590 in 627px cells. Atlas is now 2508x6270.",
+  "estimated_cost_usd": 2.11
+}

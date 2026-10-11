@@ -77,6 +77,44 @@ close it appears, strikes with high contact damage and pursues only inside its
 Art: `assets/sprites/snake_sources/` packed as atlas rows 5–7; frames are drawn at
 quad 0.9 (python) and 0.85 (serpent, viper). Review: [snake evidence](../verification/snakes/README.md).
 
+## Barbarian raid and building damage (2026-10-11)
+
+Jakob asked for barbarian art with a barbarian chieftain, and for a raid of about
+10–20 enemies landing on the second island 5–10 minutes after the player lands
+there, with enemies able to damage buildings. Source: `crates/game/src/game/raid.rs`.
+
+- **Trigger.** `GameWorld::raid` is `Waiting` until any land unit stands on island
+  index 1 (the first island reached by ship), then `Incoming { seconds_left }`
+  with a seeded 300–600 simulated seconds, then `Landed`. It fires once per run;
+  simulation speed and pause apply to the countdown.
+- **Landing.** A seeded 10–20 raiders (the first is the **Chieftain**, the rest
+  **Barbarians**) appear on a free beach cell of island 1 that is at least 20 cells
+  from every player unit and building there, choosing the beach nearest the
+  player's presence (or the island centre), and spread inland over free cells.
+  There is no raider ship yet. Ids are `raider-{n}`; they live in `animals`, so
+  fog, snapshots, health bars, attack orders and death cleanup are shared.
+- **Behavior.** Raiders have no territory. Each picks, in order: a living unit on
+  its island within 7 cells (melee as animals do); otherwise the nearest
+  reachable building on its island except the temple; once nothing stands, any
+  unit still on the island. Units on other islands and passengers are safe.
+- **Buildings.** `Building::damage` grows by the raider's building damage per
+  one-second blow (diagonal corner contact counts). At `BuildingKind::max_health()`
+  (town center, monument 2400; dock, barracks, watchtower 1200; house 500; others
+  800) the building or foundation is removed with its production queue, and
+  `Build`/`Deposit` orders aimed at it become idle. Animals never damage buildings.
+  There is no repair yet.
+
+| Kind | Health | Damage / s vs units | vs buildings | Speed (cells/s) | Aggro |
+| --- | --- | --- | --- | --- | --- |
+| Barbarian | 150 | 15 | 10 | 2.4 | 7 |
+| Chieftain | 600 | 30 | 25 | 2.2 | 7 |
+
+The client shows a toast when the snapshot's `raid_landed` turns true and a health
+bar over any damaged building. Art: `assets/sprites/barbarian_sources/`, atlas
+rows 8–9. Evidence and the staged real-seed fixture
+(`archipelago_preview -- 7 2 raid`): [barbarian review](../verification/barbarians/README.md).
+Tests: `cargo test -p aoa-game raid_tests`.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
@@ -84,7 +122,8 @@ attack orders, animal pursuit/damage and cleanup. The first island gets one wolf
 islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist; the temple island adds two marble vipers. Starting animals are at least 26
 cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
-leave their territory; they do not roam randomly or attack buildings/ships.
+leave their territory; they do not roam randomly or attack buildings/ships. Raiders
+are the exception, [above](#barbarian-raid-and-building-damage-2026-10-11).
 
 | Kind | Health | Damage / second in contact | Speed (cells/s) | Aggro / territory radius |
 | --- | --- | --- | --- | --- |
@@ -100,8 +139,8 @@ leave their territory; they do not roam randomly or attack buildings/ships.
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
 Their contact damage is 10/25/18/35 per second respectively. This is a bounded
-wildlife combat slice: ranged attacks, healing, building damage, factions/raids,
-loot and run-ending rules remain unimplemented. Wolves require a squad; bears
+wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
+scripted raid, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
 villagers move faster than predators. No friendly automatic retaliation.
 

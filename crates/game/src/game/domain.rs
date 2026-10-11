@@ -314,6 +314,8 @@ pub struct Building {
     /// Paid tasks waiting behind the active job, in submission order.
     pub queue: Vec<QueuedBuildingJob>,
     pub next_queue_id: u64,
+    /// Damage taken from raiders; the building falls at `kind.max_health()`.
+    pub damage: f64,
 }
 
 pub const MAX_QUEUED_JOBS: usize = 5;
@@ -481,6 +483,16 @@ impl BuildingKind {
                 ResourceKind::Stone | ResourceKind::Gold | ResourceKind::Iron | ResourceKind::Coal
             ),
             _ => false,
+        }
+    }
+
+    /// Damage a building or foundation absorbs before raiders tear it down.
+    pub const fn max_health(self) -> f64 {
+        match self {
+            Self::TownCenter | Self::Monument | Self::Temple => 2400.0,
+            Self::Dock | Self::Barracks | Self::Watchtower => 1200.0,
+            Self::House => 500.0,
+            _ => 800.0,
         }
     }
 
