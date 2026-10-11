@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "status": "Integrated: barbarian raider (atlas row 8), chieftain (row 9) and torchbearer (row 10). Thracian pair picked by the agent from eight concepts; torchbearer requested by Jakob on 2026-10-11 (fewer clothes, a torch); awaiting Jakob's style call.",
+  "status": "Integrated: barbarian raider (atlas row 8), chieftain (row 9) and torchbearer (row 10). Thracian pair picked by the agent from eight concepts; torchbearer requested by Jakob on 2026-10-11 (fewer clothes, a torch); approved by Jakob for release on 2026-10-11.",
   "rule": "Only the integrated renders and cutouts, the picked concepts, the style reference and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
   "concepts": {
     "model": "fal-ai/nano-banana-pro (text to image, 1K)",
