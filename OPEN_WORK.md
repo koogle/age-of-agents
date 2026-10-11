@@ -6,7 +6,7 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 ## In progress
 
-- **Generated shadow assets:** review the [end-to-end design](docs/proposals/generated-shadow-assets.md),
+- **Generated shadow assets ([draft PR #166](https://github.com/koogle/age-of-agents/pull/166)):** review the [end-to-end design](docs/proposals/generated-shadow-assets.md),
   settle the shared sun direction and Trellis model retention, then implement
   the calibrated asset pipeline and renderer. The first six-object generation
   failed visual review; no runtime masks are accepted.
