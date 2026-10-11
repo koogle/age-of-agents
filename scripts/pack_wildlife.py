@@ -21,7 +21,7 @@ def main():
     attacks = Image.open(ATTACK_SOURCE).convert("RGBA")
     assert source.size == (CELL * 2, CELL * 2)
     assert attacks.size == source.size
-    atlas = Image.new("RGBA", (CELL * 4, CELL * 8))
+    atlas = Image.new("RGBA", (CELL * 4, CELL * 11))
     frames = {}
     # Planted rear-paw landmarks, measured in the original 627px cells.
     # A lifted/swiping front paw must not shift the whole animal's ground anchor.
@@ -65,7 +65,7 @@ def main():
         assert bounds[3] + offset[1] < CELL
         atlas.alpha_composite(frame, (col * CELL + offset[0], 2 * CELL + offset[1]))
         frames[f"boar_{pose}"] = [col * CELL, 2 * CELL, CELL, CELL]
-    # Lions and snakes: 1024px source quadrants, downsampled by one common factor
+    # Lions, snakes and barbarians: 1024px source quadrants, downsampled by one common factor
     # (never enlarged) and otherwise untouched: line work and shading are the
     # image model's job, per Jakob (2026-10-10), not pixel processing here. A pose is every opaque shape whose center lies in its quadrant,
     # so a tail crossing the quadrant edge stays with its body. The lowest
@@ -73,7 +73,9 @@ def main():
     half, scale = 1024, 589 / 1024
     sheets = [(3, "lioness", "lion_sources/huntress_ink"), (4, "lion", "lion_sources/nemean_ink"),
               (5, "python", "snake_sources/rock_python_ink"), (6, "sea_serpent", "snake_sources/sea_serpent_ink"),
-              (7, "viper", "snake_sources/marble_viper_ink")]
+              (7, "viper", "snake_sources/marble_viper_ink"),
+              (8, "barbarian", "barbarian_sources/raider"), (9, "chieftain", "barbarian_sources/chieftain"),
+              (10, "torchbearer", "barbarian_sources/torchbearer")]
     for row, name, source in sheets:
         sheet = Image.open(ROOT / f"assets/sprites/{source}_cutout.png").convert("RGBA")
         assert sheet.size == (2 * half, 2 * half)

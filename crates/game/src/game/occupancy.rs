@@ -175,6 +175,7 @@ impl GameWorld {
         self.validate_wildlife()?;
         self.validate_islands()?;
         self.validate_artifact()?;
+        self.validate_raid()?;
         self.validate_local()
     }
 
@@ -353,7 +354,7 @@ impl GameWorld {
                     if !self
                         .buildings
                         .iter()
-                        .any(|b| &b.id == building_id && !b.is_complete()) =>
+                        .any(|b| &b.id == building_id && b.needs_work()) =>
                 {
                     return Err(format!("{} builds a missing foundation", unit.id));
                 }

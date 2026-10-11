@@ -7,15 +7,19 @@
 //! serpent; `vipers` charts the whole run and lands him beside a temple viper, so
 //! those snapshots show real spawns. The others stage the artifact: as a review fixture it places villager-1 beside
 //! the temple, claims the artifact, and for `home`/`won` places the bearer four or
-//! three cells from the home town center (only three wins).
-use aoa_game::{CellCoordinate, Command, GameWorld, TerrainBiome, TransportShip};
+//! three cells from the home town center (only three wins). `raid` charts two
+//! islands, lands villager-1 with a house on the second, lets the barbarian raid
+//! arm and land, takes him back aboard and runs until the raiders reach the house.
+use aoa_game::{
+    Building, BuildingKind, CellCoordinate, Command, GameWorld, Raid, TerrainBiome, TransportShip,
+};
 
 fn main() {
     let mut args = std::env::args().skip(1);
     let seed = args.next().map_or(7, |s| s.parse().expect("integer seed"));
     let mut charted: usize = args.next().map_or(1, |s| s.parse().expect("island count"));
     let stage = args.next();
-    if matches!(stage.as_deref(), Some("pride" | "snakes")) {
+    if matches!(stage.as_deref(), Some("pride" | "snakes" | "raid")) {
         charted = 2; // the ship stops at the second island, so the camera opens there
     } else if stage.is_some() {
         charted = aoa_game::archipelago_plan(seed).len();
@@ -65,7 +69,9 @@ fn main() {
             }
         }
     }
-    if let Some(kind) = match stage.as_deref() {
+    if stage.as_deref() == Some("raid") {
+        stage_raid(&mut world);
+    } else if let Some(kind) = match stage.as_deref() {
         Some("pride") => Some(aoa_game::AnimalKind::Lion),
         Some("snakes") => Some(aoa_game::AnimalKind::SeaSerpent),
         Some("vipers") => Some(aoa_game::AnimalKind::Viper),
@@ -137,4 +143,78 @@ fn main() {
     }
     world.simulation_speed = 0.0;
     println!("{}", serde_json::to_string(&world.snapshot()).unwrap());
+}
+
+/// Land villager-1 beside the stopped ship with a house a few cells inland, arm
+/// the raid, skip its countdown, and run until the war band strikes the house.
+fn stage_raid(world: &mut GameWorld) {
+    let ship = world.ships[0].cell;
+    let land = |c: CellCoordinate| {
+        world.island_at(c) == Some(1)
+            && world.terrain
+                [usize::from(c.row) * usize::from(world.columns()) + usize::from(c.column)]
+            .biome
+            .is_walkable()
+            && world.resources.iter().all(|r| r.cell != c)
+            && world
+                .animals
+                .iter()
+                .all(|a| a.cell.column.abs_diff(c.column) + a.cell.row.abs_diff(c.row) > 16)
+    };
+    let near = |c: &CellCoordinate| c.column.abs_diff(ship.column) + c.row.abs_diff(ship.row);
+    let origin = world
+        .terrain
+        .iter()
+        .map(|t| CellCoordinate::new(t.column, t.row))
+        .filter(|&o| {
+            (0..5).all(|dy| (0..5).all(|dx| land(CellCoordinate::new(o.column + dx, o.row + dy))))
+        })
+        .min_by_key(near)
+        .expect("room for a house on the second island");
+    // Steer beside the site so the opening camera frames the house.
+    let shore = world
+        .terrain
+        .iter()
+        .filter(|c| c.biome == TerrainBiome::Water)
+        .min_by_key(|c| c.column.abs_diff(origin.column) + c.row.abs_diff(origin.row))
+        .map(|c| CellCoordinate::new(c.column, c.row))
+        .expect("the island has a coast");
+    world
+        .apply_command(Command::Sail {
+            ship_id: "transport-preview".into(),
+            to: shore,
+        })
+        .expect("open sea to the site's coast");
+    while !world.ships[0].stopped() {
+        world.tick(0.1);
+    }
+    world.buildings.push(Building {
+        id: "preview-house".into(),
+        kind: BuildingKind::House,
+        origin: CellCoordinate::new(origin.column + 1, origin.row + 1),
+        construction: None,
+        job: None,
+        queue: Vec::new(),
+        next_queue_id: 0,
+        damage: 0.0,
+    });
+    world.units[0].cell = origin;
+    world.tick(0.1);
+    assert!(
+        matches!(world.raid, Raid::Incoming { .. }),
+        "landing arms the raid"
+    );
+    world.raid = Raid::Incoming { seconds_left: 0.05 };
+    world.tick(0.1);
+    assert_eq!(world.raid, Raid::Landed);
+    // Back aboard, so the house alone draws the raiders.
+    let villager = world.units.remove(0);
+    world.ships[0].passengers.push(villager);
+    for _ in 0..3000 {
+        if world.buildings.iter().any(|b| b.damage >= 60.0) {
+            break;
+        }
+        world.tick(0.1);
+    }
+    world.validate().expect("a valid raid fixture");
 }

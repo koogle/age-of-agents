@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-11",
+  "status": "Integrated: barbarian raider (atlas row 8), chieftain (row 9) and torchbearer (row 10). Thracian pair picked by the agent from eight concepts; torchbearer requested by Jakob on 2026-10-11 (fewer clothes, a torch); awaiting Jakob's style call.",
+  "rule": "Only the integrated renders and cutouts, the picked concepts, the style reference and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
+  "concepts": {
+    "model": "fal-ai/nano-banana-pro (text to image, 1K)",
+    "prompts": "concepts/concepts.json plus a shared framing sentence: 'A single full-body figure standing, facing right, at an elevated three-quarter camera looking down slightly, ancient Mediterranean era (around 400 BC), no horned helmets, painterly concept art, plain white background, no text.'",
+    "request_ids": {
+      "thracian_raider": "01a12838-ac47-7fc1-af25-e828206b9d32",
+      "thracian_chieftain": "01a12838-ac6b-7d73-a75f-f481d5515d23",
+      "gaulish_raider": "01a12838-acff-7621-8ecb-26e6eb889b1e",
+      "gaulish_chieftain": "01a12838-acc4-7811-afa6-4d8ab98663cb",
+      "scythian_raider": "01a12838-ac5a-7251-8b28-fc9f4f2fb334",
+      "scythian_chieftain": "01a12838-ac0b-7371-a063-c50c4b0299eb",
+      "illyrian_sea_raider": "01a12838-ac67-7aa3-b0d2-421b3cf72ae8",
+      "illyrian_chieftain": "01a12838-ac8b-77b3-b1ed-aa3671ba37a4"
+    },
+    "kept": [
+      "concepts/thracian_raider.png",
+      "concepts/thracian_chieftain.png",
+      "concepts/thracian_torchbearer.png"
+    ],
+    "removed": [
+      "gaulish_raider",
+      "gaulish_chieftain",
+      "scythian_raider",
+      "scythian_chieftain",
+      "illyrian_sea_raider",
+      "illyrian_chieftain"
+    ],
+    "pick": "Thracian pair: one war band, clearly non-Greek, rust and ochre that read hostile against the blue player units."
+  },
+  "style_reference": "guard_style_reference.png: hd_sources/units/guard_idle_front_cut.png (left figure) above guard_action_cut.png, flattened on white into one 2048px square.",
+  "raider": {
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+    "prompt": "adapt_prompt.txt",
+    "references": [
+      "guard_style_reference.png (style)",
+      "concepts/thracian_raider.png (design and colour)"
+    ],
+    "request_id": "01a1283a-219b-7530-b889-cb6c6f5f78f7",
+    "review": "Render 1 integrated as raider_render.png. Render 0 removed: it drew a stray guard and ground lines into the sheet.",
+    "cutout": [
+      "raider_cutout.png",
+      "fal-ai/birefnet/v2",
+      "01a1283b-a6ef-7183-b422-b5e507c5435f"
+    ]
+  },
+  "chieftain": {
+    "rejected_adapt": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+      "prompt": "adapt_prompt.txt with the chieftain concept",
+      "request_id": "01a1283a-21c7-7f23-bbdb-f8f629bc9659",
+      "review": "Both removed: render 0 had cell divider lines and a floating spear; render 1 copied the guard's blue shield (the player team colour) and lost the bear pelt."
+    },
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+    "prompt": "chieftain_sibling_prompt.txt",
+    "references": [
+      "raider_render.png (sibling: style, camera, layout)",
+      "concepts/thracian_chieftain.png (design)"
+    ],
+    "request_id": "01a1283b-0f52-78d2-a057-baca6dbaab90",
+    "review": "Render 0 integrated as chieftain_render.png (bear pelt in every cell, raider's zigzag trim, no blue). Render 1 removed: near-identical with a smaller windup.",
+    "cutout": [
+      "chieftain_cutout.png",
+      "fal-ai/birefnet/v2",
+      "01a1283b-b4c9-7a02-85cd-eb7d0bb3c952"
+    ]
+  },
+  "ink_pass": "Not run: unlike the animals, these were adapted directly from the human guard family and already share its contour weight (see docs/verification/barbarians/style-compare.png).",
+  "cleanup": "No OpenAI image_gen cleanup pass yet.",
+  "packing": "scripts/pack_wildlife.py rows 8 (barbarian), 9 (chieftain) and 10 (torchbearer): 1024px quadrants downsampled to 589/1024, feet on y=590 in 627px cells. Atlas is now 2508x6897.",
+  "estimated_cost_usd": 3.02,
+  "torchbearer": {
+    "request": "Jakob, 2026-10-11: another raider type with fewer clothes who carries a torch, doing more damage to buildings and less to people.",
+    "concept": {
+      "model": "fal-ai/nano-banana-pro (text to image, 1K, 2 images)",
+      "prompt": "torchbearer_concept_prompt.txt",
+      "request_id": "01a12862-1cf8-75a2-903d-19ae9a9ff3ae",
+      "review": "Image 0 kept as concepts/thracian_torchbearer.png; image 1 removed (sash over the chest, less bare)."
+    },
+    "sheets": {
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images per request",
+      "prompt": "torchbearer_sibling_prompt.txt",
+      "references": [
+        "raider_render.png (sibling: style, camera, layout)",
+        "each torchbearer concept in turn (design)"
+      ],
+      "request_ids": {
+        "from_concept_0": "01a12862-66c3-7882-9d9c-1cbefcdaacdf",
+        "from_concept_1": "01a12862-cba5-79d0-bdb2-dae0f54fbe35"
+      },
+      "review": "From concept 0, render 0 integrated as torchbearer_render.png. Removed: concept 0 render 1 (windup swings the axe instead of the torch), concept 1 render 0 (ground lines), concept 1 render 1 (cell divider lines)."
+    },
+    "cutout": [
+      "torchbearer_cutout.png",
+      "fal-ai/birefnet/v2",
+      "01a12863-e8f6-7a30-b65d-69e610b820fd"
+    ]
+  }
+}
