@@ -59,12 +59,14 @@ Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
 
 ## Still unresolved
 
-- **Repository weight.** On 2026-10-10 rejected and intermediate art left the
-  asset source folders, and Jakob's rule removed all historical evidence
-  captures and reviews from `docs/` (225 MB to 3 MB): final states are not
-  captured, since sprites are the source of truth. The git history (about 1 GB
-  packed) still keeps every deleted image; shrinking it means rewriting `master`
-  history, which touches every clone and needs Jakob's call.
+- **Repository weight.** Historical evidence left `docs/` on 2026-10-10. On
+  2026-10-11 `master` history was rewritten (Jakob's request) so every binary
+  path (png/jpg/webp/wasm/glb/gif/ttf/ico) keeps only its final version; text
+  history and the current tree are unchanged, and a fresh `master` clone fell from
+  1.08 GB to 0.85 GB. Commit IDs changed: re-clone or `git reset --hard
+  origin/master`. Open PRs #72, #103, #142 and #144 and the other remote
+  branches still sit on the old history and keep its objects alive; they need
+  rebasing onto the new `master` or deleting.
 - **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
   map, military shield, steel and cloth calibrations are wired in. Not wired: the
   wolf (recolor failed), the sandal Disembark (the joined platform is approved) and
