@@ -106,7 +106,7 @@ impl GameWorld {
         let Some(building) = self
             .buildings
             .iter()
-            .position(|building| building.id == building_id && !building.is_complete())
+            .position(|building| building.id == building_id && building.needs_work())
         else {
             // Another builder finished it.
             self.units[unit].action = UnitAction::Idle;
@@ -125,18 +125,32 @@ impl GameWorld {
                 }
                 Travel::Arrived { remaining } => remaining,
             };
+        if self.buildings[building].is_complete() {
+            let damage = self.buildings[building].damage - REPAIR_PER_SECOND * remaining;
+            self.buildings[building].damage = damage.max(0.0);
+            if damage <= 0.0 {
+                self.release_builders(building_id);
+            }
+            return;
+        }
         let work = self.buildings[building].construction.unwrap_or(0.0) + remaining;
         if work + f64::EPSILON < self.buildings[building].kind.build_seconds() {
             self.buildings[building].construction = Some(work);
         } else {
             // Completion releases every builder at once, so no unit is ever
-            // left working on a building that is no longer a foundation.
+            // left working on a building that needs no more work; raiders'
+            // damage to the foundation keeps them on as repairers.
             self.buildings[building].construction = None;
-            for other in &mut self.units {
-                if matches!(&other.action, UnitAction::Build { building_id: id } if id == building_id)
-                {
-                    other.action = UnitAction::Idle;
-                }
+            if self.buildings[building].damage == 0.0 {
+                self.release_builders(building_id);
+            }
+        }
+    }
+
+    fn release_builders(&mut self, building_id: &str) {
+        for other in &mut self.units {
+            if matches!(&other.action, UnitAction::Build { building_id: id } if id == building_id) {
+                other.action = UnitAction::Idle;
             }
         }
     }

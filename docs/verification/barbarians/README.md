@@ -1,18 +1,20 @@
 # Barbarian raid — review evidence (2026-10-11)
 
-Art and behavior for the barbarian monster class: a raider and a chieftain, and
+Art and behavior for the barbarian monster class: a raider, a chieftain and a
+torchbearer, and
 the raid that lands them on the second island ([guide](../../knowledge/wildlife.md#barbarian-raid-and-building-damage-2026-10-11)).
 
 - `concept-to-sprite.png`: the picked Thracian concepts and the four packed poses
-  (idle, walk, windup, strike) of each, atlas rows 8–9.
-- `style-compare.png`: the shipped villager and guard beside the raider and the
-  chieftain (idle, strike) at their in-game relative heights.
+  (idle, walk, windup, strike) of each, atlas rows 8–10.
+- `style-compare.png`: the shipped villager and guard beside the raider, the
+  chieftain and the torchbearer (idle, strike) at their in-game relative heights.
 - `raid-desktop.png`, `raid-desktop-zoom.png`, `raid-phone.png`: `cargo run
   --release -p aoa-game --example archipelago_preview -- 7 2 raid` sails from the
   home island into the fog, discovers island 2, steers beside a free site, lands
   villager-1 with a completed house there (the only staged parts), which arms the
-  raid. The countdown is then skipped; the war band the simulation lands walks to
-  the house and strikes it (60 damage, bar over the roof) while villager-1 waits
+  raid. The countdown is then skipped; the war band the simulation lands (on seed
+  7 torchbearers among it) walks to the house and strikes it (60 damage; the bar
+  over the roof shows because raiders stand against it) while villager-1 waits
   aboard. `GameWorld::validate` passes. Captured with the
   [archipelago capture script](../archipelago-plan/capture.py) plus a wheel zoom
   over the fight; the phone view is a 390×844 DPR-2 viewport panned with a mouse
@@ -30,6 +32,8 @@ the raid that lands them on the second island ([guide](../../knowledge/wildlife.
 | Era fit | Pass | Thracian peltast kit around 400 BC; no horned helmets. |
 | Integration | Pass | Clean alpha on meadow; feet registered on the shared baseline in all poses. |
 
+The torchbearer (added 2026-10-11) passes the same criteria; its flames are flat cel shapes with ink outlines, no glow.
+
 Still open: the chieftain resembles a Greek hoplite more than the raider does
 (gilded helmet and crest); no OpenAI image_gen cleanup pass.
 
@@ -43,4 +47,7 @@ Still open: the chieftain resembles a Greek hoplite more than the raider does
   island, not discovery alone) that lands 10–20 raiders, chieftain first, at least
   20 cells away, deterministically and once; raiders cut down units in reach before
   buildings; march on a town center, damage it, raze it and idle a `Deposit` order
-  aimed at it, then hunt the remaining units; friendly units can attack and kill them.
+  aimed at it, then hunt the remaining units; friendly units can attack and kill
+  them; a torchbearer does 30 building damage per blow and less to people than a
+  barbarian; a villager repairs 20 damage per second at no cost and is released
+  when the building is whole. Client: `a_building_bar_follows_raiders_striking_it`.

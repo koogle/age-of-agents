@@ -16,8 +16,8 @@ once the step changes the run. The run is still far too easy: a short walk from
 the landing to the temple, and wildlife strength does not scale with distance.
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
-   [#142](https://github.com/koogle/age-of-agents/pull/142)), healing and building
-   repair. Building health landed with the barbarian raid.
+   [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing. Building
+   health and repair landed with the barbarian raid.
 2. **Per-island difficulty.** Monster counts and strength scale with each island's
    distance from home; the temple island gets guardians.
 3. **Monster classes, art previews first:** skeletons, barbarians, centaurs,

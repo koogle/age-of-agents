@@ -132,10 +132,11 @@ impl GameWorld {
         }
         cells.truncate(count);
         for (number, cell) in cells.into_iter().enumerate() {
-            let kind = if number == 0 {
-                AnimalKind::Chieftain
-            } else {
-                AnimalKind::Barbarian
+            // The chieftain leads; every third raider after him carries a torch.
+            let kind = match number {
+                0 => AnimalKind::Chieftain,
+                n if n % 3 == 0 => AnimalKind::Torchbearer,
+                _ => AnimalKind::Barbarian,
             };
             self.animals.push(Animal {
                 id: format!("raider-{number}"),

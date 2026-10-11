@@ -426,3 +426,7 @@
 {"t": 1791676347.9208524, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "barbarian-chieftain-sibling", "est_usd": 0.3, "request_id": "01a1283b-0f52-78d2-a057-baca6dbaab90", "seconds": 26.3}
 {"t": 1791676362.9728658, "endpoint": "fal-ai/birefnet/v2", "tag": "barbarian-raider-cut", "est_usd": 0.0058, "request_id": "01a1283b-a6ef-7183-b422-b5e507c5435f", "seconds": 2.5}
 {"t": 1791676366.4857488, "endpoint": "fal-ai/birefnet/v2", "tag": "barbarian-chieftain-cut", "est_usd": 0.0058, "request_id": "01a1283b-b4c9-7a02-85cd-eb7d0bb3c952", "seconds": 2.5}
+{"t": 1791678898.6995525, "endpoint": "fal-ai/nano-banana-pro", "tag": "barbarian-concept-torchbearer", "est_usd": 0.3, "request_id": "01a12862-1cf8-75a2-903d-19ae9a9ff3ae", "seconds": 17.7}
+{"t": 1791678924.164168, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "barbarian-torchbearer-sibling-0", "est_usd": 0.3, "request_id": "01a12862-66c3-7882-9d9c-1cbefcdaacdf", "seconds": 24.2}
+{"t": 1791678980.2257457, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "barbarian-torchbearer-sibling-1", "est_usd": 0.3, "request_id": "01a12862-cba5-79d0-bdb2-dae0f54fbe35", "seconds": 54.5}
+{"t": 1791679001.3004386, "endpoint": "fal-ai/birefnet/v2", "tag": "barbarian-torchbearer-cut", "est_usd": 0.0058, "request_id": "01a12863-e8f6-7a30-b65d-69e610b820fd", "seconds": 2.5}

@@ -357,6 +357,11 @@ impl Building {
     pub fn is_complete(&self) -> bool {
         self.construction.is_none()
     }
+
+    /// A foundation to raise or a damaged building to repair.
+    pub fn needs_work(&self) -> bool {
+        !self.is_complete() || self.damage > 0.0
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]

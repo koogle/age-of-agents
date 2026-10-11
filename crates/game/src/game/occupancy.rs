@@ -354,7 +354,7 @@ impl GameWorld {
                     if !self
                         .buildings
                         .iter()
-                        .any(|b| &b.id == building_id && !b.is_complete()) =>
+                        .any(|b| &b.id == building_id && b.needs_work()) =>
                 {
                     return Err(format!("{} builds a missing foundation", unit.id));
                 }

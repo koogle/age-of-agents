@@ -62,7 +62,11 @@ fn first_landing_arms_a_seeded_raid_that_lands_a_war_band_on_the_second_island()
         let band = &world.animals[animals..];
         assert!((10..=20).contains(&band.len()), "{} raiders", band.len());
         assert_eq!(band[0].kind, AnimalKind::Chieftain);
-        assert!(band[1..].iter().all(|a| a.kind == AnimalKind::Barbarian));
+        for (n, raider) in band.iter().enumerate().skip(1) {
+            let torch = n % 3 == 0;
+            assert_eq!(raider.kind == AnimalKind::Torchbearer, torch);
+            assert_eq!(raider.kind == AnimalKind::Barbarian, !torch);
+        }
         for raider in band {
             assert_eq!(world.island_at(raider.cell), Some(1));
         }
@@ -168,5 +172,52 @@ fn friendly_units_can_fight_raiders() {
     world.tick(1.0);
     assert!(world.animals.is_empty());
     assert_eq!(world.units[0].action, UnitAction::Idle);
+    world.validate().unwrap();
+}
+
+#[test]
+fn torchbearers_burn_buildings_fast_but_fight_people_poorly() {
+    let torch = AnimalKind::Torchbearer;
+    assert!(torch.building_damage() > AnimalKind::Chieftain.building_damage());
+    assert!(torch.damage() < AnimalKind::Barbarian.damage());
+    let mut world = fixture::fixture();
+    world.resources.clear();
+    world.units[0].cell = CellCoordinate::new(5, 70);
+    world.units[1].cell = CellCoordinate::new(7, 70);
+    world.animals = vec![raider(torch, CellCoordinate::new(33, 19))];
+    world.refresh_exploration();
+    world.tick(1.0);
+    assert_eq!(world.buildings[0].damage, 30.0);
+    world.validate().unwrap();
+}
+
+#[test]
+fn villagers_repair_damaged_buildings_for_free() {
+    let mut world = fixture::fixture();
+    world.resources.clear();
+    world.buildings[0].damage = 50.0;
+    let stock = world.inventories.clone();
+    world
+        .apply_command(Command::Construct {
+            unit_id: "villager-1".into(),
+            building_id: "base-1".into(),
+        })
+        .unwrap();
+    world.tick(1.0);
+    assert_eq!(world.buildings[0].damage, 30.0);
+    for _ in 0..4 {
+        world.tick(0.5);
+    }
+    assert_eq!(world.buildings[0].damage, 0.0);
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    assert_eq!(world.inventories, stock);
+    // An intact building needs no work.
+    assert_eq!(
+        world.apply_command(Command::Construct {
+            unit_id: "villager-1".into(),
+            building_id: "base-1".into(),
+        }),
+        Err(CommandError::BuildingAlreadyComplete)
+    );
     world.validate().unwrap();
 }

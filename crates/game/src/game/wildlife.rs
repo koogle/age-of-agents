@@ -24,6 +24,8 @@ pub enum AnimalKind {
     Barbarian,
     /// The raid's leader: the barbarian's heavier form.
     Chieftain,
+    /// A lightly clad fire-raider: burns buildings fast, fights people poorly.
+    Torchbearer,
 }
 
 /// Lions whose homes lie this close belong to one pride.
@@ -44,6 +46,7 @@ impl AnimalKind {
             Self::Viper => "Marble viper",
             Self::Barbarian => "Barbarian raider",
             Self::Chieftain => "Barbarian chieftain",
+            Self::Torchbearer => "Barbarian torchbearer",
         }
     }
     pub fn max_health(self) -> f64 {
@@ -58,6 +61,7 @@ impl AnimalKind {
             Self::Viper => 250.0,
             Self::Barbarian => 150.0,
             Self::Chieftain => 600.0,
+            Self::Torchbearer => 100.0,
         }
     }
     pub(super) fn aggro(self) -> f64 {
@@ -67,7 +71,7 @@ impl AnimalKind {
             Self::Boar => 4.0,
             Self::Lioness | Self::Lion => 6.0,
             Self::Python | Self::SeaSerpent | Self::Viper => 2.5,
-            Self::Barbarian | Self::Chieftain => 7.0,
+            Self::Barbarian | Self::Chieftain | Self::Torchbearer => 7.0,
         }
     }
     fn territory(self) -> f64 {
@@ -77,7 +81,7 @@ impl AnimalKind {
             Self::Boar => 8.0,
             Self::Lioness | Self::Lion => 12.0,
             Self::Python | Self::SeaSerpent | Self::Viper => 3.0,
-            Self::Barbarian | Self::Chieftain => f64::INFINITY,
+            Self::Barbarian | Self::Chieftain | Self::Torchbearer => f64::INFINITY,
         }
     }
     fn speed(self) -> f64 {
@@ -92,13 +96,14 @@ impl AnimalKind {
             Self::Viper => 1.4,
             Self::Barbarian => 2.4,
             Self::Chieftain => 2.2,
+            Self::Torchbearer => 2.6,
         }
     }
     pub(super) fn is_lion(self) -> bool {
         matches!(self, Self::Lioness | Self::Lion)
     }
     pub fn raids(self) -> bool {
-        matches!(self, Self::Barbarian | Self::Chieftain)
+        matches!(self, Self::Barbarian | Self::Chieftain | Self::Torchbearer)
     }
     pub fn ambushes(self) -> bool {
         matches!(self, Self::Python | Self::SeaSerpent | Self::Viper)
@@ -115,6 +120,7 @@ impl AnimalKind {
             Self::Viper => 60.0,
             Self::Barbarian => 15.0,
             Self::Chieftain => 30.0,
+            Self::Torchbearer => 6.0,
         }
     }
     /// Damage per second against buildings; animals leave buildings alone.
@@ -122,6 +128,7 @@ impl AnimalKind {
         match self {
             Self::Barbarian => 10.0,
             Self::Chieftain => 25.0,
+            Self::Torchbearer => 30.0,
             _ => 0.0,
         }
     }

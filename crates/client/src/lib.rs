@@ -227,7 +227,7 @@ impl App {
             Some(view::Pick::Resource(id)) => return Some(Target::Resource(id)),
             Some(view::Pick::Building(id)) => {
                 let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
-                return Some(if building.building.construction.is_some() {
+                return Some(if building.building.needs_work() {
                     Target::Foundation(id)
                 } else {
                     Target::Building(id)
@@ -255,7 +255,7 @@ impl App {
                 && (o.row..o.row + b.rows).contains(&cell.row)
         }) {
             let id = building.building.id.clone();
-            return Some(if building.building.construction.is_some() {
+            return Some(if building.building.needs_work() {
                 Target::Foundation(id)
             } else {
                 Target::Building(id)
@@ -767,8 +767,13 @@ impl App {
         {
             self.hud.selection_box(pointer.down_at, self.cursor, scale);
         }
-        self.view
-            .draw_health(&mut self.hud, &self.atlas, &self.rig, scale);
+        self.view.draw_health(
+            &mut self.hud,
+            &self.atlas,
+            &self.rig,
+            scale,
+            &self.selection,
+        );
         self.feedback.draw(
             &mut self.hud,
             &self.atlas,

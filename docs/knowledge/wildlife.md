@@ -87,8 +87,8 @@ there, with enemies able to damage buildings. Source: `crates/game/src/game/raid
   index 1 (the first island reached by ship), then `Incoming { seconds_left }`
   with a seeded 300–600 simulated seconds, then `Landed`. It fires once per run;
   simulation speed and pause apply to the countdown.
-- **Landing.** A seeded 10–20 raiders (the first is the **Chieftain**, the rest
-  **Barbarians**) appear on a free beach cell of island 1 that is at least 20 cells
+- **Landing.** A seeded 10–20 raiders appear (the first is the **Chieftain**,
+  every third after him a **Torchbearer**, the rest **Barbarians**) on a free beach cell of island 1 that is at least 20 cells
   from every player unit and building there, choosing the beach nearest the
   player's presence (or the island centre), and spread inland over free cells.
   There is no raider ship yet. Ids are `raider-{n}`; they live in `animals`, so
@@ -102,16 +102,27 @@ there, with enemies able to damage buildings. Source: `crates/game/src/game/raid
   (town center, monument 2400; dock, barracks, watchtower 1200; house 500; others
   800) the building or foundation is removed with its production queue, and
   `Build`/`Deposit` orders aimed at it become idle. Animals never damage buildings.
-  There is no repair yet.
+- **Repair (Jakob, 2026-10-11).** Villagers repair through the existing
+  `Construct` order: tapping a damaged building with villagers selected works like
+  tapping a foundation (carried goods are dropped off first). Each villager
+  removes `REPAIR_PER_SECOND` (20) damage per second at no cost; repairers are
+  released when damage reaches zero. A foundation damaged while being raised keeps
+  its builders on as repairers after completion. A razed building is rebuilt by
+  placing it again.
+- **Torchbearer (Jakob, 2026-10-11).** A lightly clad raider with a torch: more
+  damage to buildings, less to people.
 
 | Kind | Health | Damage / s vs units | vs buildings | Speed (cells/s) | Aggro |
 | --- | --- | --- | --- | --- | --- |
 | Barbarian | 150 | 15 | 10 | 2.4 | 7 |
 | Chieftain | 600 | 30 | 25 | 2.2 | 7 |
+| Torchbearer | 100 | 6 | 30 | 2.6 | 7 |
 
-The client shows a toast when the snapshot's `raid_landed` turns true and a health
-bar over any damaged building. Art: `assets/sprites/barbarian_sources/`, atlas
-rows 8–9. Evidence and the staged real-seed fixture
+The client shows a toast when the snapshot's `raid_landed` turns true. Jakob
+(2026-10-11): a damaged building's health bar shows only while it is attacked
+(a raider stands still against its footprint, derived from the snapshot in
+`view/health.rs`) or while the player has it selected. Art:
+`assets/sprites/barbarian_sources/`, atlas rows 8–10. Evidence and the staged real-seed fixture
 (`archipelago_preview -- 7 2 raid`): [barbarian review](../verification/barbarians/README.md).
 Tests: `cargo test -p aoa-game raid_tests`.
 

@@ -1,7 +1,7 @@
 {
   "size": [
     2508,
-    6270
+    6897
   ],
   "frames": {
     "wolf_idle": [
@@ -241,6 +241,30 @@
     "chieftain_attack_strike": [
       1881,
       5643,
+      627,
+      627
+    ],
+    "torchbearer_idle": [
+      0,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_walk": [
+      627,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_attack_windup": [
+      1254,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_attack_strike": [
+      1881,
+      6270,
       627,
       627
     ]

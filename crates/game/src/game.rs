@@ -103,6 +103,8 @@ const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
 pub const UNIT_HEALTH: f64 = 100.0;
+/// Building damage one villager repairs per second, free of cost.
+pub const REPAIR_PER_SECOND: f64 = 20.0;
 /// The island new worlds get unless a seed is given.
 pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 
@@ -262,7 +264,7 @@ pub enum Command {
         #[serde(default = "town_center_kind")]
         kind: BuildingKind,
     },
-    /// Join or resume work on an existing foundation.
+    /// Join or resume work on an existing foundation, or repair a damaged building.
     Construct {
         unit_id: String,
         building_id: String,
@@ -486,7 +488,7 @@ impl GameWorld {
                     .iter()
                     .find(|building| building.id == building_id)
                     .ok_or(CommandError::BuildingNotFound)?;
-                if building.is_complete() {
+                if !building.needs_work() {
                     return Err(CommandError::BuildingAlreadyComplete);
                 }
                 if !self.can_reach_beside(unit, building.footprint()) {
