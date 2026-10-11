@@ -122,8 +122,12 @@ The client shows a toast when the snapshot's `raid_landed` turns true. Jakob
 (2026-10-11): a damaged building's health bar shows only while it is attacked
 (a raider stands still against its footprint, derived from the snapshot in
 `view/health.rs`) or while the player has it selected. Art:
-`assets/sprites/barbarian_sources/`, atlas rows 8–10. Evidence and the staged real-seed fixture
-(`archipelago_preview -- 7 2 raid`): [barbarian review](../verification/barbarians/README.md).
+`assets/sprites/barbarian_sources/`, atlas rows 8–10. To see a real raid,
+`cargo run --release -p aoa-game --example archipelago_preview -- 7 2 raid`
+exports a paused seed-7 snapshot: the ship reaches island 2, villager-1 lands with a
+staged house, the raid arms, its countdown is skipped and the war band the
+simulation lands strikes the house. No captures are committed; the style review
+lives in [#165](https://github.com/koogle/age-of-agents/pull/165).
 Tests: `cargo test -p aoa-game raid_tests`.
 
 ## Implemented rules
