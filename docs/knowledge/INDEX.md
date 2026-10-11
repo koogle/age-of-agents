@@ -17,6 +17,7 @@ of current behavior.
 | Production, research, refunds, housing, unlocks | [Economy and queues](economy-and-queues.md) | Server/saves; HUD |
 | Camera, terrain, picking, selection, minimap | [Rendering and input](rendering-and-input.md) | HUD; archipelago |
 | Frozen worlds, stuck workers, delayed input | [Runtime debugging](runtime-debugging.md) | Server/saves; affected domain guide |
+| Generated building/NPC/scenery ground shadows | [Shadow design draft](../proposals/generated-shadow-assets.md) | Rendering/input; assets; verification |
 | FAL, image refinement, sprites, icons, packing | [Asset pipeline](asset-pipeline.md) | Rendering/input; HUD; build/release |
 | Commands, copy, feedback, responsive UI, accessibility | [HUD and accessibility](hud-and-accessibility.md) | Economy/queues; rendering/input |
 | HTTP/WebSocket, snapshots, SQLite, migrations, local fixtures | [Server and saves](server-and-saves.md) | Archipelago; runtime debugging |

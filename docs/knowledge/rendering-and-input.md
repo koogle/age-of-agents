@@ -88,3 +88,12 @@ Jakob clarified that the refactor should reduce source lines. Repeated
 GPU bind-group descriptor construction is consolidated with one local helper for the renderer's
 contiguous bindings. Resource order, texture views, layout, filtering and shader
 behavior are preserved. This is GPU setup glue, not a renderer/engine framework.
+
+## Generated shadow assets — draft direction (2026-10-11)
+
+Jakob reviewed the Trellis preview and requested image-model-generated ground
+shadow assets for buildings, NPCs, and other world art, with the camera and
+light direction matching the rendered game. This is pending implementation and
+visual approval in the [end-to-end design draft](../proposals/generated-shadow-assets.md). Preserve the subject artwork and game
+behavior; generated shadow masks need explicit source frame, anchor, scale,
+light direction, provenance, animation coverage, and terrain registration.

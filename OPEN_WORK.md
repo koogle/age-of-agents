@@ -4,6 +4,13 @@ Only work that is still open: tasks, pending decisions and blockers. Delete an
 item when it is done; finished work, history and facts belong in git, `README.md`,
 `decisions.md` and the [knowledge guides](docs/knowledge/INDEX.md).
 
+## In progress
+
+- **Generated shadow assets:** review the [end-to-end design](docs/proposals/generated-shadow-assets.md),
+  settle the shared sun direction and Trellis model retention, then implement
+  the calibrated asset pipeline and renderer. The first six-object generation
+  failed visual review; no runtime masks are accepted.
+
 ## Waiting on Jakob
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
