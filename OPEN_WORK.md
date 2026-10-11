@@ -1,83 +1,47 @@
-# Open work — 2026-10-08
+# Open work
 
-Compact handoff: current state, what comes next, and what is still unresolved.
-Finished work lives in merged PRs, `README.md` and the
-[knowledge guides](docs/knowledge/INDEX.md), not here.
+Only work that is still open: tasks, pending decisions and blockers. Delete an
+item when it is done; finished work, history and facts belong in git, `README.md`,
+`decisions.md` and the [knowledge guides](docs/knowledge/INDEX.md).
 
-## Current state
+## Waiting on Jakob
 
-- Master is deployed through the merge-triggered
-  [production workflow](https://github.com/koogle/age-of-agents/actions/workflows/deploy.yml);
-  the latest release includes [#161](https://github.com/koogle/age-of-agents/pull/161).
-  Store version 19.
-- A run is playable end to end: a seeded 5–7 island archipelago under fog with only
-  the temple island marked, player-steered ships with one-tap returns, the run-down
-  Sanctuary of the Gods, artifact capture and return-home victory.
-  `crates/game/tests/full_run.rs` wins seed 7 through player commands alone in about
-  455 simulated seconds. Guides: [archipelago](docs/knowledge/archipelago-and-transport.md),
-  [temple and artifact](docs/knowledge/temple-and-artifact.md).
-- The run is still far too easy: a short walk from the landing to the temple, and
-  wildlife strength does not yet scale with distance.
-- Lions are merged and deployed ([#162](https://github.com/koogle/age-of-agents/pull/162)).
-- Giant snakes are in review ([#164](https://github.com/koogle/age-of-agents/pull/164)): rock python,
-  sea serpent and marble viper (Jakob's picks), ambush rule, habitat spawns, atlas
-  rows 5–7; waits on Jakob's style call ([comparison sheets](docs/verification/snakes/README.md)).
+- **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
+  [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
 
 ## Next steps to finish the capture-the-flag loop
 
-Proposed order, one PR each unless noted; only the lions in step 3 are started. Each step
-keeps `tests/full_run.rs` passing and extends it once the step changes the run.
+One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it
+once the step changes the run. The run is still far too easy: a short walk from
+the landing to the temple, and wildlife strength does not scale with distance.
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers, healing,
    and building health so raiders can threaten settlements. Test against today's
    wolves, bears and boars first.
 2. **Per-island difficulty.** Monster counts and strength scale with each island's
-   distance from home; the temple island gets guardians, so landing beside the
-   temple is no longer a free win.
-3. **Monster classes, one PR each with art previews first:** lions (merged), giant snakes (in progress),
-   skeletons, barbarians, centaurs, cyclops and minotaur, each with its own
-   behavior. Every class can come in several forms (Jakob, 2026-10-08: for
-   example a cyclops general or a barbarian chieftain); these are illustrations
-   of the idea, not a fixed list of variants.
+   distance from home; the temple island gets guardians.
+3. **Monster classes, art previews first:** skeletons, barbarians, centaurs,
+   cyclops and minotaur, each with its own behavior and possibly several forms
+   (Jakob, 2026-10-08: for example a cyclops general or a barbarian chieftain).
 
 ## Future work (not needed to finish the loop)
 
-Moved here by Jakob on 2026-10-08.
-
-- **Hero unit.** A special unit the player must build, unlocked only once the
-  right resources are discovered and paid; only a hero could claim the Artifact
-  of the Gods (today any unit can). Open: which building trains it and which
+- **Hero unit.** Built only once the right resources are discovered and paid; only
+  a hero could claim the artifact. Open: which building trains it and which
   resources unlock it.
-- **Return-trip escalation.** Claiming the artifact raises difficulty: new
-  monsters spawn on the temple island and along the way home.
-- **Island types.** Distinct kinds of islands (for example volcanic, forested,
-  ruined, barbarian-held), each with its own terrain look, resources and monster
-  mix, chosen per planned site from the seed.
+- **Return-trip escalation.** Claiming the artifact spawns new monsters on the
+  temple island and along the way home.
+- **Island types.** Volcanic, forested, ruined or barbarian-held islands with their
+  own terrain look, resources and monster mix, chosen per site from the seed.
 
-Not planned yet (Jakob, 2026-10-08): a loss condition. The one-hour placeholder
-`Lost` stays a recorded value only and does not block victory.
+## Unresolved
 
-## Still unresolved
-
-- **Repository weight.** Historical evidence left `docs/` on 2026-10-10. On
-  2026-10-11 `master` history was rewritten (Jakob's request) so every binary
-  path (png/jpg/webp/wasm/glb/gif/ttf/ico) keeps only its final version; text
-  history and the current tree are unchanged, and a fresh `master` clone fell from
-  1.08 GB to 0.85 GB. Commit IDs changed: re-clone or `git reset --hard
-  origin/master`. Open PRs #72, #103, #142 and #144 and the other remote
-  branches still sit on the old history and keep its objects alive; they need
-  rebasing onto the new `master` or deleting.
-- **Art alternatives ([#145](https://github.com/koogle/age-of-agents/pull/145)).** The
-  map, military shield, steel and cloth calibrations are wired in. Not wired: the
-  wolf (recolor failed), the sandal Disembark (the joined platform is approved) and
-  the earlier batches the archive review marks not ready.
-- **Performance and economy.** Populated archipelagos are unprofiled; starter-only
-  measurements in [the map budget](docs/CONTINUOUS_MAP.md) do not certify busy
-  worlds. The economy still needs refinement per [the roadmap](ROADMAP.md).
+- **Branches on the pre-rewrite history.** Open PRs #72, #103, #142 and #144 need
+  rebasing onto the rewritten `master`; stale remote branches should be deleted.
+- **Performance.** Populated archipelagos are unprofiled; the
+  [map budget](docs/CONTINUOUS_MAP.md) covers only the starter world.
+- **Economy refinement** per [the roadmap](ROADMAP.md).
 - **Production verifier.** `scripts/modal_manage.py` expects a land unit and unseen
-  terrain; a valid world without them would fail the check. See
-  [release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch).
-- **Local Modal account.** The development machine's Modal profile is `radiantai`,
-  not production. Release only through the GitHub Actions workflow.
-- `docs/RUN_PLAN.md` is an earlier written plan Jakob did not want; the lists above
+  terrain ([release guide](docs/knowledge/build-integration-and-release.md#known-verifier-mismatch)).
+- **Delete `docs/RUN_PLAN.md`:** an earlier plan Jakob did not want; the lists above
   supersede it.

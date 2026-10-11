@@ -84,7 +84,7 @@ Examples of useful capture in this repository:
 | Product summary and basic run commands | `README.md` |
 | Accepted choice and concise rationale | `decisions.md`, linking the detailed guide |
 | Proposed product work and acceptance criteria | `ROADMAP.md` |
-| Current task, blockers, PR state and next steps | `OPEN_WORK.md`, compact current state |
+| Current task, blockers, PR state and next steps | `OPEN_WORK.md`, open items only; delete them when done |
 | Detailed existing specs, benchmarks and verification artifacts | Their existing owner under `docs/`, linked from the guide |
 | Asset-specific sources, prompts, edits and requests | Existing asset README/provenance records |
 
