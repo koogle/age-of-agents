@@ -1,7 +1,7 @@
 {
   "size": [
     2508,
-    5016
+    6897
   ],
   "frames": {
     "wolf_idle": [
@@ -193,6 +193,78 @@
     "viper_attack_strike": [
       1881,
       4389,
+      627,
+      627
+    ],
+    "barbarian_idle": [
+      0,
+      5016,
+      627,
+      627
+    ],
+    "barbarian_walk": [
+      627,
+      5016,
+      627,
+      627
+    ],
+    "barbarian_attack_windup": [
+      1254,
+      5016,
+      627,
+      627
+    ],
+    "barbarian_attack_strike": [
+      1881,
+      5016,
+      627,
+      627
+    ],
+    "chieftain_idle": [
+      0,
+      5643,
+      627,
+      627
+    ],
+    "chieftain_walk": [
+      627,
+      5643,
+      627,
+      627
+    ],
+    "chieftain_attack_windup": [
+      1254,
+      5643,
+      627,
+      627
+    ],
+    "chieftain_attack_strike": [
+      1881,
+      5643,
+      627,
+      627
+    ],
+    "torchbearer_idle": [
+      0,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_walk": [
+      627,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_attack_windup": [
+      1254,
+      6270,
+      627,
+      627
+    ],
+    "torchbearer_attack_strike": [
+      1881,
+      6270,
       627,
       627
     ]

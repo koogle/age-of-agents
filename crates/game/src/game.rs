@@ -47,6 +47,9 @@ mod progression;
 mod progression_tests;
 #[cfg(test)]
 mod queue_tests;
+mod raid;
+#[cfg(test)]
+mod raid_tests;
 #[cfg(test)]
 mod ship_tests;
 mod ships;
@@ -65,6 +68,7 @@ pub use fields::{FIELD_COST, FIELD_FOOD, FIELD_SIZE, FIELD_WORK_SECONDS};
 pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
+pub use raid::Raid;
 pub use ships::*;
 pub use wildlife::*;
 
@@ -99,6 +103,8 @@ const MOVE_SPEED: f64 = 3.0;
 pub(crate) const GATHER_RATE: f64 = 2.0;
 pub const VILLAGER_CARRY_CAPACITY: f64 = 20.0;
 pub const UNIT_HEALTH: f64 = 100.0;
+/// Building damage one villager repairs per second, free of cost.
+pub const REPAIR_PER_SECOND: f64 = 20.0;
 /// The island new worlds get unless a seed is given.
 pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 
@@ -125,6 +131,8 @@ pub struct GameWorld {
     pub scenario: ScenarioState,
     /// The unit carrying the Artifact of the Gods, if it has left the temple.
     pub artifact_bearer: Option<String>,
+    /// The barbarian raid on the second island.
+    pub raid: Raid,
     next_building_id: u64,
     next_unit_id: u64,
 }
@@ -178,6 +186,8 @@ pub struct WorldSnapshot {
     pub catalog: DomainCatalog,
     pub scenario: ScenarioState,
     pub artifact_bearer: Option<String>,
+    /// Barbarians have landed on the second island.
+    pub raid_landed: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -254,7 +264,7 @@ pub enum Command {
         #[serde(default = "town_center_kind")]
         kind: BuildingKind,
     },
-    /// Join or resume work on an existing foundation.
+    /// Join or resume work on an existing foundation, or repair a damaged building.
     Construct {
         unit_id: String,
         building_id: String,
@@ -330,6 +340,7 @@ impl GameWorld {
             researched_technologies: Vec::new(),
             scenario: ScenarioState::default(),
             artifact_bearer: None,
+            raid: Raid::Waiting,
             next_building_id: 2,
             next_unit_id: 3,
         };
@@ -477,7 +488,7 @@ impl GameWorld {
                     .iter()
                     .find(|building| building.id == building_id)
                     .ok_or(CommandError::BuildingNotFound)?;
-                if building.is_complete() {
+                if !building.needs_work() {
                     return Err(CommandError::BuildingAlreadyComplete);
                 }
                 if !self.can_reach_beside(unit, building.footprint()) {
@@ -693,6 +704,7 @@ impl GameWorld {
             }
         }
         self.tick_artifact();
+        self.tick_raid(dt);
         self.tick_wildlife(dt);
         self.tick_ships(dt);
         for index in (0..self.units.len()).rev() {
@@ -830,6 +842,7 @@ impl GameWorld {
             catalog: DomainCatalog::roadmap(),
             scenario: self.scenario.clone(),
             artifact_bearer: self.artifact_bearer.clone(),
+            raid_landed: self.raid == Raid::Landed,
         }
     }
 
