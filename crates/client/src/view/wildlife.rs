@@ -30,10 +30,11 @@ pub(super) fn draw(
             aoa_game::AnimalKind::Torchbearer => (10, 0.97, 0.22),
             aoa_game::AnimalKind::Skeleton => (11, 0.97, 0.22),
             aoa_game::AnimalKind::Centaur => (12, 1.25, 0.35),
-            // Packed at 0.85 scale to fit the club swing, so the quads are larger.
-            aoa_game::AnimalKind::Cyclops => (13, 2.2, 0.5),
-            aoa_game::AnimalKind::CyclopsGeneral => (14, 2.4, 0.55),
-            aoa_game::AnimalKind::Minotaur => (15, 1.5, 0.4),
+            // The giants fill their cells (per-pose sources), so their quads
+            // carry their size without thickening the pen lines.
+            aoa_game::AnimalKind::Cyclops => (13, 1.77, 0.5),
+            aoa_game::AnimalKind::CyclopsGeneral => (14, 1.99, 0.55),
+            aoa_game::AnimalKind::Minotaur => (15, 1.39, 0.4),
         };
         let moving = animal.step.is_some();
         let stride = moving && (time * 5.0) as u32 % 2 == 1;

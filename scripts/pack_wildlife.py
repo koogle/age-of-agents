@@ -15,6 +15,7 @@ BASELINE = 590
 # Two species per atlas row (four poses each) keep the atlas square and within
 # common 8192px WebGL texture limits.
 SPECIES = 16
+POSES = ["idle", "walk", "attack_windup", "attack_strike"]
 
 
 def origin(species, col):
@@ -85,14 +86,9 @@ def main():
               (7, "viper", "snake_sources/marble_viper_ink"),
               (8, "barbarian", "barbarian_sources/raider"), (9, "chieftain", "barbarian_sources/chieftain"),
               (10, "torchbearer", "barbarian_sources/torchbearer"),
-              (11, "skeleton", "monster_sources/skeleton"), (12, "centaur", "monster_sources/centaur"),
-              (13, "cyclops", "monster_sources/cyclops"), (14, "cyclops_general", "monster_sources/cyclops_general"),
-              (15, "minotaur", "monster_sources/minotaur")]
-    # The cyclopes swing wider than one cell at the common factor; they pack
-    # smaller and the renderer draws them on a correspondingly larger quad.
-    fit = {"cyclops": 0.85, "cyclops_general": 0.85}
+              (11, "skeleton", "monster_sources/skeleton"), (12, "centaur", "monster_sources/centaur")]
     for row, name, source in sheets:
-        scale = 589 / 1024 * fit.get(name, 1.0)
+        scale = 589 / 1024
         sheet = Image.open(ROOT / f"assets/sprites/{source}_cutout.png").convert("RGBA")
         assert sheet.size == (2 * half, 2 * half)
         alpha = np.asarray(sheet.getchannel("A")) > 128
@@ -116,6 +112,27 @@ def main():
             assert 0 <= bounds[1] + offset[1]
             cell = Image.new("RGBA", (CELL, CELL))
             cell.alpha_composite(frame.crop(bounds), (bounds[0] + offset[0], bounds[1] + offset[1]))
+            ax, ay = origin(row, col)
+            atlas.alpha_composite(cell, (ax, ay))
+            frames[f"{name}_{pose}"] = [ax, ay, CELL, CELL]
+    # The giants: one cutout per pose, drawn large so their pen lines stay as fine
+    # as the family's at display size. One factor per species fits its widest and
+    # tallest pose in the cell; each pose's mass centre sits on the cell centre and
+    # its lowest opaque row on the baseline.
+    for row, name in [(13, "cyclops"), (14, "cyclops_general"), (15, "minotaur")]:
+        poses = [Image.open(ROOT / f"assets/sprites/monster_sources/{name}_{pose}_cutout.png").convert("RGBA")
+                 for pose in POSES]
+        boxes = [p.getchannel("A").point(lambda a: 255 if a > 128 else 0).getbbox() for p in poses]
+        scale = min(min((CELL - 24) / (b[2] - b[0]), (BASELINE - 12) / (b[3] - b[1])) for b in boxes)
+        for col, (pose, frame, box) in enumerate(zip(POSES, poses, boxes)):
+            frame = frame.crop(box).convert("RGBa")
+            frame = frame.resize((round(frame.width * scale), round(frame.height * scale)),
+                                 Image.Resampling.LANCZOS).convert("RGBA")
+            alpha = np.asarray(frame.getchannel("A")) > 128
+            cx = ndimage.center_of_mass(alpha)[1]
+            x = min(max(round(CELL / 2 - cx), 4), CELL - frame.width - 4)
+            cell = Image.new("RGBA", (CELL, CELL))
+            cell.alpha_composite(frame, (x, BASELINE - frame.height))
             ax, ay = origin(row, col)
             atlas.alpha_composite(cell, (ax, ay))
             frames[f"{name}_{pose}"] = [ax, ay, CELL, CELL]

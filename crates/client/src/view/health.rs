@@ -66,8 +66,8 @@ impl WorldView {
                 | aoa_game::AnimalKind::Torchbearer => 0.9,
                 aoa_game::AnimalKind::Skeleton => 0.95,
                 aoa_game::AnimalKind::Centaur => 0.84,
-                aoa_game::AnimalKind::Cyclops | aoa_game::AnimalKind::CyclopsGeneral => 0.75,
-                aoa_game::AnimalKind::Minotaur => 0.91,
+                aoa_game::AnimalKind::Cyclops | aoa_game::AnimalKind::CyclopsGeneral => 0.9,
+                aoa_game::AnimalKind::Minotaur => 0.97,
             };
             let height = sprite.size[1] * (top - sprite.pivot[1]);
             if let Some(top) = rig.screen_offset(Vec3::from(sprite.anchor), up * height) {

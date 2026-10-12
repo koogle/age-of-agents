@@ -1,6 +1,6 @@
 {
  "date": "2026-10-12",
- "status": "Integrated as drafts pending Jakob's style review: skeleton (atlas species 11), centaur (12), cyclops (13), cyclops general (14), minotaur (15). Concepts picked by the agent; the cyclops was redirected by Jakob on 2026-10-12 (scarier; eye turned 90 degrees; animal-like, inspired by an exotic animal).",
+ "status": "Integrated as drafts pending Jakob's style review: skeleton (atlas species 11), centaur (12), cyclops (13), cyclops general (14), minotaur (15). Concepts picked by the agent; the cyclops was redirected by Jakob on 2026-10-12 (scarier; eye turned 90 degrees; animal-like, inspired by an exotic animal). Style alignment (Jakob, 2026-10-12: 'make sure they are all stylistically aligned'): the three giants were redrawn one pose per image so their pen lines match the family at display size.",
  "rule": "Only the integrated renders and cutouts, the picked concepts, the style reference path and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
  "style_reference": "../barbarian_sources/guard_style_reference.png (the shipped guard family).",
  "concepts": {
@@ -22,32 +22,60 @@
    "beast_pangolin": "01a13163-9442-73f3-9634-b1bf08337fda",
    "beast_shoebill": "01a13163-93e5-7c91-8013-95435361e1e9"
   },
-  "kept": ["concepts/spartoi_skeleton.png", "concepts/wild_centaur.png", "concepts/beast_mandrill.png", "concepts/cyclops_general.png", "concepts/labyrinth_minotaur.png"],
+  "kept": [
+   "concepts/spartoi_skeleton.png",
+   "concepts/wild_centaur.png",
+   "concepts/beast_mandrill.png",
+   "concepts/cyclops_general.png",
+   "concepts/labyrinth_minotaur.png"
+  ],
   "picks": "Spartoi skeleton (Greek myth, crimson crest reads hostile); centaur archer (the bow matches its ranged attack); black labyrinth minotaur (the blue-kilt variant was rejected: blue is the player's team colour); cyclops general's armour for the leader form; mandrill beast for the cyclops (the only beast concept whose eye the model actually turned vertical)."
  },
  "skeleton": {
   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
   "prompt": "skeleton_prompt.txt",
-  "references": ["guard_style_reference.png (style)", "concepts/spartoi_skeleton.png (design)"],
+  "references": [
+   "guard_style_reference.png (style)",
+   "concepts/spartoi_skeleton.png (design)"
+  ],
   "request_id": "01a1314b-b412-7aa0-bc60-74372b85691f",
   "review": "Render 1 integrated. Render 0 removed: a stray blue guard drawn into the windup cell.",
-  "cutout": ["skeleton_cutout.png", "fal-ai/birefnet/v2", "01a1314c-d015-7803-a7a8-d23463c5d75a"]
+  "cutout": [
+   "skeleton_cutout.png",
+   "fal-ai/birefnet/v2",
+   "01a1314c-d015-7803-a7a8-d23463c5d75a"
+  ]
  },
  "centaur": {
   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
   "prompt": "centaur_prompt.txt",
-  "references": ["guard_style_reference.png (style)", "concepts/wild_centaur.png (design)"],
+  "references": [
+   "guard_style_reference.png (style)",
+   "concepts/wild_centaur.png (design)"
+  ],
   "request_id": "01a1314b-bb86-7390-8341-5a96acdea701",
   "review": "Render 0 integrated; render 1 removed (near-identical). Thin ground lines under the hooves dropped out in the cutout.",
-  "cutout": ["centaur_cutout.png", "fal-ai/birefnet/v2", "01a1314c-cee0-7fc3-a180-9dd357c05b2b"]
+  "cutout": [
+   "centaur_cutout.png",
+   "fal-ai/birefnet/v2",
+   "01a1314c-cee0-7fc3-a180-9dd357c05b2b"
+  ]
  },
  "minotaur": {
   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
   "prompt": "minotaur_prompt.txt",
-  "references": ["guard_style_reference.png (style)", "concepts/labyrinth_minotaur.png (design)"],
+  "references": [
+   "guard_style_reference.png (style)",
+   "concepts/labyrinth_minotaur.png (design)"
+  ],
   "request_id": "01a1314b-b3e1-7b92-a728-1006b5a2fc1f",
   "review": "Render 1 integrated (bronze labrys, strike swings forward). Render 0 removed (steel axe, an empty pointing hand in the strike).",
-  "cutout": ["minotaur_cutout.png", "fal-ai/birefnet/v2", "01a1314c-cf7b-7673-b32b-9d313dcbec5c"]
+  "cutout": [
+   "minotaur_cutout.png",
+   "fal-ai/birefnet/v2",
+   "01a1314c-cf7b-7673-b32b-9d313dcbec5c"
+  ],
+  "superseded_sheet": "The 2K sheet above was the pose and identity reference for the per-pose redraw below; its render and cutout were removed from the repository."
  },
  "cyclops": {
   "request": "Jakob, 2026-10-12: make the cyclops scarier; then turn the eye by 90 degrees to make it stranger; then make it look more like an animal, inspired by an exotic animal.",
@@ -58,11 +86,23 @@
   },
   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
   "prompt": "cyclops_prompt.txt (sheet, then the walk-cell fix edit)",
-  "references": ["guard_style_reference.png (style)", "concepts/beast_mandrill.png (design)"],
+  "references": [
+   "guard_style_reference.png (style)",
+   "concepts/beast_mandrill.png (design)"
+  ],
   "request_id": "01a13164-1e98-7192-9717-705f3d1e4d74",
   "review": "Render 1 picked: the only one with a clearly vertical slit eye. Render 0 removed: horizontal-looking eye and ground lines. Render 1's walk cell had dropped the club.",
-  "fix": {"model": "fal-ai/nano-banana-pro/edit, 2K, 2 images", "request_id": "01a13164-f160-7862-b3b5-1ebb3507c4f8", "review": "Image 0 integrated as cyclops_render.png (club restored in the walk cell); image 1 removed (equivalent)."},
-  "cutout": ["cyclops_cutout.png", "fal-ai/birefnet/v2", "01a13165-962d-7623-b353-0c40977cc1d4"]
+  "fix": {
+   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+   "request_id": "01a13164-f160-7862-b3b5-1ebb3507c4f8",
+   "review": "Image 0 integrated as cyclops_render.png (club restored in the walk cell); image 1 removed (equivalent)."
+  },
+  "cutout": [
+   "cyclops_cutout.png",
+   "fal-ai/birefnet/v2",
+   "01a13165-962d-7623-b353-0c40977cc1d4"
+  ],
+  "superseded_sheet": "The 2K sheet above was the pose and identity reference for the per-pose redraw below; its render and cutout were removed from the repository."
  },
  "cyclops_general": {
   "removed_passes": {
@@ -72,13 +112,91 @@
   },
   "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
   "prompt": "cyclops_general_prompt.txt",
-  "references": ["the unfixed beast sheet render 1 (sibling: species, style, layout)", "concepts/cyclops_general.png (armour)"],
+  "references": [
+   "the unfixed beast sheet render 1 (sibling: species, style, layout)",
+   "concepts/cyclops_general.png (armour)"
+  ],
   "request_id": "01a13164-f1a2-7193-8380-ad5f15ac37f1",
   "review": "Render 0 integrated. Render 1 removed: it drew cell divider lines.",
-  "cutout": ["cyclops_general_cutout.png", "fal-ai/birefnet/v2", "01a13165-9619-7bf2-b2ae-992706673a8e"]
+  "cutout": [
+   "cyclops_general_cutout.png",
+   "fal-ai/birefnet/v2",
+   "01a13165-9619-7bf2-b2ae-992706673a8e"
+  ],
+  "superseded_sheet": "The 2K sheet above was the pose and identity reference for the per-pose redraw below; its render and cutout were removed from the repository."
  },
  "ink_pass": "Not run: adapted directly from the guard family, like the barbarians.",
  "cleanup": "No OpenAI image_gen cleanup pass yet.",
- "packing": "scripts/pack_wildlife.py species 11-15 in the square two-species-per-row atlas (5016x5016): 1024px quadrants downsampled to 589/1024 (the two cyclopes at 0.85 of that so their club swing fits a cell; the renderer draws them on larger quads), feet on y=590 in 627px cells.",
- "estimated_cost_usd": 12.9
+ "packing": "Skeleton and centaur: 1024px quadrants at 589/1024 like the barbarians. The giants: see style_alignment.packing. Atlas 5016x5016, two species per row.",
+ "style_alignment": {
+  "finding": "Measured stroke width as a share of figure height: the guard family draws ~3.1 per mille, and the model keeps that share for any figure. A giant drawn at guard size in its sheet and scaled up on a larger quad therefore showed lines 1.5x (minotaur) to ~3x (cyclopes) heavier than the barbarians at display size. Prompts asking for hairlines (4K 'fine' and 'ink' passes) and a lone 4K pose (2.8 per mille) did not fix it; drawing the giant beside the guard at true scale in one 4K image did (cyclops 1.7 per mille).",
+  "model": "fal-ai/nano-banana-pro/edit, 4K, 1 image per pose",
+  "prompt": "giant_pose_prompt.txt (WORDS per pose; strike retries add a quarter-image gap and a two-handed slam)",
+  "references": [
+   "the pose's cell from the superseded 2K sheet (identity and pose)",
+   "hd_sources/units/guard_idle_front_cut.png flattened on white (the shared pen, drawn beside the giant)"
+  ],
+  "integrated_request_ids": {
+   "cyclops": {
+    "idle": "01a13196-52f4-7b03-b2a9-c00730b1e204",
+    "walk": "01a13196-5252-7b43-a38c-b04f1ca0efb8",
+    "attack_windup": "01a13196-528b-7c73-9654-9a618a5a6d0d",
+    "attack_strike": "01a13198-bb9c-79b3-9339-a65685e2ab88 (image 1)"
+   },
+   "cyclops_general": {
+    "idle": "01a13196-52cc-73e0-b423-d23014972ab4",
+    "walk": "01a13196-51f9-7a71-a874-3d532dc4e4d3",
+    "attack_windup": "01a13196-e24f-7f41-802f-595802325bcc",
+    "attack_strike": "01a13198-bb92-7930-9eaa-c033cab4769c (image 1)"
+   },
+   "minotaur": {
+    "idle": "01a13196-e8e5-74f2-98c7-ef57c13a56cc",
+    "walk": "01a13196-eb23-7ce2-b198-3c0c93b770be",
+    "attack_windup": "01a13196-f2fc-7ab1-826a-d17fc4a58117",
+    "attack_strike": "01a13197-83e8-7c70-a31f-639cd92fcd9f"
+   }
+  },
+  "removed_passes": {
+   "4K whole-sheet 'fine' redraws (lines only ~30% thinner)": [
+    "01a1318e-8f9f-7773-b70e-9fbc471a2565",
+    "01a13190-12f5-7fa0-8f22-89b6f6158be9",
+    "01a13190-11ae-7e92-abca-48eb096ef0ab"
+   ],
+   "4K 'ink' pass (returned unchanged)": [
+    "01a13190-123f-7ac3-aeb6-9b41f3b2ed82"
+   ],
+   "lone 4K pose test": [
+    "01a13191-bc0f-7541-b653-b4193bc1d480"
+   ],
+   "with-guard scale test": [
+    "01a13193-206b-77f0-91b1-1da0c88f89af"
+   ],
+   "first per-pose batch (an accidental re-run replaced it unreviewed)": [
+    "01a13194-b1d4-7793-aef6-3a1ce874899a",
+    "01a13194-b151-7e61-a394-add8500b692d",
+    "01a13194-b1a2-7871-b151-33495a192c4c",
+    "01a13194-b166-7081-ae46-1ead296852e5",
+    "01a13194-b1ef-7e61-a79f-bde96d2549df",
+    "01a13194-b183-7632-922e-3d010e17af4c",
+    "01a13195-414e-73f0-8fda-987fb2de1c58",
+    "01a13195-49b3-7460-ba2f-b91520e258bf",
+    "01a13195-3a06-7390-8b0d-bc5af5a10801",
+    "01a13195-5279-7932-a5a0-d2bcb4ba5d3a",
+    "01a13195-5a56-7c93-af32-76dec5f16a63",
+    "01a13195-6332-7e70-bc83-ac9cf84578fa"
+   ],
+   "strikes replaced by retries (guard touching, one-handed club, pose)": [
+    "01a13196-51f1-7f13-9610-96f05de0814d",
+    "01a13196-e888-77e1-8f35-5da8bc1598fd",
+    "01a13196-f484-7632-840d-cf39d8042ac8",
+    "01a13197-83fc-7f40-bef1-26c9eb6d87eb",
+    "01a13198-bb9c-79b3-9339-a65685e2ab88 (image 0)",
+    "01a13198-bb92-7930-9eaa-c033cab4769c (image 0)"
+   ]
+  },
+  "cutout": "Local, not BiRefNet: FAL's balance ran out (HTTP 403 'Exhausted balance') at the cutout step. The scenes are on flat white, so the background was flood-filled from the borders (thin ground-line strokes and enclosed pure-white pockets over 2500 px count as background), the guard dropped as a separate component left of the giant (one box painted out where his spear touched the general's maul), and the edge unmixed from white. Background keying only; no line work changed. Stored cutouts are cropped and halved (premultiplied Lanczos) to keep the folder small: {name}_{pose}_cutout.png.",
+  "packing": "scripts/pack_wildlife.py: one factor per giant fits its widest and tallest pose in the 627px cell; renderer quads 1.77 (cyclops), 1.99 (general), 1.39 (minotaur) keep the previous world heights.",
+  "estimated_cost_usd": 15.5
+ },
+ "estimated_cost_usd_total": 28.4
 }

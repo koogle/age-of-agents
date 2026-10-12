@@ -15,9 +15,12 @@ strike), facing right and mirrored in the renderer:
 - **Minotaur**: black bull head with ivory horns and a brass nose ring, red
   Minoan kilt, bronze labrys.
 
-Sheets were drawn with FAL `fal-ai/nano-banana-pro/edit`, using the shipped guard
-family (`../barbarian_sources/guard_style_reference.png`) as the style reference
-and the concept in `concepts/` as the design reference. The cyclops general used
-the cyclops sheet as its sibling reference. Cutouts come from `fal-ai/birefnet/v2`.
+Skeleton and centaur sheets were drawn with FAL `fal-ai/nano-banana-pro/edit`,
+using the shipped guard family (`../barbarian_sources/guard_style_reference.png`)
+as the style reference and the concept in `concepts/` as the design reference;
+cutouts by `fal-ai/birefnet/v2`. The three giants (cyclops, general, minotaur)
+are one cutout per pose (`{name}_{pose}_cutout.png`): each pose was redrawn at 4K
+beside a guard at true scale so the giant shares the family's pen width at
+display size, then keyed off its white background locally.
 Prompts, request IDs, reviews and removed passes are in `provenance.json`. Run
 `python3 scripts/pack_wildlife.py` to repack.

@@ -174,8 +174,10 @@ that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sourc
 Base values; multiply by the level factors above. Art: `assets/sprites/monster_sources/`
 (species 11–15). The atlas now holds two species per row in a 5016×5016 square
 so it stays under common 8192px WebGL limits; `view/wildlife.rs` derives each
-species' cell from its index. The cyclopes pack at 0.85 scale to fit their club
-swing and draw on larger quads (2.2, 2.4). Jakob (2026-10-12) steered the
+species' cell from its index. The three giants come from one 4K cutout per pose
+and fill their cells; quads 1.77 (cyclops), 1.99 (general) and 1.39 (minotaur)
+carry their size so their pen lines match the family's at display size
+([asset lesson](asset-pipeline.md#large-creatures-keep-the-familys-pen-width-2026-10-12)). Jakob (2026-10-12) steered the
 cyclops toward scarier, then a 90-degree vertical eye, then an animal look; the
 mandrill-inspired beast is the current draft. Style review is pending.
 `archipelago_preview -- 7 2 skeletons|centaurs|cyclops|general|minotaur` lands
