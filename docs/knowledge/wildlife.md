@@ -130,12 +130,63 @@ simulation lands strikes the house. No captures are committed; the style review
 lives in [#165](https://github.com/koogle/age-of-agents/pull/165).
 Tests: `cargo test -p aoa-game raid_tests`.
 
+## Island levels, respawning lairs and mythical monsters (2026-10-12)
+
+Jakob asked for more monsters, harder islands and, on later islands, monsters
+that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sources:
+`wildlife.rs` (kinds, roster, behavior), `respawn.rs`; tests: `monster_tests`.
+
+- **Level.** `Animal::level` is the island's danger rank, its index in
+  `archipelago_plan` (sites ordered by crossings from home): 0 home, the temple
+  island highest (4–6). Health grows by a quarter and damage by a tenth per level
+  beyond 1 (`Animal::max_health`, `Animal::damage`); level 0 and 1 are base
+  strength. Raiders stay at level 1, so the approved raid balance is unchanged.
+- **Roster per level** (later islands; counts are maxima, a crowded island may
+  drop some): the old roster, plus `(level − 1) / 2` extra wolves and a second
+  bear from level 4; a skeleton squad of `2 + level` from level 2; a centaur band
+  of 2–3 from level 3; a cyclops from level 4 on islands other than the temple.
+  The temple island gets the guardians: two marble vipers, the **cyclops general**
+  and the **minotaur**, all within six cells of the temple and only two cells
+  apart (the 18-cell spacing made the second viper impossible before).
+- **Packs.** The lion pride rule now covers any pack (`AnimalKind::pack`): lions,
+  skeleton squads and centaur bands each share one alert within `PRIDE_RADIUS`.
+- **Centaurs** shoot any target within `ARROW_RANGE` (4 cells), moving or not,
+  instead of closing to contact. **Cyclopes** sweep: each blow hits every
+  standing unit around them. The **minotaur** sleeps (ignores units) until the
+  artifact leaves the temple or he is struck; awake, he hunts the bearer first,
+  else anyone on his island, with no territory. Both states are derived, so saves
+  carry nothing extra. He is slower than villagers (2.6 vs 3 cells/s).
+- **Respawn.** On islands of level 2 and up, a slain lair animal queues a
+  `Respawn` (240 s; skeletons 60 s). When it is due, it rises at its home with full
+  health and its old id once no land unit is within 12 cells, the home cell is
+  free and no building stands within 16 cells; a building there claims the lair
+  for good. Raiders, the cyclops general and the minotaur never return.
+- **Save.** Store version 21 (new `level` and `respawns`); older stores reset.
+
+| Kind | Health | Damage / s | Speed | Aggro / territory |
+| --- | --- | --- | --- | --- |
+| Skeleton | 150 | 20 | 2.0 | 5 / 9 |
+| Centaur | 300 | 25 (range 4) | 2.6 | 7 / 12 |
+| Cyclops | 1000 | 60 (sweep) | 1.5 | 5 / 8 |
+| Cyclops general | 2000 | 80 (sweep) | 1.4 | 5 / 8 |
+| Minotaur | 1800 | 90 | 2.6 | 6 / whole island |
+
+Base values; multiply by the level factors above. Art: `assets/sprites/monster_sources/`
+(species 11–15). The atlas now holds two species per row in a 5016×5016 square
+so it stays under common 8192px WebGL limits; `view/wildlife.rs` derives each
+species' cell from its index. The cyclopes pack at 0.85 scale to fit their club
+swing and draw on larger quads (2.2, 2.4). Jakob (2026-10-12) steered the
+cyclops toward scarier, then a 90-degree vertical eye, then an animal look; the
+mandrill-inspired beast is the current draft. Style review is pending.
+`archipelago_preview -- 7 2 skeletons|centaurs|cyclops|general|minotaur` lands
+villager-1 beside the first such real spawn for browser review.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
 attack orders, animal pursuit/damage and cleanup. The first island gets one wolf and one boar; the second and later
-islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist; the temple island adds two marble vipers. Starting animals are at least 26
-cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
+islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist, plus the level-scaled additions [above](#island-levels-respawning-lairs-and-mythical-monsters-2026-10-12); the temple island adds two marble vipers and its guardians. Starting animals are at least 26
+cells from friendly units/buildings, with homes 18 cells apart. Only lairs on islands of level 2 and up respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships. Raiders
 are the exception, [above](#barbarian-raid-and-building-damage-2026-10-11).

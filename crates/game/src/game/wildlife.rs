@@ -26,10 +26,24 @@ pub enum AnimalKind {
     Chieftain,
     /// A lightly clad fire-raider: burns buildings fast, fights people poorly.
     Torchbearer,
+    /// Spartoi: squads of risen dead that share one alert and rise again
+    /// quickly after falling.
+    Skeleton,
+    /// Centaur archers in bands: they shoot from range instead of closing in.
+    Centaur,
+    /// A one-eyed giant whose club sweeps every unit around him.
+    Cyclops,
+    /// The cyclops warlord guarding the temple: the cyclops's heavier form.
+    CyclopsGeneral,
+    /// The temple's guardian sleeps until the artifact leaves the temple or he
+    /// is struck, then hunts the bearer across the whole island.
+    Minotaur,
 }
 
-/// Lions whose homes lie this close belong to one pride.
+/// Pack members (a pride, a squad, a band) whose homes lie this close share alerts.
 const PRIDE_RADIUS: f64 = 5.0;
+/// Centaurs shoot at units this close.
+const ARROW_RANGE: f64 = 4.0;
 /// An ambusher stays out of snapshots until a land unit is this close.
 const REVEAL_RADIUS: f64 = 3.0;
 
@@ -47,6 +61,11 @@ impl AnimalKind {
             Self::Barbarian => "Barbarian raider",
             Self::Chieftain => "Barbarian chieftain",
             Self::Torchbearer => "Barbarian torchbearer",
+            Self::Skeleton => "Skeleton warrior",
+            Self::Centaur => "Centaur archer",
+            Self::Cyclops => "Cyclops",
+            Self::CyclopsGeneral => "Cyclops general",
+            Self::Minotaur => "Minotaur",
         }
     }
     pub fn max_health(self) -> f64 {
@@ -62,6 +81,11 @@ impl AnimalKind {
             Self::Barbarian => 150.0,
             Self::Chieftain => 600.0,
             Self::Torchbearer => 100.0,
+            Self::Skeleton => 150.0,
+            Self::Centaur => 300.0,
+            Self::Cyclops => 1000.0,
+            Self::CyclopsGeneral => 2000.0,
+            Self::Minotaur => 1800.0,
         }
     }
     pub(super) fn aggro(self) -> f64 {
@@ -72,6 +96,10 @@ impl AnimalKind {
             Self::Lioness | Self::Lion => 6.0,
             Self::Python | Self::SeaSerpent | Self::Viper => 2.5,
             Self::Barbarian | Self::Chieftain | Self::Torchbearer => 7.0,
+            Self::Skeleton => 5.0,
+            Self::Centaur => 7.0,
+            Self::Cyclops | Self::CyclopsGeneral => 5.0,
+            Self::Minotaur => 6.0,
         }
     }
     fn territory(self) -> f64 {
@@ -82,6 +110,11 @@ impl AnimalKind {
             Self::Lioness | Self::Lion => 12.0,
             Self::Python | Self::SeaSerpent | Self::Viper => 3.0,
             Self::Barbarian | Self::Chieftain | Self::Torchbearer => f64::INFINITY,
+            Self::Skeleton => 9.0,
+            Self::Centaur => 12.0,
+            Self::Cyclops | Self::CyclopsGeneral => 8.0,
+            // Awake, he roams the whole temple island.
+            Self::Minotaur => f64::INFINITY,
         }
     }
     fn speed(self) -> f64 {
@@ -97,10 +130,38 @@ impl AnimalKind {
             Self::Barbarian => 2.4,
             Self::Chieftain => 2.2,
             Self::Torchbearer => 2.6,
+            Self::Skeleton => 2.0,
+            Self::Centaur => 2.6,
+            Self::Cyclops => 1.5,
+            Self::CyclopsGeneral => 1.4,
+            Self::Minotaur => 2.6,
         }
     }
-    pub(super) fn is_lion(self) -> bool {
-        matches!(self, Self::Lioness | Self::Lion)
+    /// Kinds that hunt together: one member's sighting alerts its whole pack.
+    fn pack(self) -> Option<u8> {
+        match self {
+            Self::Lioness | Self::Lion => Some(0),
+            Self::Skeleton => Some(1),
+            Self::Centaur => Some(2),
+            _ => None,
+        }
+    }
+    /// Temple guardians lie close together around the sanctuary.
+    fn guards_temple(self) -> bool {
+        matches!(self, Self::Viper | Self::CyclopsGeneral | Self::Minotaur)
+    }
+    /// Seconds before a fallen lair animal on a later island rises again;
+    /// raiders and temple bosses never return.
+    pub(super) fn respawn_seconds(self) -> Option<f64> {
+        match self {
+            Self::Skeleton => Some(60.0),
+            Self::Barbarian
+            | Self::Chieftain
+            | Self::Torchbearer
+            | Self::CyclopsGeneral
+            | Self::Minotaur => None,
+            _ => Some(240.0),
+        }
     }
     pub fn raids(self) -> bool {
         matches!(self, Self::Barbarian | Self::Chieftain | Self::Torchbearer)
@@ -121,6 +182,11 @@ impl AnimalKind {
             Self::Barbarian => 15.0,
             Self::Chieftain => 30.0,
             Self::Torchbearer => 6.0,
+            Self::Skeleton => 20.0,
+            Self::Centaur => 25.0,
+            Self::Cyclops => 60.0,
+            Self::CyclopsGeneral => 80.0,
+            Self::Minotaur => 90.0,
         }
     }
     /// Damage per second against buildings; animals leave buildings alone.
@@ -144,8 +210,36 @@ pub struct Animal {
     pub health: f64,
     pub attack_seconds: f64,
     pub heading: [i8; 2],
+    /// The danger rank of its island (0 home, rising toward the temple);
+    /// health and damage grow with it. Raiders stay at 1.
+    pub level: u8,
 }
 impl Animal {
+    pub fn spawn(id: String, kind: AnimalKind, cell: CellCoordinate, level: u8) -> Self {
+        let mut animal = Self {
+            id,
+            kind,
+            home: cell,
+            cell,
+            step: None,
+            health: 0.0,
+            attack_seconds: 0.0,
+            heading: [1, 0],
+            level,
+        };
+        animal.health = animal.max_health();
+        animal
+    }
+    /// Health and damage rise by a quarter and a tenth per level beyond the second island.
+    fn scale(&self, per_level: f64) -> f64 {
+        1.0 + per_level * f64::from(self.level.saturating_sub(1))
+    }
+    pub fn max_health(&self) -> f64 {
+        self.kind.max_health() * self.scale(0.25)
+    }
+    pub(super) fn damage(&self) -> f64 {
+        self.kind.damage() * self.scale(0.1)
+    }
     pub fn position(&self) -> Position {
         Position::on_step(self.cell, self.step)
     }
@@ -169,70 +263,73 @@ impl Animal {
 }
 
 impl GameWorld {
+    /// The island's danger rank: its place in the planned archipelago, which
+    /// orders sites by crossings from home, so the temple island ranks highest.
+    pub(super) fn island_level(&self, island: usize) -> u8 {
+        archipelago_plan(self.seed)
+            .iter()
+            .position(|site| *site == self.island_origins[island])
+            .unwrap_or(island) as u8
+    }
+
     pub(super) fn populate_wildlife(&mut self, island: usize) {
-        let count = if island == 0 {
-            1
-        } else {
-            2 + (worldgen::mix(self.seed ^ 0x7769_6c64_6c69_6665, island as u64) % 3) as usize
+        use AnimalKind::*;
+        let roll = |salt: u64, sides: u64| {
+            (worldgen::mix(self.seed ^ salt, island as u64) % sides) as usize
         };
-        let boars = if island == 0 {
-            1
+        let level = self.island_level(island);
+        // Each entry is a kind and whether it joins the last pack leader placed.
+        let mut roster = Vec::new();
+        let mut add = |kind, count: usize, joins: bool| roster.extend(vec![(kind, joins); count]);
+        if island == 0 {
+            add(Wolf, 1, false);
+            add(Boar, 1, false);
         } else {
-            2 + (worldgen::mix(self.seed ^ 0x626f_6172, island as u64) % 2) as usize
-        };
-        let pride = if island == 0 {
-            0
-        } else {
-            3 + (worldgen::mix(self.seed ^ 0x6c69_6f6e, island as u64) % 2) as usize
-        };
-        let temple_island = self.island_origins[island]
-            == *archipelago_plan(self.seed).last().expect("planned sites");
-        let snakes: Vec<AnimalKind> = if island == 0 {
-            Vec::new()
-        } else {
-            let pythons =
-                1 + (worldgen::mix(self.seed ^ 0x7079_7468_6f6e, island as u64) % 2) as usize;
-            let mut kinds = vec![AnimalKind::Python; pythons];
-            kinds.push(AnimalKind::SeaSerpent);
-            if temple_island {
-                kinds.extend([AnimalKind::Viper, AnimalKind::Viper]);
+            let temple_island = self.island_origins[island]
+                == *archipelago_plan(self.seed).last().expect("planned sites");
+            let deeper = usize::from(level.saturating_sub(1));
+            add(Wolf, 1 + roll(0x7769_6c64_6c69_6665, 3) + deeper / 2, false);
+            add(Bear, if level >= 4 { 2 } else { 1 }, false);
+            add(Boar, 2 + roll(0x626f_6172, 2), false);
+            add(Lion, 1, false);
+            add(Lioness, 2 + roll(0x6c69_6f6e, 2), true);
+            add(Python, 1 + roll(0x7079_7468_6f6e, 2), false);
+            add(SeaSerpent, 1, false);
+            if level >= 2 {
+                // A squad: its leader, then the rest beside him.
+                add(Skeleton, 1, false);
+                add(Skeleton, 1 + usize::from(level), true);
             }
-            kinds
-        };
+            if level >= 3 {
+                add(Centaur, 1, false);
+                add(Centaur, 1 + deeper / 3, true);
+            }
+            if temple_island {
+                add(Viper, 2, false);
+                add(CyclopsGeneral, 1, false);
+                add(Minotaur, 1, false);
+            } else if level >= 4 {
+                add(Cyclops, 1, false);
+            }
+        }
         let mut leader = None;
-        for number in 0..count + boars + pride + snakes.len() {
-            let kind = if number >= count + boars + pride {
-                snakes[number - count - boars - pride]
-            } else if number == count + boars {
-                AnimalKind::Lion
-            } else if number > count + boars {
-                AnimalKind::Lioness
-            } else if number >= count {
-                AnimalKind::Boar
-            } else if island > 0 && number == count - 1 {
-                AnimalKind::Bear
-            } else {
-                AnimalKind::Wolf
-            };
-            // Only lionesses join the leader; everything else keeps its own spacing.
-            let beside = (kind == AnimalKind::Lioness).then_some(leader).flatten();
-            if let Some(cell) = self.wildlife_cell(island, beside, kind) {
-                if kind == AnimalKind::Lion {
-                    leader = Some(cell);
-                }
-                self.animals.push(Animal {
-                    id: format!("animal-{island}-{number}"),
+        for (number, (kind, joins)) in roster.into_iter().enumerate() {
+            if joins && leader.is_none() {
+                // Without a leader there is no pack to join.
+                continue;
+            }
+            let beside = if joins { leader } else { None };
+            let cell = self.wildlife_cell(island, beside, kind);
+            if !joins {
+                leader = cell;
+            }
+            if let Some(cell) = cell {
+                self.animals.push(Animal::spawn(
+                    format!("animal-{island}-{number}"),
                     kind,
-                    home: cell,
                     cell,
-                    step: None,
-                    health: kind.max_health(),
-                    attack_seconds: 0.0,
-                    heading: [1, 0],
-                });
-            } else if kind == AnimalKind::Lion {
-                // Without a leader there is no pride to join.
-                break;
+                    level,
+                ));
             }
         }
     }
@@ -263,9 +360,11 @@ impl GameWorld {
                     })
                 })
             }
-            AnimalKind::Viper => self.buildings.iter().any(|b| {
-                b.id == TEMPLE_ID && b.origin.center().distance(cell.center()) <= REACH + 2.0
-            }),
+            AnimalKind::Viper | AnimalKind::CyclopsGeneral | AnimalKind::Minotaur => {
+                self.buildings.iter().any(|b| {
+                    b.id == TEMPLE_ID && b.origin.center().distance(cell.center()) <= REACH + 2.0
+                })
+            }
             _ => true,
         }
     }
@@ -304,6 +403,11 @@ impl GameWorld {
                             leader.center().distance(c.center()) <= 3.0
                                 && self.animals.iter().all(|a| a.home != c)
                         }
+                        // Temple guardians crowd the sanctuary, a little apart.
+                        None if kind.guards_temple() => self
+                            .animals
+                            .iter()
+                            .all(|a| a.home.center().distance(c.center()) >= 2.0),
                         None => self
                             .animals
                             .iter()
@@ -423,7 +527,7 @@ impl GameWorld {
                     elapsed_seconds: if elapsed >= 1.0 { 0.0 } else { elapsed },
                 };
                 if self.animals[animal].health <= 0.0 {
-                    self.animals.remove(animal);
+                    self.animal_fell(animal);
                     for u in &mut self.units {
                         if matches!(&u.action, UnitAction::AttackAnimal { animal_id, .. } if animal_id == id)
                         {
@@ -457,7 +561,8 @@ impl GameWorld {
             }
             let home = animal.home;
             let cell = animal.cell;
-            let territory = animal.kind.territory();
+            let kind = animal.kind;
+            let territory = kind.territory();
             let sighted = |a: &Animal| {
                 self.units.iter().any(|u| {
                     u.health > 0.0
@@ -465,46 +570,76 @@ impl GameWorld {
                         && u.cell.center().distance(a.cell.center()) <= a.kind.aggro()
                 })
             };
-            // One lion's sighting sends its whole pride after intruders in reach.
-            let alerted = animal.kind.is_lion()
+            // One member's sighting sends its whole pack after intruders in reach.
+            let alerted = kind.pack().is_some()
                 && self.animals.iter().any(|a| {
-                    a.kind.is_lion()
+                    a.kind.pack() == kind.pack()
                         && a.home.center().distance(home.center()) <= PRIDE_RADIUS
                         && sighted(a)
                 });
-            let target = self
-                .units
-                .iter()
-                .enumerate()
-                .filter(|(_, u)| {
-                    u.health > 0.0
-                        && u.cell.center().distance(home.center()) <= territory
-                        && (alerted
-                            || u.cell.center().distance(cell.center()) <= animal.kind.aggro())
-                })
-                .min_by(|(_, a), (_, b)| {
-                    a.cell
-                        .center()
-                        .distance(cell.center())
-                        .total_cmp(&b.cell.center().distance(cell.center()))
-                        .then_with(|| a.id.cmp(&b.id))
-                })
-                .map(|(i, _)| i);
-            if let Some(unit) = target
-                && self.units[unit].step.is_none()
-                && cell.touches(self.units[unit].cell)
-            {
-                // An animal cannot bite diagonally through two touching obstacles.
-                let clear = self.melee_clear(cell, self.units[unit].cell);
-                if clear {
-                    let target_cell = self.units[unit].cell;
-                    self.animals[index].heading = [
-                        (i32::from(target_cell.column) - i32::from(cell.column)) as i8,
-                        (i32::from(target_cell.row) - i32::from(cell.row)) as i8,
-                    ];
+            let nearest = |(_, a): &(usize, &Unit), (_, b): &(usize, &Unit)| {
+                a.cell
+                    .center()
+                    .distance(cell.center())
+                    .total_cmp(&b.cell.center().distance(cell.center()))
+                    .then_with(|| a.id.cmp(&b.id))
+            };
+            let target = if kind == AnimalKind::Minotaur {
+                // Asleep until the artifact leaves the temple or he is struck;
+                // then the bearer first, else anyone on his island.
+                let island = self.island_at(home);
+                let bearer = self.artifact_bearer.as_deref();
+                let awake = bearer.is_some() || animal.health < animal.max_health();
+                self.units
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, u)| awake && u.health > 0.0 && self.island_at(u.cell) == island)
+                    .min_by(|a, b| {
+                        (Some(a.1.id.as_str()) != bearer)
+                            .cmp(&(Some(b.1.id.as_str()) != bearer))
+                            .then_with(|| nearest(a, b))
+                    })
+                    .map(|(i, _)| i)
+            } else {
+                self.units
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, u)| {
+                        u.health > 0.0
+                            && u.cell.center().distance(home.center()) <= territory
+                            && (alerted || u.cell.center().distance(cell.center()) <= kind.aggro())
+                    })
+                    .min_by(nearest)
+                    .map(|(i, _)| i)
+            };
+            if let Some(unit) = target {
+                let target_cell = self.units[unit].cell;
+                // Centaurs shoot from range; everyone else needs clear contact
+                // and cannot bite diagonally through two touching obstacles.
+                let shot = kind == AnimalKind::Centaur
+                    && target_cell.center().distance(cell.center()) <= ARROW_RANGE;
+                let contact = self.units[unit].step.is_none()
+                    && cell.touches(target_cell)
+                    && self.melee_clear(cell, target_cell);
+                if shot || contact {
+                    self.animals[index].heading = raid::heading(cell, target_cell);
                     self.animals[index].attack_seconds += dt;
                     if self.animals[index].attack_seconds >= 1.0 {
-                        self.units[unit].health -= self.animals[index].kind.damage();
+                        let damage = self.animals[index].damage();
+                        if matches!(kind, AnimalKind::Cyclops | AnimalKind::CyclopsGeneral) {
+                            // The club sweeps every unit standing around him.
+                            for u in 0..self.units.len() {
+                                let at = self.units[u].cell;
+                                if self.units[u].step.is_none()
+                                    && cell.touches(at)
+                                    && self.melee_clear(cell, at)
+                                {
+                                    self.units[u].health -= damage;
+                                }
+                            }
+                        } else {
+                            self.units[unit].health -= damage;
+                        }
                         self.animals[index].attack_seconds = 0.0;
                     }
                     continue;
@@ -568,9 +703,11 @@ impl GameWorld {
                     )
                     .is_none_or(|t| !t.biome.is_walkable())
                 || animal.heading.iter().any(|v| !(-1..=1).contains(v))
+                // Seven planned sites at most, so ranks stop at six.
+                || animal.level > 6
                 || !animal.health.is_finite()
                 || animal.health <= 0.0
-                || animal.health > animal.kind.max_health()
+                || animal.health > animal.max_health()
                 || !animal.attack_seconds.is_finite()
                 || !(0.0..1.0).contains(&animal.attack_seconds)
                 || animal.cell.center().distance(animal.home.center()) > animal.kind.territory()

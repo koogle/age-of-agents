@@ -64,14 +64,14 @@ impl WorldView {
                 aoa_game::AnimalKind::Barbarian
                 | aoa_game::AnimalKind::Chieftain
                 | aoa_game::AnimalKind::Torchbearer => 0.9,
+                aoa_game::AnimalKind::Skeleton => 0.95,
+                aoa_game::AnimalKind::Centaur => 0.84,
+                aoa_game::AnimalKind::Cyclops | aoa_game::AnimalKind::CyclopsGeneral => 0.75,
+                aoa_game::AnimalKind::Minotaur => 0.91,
             };
             let height = sprite.size[1] * (top - sprite.pivot[1]);
             if let Some(top) = rig.screen_offset(Vec3::from(sprite.anchor), up * height) {
-                hud.health_bar(
-                    top,
-                    (animal.health / animal.kind.max_health()) as f32,
-                    scale,
-                );
+                hud.health_bar(top, (animal.health / animal.max_health()) as f32, scale);
             }
         }
     }
@@ -110,6 +110,7 @@ mod tests {
             health: 100.0,
             attack_seconds: 0.0,
             heading: [1, 0],
+            level: 1,
         };
         let beside = CellCoordinate::new(o.column + building.columns, o.row);
         let far = CellCoordinate::new(o.column + building.columns + 2, o.row);

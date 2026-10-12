@@ -1,7 +1,7 @@
 {
   "size": [
-    2508,
-    6897
+    5016,
+    5016
   ],
   "frames": {
     "wolf_idle": [
@@ -29,242 +29,362 @@
       627
     ],
     "bear_idle": [
+      2508,
       0,
-      627,
       627,
       627
     ],
     "bear_walk": [
-      627,
-      627,
+      3135,
+      0,
       627,
       627
     ],
     "bear_attack_windup": [
-      1254,
-      627,
+      3762,
+      0,
       627,
       627
     ],
     "bear_attack_strike": [
-      1881,
-      627,
+      4389,
+      0,
       627,
       627
     ],
     "boar_idle": [
       0,
-      1254,
+      627,
       627,
       627
     ],
     "boar_walk": [
       627,
-      1254,
+      627,
       627,
       627
     ],
     "boar_attack_windup": [
       1254,
-      1254,
+      627,
       627,
       627
     ],
     "boar_attack_strike": [
       1881,
-      1254,
+      627,
       627,
       627
     ],
     "lioness_idle": [
-      0,
-      1881,
+      2508,
+      627,
       627,
       627
     ],
     "lioness_walk": [
+      3135,
       627,
-      1881,
       627,
       627
     ],
     "lioness_attack_windup": [
-      1254,
-      1881,
+      3762,
+      627,
       627,
       627
     ],
     "lioness_attack_strike": [
-      1881,
-      1881,
+      4389,
+      627,
       627,
       627
     ],
     "lion_idle": [
       0,
-      2508,
+      1254,
       627,
       627
     ],
     "lion_walk": [
       627,
-      2508,
+      1254,
       627,
       627
     ],
     "lion_attack_windup": [
       1254,
-      2508,
+      1254,
       627,
       627
     ],
     "lion_attack_strike": [
       1881,
-      2508,
+      1254,
       627,
       627
     ],
     "python_idle": [
-      0,
-      3135,
+      2508,
+      1254,
       627,
       627
     ],
     "python_walk": [
-      627,
       3135,
+      1254,
       627,
       627
     ],
     "python_attack_windup": [
+      3762,
       1254,
-      3135,
       627,
       627
     ],
     "python_attack_strike": [
-      1881,
-      3135,
+      4389,
+      1254,
       627,
       627
     ],
     "sea_serpent_idle": [
       0,
-      3762,
+      1881,
       627,
       627
     ],
     "sea_serpent_walk": [
       627,
-      3762,
+      1881,
       627,
       627
     ],
     "sea_serpent_attack_windup": [
       1254,
-      3762,
+      1881,
       627,
       627
     ],
     "sea_serpent_attack_strike": [
       1881,
-      3762,
+      1881,
       627,
       627
     ],
     "viper_idle": [
-      0,
-      4389,
+      2508,
+      1881,
       627,
       627
     ],
     "viper_walk": [
-      627,
-      4389,
+      3135,
+      1881,
       627,
       627
     ],
     "viper_attack_windup": [
-      1254,
-      4389,
+      3762,
+      1881,
       627,
       627
     ],
     "viper_attack_strike": [
-      1881,
       4389,
+      1881,
       627,
       627
     ],
     "barbarian_idle": [
       0,
-      5016,
+      2508,
       627,
       627
     ],
     "barbarian_walk": [
       627,
-      5016,
+      2508,
       627,
       627
     ],
     "barbarian_attack_windup": [
       1254,
-      5016,
+      2508,
       627,
       627
     ],
     "barbarian_attack_strike": [
       1881,
-      5016,
+      2508,
       627,
       627
     ],
     "chieftain_idle": [
-      0,
-      5643,
+      2508,
+      2508,
       627,
       627
     ],
     "chieftain_walk": [
-      627,
-      5643,
+      3135,
+      2508,
       627,
       627
     ],
     "chieftain_attack_windup": [
-      1254,
-      5643,
+      3762,
+      2508,
       627,
       627
     ],
     "chieftain_attack_strike": [
-      1881,
-      5643,
+      4389,
+      2508,
       627,
       627
     ],
     "torchbearer_idle": [
       0,
-      6270,
+      3135,
       627,
       627
     ],
     "torchbearer_walk": [
       627,
-      6270,
+      3135,
       627,
       627
     ],
     "torchbearer_attack_windup": [
       1254,
-      6270,
+      3135,
       627,
       627
     ],
     "torchbearer_attack_strike": [
       1881,
-      6270,
+      3135,
+      627,
+      627
+    ],
+    "skeleton_idle": [
+      2508,
+      3135,
+      627,
+      627
+    ],
+    "skeleton_walk": [
+      3135,
+      3135,
+      627,
+      627
+    ],
+    "skeleton_attack_windup": [
+      3762,
+      3135,
+      627,
+      627
+    ],
+    "skeleton_attack_strike": [
+      4389,
+      3135,
+      627,
+      627
+    ],
+    "centaur_idle": [
+      0,
+      3762,
+      627,
+      627
+    ],
+    "centaur_walk": [
+      627,
+      3762,
+      627,
+      627
+    ],
+    "centaur_attack_windup": [
+      1254,
+      3762,
+      627,
+      627
+    ],
+    "centaur_attack_strike": [
+      1881,
+      3762,
+      627,
+      627
+    ],
+    "cyclops_idle": [
+      2508,
+      3762,
+      627,
+      627
+    ],
+    "cyclops_walk": [
+      3135,
+      3762,
+      627,
+      627
+    ],
+    "cyclops_attack_windup": [
+      3762,
+      3762,
+      627,
+      627
+    ],
+    "cyclops_attack_strike": [
+      4389,
+      3762,
+      627,
+      627
+    ],
+    "cyclops_general_idle": [
+      0,
+      4389,
+      627,
+      627
+    ],
+    "cyclops_general_walk": [
+      627,
+      4389,
+      627,
+      627
+    ],
+    "cyclops_general_attack_windup": [
+      1254,
+      4389,
+      627,
+      627
+    ],
+    "cyclops_general_attack_strike": [
+      1881,
+      4389,
+      627,
+      627
+    ],
+    "minotaur_idle": [
+      2508,
+      4389,
+      627,
+      627
+    ],
+    "minotaur_walk": [
+      3135,
+      4389,
+      627,
+      627
+    ],
+    "minotaur_attack_windup": [
+      3762,
+      4389,
+      627,
+      627
+    ],
+    "minotaur_attack_strike": [
+      4389,
+      4389,
       627,
       627
     ]

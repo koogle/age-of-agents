@@ -1,4 +1,4 @@
-//! Authored wolf, bear, boar, lion, snake and barbarian frames; snapshots already exclude hidden animals.
+//! Authored wolf, bear, boar, lion, snake, barbarian and monster frames; snapshots already exclude hidden animals.
 use super::*;
 
 pub(super) fn draw(
@@ -16,7 +16,7 @@ pub(super) fn draw(
             at.x as f32 * terrain::CELL,
             at.y as f32 * terrain::CELL,
         );
-        let (row, size, radius) = match animal.kind {
+        let (species, size, radius) = match animal.kind {
             aoa_game::AnimalKind::Wolf => (0, 0.95, 0.25),
             aoa_game::AnimalKind::Bear => (1, 1.3, 0.35),
             aoa_game::AnimalKind::Boar => (2, 0.95, 0.25),
@@ -28,6 +28,12 @@ pub(super) fn draw(
             aoa_game::AnimalKind::Barbarian => (8, 0.97, 0.22),
             aoa_game::AnimalKind::Chieftain => (9, 1.1, 0.28),
             aoa_game::AnimalKind::Torchbearer => (10, 0.97, 0.22),
+            aoa_game::AnimalKind::Skeleton => (11, 0.97, 0.22),
+            aoa_game::AnimalKind::Centaur => (12, 1.25, 0.35),
+            // Packed at 0.85 scale to fit the club swing, so the quads are larger.
+            aoa_game::AnimalKind::Cyclops => (13, 2.2, 0.5),
+            aoa_game::AnimalKind::CyclopsGeneral => (14, 2.4, 0.55),
+            aoa_game::AnimalKind::Minotaur => (15, 1.5, 0.4),
         };
         let moving = animal.step.is_some();
         let stride = moving && (time * 5.0) as u32 % 2 == 1;
@@ -45,9 +51,15 @@ pub(super) fn draw(
             anchor: center.to_array(),
             size: [size, size],
             pivot: [0.5, 1.0 - foot / 627.0],
+            // Two species share each atlas row, four poses apiece.
             uv: uv(
-                [frame as f32 * 627.0, row as f32 * 627.0, 627.0, 627.0],
-                [2508.0, 6897.0],
+                [
+                    (species % 2 * 4 + frame) as f32 * 627.0,
+                    (species / 2) as f32 * 627.0,
+                    627.0,
+                    627.0,
+                ],
+                [5016.0, 5016.0],
                 mirror,
             ),
             pull: 0.3 * size,
@@ -93,6 +105,11 @@ mod tests {
             (AnimalKind::Barbarian, "barbarian"),
             (AnimalKind::Chieftain, "chieftain"),
             (AnimalKind::Torchbearer, "torchbearer"),
+            (AnimalKind::Skeleton, "skeleton"),
+            (AnimalKind::Centaur, "centaur"),
+            (AnimalKind::Cyclops, "cyclops"),
+            (AnimalKind::CyclopsGeneral, "cyclops_general"),
+            (AnimalKind::Minotaur, "minotaur"),
         ] {
             for heading in [[1, 0], [-1, 0]] {
                 for (phase, pose) in [
@@ -142,7 +159,7 @@ mod tests {
             &mut Vec::new(),
             &mut Vec::new(),
         );
-        // The loop above leaves the torchbearer, the bottom atlas row.
-        assert_eq!(sprites[0].1.uv, [0.25, 6270.0 / 6897.0, 0.5, 1.0]);
+        // The loop above leaves the minotaur, the right half of the bottom atlas row.
+        assert_eq!(sprites[0].1.uv, [0.625, 4389.0 / 5016.0, 0.75, 1.0]);
     }
 }

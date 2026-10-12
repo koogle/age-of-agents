@@ -8,20 +8,22 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
+- **Monster art style call** (branch `feat/monster-difficulty`): skeleton, centaur,
+  mandrill-beast cyclops and cyclops general, minotaur
+  ([provenance](assets/sprites/monster_sources/provenance.json)).
 
 ## Next steps to finish the capture-the-flag loop
 
 One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it
-once the step changes the run. The run is still far too easy: a short walk from
-the landing to the temple, and wildlife strength does not scale with distance.
+once the step changes the run. The run is still too easy: a short walk from the landing to the temple.
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
    [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing.
-2. **Per-island difficulty.** Monster counts and strength scale with each island's
-   distance from home; the temple island gets guardians.
-3. **Monster classes, art previews first:** skeletons, centaurs,
-   cyclops and minotaur, each with its own behavior and possibly several forms
-   (Jakob, 2026-10-08: for example a cyclops general or a barbarian chieftain).
+2. **Tune and playtest island difficulty.** Levels, respawns and the new monsters are
+   untested in real play; `full_run.rs` still lands beside the temple and wins in
+   seconds, since the minotaur sleeps until the claim and is slower than villagers.
+   Crowded high-level islands can drop some planned monsters for lack of spaced
+   lairs.
 
 ## Future work (not needed to finish the loop)
 

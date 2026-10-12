@@ -176,6 +176,7 @@ impl GameWorld {
         self.validate_islands()?;
         self.validate_artifact()?;
         self.validate_raid()?;
+        self.validate_respawns()?;
         self.validate_local()
     }
 

@@ -138,16 +138,8 @@ impl GameWorld {
                 n if n % 3 == 0 => AnimalKind::Torchbearer,
                 _ => AnimalKind::Barbarian,
             };
-            self.animals.push(Animal {
-                id: format!("raider-{number}"),
-                kind,
-                home: cell,
-                cell,
-                step: None,
-                health: kind.max_health(),
-                attack_seconds: 0.0,
-                heading: [1, 0],
-            });
+            self.animals
+                .push(Animal::spawn(format!("raider-{number}"), kind, cell, 1));
         }
     }
 
@@ -175,7 +167,7 @@ impl GameWorld {
             .min_by(|&a, &b| self.units[a].id.cmp(&self.units[b].id));
         if let Some(unit) = struck {
             if self.swing(index, self.units[unit].cell, dt) {
-                self.units[unit].health -= kind.damage();
+                self.units[unit].health -= self.animals[index].damage();
             }
             return;
         }
@@ -287,7 +279,7 @@ impl GameWorld {
     }
 }
 
-fn heading(from: CellCoordinate, to: CellCoordinate) -> [i8; 2] {
+pub(super) fn heading(from: CellCoordinate, to: CellCoordinate) -> [i8; 2] {
     [
         (i32::from(to.column) - i32::from(from.column)).signum() as i8,
         (i32::from(to.row) - i32::from(from.row)).signum() as i8,
