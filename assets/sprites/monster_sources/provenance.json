@@ -194,7 +194,7 @@
     "01a13198-bb92-7930-9eaa-c033cab4769c (image 0)"
    ]
   },
-  "cutout": "Local, not BiRefNet: FAL's balance ran out (HTTP 403 'Exhausted balance') at the cutout step. The scenes are on flat white, so the background was flood-filled from the borders (thin ground-line strokes and enclosed pure-white pockets over 2500 px count as background), the guard dropped as a separate component left of the giant (one box painted out where his spear touched the general's maul), and the edge unmixed from white. Background keying only; no line work changed. Stored cutouts are cropped and halved (premultiplied Lanczos) to keep the folder small: {name}_{pose}_cutout.png.",
+  "cutout": "Local, not BiRefNet: FAL's balance ran out (HTTP 403 'Exhausted balance') at the cutout step. The scenes are on flat white, so the background was flood-filled from the borders (thin ground-line strokes and enclosed pure-white pockets over 300 px count as background), the guard dropped as a separate component left of the giant (one box painted out where his spear touched the general's maul), and the edge unmixed from white. Background keying only; no line work changed. Stored cutouts are cropped and halved (premultiplied Lanczos) to keep the folder small: {name}_{pose}_cutout.png.",
   "packing": "scripts/pack_wildlife.py: one factor per giant fits its widest and tallest pose in the 627px cell; renderer quads 1.77 (cyclops), 1.99 (general), 1.39 (minotaur) keep the previous world heights.",
   "estimated_cost_usd": 15.5
  },
