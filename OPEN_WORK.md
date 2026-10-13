@@ -9,11 +9,6 @@ item when it is done; finished work, history and facts belong in git, `README.md
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
 
-- **Barbarian stronghold art pick** (option B integrated): choose A, B or C from
-  [the comparison](assets/sprites/stronghold_sources/comparison.jpg), then delete the
-  unpicked option cutouts and record the pick in its `provenance.json`; the art still
-  needs the style acceptance review before merge.
-
 ## Next steps to finish the capture-the-flag loop
 
 One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it

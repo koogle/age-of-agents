@@ -161,8 +161,8 @@ whose destruction stops the raids. Source: `crates/game/src/game/stronghold.rs`.
 - **Art.** `assets/sprites/stronghold_sources/` packed as row 1 of
   `buildings_sanctuary.png` by `scripts/pack_stronghold.py`. Jakob (2026-10-13):
   the first draft was stylish but too complex and far too small beside the town
-  center; the simpler, taller redraw on a 7×7 plot replaced it; the pick between
-  its three options is open in [OPEN_WORK](../../OPEN_WORK.md).
+  center; the simpler, taller redraw on a 7×7 plot replaced it, and Jakob approved
+  its option B for merge on 2026-10-13.
 
 To see it, `cargo run --release -p aoa-game --example archipelago_preview -- 7 2 stronghold`
 exports a paused snapshot with villager-1 landed by the front corner. Building
