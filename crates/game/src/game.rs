@@ -53,10 +53,14 @@ mod raid_tests;
 #[cfg(test)]
 mod ship_tests;
 mod ships;
+mod stronghold;
+pub use stronghold::STRONGHOLD_ID;
 #[cfg(test)]
 mod slice_a_tests;
 #[cfg(test)]
 mod soundness_tests;
+#[cfg(test)]
+mod stronghold_tests;
 mod terrain_codec;
 mod wildlife;
 #[cfg(test)]
@@ -131,7 +135,7 @@ pub struct GameWorld {
     pub scenario: ScenarioState,
     /// The unit carrying the Artifact of the Gods, if it has left the temple.
     pub artifact_bearer: Option<String>,
-    /// The barbarian raid on the second island.
+    /// Barbarian war bands raiding the second island until the stronghold falls.
     pub raid: Raid,
     next_building_id: u64,
     next_unit_id: u64,
@@ -186,8 +190,10 @@ pub struct WorldSnapshot {
     pub catalog: DomainCatalog,
     pub scenario: ScenarioState,
     pub artifact_bearer: Option<String>,
-    /// Barbarians have landed on the second island.
+    /// A war band is ashore on the second island.
     pub raid_landed: bool,
+    /// The barbarian stronghold has fallen and the raids are over.
+    pub raids_ended: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -202,6 +208,11 @@ pub enum Command {
     AttackAnimal {
         unit_ids: Vec<String>,
         animal_id: String,
+    },
+    /// Send units to tear down the barbarian stronghold.
+    AttackBuilding {
+        unit_ids: Vec<String>,
+        building_id: String,
     },
     /// Send units to the temple; the first to arrive takes the artifact.
     ClaimArtifact {
@@ -390,6 +401,10 @@ impl GameWorld {
                 unit_ids,
                 animal_id,
             } => self.attack_animal(&unit_ids, &animal_id)?,
+            Command::AttackBuilding {
+                unit_ids,
+                building_id,
+            } => self.attack_building(&unit_ids, &building_id)?,
             Command::ClaimArtifact {
                 unit_ids,
                 building_id,
@@ -488,6 +503,9 @@ impl GameWorld {
                     .iter()
                     .find(|building| building.id == building_id)
                     .ok_or(CommandError::BuildingNotFound)?;
+                if building.kind.is_generated() {
+                    return Err(CommandError::NotBuildable);
+                }
                 if !building.needs_work() {
                     return Err(CommandError::BuildingAlreadyComplete);
                 }
@@ -684,6 +702,10 @@ impl GameWorld {
                     animal_id,
                     elapsed_seconds,
                 } => self.tick_attack_animal(index, &animal_id, elapsed_seconds, dt),
+                UnitAction::AttackBuilding {
+                    building_id,
+                    elapsed_seconds,
+                } => self.tick_attack_building(index, &building_id, elapsed_seconds, dt),
                 UnitAction::Board { .. } => {}
                 UnitAction::Move { to } => self.tick_move(index, to, dt),
                 UnitAction::BuildRoad { cells } => self.tick_road(index, cells, dt),
@@ -842,7 +864,8 @@ impl GameWorld {
             catalog: DomainCatalog::roadmap(),
             scenario: self.scenario.clone(),
             artifact_bearer: self.artifact_bearer.clone(),
-            raid_landed: self.raid == Raid::Landed,
+            raid_landed: matches!(self.raid, Raid::Landed { .. }),
+            raids_ended: self.raid == Raid::Ended,
         }
     }
 
@@ -865,7 +888,7 @@ impl GameWorld {
             .chain(
                 self.buildings
                     .iter()
-                    .filter(|b| b.is_complete() && b.kind != BuildingKind::Temple)
+                    .filter(|b| b.is_complete() && !b.kind.is_generated())
                     .map(|building| (building.footprint().center(), building.kind.sight_radius())),
             )
             .collect();

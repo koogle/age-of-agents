@@ -283,7 +283,7 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             }
             let added: Vec<_> = added
                 .iter()
-                .filter(|a| !a.kind.is_lion() && !a.kind.ambushes())
+                .filter(|a| !a.kind.is_lion() && !a.kind.ambushes() && !a.kind.raids())
                 .collect();
             assert!((4..=7).contains(&added.len()));
             assert_eq!(

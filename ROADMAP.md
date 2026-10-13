@@ -168,7 +168,7 @@ A combined default prototype scenario requires steel production, exploration, an
 
 ## Slice F — Combat foundation
 
-Status: wildlife contact combat, building health and one scripted barbarian raid on the second island are implemented; ranged attacks, factions and general combat remain planned.
+Status: wildlife contact combat, building health, recurring barbarian raids on the second island and the stronghold that ends them are implemented; ranged attacks, factions and general combat remain planned.
 
 Gameplay acceptance:
 

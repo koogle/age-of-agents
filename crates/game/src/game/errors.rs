@@ -5,6 +5,7 @@ use super::*;
 pub enum CommandError {
     AnimalNotVisible,
     CannotAttack,
+    NotAttackable,
     ShipStorageUnavailable,
     StorageUnavailable,
     InvalidCargoAmount,
@@ -74,6 +75,7 @@ impl std::fmt::Display for CommandError {
             Self::DockRequired => "select a completed dock",
             Self::AnimalNotVisible => "animal is not currently visible",
             Self::CannotAttack => "healers cannot attack",
+            Self::NotAttackable => "only the barbarian stronghold can be attacked",
             Self::UnitNotFound => "unit not found",
             Self::EmptyUnitGroup => "unit group is empty",
             Self::DuplicateUnit => "unit group contains a duplicate member",

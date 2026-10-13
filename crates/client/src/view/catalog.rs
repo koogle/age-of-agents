@@ -73,6 +73,7 @@ impl Catalog {
             BuildingKind::Infirmary => (9, &self.civic, "infirmary"),
             BuildingKind::Monument => (8, &self.crafts, "monument"),
             BuildingKind::Temple => (SHEET_SANCTUARY, &self.sanctuary, "temple"),
+            BuildingKind::Stronghold => (SHEET_SANCTUARY, &self.sanctuary, "stronghold"),
             _ => unreachable!("base building uses its original sheet"),
         }
     }
