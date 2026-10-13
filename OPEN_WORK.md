@@ -12,8 +12,6 @@ item when it is done; finished work, history and facts belong in git, `README.md
   mandrill-beast cyclops and cyclops general, minotaur
   ([provenance](assets/sprites/monster_sources/provenance.json)). Style-aligned on
   2026-10-12 at Jakob's request; the giants' cutouts were keyed locally, not by BiRefNet.
-- **FAL balance exhausted** (2026-10-12, HTTP 403): top up before further art or
-  BiRefNet cutouts.
 
 ## Next steps to finish the capture-the-flag loop
 
