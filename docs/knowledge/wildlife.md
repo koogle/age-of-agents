@@ -84,14 +84,16 @@ Jakob asked for barbarian art with a barbarian chieftain, and for a raid of abou
 there, with enemies able to damage buildings. Source: `crates/game/src/game/raid.rs`.
 
 - **Trigger.** `GameWorld::raid` is `Waiting` until any land unit stands on island
-  index 1 (the first island reached by ship), then `Incoming { seconds_left }`
-  with a seeded 300–600 simulated seconds, then `Landed`. It fires once per run;
-  simulation speed and pause apply to the countdown.
+  index 1 (the first island reached by ship), then `Incoming { wave, seconds_left }`
+  with a seeded 300–600 simulated seconds, then `Landed { wave }`. Once every raider
+  of that band is dead the next wave's countdown starts (2026-10-13, see
+  [stronghold](#barbarian-stronghold-2026-10-13)); `Ended` stops them for good.
+  Simulation speed and pause apply to the countdown.
 - **Landing.** A seeded 10–20 raiders appear (the first is the **Chieftain**,
   every third after him a **Torchbearer**, the rest **Barbarians**) on a free beach cell of island 1 that is at least 20 cells
   from every player unit and building there, choosing the beach nearest the
   player's presence (or the island centre), and spread inland over free cells.
-  There is no raider ship yet. Ids are `raider-{n}`; they live in `animals`, so
+  There is no raider ship yet. Ids are `raider-{wave}-{n}`; they live in `animals`, so
   fog, snapshots, health bars, attack orders and death cleanup are shared.
 - **Behavior.** Raiders have no territory. Each picks, in order: a living unit on
   its island within 7 cells (melee as animals do); otherwise the nearest
@@ -130,6 +132,45 @@ simulation lands strikes the house. No captures are committed; the style review
 lives in [#165](https://github.com/koogle/age-of-agents/pull/165).
 Tests: `cargo test -p aoa-game raid_tests`.
 
+## Barbarian stronghold (2026-10-13)
+
+Jakob asked for a well-defended barbarian headquarters on one of the later islands
+whose destruction stops the raids. Source: `crates/game/src/game/stronghold.rs`.
+
+- **Placement.** `BuildingKind::Stronghold` (7×7, `STRONGHOLD_ID` "stronghold",
+  4000 health, no cost, never buildable) stands on the k-th island the player
+  discovers after home, not counting the temple island, with k seeded from 2 up to
+  the last such island; so never on island 1 (the raided island) or the temple's.
+  It takes the central plot like the temple (`central_plot`), lifts no fog, cannot
+  be worked, repaired or used for storage, and appears in snapshots once explored.
+- **Garrison.** 10–14 raiders (`garrison-{n}`, a chieftain first, every third a
+  torchbearer) are posted 2–5 cells around the walls. Raiders whose home is on the
+  stronghold's island are garrisoned (`garrisoned`, derived, so saves carry no
+  flag): they use the territorial animal rules with a 14-cell territory instead of
+  raiding, and one sentry's sighting turns out the whole garrison, like a lion
+  pride. Survivors keep guarding after the stronghold falls. The temple and
+  stronghold are exempt from the wildlife 26-cell building clearance.
+- **Assault.** `Command::AttackBuilding { unit_ids, building_id }` (client: tap the
+  stronghold with units selected; red hover ring) accepts only the explored
+  stronghold and rejects healers. Units walk beside the walls and strike once a
+  second for their wildlife contact damage (villager 10, guard 25, archer 18, siege
+  cart 35). At 4000 damage it is removed, every order on it ends, `raid` becomes
+  `Ended` (a pending countdown is cancelled; a band already ashore stays), and the
+  snapshot's `raids_ended` drives a toast. Its health bar shows while stormed or
+  selected. Store version 21.
+- **Art.** `assets/sprites/stronghold_sources/` packed as row 1 of
+  `buildings_sanctuary.png` by `scripts/pack_stronghold.py`. Jakob (2026-10-13):
+  the first draft was stylish but too complex and far too small beside the town
+  center; the simpler, taller redraw on a 7×7 plot replaced it; the pick between
+  its three options is open in [OPEN_WORK](../../OPEN_WORK.md).
+
+To see it, `cargo run --release -p aoa-game --example archipelago_preview -- 7 2 stronghold`
+exports a paused snapshot with villager-1 landed by the front corner. Building
+sprites take their fog shade from the plot's front corner, so a 7×7 stronghold
+approached from behind shows as a remembered silhouette until that corner has been
+seen (observed 2026-10-13 in a replay capture; not yet changed).
+Tests: `cargo test -p aoa-game stronghold_tests`.
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
@@ -155,7 +196,7 @@ All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
 Their contact damage is 10/25/18/35 per second respectively. This is a bounded
 wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
-scripted raid, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
+scripted raids and their stronghold, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
 villagers move faster than predators. No friendly automatic retaliation.
 

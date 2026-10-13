@@ -353,7 +353,9 @@ pixel-identical.
 
 ## Sanctuary of the Gods: `buildings_sanctuary.{png,json}` (2026-10-07)
 
-One-row sheet in the catalog building format (512 px cells, `anchor [256, 496]`). The temple is never constructed, so the first three stage slots hold the emptied temple (artifact taken) and `complete` holds the temple with the glowing chest. BiRefNet cutouts are packed with `tools/cat_pack.py` (one scale and baseline; both frames register identically). Prompts, renders, cutouts, comparisons and request IDs are in `temple_sources/`.
+Catalog building format (512 px cells, `anchor [256, 496]`). The temple is never constructed, so the first three stage slots hold the emptied temple (artifact taken) and `complete` holds the temple with the glowing chest. BiRefNet cutouts are packed with `tools/cat_pack.py` (one scale and baseline; both frames register identically). Prompts, renders, cutouts, comparisons and request IDs are in `temple_sources/`.
+
+Row 1 (2026-10-13) holds the barbarian stronghold in all four stage slots, packed by `scripts/pack_stronghold.py` without touching the temple row; sources and provenance are in [`stronghold_sources/`](stronghold_sources/README.md).
 
 - **First pass, superseded:** an intact gilded tholos (`cutout_1.png`, `empty_cutout_0.png`). Jakob asked for a more run-down temple whose linework matches the existing buildings.
 - **Current, run-down:** `fal-ai/nano-banana/edit` with the house and town center as style references and the first temple for identity (`ruined_prompt.txt`, three drafts; the third selected for its thinner linework and no ground disc), plus a chest-removing edit of that render (two drafts; the first selected). Cracked, partly collapsed verdigris dome, fallen columns, moss and rubble. Jakob's note about the dome was cut off; the collapsed dome is pending his confirmation.

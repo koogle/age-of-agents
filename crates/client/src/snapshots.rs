@@ -28,6 +28,14 @@ impl App {
                         now + 8.0,
                     ));
                 }
+                if snapshot.raids_ended
+                    && self.view.snapshot.as_ref().is_some_and(|s| !s.raids_ended)
+                {
+                    self.toast = Some((
+                        "The barbarian stronghold has fallen. The raids are over".into(),
+                        now + 8.0,
+                    ));
+                }
             }
             // The hosted server resets after a delay, so the view may have
             // framed the old island meanwhile: look again at the new one.

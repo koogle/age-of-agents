@@ -295,6 +295,11 @@ impl App {
                 (Vec2::new(c.x, c.z), 1.2, HOVER_WORK)
             }
             Target::Ground(cell) => (terrain::cell_center(cell), 0.24, HOVER_GROUND),
+            Target::Building(id) if id == aoa_game::STRONGHOLD_ID => {
+                let building = snapshot.buildings.iter().find(|b| b.building.id == id)?;
+                let c = view::footprint_center(&self.view.heights, building);
+                (Vec2::new(c.x, c.z), 2.2, [0.85, 0.18, 0.1, 0.9])
+            }
             Target::Building(id)
                 if !storage::carriers_for(
                     self.view.snapshot.as_ref(),
@@ -504,6 +509,12 @@ impl App {
                         building_id: building_id.clone(),
                     });
                 }
+            }
+            Target::Building(building_id) if building_id == aoa_game::STRONGHOLD_ID => {
+                self.send(Command::AttackBuilding {
+                    unit_ids: units,
+                    building_id,
+                });
             }
             Target::Building(building_id) if building_id == aoa_game::TEMPLE_ID => {
                 self.send(Command::ClaimArtifact {

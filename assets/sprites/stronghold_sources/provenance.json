@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-13",
+  "status": "Integrated as option B (atlas row 1 of assets/sprites/buildings_sanctuary.png, all four stage slots) pending Jakob's pick between options A, B and C; delete the two unpicked option cutouts once decided.",
+  "rule": "Only the integrated render and cutout, the open option cutouts, the reference and prompts are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
+  "integrated": {
+    "model": "fal-ai/nano-banana-pro/edit, 2K, 3 images",
+    "prompt": "prompt.txt",
+    "reference": "reference.png: shipped town center (towncenter.png complete frame) and barracks (buildings_civic.png) above the rejected first draft as identity reference, flattened on white into one 2048px square.",
+    "request_id": "01a13732-149a-7b53-8818-e9cc8919314d",
+    "render": "render.png (image 1, option B)",
+    "cutout": ["cutout.png", "fal-ai/birefnet/v2", "01a13732-d29b-7450-ab83-1c165d339df2"],
+    "options": {
+      "A": ["option_a_cutout.png", "01a13732-c534-7a71-b0c3-21c798813ed0"],
+      "C": ["option_c_cutout.png", "01a13732-dfa6-7251-a544-b1b23da85c9f"]
+    },
+    "review": "comparison.jpg shows the options on a 7x7 plot beside the town center, barracks and sanctuary at matching footprint scale."
+  },
+  "rejected": [
+    {
+      "pass": "First draft: palisade on an earthen rampart, longhall, three watch towers, braziers and shields on a 5x5 plot.",
+      "model": "fal-ai/nano-banana-pro/edit, 2K, 2 images",
+      "prompt": "draft_prompt.txt",
+      "reference": "barracks and sanctuary complete frames above the chieftain cutout (not kept)",
+      "request_id": "01a1372a-9410-72b0-a879-522d5b5352d0"
+    },
+    {
+      "pass": "Slab removal edit of the first draft (image 0 kept the design on a thin dirt patch).",
+      "prompt": "slab_prompt.txt",
+      "request_id": "01a1372b-464e-78d3-8780-05245680d53c",
+      "cutout_request_id": "01a1372c-3f97-7b91-b0fb-a6d58330963f",
+      "review": "Jakob (2026-10-13): stylish but too complex, and far too small beside the town center. Replaced by the simpler, taller 7x7 pass."
+    }
+  ],
+  "packing": "python3 scripts/pack_stronghold.py (keeps the temple row, fits cutout.png with the catalog packer's scale and footprint estimate)."
+}

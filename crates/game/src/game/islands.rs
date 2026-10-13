@@ -67,6 +67,8 @@ impl GameWorld {
         self.island_origins.push(origin);
         if archipelago_plan(self.seed).last() == Some(&origin) {
             self.place_temple(origin);
+        } else if self.stronghold_island() == Some(id as usize) {
+            self.place_stronghold(origin, id as usize);
         }
         // A course steered into the fog may now end on land: continue to the
         // reachable water nearest the tapped point, so the new coast comes into

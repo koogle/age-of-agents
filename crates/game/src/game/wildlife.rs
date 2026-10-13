@@ -291,8 +291,8 @@ impl GameWorld {
                     && self
                         .buildings
                         .iter()
-                        // The temple is a lair, not a settlement to keep clear of.
-                        .filter(|b| b.id != TEMPLE_ID)
+                        // The temple and stronghold are not settlements to keep clear of.
+                        .filter(|b| !b.kind.is_generated())
                         .all(|b| b.footprint().center().distance(c.center()) >= 26.0)
                     && self
                         .units
@@ -410,13 +410,8 @@ impl GameWorld {
                 }
                 let elapsed = elapsed + remaining;
                 if elapsed >= 1.0 {
-                    let damage = match self.units[unit].kind {
-                        UnitKind::Guard => 25.0,
-                        UnitKind::Archer => 18.0,
-                        UnitKind::SiegeCart => 35.0,
-                        _ => 10.0,
-                    };
-                    self.animals[animal].health -= damage;
+                    self.animals[animal].health -=
+                        stronghold::contact_damage(self.units[unit].kind);
                 }
                 self.units[unit].action = UnitAction::AttackAnimal {
                     animal_id: id.into(),
@@ -438,6 +433,7 @@ impl GameWorld {
     }
 
     pub(super) fn tick_wildlife(&mut self, dt: f64) {
+        let fort = self.stronghold_island();
         for index in 0..self.animals.len() {
             let animal = &self.animals[index];
             if let Some(step) = animal.step {
@@ -451,27 +447,34 @@ impl GameWorld {
                 }
                 continue;
             }
-            if animal.kind.raids() {
+            if animal.kind.raids() && !self.garrisoned(fort, animal) {
                 self.tick_raider(index, dt);
                 continue;
             }
             let home = animal.home;
             let cell = animal.cell;
-            let territory = animal.kind.territory();
+            let territory = self.territory(fort, animal);
             let sighted = |a: &Animal| {
                 self.units.iter().any(|u| {
                     u.health > 0.0
-                        && u.cell.center().distance(a.home.center()) <= a.kind.territory()
+                        && u.cell.center().distance(a.home.center()) <= self.territory(fort, a)
                         && u.cell.center().distance(a.cell.center()) <= a.kind.aggro()
                 })
             };
-            // One lion's sighting sends its whole pride after intruders in reach.
-            let alerted = animal.kind.is_lion()
+            // One lion's sighting sends its whole pride after intruders in reach;
+            // one sentry's alarm turns out the whole garrison.
+            let garrison = self.garrisoned(fort, animal);
+            let alerted = (animal.kind.is_lion()
                 && self.animals.iter().any(|a| {
                     a.kind.is_lion()
                         && a.home.center().distance(home.center()) <= PRIDE_RADIUS
                         && sighted(a)
-                });
+                }))
+                || (garrison
+                    && self
+                        .animals
+                        .iter()
+                        .any(|a| self.garrisoned(fort, a) && sighted(a)));
             let target = self
                 .units
                 .iter()
@@ -545,6 +548,16 @@ impl GameWorld {
         self.units.retain(|u| u.health > 0.0);
     }
 
+    /// How far an animal strays from home: its kind's territory, or the
+    /// stronghold's ground for a garrison raider.
+    pub(super) fn territory(&self, fort: Option<usize>, animal: &Animal) -> f64 {
+        if self.garrisoned(fort, animal) {
+            stronghold::GARRISON_TERRITORY
+        } else {
+            animal.kind.territory()
+        }
+    }
+
     pub(super) fn melee_clear(&self, from: CellCoordinate, to: CellCoordinate) -> bool {
         if from.column == to.column || from.row == to.row {
             return true;
@@ -556,6 +569,7 @@ impl GameWorld {
 
     pub(super) fn validate_wildlife(&self) -> Result<(), String> {
         let mut ids = BTreeSet::new();
+        let fort = self.stronghold_island();
         for animal in &self.animals {
             if !ids.insert(&animal.id)
                 || animal.id.is_empty()
@@ -573,11 +587,13 @@ impl GameWorld {
                 || animal.health > animal.kind.max_health()
                 || !animal.attack_seconds.is_finite()
                 || !(0.0..1.0).contains(&animal.attack_seconds)
-                || animal.cell.center().distance(animal.home.center()) > animal.kind.territory()
+                || animal.cell.center().distance(animal.home.center())
+                    > self.territory(fort, animal)
                 || animal.step.is_some_and(|s| {
                     !animal.cell.touches(s.to)
                         || !(0.0..1.0).contains(&s.progress)
-                        || s.to.center().distance(animal.home.center()) > animal.kind.territory()
+                        || s.to.center().distance(animal.home.center())
+                            > self.territory(fort, animal)
                 })
             {
                 return Err("invalid wildlife state".into());

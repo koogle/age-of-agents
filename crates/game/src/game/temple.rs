@@ -9,11 +9,22 @@ pub const TEMPLE_ID: &str = "temple";
 const HOME_REACH: u16 = 3;
 
 impl GameWorld {
-    /// Place the sanctuary near the middle of a freshly generated final island:
-    /// the free, fully walkable 5×5 plot nearest the centre with an open ring
-    /// around it, so landing parties can always walk up to it.
+    /// Place the sanctuary near the middle of a freshly generated final island.
     pub(super) fn place_temple(&mut self, site: CellCoordinate) {
-        let (columns, rows) = BuildingKind::Temple.size();
+        if let Some(origin) = self.central_plot(site, BuildingKind::Temple) {
+            self.buildings
+                .push(building(BuildingKind::Temple, TEMPLE_ID, origin, None));
+        }
+    }
+
+    /// The free, fully walkable plot for `kind` nearest the island's centre with
+    /// an open ring around it, so landing parties can always walk up to it.
+    pub(super) fn central_plot(
+        &self,
+        site: CellCoordinate,
+        kind: BuildingKind,
+    ) -> Option<CellCoordinate> {
+        let (columns, rows) = kind.size();
         let center =
             CellCoordinate::new(site.column + WORLD_COLUMNS / 2, site.row + WORLD_ROWS / 2);
         let walkable = |world: &Self, cell: CellCoordinate| {
@@ -24,7 +35,7 @@ impl GameWorld {
                 .is_walkable()
         };
         let occupancy = self.occupancy();
-        let origin = (site.row + 2..site.row + WORLD_ROWS - rows - 2)
+        (site.row + 2..site.row + WORLD_ROWS - rows - 2)
             .flat_map(|row| {
                 (site.column + 2..site.column + WORLD_COLUMNS - columns - 2)
                     .map(move |column| CellCoordinate::new(column, row))
@@ -43,11 +54,7 @@ impl GameWorld {
                 let dx = u32::from((origin.column + columns / 2).abs_diff(center.column));
                 let dy = u32::from((origin.row + rows / 2).abs_diff(center.row));
                 (dx * dx + dy * dy, origin.row, origin.column)
-            });
-        if let Some(origin) = origin {
-            self.buildings
-                .push(building(BuildingKind::Temple, TEMPLE_ID, origin, None));
-        }
+            })
     }
 
     pub(super) fn claim_artifact(

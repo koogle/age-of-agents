@@ -48,16 +48,23 @@ fn first_landing_arms_a_seeded_raid_that_lands_a_war_band_on_the_second_island()
         world.units[0].cell = cell;
         world.units[0].action = UnitAction::Idle;
         world.tick(0.1);
-        let Raid::Incoming { seconds_left } = world.raid else {
+        let Raid::Incoming {
+            wave: 0,
+            seconds_left,
+        } = world.raid
+        else {
             panic!("a landing arms the raid");
         };
         assert!((299.0..=600.0).contains(&seconds_left));
         let animals = world.animals.len();
-        world.raid = Raid::Incoming { seconds_left: 0.05 };
+        world.raid = Raid::Incoming {
+            wave: 0,
+            seconds_left: 0.05,
+        };
         let mut replay = world.clone();
         world.tick(0.1);
         replay.tick(0.1);
-        assert_eq!(world.raid, Raid::Landed);
+        assert_eq!(world.raid, Raid::Landed { wave: 0 });
         assert_eq!(world.animals, replay.animals);
         let band = &world.animals[animals..];
         assert!((10..=20).contains(&band.len()), "{} raiders", band.len());
@@ -73,9 +80,10 @@ fn first_landing_arms_a_seeded_raid_that_lands_a_war_band_on_the_second_island()
         assert!(band[0].cell.center().distance(cell.center()) >= 20.0);
         let landed = world.animals.len();
         world.validate().unwrap();
-        // The raid lands once.
+        // One band per wave: the next waits until this one is gone.
         world.tick(0.1);
         assert_eq!(world.animals.len(), landed);
+        assert_eq!(world.raid, Raid::Landed { wave: 0 });
     }
 }
 

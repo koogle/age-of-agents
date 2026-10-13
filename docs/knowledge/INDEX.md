@@ -8,7 +8,7 @@ of current behavior.
 
 | When working on | Read first | Also consult when affected |
 | --- | --- | --- |
-| Wildlife, hunting, unit health | [Dangerous wildlife](wildlife.md) | Placement/routes; rendering/input; assets; server/saves |
+| Wildlife, hunting, unit health, barbarian raids and stronghold | [Dangerous wildlife](wildlife.md) | Placement/routes; rendering/input; assets; server/saves |
 | Island generation, discovery, sailing, passengers, expanding maps | [Archipelago and transport](archipelago-and-transport.md) | Server/saves; rendering/input |
 | Run goal, temple, artifact bearer, win state | [Temple and artifact](temple-and-artifact.md) | Archipelago; server/saves; HUD |
 | Gathering, cargo, reassignment, field work | [Tasks and cargo](tasks-and-cargo.md) | Placement/routes; HUD |

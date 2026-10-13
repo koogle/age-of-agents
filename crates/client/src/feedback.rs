@@ -44,6 +44,9 @@ fn action_status(unit: &Unit, snapshot: &WorldSnapshot) -> Option<(String, Strin
         UnitAction::AttackAnimal { animal_id, .. } => {
             ("Attacking wildlife".into(), animal_id.as_str())
         }
+        UnitAction::AttackBuilding { building_id, .. } => {
+            ("Storming the stronghold".into(), building_id.as_str())
+        }
         UnitAction::Idle => ("Idle".into(), ""),
         UnitAction::Move { to } => {
             return Some(("Moving".into(), format!("{},{}", to.column, to.row)));
