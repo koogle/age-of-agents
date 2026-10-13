@@ -161,7 +161,12 @@ fn main() {
         world.validate().expect("a valid staged run");
     }
     world.simulation_speed = 0.0;
-    println!("{}", serde_json::to_string(&world.snapshot()).unwrap());
+    // AOA_PREVIEW_WORLD=1 prints the whole world, as a hosted save stores it.
+    if std::env::var_os("AOA_PREVIEW_WORLD").is_some() {
+        println!("{}", serde_json::to_string(&world).unwrap());
+    } else {
+        println!("{}", serde_json::to_string(&world.snapshot()).unwrap());
+    }
 }
 
 /// Land villager-1 beside the stopped ship with a house a few cells inland, arm
