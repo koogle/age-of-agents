@@ -183,6 +183,32 @@ mandrill-inspired beast is the current draft. Style review is pending.
 `archipelago_preview -- 7 2 skeletons|centaurs|cyclops|general|minotaur` lands
 villager-1 beside the first such real spawn for browser review.
 
+### Live test against player squads (2026-10-13)
+
+Jakob asked for the monsters to be tested against real units, with a video,
+before merging. Method: `AOA_PREVIEW_WORLD=1 archipelago_preview -- 7 7` exports
+the seed-7 run charted by sailing; the world goes into a temporary
+`AGE_OF_AGENTS_DB` for the release server; the only staging is a player squad
+placed near each natural lair. Orders went through the WebGL client (click a unit,
+Ctrl+click the rest, click the monster or the sanctuary). Results at 2x speed:
+
+| Scene | Squad | Outcome |
+| --- | --- | --- |
+| Skeleton squad, level 2 (4 x 188 HP) | 6 guards, 4 archers | Won, 4–9 survivors; after withdrawing, skeletons had risen again at full health |
+| Centaur band, level 3 (2 x 450 HP) | 6 guards, 4 archers | Lost all 10; arrows hit from 2.8 cells; one centaur killed |
+| Cyclops, level 4 (1750 HP) | 8 guards, 2 siege carts, 2 archers | Lost all 12; one blow hit 4 units; cyclops lost ~300 HP |
+| Minotaur, level 5 (3600 HP), at the temple | villager + 12 soldiers | His lair is beside the temple: he wakes and kills the bearer at once (180 per blow), the artifact returns and he sleeps again; an earlier squad attack on him was wiped after ~370 damage |
+
+Findings: friendly units stop after their target dies (no retaliation, by design),
+so the player re-orders each kill; units only land blows on a monster standing
+still beside them, and all player attacks are melee. Against level 3+ monsters
+current squads cannot win. Balance is pending Jakob's call
+([open work](../../OPEN_WORK.md)). Gotchas for this harness: `/state` only shows
+animals in the squad's 8-cell sight; respawns need everyone 12+ cells away, so
+check them by walking back; attack orders are rejected while paused; the debug
+server with a 7-island world lags the browser, so use the release server; write
+the fixture with an upsert (the row does not exist before the first save).
+
 ## Implemented rules
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group

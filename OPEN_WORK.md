@@ -20,7 +20,13 @@ once the step changes the run. The run is still too easy: a short walk from the 
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
    [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing.
-2. **Tune and playtest island difficulty.** Levels, respawns and the new monsters are
+2. **Monster balance decision (Jakob).** The [live test](docs/knowledge/wildlife.md#live-test-against-player-squads-2026-10-13)
+   on branch `feat/monster-difficulty`: squads of 10–12 beat level-2 skeletons but
+   lose outright to level-3 centaurs, level-4 cyclopes and the minotaur, who also
+   kills the artifact bearer the moment he wakes. Options: lower per-level scaling,
+   move the minotaur's lair away from the temple or give the bearer a head start,
+   or land ranged archers and healing (step 1) first.
+3. **Tune and playtest island difficulty.** Levels, respawns and the new monsters are
    untested in real play; `full_run.rs` still lands beside the temple and wins in
    seconds, since the minotaur sleeps until the claim and is slower than villagers.
    Crowded high-level islands can drop some planned monsters for lack of spaced
