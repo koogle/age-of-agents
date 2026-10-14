@@ -8,6 +8,9 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
+- **Mirrored dock views** ([#144](https://github.com/koogle/age-of-agents/pull/144)):
+  review the port. The darker rear (north/west) dock timber still needs a separate
+  color-matching pass.
 
 ## Next steps to finish the capture-the-flag loop
 
@@ -35,7 +38,7 @@ the landing to the temple, and wildlife strength does not scale with distance.
 
 ## Unresolved
 
-- **Branches on the pre-rewrite history.** Open PRs #72, #103, #142 and #144 need
+- **Branches on the pre-rewrite history.** Open PRs #72, #103 and #142 need
   rebasing onto the rewritten `master`; stale remote branches should be deleted.
 - **Performance.** Populated archipelagos are unprofiled; the
   [map budget](docs/CONTINUOUS_MAP.md) covers only the starter world.
