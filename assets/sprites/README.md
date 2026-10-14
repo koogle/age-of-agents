@@ -361,3 +361,5 @@ Row 1 (2026-10-13) holds the barbarian stronghold in all four stage slots, packe
 - **Current, run-down:** `fal-ai/nano-banana/edit` with the house and town center as style references and the first temple for identity (`ruined_prompt.txt`, three drafts; the third selected for its thinner linework and no ground disc), plus a chest-removing edit of that render (two drafts; the first selected). Cracked, partly collapsed verdigris dome, fallen columns, moss and rubble. Jakob's note about the dome was cut off; the collapsed dome is pending his confirmation.
 - The rubble widens the automatically estimated footprint, so the ruin sits a little smaller on its 5×5 plot than the intact draft did.
 - Estimated cost for all temple passes: $0.4480. Style review pending Jakob's acceptance.
+
+The `charred_pine` frame in `resources.json` (cell `[3072, 1024]`) is the tree on the stronghold island's burnt forest; see [charred pine sources](charred_pine_sources/README.md).

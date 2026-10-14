@@ -190,8 +190,8 @@ that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sourc
   and the **minotaur**, all within six cells of the temple and only two cells
   apart (the 18-cell spacing made the second viper impossible before).
   Stronghold garrison raiders hold posts, not territories, so they do not count
-  toward the 18-cell lair spacing; otherwise the stronghold's island lost its
-  cyclops and centaurs (seed 7, found when merging the two features).
+  toward the 18-cell lair spacing. Since the stronghold has its own island
+  (2026-10-14), that island holds only its garrison, and island levels skip it.
 - **Packs.** The lion pride rule now covers any pack (`AnimalKind::pack`): lions,
   skeleton squads and centaur bands each share one alert within `PRIDE_RADIUS`.
 - **Centaurs** shoot any target within `ARROW_RANGE` (4 cells), moving or not,
@@ -262,9 +262,14 @@ Jakob asked for a well-defended barbarian headquarters on one of the later islan
 whose destruction stops the raids. Source: `crates/game/src/game/stronghold.rs`.
 
 - **Placement.** `BuildingKind::Stronghold` (7×7, `STRONGHOLD_ID` "stronghold",
-  4000 health, no cost, never buildable) stands on the k-th island the player
-  discovers after home, not counting the temple island, with k seeded from 2 up to
-  the last such island; so never on island 1 (the raided island) or the temple's.
+  4000 health, no cost, never buildable) has its own island since 2026-10-14
+  (Jakob: give it a separate, distinctive island so it is easier to attack): the
+  plan site at `stronghold_rank(sites) = sites / 2`, an extra mid-route site that
+  holds no other wildlife and does not count toward island levels. Raids land on
+  the first discovered island that is neither home nor the stronghold's
+  (`raid_island`). The island's grass, forest, heath and scrub become
+  `TerrainBiome::BurntForest` (painted ash floor, charred pines for its wood); see
+  [archipelago guide](archipelago-and-transport.md#island-size-and-the-stronghold-island-2026-10-14).
   It takes the central plot like the temple (`central_plot`), lifts no fog, cannot
   be worked, repaired or used for storage, and appears in snapshots once explored.
 - **Garrison.** 10–14 raiders (`garrison-{n}`, a chieftain first, every third a
@@ -281,14 +286,14 @@ whose destruction stops the raids. Source: `crates/game/src/game/stronghold.rs`.
   cart 35). At 4000 damage it is removed, every order on it ends, `raid` becomes
   `Ended` (a pending countdown is cancelled; a band already ashore stays), and the
   snapshot's `raids_ended` drives a toast. Its health bar shows while stormed or
-  selected. Store version 21.
+  selected. Store version 21 (23 since the sized islands).
 - **Art.** `assets/sprites/stronghold_sources/` packed as row 1 of
   `buildings_sanctuary.png` by `scripts/pack_stronghold.py`. Jakob (2026-10-13):
   the first draft was stylish but too complex and far too small beside the town
   center; the simpler, taller redraw on a 7×7 plot replaced it, and Jakob approved
   its option B for merge on 2026-10-13.
 
-To see it, `cargo run --release -p aoa-game --example archipelago_preview -- 7 2 stronghold`
+To see it, `cargo run --release -p aoa-game --example archipelago_preview -- 7 1 stronghold`
 exports a paused snapshot with villager-1 landed by the front corner. Building
 sprites take their fog shade from the plot's front corner, so a 7×7 stronghold
 approached from behind shows as a remembered silhouette until that corner has been

@@ -79,12 +79,12 @@ impl GameWorld {
         self.resize_ocean(columns, rows);
         let stride = usize::from(self.columns());
         let plan = archipelago_plan(self.seed);
-        let burnt = plan[stronghold_rank(plan.len())] == site;
+        let stronghold = plan[stronghold_rank(plan.len())] == site;
         for mut cell in generated.terrain {
             cell.column += origin.column;
             cell.row += origin.row;
             // The barbarians have burnt the green land around their stronghold.
-            if burnt
+            if stronghold
                 && matches!(
                     cell.biome,
                     TerrainBiome::Meadow
@@ -107,7 +107,7 @@ impl GameWorld {
         self.islands.push(site);
         if plan.last() == Some(&site) {
             self.place_temple(site);
-        } else if self.stronghold_island() == Some(id as usize) {
+        } else if stronghold {
             self.place_stronghold(site, id as usize);
         }
         // A course steered into the fog may now end on land: continue to the

@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-14",
+  "status": "Integrated: resources.png cell [3072, 1024] as the `charred_pine` node, drawn for wood on the stronghold island's BurntForest biome. Pending Jakob's style review.",
+  "rule": "Only the integrated render and cutout, the reference and prompt are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
+  "integrated": {
+    "model": "fal-ai/nano-banana-pro/edit, 2 images",
+    "prompt": "prompt.txt",
+    "reference": "reference.png: the shipped cypress, olive and stump frames from resources.png on white.",
+    "request_id": "01a1397a-795a-79d2-b1b0-6bf432bc5842",
+    "render": "render.png (image 1)",
+    "cutout": ["cutout.png", "fal-ai/birefnet/v2", "01a1397b-3b18-7341-9e78-ef9805e6674d"],
+    "packing": "Alpha bbox (alpha > 40), thumbnailed to 464 px tall, base at y=496 of a 512 frame; unitsPerPixel matches the cypress (worldSize 1.6 by height).",
+    "review": "comparison.jpg: cypress, olive, stump and charred pine at frame size and at about gameplay size on the ash floor."
+  },
+  "rejected": [
+    {"pass": "Image 2 of the same request: a near-identical pine with fewer, thinner bare branches; not picked because image 1's fuller branches and ash patch read better at gameplay size.", "request_id": "01a1397a-795a-79d2-b1b0-6bf432bc5842"}
+  ]
+}

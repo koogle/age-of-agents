@@ -8,6 +8,9 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
+- **Burnt island art style call** (`feat/stronghold-island`): the ash floor
+  (`assets/terrain/burnt_forest.webp`) and charred pine
+  ([comparison](assets/sprites/charred_pine_sources/comparison.jpg)) need style approval before merge.
 
 ## Next steps to finish the capture-the-flag loop
 
@@ -23,14 +26,6 @@ once the step changes the run. The run is still too easy: a short walk from the 
    he wakes. Options: lower per-level scaling, move the minotaur's lair away from the
    temple or give the bearer a head start, and healing (step 1); re-test with archer squads.
    Re-run the live squad test and record a video after the change.
-3. **Islands grow with level** (Jakob, 2026-10-14; in progress on
-   `feat/stronghold-island`). Each island's region grows with its planned rank, from
-   120×80 at home toward about 176×115, so deeper islands have room for their
-   monsters (1–3% of lairs fail to place on level 3+ islands today).
-4. **The stronghold gets its own island** (Jakob, 2026-10-14). Runs plan 6–8 sites;
-   the extra mid-route site holds only the stronghold and its garrison, with a burnt
-   pine forest look (new painted ground and charred stumps) so it reads as the
-   barbarians' land and is easier to assault.
 
 ## Future work (not needed to finish the loop)
 
@@ -39,7 +34,7 @@ once the step changes the run. The run is still too easy: a short walk from the 
   resources unlock it.
 - **Return-trip escalation.** Claiming the artifact spawns new monsters on the
   temple island and along the way home.
-- **Island types.** Volcanic, forested, ruined or barbarian-held islands with their
+- **Island types.** Volcanic, forested or ruined islands (the stronghold's burnt island is the first) with their
   own terrain look, resources and monster mix, chosen per site from the seed.
 
 ## Unresolved

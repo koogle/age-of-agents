@@ -67,7 +67,7 @@ focused topic from the [knowledge index](INDEX.md).
 
 ## Planned run archipelago (2026-10-06)
 
-Jakob's direction: every run has 5–7 islands spread over a map rather than in a
+Jakob's direction: every run has 5–7 islands (6–8 sites since the stronghold got its own, 2026-10-14) spread over a map rather than in a
 line, the layout is chosen first, the final island holds a temple with the
 Artifact of the Gods, and that goal is revealed at the start. Each island's
 terrain still generates as the player reaches it. Later work (temple building,
@@ -75,7 +75,7 @@ artifact capture, escalating monsters) is not implemented yet.
 
 Implemented in `crates/game/src/game/islands.rs`:
 
-- `archipelago_plan(seed)` grows 5–7 sites outward from the start over a 3×3 grid
+- `archipelago_plan(seed)` grows 6–8 sites (5–7 before 2026-10-14) outward from the start over a 3×3 grid
   of regions with up to 24 cells of seeded offset, retrying until the farthest
   site is at least three crossings away (32 attempts, best kept). Index 0 is the
   start at the origin; the rest are ordered by crossings; the last is the temple.
@@ -101,13 +101,37 @@ Implemented in `crates/game/src/game/islands.rs`:
   parchment fog (the shader receives the fitted extent in the globe quad's
   `color.xy`); only beyond the map is open sea.
 
-## Island size and the stronghold island (pending, Jakob 2026-10-14)
+## Island size and the stronghold island (2026-10-14)
 
 Jakob's direction after the monster live test: later islands are too crowded, so
 island regions should grow with level, and the stronghold should stand on its own
 extra island with a distinctive burnt pine forest look, which makes it easier to
 attack. Jakob chose an extra site (runs plan 6–8 sites) over replacing a later
-island. Not implemented yet; see [open work](../../OPEN_WORK.md).
+island, and growth for every later island.
+
+Implemented in `crates/game/src/game/islands.rs`:
+
+- `site_size(rank)` is 120×80 at home plus 8×5 cells per plan rank (up to 176×115
+  at rank 7). `archipelago_plan` returns `Footprint`s, spaced by the largest
+  possible site plus the 64-cell gap; `GameWorld::islands` and the snapshot carry
+  footprints (`temple_site` too) instead of origins. Store version 23.
+- Worldgen takes a `worldgen::Grid { columns, rows }` (`Grid::HOME` for the start),
+  so every island generates at its own size.
+- `stronghold_rank(sites) = sites / 2` is the stronghold's site (never home, the
+  first site or the temple). Its island gets only the garrison, island levels skip
+  it (`island_level`), and its Meadow/Forest/Prairie/Heath/Scrubland cells become
+  `TerrainBiome::BurntForest` at discovery. Clay, highland, wetland, beach and
+  rivers keep their look. The client paints BurntForest with
+  `assets/terrain/burnt_forest.webp` (ground index 12, texture layer 13) and draws
+  its wood as `charred_pine` ([sources](../../assets/sprites/charred_pine_sources/README.md)).
+- Effect: lair placement failures on level 3–6 islands went from 10 of 833 to 0 of
+  852 across seeds (measured with temporary logging while building this).
+
+- Budget (`archipelago_budget`, release, seed 7 fully charted, 2026-10-14): 385,746
+  cells and 4.6 MB of terrain against 234,465 cells and 2.8 MB before; tick time
+  unchanged at about 0.15 ms, snapshot build about 3 ms, snapshot about 7 KB.
+
+Preview: `cargo run --release -p aoa-game --example archipelago_preview -- 7 1 stronghold`.
 
 ## Player-steered voyages (2026-10-07)
 
