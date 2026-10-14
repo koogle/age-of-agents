@@ -90,6 +90,12 @@ pub(super) fn building_info(
             "Sanctuary of the Gods",
             "Holds the Artifact of the Gods · bring it home to win",
         ),
+        BuildingKind::Stronghold => (
+            "building_stronghold",
+            "stronghold",
+            "Barbarian stronghold",
+            "Raze it with your units to end the raids",
+        ),
         BuildingKind::House => ("building_house", "house", "House", "Room for 5 villagers"),
         BuildingKind::Granary => (
             "building_granary",
@@ -349,6 +355,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
             }
             .into(),
             UnitAction::AttackAnimal { .. } => "Attacking wildlife".into(),
+            UnitAction::AttackBuilding { .. } => "Storming the stronghold".into(),
             UnitAction::Board { .. } => "Walking to board transport".into(),
             UnitAction::ClaimArtifact { .. } => "Walking to the sanctuary".into(),
             UnitAction::Idle => "Awaiting orders".to_string(),

@@ -12,6 +12,8 @@
 //! three cells from the home town center (only three wins). `raid` charts two
 //! islands, lands villager-1 with a house on the second, lets the barbarian raid
 //! arm and land, takes him back aboard and runs until the raiders reach the house.
+//! `stronghold` charts the whole run, sails to the barbarian stronghold's coast and
+//! lands villager-1 in sight of its walls and garrison.
 use aoa_game::{
     Building, BuildingKind, CellCoordinate, Command, GameWorld, Raid, TerrainBiome, TransportShip,
 };
@@ -73,6 +75,8 @@ fn main() {
     }
     if stage.as_deref() == Some("raid") {
         stage_raid(&mut world);
+    } else if stage.as_deref() == Some("stronghold") {
+        stage_stronghold(&mut world);
     } else if let Some(kind) = match stage.as_deref() {
         Some("pride") => Some(aoa_game::AnimalKind::Lion),
         Some("snakes") => Some(aoa_game::AnimalKind::SeaSerpent),
@@ -169,6 +173,59 @@ fn main() {
     }
 }
 
+/// Sail to the coast nearest the stronghold and land villager-1 by its front corner.
+fn stage_stronghold(world: &mut GameWorld) {
+    let walls = world
+        .buildings
+        .iter()
+        .find(|b| b.id == aoa_game::STRONGHOLD_ID)
+        .expect("the charted run has a stronghold")
+        .footprint();
+    let center = walls.center();
+    let distance = |c: CellCoordinate| {
+        let p = c.center();
+        ((p.x - center.x).powi(2) + (p.y - center.y).powi(2)).sqrt()
+    };
+    let shore = world
+        .terrain
+        .iter()
+        .filter(|c| c.biome == TerrainBiome::Water)
+        .map(|c| CellCoordinate::new(c.column, c.row))
+        .min_by(|&a, &b| distance(a).total_cmp(&distance(b)))
+        .expect("the island has a coast");
+    world
+        .apply_command(Command::Sail {
+            ship_id: "transport-preview".into(),
+            to: shore,
+        })
+        .expect("open sea to the stronghold's coast");
+    while !world.ships[0].stopped() {
+        world.tick(0.1);
+    }
+    let post = world
+        .terrain
+        .iter()
+        .filter(|c| c.biome.is_walkable())
+        .map(|c| CellCoordinate::new(c.column, c.row))
+        .filter(|&c| {
+            world.buildings.iter().all(|b| !b.footprint().contains(c))
+                && world.resources.iter().all(|r| r.cell != c)
+                && world.animals.iter().all(|a| a.cell != c)
+        })
+        .min_by(|a, b| {
+            // Beside the front corner, where the renderer samples the fog.
+            let corner = |c: &CellCoordinate| {
+                c.column.abs_diff(walls.origin.column + walls.columns + 1)
+                    + c.row.abs_diff(walls.origin.row + walls.rows + 1)
+            };
+            corner(a).cmp(&corner(b))
+        })
+        .expect("open ground before the walls");
+    world.units[0].cell = post;
+    world.tick(0.1);
+    world.validate().expect("a valid stronghold fixture");
+}
+
 /// Land villager-1 beside the stopped ship with a house a few cells inland, arm
 /// the raid, skip its countdown, and run until the war band strikes the house.
 fn stage_raid(world: &mut GameWorld) {
@@ -228,9 +285,12 @@ fn stage_raid(world: &mut GameWorld) {
         matches!(world.raid, Raid::Incoming { .. }),
         "landing arms the raid"
     );
-    world.raid = Raid::Incoming { seconds_left: 0.05 };
+    world.raid = Raid::Incoming {
+        wave: 0,
+        seconds_left: 0.05,
+    };
     world.tick(0.1);
-    assert_eq!(world.raid, Raid::Landed);
+    assert_eq!(world.raid, Raid::Landed { wave: 0 });
     // Back aboard, so the house alone draws the raiders.
     let villager = world.units.remove(0);
     world.ships[0].passengers.push(villager);

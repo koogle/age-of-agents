@@ -29,8 +29,8 @@ impl WorldView {
             let id = match &pick.pick {
                 Pick::Animal(id) => id,
                 Pick::Building(id) => {
-                    // A damaged building shows its bar above the roof only while a
-                    // raider stands against it or the player has it selected.
+                    // A damaged building shows its bar above the roof only while it
+                    // is under attack or the player has it selected.
                     if let Some(b) = snapshot.buildings.iter().find(|b| &b.building.id == id)
                         && b.building.damage > 0.0
                         && (selection.building.as_ref() == Some(id) || under_attack(snapshot, b))
@@ -77,18 +77,24 @@ impl WorldView {
     }
 }
 
-/// A raider standing still against the footprint is striking it.
+/// A raider standing still against the footprint is striking it, as are
+/// friendly units ordered to storm it.
 fn under_attack(snapshot: &WorldSnapshot, building: &aoa_game::BuildingView) -> bool {
+    let stormed = snapshot.units.iter().any(|u| {
+        matches!(&u.unit.action, aoa_game::UnitAction::AttackBuilding { building_id, .. }
+            if *building_id == building.building.id)
+    });
     let o = building.building.origin;
     let (columns, rows) = (i32::from(building.columns), i32::from(building.rows));
-    snapshot.animals.iter().any(|a| {
-        let dx = i32::from(a.cell.column) - i32::from(o.column);
-        let dy = i32::from(a.cell.row) - i32::from(o.row);
-        a.kind.raids()
-            && a.step.is_none()
-            && (-1..=columns).contains(&dx)
-            && (-1..=rows).contains(&dy)
-    })
+    stormed
+        || snapshot.animals.iter().any(|a| {
+            let dx = i32::from(a.cell.column) - i32::from(o.column);
+            let dy = i32::from(a.cell.row) - i32::from(o.row);
+            a.kind.raids()
+                && a.step.is_none()
+                && (-1..=columns).contains(&dx)
+                && (-1..=rows).contains(&dy)
+        })
 }
 
 #[cfg(test)]

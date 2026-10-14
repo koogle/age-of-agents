@@ -84,14 +84,16 @@ Jakob asked for barbarian art with a barbarian chieftain, and for a raid of abou
 there, with enemies able to damage buildings. Source: `crates/game/src/game/raid.rs`.
 
 - **Trigger.** `GameWorld::raid` is `Waiting` until any land unit stands on island
-  index 1 (the first island reached by ship), then `Incoming { seconds_left }`
-  with a seeded 300–600 simulated seconds, then `Landed`. It fires once per run;
-  simulation speed and pause apply to the countdown.
+  index 1 (the first island reached by ship), then `Incoming { wave, seconds_left }`
+  with a seeded 300–600 simulated seconds, then `Landed { wave }`. Once every raider
+  of that band is dead the next wave's countdown starts (2026-10-13, see
+  [stronghold](#barbarian-stronghold-2026-10-13)); `Ended` stops them for good.
+  Simulation speed and pause apply to the countdown.
 - **Landing.** A seeded 10–20 raiders appear (the first is the **Chieftain**,
   every third after him a **Torchbearer**, the rest **Barbarians**) on a free beach cell of island 1 that is at least 20 cells
   from every player unit and building there, choosing the beach nearest the
   player's presence (or the island centre), and spread inland over free cells.
-  There is no raider ship yet. Ids are `raider-{n}`; they live in `animals`, so
+  There is no raider ship yet. Ids are `raider-{wave}-{n}`; they live in `animals`, so
   fog, snapshots, health bars, attack orders and death cleanup are shared.
 - **Behavior.** Raiders have no territory. Each picks, in order: a living unit on
   its island within 7 cells (melee as animals do); otherwise the nearest
@@ -148,6 +150,9 @@ that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sourc
   The temple island gets the guardians: two marble vipers, the **cyclops general**
   and the **minotaur**, all within six cells of the temple and only two cells
   apart (the 18-cell spacing made the second viper impossible before).
+  Stronghold garrison raiders hold posts, not territories, so they do not count
+  toward the 18-cell lair spacing; otherwise the stronghold's island lost its
+  cyclops and centaurs (seed 7, found when merging the two features).
 - **Packs.** The lion pride rule now covers any pack (`AnimalKind::pack`): lions,
   skeleton squads and centaur bands each share one alert within `PRIDE_RADIUS`.
 - **Centaurs** shoot any target within `ARROW_RANGE` (4 cells), moving or not,
@@ -161,7 +166,7 @@ that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sourc
   health and its old id once no land unit is within 12 cells, the home cell is
   free and no building stands within 16 cells; a building there claims the lair
   for good. Raiders, the cyclops general and the minotaur never return.
-- **Save.** Store version 21 (new `level` and `respawns`); older stores reset.
+- **Save.** Store version 22 (new `level` and `respawns`); older stores reset.
 
 | Kind | Health | Damage / s | Speed | Aggro / territory |
 | --- | --- | --- | --- | --- |
@@ -179,7 +184,8 @@ and fill their cells; quads 1.77 (cyclops), 1.99 (general) and 1.39 (minotaur)
 carry their size so their pen lines match the family's at display size
 ([asset lesson](asset-pipeline.md#large-creatures-keep-the-familys-pen-width-2026-10-12)). Jakob (2026-10-12) steered the
 cyclops toward scarier, then a 90-degree vertical eye, then an animal look; the
-mandrill-inspired beast is the current draft. Style review is pending.
+mandrill-inspired beast was approved with the rest of the monster art when Jakob
+approved the merge on 2026-10-14.
 `archipelago_preview -- 7 2 skeletons|centaurs|cyclops|general|minotaur` lands
 villager-1 beside the first such real spawn for browser review.
 
@@ -199,15 +205,56 @@ Ctrl+click the rest, click the monster or the sanctuary). Results at 2x speed:
 | Cyclops, level 4 (1750 HP) | 8 guards, 2 siege carts, 2 archers | Lost all 12; one blow hit 4 units; cyclops lost ~300 HP |
 | Minotaur, level 5 (3600 HP), at the temple | villager + 12 soldiers | His lair is beside the temple: he wakes and kills the bearer at once (180 per blow), the artifact returns and he sleeps again; an earlier squad attack on him was wiped after ~370 damage |
 
-Findings: friendly units stop after their target dies (no retaliation, by design),
-so the player re-orders each kill; units only land blows on a monster standing
-still beside them, and all player attacks are melee. Against level 3+ monsters
-current squads cannot win. Balance is pending Jakob's call
+Findings: friendly units stopped after their target died, so the player had to
+re-order each kill (fixed since: attackers move on to the next monster in sight,
+[#167](https://github.com/koogle/age-of-agents/pull/167)); units only land blows
+on a monster standing still beside them, and all player attacks are melee. Against
+level 3+ monsters current squads cannot win. Jakob (2026-10-14) merged it as is:
+the run may be unwinnable for now, and balance follows
 ([open work](../../OPEN_WORK.md)). Gotchas for this harness: `/state` only shows
 animals in the squad's 8-cell sight; respawns need everyone 12+ cells away, so
 check them by walking back; attack orders are rejected while paused; the debug
 server with a 7-island world lags the browser, so use the release server; write
 the fixture with an upsert (the row does not exist before the first save).
+
+## Barbarian stronghold (2026-10-13)
+
+Jakob asked for a well-defended barbarian headquarters on one of the later islands
+whose destruction stops the raids. Source: `crates/game/src/game/stronghold.rs`.
+
+- **Placement.** `BuildingKind::Stronghold` (7×7, `STRONGHOLD_ID` "stronghold",
+  4000 health, no cost, never buildable) stands on the k-th island the player
+  discovers after home, not counting the temple island, with k seeded from 2 up to
+  the last such island; so never on island 1 (the raided island) or the temple's.
+  It takes the central plot like the temple (`central_plot`), lifts no fog, cannot
+  be worked, repaired or used for storage, and appears in snapshots once explored.
+- **Garrison.** 10–14 raiders (`garrison-{n}`, a chieftain first, every third a
+  torchbearer) are posted 2–5 cells around the walls. Raiders whose home is on the
+  stronghold's island are garrisoned (`garrisoned`, derived, so saves carry no
+  flag): they use the territorial animal rules with a 14-cell territory instead of
+  raiding, and one sentry's sighting turns out the whole garrison, like a lion
+  pride. Survivors keep guarding after the stronghold falls. The temple and
+  stronghold are exempt from the wildlife 26-cell building clearance.
+- **Assault.** `Command::AttackBuilding { unit_ids, building_id }` (client: tap the
+  stronghold with units selected; red hover ring) accepts only the explored
+  stronghold and rejects healers. Units walk beside the walls and strike once a
+  second for their wildlife contact damage (villager 10, guard 25, archer 18, siege
+  cart 35). At 4000 damage it is removed, every order on it ends, `raid` becomes
+  `Ended` (a pending countdown is cancelled; a band already ashore stays), and the
+  snapshot's `raids_ended` drives a toast. Its health bar shows while stormed or
+  selected. Store version 21.
+- **Art.** `assets/sprites/stronghold_sources/` packed as row 1 of
+  `buildings_sanctuary.png` by `scripts/pack_stronghold.py`. Jakob (2026-10-13):
+  the first draft was stylish but too complex and far too small beside the town
+  center; the simpler, taller redraw on a 7×7 plot replaced it, and Jakob approved
+  its option B for merge on 2026-10-13.
+
+To see it, `cargo run --release -p aoa-game --example archipelago_preview -- 7 2 stronghold`
+exports a paused snapshot with villager-1 landed by the front corner. Building
+sprites take their fog shade from the plot's front corner, so a 7×7 stronghold
+approached from behind shows as a remembered silhouette until that corner has been
+seen (observed 2026-10-13 in a replay capture; not yet changed).
+Tests: `cargo test -p aoa-game stronghold_tests`.
 
 ## Implemented rules
 
@@ -234,9 +281,14 @@ All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
 Their contact damage is 10/25/18/35 per second respectively. This is a bounded
 wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
-scripted raid, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
+scripted raids and their stronghold, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
-villagers move faster than predators. No friendly automatic retaliation.
+villagers move faster than predators. No friendly automatic retaliation: units never start
+a fight on their own. When an attack target dies, each of its attackers moves on to the
+nearest visible, reachable monster within its own sight (`UNIT_SIGHT_RADIUS`, 8 cells;
+concealed snakes excluded), else goes idle; only the nearest candidate is checked for
+reachability (`next_quarry` in `wildlife.rs`; Jakob, 2026-10-14, after the live squad test
+showed units idling while a skeleton squad cut them down).
 
 Attack orders validate all members and current target visibility before mutation.
 Stop/reassignment remains explicit. Personal cargo stays with a living hunter;

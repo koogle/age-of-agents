@@ -234,7 +234,8 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(&world.animals[..old.len()], old.as_slice());
             let added = &world.animals[old.len()..];
             let level = world.island_level(island);
-            assert!(level >= 1 && added.iter().all(|a| a.level == level));
+            // Stronghold garrisons are raiders and keep level 1.
+            assert!(level >= 1 && added.iter().all(|a| a.level == level || a.kind.raids()));
             let count = |kind| added.iter().filter(|a| a.kind == kind).count();
             assert!((2..=3).contains(&count(AnimalKind::Boar)));
             assert_eq!(count(AnimalKind::Bear), if level >= 4 { 2 } else { 1 });
@@ -275,7 +276,10 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(count(AnimalKind::Viper), 2 * guardians);
             assert_eq!(count(AnimalKind::CyclopsGeneral), guardians);
             assert_eq!(count(AnimalKind::Minotaur), guardians);
-            assert!(count(AnimalKind::Cyclops) <= usize::from(level >= 4 && !temple_island));
+            assert_eq!(
+                count(AnimalKind::Cyclops),
+                usize::from(level >= 4 && !temple_island)
+            );
             for a in added {
                 if a.kind == AnimalKind::SeaSerpent {
                     assert!(world.terrain.iter().any(|c| c.biome == TerrainBiome::Water
@@ -516,4 +520,44 @@ fn snakes_strike_hard_but_never_leave_their_lair() {
     }
     assert_eq!(world.animals[0].cell, world.animals[0].home);
     assert!(world.animals[0].concealed(&world.units));
+}
+
+/// The beast at 1 health beside villager-1, plus a second animal at `next`.
+fn last_blow(next: AnimalKind, at: CellCoordinate) -> GameWorld {
+    let mut world = wildlife(AnimalKind::Boar);
+    world.animals[0].health = 1.0;
+    let mut second = world.animals[0].clone();
+    second.id = "next".into();
+    second.kind = next;
+    second.home = at;
+    second.cell = at;
+    second.health = next.max_health();
+    world.animals.push(second);
+    world.refresh_exploration();
+    attack(&mut world);
+    for _ in 0..15 {
+        world.tick(0.1);
+    }
+    assert!(world.animals.iter().all(|a| a.id != "beast"));
+    world.validate().unwrap();
+    world
+}
+
+#[test]
+fn hunters_move_on_to_the_next_monster_in_sight() {
+    let world = last_blow(AnimalKind::Boar, CellCoordinate::new(14, 12));
+    assert!(matches!(
+        &world.units[0].action,
+        UnitAction::AttackAnimal { animal_id, .. } if animal_id == "next"
+    ));
+}
+
+#[test]
+fn hunters_stop_when_no_visible_monster_is_within_their_sight() {
+    // Beyond the hunter's eight-cell sight.
+    let world = last_blow(AnimalKind::Boar, CellCoordinate::new(25, 10));
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    // A hidden snake is no quarry until it reveals itself.
+    let world = last_blow(AnimalKind::Python, CellCoordinate::new(15, 10));
+    assert_eq!(world.units[0].action, UnitAction::Idle);
 }

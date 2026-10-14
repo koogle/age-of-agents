@@ -10,7 +10,7 @@ Start on an island, gather resources, and build a settlement. Build ships to exp
 
 Time keeps moving as you expand. Planned threats include pirates and mythical creatures, followed by increasingly destructive calamities. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs.
 
-Wildlife combat, mythical monsters that scale with distance and one barbarian raid on the second island are implemented; broader combat, calamities and permanent progression are not implemented yet.
+Wildlife combat, mythical monsters that scale with distance, barbarian raids on the second island and a stronghold that ends them are implemented; broader combat, calamities and permanent progression are not implemented yet.
 
 ## Implemented roadmap
 
@@ -24,7 +24,8 @@ Wildlife combat, mythical monsters that scale with distance and one barbarian ra
 - A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe. The Sanctuary of the Gods holds the Artifact of the Gods; carrying it home to a town center wins the run.
 - Territorial wolves, bears and boars, lion prides that hunt together, ambushing giant snakes, unit health and hunting orders.
 - Islands grow more dangerous with distance from home: stronger and more numerous wildlife, skeleton squads, centaur archers and cyclopes; the temple is guarded by a cyclops general and a minotaur that wakes when the artifact is taken. Lairs on later islands refill unless a building claims the land.
-- A barbarian raid led by a chieftain lands on the second island 5–10 minutes after the player first lands there; raiders, including torchbearers, damage and destroy buildings, and villagers repair them.
+- Barbarian war bands led by a chieftain land on the second island 5–10 minutes after the player first lands there, and again 5–10 minutes after each band is wiped out; raiders, including torchbearers, damage and destroy buildings, and villagers repair them.
+- A garrisoned barbarian stronghold stands on a later island; razing it ends the raids.
 - Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
 - SQLite saves for hosted games; native and browser-local games are in-memory.

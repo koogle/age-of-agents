@@ -165,6 +165,11 @@ pub enum UnitAction {
         animal_id: String,
         elapsed_seconds: f64,
     },
+    /// Walk beside the barbarian stronghold and strike it once a second.
+    AttackBuilding {
+        building_id: String,
+        elapsed_seconds: f64,
+    },
     Board {
         ship_id: String,
     },
@@ -386,6 +391,9 @@ pub enum BuildingKind {
     Dock,
     /// The Sanctuary of the Gods on the run's final island. Generated, never built.
     Temple,
+    /// The barbarians' fortified headquarters on a later island. Generated, never
+    /// built; while it stands, war bands keep raiding the second island.
+    Stronghold,
 }
 
 /// What villagers can construct, in build-menu order.
@@ -419,6 +427,7 @@ impl BuildingKind {
             Self::House | Self::Granary => (3, 3),
             Self::Watchtower => (2, 2),
             Self::Monument | Self::Temple => (5, 5),
+            Self::Stronghold => (7, 7),
             Self::MiningCamp
             | Self::Farm
             | Self::Kiln
@@ -457,7 +466,7 @@ impl BuildingKind {
                 (ResourceKind::Gold, 20.0),
                 (ResourceKind::Steel, 15.0),
             ],
-            Self::Temple => &[],
+            Self::Temple | Self::Stronghold => &[],
         }
     }
 
@@ -494,6 +503,7 @@ impl BuildingKind {
     /// Damage a building or foundation absorbs before raiders tear it down.
     pub const fn max_health(self) -> f64 {
         match self {
+            Self::Stronghold => 4000.0,
             Self::TownCenter | Self::Monument | Self::Temple => 2400.0,
             Self::Dock | Self::Barracks | Self::Watchtower => 1200.0,
             Self::House => 500.0,
@@ -508,6 +518,11 @@ impl BuildingKind {
             Self::Monument => 24.0,
             _ => super::BUILDING_SIGHT_RADIUS,
         }
+    }
+
+    /// Generated sites the player does not own: no sight, no work, no storage.
+    pub const fn is_generated(self) -> bool {
+        matches!(self, Self::Temple | Self::Stronghold)
     }
 
     /// A dock must stand on land with open water along one side.

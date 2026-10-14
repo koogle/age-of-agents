@@ -177,6 +177,7 @@ impl GameWorld {
         self.validate_artifact()?;
         self.validate_raid()?;
         self.validate_respawns()?;
+        self.validate_stronghold()?;
         self.validate_local()
     }
 

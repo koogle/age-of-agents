@@ -1,12 +1,14 @@
-//! The barbarian raid on the second island: armed when the first unit sets foot
-//! there, landing 5–10 minutes later. Raiders hunt the island's units and tear
-//! down its buildings until the player defeats them.
+//! Barbarian raids on the second island: armed when the first unit sets foot
+//! there, the first war band lands 5–10 minutes later. Raiders hunt the island's
+//! units and tear down its buildings; 5–10 minutes after a band is wiped out the
+//! next one lands, until the player razes the barbarian stronghold.
 use super::*;
 use crate::navigation::{PathTree, offset};
 
 /// The second island, the first one the player reaches by ship.
 const RAID_ISLAND: usize = 1;
-/// Seconds from the first landing until the raiders arrive.
+/// Seconds from the first landing, or from the previous band's defeat, until
+/// the next war band arrives.
 const RAID_DELAY_SECONDS: (u64, u64) = (300, 600);
 /// Raiders per raid, the chieftain included.
 const RAID_SIZE: (u64, u64) = (10, 20);
@@ -19,11 +21,12 @@ const RAID_SALT: u64 = 0x7261_6964;
 pub enum Raid {
     /// No unit has set foot on the second island yet.
     Waiting,
-    /// The raiders land when the countdown runs out.
-    Incoming {
-        seconds_left: f64,
-    },
-    Landed,
+    /// War band `wave` (counting from 0) lands when the countdown runs out.
+    Incoming { wave: u32, seconds_left: f64 },
+    /// War band `wave` is ashore; the next countdown starts once it is gone.
+    Landed { wave: u32 },
+    /// The stronghold has fallen: no more war bands sail.
+    Ended,
 }
 
 fn seeded(seed: u64, salt: u64, (low, high): (u64, u64)) -> u64 {
@@ -39,28 +42,44 @@ impl GameWorld {
                     .iter()
                     .any(|u| self.island_at(u.cell) == Some(RAID_ISLAND))
                 {
-                    let delay = seeded(self.seed, 1, RAID_DELAY_SECONDS);
-                    self.raid = Raid::Incoming {
-                        seconds_left: delay as f64,
-                    };
+                    self.raid = self.next_raid(0);
                 }
             }
-            Raid::Incoming { seconds_left } if seconds_left > dt => {
+            Raid::Incoming { wave, seconds_left } if seconds_left > dt => {
                 self.raid = Raid::Incoming {
+                    wave,
                     seconds_left: seconds_left - dt,
                 };
             }
-            Raid::Incoming { .. } => {
-                self.land_raiders();
-                self.raid = Raid::Landed;
+            Raid::Incoming { wave, .. } => {
+                self.land_raiders(wave);
+                self.raid = Raid::Landed { wave };
             }
-            Raid::Landed => {}
+            Raid::Landed { wave } => {
+                let fort = self.stronghold_island();
+                if !self
+                    .animals
+                    .iter()
+                    .any(|a| a.kind.raids() && !self.garrisoned(fort, a))
+                {
+                    self.raid = self.next_raid(wave + 1);
+                }
+            }
+            Raid::Ended => {}
+        }
+    }
+
+    fn next_raid(&self, wave: u32) -> Raid {
+        let delay = seeded(self.seed, 2 * u64::from(wave) + 1, RAID_DELAY_SECONDS);
+        Raid::Incoming {
+            wave,
+            seconds_left: delay as f64,
         }
     }
 
     /// Put the war band ashore on the free beach nearest the player's presence
     /// on the island that still keeps its distance, spreading inland from there.
-    fn land_raiders(&mut self) {
+    fn land_raiders(&mut self, wave: u32) {
         let origin = self.island_origins[RAID_ISLAND];
         let island = Footprint {
             origin,
@@ -75,7 +94,9 @@ impl GameWorld {
             .chain(
                 self.buildings
                     .iter()
-                    .filter(|b| b.id != TEMPLE_ID && self.island_at(b.origin) == Some(RAID_ISLAND))
+                    .filter(|b| {
+                        !b.kind.is_generated() && self.island_at(b.origin) == Some(RAID_ISLAND)
+                    })
                     .map(|b| b.footprint().center()),
             )
             .collect();
@@ -119,7 +140,7 @@ impl GameWorld {
         let Some(beach) = beach else {
             return;
         };
-        let count = seeded(self.seed, 2, RAID_SIZE) as usize;
+        let count = seeded(self.seed, 2 * u64::from(wave) + 2, RAID_SIZE) as usize;
         let mut cells = vec![beach];
         let mut cursor = 0;
         while cells.len() < count && cursor < cells.len() {
@@ -132,14 +153,11 @@ impl GameWorld {
         }
         cells.truncate(count);
         for (number, cell) in cells.into_iter().enumerate() {
-            // The chieftain leads; every third raider after him carries a torch.
-            let kind = match number {
-                0 => AnimalKind::Chieftain,
-                n if n % 3 == 0 => AnimalKind::Torchbearer,
-                _ => AnimalKind::Barbarian,
-            };
-            self.animals
-                .push(Animal::spawn(format!("raider-{number}"), kind, cell, 1));
+            self.animals.push(war_band_member(
+                format!("raider-{wave}-{number}"),
+                number,
+                cell,
+            ));
         }
     }
 
@@ -173,7 +191,7 @@ impl GameWorld {
         }
         let buildings: Vec<usize> = (0..self.buildings.len())
             .filter(|&b| {
-                self.buildings[b].id != TEMPLE_ID
+                !self.buildings[b].kind.is_generated()
                     && self.island_at(self.buildings[b].origin) == island
             })
             .collect();
@@ -248,13 +266,21 @@ impl GameWorld {
     }
 
     /// A razed building takes its queue with it; orders aimed at it end.
-    fn destroy_building(&mut self, index: usize) {
-        let id = self.buildings.remove(index).id;
+    /// Razing the stronghold ends the raids.
+    pub(super) fn destroy_building(&mut self, index: usize) {
+        let Building { id, kind, .. } = self.buildings.remove(index);
+        if kind == BuildingKind::Stronghold {
+            self.raid = Raid::Ended;
+        }
         for unit in &mut self.units {
             if let UnitAction::Build {
                 building_id: target,
             }
-            | UnitAction::Deposit { storage_id: target } = &unit.action
+            | UnitAction::Deposit { storage_id: target }
+            | UnitAction::AttackBuilding {
+                building_id: target,
+                ..
+            } = &unit.action
                 && *target == id
             {
                 unit.action = UnitAction::Idle;
@@ -263,7 +289,7 @@ impl GameWorld {
     }
 
     pub(super) fn validate_raid(&self) -> Result<(), String> {
-        if let Raid::Incoming { seconds_left } = self.raid
+        if let Raid::Incoming { seconds_left, .. } = self.raid
             && !(seconds_left.is_finite() && seconds_left > 0.0)
         {
             return Err("invalid raid countdown".into());
@@ -277,6 +303,17 @@ impl GameWorld {
         }
         Ok(())
     }
+}
+
+/// The chieftain leads; every third member after him carries a torch. Raiders
+/// keep the base strength of level 1 wherever they land.
+pub(super) fn war_band_member(id: String, number: usize, cell: CellCoordinate) -> Animal {
+    let kind = match number {
+        0 => AnimalKind::Chieftain,
+        n if n % 3 == 0 => AnimalKind::Torchbearer,
+        _ => AnimalKind::Barbarian,
+    };
+    Animal::spawn(id, kind, cell, 1)
 }
 
 pub(super) fn heading(from: CellCoordinate, to: CellCoordinate) -> [i8; 2] {
