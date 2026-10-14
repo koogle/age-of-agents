@@ -31,7 +31,7 @@ pub(super) fn selection(snapshot: &WorldSnapshot, model: &Model) -> Option<Selec
         .find(|c| c.ship_id == ship.id);
     // Players steer by tapping the sea; shortcuts only return to discovered
     // islands: home first, then the others, never the one the ship is at.
-    let origins = &snapshot.island_origins;
+    let origins = &snapshot.islands;
     let here = aoa_game::island_at(origins, ship.cell);
     let home = ship
         .home_dock_id
@@ -148,7 +148,7 @@ mod tests {
         );
         let plan = aoa_game::archipelago_plan(snapshot_seed());
         snapshot.island_count = 3;
-        snapshot.island_origins.extend([plan[1], plan[2]]);
+        snapshot.islands.extend([plan[1], plan[2]]);
         let labels = |snapshot: &WorldSnapshot| {
             commands(snapshot)
                 .into_iter()
@@ -164,7 +164,8 @@ mod tests {
             ]
         );
         // Away from home, Return home comes first and the current island is omitted.
-        snapshot.ships[0].cell = CellCoordinate::new(plan[1].column + 2, plan[1].row + 2);
+        snapshot.ships[0].cell =
+            CellCoordinate::new(plan[1].origin.column + 2, plan[1].origin.row + 2);
         assert_eq!(
             labels(&snapshot),
             vec![

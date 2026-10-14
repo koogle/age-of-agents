@@ -88,7 +88,7 @@ impl App {
         {
             return Some((
                 origin,
-                snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
+                snapshot.inventories[aoa_game::island_at(&snapshot.islands, origin)?]
                     .affords(kind.cost()),
             ));
         }
@@ -118,12 +118,13 @@ impl App {
         Some((
             origin,
             !blocked
-                && snapshot.inventories[aoa_game::island_at(&snapshot.island_origins, origin)?]
-                    .affords(if self.build == crate::hud::BuildUi::PlacingField {
+                && snapshot.inventories[aoa_game::island_at(&snapshot.islands, origin)?].affords(
+                    if self.build == crate::hud::BuildUi::PlacingField {
                         aoa_game::FIELD_COST
                     } else {
                         kind.cost()
-                    })
+                    },
+                )
                 && (coast || !kind.needs_coast())
                 && (self.build != crate::hud::BuildUi::PlacingField
                     || snapshot.buildings.iter().any(|b| {

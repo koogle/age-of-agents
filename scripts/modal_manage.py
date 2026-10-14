@@ -74,7 +74,7 @@ def verify_inventories(state: dict) -> None:
         "cloth",
         "rations",
     }
-    island_count = len(state.get("island_origins", []))
+    island_count = len(state.get("islands", []))
     if not island_count:
         raise RuntimeError("production state has no island inventories")
     for field in ("inventories", "stored_inventories"):

@@ -24,7 +24,10 @@ class InventoryTests(unittest.TestCase):
     def setUp(self):
         stock = dict.fromkeys("water wood food stone gold iron coal clay fiber timber steel bricks cloth rations".split(), 0.0)
         self.state = {
-            "island_origins": [{"column": 0, "row": 0}, {"column": 184, "row": 0}],
+            "islands": [
+                {"origin": {"column": 0, "row": 0}, "columns": 120, "rows": 80},
+                {"origin": {"column": 184, "row": 0}, "columns": 128, "rows": 85},
+            ],
             "inventories": [dict(stock, wood=10.0), dict(stock, food=7.0)],
             "stored_inventories": [stock.copy(), dict(stock, food=7.0)],
         }
