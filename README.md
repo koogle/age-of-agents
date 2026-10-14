@@ -26,7 +26,7 @@ Wildlife combat, mythical monsters that scale with distance, barbarian raids on 
 - Islands grow more dangerous with distance from home: stronger and more numerous wildlife, skeleton squads, centaur archers and cyclopes; the temple is guarded by a cyclops general and a minotaur that wakes when the artifact is taken. Lairs on later islands refill unless a building claims the land.
 - Barbarian war bands led by a chieftain land on the second island 5–10 minutes after the player first lands there, and again 5–10 minutes after each band is wiped out; raiders, including torchbearers, damage and destroy buildings, and villagers repair them.
 - A garrisoned barbarian stronghold stands on a later island; razing it ends the raids.
-- Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
+- Guard, archer, healer and siege-cart production; archers shoot wildlife and raiders from up to six cells away, while healing remains future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
 - SQLite saves for hosted games; native and browser-local games are in-memory.
 

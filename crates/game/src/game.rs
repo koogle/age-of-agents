@@ -52,6 +52,9 @@ mod queue_tests;
 mod raid;
 #[cfg(test)]
 mod raid_tests;
+mod ranged;
+#[cfg(test)]
+mod ranged_tests;
 mod respawn;
 #[cfg(test)]
 mod ship_tests;

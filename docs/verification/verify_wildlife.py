@@ -135,19 +135,43 @@ async def main(out, only, closeups=False, target='wolf'):
                             await command({'type':'attack_animal','unit_ids':[u['id'] for u in ordered['units']], 'animal_id':target})
                         await command({'type':'set_simulation_speed','multiplier':2.0})
                         injured=None
+                        ranged=None
+                        first_hit=None
                         injured_units=False
+                        archers=target != 'boar'
+                        def position(entity):
+                            at=entity['cell'];step=entity['step']
+                            if not step:return at['column'],at['row']
+                            return (at['column']+(step['to']['column']-at['column'])*step['progress'],at['row']+(step['to']['row']-at['row'])*step['progress'])
                         for _ in range(120):
                             await asyncio.sleep(.15)
                             live=await state()
                             injured_units |= any(u['health']<100 for u in live['units']) or len(live['units']) < len(ordered['units'])
                             animal=next((a for a in live['animals'] if a['id']==target),None)
+                            if archers and animal and ranged is None:
+                                for hunter in live['units']:
+                                    action=hunter['action']
+                                    distance=((hunter['cell']['column']-animal['cell']['column'])**2+(hunter['cell']['row']-animal['cell']['row'])**2)**.5
+                                    if hunter['step'] is None and action['type']=='attack_animal' and action['elapsed_seconds']>0 and distance>1.5:
+                                        ranged={'hunter':copy.deepcopy(hunter),'animal':copy.deepcopy(animal),'distance':distance}
+                                        await command({'type':'set_simulation_speed','multiplier':0.0})
+                                        await page.wait_for_timeout(300)
+                                        await page.screenshot(path=str(out/(label+'-ranged.png')))
+                                        await command({'type':'set_simulation_speed','multiplier':2.0})
+                                        break
                             if animal and animal['health']<target_hp and injured is None:
+                                if archers:
+                                    ax,ay=position(animal)
+                                    nearest=min(((position(u)[0]-ax)**2+(position(u)[1]-ay)**2)**.5 for u in live['units'])
+                                    first_hit={'distance':nearest,'health':animal['health']}
+                                    assert nearest>=3.0, first_hit
                                 injured=copy.deepcopy(live)
                                 await command({'type':'set_simulation_speed','multiplier':0.0})
                                 await page.screenshot(path=str(out/(label+'-combat.png')))
                                 await command({'type':'set_simulation_speed','multiplier':2.0})
                             if not animal:break
                         else:raise AssertionError(f'{target} was not defeated')
+                        assert not archers or ranged is not None, 'Archers must fire before reaching melee contact'
                         assert injured is not None
                         assert injured_units, 'Animal must fight back'
                         assert live['units'], 'The hunters must survive'
@@ -157,7 +181,7 @@ async def main(out, only, closeups=False, target='wolf'):
                         await page.screenshot(path=str(out/(label+'-after.png')))
                         assert not errors,errors
                         results.append({'viewport':label,'ordered':ordered['units'][0]['action'],
-                                        'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
+                                        'ranged':ranged,'first_hit':first_hit,'injured_animals':injured['animals'],'units_hurt':injured_units,'survivors':live['units'],'errors':errors})
                         await context.close();stop()
                     await browser.close()
             finally:stop()
