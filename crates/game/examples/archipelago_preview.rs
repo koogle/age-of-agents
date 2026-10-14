@@ -1,10 +1,12 @@
 //! Export a paused run snapshot for archipelago review:
 //! cargo run -p aoa-game --example archipelago_preview -- <seed> <charted islands>
 //! With more than one charted island, a ship steers into the fog from the start island.
-//! An optional third argument (`pride`, `snakes`, `vipers`, `found`, `carried`,
+//! An optional third argument (`pride`, `snakes`, `vipers`, `skeletons`,
+//! `centaurs`, `cyclops`, `general`, `minotaur`, `found`, `carried`,
 //! `home` or `won`) stages a review snapshot. `pride` and `snakes` chart two islands
 //! and land villager-1 beside the second island's worldgen lion pride or sea
-//! serpent; `vipers` charts the whole run and lands him beside a temple viper, so
+//! serpent; `vipers` and the monster stages chart the whole run and land him
+//! beside the first such monster the simulation spawned, so
 //! those snapshots show real spawns. The others stage the artifact: as a review fixture it places villager-1 beside
 //! the temple, claims the artifact, and for `home`/`won` places the bearer four or
 //! three cells from the home town center (only three wins). `raid` charts two
@@ -79,14 +81,18 @@ fn main() {
         Some("pride") => Some(aoa_game::AnimalKind::Lion),
         Some("snakes") => Some(aoa_game::AnimalKind::SeaSerpent),
         Some("vipers") => Some(aoa_game::AnimalKind::Viper),
+        Some("skeletons") => Some(aoa_game::AnimalKind::Skeleton),
+        Some("centaurs") => Some(aoa_game::AnimalKind::Centaur),
+        Some("cyclops") => Some(aoa_game::AnimalKind::Cyclops),
+        Some("general") => Some(aoa_game::AnimalKind::CyclopsGeneral),
+        Some("minotaur") => Some(aoa_game::AnimalKind::Minotaur),
         _ => None,
     } {
-        let island = world.island_origins.len() - 1;
         let lair = world
             .animals
             .iter()
-            .find(|a| a.id.starts_with(&format!("animal-{island}-")) && a.kind == kind)
-            .unwrap_or_else(|| panic!("island {island} spawns a {}", kind.name()))
+            .find(|a| a.id.starts_with("animal-") && a.kind == kind)
+            .unwrap_or_else(|| panic!("the run spawns a {}", kind.name()))
             .home;
         // Sail to the water nearest the animal so the opening camera frames it,
         // then land the observer: placing him first would let the animal hunt him
@@ -107,15 +113,28 @@ fn main() {
         while !world.ships[0].stopped() {
             world.tick(0.1);
         }
-        let (dx, dy) = if kind == aoa_game::AnimalKind::Lion {
-            (-4, 3)
+        // Ambushers reveal at two cells; pack hunters and giants sight him
+        // from farther away. Take the first offset that is valid ground.
+        let offsets: &[(i32, i32)] = if kind.ambushes() {
+            &[(-2, 0)]
         } else {
-            (-2, 0)
+            &[(-5, 3), (5, 3), (-5, -3), (5, -3), (-6, 0), (6, 0)]
         };
-        world.units[0].cell = CellCoordinate::new(
-            (i32::from(lair.column) + dx) as u16,
-            (i32::from(lair.row) + dy) as u16,
-        );
+        let cell = offsets
+            .iter()
+            .map(|&(dx, dy)| {
+                CellCoordinate::new(
+                    (i32::from(lair.column) + dx) as u16,
+                    (i32::from(lair.row) + dy) as u16,
+                )
+            })
+            .find(|&cell| {
+                let mut trial = world.clone();
+                trial.units[0].cell = cell;
+                trial.validate().is_ok()
+            })
+            .expect("open ground beside the lair");
+        world.units[0].cell = cell;
         world.tick(0.1);
         world.validate().expect("a valid wildlife fixture");
     } else if let Some(stage) = stage.as_deref() {
@@ -146,7 +165,12 @@ fn main() {
         world.validate().expect("a valid staged run");
     }
     world.simulation_speed = 0.0;
-    println!("{}", serde_json::to_string(&world.snapshot()).unwrap());
+    // AOA_PREVIEW_WORLD=1 prints the whole world, as a hosted save stores it.
+    if std::env::var_os("AOA_PREVIEW_WORLD").is_some() {
+        println!("{}", serde_json::to_string(&world).unwrap());
+    } else {
+        println!("{}", serde_json::to_string(&world.snapshot()).unwrap());
+    }
 }
 
 /// Sail to the coast nearest the stronghold and land villager-1 by its front corner.

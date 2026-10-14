@@ -255,6 +255,7 @@ fn paused_wildlife_holds_its_rendered_stride_until_resumed() {
         health: 40.0,
         attack_seconds: 0.0,
         heading: [1, 0],
+        level: 1,
     }];
     snapshot.simulation_speed = 0.0;
     let mut view = WorldView::new();

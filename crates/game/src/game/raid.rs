@@ -185,7 +185,7 @@ impl GameWorld {
             .min_by(|&a, &b| self.units[a].id.cmp(&self.units[b].id));
         if let Some(unit) = struck {
             if self.swing(index, self.units[unit].cell, dt) {
-                self.units[unit].health -= kind.damage();
+                self.units[unit].health -= self.animals[index].damage();
             }
             return;
         }
@@ -305,26 +305,18 @@ impl GameWorld {
     }
 }
 
-/// The chieftain leads; every third member after him carries a torch.
+/// The chieftain leads; every third member after him carries a torch. Raiders
+/// keep the base strength of level 1 wherever they land.
 pub(super) fn war_band_member(id: String, number: usize, cell: CellCoordinate) -> Animal {
     let kind = match number {
         0 => AnimalKind::Chieftain,
         n if n % 3 == 0 => AnimalKind::Torchbearer,
         _ => AnimalKind::Barbarian,
     };
-    Animal {
-        id,
-        kind,
-        home: cell,
-        cell,
-        step: None,
-        health: kind.max_health(),
-        attack_seconds: 0.0,
-        heading: [1, 0],
-    }
+    Animal::spawn(id, kind, cell, 1)
 }
 
-fn heading(from: CellCoordinate, to: CellCoordinate) -> [i8; 2] {
+pub(super) fn heading(from: CellCoordinate, to: CellCoordinate) -> [i8; 2] {
     [
         (i32::from(to.column) - i32::from(from.column)).signum() as i8,
         (i32::from(to.row) - i32::from(from.row)).signum() as i8,

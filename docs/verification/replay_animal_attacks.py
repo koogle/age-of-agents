@@ -50,7 +50,7 @@ async def main(out):
     base['animals']=[]
     for kind,at,hp in [('wolf',{'column':31,'row':24},40),('bear',{'column':34,'row':24},100),('boar',{'column':28,'row':24},60)]:
         base['animals'].append(dict(id=kind,kind=kind,home=at,cell=at,step=None,
-                                    health=hp,attack_seconds=0,heading=[1,0]))
+                                    health=hp,attack_seconds=0,heading=[1,0],level=1))
     clients=[]
     sequence=0
     async def ws(request):
@@ -98,10 +98,15 @@ async def main(out):
                 await page.goto('http://127.0.0.1:8013/play',wait_until='networkidle')
                 await page.locator('#loading').wait_for(state='detached',timeout=120000)
                 async def check(column,mirror=False):
-                    expected=[(column+1)/4,column/4] if mirror else [column/4,(column+1)/4]
+                    # Two species per atlas row: wolf and boar on the left half, bear on the right.
+                    expected=[]
+                    for half in (0,4):
+                        lo,hi=(half+column)/8,(half+column+1)/8
+                        expected.append([hi,lo] if mirror else [lo,hi])
                     try:
-                        await page.wait_for_function('''([u0,u1])=>window.animalSprites.length===3 &&
-                            window.animalSprites.every(a=>a[7]===u0 && a[9]===u1)''',arg=expected,timeout=120000)
+                        await page.wait_for_function('''pairs=>window.animalSprites.length===3 &&
+                            window.animalSprites.every(a=>pairs.some(([u0,u1])=>a[7]===u0 && a[9]===u1)) &&
+                            pairs.every(([u0,u1])=>window.animalSprites.some(a=>a[7]===u0 && a[9]===u1))''',arg=expected,timeout=120000)
                     except Exception:
                         print('Failed UV check', expected, await page.evaluate('window.animalSprites'), errors, flush=True)
                         await page.screenshot(path=str(out/f'{label}-failed.png'))

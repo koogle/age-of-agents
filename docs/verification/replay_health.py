@@ -43,7 +43,7 @@ async def main(out):
     base['animals']=[]
     for kind,at,hp in [('wolf',{'column':31,'row':24},300),('bear',{'column':34,'row':24},600),('boar',{'column':28,'row':24},60)]:
         base['animals'].append(dict(id=kind,kind=kind,home=at,cell=at,step=None,
-                                    health=hp,attack_seconds=0,heading=[1,0]))
+                                    health=hp,attack_seconds=0,heading=[1,0],level=1))
     clients=[]
     sequence=0
     async def ws(request):
