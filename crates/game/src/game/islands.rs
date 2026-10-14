@@ -13,7 +13,7 @@ const SITE_SALT: u64 = 0x6172_6368_6970_656c;
 /// and rows, so the deepest islands have room for their monsters.
 const GROWTH_PER_RANK: (u16, u16) = (8, 5);
 /// The most sites a run plans; the grid pitch fits the largest of them.
-const MAX_SITES: u16 = 7;
+const MAX_SITES: u16 = 8;
 
 /// The region of the site at planned rank `rank`.
 pub fn site_size(rank: usize) -> (u16, u16) {
@@ -246,7 +246,8 @@ impl GameWorld {
 pub fn archipelago_plan(seed: u64) -> Vec<Footprint> {
     const GRID: u64 = 3;
     let hash = |salt: u64, value: u64| worldgen::mix(seed ^ SITE_SALT ^ salt, value);
-    let count = 5 + (hash(0, 0) % 3) as usize;
+    // Five to seven ordinary sites plus the barbarians' stronghold island.
+    let count = 6 + (hash(0, 0) % 3) as usize;
     let neighbors = |slot: u64| {
         let (x, y) = (slot % GRID, slot / GRID);
         [
@@ -267,7 +268,7 @@ pub fn archipelago_plan(seed: u64) -> Vec<Footprint> {
                 .flat_map(|&slot| neighbors(slot))
                 .filter(|slot| !slots.contains(slot))
                 .min_by_key(|&slot| hash(attempt, slot))
-                .expect("a 3×3 grid holds seven sites");
+                .expect("a 3×3 grid holds eight sites");
             slots.push(next);
         }
         // Crossings from the start through chosen sites (breadth-first).
@@ -321,6 +322,12 @@ pub fn archipelago_plan(seed: u64) -> Vec<Footprint> {
             }
         })
         .collect()
+}
+
+/// The barbarian stronghold's own island: the middle site by crossings, so
+/// never home, the temple, or the first island a ship reaches.
+pub fn stronghold_rank(sites: usize) -> usize {
+    sites / 2
 }
 
 /// The map size that contains every planned site.

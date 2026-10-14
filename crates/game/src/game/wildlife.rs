@@ -265,11 +265,14 @@ impl Animal {
 impl GameWorld {
     /// The island's danger rank: its place in the planned archipelago, which
     /// orders sites by crossings from home, so the temple island ranks highest.
+    /// The stronghold's own site is skipped, so monster levels run 0..=6.
     pub(super) fn island_level(&self, island: usize) -> u8 {
-        archipelago_plan(self.seed)
+        let plan = archipelago_plan(self.seed);
+        let rank = plan
             .iter()
             .position(|site| *site == self.islands[island])
-            .unwrap_or(island) as u8
+            .unwrap_or(island);
+        (rank - usize::from(rank > stronghold_rank(plan.len()))) as u8
     }
 
     pub(super) fn populate_wildlife(&mut self, island: usize) {
@@ -281,7 +284,9 @@ impl GameWorld {
         // Each entry is a kind and whether it joins the last pack leader placed.
         let mut roster = Vec::new();
         let mut add = |kind, count: usize, joins: bool| roster.extend(vec![(kind, joins); count]);
-        if island == 0 {
+        if self.stronghold_island() == Some(island) {
+            // The barbarians' island holds only their fort and its garrison.
+        } else if island == 0 {
             add(Wolf, 1, false);
             add(Boar, 1, false);
         } else {

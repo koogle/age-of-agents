@@ -5,8 +5,6 @@
 use super::*;
 use crate::navigation::{PathTree, offset};
 
-/// The second island, the first one the player reaches by ship.
-const RAID_ISLAND: usize = 1;
 /// Seconds from the first landing, or from the previous band's defeat, until
 /// the next war band arrives.
 const RAID_DELAY_SECONDS: (u64, u64) = (300, 600);
@@ -37,11 +35,8 @@ impl GameWorld {
     pub(super) fn tick_raid(&mut self, dt: f64) {
         match self.raid {
             Raid::Waiting => {
-                if self
-                    .units
-                    .iter()
-                    .any(|u| self.island_at(u.cell) == Some(RAID_ISLAND))
-                {
+                let target = self.raid_island();
+                if target.is_some() && self.units.iter().any(|u| self.island_at(u.cell) == target) {
                     self.raid = self.next_raid(0);
                 }
             }
@@ -69,6 +64,13 @@ impl GameWorld {
         }
     }
 
+    /// The raids strike the first island a ship reaches, other than the
+    /// stronghold's own island.
+    pub(super) fn raid_island(&self) -> Option<usize> {
+        let fort = self.stronghold_island();
+        (1..self.islands.len()).find(|&island| Some(island) != fort)
+    }
+
     fn next_raid(&self, wave: u32) -> Raid {
         let delay = seeded(self.seed, 2 * u64::from(wave) + 1, RAID_DELAY_SECONDS);
         Raid::Incoming {
@@ -80,18 +82,19 @@ impl GameWorld {
     /// Put the war band ashore on the free beach nearest the player's presence
     /// on the island that still keeps its distance, spreading inland from there.
     fn land_raiders(&mut self, wave: u32) {
-        let island = self.islands[RAID_ISLAND];
+        let Some(target) = self.raid_island() else {
+            return;
+        };
+        let island = self.islands[target];
         let presence: Vec<Position> = self
             .units
             .iter()
-            .filter(|u| self.island_at(u.cell) == Some(RAID_ISLAND))
+            .filter(|u| self.island_at(u.cell) == Some(target))
             .map(|u| u.cell.center())
             .chain(
                 self.buildings
                     .iter()
-                    .filter(|b| {
-                        !b.kind.is_generated() && self.island_at(b.origin) == Some(RAID_ISLAND)
-                    })
+                    .filter(|b| !b.kind.is_generated() && self.island_at(b.origin) == Some(target))
                     .map(|b| b.footprint().center()),
             )
             .collect();

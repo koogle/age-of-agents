@@ -24,12 +24,15 @@ pub(super) fn open_water_beside(site: Footprint, distance: u16) -> CellCoordinat
 }
 
 #[test]
-fn every_run_plans_five_to_seven_separated_sites_with_the_temple_farthest() {
+fn every_run_plans_six_to_eight_separated_sites_with_the_temple_farthest() {
     let mut sizes = BTreeSet::new();
     for seed in 0..200 {
         let plan = archipelago_plan(seed);
         assert_eq!(plan, archipelago_plan(seed));
-        assert!((5..=7).contains(&plan.len()), "seed {seed}: {plan:?}");
+        assert!((6..=8).contains(&plan.len()), "seed {seed}: {plan:?}");
+        // The stronghold's island is mid-route: never home, first or the temple.
+        let fort = stronghold_rank(plan.len());
+        assert!(fort >= 2 && fort < plan.len() - 1);
         sizes.insert(plan.len());
         assert_eq!(plan[0].origin, CellCoordinate::new(0, 0));
         assert_eq!((plan[0].columns, plan[0].rows), (WORLD_COLUMNS, WORLD_ROWS));
@@ -70,7 +73,7 @@ fn every_run_plans_five_to_seven_separated_sites_with_the_temple_farthest() {
         // Not a line: the sites span both directions.
         assert!(plan.iter().any(|s| s.origin.column > 0) && plan.iter().any(|s| s.origin.row > 0));
     }
-    assert_eq!(sizes, BTreeSet::from([5, 6, 7]));
+    assert_eq!(sizes, BTreeSet::from([6, 7, 8]));
 }
 
 #[test]

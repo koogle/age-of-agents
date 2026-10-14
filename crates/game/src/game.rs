@@ -35,7 +35,7 @@ pub use storage::{CargoDirection, SHIP_RESOURCE_CAPACITY, ShipConnection, island
 #[cfg(test)]
 mod islands_tests;
 use islands::starting_islands;
-pub use islands::{archipelago_plan, plan_extent, site_size};
+pub use islands::{archipelago_plan, plan_extent, site_size, stronghold_rank};
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
