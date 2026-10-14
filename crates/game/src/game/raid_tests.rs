@@ -1,16 +1,7 @@
 use super::*;
 
 fn raider(kind: AnimalKind, cell: CellCoordinate) -> Animal {
-    Animal {
-        id: "raider-0".into(),
-        kind,
-        home: cell,
-        cell,
-        step: None,
-        health: kind.max_health(),
-        attack_seconds: 0.0,
-        heading: [1, 0],
-    }
+    Animal::spawn("raider-0".into(), kind, cell, 1)
 }
 
 /// A free land cell on the second island, away from its wildlife.

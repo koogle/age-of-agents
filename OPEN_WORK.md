@@ -8,23 +8,22 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
-- **Mirrored dock views** ([#144](https://github.com/koogle/age-of-agents/pull/144)):
-  review the port. The darker rear (north/west) dock timber still needs a separate
-  color-matching pass.
 
 ## Next steps to finish the capture-the-flag loop
 
 One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it
-once the step changes the run. The run is still far too easy: a short walk from
-the landing to the temple, and wildlife strength does not scale with distance.
+once the step changes the run. The run is still too easy: a short walk from the landing to the temple.
 
-1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
-   [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing.
-2. **Per-island difficulty.** Monster counts and strength scale with each island's
-   distance from home; the temple island gets guardians.
-3. **Monster classes, art previews first:** skeletons, centaurs,
-   cyclops and minotaur, each with its own behavior and possibly several forms
-   (Jakob, 2026-10-08: for example a cyclops general or a barbarian chieftain).
+1. **Combat foundations the monsters need.** Healing (archers already shoot from six cells).
+2. **Make the run winnable again (monster balance).** Jakob merged the monsters on
+   2026-10-14 knowing level 3+ islands are currently unwinnable. The
+   [live test](docs/knowledge/wildlife.md#live-test-against-player-squads-2026-10-13):
+   squads of 10–12 beat level-2 skeletons but lose outright to level-3 centaurs,
+   level-4 cyclopes and the minotaur, who also kills the artifact bearer the moment
+   he wakes. Options: lower per-level scaling, move the minotaur's lair away from the
+   temple or give the bearer a head start, and healing (step 1); re-test with archer squads.
+   Re-run the live squad test and record a video after the change. Crowded
+   high-level islands can drop some planned monsters for lack of spaced lairs.
 
 ## Future work (not needed to finish the loop)
 
@@ -35,11 +34,18 @@ the landing to the temple, and wildlife strength does not scale with distance.
   temple island and along the way home.
 - **Island types.** Volcanic, forested, ruined or barbarian-held islands with their
   own terrain look, resources and monster mix, chosen per site from the seed.
+- **Upgradable buildings** (Jakob, 2026-10-14: revisit later). Closed #103 proposed
+  masonry tiers; a fresh design needs approved art and research/cost changes.
 
 ## Unresolved
+- **Rear dock timber.** The north dock art (and the west dock mirrored from it) has
+  greyer wood than the south and east; needs a color-matching pass.
 
-- **Branches on the pre-rewrite history.** Open PRs #72, #103 and #142 need
-  rebasing onto the rewritten `master`; stale remote branches should be deleted.
+- **Stale branches from the pre-rewrite history** (including closed #72 and #103)
+  should be deleted from the remote.
+- **Client placement duplicates the simulation's rules.** `crates/client/src/placement.rs`
+  re-implements resource, unit, building, terrain and bounds blocking; move it onto
+  shared `aoa_game` snapshot helpers (the one part of closed #72 still worth doing).
 - **Performance.** Populated archipelagos are unprofiled; the
   [map budget](docs/CONTINUOUS_MAP.md) covers only the starter world.
 - **Economy refinement** per [the roadmap](ROADMAP.md).

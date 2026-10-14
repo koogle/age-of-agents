@@ -40,6 +40,8 @@ pub use islands::{archipelago_plan, plan_extent};
 mod gathering_tests;
 #[cfg(test)]
 mod group_move_tests;
+#[cfg(test)]
+mod monster_tests;
 mod movement;
 mod occupancy;
 mod progression;
@@ -50,6 +52,10 @@ mod queue_tests;
 mod raid;
 #[cfg(test)]
 mod raid_tests;
+mod ranged;
+#[cfg(test)]
+mod ranged_tests;
+mod respawn;
 #[cfg(test)]
 mod ship_tests;
 mod ships;
@@ -73,6 +79,7 @@ pub use gathering::NEXT_RESOURCE_RADIUS;
 use movement::{Goal, Travel};
 pub use progression::*;
 pub use raid::Raid;
+pub use respawn::Respawn;
 pub use ships::*;
 pub use wildlife::*;
 
@@ -137,6 +144,8 @@ pub struct GameWorld {
     pub artifact_bearer: Option<String>,
     /// Barbarian war bands raiding the second island until the stronghold falls.
     pub raid: Raid,
+    /// Fallen lair animals on later islands, waiting to rise again.
+    pub respawns: Vec<Respawn>,
     next_building_id: u64,
     next_unit_id: u64,
 }
@@ -352,6 +361,7 @@ impl GameWorld {
             scenario: ScenarioState::default(),
             artifact_bearer: None,
             raid: Raid::Waiting,
+            respawns: Vec::new(),
             next_building_id: 2,
             next_unit_id: 3,
         };
@@ -728,6 +738,7 @@ impl GameWorld {
         self.tick_artifact();
         self.tick_raid(dt);
         self.tick_wildlife(dt);
+        self.tick_respawns(dt);
         self.tick_ships(dt);
         for index in (0..self.units.len()).rev() {
             if let UnitAction::Board { ship_id } = self.units[index].action.clone() {

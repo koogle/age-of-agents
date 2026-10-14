@@ -33,6 +33,45 @@ arrival can change casualties. Existing saved current health is preserved; incre
 damage applies immediately, and new animals spawn at the increased maximum.
 There is no schema change or world reset.
 
+## Ranged archers (2026-10-06)
+
+Jakob requested true distance attacks in a separate PR after the strength change
+([#142](https://github.com/koogle/age-of-agents/pull/142), ported onto the
+rewritten history on 2026-10-14). Source: `crates/game/src/game/ranged.rs`,
+the archer branch of `tick_attack_animal` in `wildlife.rs`, and
+`Goal::ArcherRange` in `movement.rs` ([firing positions](placement-and-routes.md#archer-firing-positions-2026-10-06)).
+
+- **Range.** Archers ordered with `AttackAnimal` stop at a clear firing position
+  within six cells (`ARCHER_RANGE`) and deal their 18 damage per one-second
+  windup, including against moving targets: both ends of the target's step must
+  be in range and clear. Other units keep contact attacks.
+- **Line of fire.** Buildings, live non-water resources and mountains block the
+  shot, including at diagonal corners; water, rivers and units do not, so a river
+  can shield archers from melee wildlife.
+- **Windup.** Walking or losing the shot resets the timer; archers finish a
+  step before shooting. They hold position as targets close and pursue if range
+  is lost. Damage resolves at release: no projectiles, ammunition or save change.
+- **Correction (Jakob, after reviewing the recording).** Wolves closing the gap
+  is fine; archers should open fire earlier. Range went from four to six cells,
+  verified by where actual first damage lands rather than by a positive windup
+  timer. This is not a request for automatic retreat.
+- **Retaliation.** A territorial animal (or garrison raider) also targets any
+  unit inside its territory that is attacking it, beyond its normal aggro, so
+  archers cannot freely shoot idle bears. Raiders already charge anyone within
+  their 7-cell aggro. A snake that goes back into hiding cancels the order
+  (`concealed`), as before.
+- **Targets.** Raiders live in `animals`, so the same order shoots them. Storming
+  the stronghold (`AttackBuilding`) stays a contact attack for every unit kind.
+- **Art.** The authored bow action aims at the target while the authoritative
+  timer is positive and the archer stands on its cell (`work_target` in
+  `crates/client/src/view.rs`); pause freezes it.
+
+Mixed groups validate each member against its own reach (archers need a
+reachable firing position) before any order is assigned. Open-ground tests at
+100 ms: one/two archers lose to a full-health wolf; three to five win, with
+casualties depending on position and arrival order.
+Tests: `cargo test -p aoa-game ranged_tests`.
+
 ## Lion prides (2026-10-09)
 
 Jakob asked for more monsters, one class per PR with art previews first; lions
@@ -132,6 +171,91 @@ simulation lands strikes the house. No captures are committed; the style review
 lives in [#165](https://github.com/koogle/age-of-agents/pull/165).
 Tests: `cargo test -p aoa-game raid_tests`.
 
+## Island levels, respawning lairs and mythical monsters (2026-10-12)
+
+Jakob asked for more monsters, harder islands and, on later islands, monsters
+that respawn (the next classes come from [open work](../../OPEN_WORK.md)). Sources:
+`wildlife.rs` (kinds, roster, behavior), `respawn.rs`; tests: `monster_tests`.
+
+- **Level.** `Animal::level` is the island's danger rank, its index in
+  `archipelago_plan` (sites ordered by crossings from home): 0 home, the temple
+  island highest (4–6). Health grows by a quarter and damage by a tenth per level
+  beyond 1 (`Animal::max_health`, `Animal::damage`); level 0 and 1 are base
+  strength. Raiders stay at level 1, so the approved raid balance is unchanged.
+- **Roster per level** (later islands; counts are maxima, a crowded island may
+  drop some): the old roster, plus `(level − 1) / 2` extra wolves and a second
+  bear from level 4; a skeleton squad of `2 + level` from level 2; a centaur band
+  of 2–3 from level 3; a cyclops from level 4 on islands other than the temple.
+  The temple island gets the guardians: two marble vipers, the **cyclops general**
+  and the **minotaur**, all within six cells of the temple and only two cells
+  apart (the 18-cell spacing made the second viper impossible before).
+  Stronghold garrison raiders hold posts, not territories, so they do not count
+  toward the 18-cell lair spacing; otherwise the stronghold's island lost its
+  cyclops and centaurs (seed 7, found when merging the two features).
+- **Packs.** The lion pride rule now covers any pack (`AnimalKind::pack`): lions,
+  skeleton squads and centaur bands each share one alert within `PRIDE_RADIUS`.
+- **Centaurs** shoot any target within `ARROW_RANGE` (4 cells), moving or not,
+  instead of closing to contact. **Cyclopes** sweep: each blow hits every
+  standing unit around them. The **minotaur** sleeps (ignores units) until the
+  artifact leaves the temple or he is struck; awake, he hunts the bearer first,
+  else anyone on his island, with no territory. Both states are derived, so saves
+  carry nothing extra. He is slower than villagers (2.6 vs 3 cells/s).
+- **Respawn.** On islands of level 2 and up, a slain lair animal queues a
+  `Respawn` (240 s; skeletons 60 s). When it is due, it rises at its home with full
+  health and its old id once no land unit is within 12 cells, the home cell is
+  free and no building stands within 16 cells; a building there claims the lair
+  for good. Raiders, the cyclops general and the minotaur never return.
+- **Save.** Store version 22 (new `level` and `respawns`); older stores reset.
+
+| Kind | Health | Damage / s | Speed | Aggro / territory |
+| --- | --- | --- | --- | --- |
+| Skeleton | 150 | 20 | 2.0 | 5 / 9 |
+| Centaur | 300 | 25 (range 4) | 2.6 | 7 / 12 |
+| Cyclops | 1000 | 60 (sweep) | 1.5 | 5 / 8 |
+| Cyclops general | 2000 | 80 (sweep) | 1.4 | 5 / 8 |
+| Minotaur | 1800 | 90 | 2.6 | 6 / whole island |
+
+Base values; multiply by the level factors above. Art: `assets/sprites/monster_sources/`
+(species 11–15). The atlas now holds two species per row in a 5016×5016 square
+so it stays under common 8192px WebGL limits; `view/wildlife.rs` derives each
+species' cell from its index. The three giants come from one 4K cutout per pose
+and fill their cells; quads 1.77 (cyclops), 1.99 (general) and 1.39 (minotaur)
+carry their size so their pen lines match the family's at display size
+([asset lesson](asset-pipeline.md#large-creatures-keep-the-familys-pen-width-2026-10-12)). Jakob (2026-10-12) steered the
+cyclops toward scarier, then a 90-degree vertical eye, then an animal look; the
+mandrill-inspired beast was approved with the rest of the monster art when Jakob
+approved the merge on 2026-10-14.
+`archipelago_preview -- 7 2 skeletons|centaurs|cyclops|general|minotaur` lands
+villager-1 beside the first such real spawn for browser review.
+
+### Live test against player squads (2026-10-13)
+
+Jakob asked for the monsters to be tested against real units, with a video,
+before merging. Method: `AOA_PREVIEW_WORLD=1 archipelago_preview -- 7 7` exports
+the seed-7 run charted by sailing; the world goes into a temporary
+`AGE_OF_AGENTS_DB` for the release server; the only staging is a player squad
+placed near each natural lair. Orders went through the WebGL client (click a unit,
+Ctrl+click the rest, click the monster or the sanctuary). Results at 2x speed:
+
+| Scene | Squad | Outcome |
+| --- | --- | --- |
+| Skeleton squad, level 2 (4 x 188 HP) | 6 guards, 4 archers | Won, 4–9 survivors; after withdrawing, skeletons had risen again at full health |
+| Centaur band, level 3 (2 x 450 HP) | 6 guards, 4 archers | Lost all 10; arrows hit from 2.8 cells; one centaur killed |
+| Cyclops, level 4 (1750 HP) | 8 guards, 2 siege carts, 2 archers | Lost all 12; one blow hit 4 units; cyclops lost ~300 HP |
+| Minotaur, level 5 (3600 HP), at the temple | villager + 12 soldiers | His lair is beside the temple: he wakes and kills the bearer at once (180 per blow), the artifact returns and he sleeps again; an earlier squad attack on him was wiped after ~370 damage |
+
+Findings: friendly units stopped after their target died, so the player had to
+re-order each kill (fixed since: attackers move on to the next monster in sight,
+[#167](https://github.com/koogle/age-of-agents/pull/167)); units only land blows
+on a monster standing still beside them, and all player attacks are melee. Against
+level 3+ monsters current squads cannot win. Jakob (2026-10-14) merged it as is:
+the run may be unwinnable for now, and balance follows
+([open work](../../OPEN_WORK.md)). Gotchas for this harness: `/state` only shows
+animals in the squad's 8-cell sight; respawns need everyone 12+ cells away, so
+check them by walking back; attack orders are rejected while paused; the debug
+server with a 7-island world lags the browser, so use the release server; write
+the fixture with an upsert (the row does not exist before the first save).
+
 ## Barbarian stronghold (2026-10-13)
 
 Jakob asked for a well-defended barbarian headquarters on one of the later islands
@@ -175,8 +299,8 @@ Tests: `cargo test -p aoa-game stronghold_tests`.
 
 `crates/game/src/game/wildlife.rs` owns deterministic generation, explicit group
 attack orders, animal pursuit/damage and cleanup. The first island gets one wolf and one boar; the second and later
-islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist; the temple island adds two marble vipers. Starting animals are at least 26
-cells from friendly units/buildings, with homes 18 cells apart. They never respawn.
+islands get one bear, 1–3 wolves, 2–3 boars, one lion pride, 1–2 rock pythons and a sea serpent where valid cells exist, plus the level-scaled additions [above](#island-levels-respawning-lairs-and-mythical-monsters-2026-10-12); the temple island adds two marble vipers and its guardians. Starting animals are at least 26
+cells from friendly units/buildings, with homes 18 cells apart. Only lairs on islands of level 2 and up respawn.
 Idle animals at home skip occupancy/path reconstruction. Animals pursue nearby land units and return when targets
 leave their territory; they do not roam randomly or attack buildings/ships. Raiders
 are the exception, [above](#barbarian-raid-and-building-damage-2026-10-11).
@@ -194,11 +318,17 @@ are the exception, [above](#barbarian-raid-and-building-damage-2026-10-11).
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
-Their contact damage is 10/25/18/35 per second respectively. This is a bounded
-wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
+Their damage is 10/25/18/35 per second respectively; archers shoot from up to six
+cells ([above](#ranged-archers-2026-10-06)) and the others need contact. This is a bounded
+wildlife combat slice: healing, factions beyond the one
 scripted raids and their stronghold, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
-villagers move faster than predators. No friendly automatic retaliation.
+villagers move faster than predators. No friendly automatic retaliation: units never start
+a fight on their own. When an attack target dies, each of its attackers moves on to the
+nearest visible, reachable monster within its own sight (`UNIT_SIGHT_RADIUS`, 8 cells;
+concealed snakes excluded), else goes idle; only the nearest candidate is checked for
+reachability (`next_quarry` in `wildlife.rs`; Jakob, 2026-10-14, after the live squad test
+showed units idling while a skeleton squad cut them down).
 
 Attack orders validate all members and current target visibility before mutation.
 Stop/reassignment remains explicit. Personal cargo stays with a living hunter;
@@ -232,7 +362,8 @@ Overhead bars show health, and red rings identify wildlife. Authored sprites are
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
 Frames are authored and mirrored; reverse-facing poses remain future art work.
-All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
+All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art; archers
+use the authored bow action at range.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
 (including 12 and the earlier branch-only wildlife schema 13) reset under the existing
@@ -254,6 +385,9 @@ phone touch to select an archer and attack a wolf. A subsequent explicit WebSock
 group order recruits the squad (additive touch selection is not implemented). It verifies damage both ways,
 defeat and cleanup, captures screenshots and checks page errors. The controlled
 fixture is not evidence of natural spawn placement (domain tests cover that).
+For the archer (wolf) fixture it also requires a stationary archer with a running
+windup beyond melee distance and asserts the wolf's first damage lands at least
+three cells from the nearest archer.
 
 Browser-verifier timing: software-rendered screenshot capture can take enough
 wall time for combat and subsequent attacks to finish. Pause authoritative

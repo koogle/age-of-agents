@@ -135,6 +135,7 @@ fn completed_roads_are_fifty_percent_faster_for_all_friendly_units_only() {
             health: kind.max_health(),
             attack_seconds: 0.0,
             heading: [-1, 0],
+            level: 1,
         });
         let mut paved = plain.clone();
         lay(

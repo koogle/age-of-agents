@@ -260,6 +260,25 @@ ink colour and continuity rather than "thinner"; an earlier "thinner lines"
 prompt had barely moved line weight. Provenance:
 [lion sources](../../assets/sprites/lion_sources/provenance.json).
 
+## Large creatures keep the family's pen width (2026-10-12)
+
+Jakob asked for the new monsters to be stylistically aligned. Measured on the
+renders, `nano-banana-pro` draws contours at a nearly fixed share of the figure's
+height (about 3 per mille for the guard family), whatever the canvas size or the
+prompt ("hairline", "half as thick" and a 4K ink pass barely moved it; a lone
+pose filling a 4K canvas still gave 2.8 per mille). A giant drawn at guard size
+in its sheet and enlarged on a bigger quad therefore shows lines as much heavier
+as it is taller (cyclopes ~3x, minotaur 1.5x at display size).
+
+What worked: redraw each pose at 4K **beside a guard at true scale** in one
+image, asking for one shared pen; the giant then came out at 1.7 per mille.
+Leave a quarter-image gap so the guard separates as its own component, name the
+pose concretely (the model turns strikes into windups), and pack the giant to
+fill its cell so its quad carries the size. Judge the result by eye at true
+relative scale: the pixel stroke metric is unreliable once lines go sub-pixel.
+Source: [monster provenance](../../assets/sprites/monster_sources/provenance.json).
+Pitfall: an importable FAL script without a `__main__` guard re-ran a paid batch.
+
 ## Wildlife style correction (2026-10-05)
 
 Jakob found the shipped wolves and bears too generic and not fully aligned with the game. Refine against `assets/reference/diorama_primary.webp`: simplify dense fur into painted masses, soften dark contours and contrast, and preserve readable species silhouettes, existing idle/walk identities, camera and ground anchors. The current atlas is the edit target, not an approved style reference. Validate against the world reference and actual gameplay before release.
