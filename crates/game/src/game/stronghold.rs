@@ -14,25 +14,16 @@ pub(super) const GARRISON_TERRITORY: f64 = 14.0;
 const STRONGHOLD_SALT: u64 = 0x0068_666f_7274;
 
 impl GameWorld {
-    /// The stronghold stands on the k-th island the player discovers after home,
-    /// never the temple's, with k seeded from 2 up to the last such island, so it
-    /// is always a later island than the one the raids strike. `None` until then.
+    /// The stronghold stands alone on its own planned site (`stronghold_rank`).
+    /// `None` until a ship discovers it.
     pub(super) fn stronghold_island(&self) -> Option<usize> {
         let plan = archipelago_plan(self.seed);
-        let temple = *plan.last().expect("planned sites");
-        let ordinary = plan.len() as u64 - 2;
-        let k = 2 + worldgen::mix(self.seed ^ STRONGHOLD_SALT, 0) % (ordinary - 1);
-        self.island_origins
-            .iter()
-            .enumerate()
-            .skip(1)
-            .filter(|&(_, &o)| o != temple)
-            .nth(k as usize - 1)
-            .map(|(island, _)| island)
+        let site = plan[stronghold_rank(plan.len())];
+        self.islands.iter().position(|&island| island == site)
     }
 
     /// Raise the stronghold near the island's centre and post its garrison around it.
-    pub(super) fn place_stronghold(&mut self, site: CellCoordinate, island: usize) {
+    pub(super) fn place_stronghold(&mut self, site: Footprint, island: usize) {
         let Some(origin) = self.central_plot(site, BuildingKind::Stronghold) else {
             return;
         };

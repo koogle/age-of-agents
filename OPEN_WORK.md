@@ -22,8 +22,7 @@ once the step changes the run. The run is still too easy: a short walk from the 
    level-4 cyclopes and the minotaur, who also kills the artifact bearer the moment
    he wakes. Options: lower per-level scaling, move the minotaur's lair away from the
    temple or give the bearer a head start, and healing (step 1); re-test with archer squads.
-   Re-run the live squad test and record a video after the change. Crowded
-   high-level islands can drop some planned monsters for lack of spaced lairs.
+   Re-run the live squad test and record a video after the change.
 
 ## Future work (not needed to finish the loop)
 
@@ -32,7 +31,7 @@ once the step changes the run. The run is still too easy: a short walk from the 
   resources unlock it.
 - **Return-trip escalation.** Claiming the artifact spawns new monsters on the
   temple island and along the way home.
-- **Island types.** Volcanic, forested, ruined or barbarian-held islands with their
+- **Island types.** Volcanic, forested or ruined islands (the stronghold's burnt island is the first) with their
   own terrain look, resources and monster mix, chosen per site from the seed.
 - **Upgradable buildings** (Jakob, 2026-10-14: revisit later). Closed #103 proposed
   masonry tiers; a fresh design needs approved art and research/cost changes.

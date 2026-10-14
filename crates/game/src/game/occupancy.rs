@@ -216,7 +216,7 @@ impl GameWorld {
         {
             return Err("an id counter would reissue an existing id".into());
         }
-        if self.inventories.len() != self.island_origins.len() {
+        if self.inventories.len() != self.islands.len() {
             return Err("island inventory count does not match map".into());
         }
         for stock in self

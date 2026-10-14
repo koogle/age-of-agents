@@ -5,7 +5,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 use aoa_game::GameWorld;
 
 // No save migrations during development. Bump this when the persisted model changes.
-const STORE_VERSION: u32 = 22;
+const STORE_VERSION: u32 = 23;
 
 const DEFAULT_DB_PATH: &str = "age_of_agents.db";
 
@@ -230,6 +230,10 @@ mod tests {
                 }
                 "islands" => {
                     value["islands"] = serde_json::json!([]);
+                }
+                // Islands were bare origins before version 23.
+                "island_origins" => {
+                    value["island_origins"] = serde_json::json!([{ "column": 0, "row": 0 }]);
                 }
                 _ => {
                     value.as_object_mut().unwrap().remove(*field);

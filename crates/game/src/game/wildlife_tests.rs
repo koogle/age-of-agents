@@ -233,6 +233,11 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(world.animals, replay.animals);
             assert_eq!(&world.animals[..old.len()], old.as_slice());
             let added = &world.animals[old.len()..];
+            if world.stronghold_island() == Some(island) {
+                // The barbarians' own island holds only the garrison.
+                assert!(!added.is_empty() && added.iter().all(|a| a.kind.raids()));
+                continue;
+            }
             let level = world.island_level(island);
             // Stronghold garrisons are raiders and keep level 1.
             assert!(level >= 1 && added.iter().all(|a| a.level == level || a.kind.raids()));
@@ -271,7 +276,7 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
                     }
             );
             assert!(count(AnimalKind::Centaur) <= if level >= 3 { 3 } else { 0 });
-            let temple_island = archipelago_plan(seed).last() == world.island_origins.last();
+            let temple_island = archipelago_plan(seed).last() == world.islands.last();
             let guardians = if temple_island { 1 } else { 0 };
             assert_eq!(count(AnimalKind::Viper), 2 * guardians);
             assert_eq!(count(AnimalKind::CyclopsGeneral), guardians);

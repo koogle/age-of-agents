@@ -506,3 +506,6 @@
 {"t": 1791927439.1025488, "endpoint": "fal-ai/birefnet/v2", "tag": "stronghold-simple-cutout-0", "est_usd": 0.01, "request_id": "01a13732-c534-7a71-b0c3-21c798813ed0", "seconds": 2.5}
 {"t": 1791927442.6386852, "endpoint": "fal-ai/birefnet/v2", "tag": "stronghold-simple-cutout-1", "est_usd": 0.01, "request_id": "01a13732-d29b-7450-ab83-1c165d339df2", "seconds": 2.5}
 {"t": 1791927445.8991287, "endpoint": "fal-ai/birefnet/v2", "tag": "stronghold-simple-cutout-2", "est_usd": 0.01, "request_id": "01a13732-dfa6-7251-a544-b1b23da85c9f", "seconds": 2.5}
+{"t": 1791965701.331378, "endpoint": "fal-ai/nano-banana/edit", "tag": "terrain:burnt_forest", "est_usd": 0.08, "request_id": "01a1397a-78ee-76e3-bdfd-058c287f24ab", "seconds": 11.2}
+{"t": 1791965718.939481, "endpoint": "fal-ai/nano-banana-pro/edit", "tag": "sprite:charred_pine", "est_usd": 0.6, "request_id": "01a1397a-795a-79d2-b1b0-6bf432bc5842", "seconds": 28.8}
+{"t": 1791965742.2743344, "endpoint": "fal-ai/birefnet/v2", "tag": "cutout:charred_pine", "est_usd": 0.01, "request_id": "01a1397b-3b18-7341-9e78-ef9805e6674d", "seconds": 2.5}

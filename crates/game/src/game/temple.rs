@@ -10,7 +10,7 @@ const HOME_REACH: u16 = 3;
 
 impl GameWorld {
     /// Place the sanctuary near the middle of a freshly generated final island.
-    pub(super) fn place_temple(&mut self, site: CellCoordinate) {
+    pub(super) fn place_temple(&mut self, site: Footprint) {
         if let Some(origin) = self.central_plot(site, BuildingKind::Temple) {
             self.buildings
                 .push(building(BuildingKind::Temple, TEMPLE_ID, origin, None));
@@ -21,12 +21,11 @@ impl GameWorld {
     /// an open ring around it, so landing parties can always walk up to it.
     pub(super) fn central_plot(
         &self,
-        site: CellCoordinate,
+        site: Footprint,
         kind: BuildingKind,
     ) -> Option<CellCoordinate> {
         let (columns, rows) = kind.size();
-        let center =
-            CellCoordinate::new(site.column + WORLD_COLUMNS / 2, site.row + WORLD_ROWS / 2);
+        let center = site.middle();
         let walkable = |world: &Self, cell: CellCoordinate| {
             world.in_bounds(cell)
                 && world.terrain[usize::from(cell.row) * usize::from(world.columns())
@@ -35,9 +34,10 @@ impl GameWorld {
                 .is_walkable()
         };
         let occupancy = self.occupancy();
-        (site.row + 2..site.row + WORLD_ROWS - rows - 2)
+        let site_origin = site.origin;
+        (site_origin.row + 2..site_origin.row + site.rows - rows - 2)
             .flat_map(|row| {
-                (site.column + 2..site.column + WORLD_COLUMNS - columns - 2)
+                (site_origin.column + 2..site_origin.column + site.columns - columns - 2)
                     .map(move |column| CellCoordinate::new(column, row))
             })
             .filter(|&origin| {

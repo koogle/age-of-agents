@@ -25,7 +25,7 @@ stock = state["inventories"][0]
 state.update(
     island_id=0,
     island_count=1,
-    island_origins=[{"column": 0, "row": 0}],
+    islands=[{"origin": {"column": 0, "row": 0}, "columns": 120, "rows": 80}],
     units=[],
     resources=[],
     buildings=[],

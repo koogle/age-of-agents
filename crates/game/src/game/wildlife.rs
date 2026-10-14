@@ -265,11 +265,14 @@ impl Animal {
 impl GameWorld {
     /// The island's danger rank: its place in the planned archipelago, which
     /// orders sites by crossings from home, so the temple island ranks highest.
+    /// The stronghold's own site is skipped, so monster levels run 0..=6.
     pub(super) fn island_level(&self, island: usize) -> u8 {
-        archipelago_plan(self.seed)
+        let plan = archipelago_plan(self.seed);
+        let rank = plan
             .iter()
-            .position(|site| *site == self.island_origins[island])
-            .unwrap_or(island) as u8
+            .position(|site| *site == self.islands[island])
+            .unwrap_or(island);
+        (rank - usize::from(rank > stronghold_rank(plan.len()))) as u8
     }
 
     pub(super) fn populate_wildlife(&mut self, island: usize) {
@@ -281,12 +284,14 @@ impl GameWorld {
         // Each entry is a kind and whether it joins the last pack leader placed.
         let mut roster = Vec::new();
         let mut add = |kind, count: usize, joins: bool| roster.extend(vec![(kind, joins); count]);
-        if island == 0 {
+        if self.stronghold_island() == Some(island) {
+            // The barbarians' island holds only their fort and its garrison.
+        } else if island == 0 {
             add(Wolf, 1, false);
             add(Boar, 1, false);
         } else {
-            let temple_island = self.island_origins[island]
-                == *archipelago_plan(self.seed).last().expect("planned sites");
+            let temple_island =
+                self.islands[island] == *archipelago_plan(self.seed).last().expect("planned sites");
             let deeper = usize::from(level.saturating_sub(1));
             add(Wolf, 1 + roll(0x7769_6c64_6c69_6665, 3) + deeper / 2, false);
             add(Bear, if level >= 4 { 2 } else { 1 }, false);
@@ -375,16 +380,13 @@ impl GameWorld {
         pride: Option<CellCoordinate>,
         kind: AnimalKind,
     ) -> Option<CellCoordinate> {
-        let origin = self.island_origins[island];
+        let region = self.islands[island];
         let occupancy = self.occupancy();
         self.terrain
             .iter()
             .filter_map(|t| {
                 let c = t.coordinate();
-                (c.column >= origin.column
-                    && c.column < origin.column + WORLD_COLUMNS
-                    && c.row >= origin.row
-                    && c.row < origin.row + WORLD_ROWS
+                (region.contains(c)
                     && t.biome.is_walkable()
                     && occupancy.is_free_for(c, None)
                     && self

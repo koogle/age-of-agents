@@ -208,6 +208,12 @@ impl Renderer {
                     .resized(GROUND_SIZE, GROUND_SIZE),
             );
         }
+        // Layer 13: the stronghold island's burnt forest floor.
+        layers.push(
+            assets
+                .image("terrain/burnt_forest.webp")
+                .resized(GROUND_SIZE, GROUND_SIZE),
+        );
         let ground_layers = upload_texture(device, &gpu.queue, &layers, "ground layers");
         let repeat = device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::Repeat,

@@ -39,17 +39,83 @@ pub(super) struct Island {
 
 /// The first acceptable island for `seed`, re-rolling deterministically.
 pub(super) fn generate(seed: u64) -> Island {
-    generate_with_resources(seed, &STARTER_RESOURCES)
+    generate_with_resources(seed, &STARTER_RESOURCES, Grid::HOME)
 }
 
-fn generate_with_resources(seed: u64, kinds: &[ResourceKind]) -> Island {
+fn generate_with_resources(seed: u64, kinds: &[ResourceKind], g: Grid) -> Island {
     (0..MAX_ATTEMPTS)
-        .find_map(|attempt| attempt_island(seed, mix(seed, attempt), kinds))
+        .find_map(|attempt| attempt_island(seed, mix(seed, attempt), kinds, g))
         .expect("an acceptable island within the re-roll budget")
 }
 
-const COLUMNS: usize = WORLD_COLUMNS as usize;
-const ROWS: usize = WORLD_ROWS as usize;
+/// The cell grid an island generates on: its region's size.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) struct Grid {
+    pub columns: usize,
+    pub rows: usize,
+}
+
+impl Grid {
+    /// The home island's region.
+    pub(super) const HOME: Grid = Grid {
+        columns: WORLD_COLUMNS as usize,
+        rows: WORLD_ROWS as usize,
+    };
+
+    pub(super) fn at(self, column: usize, row: usize) -> usize {
+        row * self.columns + column
+    }
+
+    pub(super) fn neighbours4(self, index: usize) -> impl Iterator<Item = usize> {
+        let (column, row) = (index % self.columns, index / self.columns);
+        [(0i64, -1i64), (-1, 0), (1, 0), (0, 1)]
+            .into_iter()
+            .filter_map(move |(dx, dy)| {
+                let (c, r) = (column as i64 + dx, row as i64 + dy);
+                (c >= 0 && r >= 0 && c < self.columns as i64 && r < self.rows as i64)
+                    .then(|| self.at(c as usize, r as usize))
+            })
+    }
+
+    pub(super) fn neighbours8(self, index: usize) -> impl Iterator<Item = usize> {
+        let (column, row) = (index % self.columns, index / self.columns);
+        (-1i64..=1)
+            .flat_map(|dy| (-1i64..=1).map(move |dx| (dx, dy)))
+            .filter(|&(dx, dy)| (dx, dy) != (0, 0))
+            .filter_map(move |(dx, dy)| {
+                let (c, r) = (column as i64 + dx, row as i64 + dy);
+                (c >= 0 && r >= 0 && c < self.columns as i64 && r < self.rows as i64)
+                    .then(|| self.at(c as usize, r as usize))
+            })
+    }
+
+    pub(super) fn coordinate(self, index: usize) -> CellCoordinate {
+        CellCoordinate::new((index % self.columns) as u16, (index / self.columns) as u16)
+    }
+
+    /// Breadth-first distance (in steps) from every cell to the nearest source.
+    pub(super) fn distance_from(
+        self,
+        sources: impl Iterator<Item = usize>,
+        passable: impl Fn(usize) -> bool,
+    ) -> Vec<u32> {
+        let mut distance = vec![u32::MAX; self.columns * self.rows];
+        let mut queue = VecDeque::new();
+        for source in sources {
+            distance[source] = 0;
+            queue.push_back(source);
+        }
+        while let Some(cell) = queue.pop_front() {
+            for next in self.neighbours4(cell) {
+                if distance[next] == u32::MAX && passable(next) {
+                    distance[next] = distance[cell] + 1;
+                    queue.push_back(next);
+                }
+            }
+        }
+        distance
+    }
+}
 
 /// SplitMix64: a tiny, well-mixed, platform-independent hash.
 pub(super) fn mix(a: u64, b: u64) -> u64 {
@@ -107,62 +173,9 @@ impl Rng {
     }
 }
 
-fn at(column: usize, row: usize) -> usize {
-    row * COLUMNS + column
-}
-
-fn neighbours4(index: usize) -> impl Iterator<Item = usize> {
-    let (column, row) = (index % COLUMNS, index / COLUMNS);
-    [(0i64, -1i64), (-1, 0), (1, 0), (0, 1)]
-        .into_iter()
-        .filter_map(move |(dx, dy)| {
-            let (c, r) = (column as i64 + dx, row as i64 + dy);
-            (c >= 0 && r >= 0 && c < COLUMNS as i64 && r < ROWS as i64)
-                .then(|| at(c as usize, r as usize))
-        })
-}
-
-fn neighbours8(index: usize) -> impl Iterator<Item = usize> {
-    let (column, row) = (index % COLUMNS, index / COLUMNS);
-    (-1i64..=1)
-        .flat_map(|dy| (-1i64..=1).map(move |dx| (dx, dy)))
-        .filter(|&(dx, dy)| (dx, dy) != (0, 0))
-        .filter_map(move |(dx, dy)| {
-            let (c, r) = (column as i64 + dx, row as i64 + dy);
-            (c >= 0 && r >= 0 && c < COLUMNS as i64 && r < ROWS as i64)
-                .then(|| at(c as usize, r as usize))
-        })
-}
-
-fn coordinate(index: usize) -> CellCoordinate {
-    CellCoordinate::new((index % COLUMNS) as u16, (index / COLUMNS) as u16)
-}
-
-/// Breadth-first distance (in steps) from every cell to the nearest source.
-fn distance_from(
-    sources: impl Iterator<Item = usize>,
-    passable: impl Fn(usize) -> bool,
-) -> Vec<u32> {
-    let mut distance = vec![u32::MAX; COLUMNS * ROWS];
-    let mut queue = VecDeque::new();
-    for source in sources {
-        distance[source] = 0;
-        queue.push_back(source);
-    }
-    while let Some(cell) = queue.pop_front() {
-        for next in neighbours4(cell) {
-            if distance[next] == u32::MAX && passable(next) {
-                distance[next] = distance[cell] + 1;
-                queue.push_back(next);
-            }
-        }
-    }
-    distance
-}
-
-fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island> {
+fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind], g: Grid) -> Option<Island> {
     let mut rng = Rng(roll);
-    let (width, height) = (COLUMNS as f64, ROWS as f64);
+    let (width, height) = (g.columns as f64, g.rows as f64);
     // Several mountain ranges stand out from the middle, each a ridge broken
     // into peaks by ridged noise, so the start is ringed by high ground but
     // never sits on it. Rolling hills and winding valleys cover the rest; the
@@ -206,12 +219,12 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
         rng.next(),
     );
     let valley_seed = rng.next();
-    let outline = shape::outline(seed, shape_seed);
-    let raw: Vec<f64> = (0..COLUMNS * ROWS)
+    let outline = shape::outline(g, seed, shape_seed);
+    let raw: Vec<f64> = (0..g.columns * g.rows)
         .map(|index| {
             let (x, y) = (
-                (index % COLUMNS) as f64 + 0.5,
-                (index / COLUMNS) as f64 + 0.5,
+                (index % g.columns) as f64 + 0.5,
+                (index / g.columns) as f64 + 0.5,
             );
             let crags = 1.0 - (2.0 * noise(crag_seed, x / 5.0, y / 5.0) - 1.0).abs();
             let mountain = ridges
@@ -248,7 +261,7 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
         let mut size = 0;
         while let Some(cell) = queue.pop_front() {
             size += 1;
-            for next in neighbours4(cell) {
+            for next in g.neighbours4(cell) {
                 if land[next] && component[next] == usize::MAX {
                     component[next] = id;
                     queue.push_back(next);
@@ -260,15 +273,15 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
     let main = (0..sizes.len()).max_by_key(|&id| (sizes[id], usize::MAX - id))?;
     // Land must not touch the map edge: the island is surrounded by sea.
     for (index, cell) in land.iter_mut().enumerate() {
-        let (column, row) = (index % COLUMNS, index / COLUMNS);
-        let edge = column == 0 || row == 0 || column == COLUMNS - 1 || row == ROWS - 1;
+        let (column, row) = (index % g.columns, index / g.columns);
+        let edge = column == 0 || row == 0 || column == g.columns - 1 || row == g.rows - 1;
         *cell = *cell && component[index] == main && !edge;
     }
 
     // Coast first, then relief: ridges cannot accidentally fill a bay or create
     // offshore peaks. Coastal slopes taper continuously toward sea level.
-    let shore = distance_from((0..land.len()).filter(|&i| !land[i]), |i| land[i]);
-    let offshore = distance_from((0..land.len()).filter(|&i| land[i]), |i| !land[i]);
+    let shore = g.distance_from((0..land.len()).filter(|&i| !land[i]), |i| land[i]);
+    let offshore = g.distance_from((0..land.len()).filter(|&i| land[i]), |i| !land[i]);
     let mut elevation: Vec<f32> = (0..land.len())
         .map(|i| {
             if land[i] {
@@ -278,7 +291,7 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
             }
         })
         .collect();
-    let drainage = drainage::drain(&land, &mut elevation);
+    let drainage = drainage::drain(g, &land, &mut elevation);
     let top = elevation.iter().copied().fold(0.0, f32::max);
     for (i, height) in elevation.iter_mut().enumerate() {
         if land[i] {
@@ -295,24 +308,24 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
     }
     let mountain = |i: usize| land[i] && rank[i] >= MOUNTAIN_RANK;
 
-    let (river, ford) = drainage.rivers(&land, &rank);
+    let (river, ford) = drainage.rivers(g, &land, &rank);
     if river.iter().filter(|&&r| r).count() < MIN_RIVER_LENGTH {
         return None;
     }
 
     // Distance to the open sea (water reachable from the map edge) versus
     // inland lakes and rivers, and a moisture field that is wetter near water.
-    let open_sea = distance_from((0..land.len()).filter(|&i| i < COLUMNS), |i| !land[i]);
-    let coast = distance_from(
+    let open_sea = g.distance_from((0..land.len()).filter(|&i| i < g.columns), |i| !land[i]);
+    let coast = g.distance_from(
         (0..land.len()).filter(|&i| !land[i] && open_sea[i] != u32::MAX),
         |i| land[i],
     );
-    let water_any = distance_from((0..land.len()).filter(|&i| !land[i] || river[i]), |i| {
+    let water_any = g.distance_from((0..land.len()).filter(|&i| !land[i] || river[i]), |i| {
         land[i]
     });
     let terrain: Vec<TerrainCell> = (0..land.len())
         .map(|index| {
-            let (column, row) = (index % COLUMNS, index / COLUMNS);
+            let (column, row) = (index % g.columns, index / g.columns);
             let r = rank[index];
             let wet = (fbm(moisture_seed, column as f64 / 8.0, row as f64 / 8.0) * 0.7
                 + 0.3 / (1.0 + f64::from(water_any[index].min(40)) / 3.0))
@@ -357,10 +370,17 @@ fn attempt_island(seed: u64, roll: u64, kinds: &[ResourceKind]) -> Option<Island
         })
         .collect();
 
-    let (town_center, villagers) = choose_start(&terrain, &coast)?;
-    let resources = place_resources(&terrain, &ford, town_center, &mut rng, kinds);
-    let mut resources = reachable_only(&terrain, resources, town_center, villagers[0]);
-    water::place(&terrain, &ford, &mut resources, town_center, villagers[0]);
+    let (town_center, villagers) = choose_start(g, &terrain, &coast)?;
+    let resources = place_resources(g, &terrain, &ford, town_center, &mut rng, kinds);
+    let mut resources = reachable_only(g, &terrain, resources, town_center, villagers[0]);
+    water::place(
+        g,
+        &terrain,
+        &ford,
+        &mut resources,
+        town_center,
+        villagers[0],
+    );
     let enough = STARTER_RESOURCE_BUDGET.iter().all(|&(kind, cost)| {
         let total: f64 = resources
             .iter()
@@ -412,24 +432,25 @@ fn distance_to_segment(p: (f64, f64), (a, b): ((f64, f64), (f64, f64))) -> f64 {
 /// A flat, dry, central site for the town center, with two villager spots
 /// in front of it.
 fn choose_start(
+    g: Grid,
     terrain: &[TerrainCell],
     coast: &[u32],
 ) -> Option<(CellCoordinate, [CellCoordinate; 2])> {
     let settles = |c: usize, r: usize| {
-        let cell = &terrain[at(c, r)];
+        let cell = &terrain[g.at(c, r)];
         matches!(
             cell.biome,
             TerrainBiome::Meadow
                 | TerrainBiome::Prairie
                 | TerrainBiome::Scrubland
                 | TerrainBiome::Heath
-        ) && coast[at(c, r)] >= 3
+        ) && coast[g.at(c, r)] >= 3
     };
-    let center = (COLUMNS as f64 / 2.0, ROWS as f64 / 2.0);
+    let center = (g.columns as f64 / 2.0, g.rows as f64 / 2.0);
     let size = usize::from(BuildingKind::TownCenter.size().0);
     let mut best: Option<(f64, usize, usize)> = None;
-    for row in 1..ROWS - (size + 3) {
-        for column in 1..COLUMNS - (size + 1) {
+    for row in 1..g.rows - (size + 3) {
+        for column in 1..g.columns - (size + 1) {
             // Footprint plus a one-cell apron and the villager row in front.
             let site = (column - 1..column + size + 1)
                 .all(|c| (row - 1..row + size + 3).all(|r| settles(c, r)));
@@ -439,7 +460,7 @@ fn choose_start(
             let half = size as f64 / 2.0;
             let (x, y) = (column as f64 + half, row as f64 + half);
             let heights = (column..column + size).flat_map(|c| {
-                (row..row + size).map(move |r| f64::from(terrain[at(c, r)].elevation))
+                (row..row + size).map(move |r| f64::from(terrain[g.at(c, r)].elevation))
             });
             let (lo, hi) = heights.fold((f64::MAX, f64::MIN), |(lo, hi), h| (lo.min(h), hi.max(h)));
             let score = (x - center.0).hypot((y - center.1) * 1.4) + (hi - lo) * 20.0;
@@ -573,6 +594,7 @@ pub(super) fn grows_in(kind: ResourceKind) -> &'static [TerrainBiome] {
 }
 
 fn place_resources(
+    g: Grid,
     terrain: &[TerrainCell],
     ford: &[bool],
     town_center: CellCoordinate,
@@ -610,7 +632,7 @@ fn place_resources(
             };
             let candidates: Vec<usize> = (0..terrain.len())
                 .filter(|&i| {
-                    let center = coordinate(i).center();
+                    let center = g.coordinate(i).center();
                     biomes.contains(&terrain[i].biome)
                         && (closest..=furthest).contains(&center.distance(base))
                         && resources.iter().all(|r| {
@@ -650,20 +672,20 @@ fn place_resources(
                         field: None,
                         id: format!("{prefix}-{number}"),
                         kind,
-                        cell: coordinate(cell),
+                        cell: g.coordinate(cell),
                         amount,
                         capacity: amount,
                     });
                 }
                 let mut next: Vec<usize> =
-                    neighbours8(cell).filter(|n| !seen.contains(n)).collect();
+                    g.neighbours8(cell).filter(|n| !seen.contains(n)).collect();
                 // Shuffle so clusters grow into organic shapes, not squares.
                 for i in (1..next.len()).rev() {
                     next.swap(i, rng.below(i + 1));
                 }
                 for n in next {
                     if biomes.contains(&terrain[n].biome)
-                        && coordinate(n).center().distance(base) >= closest - 2.0
+                        && g.coordinate(n).center().distance(base) >= closest - 2.0
                     {
                         seen.push(n);
                         queue.push_back(n);
@@ -678,6 +700,7 @@ fn place_resources(
 /// Drops nodes nobody could stand beside, walking from the villagers'
 /// spot around water, peaks, rivers, the town center and other nodes.
 fn reachable_only(
+    g: Grid,
     terrain: &[TerrainCell],
     resources: Vec<ResourceNode>,
     town_center: CellCoordinate,
@@ -691,20 +714,20 @@ fn reachable_only(
     };
     let mut blocked: Vec<bool> = terrain.iter().map(|c| !c.biome.is_walkable()).collect();
     for cell in footprint.cells() {
-        blocked[at(usize::from(cell.column), usize::from(cell.row))] = true;
+        blocked[g.at(usize::from(cell.column), usize::from(cell.row))] = true;
     }
     for resource in &resources {
-        blocked[at(
+        blocked[g.at(
             usize::from(resource.cell.column),
             usize::from(resource.cell.row),
         )] = true;
     }
-    let start = at(usize::from(start.column), usize::from(start.row));
-    let walk = distance_from(std::iter::once(start), |i| !blocked[i]);
+    let start = g.at(usize::from(start.column), usize::from(start.row));
+    let walk = g.distance_from(std::iter::once(start), |i| !blocked[i]);
     resources
         .into_iter()
         .filter(|r| {
-            neighbours4(at(usize::from(r.cell.column), usize::from(r.cell.row)))
+            g.neighbours4(g.at(usize::from(r.cell.column), usize::from(r.cell.row)))
                 .any(|n| walk[n] != u32::MAX)
         })
         .collect()
@@ -714,7 +737,7 @@ fn reachable_only(
 mod tests;
 
 /// Each destination supplies one complementary chain in its native biomes.
-pub(super) fn destination(seed: u64, id: u64) -> Island {
+pub(super) fn destination(seed: u64, id: u64, g: Grid) -> Island {
     let special: &[ResourceKind] = match (id - 1) % 3 {
         0 => &[ResourceKind::Iron, ResourceKind::Coal],
         1 => &[ResourceKind::Clay],
@@ -722,5 +745,5 @@ pub(super) fn destination(seed: u64, id: u64) -> Island {
     };
     let mut kinds = STARTER_RESOURCES.to_vec();
     kinds.extend_from_slice(special);
-    generate_with_resources(seed, &kinds)
+    generate_with_resources(seed, &kinds, g)
 }

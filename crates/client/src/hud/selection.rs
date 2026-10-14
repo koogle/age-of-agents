@@ -214,7 +214,7 @@ pub(super) fn selection_model(snapshot: &WorldSnapshot, model: &Model) -> Option
                 .map(|u| u.unit.cell)
         });
     let island = cell
-        .and_then(|c| aoa_game::island_at(&snapshot.island_origins, c))
+        .and_then(|c| aoa_game::island_at(&snapshot.islands, c))
         .unwrap_or(model.resource_island);
     let stock = &snapshot.inventories[island];
     if !model.units.is_empty() {

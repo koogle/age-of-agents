@@ -3,7 +3,7 @@ use super::*;
 /// A run with every island charted, so the temple exists.
 fn charted() -> GameWorld {
     let mut world = GameWorld::default();
-    while world.island_origins.len() < archipelago_plan(world.seed).len() {
+    while world.islands.len() < archipelago_plan(world.seed).len() {
         world.discover_island();
     }
     world
@@ -35,7 +35,7 @@ fn beside_temple(world: &mut GameWorld, unit: usize) {
 fn only_the_final_island_gets_one_complete_temple_that_lights_no_fog() {
     let mut world = GameWorld::default();
     let plan = archipelago_plan(world.seed);
-    while world.island_origins.len() < plan.len() - 1 {
+    while world.islands.len() < plan.len() - 1 {
         world.discover_island();
         assert!(
             world
@@ -144,7 +144,7 @@ fn bringing_the_artifact_beside_the_home_town_center_wins_the_run() {
 fn every_run_places_a_temple_reachable_on_foot_from_its_coast() {
     for seed in 0..24 {
         let mut world = GameWorld::generate(seed);
-        while world.island_origins.len() < archipelago_plan(seed).len() {
+        while world.islands.len() < archipelago_plan(seed).len() {
             world.discover_island();
         }
         let temple = temple(&world).footprint();

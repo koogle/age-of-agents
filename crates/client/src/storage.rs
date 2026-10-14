@@ -57,7 +57,7 @@ impl App {
                 (point.x / terrain::CELL).max(0.0) as u16,
                 (point.y / terrain::CELL).max(0.0) as u16,
             );
-            if let Some(island) = island_at(&snapshot.island_origins, cell) {
+            if let Some(island) = island_at(&snapshot.islands, cell) {
                 self.resource_island = island;
             }
         }

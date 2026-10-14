@@ -127,7 +127,7 @@ def fixture(name, portrait=False):
         s["ships"] = [ship]
         if name == "command_sail":
             s["island_count"] = 2
-            s["island_origins"].append({"column": 184, "row": 0})
+            s["islands"].append({"origin": {"column": 184, "row": 0}, "columns": 128, "rows": 85})
             s["inventories"].append(copy.deepcopy(s["inventories"][0]))
             s["stored_inventories"].append(copy.deepcopy(s["stored_inventories"][0]))
         if name == "command_cargo":

@@ -57,7 +57,7 @@ fn water_uses_ship_capacity_and_only_supplies_the_connected_island() {
     w.discover_island();
     let before = w.clone();
     assert!(
-        w.spend_at(w.island_origins[1], &[(ResourceKind::Water, 1.0)])
+        w.spend_at(w.islands[1].origin, &[(ResourceKind::Water, 1.0)])
             .is_err()
     );
     assert_eq!(w, before);
@@ -84,7 +84,7 @@ fn transport_builds_once_with_exact_cost_and_no_housing() {
         w.tick(1.0);
     }
     assert_eq!(w.ships.len(), 1);
-    assert_eq!(w.island_origins.len(), 1);
+    assert_eq!(w.islands.len(), 1);
     assert!(w.ships[0].stopped());
     w.validate().unwrap();
 }
@@ -369,7 +369,7 @@ fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing(
         building(BuildingKind::Dock, "other-dock", c(50, 26), None),
     );
     world.discover_island();
-    let at_sea = super::islands_tests::open_water_beside(world.island_origins[1], 20);
+    let at_sea = super::islands_tests::open_water_beside(world.islands[1], 20);
     world.ships[0].cell = at_sea;
     let id = world.ships[0].id.clone();
     world
@@ -394,7 +394,7 @@ fn continuous_return_prefers_the_original_dock_and_keeps_position_until_sailing(
 fn blocked_home_dock_rejects_the_continuous_return_atomically() {
     let mut world = harbor();
     world.discover_island();
-    world.ships[0].cell = super::islands_tests::open_water_beside(world.island_origins[1], 20);
+    world.ships[0].cell = super::islands_tests::open_water_beside(world.islands[1], 20);
     for column in 20..24 {
         let mut blocker = world.ships[0].clone();
         blocker.id = format!("berth-{column}");
@@ -498,7 +498,7 @@ fn shore_ship_supplies_construction_and_accepts_partial_villager_deposits() {
     w.discover_island();
     let before = w.clone();
     assert!(
-        w.spend_at(w.island_origins[1], &[(ResourceKind::Wood, 1.0)])
+        w.spend_at(w.islands[1].origin, &[(ResourceKind::Wood, 1.0)])
             .is_err()
     );
     assert_eq!(w, before);
@@ -641,6 +641,6 @@ fn a_newly_launched_ship_can_steer_into_the_fog_at_once() {
     let id = w.ships[0].id.clone();
     let site = archipelago_plan(w.seed)[1];
     super::islands_tests::steer_toward(&mut w, &id, site);
-    assert_eq!(w.island_origins[1], site);
+    assert_eq!(w.islands[1], site);
     w.validate().unwrap();
 }

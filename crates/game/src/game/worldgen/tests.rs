@@ -1,13 +1,21 @@
 use super::*;
 
+const G: Grid = Grid::HOME;
+
 #[test]
 fn first_and_later_islands_have_reachable_renewable_riverbank_water() {
     for seed in 0..24 {
         for id in 0..4 {
+            // Later islands generate on their larger planned regions.
+            let (columns, rows) = site_size(2 * id as usize);
+            let g = Grid {
+                columns: usize::from(columns),
+                rows: usize::from(rows),
+            };
             let island = if id == 0 {
                 generate(seed)
             } else {
-                destination(seed, id)
+                destination(seed, id, g)
             };
             let sources: Vec<_> = island
                 .resources
@@ -16,13 +24,17 @@ fn first_and_later_islands_have_reachable_renewable_riverbank_water() {
                 .collect();
             assert!(!sources.is_empty(), "seed {seed}, island {id}");
             for r in sources {
-                let i = index(r.cell);
+                let i = g.at(usize::from(r.cell.column), usize::from(r.cell.row));
                 assert!(island.terrain[i].biome.is_walkable());
-                assert!(neighbours4(i).any(|n| island.terrain[n].biome == TerrainBiome::River));
+                assert!(
+                    g.neighbours4(i)
+                        .any(|n| island.terrain[n].biome == TerrainBiome::River)
+                );
                 assert_eq!(r.amount, r.capacity);
             }
             assert_eq!(
                 reachable_only(
+                    g,
                     &island.terrain,
                     island.resources.clone(),
                     island.town_center,
@@ -36,7 +48,7 @@ fn first_and_later_islands_have_reachable_renewable_riverbank_water() {
 }
 
 fn index(cell: CellCoordinate) -> usize {
-    at(usize::from(cell.column), usize::from(cell.row))
+    G.at(usize::from(cell.column), usize::from(cell.row))
 }
 
 #[test]
@@ -72,7 +84,7 @@ fn every_island_is_one_landmass_ringed_by_sea_and_beach() {
             );
         }
         let first = land.iter().position(|&l| l).unwrap();
-        let reached = distance_from(std::iter::once(first), |i| land[i]);
+        let reached = G.distance_from(std::iter::once(first), |i| land[i]);
         assert!(
             land.iter()
                 .zip(&reached)
@@ -177,7 +189,7 @@ fn every_island_has_ranges_of_peaks_and_rivers_that_reach_the_water() {
         for &peak in &peaks {
             if !seen[peak] {
                 ranges += 1;
-                let reach = distance_from(std::iter::once(peak), |i| {
+                let reach = G.distance_from(std::iter::once(peak), |i| {
                     biome(i) == TerrainBiome::Mountain
                 });
                 for (i, &d) in reach.iter().enumerate() {
@@ -192,7 +204,7 @@ fn every_island_has_ranges_of_peaks_and_rivers_that_reach_the_water() {
         );
         // Following river cells (and the fords across them) leads to the water.
         let wet = |i: usize| matches!(biome(i), TerrainBiome::River | TerrainBiome::Beach);
-        let mouth = distance_from(
+        let mouth = G.distance_from(
             (0..world.terrain.len()).filter(|&i| biome(i) == TerrainBiome::Water),
             wet,
         );
@@ -288,12 +300,12 @@ fn nobody_walks_or_builds_on_water() {
 
 #[test]
 fn relief_drains_without_uphill_steps_and_conserves_runoff() {
-    let mut land = vec![false; COLUMNS * ROWS];
+    let mut land = vec![false; G.columns * G.rows];
     let mut height = vec![-0.5; land.len()];
     // A closed bowl and flat plateau exercise spill filling, not just slopes.
     for y in 12..68 {
         for x in 12..108 {
-            let i = at(x, y);
+            let i = G.at(x, y);
             land[i] = true;
             height[i] = if (35..85).contains(&x) && (25..55).contains(&y) {
                 0.1
@@ -302,7 +314,7 @@ fn relief_drains_without_uphill_steps_and_conserves_runoff() {
             };
         }
     }
-    let flow = drainage::drain(&land, &mut height);
+    let flow = drainage::drain(G, &land, &mut height);
     let total: u32 = flow
         .accumulation
         .iter()
@@ -313,7 +325,7 @@ fn relief_drains_without_uphill_steps_and_conserves_runoff() {
     assert_eq!(total as usize, land.iter().filter(|&&l| l).count());
     for i in (0..land.len()).filter(|&i| land[i]) {
         let n = flow.downstream[i];
-        assert!(neighbours4(i).any(|adjacent| adjacent == n));
+        assert!(G.neighbours4(i).any(|adjacent| adjacent == n));
         assert!(height[n] < height[i]);
         assert!(flow.accumulation[n] >= flow.accumulation[i]);
     }
@@ -332,7 +344,7 @@ fn generated_rivers_have_a_downhill_route_to_the_sea_including_fords() {
             }
         }
         while let Some(i) = queue.pop_front() {
-            for n in neighbours4(i) {
+            for n in G.neighbours4(i) {
                 if !reached[n]
                     && matches!(
                         world.terrain[n].biome,
@@ -377,11 +389,11 @@ fn shape_families_survive_generation_and_bays_stay_open() {
             assert!((0.8..1.3).contains(&(f64::from(width) / f64::from(height))));
         }
         if kind == shape::Shape::Bay {
-            let sea = distance_from(0..COLUMNS, |i| {
+            let sea = G.distance_from(0..G.columns, |i| {
                 world.terrain[i].biome == TerrainBiome::Water
             });
             assert_ne!(
-                sea[at(COLUMNS / 2, ROWS / 2)],
+                sea[G.at(G.columns / 2, G.rows / 2)],
                 u32::MAX,
                 "seed {seed}: closed bay"
             );

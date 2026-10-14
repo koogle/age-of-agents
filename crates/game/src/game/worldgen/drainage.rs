@@ -11,17 +11,17 @@ pub(super) struct Drainage {
 /// Priority-flood depressions to their spill height, with a tiny positive slope
 /// across flats. Every land cell then has a strictly lower route to water.
 /// Heights are positive f32s, so their bit patterns have the same ordering.
-pub(super) fn drain(land: &[bool], elevation: &mut [f32]) -> Drainage {
+pub(super) fn drain(g: Grid, land: &[bool], elevation: &mut [f32]) -> Drainage {
     let mut seen: Vec<bool> = land.iter().map(|&l| !l).collect();
     let mut heap = BinaryHeap::new();
     for i in (0..land.len()).filter(|&i| !land[i]) {
-        if neighbours4(i).any(|n| land[n]) {
+        if g.neighbours4(i).any(|n| land[n]) {
             heap.push(Reverse((0_u32, i)));
         }
     }
     while let Some(Reverse((bits, cell))) = heap.pop() {
         let level = f32::from_bits(bits);
-        for next in neighbours4(cell) {
+        for next in g.neighbours4(cell) {
             if !seen[next] {
                 seen[next] = true;
                 elevation[next] = elevation[next].max(level + 0.0001);
@@ -32,7 +32,8 @@ pub(super) fn drain(land: &[bool], elevation: &mut [f32]) -> Drainage {
     let mut downstream = vec![usize::MAX; land.len()];
     let mut order: Vec<usize> = (0..land.len()).filter(|&i| land[i]).collect();
     for &i in &order {
-        downstream[i] = neighbours4(i)
+        downstream[i] = g
+            .neighbours4(i)
             .filter(|&n| elevation[n] < elevation[i])
             .min_by(|&a, &b| elevation[a].total_cmp(&elevation[b]).then(a.cmp(&b)))
             .expect("filled relief drains to water");
@@ -49,7 +50,7 @@ pub(super) fn drain(land: &[bool], elevation: &mut [f32]) -> Drainage {
 }
 
 impl Drainage {
-    pub(super) fn rivers(&self, land: &[bool], rank: &[f64]) -> (Vec<bool>, Vec<bool>) {
+    pub(super) fn rivers(&self, g: Grid, land: &[bool], rank: &[f64]) -> (Vec<bool>, Vec<bool>) {
         let mut river = vec![false; land.len()];
         let mut ford = vec![false; land.len()];
         // Headwaters need an upstream catchment, not an arbitrary random peak.
@@ -71,7 +72,7 @@ impl Drainage {
             if river
                 .iter()
                 .enumerate()
-                .any(|(i, &r)| r && near(i, source, 8))
+                .any(|(i, &r)| r && near(g, i, source, 8))
             {
                 continue;
             }
@@ -102,6 +103,7 @@ impl Drainage {
     }
 }
 
-fn near(a: usize, b: usize, cells: usize) -> bool {
-    (a % COLUMNS).abs_diff(b % COLUMNS) <= cells && (a / COLUMNS).abs_diff(b / COLUMNS) <= cells
+fn near(g: Grid, a: usize, b: usize, cells: usize) -> bool {
+    (a % g.columns).abs_diff(b % g.columns) <= cells
+        && (a / g.columns).abs_diff(b / g.columns) <= cells
 }

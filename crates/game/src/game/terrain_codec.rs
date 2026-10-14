@@ -12,7 +12,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::*;
 
-const BIOMES: [TerrainBiome; 12] = [
+const BIOMES: [TerrainBiome; 13] = [
     TerrainBiome::Meadow,
     TerrainBiome::Forest,
     TerrainBiome::Prairie,
@@ -25,6 +25,7 @@ const BIOMES: [TerrainBiome; 12] = [
     TerrainBiome::Water,
     TerrainBiome::Mountain,
     TerrainBiome::River,
+    TerrainBiome::BurntForest,
 ];
 const DIGITS: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
@@ -100,11 +101,11 @@ pub(super) fn deserialize<'de, D: Deserializer<'de>>(
         .map(|(index, (cell, height))| {
             let (visibility, biome) = match cell {
                 b'.' => (CellVisibility::Unseen, None),
-                b'a'..=b'l' => (
+                b'a'..=b'm' => (
                     CellVisibility::Explored,
                     Some(BIOMES[usize::from(cell - b'a')]),
                 ),
-                b'A'..=b'L' => (
+                b'A'..=b'M' => (
                     CellVisibility::Visible,
                     Some(BIOMES[usize::from(cell - b'A')]),
                 ),
@@ -197,4 +198,28 @@ mod tests {
             assert!(unpack(input, 8).is_err(), "{input}");
         }
     }
+
+    #[test]
+    fn every_biome_round_trips_in_both_visibilities() {
+        let terrain: Vec<SnapshotTerrainCell> = BIOMES
+            .iter()
+            .flat_map(|&biome| {
+                [CellVisibility::Explored, CellVisibility::Visible].map(|v| (biome, v))
+            })
+            .enumerate()
+            .map(|(column, (biome, visibility))| SnapshotTerrainCell {
+                column: column as u16,
+                row: 0,
+                biome: Some(biome),
+                elevation: Some(quantize(0.25)),
+                visibility,
+            })
+            .collect();
+        let json = serde_json::to_value(Wrap(terrain.clone())).unwrap();
+        let back: Wrap = serde_json::from_value(json).unwrap();
+        assert_eq!(back.0, terrain);
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct Wrap(#[serde(with = "super")] Vec<SnapshotTerrainCell>);
 }

@@ -16,7 +16,7 @@ One seamless, top-down painted texture per biome, sampled by `frontend/ground-pa
 | `tools/terrain.py` | | Generation and post-processing script |
 | `tools/ledger.jsonl` | | Per-request FAL ledger for this branch |
 
-Names: meadow, forest, prairie, highland, wetland, scrubland, heath, clayland (the eight `BIOME_COLORS` biomes), plus beach and shallows for the coastal rim.
+Names: meadow, forest, prairie, highland, wetland, scrubland, heath, clayland (the eight `BIOME_COLORS` biomes), plus beach and shallows for the coastal rim, and burnt_forest for the barbarian stronghold's island.
 
 ## Generation
 
@@ -93,3 +93,7 @@ Jakob reported it was hard to see. The previous source is retained in
 records approved references and the exact prompt. The generated full-resolution
 PNG replaces only the dirt material; sampling and stone/biome/plot assets remain
 unchanged.
+
+## Burnt forest (2026-10-14)
+
+`burnt_forest.webp` is the ash floor of the stronghold's island (`TerrainBiome::BurntForest`, texture layer 13 after the plot and road layers). Same endpoint, references, prompt prefix and `finish()` post-process as the other biomes, request `01a1397a-78ee-76e3-bdfd-058c287f24ab` (image 2 kept; image 1 had large, sparse twigs and needles on warm brown soil with little ash, which would show the repeat). Afterwards the darker-than-mean deviations were halved (lighter ones kept at 85%), because the shader's 1.8x contrast lift turned the charcoal flecks near black at gameplay zoom. Target mean (146,128,110).

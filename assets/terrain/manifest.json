@@ -153,6 +153,23 @@
         189
       ],
       "prompt_ground": "clear turquoise shallow sea water over pale sand, soft light ripples, seen from directly above"
+    },
+    "burnt_forest": {
+      "file": "burnt_forest.webp",
+      "master": "masters/burnt_forest.webp",
+      "target_mean": [
+        146,
+        128,
+        110
+      ],
+      "mean": [
+        146,
+        128,
+        109
+      ],
+      "prompt_ground": "the floor of a burnt pine forest: soft warm grey ash and dusky brown scorched earth, scattered rust-brown fallen pine needles, small blackened charcoal twigs and flakes, a few tiny tufts of fresh green regrowth; muted and painterly, never pure black",
+      "request_id": "01a1397a-78ee-76e3-bdfd-058c287f24ab",
+      "note": "Stronghold island only (TerrainBiome::BurntForest). Two images requested; image 2 kept, image 1 rejected for large, sparse twigs and needles with little ash, which would show the repeat. Same post-process as the other biomes, then darker-than-mean deviations halved so the charcoal flecks survive the shader's 1.8x contrast lift."
     }
   },
   "generation": {

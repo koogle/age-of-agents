@@ -6,7 +6,7 @@ The current prototype is an island-exploration RTS economy with a shared Rust si
 
 ## Proposed gameplay loop
 
-Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. Each run plans 5–7 islands spread across the sea; the farthest holds a temple with the Artifact of the Gods. The rest of the world stays under fog: only the temple is marked on the globe from the start, and each island generates as you reach it.
+Start on an island, gather resources, and build a settlement. Build ships to explore and settle more islands, find new resources and treasures, and research better tools and buildings. Each run plans 6–8 islands spread across the sea, growing larger the farther they lie, and the barbarians hold one of them as a burnt island; the farthest holds a temple with the Artifact of the Gods. The rest of the world stays under fog: only the temple is marked on the globe from the start, and each island generates as you reach it.
 
 Time keeps moving as you expand. Planned threats include pirates and mythical creatures, followed by increasingly destructive calamities. Runs are expected to end in defeat. Treasures and monuments unlock permanent upgrades, including new research and ways to skip early setup on later runs.
 
@@ -21,7 +21,7 @@ Wildlife combat, mythical monsters that scale with distance, barbarian raids on 
 - 17 buildings, 14 resources/products, farming with granary yield bonuses, processing, research and production queues.
 - Buildings unlocked when discovered resources support construction and productive use.
 - Transport ships with four passenger seats and cargo holds; continuous sailing between persistent islands with local inventories.
-- A seeded 5–7 island archipelago per run under fog, with only the temple island marked on the globe. The Sanctuary of the Gods holds the Artifact of the Gods; carrying it home to a town center wins the run.
+- A seeded 6–8 island archipelago per run, with later islands larger and the barbarian stronghold on its own burnt pine forest island under fog, with only the temple island marked on the globe. The Sanctuary of the Gods holds the Artifact of the Gods; carrying it home to a town center wins the run.
 - Territorial wolves, bears and boars, lion prides that hunt together, ambushing giant snakes, unit health and hunting orders.
 - Islands grow more dangerous with distance from home: stronger and more numerous wildlife, skeleton squads, centaur archers and cyclopes; the temple is guarded by a cyclops general and a minotaur that wakes when the artifact is taken. Lairs on later islands refill unless a building claims the land.
 - Barbarian war bands led by a chieftain land on the second island 5–10 minutes after the player first lands there, and again 5–10 minutes after each band is wiped out; raiders, including torchbearers, damage and destroy buildings, and villagers repair them.

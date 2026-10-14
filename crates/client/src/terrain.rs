@@ -65,6 +65,7 @@ pub fn biome_layer(biome: TerrainBiome) -> u8 {
         // water over the shallows paint, and rock and snow over the highland's.
         TerrainBiome::River => 10,
         TerrainBiome::Mountain => 11,
+        TerrainBiome::BurntForest => 12,
     }
 }
 
@@ -82,6 +83,7 @@ pub fn biome_color(biome: TerrainBiome) -> [u8; 3] {
         TerrainBiome::Clayland => [214, 142, 92],
         TerrainBiome::Mountain => [156, 148, 138],
         TerrainBiome::River => [86, 166, 200],
+        TerrainBiome::BurntForest => [146, 128, 110],
     }
 }
 pub const UNSEEN_COLOR: [u8; 3] = [233, 216, 176];

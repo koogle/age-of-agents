@@ -226,10 +226,7 @@ fn a_run_is_won_through_player_commands_alone() {
     }
     run.tick_until("both aboard", 300.0, |w| w.ships[0].passengers.len() == 2);
     let temple_site = *plan.last().unwrap();
-    let heart = CellCoordinate::new(
-        temple_site.column + WORLD_COLUMNS / 2,
-        temple_site.row + WORLD_ROWS / 2,
-    );
+    let heart = temple_site.middle();
     run.command(Command::Sail {
         ship_id: ship.clone(),
         to: heart,

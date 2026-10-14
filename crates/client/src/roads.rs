@@ -60,14 +60,14 @@ impl App {
         let Some(cells) = road_line(start, end) else {
             return false;
         };
-        let Some(island) = aoa_game::island_at(&snapshot.island_origins, start) else {
+        let Some(island) = aoa_game::island_at(&snapshot.islands, start) else {
             return false;
         };
         let mut cost = 0.0;
         for cell in cells {
             let terrain = &snapshot.terrain
                 [cell.row as usize * snapshot.columns as usize + cell.column as usize];
-            if aoa_game::island_at(&snapshot.island_origins, cell) != Some(island)
+            if aoa_game::island_at(&snapshot.islands, cell) != Some(island)
                 || terrain.visibility != aoa_game::CellVisibility::Visible
                 || terrain.biome.is_none_or(|b| !b.is_walkable())
                 || snapshot

@@ -46,6 +46,8 @@ pub enum TerrainBiome {
     Mountain,
     /// Fresh water running from the hills to the sea, crossed only at fords.
     River,
+    /// Ash and charred pines around the barbarian stronghold.
+    BurntForest,
 }
 
 impl TerrainBiome {
@@ -82,7 +84,7 @@ impl CellCoordinate {
 }
 
 /// An axis-aligned block of cells. Every static thing in the world claims one.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Footprint {
     pub origin: CellCoordinate,
     pub columns: u16,
@@ -95,6 +97,14 @@ impl Footprint {
             (self.origin.column..self.origin.column + self.columns)
                 .map(move |column| CellCoordinate::new(column, row))
         })
+    }
+
+    /// The cell at the middle of the block.
+    pub fn middle(self) -> CellCoordinate {
+        CellCoordinate::new(
+            self.origin.column + self.columns / 2,
+            self.origin.row + self.rows / 2,
+        )
     }
 
     pub fn contains(self, cell: CellCoordinate) -> bool {

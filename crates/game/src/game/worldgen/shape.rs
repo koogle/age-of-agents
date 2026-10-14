@@ -28,14 +28,14 @@ pub(super) fn land_share(seed: u64) -> f64 {
     }
 }
 
-pub(super) fn outline(seed: u64, detail: u64) -> Vec<f64> {
+pub(super) fn outline(g: Grid, seed: u64, detail: u64) -> Vec<f64> {
     let shape = kind(seed);
     let flip = mix(seed, 81) & 1 == 0;
-    (0..COLUMNS * ROWS)
+    (0..g.columns * g.rows)
         .map(|i| {
-            let (x, y) = ((i % COLUMNS) as f64 + 0.5, (i / COLUMNS) as f64 + 0.5);
-            let nx = (x - COLUMNS as f64 / 2.0) / (COLUMNS as f64 * 0.46);
-            let ny = (y - ROWS as f64 / 2.0) / (ROWS as f64 * 0.44);
+            let (x, y) = ((i % g.columns) as f64 + 0.5, (i / g.columns) as f64 + 0.5);
+            let nx = (x - g.columns as f64 / 2.0) / (g.columns as f64 * 0.46);
+            let ny = (y - g.rows as f64 / 2.0) / (g.rows as f64 * 0.44);
             // Low-frequency coordinate warping bends long coasts and bay mouths,
             // while the smaller mask noise roughens their shoreline.
             let nx = nx + (noise(mix(detail, 1), x / 35.0, y / 35.0) - 0.5) * 0.18;

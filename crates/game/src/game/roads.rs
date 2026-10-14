@@ -148,14 +148,13 @@ impl GameWorld {
         } else {
             road_line(start, end).ok_or(CommandError::InvalidBuildSite)?
         };
-        let island =
-            island_at(&self.island_origins, start).ok_or(CommandError::InvalidBuildSite)?;
+        let island = island_at(&self.islands, start).ok_or(CommandError::InvalidBuildSite)?;
         let visible = self.visible_cells();
         let occupancy = self.occupancy();
         let paths = self.static_paths(unit, &occupancy);
         let mut new = Vec::new();
         for &cell in &cells {
-            if island_at(&self.island_origins, cell) != Some(island)
+            if island_at(&self.islands, cell) != Some(island)
                 || (!visible.contains(&cell) && (!resuming || cell == start))
                 || occupancy.is_static(cell)
             {
