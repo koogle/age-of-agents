@@ -30,13 +30,8 @@ pub(super) struct StorageSite<'a> {
     pub space: f64,
 }
 
-pub fn island_at(origins: &[CellCoordinate], cell: CellCoordinate) -> Option<usize> {
-    origins.iter().position(|origin| {
-        cell.column >= origin.column
-            && cell.row >= origin.row
-            && cell.column - origin.column < WORLD_COLUMNS
-            && cell.row - origin.row < WORLD_ROWS
-    })
+pub fn island_at(islands: &[Footprint], cell: CellCoordinate) -> Option<usize> {
+    islands.iter().position(|island| island.contains(cell))
 }
 
 impl Stockpile {
@@ -47,7 +42,7 @@ impl Stockpile {
 
 impl GameWorld {
     pub fn island_at(&self, cell: CellCoordinate) -> Option<usize> {
-        island_at(&self.island_origins, cell)
+        island_at(&self.islands, cell)
     }
 
     pub fn connected_island(&self, ship: usize) -> Option<usize> {

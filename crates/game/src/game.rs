@@ -34,8 +34,8 @@ mod storage;
 pub use storage::{CargoDirection, SHIP_RESOURCE_CAPACITY, ShipConnection, island_at};
 #[cfg(test)]
 mod islands_tests;
-use islands::starting_origins;
-pub use islands::{archipelago_plan, plan_extent};
+use islands::starting_islands;
+pub use islands::{archipelago_plan, plan_extent, site_size};
 #[cfg(test)]
 mod gathering_tests;
 #[cfg(test)]
@@ -123,7 +123,8 @@ pub const DEFAULT_SEED: u64 = 0x00A6_E0F0_A6E7;
 #[serde(deny_unknown_fields)]
 pub struct GameWorld {
     pub island_id: u64,
-    pub island_origins: Vec<CellCoordinate>,
+    /// Discovered island regions in discovery order; each is a planned site.
+    pub islands: Vec<Footprint>,
     /// The island this world was generated from.
     pub seed: u64,
     pub economy_rules: EconomyRules,
@@ -173,9 +174,9 @@ pub struct BuildingView {
 pub struct WorldSnapshot {
     pub island_id: u64,
     pub island_count: usize,
-    pub island_origins: Vec<CellCoordinate>,
+    pub islands: Vec<Footprint>,
     /// The temple island's site, the only planned site revealed before discovery.
-    pub temple_site: CellCoordinate,
+    pub temple_site: Footprint,
     pub available_buildings: Vec<BuildingKind>,
     pub columns: u16,
     pub rows: u16,
@@ -340,7 +341,7 @@ impl GameWorld {
         };
         let mut world = Self {
             island_id: 0,
-            island_origins: starting_origins(),
+            islands: starting_islands(),
             seed: island.seed,
             economy_rules: EconomyRules::IslandProgression,
             tick: 0,
@@ -797,8 +798,8 @@ impl GameWorld {
                 .cloned()
                 .collect(),
             island_id: self.island_id,
-            island_count: self.island_origins.len(),
-            island_origins: self.island_origins.clone(),
+            island_count: self.islands.len(),
+            islands: self.islands.clone(),
             temple_site: *archipelago_plan(self.seed).last().expect("planned sites"),
             available_buildings: self.available_buildings(),
             columns: self.columns(),
@@ -866,7 +867,7 @@ impl GameWorld {
                 })
                 .collect(),
             ships: self.ships.clone(),
-            inventories: (0..self.island_origins.len())
+            inventories: (0..self.islands.len())
                 .map(|id| self.available_on(id))
                 .collect(),
             stored_inventories: self.inventories.clone(),

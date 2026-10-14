@@ -22,8 +22,15 @@ once the step changes the run. The run is still too easy: a short walk from the 
    level-4 cyclopes and the minotaur, who also kills the artifact bearer the moment
    he wakes. Options: lower per-level scaling, move the minotaur's lair away from the
    temple or give the bearer a head start, and healing (step 1); re-test with archer squads.
-   Re-run the live squad test and record a video after the change. Crowded
-   high-level islands can drop some planned monsters for lack of spaced lairs.
+   Re-run the live squad test and record a video after the change.
+3. **Islands grow with level** (Jakob, 2026-10-14; in progress on
+   `feat/stronghold-island`). Each island's region grows with its planned rank, from
+   120×80 at home toward about 176×115, so deeper islands have room for their
+   monsters (1–3% of lairs fail to place on level 3+ islands today).
+4. **The stronghold gets its own island** (Jakob, 2026-10-14). Runs plan 6–8 sites;
+   the extra mid-route site holds only the stronghold and its garrison, with a burnt
+   pine forest look (new painted ground and charred stumps) so it reads as the
+   barbarians' land and is easier to assault.
 
 ## Future work (not needed to finish the loop)
 

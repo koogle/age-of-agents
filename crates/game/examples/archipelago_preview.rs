@@ -52,16 +52,13 @@ fn main() {
         world.tick(0.1); // the ocean opens to the whole run once a ship exists
         // Steer into the fog toward each planned site in run order, as a player would.
         for site in aoa_game::archipelago_plan(seed).into_iter().skip(1) {
-            if world.island_origins.len() >= charted {
+            if world.islands.len() >= charted {
                 break;
             }
-            if world.island_origins.contains(&site) {
+            if world.islands.contains(&site) {
                 continue; // discovered on the way to an earlier site
             }
-            let to = CellCoordinate::new(
-                site.column + aoa_game::WORLD_COLUMNS / 2,
-                site.row + aoa_game::WORLD_ROWS / 2,
-            );
+            let to = site.middle();
             world
                 .apply_command(Command::Sail {
                     ship_id: "transport-preview".into(),

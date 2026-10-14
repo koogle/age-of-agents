@@ -101,6 +101,14 @@ Implemented in `crates/game/src/game/islands.rs`:
   parchment fog (the shader receives the fitted extent in the globe quad's
   `color.xy`); only beyond the map is open sea.
 
+## Island size and the stronghold island (pending, Jakob 2026-10-14)
+
+Jakob's direction after the monster live test: later islands are too crowded, so
+island regions should grow with level, and the stronghold should stand on its own
+extra island with a distinctive burnt pine forest look, which makes it easier to
+attack. Jakob chose an extra site (runs plan 6–8 sites) over replacing a later
+island. Not implemented yet; see [open work](../../OPEN_WORK.md).
+
 ## Player-steered voyages (2026-10-07)
 
 Jakob's direction: ships no longer go to the next island by themselves. The

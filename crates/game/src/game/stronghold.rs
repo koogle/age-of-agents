@@ -22,7 +22,7 @@ impl GameWorld {
         let temple = *plan.last().expect("planned sites");
         let ordinary = plan.len() as u64 - 2;
         let k = 2 + worldgen::mix(self.seed ^ STRONGHOLD_SALT, 0) % (ordinary - 1);
-        self.island_origins
+        self.islands
             .iter()
             .enumerate()
             .skip(1)
@@ -32,7 +32,7 @@ impl GameWorld {
     }
 
     /// Raise the stronghold near the island's centre and post its garrison around it.
-    pub(super) fn place_stronghold(&mut self, site: CellCoordinate, island: usize) {
+    pub(super) fn place_stronghold(&mut self, site: Footprint, island: usize) {
         let Some(origin) = self.central_plot(site, BuildingKind::Stronghold) else {
             return;
         };

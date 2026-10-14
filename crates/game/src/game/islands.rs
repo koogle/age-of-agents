@@ -9,8 +9,28 @@ const SITE_JITTER: u16 = 24;
 const DISCOVERY_REACH: u16 = 12;
 const SITE_SALT: u64 = 0x6172_6368_6970_656c;
 
-pub(super) fn starting_origins() -> Vec<CellCoordinate> {
-    vec![CellCoordinate::new(0, 0)]
+/// Planned rank 0 (home) is 120×80; each rank further adds this many columns
+/// and rows, so the deepest islands have room for their monsters.
+const GROWTH_PER_RANK: (u16, u16) = (8, 5);
+/// The most sites a run plans; the grid pitch fits the largest of them.
+const MAX_SITES: u16 = 7;
+
+/// The region of the site at planned rank `rank`.
+pub fn site_size(rank: usize) -> (u16, u16) {
+    let rank = rank as u16;
+    (
+        WORLD_COLUMNS + GROWTH_PER_RANK.0 * rank,
+        WORLD_ROWS + GROWTH_PER_RANK.1 * rank,
+    )
+}
+
+pub(super) fn starting_islands() -> Vec<Footprint> {
+    let (columns, rows) = site_size(0);
+    vec![Footprint {
+        origin: CellCoordinate::new(0, 0),
+        columns,
+        rows,
+    }]
 }
 
 impl GameWorld {
@@ -39,18 +59,23 @@ impl GameWorld {
     }
 
     /// The run's planned sites without generated terrain yet, in run order.
-    pub(super) fn undiscovered_sites(&self) -> Vec<CellCoordinate> {
+    pub(super) fn undiscovered_sites(&self) -> Vec<Footprint> {
         archipelago_plan(self.seed)
             .into_iter()
-            .filter(|site| !self.island_origins.contains(site))
+            .filter(|site| !self.islands.contains(site))
             .collect()
     }
 
-    fn discover_site(&mut self, origin: CellCoordinate) {
-        let id = self.island_origins.len() as u64;
-        let columns = self.columns().max(origin.column + WORLD_COLUMNS);
-        let rows = self.rows().max(origin.row + WORLD_ROWS);
-        let generated = worldgen::destination(worldgen::mix(self.seed, id), id);
+    fn discover_site(&mut self, site: Footprint) {
+        let id = self.islands.len() as u64;
+        let origin = site.origin;
+        let columns = self.columns().max(origin.column + site.columns);
+        let rows = self.rows().max(origin.row + site.rows);
+        let grid = worldgen::Grid {
+            columns: usize::from(site.columns),
+            rows: usize::from(site.rows),
+        };
+        let generated = worldgen::destination(worldgen::mix(self.seed, id), id, grid);
         self.resize_ocean(columns, rows);
         let stride = usize::from(self.columns());
         for mut cell in generated.terrain {
@@ -64,11 +89,11 @@ impl GameWorld {
             node.id = format!("island-{id}:{}", node.id);
             self.resources.push(node);
         }
-        self.island_origins.push(origin);
-        if archipelago_plan(self.seed).last() == Some(&origin) {
-            self.place_temple(origin);
+        self.islands.push(site);
+        if archipelago_plan(self.seed).last() == Some(&site) {
+            self.place_temple(site);
         } else if self.stronghold_island() == Some(id as usize) {
-            self.place_stronghold(origin, id as usize);
+            self.place_stronghold(site, id as usize);
         }
         // A course steered into the fog may now end on land: continue to the
         // reachable water nearest the tapped point, so the new coast comes into
@@ -78,17 +103,13 @@ impl GameWorld {
                 continue;
             };
             let paths = self.sea_paths(ship, self.ships[ship].cell);
-            let coast = Footprint {
-                origin,
-                columns: WORLD_COLUMNS,
-                rows: WORLD_ROWS,
-            }
-            .cells()
-            .filter(|&c| self.water_free(c, Some(ship)) && paths.cost(c).is_some())
-            .min_by_key(|c| {
-                let (dx, dy) = (c.column.abs_diff(to.column), c.row.abs_diff(to.row));
-                (u32::from(dx).pow(2) + u32::from(dy).pow(2), c.row, c.column)
-            });
+            let coast = site
+                .cells()
+                .filter(|&c| self.water_free(c, Some(ship)) && paths.cost(c).is_some())
+                .min_by_key(|c| {
+                    let (dx, dy) = (c.column.abs_diff(to.column), c.row.abs_diff(to.row));
+                    (u32::from(dx).pow(2) + u32::from(dy).pow(2), c.row, c.column)
+                });
             self.ships[ship].destination = coast;
         }
         self.populate_wildlife(id as usize);
@@ -139,20 +160,15 @@ impl GameWorld {
     /// undiscovered islands are reached only by steering into the fog.
     pub(super) fn voyage(&mut self, ship_id: &str, id: u64) -> Result<(), CommandError> {
         let ship = self.ship_index(ship_id)?;
-        let origin = *self
-            .island_origins
+        let island = *self
+            .islands
             .get(id as usize)
             .ok_or(CommandError::InvalidDestination)?;
         if let Some(dock) = self
             .buildings
             .iter()
             .filter(|b| {
-                b.kind == BuildingKind::Dock
-                    && b.is_complete()
-                    && b.origin.column >= origin.column
-                    && b.origin.column < origin.column + WORLD_COLUMNS
-                    && b.origin.row >= origin.row
-                    && b.origin.row < origin.row + WORLD_ROWS
+                b.kind == BuildingKind::Dock && b.is_complete() && island.contains(b.origin)
             })
             .min_by_key(|dock| Some(&dock.id) != self.ships[ship].home_dock_id.as_ref())
         {
@@ -164,13 +180,8 @@ impl GameWorld {
         let goals = self
             .terrain
             .iter()
-            .filter(|cell| {
-                cell.column >= origin.column
-                    && cell.column < origin.column + WORLD_COLUMNS
-                    && cell.row >= origin.row
-                    && cell.row < origin.row + WORLD_ROWS
-            })
             .map(|cell| cell.coordinate())
+            .filter(|&cell| island.contains(cell))
             .filter(|&cell| {
                 self.water_free(cell, Some(ship))
                     && [(0, -1), (-1, 0), (1, 0), (0, 1)]
@@ -203,19 +214,21 @@ impl GameWorld {
             }
         }
         let plan = archipelago_plan(self.seed);
-        let distinct: BTreeSet<_> = self.island_origins.iter().collect();
+        let distinct: BTreeSet<_> = self.islands.iter().map(|i| i.origin).collect();
         if self.island_id != 0
-            || self.island_origins.first() != plan.first()
-            || distinct.len() != self.island_origins.len()
-            || self.island_origins.iter().any(|origin| {
-                !plan.contains(origin)
-                    || origin
+            || self.islands.first() != plan.first()
+            || distinct.len() != self.islands.len()
+            || self.islands.iter().any(|island| {
+                !plan.contains(island)
+                    || island
+                        .origin
                         .column
-                        .checked_add(WORLD_COLUMNS)
+                        .checked_add(island.columns)
                         .is_none_or(|end| end > self.columns())
-                    || origin
+                    || island
+                        .origin
                         .row
-                        .checked_add(WORLD_ROWS)
+                        .checked_add(island.rows)
                         .is_none_or(|end| end > self.rows())
             })
         {
@@ -230,7 +243,7 @@ impl GameWorld {
 /// grown outward from the start so the archipelago spreads in two directions.
 /// Index 0 is the start at the origin; the last site, the farthest by crossings,
 /// holds the temple. The rest are ordered by crossings from the start.
-pub fn archipelago_plan(seed: u64) -> Vec<CellCoordinate> {
+pub fn archipelago_plan(seed: u64) -> Vec<Footprint> {
     const GRID: u64 = 3;
     let hash = |salt: u64, value: u64| worldgen::mix(seed ^ SITE_SALT ^ salt, value);
     let count = 5 + (hash(0, 0) % 3) as usize;
@@ -284,9 +297,11 @@ pub fn archipelago_plan(seed: u64) -> Vec<CellCoordinate> {
     let (slots, crossings) = best.expect("at least one attempt");
     let mut order: Vec<usize> = (0..slots.len()).collect();
     order.sort_by_key(|&i| (crossings[i], hash(1 << 32, slots[i])));
+    let (pitch_columns, pitch_rows) = site_size(usize::from(MAX_SITES) - 1);
     order
         .into_iter()
-        .map(|i| {
+        .enumerate()
+        .map(|(rank, i)| {
             let slot = slots[i];
             let jitter = |axis: u64| {
                 if slot == 0 {
@@ -295,27 +310,32 @@ pub fn archipelago_plan(seed: u64) -> Vec<CellCoordinate> {
                     (hash(axis << 40, slot) % u64::from(SITE_JITTER + 1)) as u16
                 }
             };
-            CellCoordinate::new(
-                (slot % GRID) as u16 * (WORLD_COLUMNS + OCEAN_GAP + SITE_JITTER) + jitter(1),
-                (slot / GRID) as u16 * (WORLD_ROWS + OCEAN_GAP + SITE_JITTER) + jitter(2),
-            )
+            let (columns, rows) = site_size(rank);
+            Footprint {
+                origin: CellCoordinate::new(
+                    (slot % GRID) as u16 * (pitch_columns + OCEAN_GAP + SITE_JITTER) + jitter(1),
+                    (slot / GRID) as u16 * (pitch_rows + OCEAN_GAP + SITE_JITTER) + jitter(2),
+                ),
+                columns,
+                rows,
+            }
         })
         .collect()
 }
 
 /// The map size that contains every planned site.
-pub fn plan_extent(plan: &[CellCoordinate]) -> (u16, u16) {
+pub fn plan_extent(plan: &[Footprint]) -> (u16, u16) {
     plan.iter()
         .fold((WORLD_COLUMNS, WORLD_ROWS), |(c, r), site| {
             (
-                c.max(site.column + WORLD_COLUMNS),
-                r.max(site.row + WORLD_ROWS),
+                c.max(site.origin.column + site.columns),
+                r.max(site.origin.row + site.rows),
             )
         })
 }
 
 /// Chebyshev distance from a cell to a site's region (0 inside it).
-pub(super) fn site_distance(site: CellCoordinate, cell: CellCoordinate) -> u16 {
+pub(super) fn site_distance(site: Footprint, cell: CellCoordinate) -> u16 {
     let gap = |value: u16, start: u16, length: u16| {
         if value < start {
             start - value
@@ -323,5 +343,9 @@ pub(super) fn site_distance(site: CellCoordinate, cell: CellCoordinate) -> u16 {
             value.saturating_sub(start + length - 1)
         }
     };
-    gap(cell.column, site.column, WORLD_COLUMNS).max(gap(cell.row, site.row, WORLD_ROWS))
+    gap(cell.column, site.origin.column, site.columns).max(gap(
+        cell.row,
+        site.origin.row,
+        site.rows,
+    ))
 }

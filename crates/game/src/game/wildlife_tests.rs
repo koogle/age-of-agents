@@ -271,7 +271,7 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
                     }
             );
             assert!(count(AnimalKind::Centaur) <= if level >= 3 { 3 } else { 0 });
-            let temple_island = archipelago_plan(seed).last() == world.island_origins.last();
+            let temple_island = archipelago_plan(seed).last() == world.islands.last();
             let guardians = if temple_island { 1 } else { 0 };
             assert_eq!(count(AnimalKind::Viper), 2 * guardians);
             assert_eq!(count(AnimalKind::CyclopsGeneral), guardians);

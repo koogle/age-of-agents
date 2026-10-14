@@ -80,12 +80,7 @@ impl GameWorld {
     /// Put the war band ashore on the free beach nearest the player's presence
     /// on the island that still keeps its distance, spreading inland from there.
     fn land_raiders(&mut self, wave: u32) {
-        let origin = self.island_origins[RAID_ISLAND];
-        let island = Footprint {
-            origin,
-            columns: WORLD_COLUMNS,
-            rows: WORLD_ROWS,
-        };
+        let island = self.islands[RAID_ISLAND];
         let presence: Vec<Position> = self
             .units
             .iter()

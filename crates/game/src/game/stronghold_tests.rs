@@ -33,7 +33,7 @@ fn one_stronghold_and_its_garrison_stand_on_a_later_island() {
         let island = world.island_at(fort.origin).unwrap();
         assert!(island >= 2, "seed {seed}: island {island}");
         assert_ne!(
-            world.island_origins[island],
+            world.islands[island],
             *archipelago_plan(seed).last().unwrap(),
             "never on the temple island"
         );
