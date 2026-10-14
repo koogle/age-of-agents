@@ -333,16 +333,21 @@ The 2048×1536 RGBA atlas has twelve 512×512 cells, feet at `[256,480]`, standi
 
 FAL credentials were unavailable in this session, so the built-in OpenAI image tool generated the poses against the approved identity masters and a refined hoeing draft. The draft atlases were rejected for insufficient source resolution. `field_preparation_sources/provenance.json` records generation IDs, references, exact prompts and the exception; no FAL spend occurred. `villager_field_preparation_preview.gif` shows the cycle at gameplay scale. Reproduce with `python3 scripts/pack_field_preparation.py` (Pillow), then run `python3 scripts/check_field_preparation_assets.py`. The new cycle passes the HD minimum; the full sprite audit also includes this cycle.
 
-## Shore-facing docks (2026-10-05)
+## Shore-facing docks (updated 2026-10-14)
 
-`buildings_hd` now has seven rows (2048×3584): its four original rows remain
-pixel-identical, followed by `dock_east`, `dock_north`, and `dock_west`. The
-original `dock` faces south (+row). Every row has four 512×512 construction
-frames, packed from retained 724×724 directional source cells. These are upright
-quarter-turn views, not rotated billboards. `scripts/pack_building_sprites.py`
-reproduces the atlas; structural deck corners in `building_sources/footprints.json`
-register the art to the same 4×4 plot. Sources and generation/refinement details
-are in [directions/provenance.json](building_sources/directions/provenance.json).
+`buildings_hd` has five rows (2048×2560): house, granary, watchtower, south-facing
+`dock`, and north-facing `dock_north`. Each has four 512×512 construction frames,
+packed from retained 724×724 directional source cells. The client mirrors south
+for east and north for west (PR #144), halving dock frames from 16 to 8; retained
+frame pixels and authored ground corners match the previous seven-row atlas.
+
+`scripts/pack_building_sprites.py` reproduces the atlas from the retained cutouts.
+Structural deck corners in `building_sources/footprints.json` register the art to
+the same 4×4 plot. Mirrored rendering reverses U coordinates and reflects the
+atlas-local corner X coordinates before fitting, so placement ghosts and placed
+docks stay on their plots. The eight derived east/west cutouts were removed; the
+original generation strips and prompts remain historical sources in
+[directions/provenance.json](building_sources/directions/provenance.json).
 
 ### Riverbank water marker
 

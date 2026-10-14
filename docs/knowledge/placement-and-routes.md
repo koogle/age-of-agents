@@ -117,7 +117,9 @@ diagonal-only water. Both domain validation and client preview use this rule.
 The snapshot helper samples only disclosed terrain and falls back to south when
 no water is known. Placed docks and ghosts use the same helper. Static coastlines
 make facing derived data, so no new persisted field or save reset is needed.
-All four views have foundation, wall, roof and complete frames; see the
+All four facings keep foundation, wall, roof and complete appearances. The
+client stores south and north artwork, mirroring south for east and north for
+west; mirrored ground-corner registration keeps every stage on its plot. See the
 [directional provenance](../../assets/sprites/building_sources/directions/provenance.json).
 
 

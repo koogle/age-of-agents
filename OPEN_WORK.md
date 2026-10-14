@@ -36,11 +36,18 @@ once the step changes the run. The run is still too easy: a short walk from the 
   temple island and along the way home.
 - **Island types.** Volcanic, forested or ruined islands (the stronghold's burnt island is the first) with their
   own terrain look, resources and monster mix, chosen per site from the seed.
+- **Upgradable buildings** (Jakob, 2026-10-14: revisit later). Closed #103 proposed
+  masonry tiers; a fresh design needs approved art and research/cost changes.
 
 ## Unresolved
+- **Rear dock timber.** The north dock art (and the west dock mirrored from it) has
+  greyer wood than the south and east; needs a color-matching pass.
 
-- **Branches on the pre-rewrite history.** Open PR #144 needs rebasing onto the
-  rewritten `master`; stale remote branches (including closed #72 and #103) should be deleted.
+- **Stale branches from the pre-rewrite history** (including closed #72 and #103)
+  should be deleted from the remote.
+- **Client placement duplicates the simulation's rules.** `crates/client/src/placement.rs`
+  re-implements resource, unit, building, terrain and bounds blocking; move it onto
+  shared `aoa_game` snapshot helpers (the one part of closed #72 still worth doing).
 - **Performance.** Populated archipelagos are unprofiled; the
   [map budget](docs/CONTINUOUS_MAP.md) covers only the starter world.
 - **Economy refinement** per [the roadmap](ROADMAP.md).

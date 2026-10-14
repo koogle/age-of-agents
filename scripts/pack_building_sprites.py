@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets/sprites/building_sources"
 DEST = ROOT / "assets/sprites"
 CELL, BASE, FIT_H, FIT_W = 512, 496, 472, 488
-KINDS = ("house", "granary", "watchtower", "dock", "dock_east", "dock_north", "dock_west")
+KINDS = ("house", "granary", "watchtower", "dock", "dock_north")
 STAGES = ("foundation", "walls", "roof", "complete")
 
 
