@@ -158,14 +158,30 @@ focused topic from the [knowledge index](INDEX.md).
 
 ## Directional dock integration (2026-10-05)
 
-The building packer appends three directional rows to the existing atlas, keeping
-all original pixels and UV rectangles. Use the retained 2172×724 strips in
+The original integration appended three directional rows to the building atlas.
+The two-view reuse below replaces that layout: retained pixels stay identical, but
+the north row moves and UVs use the smaller atlas. Use the retained 2172×724 strips in
 `assets/sprites/building_sources/directions`; the earlier 1254×1254 construction
 sheet was rejected because its cells were only 418px. Each integrated source
 cell is 724×724 before packing down to 512×512. Manual structural deck corners
 register each construction stage, and the atlas manifest drives texture dimensions.
 The new geometry remains upright in the fixed camera. Domain facing and preview
 behavior are documented in [placement](placement-and-routes.md#dock-orientation-2026-10-05).
+
+## Two-view dock reuse (2026-10-06, ported 2026-10-14)
+
+Jakob requested halving the dock artwork by mirroring two views (PR #144). Keep
+the south/front and north/rear rows across foundation, walls, roof and completion;
+east mirrors south and west mirrors north. Mirror the registered ground corners
+with the UVs so plot fitting and placement previews remain aligned. East
+construction therefore follows the south progression (pilings, open frame, lattice
+roof), and baked highlights flip with the reflection. The atlas PNG shrinks 31%
+(6.26 MB to 4.31 MB) and base-level RGBA texture storage by 8 MiB.
+
+Jakob noted during review that the north/rear source has darker, greyer timber than
+the south/front source; mirroring carries that existing mismatch into west. The
+reduction does not fix or approve it; a later art pass should match timber across
+both source views (see the alternatives note below).
 
 ## Water icon correction (2026-10-06)
 

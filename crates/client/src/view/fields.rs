@@ -50,6 +50,7 @@ fn plot(sheets: &Sheets, heights: &Heights, center: Vec3, stage: usize) -> (usiz
             atlas: art.size,
             cell: art.cell,
             corners: art.footprints["field"][stage],
+            mirror: false,
         },
         heights,
         center,
