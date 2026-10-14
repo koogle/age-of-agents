@@ -298,6 +298,24 @@ fn both_settlements_keep_producing_from_local_resources() {
 }
 
 #[test]
+fn only_the_stronghold_island_is_burnt() {
+    let mut world = GameWorld::generate(17);
+    let plan = archipelago_plan(17);
+    while world.islands.len() < plan.len() {
+        world.discover_island();
+    }
+    let fort = plan[stronghold_rank(plan.len())];
+    let burnt: Vec<_> = world
+        .terrain
+        .iter()
+        .filter(|c| c.biome == TerrainBiome::BurntForest)
+        .collect();
+    assert!(burnt.len() > usize::from(fort.columns) * usize::from(fort.rows) / 4);
+    assert!(burnt.iter().all(|c| fort.contains(c.coordinate())));
+    world.validate().unwrap();
+}
+
+#[test]
 fn expanded_snapshot_terrain_round_trips_runtime_dimensions() {
     let mut world = GameWorld::default();
     world.discover_island();

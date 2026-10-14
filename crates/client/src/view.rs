@@ -546,12 +546,12 @@ impl WorldView {
             let center = terrain::cell_center(resource.cell);
             if resource.kind == ResourceKind::Wood {
                 // One tree per cell, so woodlines read as dense stands: dark
-                // cypresses, or gnarled olives on the heath.
-                let olive = self.biome_at(column, row) == Some(TerrainBiome::Heath);
-                let (tree, base) = if olive {
-                    ("olive", 0.62)
-                } else {
-                    ("cypress", 0.85)
+                // cypresses, gnarled olives on the heath, charred pines on the
+                // stronghold's burnt island.
+                let (tree, base) = match self.biome_at(column, row) {
+                    Some(TerrainBiome::Heath) => ("olive", 0.62),
+                    Some(TerrainBiome::BurntForest) => ("charred_pine", 0.85),
+                    _ => ("cypress", 0.85),
                 };
                 let node = if fraction > 0.0 { tree } else { "stump" };
                 let x = center.x + (random(seed) - 0.5) * 0.12;

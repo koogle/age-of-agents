@@ -10,6 +10,9 @@ const BEACH: i32 = 8;
 // shallows) and bare peaks (painted with the highland, then turned to rock).
 const RIVER: i32 = 10;
 const MOUNTAIN: i32 = 11;
+// The stronghold island's ash floor, painted from the last texture layer.
+const BURNT: i32 = 12;
+const BURNT_LAYER: i32 = 13;
 
 struct VOut {
     @builtin(position) clip: vec4<f32>,
@@ -36,8 +39,8 @@ fn layer_at(cell: vec2<f32>) -> i32 {
 
 // rgb = painted colour (linear), a = 1 where the biome is known.
 fn paint_sample(xz: vec2<f32>, layer: i32) -> vec4<f32> {
-    let known = select(1.0, 0.0, layer > MOUNTAIN);
-    let l = select(min(layer, 9), 3, layer == MOUNTAIN);
+    let known = select(1.0, 0.0, layer > BURNT);
+    let l = select(select(min(layer, 9), 3, layer == MOUNTAIN), BURNT_LAYER, layer == BURNT);
     let uv = xz / REPEAT;
     let a = textureSample(ground_layers, repeat_sampler, uv, l).rgb;
     let b = textureSample(ground_layers, repeat_sampler, mat2x2<f32>(0.8, -0.6, 0.6, 0.8) * uv * 0.43 + 0.37, l).rgb;
@@ -152,7 +155,7 @@ fn fs(in: VOut) -> @location(0) vec4<f32> {
     let edge = min(q, g.placement.zw - q);
     let near = all(q >= vec2<f32>(-2.0)) && all(q <= g.placement.zw + 2.0);
     let placing = g.placement_color.a > 0.0;
-    let known = layer_at(floor(cell)) <= MOUNTAIN && wild < 0.01;
+    let known = layer_at(floor(cell)) <= BURNT && wild < 0.01;
     if known && (g.grid.x > 0.5 || (placing && near)) {
         color = mix(color, vec3<f32>(0.88, 0.92, 0.82), line * 0.4);
     }

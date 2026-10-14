@@ -19,6 +19,7 @@ pub fn manifest() -> Vec<String> {
     files.push("terrain/cobblestone.png".into());
     files.push("terrain/road_dirt.png".into());
     files.push("terrain/road_stone.png".into());
+    files.push("terrain/burnt_forest.webp".into());
     files.push("sprites/villager_idle_hd.png".into());
     files.push("sprites/villager.json".into());
     files.push("sprites/villager_idle_hd.json".into());

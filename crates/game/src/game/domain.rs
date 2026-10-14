@@ -46,6 +46,8 @@ pub enum TerrainBiome {
     Mountain,
     /// Fresh water running from the hills to the sea, crossed only at fords.
     River,
+    /// Ash and charred pines around the barbarian stronghold.
+    BurntForest,
 }
 
 impl TerrainBiome {

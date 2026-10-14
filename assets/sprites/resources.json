@@ -215,6 +215,19 @@
    "unitsPerPixel": 0.0018,
    "worldSize": 0.84,
    "measured": "height"
+  },
+  "charred_pine": {
+   "stages": [
+    [
+     3072,
+     1024,
+     512,
+     512
+    ]
+   ],
+   "unitsPerPixel": 0.003448,
+   "worldSize": 1.6,
+   "measured": "height"
   }
  }
 }

@@ -78,9 +78,24 @@ impl GameWorld {
         let generated = worldgen::destination(worldgen::mix(self.seed, id), id, grid);
         self.resize_ocean(columns, rows);
         let stride = usize::from(self.columns());
+        let plan = archipelago_plan(self.seed);
+        let burnt = plan[stronghold_rank(plan.len())] == site;
         for mut cell in generated.terrain {
             cell.column += origin.column;
             cell.row += origin.row;
+            // The barbarians have burnt the green land around their stronghold.
+            if burnt
+                && matches!(
+                    cell.biome,
+                    TerrainBiome::Meadow
+                        | TerrainBiome::Forest
+                        | TerrainBiome::Prairie
+                        | TerrainBiome::Heath
+                        | TerrainBiome::Scrubland
+                )
+            {
+                cell.biome = TerrainBiome::BurntForest;
+            }
             self.terrain[usize::from(cell.row) * stride + usize::from(cell.column)] = cell;
         }
         for mut node in generated.resources {
@@ -90,7 +105,7 @@ impl GameWorld {
             self.resources.push(node);
         }
         self.islands.push(site);
-        if archipelago_plan(self.seed).last() == Some(&site) {
+        if plan.last() == Some(&site) {
             self.place_temple(site);
         } else if self.stronghold_island() == Some(id as usize) {
             self.place_stronghold(site, id as usize);
