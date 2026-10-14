@@ -11,6 +11,7 @@ use crate::gpu::{
     upload_texture,
 };
 use crate::hud::Quad;
+use crate::shadows::Shadows;
 use crate::terrain::{self, GroundVertex};
 
 mod map;
@@ -126,6 +127,10 @@ pub struct Renderer {
     sprite_buffer: wgpu::Buffer,
     decal_pipeline: wgpu::RenderPipeline,
     decal_buffer: wgpu::Buffer,
+    /// Generated ground shadows, sampled from the last sheet.
+    shadow_pipeline: wgpu::RenderPipeline,
+    shadow_buffer: wgpu::Buffer,
+    shadows: Shadows,
     post_layout: wgpu::BindGroupLayout,
     post_sampler: wgpu::Sampler,
     post_uniforms: [wgpu::Buffer; 3],
@@ -415,6 +420,33 @@ impl Renderer {
                 },
             )
         };
+        let shadow_module = shader(device, "shadow", include_str!("shaders/shadow.wgsl"));
+        let shadow_pipeline = pipeline(
+            device,
+            PipelineSpec {
+                label: "ground shadow",
+                module: &shadow_module,
+                layouts: &[Some(&globals_layout), Some(&sheet_layout)],
+                buffers: &[Some(wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Sprite>() as u64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &sprite_attributes,
+                })],
+                format: SCENE_FORMAT,
+                // Darken the ground; scene alpha stays the grading weight.
+                blend: Some(wgpu::BlendState {
+                    color: wgpu::BlendComponent::OVER,
+                    alpha: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::Zero,
+                        dst_factor: wgpu::BlendFactor::One,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                }),
+                depth: Some((false, wgpu::CompareFunction::LessEqual)),
+                vs: "vs",
+                fs: "fs",
+            },
+        );
         let sprite_pipeline = make_sprite_pipeline(false);
         let ghost_pipeline = make_sprite_pipeline(true);
         let silhouette_pipeline = pipeline(
@@ -466,6 +498,7 @@ impl Renderer {
         );
         let sprite_buffer = instance_buffer(device, 64 * 1024);
         let decal_buffer = instance_buffer(device, 16 * 1024);
+        let shadow_buffer = instance_buffer(device, 64 * 1024);
 
         // Finish passes.
         let post_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -622,6 +655,9 @@ impl Renderer {
             sprite_buffer,
             decal_pipeline,
             decal_buffer,
+            shadow_pipeline,
+            shadow_buffer,
+            shadows: Shadows::parse(assets.bytes("sprites/shadows.json")),
             post_layout,
             post_sampler,
             post_uniforms,
@@ -732,6 +768,11 @@ impl Renderer {
             bytemuck::bytes_of(&post([0.0, 1.0 / height], true)),
         );
 
+        let shadows: Vec<Sprite> = sprites
+            .iter()
+            .filter_map(|(sheet, sprite)| self.shadows.of(*sheet, sprite))
+            .collect();
+        let shadows = shadows.as_slice();
         sprites.sort_by_key(|(sheet, sprite)| (sprite.tint[3] < 1.0, *sheet));
         let instances: Vec<Sprite> = sprites.iter().map(|(_, sprite)| *sprite).collect();
         ensure_capacity(
@@ -741,6 +782,13 @@ impl Renderer {
         );
         gpu.queue
             .write_buffer(&self.sprite_buffer, 0, bytemuck::cast_slice(&instances));
+        ensure_capacity(
+            &gpu.device,
+            &mut self.shadow_buffer,
+            std::mem::size_of_val(shadows),
+        );
+        gpu.queue
+            .write_buffer(&self.shadow_buffer, 0, bytemuck::cast_slice(shadows));
         ensure_capacity(
             &gpu.device,
             &mut self.decal_buffer,
@@ -797,6 +845,12 @@ impl Renderer {
             pass.set_vertex_buffer(0, self.ground.0.slice(..));
             pass.set_index_buffer(self.ground.1.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..self.ground.2, 0, 0..1);
+            if !shadows.is_empty() {
+                pass.set_pipeline(&self.shadow_pipeline);
+                pass.set_bind_group(1, &self.sheets[self.sheets.len() - 1].bind_group, &[]);
+                pass.set_vertex_buffer(0, self.shadow_buffer.slice(..));
+                pass.draw(0..6, 0..shadows.len() as u32);
+            }
             if !decals.is_empty() {
                 pass.set_pipeline(&self.decal_pipeline);
                 pass.set_vertex_buffer(0, self.decal_buffer.slice(..));

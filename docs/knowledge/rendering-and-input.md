@@ -88,3 +88,14 @@ Jakob clarified that the refactor should reduce source lines. Repeated
 GPU bind-group descriptor construction is consolidated with one local helper for the renderer's
 contiguous bindings. Resource order, texture views, layout, filtering and shader
 behavior are preserved. This is GPU setup glue, not a renderer/engine framework.
+
+## Generated ground shadows (2026-10-14, draft)
+
+`shadows.rs` maps each drawn sprite (sheet, frame rect, uv mirroring) to an
+authored mask; `shaders/shadow.wgsl` draws it after terrain and before sea and
+sprites. Masks are screen-space pictures, so the quad is placed like its sprite's
+and each corner slides along the view ray to the anchor's ground plane: in the
+orthographic view that keeps screen position and gives ground depth. The output
+is premultiplied for the OVER blend and leaves scene alpha (grading weight)
+untouched; non-premultiplied colour washed whole quads. Small terrain bumps clip
+an unlifted mask, so it is lifted 0.4 units toward the camera. Overlaps stack.

@@ -13,6 +13,7 @@ mod placement;
 mod render;
 mod reset;
 mod roads;
+mod shadows;
 mod snapshots;
 mod source;
 mod storage;
@@ -834,6 +835,8 @@ fn sheet_images(assets: &Assets) -> Vec<Rgba> {
         assets.image("sprites/villager_field_preparation.png"),
         assets.image("sprites/wildlife.png"),
         assets.image("sprites/buildings_sanctuary.png"),
+        // Last: generated ground shadows (`shadows.rs`).
+        assets.image("sprites/shadows.png"),
     ]
 }
 

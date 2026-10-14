@@ -1,0 +1,414 @@
+{"key": "npc/villager/front", "sheet": "villager_idle_hd", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139cf-793b-7b20-9707-fc5c74b14eef", "est_usd": 0.15, "submitted": 1791971260.6840277}
+{"key": "building/house/3", "sheet": "buildings_hd", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139cf-79ae-7ae0-97e4-3d641bfdaf37", "est_usd": 0.15, "submitted": 1791971260.797956}
+{"key": "npc/villager/front", "completed": 1791971280.3780456}
+{"key": "building/house/3", "completed": 1791971283.5163586}
+{"key": "building/granary/1", "sheet": "buildings_hd", "rect": [512, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9d65-74a3-9beb-b3b3de9b19c4", "est_usd": 0.15, "submitted": 1791971335.482198}
+{"key": "building/house/1", "sheet": "buildings_hd", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9d66-7dd2-bd49-6548ddd685bc", "est_usd": 0.15, "submitted": 1791971335.4858892}
+{"key": "building/granary/0", "sheet": "buildings_hd", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9daf-7b62-9144-8e67d6137f72", "est_usd": 0.15, "submitted": 1791971335.5701528}
+{"key": "building/house/0", "sheet": "buildings_hd", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9dcc-7cf3-9f32-3119c7ac1c79", "est_usd": 0.15, "submitted": 1791971335.5829537}
+{"key": "building/granary/2", "sheet": "buildings_hd", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9de6-7e43-8d4f-f8acd4bb421b", "est_usd": 0.15, "submitted": 1791971335.6204848}
+{"key": "building/house/2", "sheet": "buildings_hd", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-9e60-7582-ba69-65f3ea6fd8f4", "est_usd": 0.15, "submitted": 1791971335.7356398}
+{"key": "building/granary/1", "completed": 1791971354.934792}
+{"key": "building/house/1", "completed": 1791971355.1955152}
+{"key": "building/granary/3", "sheet": "buildings_hd", "rect": [1536, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-eb72-76a0-93a6-6cc8c030f982", "est_usd": 0.15, "submitted": 1791971355.4790764}
+{"key": "building/watchtower/0", "sheet": "buildings_hd", "rect": [0, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-ec32-70b3-be17-415094799973", "est_usd": 0.15, "submitted": 1791971355.6777556}
+{"key": "building/granary/2", "completed": 1791971358.1418839}
+{"key": "building/granary/0", "completed": 1791971358.3451426}
+{"key": "building/house/0", "completed": 1791971358.4969163}
+{"key": "building/watchtower/1", "sheet": "buildings_hd", "rect": [512, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-f7e0-7252-925d-368326fe7b6a", "est_usd": 0.15, "submitted": 1791971358.6437933}
+{"key": "building/house/2", "completed": 1791971358.6818001}
+{"key": "building/watchtower/2", "sheet": "buildings_hd", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-f8be-7ad2-8f5b-ac108dfc9fb5", "est_usd": 0.15, "submitted": 1791971358.8731701}
+{"key": "building/watchtower/3", "sheet": "buildings_hd", "rect": [1536, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-f946-7f71-b35a-bd27a7300c85", "est_usd": 0.15, "submitted": 1791971359.0075507}
+{"key": "building/dock/0", "sheet": "buildings_hd", "rect": [0, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d0-fa0d-74a2-be04-fa9130d82838", "est_usd": 0.15, "submitted": 1791971359.2097712}
+{"key": "building/watchtower/1", "completed": 1791971378.0932915}
+{"key": "building/watchtower/0", "completed": 1791971378.6335545}
+{"key": "building/dock/0/mirror", "sheet": "buildings_hd", "rect": [0, 1536, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-4613-7ec0-a95c-a25c46245d0b", "est_usd": 0.15, "submitted": 1791971378.6652994}
+{"key": "building/dock/1", "sheet": "buildings_hd", "rect": [512, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-47da-7d50-992d-dd261e640a22", "est_usd": 0.15, "submitted": 1791971379.1250098}
+{"key": "building/dock/0", "completed": 1791971381.9984128}
+{"key": "building/watchtower/2", "completed": 1791971382.0476093}
+{"key": "building/dock/1/mirror", "sheet": "buildings_hd", "rect": [512, 1536, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-5579-7b52-9820-c7f44fdee904", "est_usd": 0.15, "submitted": 1791971382.610956}
+{"key": "building/dock/2", "sheet": "buildings_hd", "rect": [1024, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-5629-7e50-8eef-7ee42bedb8a8", "est_usd": 0.15, "submitted": 1791971382.7900577}
+{"key": "building/dock/0/mirror", "completed": 1791971398.2679214}
+{"key": "building/dock/1", "completed": 1791971398.9072983}
+{"key": "building/dock/2/mirror", "sheet": "buildings_hd", "rect": [1024, 1536, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-95f5-7671-b997-6e19dd85c38d", "est_usd": 0.15, "submitted": 1791971399.127942}
+{"key": "building/dock/3", "sheet": "buildings_hd", "rect": [1536, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-971c-7c32-b880-f8860957acce", "est_usd": 0.15, "submitted": 1791971399.4137752}
+{"key": "building/dock/2", "completed": 1791971402.4309459}
+{"key": "building/dock/3/mirror", "sheet": "buildings_hd", "rect": [1536, 1536, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-a572-7c62-b449-03c63d708cf3", "est_usd": 0.15, "submitted": 1791971403.0912995}
+{"key": "building/dock/1/mirror", "completed": 1791971405.394638}
+{"key": "building/dock_north/0", "sheet": "buildings_hd", "rect": [0, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-b0a7-7762-9c35-fc85976a9d80", "est_usd": 0.15, "submitted": 1791971405.946362}
+{"key": "building/dock/2/mirror", "completed": 1791971421.9592974}
+{"key": "building/dock/3", "completed": 1791971422.1590242}
+{"key": "building/dock_north/0/mirror", "sheet": "buildings_hd", "rect": [0, 2048, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-f17d-7e03-b6a9-462ced7d6da2", "est_usd": 0.15, "submitted": 1791971422.5445518}
+{"key": "building/dock/3/mirror", "completed": 1791971422.5905726}
+{"key": "building/dock_north/1", "sheet": "buildings_hd", "rect": [512, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-f2a7-78f3-841d-7b84332cfbe9", "est_usd": 0.15, "submitted": 1791971422.8506873}
+{"key": "building/dock_north/1/mirror", "sheet": "buildings_hd", "rect": [512, 2048, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d1-f3d2-7891-8790-42eaae29f06e", "est_usd": 0.15, "submitted": 1791971423.202021}
+{"key": "building/dock_north/0", "completed": 1791971428.833868}
+{"key": "building/dock_north/2", "sheet": "buildings_hd", "rect": [1024, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-0c3b-7c71-bc7f-07ab4223b96a", "est_usd": 0.15, "submitted": 1791971429.3916938}
+{"key": "building/dock_north/1", "completed": 1791971442.3916867}
+{"key": "building/dock_north/0/mirror", "completed": 1791971442.418044}
+{"key": "building/dock_north/3", "sheet": "buildings_hd", "rect": [1536, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-4172-7f50-a2fe-06ab1e64dd73", "est_usd": 0.15, "submitted": 1791971443.021622}
+{"key": "building/dock_north/2/mirror", "sheet": "buildings_hd", "rect": [1024, 2048, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-4176-70e3-aa8a-c2e17f62dd4f", "est_usd": 0.15, "submitted": 1791971443.0226688}
+{"key": "building/dock_north/1/mirror", "completed": 1791971446.2845685}
+{"key": "building/dock_north/3/mirror", "sheet": "buildings_hd", "rect": [1536, 2048, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-5059-7743-a529-c5b00b2dee7f", "est_usd": 0.15, "submitted": 1791971446.8300307}
+{"key": "building/dock_north/2", "completed": 1791971452.390769}
+{"key": "building/mining_camp/0", "sheet": "buildings_economy", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-69cd-75e3-8ed1-32abc49812a5", "est_usd": 0.15, "submitted": 1791971453.3468106}
+{"key": "building/dock_north/2/mirror", "completed": 1791971462.9237745}
+{"key": "building/dock_north/3", "completed": 1791971463.2986047}
+{"key": "building/mining_camp/1", "sheet": "buildings_economy", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-919d-72b1-a310-aca8e8f00c93", "est_usd": 0.15, "submitted": 1791971463.5393918}
+{"key": "building/mining_camp/2", "sheet": "buildings_economy", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-92a1-7a30-89a1-a7d1fd7730f4", "est_usd": 0.15, "submitted": 1791971463.795293}
+{"key": "building/dock_north/3/mirror", "completed": 1791971466.5927012}
+{"key": "building/mining_camp/3", "sheet": "buildings_economy", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-9fd7-7f03-acd4-6d016dd0a412", "est_usd": 0.15, "submitted": 1791971467.1888926}
+{"key": "building/mining_camp/0", "completed": 1791971473.718157}
+{"key": "building/farm/0", "sheet": "buildings_economy", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-bb91-78d1-93d5-f60a780fbc7b", "est_usd": 0.15, "submitted": 1791971474.2833765}
+{"key": "building/granary/3", "completed": 1791971476.5387626}
+{"key": "building/farm/1", "sheet": "buildings_economy", "rect": [512, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-c65e-7170-8c29-26a6cc6d7f83", "est_usd": 0.15, "submitted": 1791971477.0553622}
+{"key": "building/watchtower/3", "completed": 1791971483.335701}
+{"key": "building/farm/2", "sheet": "buildings_economy", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-e170-77a2-b9ff-73cd92d25971", "est_usd": 0.15, "submitted": 1791971483.976507}
+{"key": "building/mining_camp/2", "completed": 1791971484.2162304}
+{"key": "building/farm/3", "sheet": "buildings_economy", "rect": [1536, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-e6a7-7b71-9431-6d04b8ad8e76", "est_usd": 0.15, "submitted": 1791971485.318548}
+{"key": "building/mining_camp/3", "completed": 1791971487.097159}
+{"key": "building/lumber_mill/0", "sheet": "buildings_economy", "rect": [0, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d2-f055-7b33-b164-97e4f240e25f", "est_usd": 0.15, "submitted": 1791971487.7901855}
+{"key": "building/farm/0", "completed": 1791971493.798084}
+{"key": "building/lumber_mill/1", "sheet": "buildings_economy", "rect": [512, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-0a83-75e2-bfd6-00b196cab661", "est_usd": 0.15, "submitted": 1791971494.4906344}
+{"key": "building/farm/1", "completed": 1791971500.3129225}
+{"key": "building/lumber_mill/2", "sheet": "buildings_economy", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-24f9-7b83-8b78-ff6be2af402c", "est_usd": 0.15, "submitted": 1791971501.2606084}
+{"key": "building/farm/2", "completed": 1791971503.9952116}
+{"key": "building/lumber_mill/3", "sheet": "buildings_economy", "rect": [1536, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-3359-76f1-828d-35adbed16b93", "est_usd": 0.15, "submitted": 1791971504.9424036}
+{"key": "building/farm/3", "completed": 1791971505.25086}
+{"key": "building/smelter/0", "sheet": "buildings_economy", "rect": [0, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-384e-75e1-a4a1-4f2fb31b25ed", "est_usd": 0.15, "submitted": 1791971506.2150714}
+{"key": "building/lumber_mill/0", "completed": 1791971510.6448603}
+{"key": "building/smelter/1", "sheet": "buildings_economy", "rect": [512, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-4ba9-7c71-8ed7-533dd7383b71", "est_usd": 0.15, "submitted": 1791971511.1659198}
+{"key": "building/lumber_mill/1", "completed": 1791971520.565888}
+{"key": "building/smelter/2", "sheet": "buildings_economy", "rect": [1024, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-7267-7540-8863-e6016b81e27d", "est_usd": 0.15, "submitted": 1791971521.0835145}
+{"key": "building/lumber_mill/2", "completed": 1791971524.0957532}
+{"key": "building/smelter/3", "sheet": "buildings_economy", "rect": [1536, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-806d-7272-9623-ae68f3039c2f", "est_usd": 0.15, "submitted": 1791971524.6898715}
+{"key": "building/smelter/0", "completed": 1791971525.8668175}
+{"key": "building/field/0", "sheet": "buildings_economy", "rect": [0, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-8719-7892-8adf-3c949477441c", "est_usd": 0.15, "submitted": 1791971526.3920922}
+{"key": "building/lumber_mill/3", "completed": 1791971528.0038133}
+{"key": "building/field/1", "sheet": "buildings_economy", "rect": [512, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-8fcf-7421-8a1e-334272a88fbf", "est_usd": 0.15, "submitted": 1791971528.6124802}
+{"key": "building/mining_camp/1", "completed": 1791971538.15295}
+{"key": "building/field/2", "sheet": "buildings_economy", "rect": [1024, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-b814-7b82-9998-6d977a5d35fa", "est_usd": 0.15, "submitted": 1791971538.9326174}
+{"key": "building/smelter/2", "completed": 1791971543.8027794}
+{"key": "building/smelter/3", "completed": 1791971544.650017}
+{"key": "building/field/3", "sheet": "buildings_economy", "rect": [1536, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-ce78-74e2-ae1e-4e76e2d199d9", "est_usd": 0.15, "submitted": 1791971544.8011036}
+{"key": "building/kiln/0", "sheet": "buildings_crafts", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-d153-7341-bef9-9af8f8004b86", "est_usd": 0.15, "submitted": 1791971545.3820512}
+{"key": "building/field/0", "completed": 1791971546.0413475}
+{"key": "building/kiln/1", "sheet": "buildings_crafts", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-d5ec-76f2-9930-9c67072d45e5", "est_usd": 0.15, "submitted": 1791971546.5795398}
+{"key": "building/field/1", "completed": 1791971548.883282}
+{"key": "building/kiln/2", "sheet": "buildings_crafts", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d3-e119-7dc1-a187-7a794e857ed3", "est_usd": 0.15, "submitted": 1791971549.4276395}
+{"key": "building/field/2", "completed": 1791971561.7955697}
+{"key": "building/kiln/3", "sheet": "buildings_crafts", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-135d-7d93-bd7d-911dbc6bc904", "est_usd": 0.15, "submitted": 1791971562.2896233}
+{"key": "building/field/3", "completed": 1791971564.498624}
+{"key": "building/weaver/0", "sheet": "buildings_crafts", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-1e28-7383-aa1a-2128c37ddd47", "est_usd": 0.15, "submitted": 1791971565.0857415}
+{"key": "building/kiln/1", "completed": 1791971569.3274868}
+{"key": "building/weaver/1", "sheet": "buildings_crafts", "rect": [512, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-30d5-7be3-a15b-ad0638e50367", "est_usd": 0.15, "submitted": 1791971569.8348706}
+{"key": "building/kiln/0", "completed": 1791971571.5367117}
+{"key": "building/weaver/2", "sheet": "buildings_crafts", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-3985-7863-a998-fe6b461040ab", "est_usd": 0.15, "submitted": 1791971572.0751243}
+{"key": "building/kiln/2", "completed": 1791971572.3840559}
+{"key": "building/weaver/3", "sheet": "buildings_crafts", "rect": [1536, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-3cb1-7091-8647-038bc19a1bec", "est_usd": 0.15, "submitted": 1791971572.8688612}
+{"key": "building/kiln/3", "completed": 1791971585.0448496}
+{"key": "building/kitchen/0", "sheet": "buildings_crafts", "rect": [0, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-6e2a-74f0-9a78-1b02a03273f6", "est_usd": 0.15, "submitted": 1791971585.5345688}
+{"key": "building/weaver/1", "completed": 1791971589.6673589}
+{"key": "building/kitchen/1", "sheet": "buildings_crafts", "rect": [512, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-8049-78c1-94fc-71ca7cf709f6", "est_usd": 0.15, "submitted": 1791971590.1774518}
+{"key": "building/weaver/0", "completed": 1791971590.95223}
+{"key": "building/kitchen/2", "sheet": "buildings_crafts", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-856c-7761-a022-f581c616c2f0", "est_usd": 0.15, "submitted": 1791971591.490799}
+{"key": "building/weaver/3", "completed": 1791971595.7185853}
+{"key": "building/kitchen/3", "sheet": "buildings_crafts", "rect": [1536, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-9822-7a12-8acb-81b29f6430ad", "est_usd": 0.15, "submitted": 1791971596.2847033}
+{"key": "building/weaver/2", "completed": 1791971598.3567214}
+{"key": "building/monument/0", "sheet": "buildings_crafts", "rect": [0, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-a293-7290-8404-8b44f8461f66", "est_usd": 0.15, "submitted": 1791971598.9554634}
+{"key": "building/kitchen/0", "completed": 1791971602.0342996}
+{"key": "building/monument/1", "sheet": "buildings_crafts", "rect": [512, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-b078-7a23-88ce-1c037af02851", "est_usd": 0.15, "submitted": 1791971602.5161033}
+{"key": "building/smelter/1", "completed": 1791971606.919751}
+{"key": "building/monument/2", "sheet": "buildings_crafts", "rect": [1024, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-c411-7ea2-b353-0fd4f6013c73", "est_usd": 0.15, "submitted": 1791971607.5282388}
+{"key": "building/kitchen/2", "completed": 1791971608.0348952}
+{"key": "building/monument/3", "sheet": "buildings_crafts", "rect": [1536, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-c7c6-7bc3-b1ca-056674003f2c", "est_usd": 0.15, "submitted": 1791971608.4755707}
+{"key": "building/kitchen/1", "completed": 1791971609.7264843}
+{"key": "building/barracks/0", "sheet": "buildings_civic", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-cf7a-7f52-a18f-95b5db261f4f", "est_usd": 0.15, "submitted": 1791971610.441879}
+{"key": "building/monument/0", "completed": 1791971618.6619813}
+{"key": "building/kitchen/3", "completed": 1791971619.0828748}
+{"key": "building/barracks/1", "sheet": "buildings_civic", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-f1de-78d2-b917-638c7f8fb972", "est_usd": 0.15, "submitted": 1791971619.2538772}
+{"key": "building/barracks/2", "sheet": "buildings_civic", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-f358-7353-95ea-9a4f3cef0472", "est_usd": 0.15, "submitted": 1791971619.6286182}
+{"key": "building/monument/1", "completed": 1791971621.909702}
+{"key": "building/barracks/3", "sheet": "buildings_civic", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d4-fe17-7ea1-8d24-ee8ce22b92a2", "est_usd": 0.15, "submitted": 1791971622.3723688}
+{"key": "building/monument/2", "completed": 1791971626.9785154}
+{"key": "building/range/0", "sheet": "buildings_civic", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-121b-7d90-9a9c-fb2b81b4b7aa", "est_usd": 0.15, "submitted": 1791971627.5061555}
+{"key": "building/monument/3", "completed": 1791971628.0776622}
+{"key": "building/range/1", "sheet": "buildings_civic", "rect": [512, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-16a6-7472-b57f-62754bc5f685", "est_usd": 0.15, "submitted": 1791971628.6731634}
+{"key": "building/barracks/0", "completed": 1791971630.1072078}
+{"key": "building/range/2", "sheet": "buildings_civic", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-1e26-7461-9c97-d9cb0124ad6c", "est_usd": 0.15, "submitted": 1791971630.5982509}
+{"key": "building/barracks/1", "completed": 1791971642.165223}
+{"key": "building/range/3", "sheet": "buildings_civic", "rect": [1536, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-4d6f-74f1-aaf9-9993a36b8709", "est_usd": 0.15, "submitted": 1791971642.6971397}
+{"key": "building/barracks/3", "completed": 1791971648.3727536}
+{"key": "building/barracks/2", "completed": 1791971648.6736085}
+{"key": "building/workshop/0", "sheet": "buildings_civic", "rect": [0, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-659b-7972-bd48-c78791482e05", "est_usd": 0.15, "submitted": 1791971648.8724046}
+{"key": "building/workshop/1", "sheet": "buildings_civic", "rect": [512, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-66f4-7e71-adde-e3c1bd136c87", "est_usd": 0.15, "submitted": 1791971649.232249}
+{"key": "building/range/2", "completed": 1791971650.280764}
+{"key": "building/range/0", "completed": 1791971650.4699013}
+{"key": "building/workshop/2", "sheet": "buildings_civic", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-6d37-7b13-adf3-586d79599190", "est_usd": 0.15, "submitted": 1791971650.8295426}
+{"key": "building/workshop/3", "sheet": "buildings_civic", "rect": [1536, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-6de4-7d12-ba42-fed19600d35c", "est_usd": 0.15, "submitted": 1791971650.9972441}
+{"key": "building/range/1", "completed": 1791971654.8033082}
+{"key": "building/infirmary/0", "sheet": "buildings_civic", "rect": [0, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-7ee1-7f61-aebe-94494631b17e", "est_usd": 0.15, "submitted": 1791971655.350057}
+{"key": "building/range/3", "completed": 1791971665.8584826}
+{"key": "building/infirmary/1", "sheet": "buildings_civic", "rect": [512, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-aa1a-7c63-ad05-67448d6673f6", "est_usd": 0.15, "submitted": 1791971666.4157712}
+{"key": "building/workshop/1", "completed": 1791971668.8484206}
+{"key": "building/workshop/0", "completed": 1791971668.8689592}
+{"key": "building/infirmary/2", "sheet": "buildings_civic", "rect": [1024, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-b614-7740-8dfb-e4a88c14a1d2", "est_usd": 0.15, "submitted": 1791971669.4820187}
+{"key": "building/infirmary/3", "sheet": "buildings_civic", "rect": [1536, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-b631-75a3-a7da-90969329629a", "est_usd": 0.15, "submitted": 1791971669.5163796}
+{"key": "building/workshop/2", "completed": 1791971670.348713}
+{"key": "building/temple/0", "sheet": "buildings_sanctuary", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-bb84-7082-8627-c508861a22e4", "est_usd": 0.15, "submitted": 1791971670.882093}
+{"key": "building/workshop/3", "completed": 1791971673.7468302}
+{"key": "building/temple/1", "sheet": "buildings_sanctuary", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-c8a4-7552-996e-e6f258e582d9", "est_usd": 0.15, "submitted": 1791971674.2363577}
+{"key": "building/infirmary/0", "completed": 1791971675.062356}
+{"key": "building/temple/2", "sheet": "buildings_sanctuary", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-cdb3-7643-9f04-ef40c1a19a42", "est_usd": 0.15, "submitted": 1791971675.5260742}
+{"key": "building/infirmary/1", "completed": 1791971685.8612273}
+{"key": "building/temple/3", "sheet": "buildings_sanctuary", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d5-f83e-7ae3-8f64-cd31e0f1dfba", "est_usd": 0.15, "submitted": 1791971686.4262605}
+{"key": "building/temple/0", "completed": 1791971690.570146}
+{"key": "building/stronghold/0", "sheet": "buildings_sanctuary", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-0a80-7961-9020-6466e2224d11", "est_usd": 0.15, "submitted": 1791971691.107008}
+{"key": "building/infirmary/2", "completed": 1791971692.1284723}
+{"key": "building/stronghold/1", "sheet": "buildings_sanctuary", "rect": [512, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-1075-72e3-9854-eb5f24b0d5fe", "est_usd": 0.15, "submitted": 1791971692.6162162}
+{"key": "building/infirmary/3", "completed": 1791971692.6551538}
+{"key": "building/stronghold/2", "sheet": "buildings_sanctuary", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-1266-7262-b55e-556af1bd3024", "est_usd": 0.15, "submitted": 1791971693.1256862}
+{"key": "building/temple/2", "completed": 1791971698.414475}
+{"key": "building/stronghold/3", "sheet": "buildings_sanctuary", "rect": [1536, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-28d2-70e0-96a2-7dd8b72043af", "est_usd": 0.15, "submitted": 1791971698.8559077}
+{"key": "building/temple/3", "completed": 1791971706.105441}
+{"key": "building/towncenter/foundation", "sheet": "towncenter", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-47db-7082-931f-7c161dca7088", "est_usd": 0.15, "submitted": 1791971706.7985067}
+{"key": "building/stronghold/0", "completed": 1791971710.9483027}
+{"key": "building/towncenter/build33", "sheet": "towncenter", "rect": [512, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-59a4-72c3-8098-5c73fe01af72", "est_usd": 0.15, "submitted": 1791971711.3579454}
+{"key": "building/stronghold/1", "completed": 1791971712.262438}
+{"key": "building/towncenter/build66", "sheet": "towncenter", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-5eeb-73e0-98f2-0208c8bf3bac", "est_usd": 0.15, "submitted": 1791971712.7022524}
+{"key": "building/stronghold/2", "completed": 1791971716.124369}
+{"key": "building/towncenter/complete", "sheet": "towncenter", "rect": [1536, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-6e09-7ea0-b074-1dd313b5f472", "est_usd": 0.15, "submitted": 1791971716.5837238}
+{"key": "building/stronghold/3", "completed": 1791971721.5598705}
+{"key": "building/towncenter/working", "sheet": "towncenter", "rect": [2048, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-8350-7e81-9092-8cdb6c18114e", "est_usd": 0.15, "submitted": 1791971722.0196798}
+{"key": "building/towncenter/build33", "completed": 1791971730.9946663}
+{"key": "npc/villager/front/mirror", "sheet": "villager_idle_hd", "rect": [0, 0, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-a7e5-7a40-a49d-87a89ee4c482", "est_usd": 0.15, "submitted": 1791971731.3797808}
+{"key": "building/towncenter/build66", "completed": 1791971732.1170044}
+{"key": "npc/villager/back", "sheet": "villager_idle_hd", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-ac89-7771-bd96-529bbe98ade2", "est_usd": 0.15, "submitted": 1791971732.5696042}
+{"key": "building/towncenter/foundation", "completed": 1791971732.7149732}
+{"key": "npc/villager/back/mirror", "sheet": "villager_idle_hd", "rect": [1024, 0, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-aeb8-7d82-8cb5-dabbef148eaf", "est_usd": 0.15, "submitted": 1791971733.133763}
+{"key": "building/towncenter/complete", "completed": 1791971736.2722743}
+{"key": "npc/villager_woman/front", "sheet": "villager_idle_hd", "rect": [0, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-bcd3-75d1-acb9-94736c0b3cb2", "est_usd": 0.15, "submitted": 1791971736.7461834}
+{"key": "building/temple/1", "completed": 1791971741.6628976}
+{"key": "building/towncenter/working", "completed": 1791971742.0270977}
+{"key": "npc/villager_woman/front/mirror", "sheet": "villager_idle_hd", "rect": [0, 512, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-d198-7710-b22a-24ac8dbb2ee7", "est_usd": 0.15, "submitted": 1791971742.0686255}
+{"key": "npc/villager_woman/back", "sheet": "villager_idle_hd", "rect": [1024, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-d301-7262-84a9-76043912af73", "est_usd": 0.15, "submitted": 1791971742.417565}
+{"key": "npc/villager/front/mirror", "completed": 1791971750.96651}
+{"key": "npc/villager_woman/back/mirror", "sheet": "villager_idle_hd", "rect": [1024, 512, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d6-f649-7a42-bd1a-502adc49f593", "est_usd": 0.15, "submitted": 1791971751.4589934}
+{"key": "npc/villager/back", "completed": 1791971755.7785375}
+{"key": "npc/villager_elder/front", "sheet": "villager_idle_hd", "rect": [0, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-08bd-7272-87ca-54cd14487363", "est_usd": 0.15, "submitted": 1791971756.1783426}
+{"key": "npc/villager_woman/front", "completed": 1791971756.2029934}
+{"key": "npc/villager_elder/front/mirror", "sheet": "villager_idle_hd", "rect": [0, 1024, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-0a5f-7111-bb0f-e60bb31ed097", "est_usd": 0.15, "submitted": 1791971756.5941927}
+{"key": "npc/villager/back/mirror", "completed": 1791971758.9644442}
+{"key": "npc/villager_elder/back", "sheet": "villager_idle_hd", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-1528-7012-a050-5c498e60b77f", "est_usd": 0.15, "submitted": 1791971759.3541615}
+{"key": "npc/villager_woman/front/mirror", "completed": 1791971761.6697218}
+{"key": "npc/villager_elder/back/mirror", "sheet": "villager_idle_hd", "rect": [1024, 1024, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-1fb9-7471-b9ca-2563ba3db19a", "est_usd": 0.15, "submitted": 1791971762.0771651}
+{"key": "npc/villager_woman/back", "completed": 1791971765.1709635}
+{"key": "npc/guard/front", "sheet": "units", "rect": [0, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-3117-7233-8722-289b1302630c", "est_usd": 0.15, "submitted": 1791971766.5077243}
+{"key": "npc/villager_woman/back/mirror", "completed": 1791971777.2017372}
+{"key": "npc/guard/front/mirror", "sheet": "units", "rect": [0, 0, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-5e48-78e1-bac5-b4749f8d97d2", "est_usd": 0.15, "submitted": 1791971778.084384}
+{"key": "npc/villager_elder/front", "completed": 1791971778.7322235}
+{"key": "npc/villager_elder/front/mirror", "completed": 1791971779.2212753}
+{"key": "npc/guard/back", "sheet": "units", "rect": [1024, 0, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-645d-7770-94f6-aeb0200d25ed", "est_usd": 0.15, "submitted": 1791971779.6287193}
+{"key": "npc/guard/back/mirror", "sheet": "units", "rect": [1024, 0, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-6580-7a53-8343-65767d4937e0", "est_usd": 0.15, "submitted": 1791971779.935935}
+{"key": "npc/villager_elder/back/mirror", "completed": 1791971785.0145717}
+{"key": "npc/villager_elder/back", "completed": 1791971785.2657087}
+{"key": "npc/archer/front", "sheet": "units", "rect": [3584, 512, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-7c9c-7a33-9713-dae77c31e0fe", "est_usd": 0.15, "submitted": 1791971785.8456028}
+{"key": "npc/archer/front/mirror", "sheet": "units", "rect": [3584, 512, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-7d45-7360-b892-efed2909669c", "est_usd": 0.15, "submitted": 1791971786.007213}
+{"key": "npc/guard/front/mirror", "completed": 1791971800.7072423}
+{"key": "npc/archer/back", "sheet": "units", "rect": [512, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-b994-74e3-b66b-0d251981407d", "est_usd": 0.15, "submitted": 1791971801.4495797}
+{"key": "npc/guard/back/mirror", "completed": 1791971802.821771}
+{"key": "npc/archer/back/mirror", "sheet": "units", "rect": [512, 1024, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-c249-76f2-b6c3-741ee96f659d", "est_usd": 0.15, "submitted": 1791971803.6830583}
+{"key": "npc/archer/front/mirror", "completed": 1791971805.5969622}
+{"key": "npc/archer/front", "completed": 1791971805.6532116}
+{"key": "npc/guard/back", "completed": 1791971806.3001876}
+{"key": "npc/healer/front/mirror", "sheet": "units", "rect": [3072, 1536, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-ccda-7cd1-a5cd-f50559146d26", "est_usd": 0.15, "submitted": 1791971806.375369}
+{"key": "npc/healer/front", "sheet": "units", "rect": [3072, 1536, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-cd02-7670-84fa-285d784ca693", "est_usd": 0.15, "submitted": 1791971806.4294715}
+{"key": "npc/healer/back", "sheet": "units", "rect": [0, 2048, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d7-cf43-7890-a171-aeee7cdb7f7a", "est_usd": 0.15, "submitted": 1791971807.0041742}
+{"key": "npc/archer/back", "completed": 1791971820.9467254}
+{"key": "npc/healer/back/mirror", "sheet": "units", "rect": [0, 2048, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-08dd-7620-b3e2-f0baa76a3802", "est_usd": 0.15, "submitted": 1791971821.7591968}
+{"key": "npc/archer/back/mirror", "completed": 1791971823.3348143}
+{"key": "npc/siege_cart/front", "sheet": "units", "rect": [2560, 2560, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-1274-72f2-b4fd-c499ac8424a6", "est_usd": 0.15, "submitted": 1791971824.2064536}
+{"key": "npc/healer/front/mirror", "completed": 1791971825.8700154}
+{"key": "npc/healer/front", "completed": 1791971826.13107}
+{"key": "npc/healer/back", "completed": 1791971826.5198367}
+{"key": "npc/siege_cart/front/mirror", "sheet": "units", "rect": [2560, 2560, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-1d4e-79a0-8c38-c20279982757", "est_usd": 0.15, "submitted": 1791971826.9732356}
+{"key": "npc/siege_cart/back", "sheet": "units", "rect": [3584, 2560, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-1d64-7992-9bf6-9c430144e667", "est_usd": 0.15, "submitted": 1791971826.9982266}
+{"key": "npc/siege_cart/back/mirror", "sheet": "units", "rect": [3584, 2560, 512, 512], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-1e97-7181-8694-1b599839628c", "est_usd": 0.15, "submitted": 1791971827.3224037}
+{"key": "npc/healer/back/mirror", "completed": 1791971841.3006172}
+{"key": "npc/wolf", "sheet": "wildlife", "rect": [0, 0, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-59eb-7531-88d7-ef21a538c518", "est_usd": 0.15, "submitted": 1791971842.5017393}
+{"key": "npc/siege_cart/front", "completed": 1791971843.8628223}
+{"key": "npc/wolf/mirror", "sheet": "wildlife", "rect": [0, 0, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-63a8-7ae3-a8df-9493c493d227", "est_usd": 0.15, "submitted": 1791971844.9898062}
+{"key": "npc/guard/front", "completed": 1791971846.2520385}
+{"key": "npc/siege_cart/back", "completed": 1791971847.0938833}
+{"key": "npc/siege_cart/back/mirror", "completed": 1791971847.1317852}
+{"key": "npc/bear", "sheet": "wildlife", "rect": [2508, 0, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-6d5b-78e3-8b87-307478f5eb6f", "est_usd": 0.15, "submitted": 1791971847.494792}
+{"key": "npc/boar", "sheet": "wildlife", "rect": [0, 627, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-6fff-7a82-92b8-e2012f077d9b", "est_usd": 0.15, "submitted": 1791971848.1446369}
+{"key": "npc/bear/mirror", "sheet": "wildlife", "rect": [2508, 0, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-70b4-70f3-a786-d8381044a5f6", "est_usd": 0.15, "submitted": 1791971848.333025}
+{"key": "npc/siege_cart/front/mirror", "completed": 1791971853.2596936}
+{"key": "npc/boar/mirror", "sheet": "wildlife", "rect": [0, 627, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-882e-7451-a2b4-ff0bf3c70793", "est_usd": 0.15, "submitted": 1791971854.3393974}
+{"key": "npc/wolf", "completed": 1791971862.8890545}
+{"key": "npc/lioness", "sheet": "wildlife", "rect": [2508, 627, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-ae17-7b81-98f5-5d615b3d34ba", "est_usd": 0.15, "submitted": 1791971864.0485263}
+{"key": "npc/wolf/mirror", "completed": 1791971865.1456714}
+{"key": "npc/lioness/mirror", "sheet": "wildlife", "rect": [2508, 627, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-b6c7-74a2-8d01-d1f1154a568c", "est_usd": 0.15, "submitted": 1791971866.2698622}
+{"key": "npc/bear", "completed": 1791971867.510018}
+{"key": "npc/boar", "completed": 1791971867.702221}
+{"key": "npc/bear/mirror", "completed": 1791971868.1879437}
+{"key": "npc/lion", "sheet": "wildlife", "rect": [0, 1254, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-c016-7b53-a406-d40a7663dcb4", "est_usd": 0.15, "submitted": 1791971868.6624975}
+{"key": "npc/lion/mirror", "sheet": "wildlife", "rect": [0, 1254, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-c0f1-74f3-9661-c65a37d7368e", "est_usd": 0.15, "submitted": 1791971868.8742576}
+{"key": "npc/python", "sheet": "wildlife", "rect": [2508, 1254, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-c287-7f02-8d0a-10b4f1625ba9", "est_usd": 0.15, "submitted": 1791971869.272334}
+{"key": "npc/boar/mirror", "completed": 1791971873.9477377}
+{"key": "npc/python/mirror", "sheet": "wildlife", "rect": [2508, 1254, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-d950-7ab2-87c5-f28c30fd8c6e", "est_usd": 0.15, "submitted": 1791971875.1100502}
+{"key": "npc/lioness", "completed": 1791971883.6535184}
+{"key": "npc/sea_serpent", "sheet": "wildlife", "rect": [0, 1881, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d8-ff20-7b10-813f-9f6a66397d40", "est_usd": 0.15, "submitted": 1791971884.7857559}
+{"key": "npc/lion", "completed": 1791971888.3965945}
+{"key": "npc/python", "completed": 1791971888.9367468}
+{"key": "npc/lion/mirror", "completed": 1791971889.0464025}
+{"key": "npc/sea_serpent/mirror", "sheet": "wildlife", "rect": [0, 1881, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-11de-7523-bbdc-db3898acff44", "est_usd": 0.15, "submitted": 1791971889.8021715}
+{"key": "npc/viper", "sheet": "wildlife", "rect": [2508, 1881, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-1471-7562-9f74-be116cfcbfbd", "est_usd": 0.15, "submitted": 1791971890.2464046}
+{"key": "npc/viper/mirror", "sheet": "wildlife", "rect": [2508, 1881, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-1781-7071-9ab6-367a74809b04", "est_usd": 0.15, "submitted": 1791971891.035438}
+{"key": "npc/lioness/mirror", "completed": 1791971893.2519436}
+{"key": "npc/barbarian", "sheet": "wildlife", "rect": [0, 2508, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-25fc-7890-8ffe-c3e8451fbe2a", "est_usd": 0.15, "submitted": 1791971894.7411873}
+{"key": "npc/python/mirror", "completed": 1791971895.5536447}
+{"key": "npc/barbarian/mirror", "sheet": "wildlife", "rect": [0, 2508, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-2dd7-7291-8270-a66cfdcd6925", "est_usd": 0.15, "submitted": 1791971896.7473333}
+{"key": "npc/sea_serpent/mirror", "completed": 1791971907.9899578}
+{"key": "npc/viper/mirror", "completed": 1791971909.0411713}
+{"key": "npc/chieftain", "sheet": "wildlife", "rect": [2508, 2508, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-64a2-7af1-8f0e-6da9fe644b90", "est_usd": 0.15, "submitted": 1791971910.7764785}
+{"key": "npc/chieftain/mirror", "sheet": "wildlife", "rect": [2508, 2508, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-6560-7d31-ada6-d21baec83b67", "est_usd": 0.15, "submitted": 1791971910.975214}
+{"key": "npc/viper", "completed": 1791971911.4651973}
+{"key": "npc/torchbearer", "sheet": "wildlife", "rect": [0, 3135, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-6c67-7a53-b157-a62ecab141fb", "est_usd": 0.15, "submitted": 1791971912.7620928}
+{"key": "npc/barbarian", "completed": 1791971914.904744}
+{"key": "npc/torchbearer/mirror", "sheet": "wildlife", "rect": [0, 3135, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-7d05-7830-a63f-d10e8a417316", "est_usd": 0.15, "submitted": 1791971917.0145645}
+{"key": "npc/barbarian/mirror", "completed": 1791971917.1897142}
+{"key": "npc/skeleton", "sheet": "wildlife", "rect": [2508, 3135, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-8401-76e0-b951-e2147e712bd3", "est_usd": 0.15, "submitted": 1791971918.8065772}
+{"key": "npc/chieftain/mirror", "completed": 1791971930.7317588}
+{"key": "npc/skeleton/mirror", "sheet": "wildlife", "rect": [2508, 3135, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-b830-7d12-9d8e-b53b48b1305e", "est_usd": 0.15, "submitted": 1791971932.1680617}
+{"key": "npc/torchbearer", "completed": 1791971932.6354356}
+{"key": "npc/sea_serpent", "completed": 1791971933.892308}
+{"key": "npc/centaur", "sheet": "wildlife", "rect": [0, 3762, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-bf8b-7b81-a06c-ab81d7d4f725", "est_usd": 0.15, "submitted": 1791971934.1542027}
+{"key": "npc/centaur/mirror", "sheet": "wildlife", "rect": [0, 3762, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-c673-72c3-93a9-6a1f06d97b61", "est_usd": 0.15, "submitted": 1791971935.8082628}
+{"key": "npc/skeleton", "completed": 1791971938.570664}
+{"key": "npc/torchbearer/mirror", "completed": 1791971939.6589978}
+{"key": "npc/cyclops", "sheet": "wildlife", "rect": [2508, 3762, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-d6b0-7850-949d-0b5e469b2d00", "est_usd": 0.15, "submitted": 1791971939.9851828}
+{"key": "npc/chieftain", "completed": 1791971940.2195551}
+{"key": "npc/cyclops/mirror", "sheet": "wildlife", "rect": [2508, 3762, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-da12-7003-aec3-467d1147dd60", "est_usd": 0.15, "submitted": 1791971940.8419464}
+{"key": "npc/cyclops_general", "sheet": "wildlife", "rect": [0, 4389, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139d9-de1b-7453-afc8-367b28015b98", "est_usd": 0.15, "submitted": 1791971941.8702598}
+{"key": "npc/centaur", "completed": 1791971953.9092293}
+{"key": "npc/cyclops_general/mirror", "sheet": "wildlife", "rect": [0, 4389, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139da-11fb-7812-957d-7613d17fa33f", "est_usd": 0.15, "submitted": 1791971955.1575544}
+{"key": "npc/centaur/mirror", "completed": 1791971955.5355303}
+{"key": "npc/minotaur", "sheet": "wildlife", "rect": [2508, 4389, 627, 627], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139da-1bff-77f1-bbee-89c241b8ee39", "est_usd": 0.15, "submitted": 1791971957.7135801}
+{"key": "npc/cyclops", "completed": 1791971962.8532953}
+{"key": "npc/cyclops/mirror", "completed": 1791971963.3217387}
+{"key": "npc/minotaur/mirror", "sheet": "wildlife", "rect": [2508, 4389, 627, 627], "mirror": true, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139da-36a6-7e40-81a8-52b59725c1c6", "est_usd": 0.15, "submitted": 1791971964.5381322}
+{"key": "npc/cyclops_general", "completed": 1791971965.2048016}
+{"key": "npc/cyclops_general/mirror", "completed": 1791971974.75632}
+{"key": "npc/minotaur", "completed": 1791971977.5103061}
+{"key": "npc/skeleton/mirror", "completed": 1791971980.4203012}
+{"key": "npc/minotaur/mirror", "completed": 1791971984.3041875}
+{"key": "npc/villager/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5089557}
+{"key": "npc/villager/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5100613}
+{"key": "npc/villager/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.510923}
+{"key": "npc/villager_woman/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5116813}
+{"key": "npc/villager_woman/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5153806}
+{"key": "npc/villager_woman/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5213792}
+{"key": "npc/villager_woman/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.522593}
+{"key": "npc/villager_elder/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5253932}
+{"key": "npc/villager_elder/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5293667}
+{"key": "npc/villager_elder/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.533364}
+{"key": "npc/villager_elder/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.537367}
+{"key": "npc/guard/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5413556}
+{"key": "npc/guard/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5453725}
+{"key": "npc/guard/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.549354}
+{"key": "npc/guard/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5533645}
+{"key": "npc/archer/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5573545}
+{"key": "npc/archer/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5613608}
+{"key": "npc/archer/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.565374}
+{"key": "npc/archer/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5693579}
+{"key": "npc/healer/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5733695}
+{"key": "npc/healer/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5773776}
+{"key": "npc/healer/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5788984}
+{"key": "npc/healer/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.580105}
+{"key": "npc/siege_cart/front", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5828657}
+{"key": "npc/siege_cart/front/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5834775}
+{"key": "npc/siege_cart/back", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5890837}
+{"key": "npc/siege_cart/back/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5899446}
+{"key": "npc/wolf", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5905793}
+{"key": "npc/wolf/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5933444}
+{"key": "npc/bear", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.595277}
+{"key": "npc/bear/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.5973918}
+{"key": "npc/boar", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6013622}
+{"key": "npc/boar/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6053963}
+{"key": "npc/lioness", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.609371}
+{"key": "npc/lioness/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6133752}
+{"key": "npc/lion", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6173975}
+{"key": "npc/lion/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.621415}
+{"key": "npc/python", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6253917}
+{"key": "npc/python/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.627631}
+{"key": "npc/sea_serpent", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6282973}
+{"key": "npc/sea_serpent/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6295114}
+{"key": "npc/viper", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6333601}
+{"key": "npc/viper/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.63738}
+{"key": "npc/barbarian", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6413653}
+{"key": "npc/barbarian/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6494253}
+{"key": "npc/chieftain", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6504993}
+{"key": "npc/chieftain/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6533725}
+{"key": "npc/torchbearer", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6574361}
+{"key": "npc/torchbearer/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6614132}
+{"key": "npc/skeleton", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.665414}
+{"key": "npc/skeleton/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.668164}
+{"key": "npc/centaur", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6694202}
+{"key": "npc/centaur/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6733696}
+{"key": "npc/cyclops", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6773715}
+{"key": "npc/cyclops/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6789553}
+{"key": "npc/cyclops_general", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.681356}
+{"key": "npc/cyclops_general/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6823587}
+{"key": "npc/minotaur", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6835759}
+{"key": "npc/minotaur/mirror", "request_id": null, "rejected": "copied the house example's blocky shape or filled the background; regenerated with an NPC example", "at": 1791973463.6841989}
+{"key": "building/dock/1", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.811151}
+{"key": "building/dock_north/1", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.812105}
+{"key": "building/kitchen/1", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.8174217}
+{"key": "building/kitchen/2", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.8214104}
+{"key": "building/barracks/2", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.825387}
+{"key": "building/workshop/1", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.8294232}
+{"key": "building/temple/1", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.8333905}
+{"key": "building/towncenter/complete", "request_id": null, "rejected": "ghost copy of the building or filled background", "at": 1791973463.8373985}
+{"key": "building/kitchen/2", "sheet": "buildings_crafts", "rect": [1024, 1024, 512, 512], "mirror": false, "endpoint": "fal-ai/nano-banana-pro/edit", "request_id": "01a139f1-2d3c-7991-bead-f80e2ee8756a", "est_usd": 0.15, "submitted": 1791973469.4439237}
+{"key": "npc/villager/back/mirror", "request_id": "01a139d6-aeb8-7d82-8cb5-dabbef148eaf", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.396471}
+{"key": "npc/villager_woman/front", "request_id": "01a139d6-bcd3-75d1-acb9-94736c0b3cb2", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3968434}
+{"key": "npc/villager_woman/front/mirror", "request_id": "01a139d6-d198-7710-b22a-24ac8dbb2ee7", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3971813}
+{"key": "npc/villager_woman/back", "request_id": "01a139d6-d301-7262-84a9-76043912af73", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3975282}
+{"key": "npc/villager_woman/back/mirror", "request_id": "01a139d6-f649-7a42-bd1a-502adc49f593", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3978086}
+{"key": "npc/villager_elder/back/mirror", "request_id": "01a139d7-1fb9-7471-b9ca-2563ba3db19a", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.398105}
+{"key": "npc/guard/front", "request_id": "01a139d7-3117-7233-8722-289b1302630c", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3983903}
+{"key": "npc/guard/front/mirror", "request_id": "01a139d7-5e48-78e1-bac5-b4749f8d97d2", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3986795}
+{"key": "npc/guard/back/mirror", "request_id": "01a139d7-6580-7a53-8343-65767d4937e0", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3990521}
+{"key": "npc/archer/front/mirror", "request_id": "01a139d7-7d45-7360-b892-efed2909669c", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3993466}
+{"key": "npc/archer/back", "request_id": "01a139d7-b994-74e3-b66b-0d251981407d", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.3997123}
+{"key": "npc/archer/back/mirror", "request_id": "01a139d7-c249-76f2-b6c3-741ee96f659d", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4000845}
+{"key": "npc/healer/front", "request_id": "01a139d7-cd02-7670-84fa-285d784ca693", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4003518}
+{"key": "npc/healer/back", "request_id": "01a139d7-cf43-7890-a171-aeee7cdb7f7a", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.400669}
+{"key": "npc/healer/back/mirror", "request_id": "01a139d8-08dd-7620-b3e2-f0baa76a3802", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4009876}
+{"key": "npc/siege_cart/front", "request_id": "01a139d8-1274-72f2-b4fd-c499ac8424a6", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4012764}
+{"key": "npc/siege_cart/front/mirror", "request_id": "01a139d8-1d4e-79a0-8c38-c20279982757", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4015963}
+{"key": "npc/siege_cart/back", "request_id": "01a139d8-1d64-7992-9bf6-9c430144e667", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4019303}
+{"key": "npc/wolf/mirror", "request_id": "01a139d8-63a8-7ae3-a8df-9493c493d227", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4021986}
+{"key": "npc/bear", "request_id": "01a139d8-6d5b-78e3-8b87-307478f5eb6f", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4024806}
+{"key": "npc/boar", "request_id": "01a139d8-6fff-7a82-92b8-e2012f077d9b", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4027581}
+{"key": "npc/boar/mirror", "request_id": "01a139d8-882e-7451-a2b4-ff0bf3c70793", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4031365}
+{"key": "npc/lioness", "request_id": "01a139d8-ae17-7b81-98f5-5d615b3d34ba", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4034014}
+{"key": "npc/lion", "request_id": "01a139d8-c016-7b53-a406-d40a7663dcb4", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4036674}
+{"key": "npc/lion/mirror", "request_id": "01a139d8-c0f1-74f3-9661-c65a37d7368e", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4040065}
+{"key": "npc/python", "request_id": "01a139d8-c287-7f02-8d0a-10b4f1625ba9", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4042902}
+{"key": "npc/sea_serpent/mirror", "request_id": "01a139d9-11de-7523-bbdc-db3898acff44", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4045625}
+{"key": "npc/viper", "request_id": "01a139d9-1471-7562-9f74-be116cfcbfbd", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4048796}
+{"key": "npc/chieftain", "request_id": "01a139d9-64a2-7af1-8f0e-6da9fe644b90", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4051533}
+{"key": "npc/chieftain/mirror", "request_id": "01a139d9-6560-7d31-ada6-d21baec83b67", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4054837}
+{"key": "npc/torchbearer", "request_id": "01a139d9-6c67-7a53-b157-a62ecab141fb", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.405756}
+{"key": "npc/torchbearer/mirror", "request_id": "01a139d9-7d05-7830-a63f-d10e8a417316", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4060216}
+{"key": "npc/skeleton/mirror", "request_id": "01a139d9-b830-7d12-9d8e-b53b48b1305e", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.406256}
+{"key": "npc/centaur", "request_id": "01a139d9-bf8b-7b81-a06c-ab81d7d4f725", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4065263}
+{"key": "npc/centaur/mirror", "request_id": "01a139d9-c673-72c3-93a9-6a1f06d97b61", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4068432}
+{"key": "npc/cyclops/mirror", "request_id": "01a139d9-da12-7003-aec3-467d1147dd60", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4071906}
+{"key": "npc/cyclops_general", "request_id": "01a139d9-de1b-7453-afc8-367b28015b98", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4074845}
+{"key": "npc/cyclops_general/mirror", "request_id": "01a139da-11fb-7812-957d-7613d17fa33f", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4077713}
+{"key": "npc/minotaur", "request_id": "01a139da-1bff-77f1-bbee-89c241b8ee39", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.408133}
+{"key": "npc/minotaur/mirror", "request_id": "01a139da-36a6-7e40-81a8-52b59725c1c6", "rejected": null, "reviewed": "accepted on the review sheet after an over-broad reject", "at": 1791973575.4084587}

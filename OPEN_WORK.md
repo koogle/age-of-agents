@@ -9,6 +9,11 @@ item when it is done; finished work, history and facts belong in git, `README.md
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
 
+- **Generated shadows preview** (branch `claude/review-open-prs-g2a83m`): style call on
+  the [shadow pipeline](assets/shadows/README.md). 27 masks still need regenerating
+  once the FAL balance is topped up (`generate.py run`, then `pack.py`); the sun
+  direction differs slightly from the terrain light (#166).
+
 ## Next steps to finish the capture-the-flag loop
 
 One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it

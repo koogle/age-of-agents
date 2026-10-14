@@ -402,3 +402,17 @@ its colours (the chieftain took the guard's blue shield, the player team colour)
 Generating the second form with the accepted first form as its only style
 reference fixed both; ask for "no blue anywhere" and "no extra figures" explicitly.
 Provenance: [barbarian sources](../../assets/sprites/barbarian_sources/provenance.json).
+
+## Generated shadow masks (2026-10-14, draft)
+
+`fal-ai/nano-banana-pro/edit` can return a usable black-and-white cast-shadow mask
+of a sprite canvas; nano-banana, Qwen image edit and Seedream v4 edit could not
+(silhouettes, line art or a recoloured scene). A guide pole with a drawn shadow
+only nudges direction and length. An example pair steers style but leaks shape:
+NPCs given the house example copied its blocky outline, so each family needs its
+own example. Expect a few failures per batch (ghost copy of the object, filled
+background); review a composited sheet before packing. The queue's status polling
+can drop connections through the proxy; record request IDs before polling and
+recover results with `GET queue.fal.run/<app>/requests/<id>` rather than
+resubmitting. A 403 "Exhausted balance" stops a batch outright. Pipeline and
+limits: [assets/shadows/README.md](../../assets/shadows/README.md).
