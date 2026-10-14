@@ -30,7 +30,8 @@ Current choices are below; superseded designs are isolated at the end. Supportin
 
 - **Feature preservation (2026-10-05):** Existing buildings, including Watchtower and Barracks, remain important to the game. Removing, hiding, disabling, or adding prerequisites to existing features requires Jakob’s explicit approval after a before/after impact review and before release.
 - **Game direction:** Build a Greek strategy roguelike around island expansion, escalating threats, eventual defeat, and permanent progression. Fixed win-condition scenarios were an earlier proposal; survival runs are now the direction.
-- **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind.
+- **Player control:** Villagers and friendly units wait for orders; there are no LLM-controlled game entities. A gather order may continue onto nearby resources of the same kind, and an attack order onto the next monster in sight (below).
+- **Attackers move on (2026-10-14, Jakob):** after the live monster test showed squads standing idle while a pack cut them down, Jakob asked that units move on to the next visible monster after a kill, like gatherers moving on to the next node; the nearest visible, reachable monster within the unit's own eight-cell sight becomes its target, else it goes idle. Units still never start a fight on their own ([wildlife](docs/knowledge/wildlife.md)).
 - **Shared simulation:** Keep deterministic game rules in `crates/game`, shared by hosted, native, and browser-local games. Rendering never decides gameplay outcomes.
 - **Rust client:** One wgpu client serves native and WebGL2 builds. The retired Three.js client and its asset pipeline are removed; `/` and `/play` both serve the Rust client.
 - **Scope:** Prefer small, playable slices and direct typed data over a generic engine, ECS, recipe language, or broad technology matrix.
