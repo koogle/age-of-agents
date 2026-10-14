@@ -6,16 +6,7 @@ fn wildlife(kind: AnimalKind) -> GameWorld {
     world.units[0].cell = CellCoordinate::new(10, 10);
     world.units[1].cell = CellCoordinate::new(5, 5);
     let cell = CellCoordinate::new(11, 10);
-    world.animals = vec![Animal {
-        id: "beast".into(),
-        kind,
-        home: cell,
-        cell,
-        step: None,
-        health: kind.max_health(),
-        attack_seconds: 0.0,
-        heading: [1, 0],
-    }];
+    world.animals = vec![Animal::spawn("beast".into(), kind, cell, 1)];
     world.refresh_exploration();
     world.validate().unwrap();
     world
@@ -231,10 +222,10 @@ fn animals_pursue_locally_and_retreat_to_their_territory() {
 
 #[test]
 fn discovery_adds_wildlife_without_replacing_existing_animals() {
-    let mut counts = std::collections::BTreeSet::new();
+    let mut wolf_counts = std::collections::BTreeSet::new();
     for seed in [1, 2, 3, 123, DEFAULT_SEED] {
         let mut world = GameWorld::generate(seed);
-        for _ in 0..3 {
+        for island in 1..archipelago_plan(seed).len() {
             let old = world.animals.clone();
             let mut replay = world.clone();
             world.discover_island();
@@ -242,63 +233,80 @@ fn discovery_adds_wildlife_without_replacing_existing_animals() {
             assert_eq!(world.animals, replay.animals);
             assert_eq!(&world.animals[..old.len()], old.as_slice());
             let added = &world.animals[old.len()..];
-            let boars = added.iter().filter(|a| a.kind == AnimalKind::Boar).count();
-            assert!((2..=3).contains(&boars));
-            let lions: Vec<_> = added.iter().filter(|a| a.kind.is_lion()).collect();
-            assert!((3..=4).contains(&lions.len()));
-            assert_eq!(lions[0].kind, AnimalKind::Lion);
-            assert!(lions[1..].iter().all(|a| a.kind == AnimalKind::Lioness
-                && a.home.center().distance(lions[0].home.center()) <= 3.0));
-            let snakes: Vec<_> = added.iter().filter(|a| a.kind.ambushes()).collect();
-            let pythons = snakes
-                .iter()
-                .filter(|a| a.kind == AnimalKind::Python)
-                .count();
-            assert!((1..=2).contains(&pythons));
-            assert_eq!(
-                snakes
+            let level = world.island_level(island);
+            // Stronghold garrisons are raiders and keep level 1.
+            assert!(level >= 1 && added.iter().all(|a| a.level == level || a.kind.raids()));
+            let count = |kind| added.iter().filter(|a| a.kind == kind).count();
+            assert!((2..=3).contains(&count(AnimalKind::Boar)));
+            assert_eq!(count(AnimalKind::Bear), if level >= 4 { 2 } else { 1 });
+            let extra_wolves = usize::from(level - 1) / 2;
+            assert!((1..=3 + extra_wolves).contains(&count(AnimalKind::Wolf)));
+            if level == 1 {
+                wolf_counts.insert(count(AnimalKind::Wolf));
+            }
+            assert!((1..=2).contains(&count(AnimalKind::Python)));
+            assert!(count(AnimalKind::SeaSerpent) <= 1);
+            // Packs: a leader first, the rest within three cells of it.
+            for (leader, member) in [
+                (AnimalKind::Lion, AnimalKind::Lioness),
+                (AnimalKind::Skeleton, AnimalKind::Skeleton),
+                (AnimalKind::Centaur, AnimalKind::Centaur),
+            ] {
+                let pack: Vec<_> = added
                     .iter()
-                    .filter(|a| a.kind == AnimalKind::SeaSerpent)
-                    .count(),
-                1
-            );
-            let temple_island = world.buildings.iter().any(|b| {
-                b.id == TEMPLE_ID
-                    && snakes
-                        .iter()
-                        .any(|s| s.home.center().distance(b.origin.center()) < 40.0)
-            });
-            assert_eq!(
-                snakes
-                    .iter()
-                    .filter(|a| a.kind == AnimalKind::Viper)
-                    .count(),
-                if temple_island { 2 } else { 0 }
-            );
-            for s in &snakes {
-                if s.kind == AnimalKind::SeaSerpent {
-                    assert!(world.terrain.iter().any(|c| c.biome == TerrainBiome::Water
-                        && c.coordinate().center().distance(s.home.center()) <= 4.0));
+                    .filter(|a| a.kind == leader || a.kind == member)
+                    .collect();
+                if let Some((first, rest)) = pack.split_first() {
+                    assert_eq!(first.kind, leader);
+                    assert!(rest.iter().all(|a| a.kind == member
+                        && a.home.center().distance(first.home.center()) <= 3.0));
                 }
             }
-            let added: Vec<_> = added
-                .iter()
-                .filter(|a| !a.kind.is_lion() && !a.kind.ambushes() && !a.kind.raids())
-                .collect();
-            assert!((4..=7).contains(&added.len()));
-            assert_eq!(
-                added.iter().filter(|a| a.kind == AnimalKind::Bear).count(),
-                1
+            assert!(
+                count(AnimalKind::Skeleton)
+                    <= if level >= 2 {
+                        2 + usize::from(level)
+                    } else {
+                        0
+                    }
             );
+            assert!(count(AnimalKind::Centaur) <= if level >= 3 { 3 } else { 0 });
+            let temple_island = archipelago_plan(seed).last() == world.island_origins.last();
+            let guardians = if temple_island { 1 } else { 0 };
+            assert_eq!(count(AnimalKind::Viper), 2 * guardians);
+            assert_eq!(count(AnimalKind::CyclopsGeneral), guardians);
+            assert_eq!(count(AnimalKind::Minotaur), guardians);
             assert_eq!(
-                added.iter().filter(|a| a.kind == AnimalKind::Wolf).count(),
-                added.len() - boars - 1
+                count(AnimalKind::Cyclops),
+                usize::from(level >= 4 && !temple_island)
             );
-            counts.insert(added.len() - boars);
+            for a in added {
+                if a.kind == AnimalKind::SeaSerpent {
+                    assert!(world.terrain.iter().any(|c| c.biome == TerrainBiome::Water
+                        && c.coordinate().center().distance(a.home.center()) <= 4.0));
+                }
+            }
             world.validate().unwrap();
         }
     }
-    assert_eq!(counts, [2, 3, 4].into_iter().collect());
+    assert_eq!(wolf_counts, [1, 2, 3].into_iter().collect());
+}
+
+#[test]
+fn deeper_islands_breed_stronger_monsters() {
+    let wolf = |level| {
+        Animal::spawn(
+            "w".into(),
+            AnimalKind::Wolf,
+            CellCoordinate::new(1, 1),
+            level,
+        )
+    };
+    assert_eq!(wolf(0).max_health(), AnimalKind::Wolf.max_health());
+    assert_eq!(wolf(1).max_health(), AnimalKind::Wolf.max_health());
+    assert_eq!(wolf(5).max_health(), 2.0 * AnimalKind::Wolf.max_health());
+    assert!((wolf(5).damage() - 1.4 * AnimalKind::Wolf.damage()).abs() < 1e-9);
+    assert_eq!(wolf(5).health, wolf(5).max_health());
 }
 
 #[test]

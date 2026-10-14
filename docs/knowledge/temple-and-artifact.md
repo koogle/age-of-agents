@@ -75,9 +75,10 @@ statuses, linger for eight seconds. Do not reintroduce a victory pill.
   snapshots from `archipelago_preview <seed> 1 found|carried|won`, which place a
   villager by the temple as a fixture; a full live run to the temple is not yet
   verified.
+- Guardians (2026-10-12): two marble vipers, a cyclops general and a minotaur
+  that wakes when the artifact leaves the temple ([wildlife](wildlife.md#island-levels-respawning-lairs-and-mythical-monsters-2026-10-12)).
 - Open: return-trip escalation once the artifact is claimed (Jakob, 2026-10-07:
-  difficulty rises and new monsters spawn on the way home), guardians around the
-  temple, loss rules, and what happens after victory (the game keeps simulating;
+  difficulty rises and new monsters spawn on the way home), loss rules, and what happens after victory (the game keeps simulating;
   Reset game starts a new run).
 
 ## Keep this document current

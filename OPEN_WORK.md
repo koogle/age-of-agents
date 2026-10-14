@@ -12,16 +12,19 @@ item when it is done; finished work, history and facts belong in git, `README.md
 ## Next steps to finish the capture-the-flag loop
 
 One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it
-once the step changes the run. The run is still far too easy: a short walk from
-the landing to the temple, and wildlife strength does not scale with distance.
+once the step changes the run. The run is still too easy: a short walk from the landing to the temple.
 
 1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
    [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing.
-2. **Per-island difficulty.** Monster counts and strength scale with each island's
-   distance from home; the temple island gets guardians.
-3. **Monster classes, art previews first:** skeletons, centaurs,
-   cyclops and minotaur, each with its own behavior and possibly several forms
-   (Jakob, 2026-10-08: for example a cyclops general or a barbarian chieftain).
+2. **Make the run winnable again (monster balance).** Jakob merged the monsters on
+   2026-10-14 knowing level 3+ islands are currently unwinnable. The
+   [live test](docs/knowledge/wildlife.md#live-test-against-player-squads-2026-10-13):
+   squads of 10–12 beat level-2 skeletons but lose outright to level-3 centaurs,
+   level-4 cyclopes and the minotaur, who also kills the artifact bearer the moment
+   he wakes. Options: lower per-level scaling, move the minotaur's lair away from the
+   temple or give the bearer a head start, and ranged archers and healing (step 1).
+   Re-run the live squad test and record a video after the change. Crowded
+   high-level islands can drop some planned monsters for lack of spaced lairs.
 
 ## Future work (not needed to finish the loop)
 

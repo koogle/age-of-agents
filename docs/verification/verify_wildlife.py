@@ -72,7 +72,7 @@ async def main(out, only, closeups=False, target='wolf'):
                     u.update(id=f'archer-{i}',kind='guard' if target == 'boar' else 'archer',health=100.0,cell=cell(x-i,y),step=None,action={'type':'idle'},cargo=None)
                 fixture['animals']=[]
                 for name,kind,at,hp in [(target,target,target_at,target_hp),(companion,companion,cell(x-8,y+6),300.0 if companion == 'wolf' else 600.0)]:
-                    fixture['animals'].append({'id':name,'kind':kind,'home':at,'cell':at,'step':None,'health':hp,'attack_seconds':0.0,'heading':[1,0]})
+                    fixture['animals'].append({'id':name,'kind':kind,'home':at,'cell':at,'step':None,'health':hp,'attack_seconds':0.0,'heading':[1,0],'level':1})
                 async with async_playwright() as p:
                     browser=await p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--enable-unsafe-swiftshader'])
                     for label,size,dpr in [('desktop',(1280,800),1),('phone',(390,844),2)]:

@@ -3,8 +3,8 @@
 //! fog to the temple island, land, claim the artifact, sail home and win.
 //! No state is edited directly; every step is a typed command plus ticks.
 use aoa_game::{
-    BuildingKind, CellCoordinate, Command, GameWorld, ProductKind, ResourceKind, ScenarioOutcome,
-    TEMPLE_ID, TerrainBiome, WORLD_COLUMNS, WORLD_ROWS, archipelago_plan,
+    AnimalKind, BuildingKind, CellCoordinate, Command, GameWorld, ProductKind, ResourceKind,
+    ScenarioOutcome, TEMPLE_ID, TerrainBiome, WORLD_COLUMNS, WORLD_ROWS, archipelago_plan,
 };
 
 const DT: f64 = 0.1;
@@ -251,6 +251,12 @@ fn a_run_is_won_through_player_commands_alone() {
     });
     run.tick_until("artifact claimed", 600.0, |w| w.artifact_bearer.is_some());
     let bearer = run.world.artifact_bearer.clone().unwrap();
+    // Taking the artifact rouses the temple's minotaur.
+    run.tick_until("the minotaur wakes", 10.0, |w| {
+        w.animals
+            .iter()
+            .any(|a| a.kind == AnimalKind::Minotaur && a.step.is_some())
+    });
 
     // Home: board, take the one-tap return, land, walk beside the town center.
     for unit_id in run.villagers() {
