@@ -1,6 +1,6 @@
 {
   "date": "2026-10-14",
-  "status": "Integrated: resources.png cell [3072, 1024] as the `charred_pine` node, drawn for wood on the stronghold island's BurntForest biome. Pending Jakob's style review.",
+  "status": "Integrated: resources.png cell [3072, 1024] as the `charred_pine` node, drawn for wood on the stronghold island's BurntForest biome. Jakob approved it, with the burnt_forest ground texture, for merge on 2026-10-14.",
   "rule": "Only the integrated render and cutout, the reference and prompt are kept; every other pass is recorded here as request IDs (Jakob, 2026-10-10).",
   "integrated": {
     "model": "fal-ai/nano-banana-pro/edit, 2 images",

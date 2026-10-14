@@ -8,9 +8,6 @@ item when it is done; finished work, history and facts belong in git, `README.md
 
 - **Giant snakes style call** ([#164](https://github.com/koogle/age-of-agents/pull/164)):
   [comparison sheets](docs/verification/snakes/README.md). Delete the sheets once decided.
-- **Burnt island art style call** (`feat/stronghold-island`): the ash floor
-  (`assets/terrain/burnt_forest.webp`) and charred pine
-  ([comparison](assets/sprites/charred_pine_sources/comparison.jpg)) need style approval before merge.
 
 ## Next steps to finish the capture-the-flag loop
 
