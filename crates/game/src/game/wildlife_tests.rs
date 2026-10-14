@@ -513,3 +513,43 @@ fn snakes_strike_hard_but_never_leave_their_lair() {
     assert_eq!(world.animals[0].cell, world.animals[0].home);
     assert!(world.animals[0].concealed(&world.units));
 }
+
+/// The beast at 1 health beside villager-1, plus a second animal at `next`.
+fn last_blow(next: AnimalKind, at: CellCoordinate) -> GameWorld {
+    let mut world = wildlife(AnimalKind::Boar);
+    world.animals[0].health = 1.0;
+    let mut second = world.animals[0].clone();
+    second.id = "next".into();
+    second.kind = next;
+    second.home = at;
+    second.cell = at;
+    second.health = next.max_health();
+    world.animals.push(second);
+    world.refresh_exploration();
+    attack(&mut world);
+    for _ in 0..15 {
+        world.tick(0.1);
+    }
+    assert!(world.animals.iter().all(|a| a.id != "beast"));
+    world.validate().unwrap();
+    world
+}
+
+#[test]
+fn hunters_move_on_to_the_next_monster_in_sight() {
+    let world = last_blow(AnimalKind::Boar, CellCoordinate::new(14, 12));
+    assert!(matches!(
+        &world.units[0].action,
+        UnitAction::AttackAnimal { animal_id, .. } if animal_id == "next"
+    ));
+}
+
+#[test]
+fn hunters_stop_when_no_visible_monster_is_within_their_sight() {
+    // Beyond the hunter's eight-cell sight.
+    let world = last_blow(AnimalKind::Boar, CellCoordinate::new(25, 10));
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+    // A hidden snake is no quarry until it reveals itself.
+    let world = last_blow(AnimalKind::Python, CellCoordinate::new(15, 10));
+    assert_eq!(world.units[0].action, UnitAction::Idle);
+}

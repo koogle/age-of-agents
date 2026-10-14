@@ -419,10 +419,17 @@ impl GameWorld {
                 };
                 if self.animals[animal].health <= 0.0 {
                     self.animals.remove(animal);
-                    for u in &mut self.units {
-                        if matches!(&u.action, UnitAction::AttackAnimal { animal_id, .. } if animal_id == id)
+                    // Its hunters move on to the next monster in their own sight, if any.
+                    for hunter in 0..self.units.len() {
+                        if matches!(&self.units[hunter].action, UnitAction::AttackAnimal { animal_id, .. } if animal_id == id)
                         {
-                            u.action = UnitAction::Idle;
+                            self.units[hunter].action = match self.next_quarry(hunter) {
+                                Some(animal_id) => UnitAction::AttackAnimal {
+                                    animal_id,
+                                    elapsed_seconds: 0.0,
+                                },
+                                None => UnitAction::Idle,
+                            };
                         }
                     }
                 }
@@ -430,6 +437,30 @@ impl GameWorld {
             Travel::Unreachable => self.units[unit].action = UnitAction::Idle,
             Travel::EnRoute => {}
         }
+    }
+
+    /// The nearest visible, reachable monster within the unit's own sight, the
+    /// way a gatherer moves on to the next node of a patch.
+    fn next_quarry(&self, unit: usize) -> Option<String> {
+        let visible = self.visible_cells();
+        let at = self.units[unit].cell.center();
+        self.animals
+            .iter()
+            .filter(|a| {
+                !a.concealed(&self.units)
+                    && visible.contains(&a.cell)
+                    && a.step.is_none_or(|s| visible.contains(&s.to))
+                    && a.cell.center().distance(at) <= UNIT_SIGHT_RADIUS
+            })
+            .min_by(|a, b| {
+                a.cell
+                    .center()
+                    .distance(at)
+                    .total_cmp(&b.cell.center().distance(at))
+                    .then_with(|| a.id.cmp(&b.id))
+            })
+            .filter(|a| self.can_reach_beside(unit, a.footprint()))
+            .map(|a| a.id.clone())
     }
 
     pub(super) fn tick_wildlife(&mut self, dt: f64) {

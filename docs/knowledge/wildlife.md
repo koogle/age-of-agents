@@ -198,7 +198,12 @@ Their contact damage is 10/25/18/35 per second respectively. This is a bounded
 wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
 scripted raids and their stronghold, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
-villagers move faster than predators. No friendly automatic retaliation.
+villagers move faster than predators. No friendly automatic retaliation: units never start
+a fight on their own. When an attack target dies, each of its attackers moves on to the
+nearest visible, reachable monster within its own sight (`UNIT_SIGHT_RADIUS`, 8 cells;
+concealed snakes excluded), else goes idle; only the nearest candidate is checked for
+reachability (`next_quarry` in `wildlife.rs`; Jakob, 2026-10-14, after the live squad test
+showed units idling while a skeleton squad cut them down).
 
 Attack orders validate all members and current target visibility before mutation.
 Stop/reassignment remains explicit. Personal cargo stays with a living hunter;
