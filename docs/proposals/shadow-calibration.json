@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-11",
+  "source_revision": "8917c749bd76e6f57047c4ea78c83f5d2ca439e8",
+  "tool": "OpenAI image_gen.imagegen",
+  "underlying_model_version": null,
+  "provider_request_id": null,
+  "cost_usd": null,
+  "prompt": "Create a precisely registered SHADOW-ONLY game sprite atlas from the supplied 1536x1024 reference, preserving its 3 columns by 2 rows, each tile exactly 512x512. The six subjects are temple town center, house, watchtower / villager, cypress cluster, olive tree. Output only their cast ground shadows, removing all six subjects completely. Transparent background, no white matte, no text, no labels, no grid. Each shadow starts exactly beneath the subject's feet or building ground contact in the reference image, same position and scale as reference. The fixed isometric camera elevation is 35.264 degrees and yaw 45 degrees. The sunlight comes from high screen upper-left, ALL shadows extend toward screen RIGHT and slightly UP (endpoint direction +1,-0.18 in image coordinates), never downward. Shadow length should be about 75% of subject visible height. Shadows lie on a horizontal ground plane: flattened perspective roof/column geometry for buildings, accurate cone-tower roof, legs/body/head for villager, branching leaves and trunks for trees. Reconstruct the cast 3D silhouette, do not just rotate a copy of the upright subject. Include filled connected contact shadow under the subject and the hidden base footprint, not only the part visible beside it. Uniform cool charcoal translucent shadow body at about 35% opacity, gently feathered edges 2-3 pixels, darkest at contact and lightly softened at distance, no outlines, no painted texture. All complete silhouettes must remain inside their own 512x512 tile. This is a technical reusable game asset layer to overlay UNDER the unchanged reference sprites; absolutely no visible buildings, people, trees, floor, or lighting rays should remain.",
+  "transparent_background": true,
+  "references": [
+    {
+      "name": "towncenter",
+      "source_path": "assets/sprites/towncenter.png",
+      "source_sha256": "40d4cc10a7ca1256b41c5fecab88dcb853cd410d6ff96c69cfee96b3785b91a6",
+      "source_rect_px": [
+        1536,
+        0,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        32,
+        64,
+        256,
+        256
+      ],
+      "source_crop_sha256": "eb023d5eefcd34d50371cdb7eaa4fe3ef85143b8011f975e03c14228c807008f"
+    },
+    {
+      "name": "house",
+      "source_path": "assets/sprites/buildings_hd.png",
+      "source_sha256": "1a333776fd2a5188c9f07ac7a52cc2fd01f74b15684962c86a49fb01aea29307",
+      "source_rect_px": [
+        1536,
+        0,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        544,
+        64,
+        256,
+        256
+      ],
+      "source_crop_sha256": "3f0274d0eeeb1ccdfc8ca3d1033dc78a3bb280796a0c073dfec59b0edfabfd2e"
+    },
+    {
+      "name": "watchtower",
+      "source_path": "assets/sprites/buildings_hd.png",
+      "source_sha256": "1a333776fd2a5188c9f07ac7a52cc2fd01f74b15684962c86a49fb01aea29307",
+      "source_rect_px": [
+        1536,
+        1024,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        1056,
+        64,
+        256,
+        256
+      ],
+      "source_crop_sha256": "477d3051937472e16da0a67047a2401b57189c07aff33313e3866cc5dad20008"
+    },
+    {
+      "name": "villager",
+      "source_path": "assets/sprites/villager_idle_hd.png",
+      "source_sha256": "4ffd31e2f1cfd0be413a7ae68bdd0414dd3ef230f1782fb1ea40f1d2b551c6ef",
+      "source_rect_px": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        32,
+        576,
+        256,
+        256
+      ],
+      "source_crop_sha256": "b579607c96fda126301e59d35236f400719eed0704e7f9ebbb27ad1bbd96b56e"
+    },
+    {
+      "name": "cypress",
+      "source_path": "assets/sprites/resources.png",
+      "source_sha256": "198e09a03e372eb41022c5aaa518ac0d319ac4b004b21a231c649238f661d587",
+      "source_rect_px": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        544,
+        576,
+        256,
+        256
+      ],
+      "source_crop_sha256": "07e5dfca0f7dc48c46fe64fd9599b3d06bcd7388add0930de490ab47b149fc22"
+    },
+    {
+      "name": "olive",
+      "source_path": "assets/sprites/resources.png",
+      "source_sha256": "198e09a03e372eb41022c5aaa518ac0d319ac4b004b21a231c649238f661d587",
+      "source_rect_px": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "reference_rect_px": [
+        1056,
+        576,
+        256,
+        256
+      ],
+      "source_crop_sha256": "62a0dc318df62a33caf2eae6237bdf1c24b6457539fc7d05d175ebbc5abc6637"
+    }
+  ],
+  "reference_board": {
+    "size_px": [
+      1536,
+      1024
+    ],
+    "background": "white",
+    "resize": "Pillow Lanczos",
+    "sha256": "d3b36880f70165ad27bb3e42dabf76da1e53741b43c501a7a7806fce11077bf0"
+  },
+  "output": {
+    "size_px": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "sha256": "f5e54376016ae31c88e2d3010820229f811d02757e80c48744e14b76b4403b06",
+    "alpha_min_max": [
+      0,
+      244
+    ],
+    "retained_in_repository": false
+  },
+  "review": {
+    "status": "rejected",
+    "failures": [
+      "Upright subject silhouettes remain instead of shadow-only ground silhouettes.",
+      "Broad blurred halos and contact/registration drift.",
+      "Prompt direction was provisional and not derived from the final shared sun vector."
+    ],
+    "integration": "None; no runtime assets accepted or changed."
+  }
+}
