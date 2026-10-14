@@ -351,7 +351,15 @@ impl GameWorld {
             if self.units[index].kind == UnitKind::Healer {
                 return Err(CommandError::CannotAttack);
             }
-            if !self.can_reach_beside(index, footprint) {
+            let reachable = if self.units[index].kind == UnitKind::Archer {
+                let occupancy = self.occupancy();
+                self.static_paths(index, &occupancy)
+                    .nearest(self.archer_positions(animal.cell, &occupancy))
+                    .is_some()
+            } else {
+                self.can_reach_beside(index, footprint)
+            };
+            if !reachable {
                 return Err(CommandError::TargetUnreachable);
             }
         }
@@ -379,7 +387,8 @@ impl GameWorld {
         let footprint = self.animals[animal].footprint();
         let from = self.units[unit].cell;
         let to = footprint.origin;
-        if from.touches(to) && !self.melee_clear(from, to) {
+        let archer = self.units[unit].kind == UnitKind::Archer;
+        if !archer && from.touches(to) && !self.melee_clear(from, to) {
             let occupancy = self.occupancy();
             let clear = |c| occupancy.is_free_for(c, Some(unit));
             let roads = self.completed_road_cells();
@@ -401,11 +410,29 @@ impl GameWorld {
             }
             return;
         }
-        match self.travel(unit, Goal::Beside(footprint), dt) {
+        let goal = if archer {
+            Goal::ArcherRange(to)
+        } else {
+            Goal::Beside(footprint)
+        };
+        match self.travel(unit, goal, dt) {
             Travel::Arrived { remaining } => {
-                if self.animals[animal].step.is_some()
-                    || !self.melee_clear(self.units[unit].cell, self.animals[animal].cell)
-                {
+                let target = &self.animals[animal];
+                let ready = if archer {
+                    // Both ends of a moving target's step must stay in a clear shot.
+                    let occupancy = self.occupancy();
+                    let from = self.units[unit].cell;
+                    self.archer_shot_clear(from, target.cell, &occupancy)
+                        && target
+                            .step
+                            .is_none_or(|step| self.archer_shot_clear(from, step.to, &occupancy))
+                } else {
+                    target.step.is_none() && self.melee_clear(self.units[unit].cell, target.cell)
+                };
+                if !ready {
+                    if archer {
+                        self.reset_windup(unit, id);
+                    }
                     return;
                 }
                 let elapsed = elapsed + remaining;
@@ -428,8 +455,17 @@ impl GameWorld {
                 }
             }
             Travel::Unreachable => self.units[unit].action = UnitAction::Idle,
+            // An archer that has to move again draws its next shot from scratch.
+            Travel::EnRoute if archer => self.reset_windup(unit, id),
             Travel::EnRoute => {}
         }
+    }
+
+    fn reset_windup(&mut self, unit: usize, id: &str) {
+        self.units[unit].action = UnitAction::AttackAnimal {
+            animal_id: id.into(),
+            elapsed_seconds: 0.0,
+        };
     }
 
     pub(super) fn tick_wildlife(&mut self, dt: f64) {
@@ -483,7 +519,10 @@ impl GameWorld {
                     u.health > 0.0
                         && u.cell.center().distance(home.center()) <= territory
                         && (alerted
-                            || u.cell.center().distance(cell.center()) <= animal.kind.aggro())
+                            || u.cell.center().distance(cell.center()) <= animal.kind.aggro()
+                            // Anyone attacking it from inside its territory draws it out, so
+                            // archers cannot freely shoot an idle animal.
+                            || matches!(&u.action, UnitAction::AttackAnimal { animal_id, .. } if animal_id == &animal.id))
                 })
                 .min_by(|(_, a), (_, b)| {
                     a.cell

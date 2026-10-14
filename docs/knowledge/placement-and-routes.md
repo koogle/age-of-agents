@@ -164,3 +164,13 @@ units, wildlife and ships share cell/step position interpolation; movement speed
 and routing stay separate. The proposed expanded footprint geometry helpers were
 not retained: they grew source without sufficient subtraction. Existing placement,
 route-preservation and distance scans remain unchanged.
+
+## Archer firing positions (2026-10-06)
+
+`Goal::ArcherRange` (`crates/game/src/game/movement.rs`, shot geometry in
+`ranged.rs`) reuses the weighted movement and temporary-reservation handling,
+with reachable clear-shot cells in a six-cell radius as goals. Walking blockers
+differ from shot blockers: arrows cross water, rivers and units, but buildings,
+live non-water resources and mountain cells stop them. A supercover trace checks
+both sides of diagonal corners. Archers on the way to a firing position count as
+walking for idle units stepping aside. See [wildlife](wildlife.md#ranged-archers-2026-10-06).

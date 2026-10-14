@@ -33,6 +33,45 @@ arrival can change casualties. Existing saved current health is preserved; incre
 damage applies immediately, and new animals spawn at the increased maximum.
 There is no schema change or world reset.
 
+## Ranged archers (2026-10-06)
+
+Jakob requested true distance attacks in a separate PR after the strength change
+([#142](https://github.com/koogle/age-of-agents/pull/142), ported onto the
+rewritten history on 2026-10-14). Source: `crates/game/src/game/ranged.rs`,
+the archer branch of `tick_attack_animal` in `wildlife.rs`, and
+`Goal::ArcherRange` in `movement.rs` ([firing positions](placement-and-routes.md#archer-firing-positions-2026-10-06)).
+
+- **Range.** Archers ordered with `AttackAnimal` stop at a clear firing position
+  within six cells (`ARCHER_RANGE`) and deal their 18 damage per one-second
+  windup, including against moving targets: both ends of the target's step must
+  be in range and clear. Other units keep contact attacks.
+- **Line of fire.** Buildings, live non-water resources and mountains block the
+  shot, including at diagonal corners; water, rivers and units do not, so a river
+  can shield archers from melee wildlife.
+- **Windup.** Walking or losing the shot resets the timer; archers finish a
+  step before shooting. They hold position as targets close and pursue if range
+  is lost. Damage resolves at release: no projectiles, ammunition or save change.
+- **Correction (Jakob, after reviewing the recording).** Wolves closing the gap
+  is fine; archers should open fire earlier. Range went from four to six cells,
+  verified by where actual first damage lands rather than by a positive windup
+  timer. This is not a request for automatic retreat.
+- **Retaliation.** A territorial animal (or garrison raider) also targets any
+  unit inside its territory that is attacking it, beyond its normal aggro, so
+  archers cannot freely shoot idle bears. Raiders already charge anyone within
+  their 7-cell aggro. A snake that goes back into hiding cancels the order
+  (`concealed`), as before.
+- **Targets.** Raiders live in `animals`, so the same order shoots them. Storming
+  the stronghold (`AttackBuilding`) stays a contact attack for every unit kind.
+- **Art.** The authored bow action aims at the target while the authoritative
+  timer is positive and the archer stands on its cell (`work_target` in
+  `crates/client/src/view.rs`); pause freezes it.
+
+Mixed groups validate each member against its own reach (archers need a
+reachable firing position) before any order is assigned. Open-ground tests at
+100 ms: one/two archers lose to a full-health wolf; three to five win, with
+casualties depending on position and arrival order.
+Tests: `cargo test -p aoa-game ranged_tests`.
+
 ## Lion prides (2026-10-09)
 
 Jakob asked for more monsters, one class per PR with art previews first; lions
@@ -194,8 +233,9 @@ are the exception, [above](#barbarian-raid-and-building-damage-2026-10-11).
 
 All friendly units have 100 health. Villagers, guards, archers and siege carts
 can receive `AttackAnimal { unit_ids, animal_id }`; healers reject attack orders.
-Their contact damage is 10/25/18/35 per second respectively. This is a bounded
-wildlife combat slice: ranged attacks, healing, repair, factions beyond the one
+Their damage is 10/25/18/35 per second respectively; archers shoot from up to six
+cells ([above](#ranged-archers-2026-10-06)) and the others need contact. This is a bounded
+wildlife combat slice: healing, factions beyond the one
 scripted raids and their stronghold, loot and run-ending rules remain unimplemented. Wolves require a squad; bears
 are stronger still and defeat three archers in the contact fixture. Retreat is possible because
 villagers move faster than predators. No friendly automatic retaliation.
@@ -232,7 +272,8 @@ Overhead bars show health, and red rings identify wildlife. Authored sprites are
 [provenance](../../assets/sprites/wildlife_sources/README.md). Idle/walk frames use the shared simulation-speed animation clock, so pause freezes
 the current stride and resume continues it. Attack orders are rejected while paused.
 Frames are authored and mirrored; reverse-facing poses remain future art work.
-All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art.
+All three animals have authored attack windup and strike poses. Friendly hunting reuses existing villager chopping / military action art; archers
+use the authored bow action at range.
 
 Store version 14 combines island inventories and ship cargo with required health and wildlife state. Incompatible stores
 (including 12 and the earlier branch-only wildlife schema 13) reset under the existing
@@ -254,6 +295,9 @@ phone touch to select an archer and attack a wolf. A subsequent explicit WebSock
 group order recruits the squad (additive touch selection is not implemented). It verifies damage both ways,
 defeat and cleanup, captures screenshots and checks page errors. The controlled
 fixture is not evidence of natural spawn placement (domain tests cover that).
+For the archer (wolf) fixture it also requires a stationary archer with a running
+windup beyond melee distance and asserts the wolf's first damage lands at least
+three cells from the nearest archer.
 
 Browser-verifier timing: software-rendered screenshot capture can take enough
 wall time for combat and subsequent attacks to finish. Pause authoritative

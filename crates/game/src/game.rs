@@ -50,6 +50,9 @@ mod queue_tests;
 mod raid;
 #[cfg(test)]
 mod raid_tests;
+mod ranged;
+#[cfg(test)]
+mod ranged_tests;
 #[cfg(test)]
 mod ship_tests;
 mod ships;

@@ -25,7 +25,7 @@ Wildlife combat, barbarian raids on the second island and a stronghold that ends
 - Territorial wolves, bears and boars, lion prides that hunt together, ambushing giant snakes, unit health and hunting orders.
 - Barbarian war bands led by a chieftain land on the second island 5–10 minutes after the player first lands there, and again 5–10 minutes after each band is wiped out; raiders, including torchbearers, damage and destroy buildings, and villagers repair them.
 - A garrisoned barbarian stronghold stands on a later island; razing it ends the raids.
-- Guard, archer, healer and siege-cart production; ranged combat and healing remain future work.
+- Guard, archer, healer and siege-cart production; archers shoot wildlife and raiders from up to six cells away, while healing remains future work.
 - Native and WebGL2 clients, mouse/touch controls, pause/speed controls and seeded reset.
 - SQLite saves for hosted games; native and browser-local games are in-memory.
 

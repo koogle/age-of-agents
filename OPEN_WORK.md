@@ -15,8 +15,9 @@ One PR each; each keeps `crates/game/tests/full_run.rs` passing and extends it
 once the step changes the run. The run is still far too easy: a short walk from
 the landing to the temple, and wildlife strength does not scale with distance.
 
-1. **Combat foundations the monsters need.** Ranged attacks for archers (stale PR
-   [#142](https://github.com/koogle/age-of-agents/pull/142)) and healing.
+1. **Combat foundations the monsters need.** Healing. Ranged archers are in review
+   on [#142](https://github.com/koogle/age-of-agents/pull/142) (ported to the
+   rewritten `master`; browser combat check and deploy pending).
 2. **Per-island difficulty.** Monster counts and strength scale with each island's
    distance from home; the temple island gets guardians.
 3. **Monster classes, art previews first:** skeletons, centaurs,
@@ -35,7 +36,7 @@ the landing to the temple, and wildlife strength does not scale with distance.
 
 ## Unresolved
 
-- **Branches on the pre-rewrite history.** Open PRs #72, #103, #142 and #144 need
+- **Branches on the pre-rewrite history.** Open PRs #72, #103 and #144 need
   rebasing onto the rewritten `master`; stale remote branches should be deleted.
 - **Performance.** Populated archipelagos are unprofiled; the
   [map budget](docs/CONTINUOUS_MAP.md) covers only the starter world.

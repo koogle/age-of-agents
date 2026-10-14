@@ -830,6 +830,22 @@ fn work_target(
     position: Vec3,
 ) -> Option<(Vec2, &'static str)> {
     let (footprint, activity) = match &unit.action {
+        UnitAction::AttackAnimal {
+            animal_id,
+            elapsed_seconds,
+        } if unit.kind == aoa_game::UnitKind::Archer => {
+            // The domain timer runs only with a clear shot from a stationary cell.
+            let at = terrain::cell_center(unit.cell);
+            if *elapsed_seconds <= 0.0
+                || unit.step.is_some()
+                || Vec2::new(position.x, position.z).distance(at) > 0.001
+            {
+                return None;
+            }
+            let target = snapshot.animals.iter().find(|a| &a.id == animal_id)?;
+            let target = target.position();
+            return Some((terrain::world_of(target.x, target.y), "action"));
+        }
         UnitAction::AttackAnimal { animal_id, .. } => {
             let animal = snapshot
                 .animals
